@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="multi-unit-limiter-wall">
+<meta name="plan-title" content="Multi-unit limiter wall — a first wall made of several units, read losslessly, contained as an occupiable region, referenced not copied">
+<meta name="plan-summary" content="Read, contain, anchor, shadow, paint and reference the first wall as a typed collection of limiter units, with one closed ring as the bit-identical degenerate case.">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort-hours" content="24.0">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-sprint" content="S19">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-tags" content="wall,imas,topology,schema,machine-description,equilibrium">
+<meta name="plan-blocks" content="playable-forward-solve">
+<meta name="plan-informs" content="null-identification-authority">
+<title>Multi-unit limiter wall | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-impl" content="0.0">
+</head>
+<body>
+<main class="plan-doc">
+<header>
+  <p class="eyebrow">nova &middot; plan &middot; S19</p>
+  <h1>Multi-unit limiter wall</h1>
+  <p class="lead">Some machines are defined completely by discrete limiter surfaces stored as multiple units in the wall IDS. Nova today collapses the first wall to one closed polygon at every seam: the IMAS readers select unit zero, the FrameSpace first wall inserts one loop, the forward operator builds one cyclic wall-node array, the topology read screens containment against one polygon, the shadow mask and the strike-point selection index one flat node set, the session schema writes one ring, and the painters close one polyline. The count guards landed on 2026-09-07 make that collapse refuse loudly instead of silently, which is the right first step and the measure of the gap. This plan makes the wall a typed collection of units end to end, with the single closed ring as the degenerate case that stays bit-identical, and moves the wall out of the session file into a reference to the machine description, as the lead directed the same evening.</p>
+</header>
+
+<section id="s1">
+  <h2>&sect;1 &mdash; The representation: units, kinds and the occupiable region</h2>
+  <p>The scout of 2026-09-08 (<code>~/.config/reckon/crew/reports/nova/s19-labeller/wall-units-scout.md</code>) measured what is in reach: the JT-60SA description <code>jt-60sa_md</code> carries one <code>description_2d</code> with five limiter units, an 89-vertex closed vessel ring and four open structures of 6, 6, 10 and 8 vertices; the default ITER description <code>iter_md/3/116000/2</code> carries two open units of 19 and 37 vertices; the MAST chain-factory artifact and the persisted DIII-D description each carry one closed unit (37 and 84 vertices); the HL-3 descriptions carry one open and one closed unit respectively. So a wall is a list of polylines, each with a closure flag and a kind, and a single closed ring is one member of that family rather than the family itself. Nova already carries the right model in one place: <code>nova/equilibrium/wall_mask.py</code> defines a typed <code>WallUnit</code> with open and closed semantics, unions the interiors of closed vessel units, subtracts material units as rasters, supercover-rasterises every segment and densifies units. That module is the reuse authority for raster semantics and its unit type is the one every other seam adopts; nothing in this plan authors a second wall type.</p>
+  <p>The representation the seams consume is a packed wall: one flat node array with unit offsets, one closure flag and one kind per unit, and a derived <strong>occupiable region</strong> equal to the union of closed vessel interiors minus the material units. Three rules follow and are the contract every section below tests. Units are never concatenated into one chain and then closed, because the edge that closes a concatenation joins two structures that are not joined in the machine. Any operation that today rolls the wall as one cyclic chain (segment lengths, arcs, tangency brackets, wall-height shadow neighbours) becomes per-unit, with the closure flag deciding whether the last node wraps to the first. And containment is a question about the occupiable region, not about any one polyline: a point is inside the wall when it lies inside a closed vessel unit and outside every material unit. On a machine with one closed ring all three rules reduce to today's behaviour exactly, which is the regression contract: the twelve positive-current MAST bank rows, the Solovev certificate and the persisted DIII-D gate frames stay bit-identical through every node of this plan.</p>
+</section>
+
+<section id="s2">
+  <h2>&sect;2 &mdash; Readers and writers: lossless in, lossless out</h2>
+  <p>The IMAS readers are the first seam. <code>nova/imas/mast_chain_factory.py</code> and <code>nova/imas/diiid_machine_ids.py</code> require one description and one limiter unit and select unit zero; <code>nova/media/sources/diiid_efit.py</code>, <code>benchmarks/diiid_ids_machine_description.py</code>, <code>benchmarks/diiid_vessel_hex_mesh.py</code> and <code>benchmarks/diiid_poloidal_figures.py</code> repeat the same read; the normalised DIII-D writer at <code>diiid_machine_ids.py</code> near line 551 collapses the source to one description and one unit on the way out, and the MAST wall-artifact producer in <code>nova/imas/mast_geometry.py</code> authors exactly one unit. The snapshot walker at <code>diiid_machine_ids.py</code> near line 736 is already plural and preserves indices; it is the model the readers adopt. Each reader parses every limiter unit of the selected description into a <code>WallUnit</code> with its <code>closed</code> flag read from the IDS and its kind derived from closure and the unit's name where the description supplies one, refuses a description count other than one as the landed guards do, and no longer refuses a unit count other than one. Writers preserve the unit collection with its metadata. The FrameSpace first wall (<code>nova/frame/firstwall.py</code> with <code>nova/imas/machine.py</code>) keeps unit identity and rings rather than one <code>Contour.loop</code>, and the nearest-endpoint concatenation that today can invent an edge between disjoint units is removed. The MAST seed-parameter provenance path at <code>nova/imas/mast_seed_parameters.py</code> near line 790 names the limiter outline without a unit index and gains one.</p>
+  <p>Fixtures: the JT-60SA and default ITER descriptions are the two real multi-unit machines and become test fixtures opened through imas-python at their own DD versions (4.1.0 and 3.37.0); a synthetic two-unit machine, a closed vessel ring with one open limiter blade inside it, is the CPU fixture every later section reuses. Done-when: both real descriptions load with their unit counts and closure flags asserted; the MAST and DIII-D artifacts load as one closed unit each and produce wall arrays bit-identical to today's; the writers round-trip the JT-60SA collection losslessly; the four ITER wall occurrences the scout could not count from its read-only sandbox are counted on a debug partition as the node's first step and recorded.</p>
+</section>
+
+<section id="s3">
+  <h2>&sect;3 &mdash; The solver's wall consumers: nodes with offsets, per-unit arcs, occupiable containment</h2>
+  <p>The forward operator (<code>nova/equilibrium/forward_operator.py</code> near lines 937 to 956 and 1163 to 1196) builds one wall-node array, maps each node to its nearest grid cell and hands one cyclic <code>wall_r</code>, <code>wall_z</code> pair to the connectivity and class read. It keeps a flat node array, because wall flux and the shadow mask are per node and stay flat, and gains the unit offsets and flags so consumers that roll or bracket along the wall do so per unit. <code>nova/equilibrium/connectivity_boundary.py</code> treats <code>roll(wall)</code> as one cyclic chain in its ray-cast containment, wall reachability and line of sight, spline-restricted wall minimum and supplied-wall shadow test (near lines 137, 634, 882, 1499, 1674 and 1920); each becomes unit-aware, with containment evaluated on the occupiable region and arcs and brackets confined to a unit. <code>nova/equilibrium/topology.py</code> screens X candidates by polygon containment near line 352 and ranks the wall-extremum anchor over the flat node set near line 440; the screen moves to the occupiable region and the anchor ranks over eligible nodes across all units, with the tangency bracket local to the node's unit. The wall-height shadow mask near <code>forward_operator.py</code> line 1619 is mostly fit once its producer stops joining units. Strike points, which the exact-intersection node on playable-forward-solve is moving from nearest-vertex to the crossing of the boundary level curve with a wall segment, record the unit index beside the segment index and parameter, so a strike point on an open limiter blade is distinguishable from one on the vessel.</p>
+  <p>Done-when: on the synthetic two-unit fixture, a point inside the blade is outside the occupiable region and a point in the vessel beside the blade is inside; an X candidate inside the blade is screened out; the first-contact anchor on a flux map that touches the blade before the vessel selects the blade node with a bracket that does not cross the blade's end; the shadow mask marks nodes by unit; and on the twelve MAST bank rows, the Solovev certificate and the DIII-D gate frames every read is bit-identical to main. The seven referee tests and the hex reference gates stay green. Every change here returns to the lead before merging, as solver changes do.</p>
+</section>
+
+<section id="s4">
+  <h2>&sect;4 &mdash; The session carries a reference to the wall, not a copy</h2>
+  <p>Lead direction 2026-09-07: the wall polygon is machine geometry with campaign-stable identity and belongs in the machine description, not in every session file. The wall group landed at <code>cc06321f</code> writes one closed ring per session and stays as an interim. This section replaces the copied coordinates with a reference: the machine identifier, the description's source (IDS path or persisted artifact) and its content digest, the DD version it was read at, the unit count and each unit's vertex count, closure and kind, written once per session, so a consumer dereferences the geometry through imas-python or the persisted artifact and can prove it read the same wall the solve used. The writer's containment receipt (labelled points outside the wall, X-points by inclusion in the occupiable region, strike points by exact segment membership once the intersection node lands) is computed at write time against the referenced description, so the session still reports its own containment. Legacy sessions carrying the copied ring read as a reference to one closed vessel unit of unknown source and are flagged as such. The schema moves once: the reference and the multi-unit shape land in the same change, before any corpus relabel writes the group at scale.</p>
+  <p>Done-when: <code>nova/equilibrium/steering_frames.py</code> writes the reference group and no coordinates; a rasterless Solovev session round-trips the reference with its digest and unit table; a consumer test dereferences the MAST artifact from the reference and reproduces the operator's wall vertices to 1e-12; the containment receipt on the two-point fixture is unchanged; a legacy one-ring session reads with the flag set; the fast steering-frame lane stays green.</p>
+</section>
+
+<section id="s5">
+  <h2>&sect;5 &mdash; Painters, apps and media sources draw units</h2>
+  <p><code>nova/media/poloidal.py</code> <code>draw_wall</code> closes one polyline and <code>draw_nulls</code> filters against one polygon; <code>apps/pulsedesign/poloidal_view.py</code> forcibly closes <code>wall_outline</code> and hides markers outside that ring; <code>nova/media/sources/frame.py</code> and <code>plasma_mesh.py</code> carry the limiter as one array; the media scripts under <code>scripts/media/</code> consume <code>MachineGeometry.limiter</code> as one ring. Each accepts the unit collection, draws every polyline with its own closure, distinguishes open structures visually, and evaluates null containment against the same occupiable model the solver uses, so a picture and the solve never disagree about what is inside the wall. The convergence atlas gains a JT-60SA panel as the visual proof that a five-unit wall is drawn as five structures and not as one invented ring.</p>
+  <p>Done-when: the painters draw the synthetic two-unit fixture and the JT-60SA description with unit-faithful closure in a committed PNG under <code>docs/figures/multi-unit-limiter-wall/</code>, the pulse-design app renders the two-unit fixture without closing across units, and the media tests stay green.</p>
+</section>
+
+<section id="s6">
+  <h2>&sect;6 &mdash; Order, ownership and the regression contract</h2>
+  <p>Order: &sect;2 first (readers, fixtures, the ITER count), because every other section consumes typed units; &sect;4 next, because the corpus relabel on playable-forward-solve waits on the schema moving once; &sect;3 then, held for the lead before merge; &sect;5 last, since it consumes the shared occupiable model. The regression contract runs through every node: single-closed-ring machines are bit-identical at every read, and the two real multi-unit descriptions plus the synthetic fixture are the positive controls, so a node cannot pass by leaving the plural path unexercised. Nodes cite the scout's inventory as their reuse map and <code>wall_mask.py</code> as the type they extend; a node that authors a second wall type states why <code>WallUnit</code> fails.</p>
+</section>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+  <h2><span class="sec">&sect;</span> Decisions</h2>
+  <div class="r-dec" data-key="wall-representation" data-choice="packed-units-occupiable-region" data-by="reckon-ship" data-when="2026-09-08">
+    <p class="r-dec-q">How does Nova represent a first wall made of several units?</p>
+    <p class="r-dec-ctx">The scout found the collapse to one closed polygon at eleven seams and one existing plural model, the typed WallUnit of nova/equilibrium/wall_mask.py with union-of-vessel and material-subtraction semantics.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="packed-units-occupiable-region">Packed units with offsets, closure and kind; containment on the occupiable region</button>
+      <button class="r-opt" data-value="concatenate-and-close">Concatenate units into one ring</button>
+      <button class="r-opt" data-value="vessel-only">Read only the closed vessel unit and drop the rest</button>
+    </p>
+    <p class="r-dec-rat">Concatenation invents edges between disjoint structures and vessel-only drops the limiters that define the plasma on these machines; the packed collection reduces exactly to today's ring on single-unit machines, which is what makes bit-identity the regression contract.</p>
+  </div>
+  <div class="r-dec" data-key="wall-by-reference" data-choice="reference-with-digest" data-by="lead" data-when="2026-09-07">
+    <p class="r-dec-q">Does the labeller session carry the wall's coordinates or a reference to the machine description?</p>
+    <p class="r-dec-ctx">The wall group landed on 2026-09-07 writes one closed ring per session; the lead asked why geometry stable across campaigns is copied into every session.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="reference-with-digest">A reference: machine, description source and digest, DD version, unit table</button>
+      <button class="r-opt" data-value="copy-per-session">Copy the coordinates into every session</button>
+    </p>
+    <p class="r-dec-rat">Lead direction 2026-09-07: the wall is machine geometry with campaign-stable identity and belongs in the machine description; the session keeps its containment receipt computed at write time and a consumer dereferences the geometry to reproduce the solve's own admission decision.</p>
+  </div>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+  <h2><span class="sec">&sect;</span> Followups</h2>
+  <article class="r-fu" data-id="f-mulw-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-08" data-recommends-skill="/reckon-ship multi-unit-limiter-wall">
+    <h4 class="r-fu-title">Read the wall losslessly, then move the session to a reference, then make the solver's consumers unit-aware</h4>
+    <div class="r-fu-body">Order: &sect;2 readers and fixtures with the ITER occurrence count as the first step; &sect;4 the session reference in one schema move before any corpus relabel; &sect;3 the solver consumers held for the lead; &sect;5 the painters. Every node keeps the single-closed-ring machines bit-identical and exercises the JT-60SA and ITER descriptions plus the synthetic two-unit fixture as positive controls.</div>
+    <pre class="r-fu-prompt">/reckon-ship multi-unit-limiter-wall</pre>
+  </article>
+</section>
+
+<section data-reckon="questions" id="questions" class="r-questions">
+  <h2><span class="sec">&sect;</span> Open questions</h2>
+  <div class="r-q" data-id="q-mulw-blade-anchors" data-section="s3" data-status="open" data-opened-by="reckon-ship" data-opened-at="2026-09-08">
+    <p class="r-q-body">Are open limiter structures admissible first-contact anchors for the limited boundary and do they cast wall-height shadows like the vessel, or is only the closed vessel ring the anchor set? Coordinator's reading: a limiter is where the plasma is limited, so its nodes are admissible anchors and its segments shadow like any other wall, with the unit index recorded so a receipt says which structure limited the plasma; the lead decides before &sect;3 merges.</p>
+  </div>
+</section>
+
+<section data-reckon="research" id="research" class="r-research-list">
+  <h2><span class="sec">&sect;</span> Research</h2>
+  <div class="r-research" data-id="wall-units-inventory" data-type="reference" data-source="crew-report" data-added-by="reckon-ship" data-when="2026-09-08">
+    <span class="r-research-title">Wall-unit assumption inventory: 65 source files, 45 direct IDS-index hits, seven machine descriptions counted, two multi-unit (~/.config/reckon/crew/reports/nova/s19-labeller/wall-units-scout.md)</span>
+  </div>
+</section>
+
+<section data-reckon="comments" id="comments" class="r-comments">
+  <h2><span class="sec">&sect;</span> Comments</h2>
+</section>
+</main>
+</body>
+</html>

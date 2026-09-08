@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-08">
-<meta name="plan-version" content="108">
+<meta name="plan-version" content="109">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html,docs/figures/null-identification-authority/bank-integrated/bank-integrated.json,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json,docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087,7b0311d2,e76bc389">
 <meta name="plan-impl" content="0.925">
@@ -338,6 +338,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260908T024700-atlas-landed" data-who="reckon-ship" data-when="2026-09-08T02:47:00Z">
     <div class="r-comment-body">nia-convergence-atlas LANDED (run r-20260907T164554588285, local lane, spec guided, 12 hours on the lane; commit 5e71cef7 merged at 169d928e; gate: audit-doc clean, 17 panels on disk, renderer lint clean). The instrument shows the sprint's convergence problem in one grid: eleven of twelve MAST bank arms end on an exhausted iteration budget or an active-set cycle at residuals 5e-4 to 6e-3 at the banked revision, and only 22086/43 mixed converges. DIII-D contours are EFIT's psirz because the committed operands carry no Nova flux field; four of five demo reads return no closed boundary. Supplement followup opened for the two frames without committed flux.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260908T022820151434-wall-units-scout-2" data-who="wall-units-x" data-when="2026-09-08T02:55:08Z">
+    <div class="r-comment-body"><p>Single-limiter-polygon assumption inventoried at eleven seams with fitness verdicts; JT-60SA (5 units: one closed vessel, four open structures) and the default ITER description (2 open units) are the multi-unit machines in reach; MAST and DIII-D artifacts carry one closed unit; wall_mask.py&#x27;s typed WallUnit is the existing plural model to reuse; four further ITER wall occurrences left for the first execution node to count</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260904T043201409904-nia-test-health-repairs-codex" data-who="nia-test-health-x" data-when="2026-09-04T04:59:31Z">
     <div class="r-comment-body"><p>signature call fixed to the seven-parameter contract, the nineteen-amplitude sweep moved under the slow marker, the threshold assertion compares the parsed number; default lane green; run to completion the sweep fails a pre-existing 0.13025 mm selected-X-coordinate identity assertion, recorded for a follow-on; worker parked on that unmet slow-lane requirement and codex resume was refused by a stale hold</p></div>

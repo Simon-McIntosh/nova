@@ -1187,7 +1187,8 @@ def test_fixture_frame_carries_every_decoder_field(machine, tmp_path) -> None:
     assert np.isfinite(frame.magnetic_axis_z)
     assert frame.x_point_r.shape == (2,)
     assert frame.x_point_z.shape == (2,)
-    assert np.isfinite(frame.x_point_r[0])  # primary X-point in slot 0
+    assert np.all(np.isnan(frame.x_point_r))
+    assert np.all(np.isnan(frame.x_point_z))
     assert frame.lcfs_r.shape == frame.lcfs_z.shape
     assert frame.lcfs_r.ndim == 1 and frame.lcfs_r.size > 0
     assert int(frame.n_boundary_coords) > 0
@@ -1196,7 +1197,7 @@ def test_fixture_frame_carries_every_decoder_field(machine, tmp_path) -> None:
     assert frame.finite_mask.shape == (len(FINITE_MASK_COMPONENTS),)
     assert frame.finite_mask.dtype == bool
     assert bool(frame.finite_mask[0])
-    assert bool(frame.finite_mask[1])
+    assert not bool(frame.finite_mask[1])  # this limited fixture has no X-point
     assert bool(frame.finite_mask[5])  # LCFS present
     assert frame.coil_current.shape == (CONDUCTORS,)
     assert frame.coil_current.dtype == np.float64

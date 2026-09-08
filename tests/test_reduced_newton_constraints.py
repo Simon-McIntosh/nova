@@ -42,9 +42,11 @@ with skip_import("jax"):
     from nova.equilibrium import reduced_newton
     from nova.equilibrium.constraint import (
         ConstraintBinding,
+        ConstraintContext,
         ConstraintMultiplier,
         ConstraintPair,
         CurrentCentroidConstraint,
+        IsofluxConstraint,
         ProfileAmplitudeUnknown,
     )
     from nova.equilibrium.fixed_point import _relative_residual
@@ -418,6 +420,76 @@ def test_the_current_cap_bounds_a_single_trip_displacement(steered):
     )
     assert result.newton_steps_per_trip[0] >= 1
     assert abs(float(np.asarray(result.constraints[0].physical_unknown)[0])) <= cap
+
+
+def test_centroid_and_named_boundary_flux_rows_converge_together(steered):
+    """One globalised solve closes placement and a diagnostic flux crossing."""
+    profile, _seed, free = steered
+    field = profile.operator.prescribed_current_field
+    _masks, topology = profile.operator.read(jnp.asarray(free.state))
+    axis = jnp.asarray(topology.axis)
+    boundary = jnp.asarray(topology.boundary)
+    diagnostic_crossing = axis + 0.65 * (boundary - axis)
+    boundary_reference = boundary
+    flux_payload = jnp.stack((diagnostic_crossing, boundary_reference))
+    flux_functional = IsofluxConstraint(point_count=1, reference="reference_point")
+    context = ConstraintContext(jnp.asarray(free.state), None, None, None)
+    achieved_flux = jnp.atleast_1d(
+        flux_functional.observed(profile, context, flux_payload)
+    )
+    flux_span = abs(float(np.asarray(topology.flux_span)))
+    centroid_scale = float(np.ptp(np.asarray(profile.lattice.height)))
+    centroid_target = _centroid(profile, free.state) + 1.0e-3
+    flux_target = achieved_flux + 1.0e-4 * flux_span
+    seeded = (
+        ConstraintPair(
+            functional=CurrentCentroidConstraint(
+                components=("centroid_z",),
+                support=MomentIntegralSupport.ALL_DOMAIN,
+            ),
+            unknown=ConstraintMultiplier(multiplier_scale=jnp.asarray([1.0])),
+            binding=ConstraintBinding(
+                target=jnp.asarray([centroid_target]),
+                tolerance=jnp.asarray([CENTROID_AGREEMENT]),
+                scale=jnp.asarray([centroid_scale]),
+                initial_unknown=jnp.asarray([0.0]),
+            ),
+        ),
+        ConstraintPair(
+            functional=flux_functional,
+            unknown=ConstraintMultiplier(multiplier_scale=jnp.asarray([1.0])),
+            binding=ConstraintBinding(
+                target=flux_target,
+                tolerance=jnp.asarray([1.0e-6 * flux_span]),
+                scale=jnp.asarray([flux_span]),
+                initial_unknown=jnp.asarray([0.0]),
+                payload=flux_payload,
+            ),
+        ),
+    )
+    pairs, _selection = reduced_newton.derive_reduced_constraint_pairs(
+        profile,
+        seeded,
+        free.state,
+        prescribed_current=field.current,
+        program=free.program,
+    )
+    result = reduced_newton.solve_constrained_reduced_newton(
+        profile,
+        free.state,
+        constraint_pairs=pairs,
+        prescribed_current=field.current,
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=NEWTON_STEPS,
+    )
+    assert result.converged
+    assert result.row_count == 2
+    assert all(bool(np.asarray(record.qualified)[0]) for record in result.constraints)
+    assert abs(_centroid(profile, result.state) - centroid_target) <= CENTROID_AGREEMENT
+    assert (
+        abs(float(np.asarray(result.constraints[1].physical_residual)[0]))
+        <= 1.0e-6 * flux_span
+    )
 
 
 def test_the_public_route_carries_the_rows_into_a_receipt(steered):

@@ -2387,7 +2387,9 @@ class ForwardFluxOperator:
                 psi, image, requested_class, shadow=shadow
             )
 
-        if not self.use_linear_moments or self.moment_geometry is not None:
+        if target_current is None and (
+            not self.use_linear_moments or self.moment_geometry is not None
+        ):
 
             def read_partition(psi, previous_shadow=None):
                 return self._frozen_topology_partition(

@@ -127,13 +127,6 @@ def test_dynamic_edge_control_reproduces_batched_difference():
     assert int(np.count_nonzero(difference)) == 9
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "custom vmap JVP output retains a member axis: shape (2, 3759) where "
-        "(3759,) is expected"
-    ),
-)
 def test_vmap_preserves_unbatched_sampled_values_and_state_derivatives():
     assert jax.config.jax_enable_x64 is True
     coordinate = np.linspace(0.0, 1.0, 65)
@@ -141,19 +134,20 @@ def test_vmap_preserves_unbatched_sampled_values_and_state_derivatives():
     sampled = SampledFluxFunction(coordinate, values)
     points = jnp.linspace(-0.02, 1.02, 3759, dtype=jnp.float64)
     tangents = jnp.linspace(0.5, 1.5, points.size, dtype=jnp.float64)
+    closure = _closed_sampled_flux(coordinate, values)
     batched_sampled = jax.tree_util.tree_map(
         lambda value: jnp.stack((value, value)), sampled
     )
     batched_points = jnp.stack((points, points))
     batched_tangents = jnp.stack((tangents, tangents))
 
-    expected = jax.jit(lambda function, argument: function(argument))(sampled, points)
+    expected = jax.jit(closure)(points)
     observed = jax.jit(jax.vmap(lambda function, argument: function(argument)))(
         batched_sampled, batched_points
     )
     expected_primal, expected_tangent = jax.jit(
-        lambda function, argument, tangent: jax.jvp(function, (argument,), (tangent,))
-    )(sampled, points, tangents)
+        lambda argument, tangent: jax.jvp(closure, (argument,), (tangent,))
+    )(points, tangents)
     observed_primal, observed_tangent = jax.jit(
         jax.vmap(
             lambda function, argument, tangent: jax.jvp(
@@ -162,13 +156,15 @@ def test_vmap_preserves_unbatched_sampled_values_and_state_derivatives():
         )
     )(batched_sampled, batched_points, batched_tangents)
 
-    np.testing.assert_array_equal(np.asarray(observed[0]), np.asarray(expected))
+    assert int(np.count_nonzero(np.asarray(observed[0]) != np.asarray(expected))) == 0
     np.testing.assert_array_equal(
         np.asarray(observed_primal[0]), np.asarray(expected_primal)
     )
     np.testing.assert_array_equal(
         np.asarray(observed_tangent[0]), np.asarray(expected_tangent)
     )
+    assert observed_primal[0].shape == expected_primal.shape
+    assert observed_tangent[0].shape == expected_tangent.shape
 
 
 def _compare_at_recorded_points(

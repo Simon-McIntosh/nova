@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T10:27:40",
+  "updated": "2026-09-08T10:37:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -132560,6 +132560,175 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T071242575641-pfs-constraint-jacobian-plasma-response",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-constraint-jacobian-plasma-response",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2129,
+                "cached_input_tokens": 581595,
+                "input_tokens": 583756,
+                "output_tokens": 5150,
+                "reasoning_output_tokens": 263,
+                "total_tokens": 588906,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The constraint pair the labeller builds (the _centroid_pair path and the constrained reduced-Newton route in nova/equilibrium/reduced_newton.py) reports as its Jacobian entry the derivative of the converged equilibrium's current-centroid height with respect to the compensating circuit current, obtained through the fixed point (the implicit-function derivative, or the linearised plasma response assembled from the reduced Jacobian the solve already factors) rather than the direct flux image alone; on 27079 row 96 the new entry for p6_upper and for the antisymmetric p6 pair matches the finite-difference values in docs/figures/playable-forward-solve/compensator-jacobian/compensator-jacobian-response.json (1.527e-5 and 2.466e-5 m/A) within 20 percent, and on row 16 stays within a factor of two of 1.9e-8 and 4.1e-8; a constrained solve on one flat-top row with the centroid row active reports its Newton step count before and after on a debug partition with JAX_PLATFORMS=cpu and a per-job TMPDIR; tests/test_reduced_newton_constraints.py runs green as fresh-process lanes of at most six tests on all_debug with --mem=64G, and a new test pins the row-96 agreement; the receipt under docs/figures/playable-forward-solve/constraint-jacobian/ carries the before and after entries per direction and row; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/constraint-jacobian-plasma-response.md states the mechanism in one paragraph; the unknown stays a circuit current; this serves diagnostic placement only, not shape control; no PNG read back; no tolerance set from observed values; every uv command carries --no-sync and nothing runs uv sync; commit at each deliverable",
+          "estimated_hours": 2.0,
+          "goal": "The centroid constraint Jacobian carries the plasma's free vertical response, matched against the finite-difference receipt on flat-top row 96 and early row 16",
+          "id": "pfs-constraint-jacobian-plasma-response",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T071242575641-pfs-constraint-jacobian-plasma-response/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "scripts/labeller_batch/forward_labeller_throughput.py",
+            "scripts/labeller_batch/shard.py",
+            "tests/test_reduced_newton_constraints.py",
+            "docs/figures/playable-forward-solve/constraint-jacobian/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/constraint-jacobian-plasma-response.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-cjac-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T07:13:10Z",
+        "completed_at": "2026-09-08T08:35:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4938,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4938,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5f4e86629ed0d9e0217e8e4e2bc585ac4f20e750",
+        "commits": [
+          "71e6e00602e0077d4baae3399cccfc37898d3756",
+          "9c9a60ad307dbf7a8865767bda902c4836172202"
+        ],
+        "changed_lines": {
+          "added": 727,
+          "removed": 4,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "all_debug fresh-process lanes: the exact linearised-residual unit contract; three formulations of the local derivative against the banked receipt on rows 16 and 96; two of three constraint sub-lanes 6/6 (the middle lane aborted in the compilation cache)",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/constraint-jacobian-plasma-response.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T071242575641-pfs-constraint-jacobian-plasma-response/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07fdd-184e-7f93-84f7-4fb0f89ed8bf",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2385280,
+            "cached_input_tokens_cumulative": 2385280,
+            "input_tokens": 2434773,
+            "input_tokens_cumulative": 2434773,
+            "output_tokens": 19996,
+            "output_tokens_cumulative": 19996,
+            "reasoning_output_tokens": 4887,
+            "reasoning_output_tokens_cumulative": 4887
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T08:35:28Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 23.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T08:35:28Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2385280,
+          "cumulative_input_tokens": 4820053,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 24883
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "scope_acceptances": [
+          {
+            "path": "benchmarks/constraint_jacobian_receipt.py",
+            "reason": "the receipt runner the coordinator asked to be moved here from a colliding scripts path mid-flight"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-constraint-jacobian-plasma-response",
+          "session_id": "01a07fdd-184e-7f93-84f7-4fb0f89ed8bf",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T08:35:28Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -132872,6 +133041,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2200
+    "_version": 2201
   }
 }

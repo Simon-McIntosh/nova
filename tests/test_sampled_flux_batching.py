@@ -42,6 +42,42 @@ def _recording_function(function, batches: list[np.ndarray]):
     return recorded
 
 
+def test_vmap_preserves_unbatched_sampled_values_and_state_derivatives():
+    coordinate = np.linspace(0.0, 1.0, 65)
+    values = np.sin(coordinate) * 12345.6789
+    sampled = SampledFluxFunction(coordinate, values)
+    points = jnp.linspace(-0.02, 1.02, 3759, dtype=jnp.float64)
+    tangents = jnp.linspace(0.5, 1.5, points.size, dtype=jnp.float64)
+    batched_sampled = jax.tree_util.tree_map(
+        lambda value: jnp.stack((value, value)), sampled
+    )
+    batched_points = jnp.stack((points, points))
+    batched_tangents = jnp.stack((tangents, tangents))
+
+    expected = jax.jit(lambda function, argument: function(argument))(sampled, points)
+    observed = jax.jit(jax.vmap(lambda function, argument: function(argument)))(
+        batched_sampled, batched_points
+    )
+    expected_primal, expected_tangent = jax.jit(
+        lambda function, argument, tangent: jax.jvp(function, (argument,), (tangent,))
+    )(sampled, points, tangents)
+    observed_primal, observed_tangent = jax.jit(
+        jax.vmap(
+            lambda function, argument, tangent: jax.jvp(
+                function, (argument,), (tangent,)
+            )
+        )
+    )(batched_sampled, batched_points, batched_tangents)
+
+    np.testing.assert_array_equal(np.asarray(observed[0]), np.asarray(expected))
+    np.testing.assert_array_equal(
+        np.asarray(observed_primal[0]), np.asarray(expected_primal)
+    )
+    np.testing.assert_array_equal(
+        np.asarray(observed_tangent[0]), np.asarray(expected_tangent)
+    )
+
+
 def _compare_at_recorded_points(
     closure,
     sampled: SampledFluxFunction,

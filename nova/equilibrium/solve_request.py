@@ -35,6 +35,38 @@ SolveRoute = Literal[
 JsonScalar = str | int | float | bool | None
 
 
+@jax.custom_batching.sequential_vmap
+def _evaluate_sampled_flux_function(coordinate, values, psi_norm):
+    """Evaluate one member without changing scalar interpolation arithmetic."""
+    grid = jnp.asarray(coordinate)
+    samples = jnp.asarray(values)
+    evaluation_coordinate = jnp.asarray(psi_norm)
+    edge_width = grid[1] - grid[0]
+    lower_slope = (samples[1] - samples[0]) / edge_width
+    upper_slope = (samples[-1] - samples[-2]) / edge_width
+    interior = jnp.interp(evaluation_coordinate, grid, samples)
+    below = evaluation_coordinate < grid[0]
+    edge_value = jnp.where(below, samples[0], samples[-1])
+    outward_slope = jnp.where(below, -lower_slope, upper_slope)
+    outward_distance = jnp.where(
+        below,
+        grid[0] - evaluation_coordinate,
+        evaluation_coordinate - grid[-1],
+    )
+    parameter = jnp.clip(outward_distance / edge_width, 0.0, 1.0)
+    parameter_cubed = parameter * parameter * parameter
+    value_basis = 1.0 + parameter_cubed * (-10.0 + parameter * (15.0 - 6.0 * parameter))
+    slope_basis = parameter + parameter_cubed * (
+        -6.0 + parameter * (8.0 - 3.0 * parameter)
+    )
+    exterior = value_basis * edge_value + slope_basis * edge_width * outward_slope
+    return jnp.where(
+        (evaluation_coordinate >= grid[0]) & (evaluation_coordinate <= grid[-1]),
+        interior,
+        exterior,
+    )
+
+
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True, slots=True)
 class SampledFluxFunction:
@@ -64,28 +96,10 @@ class SampledFluxFunction:
 
     def __call__(self, psi_norm):
         """Evaluate the interpolant and its slope-matched compact end caps."""
-        grid = jnp.asarray(self.coordinate)
-        samples = jnp.asarray(self.values)
-        coordinate = jnp.asarray(psi_norm)
-        edge_width = grid[1] - grid[0]
-        lower_slope = (samples[1] - samples[0]) / edge_width
-        upper_slope = (samples[-1] - samples[-2]) / edge_width
-        interior = jnp.interp(coordinate, grid, samples)
-        below = coordinate < grid[0]
-        edge_value = jnp.where(below, samples[0], samples[-1])
-        outward_slope = jnp.where(below, -lower_slope, upper_slope)
-        outward_distance = jnp.where(below, grid[0] - coordinate, coordinate - grid[-1])
-        parameter = jnp.clip(outward_distance / edge_width, 0.0, 1.0)
-        parameter_cubed = parameter * parameter * parameter
-        value_basis = 1.0 + parameter_cubed * (
-            -10.0 + parameter * (15.0 - 6.0 * parameter)
-        )
-        slope_basis = parameter + parameter_cubed * (
-            -6.0 + parameter * (8.0 - 3.0 * parameter)
-        )
-        exterior = value_basis * edge_value + slope_basis * edge_width * outward_slope
-        return jnp.where(
-            (coordinate >= grid[0]) & (coordinate <= grid[-1]), interior, exterior
+        return _evaluate_sampled_flux_function(
+            self.coordinate,
+            self.values,
+            psi_norm,
         )
 
     def tree_flatten(self):

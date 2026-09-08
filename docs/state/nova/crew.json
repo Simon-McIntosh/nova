@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T12:04:14",
+  "updated": "2026-09-08T12:10:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2336,6 +2336,15 @@
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "3df17653-092c-4589-8c5c-28ca9066d71f"
         },
         "created": "2026-09-07"
+      },
+      {
+        "id": "nia-bracket-t",
+        "harness": "codex-terra",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "nia-candidate2-gate-x",
@@ -133942,6 +133951,159 @@
           "reason": "the CPU proof delivered its finding and the repair is in another file scope; the measurement redispatches from the repaired head"
         },
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T081142939662-nia-certificate-drift-attribution",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-certificate-drift-attribution",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2764,
+                "cached_input_tokens": 718850,
+                "input_tokens": 721646,
+                "output_tokens": 4552,
+                "reasoning_output_tokens": 591,
+                "total_tokens": 726198,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "In fresh-process all_debug lanes (--cpus-per-task=4 --mem=64G, TMPDIR=/tmp, JAX_PLATFORMS=cpu, JAX compilation cache disabled, the shared environment through UV_PROJECT_ENVIRONMENT with --no-sync and PYTHONPATH at the tree under test), the certificate driver benchmarks/solovev_certificate.py solves the diverted -110 and diverted -300 rows at four revisions extracted as git archives under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/certificate-drift/: 8fb5a767 (the last committed certificate), dbeac7df (before the adaptive Jacobian refresh), ff9da2c9 (after it) and the current head of main; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/certificate-drift-attribution.md tabulates per revision and row the terminal residual, the step count, the converged flag and whether the CurrentNormalisationError NaN appears, names the first revision at which each row's residual moves from 8fb5a767 and the first at which -300 fails, and states whether the -110 move is a changed Newton path to the same fixed point within the certificate tolerance or a change in the converged residual itself; logs captured once per lane under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/certificate-drift/; no source or test file is changed; if a row does not fit a lane in 55 minutes, say so and report the rows that did",
+          "estimated_hours": 1.5,
+          "goal": "The exact-oracle residual drift since the last committed certificate attributed to a commit, row by row, and the diverted -300 NaN located to a revision",
+          "id": "nia-certificate-drift-attribution",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081142939662-nia-certificate-drift-attribution/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/certificate-drift-attribution.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/certificate-drift/"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "nia-drift-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T08:12:03Z",
+        "completed_at": "2026-09-08T10:08:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 7009,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 7009,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "4d7139b31399ee09f01cd7771749ce5f9c780558",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "Slurm array 1265113 (eight pure-revision lanes) plus eight mixed-code bisect probes in jobs 1265150, 1265151, 1265153, 1265154, 1265169, 1265170, 1265345, 1265346; each a fresh process on all_debug, --cpus-per-task=4 --mem=64G, JAX_PLATFORMS=cpu, compilation cache disabled, archive-local PYTHONPATH",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/certificate-drift-attribution.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081142939662-nia-certificate-drift-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08013-00b0-7163-88cd-e852cb20f0bf",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 32965504,
+            "cached_input_tokens_cumulative": 32965504,
+            "input_tokens": 33409275,
+            "input_tokens_cumulative": 33409275,
+            "output_tokens": 63320,
+            "output_tokens_cumulative": 63320,
+            "reasoning_output_tokens": 18399,
+            "reasoning_output_tokens_cumulative": 18399
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T10:08:52Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 28.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T10:08:52Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 32965504,
+          "cumulative_input_tokens": 66374779,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 81719
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": "test role; the attribution report and its lane logs are the deliverable",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-certificate-drift-attribution",
+          "session_id": "01a08013-00b0-7163-88cd-e852cb20f0bf",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T10:08:52Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -134254,6 +134416,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2221
+    "_version": 2223
   }
 }

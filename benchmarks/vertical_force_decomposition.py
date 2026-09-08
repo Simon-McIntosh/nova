@@ -1098,6 +1098,7 @@ def measure_case_current_repair(
     )
     output.mkdir(parents=True, exist_ok=True)
     receipt_path = output / "case-current-repair.json"
+    existing: dict[str, Any] = {}
     existing_rows = []
     if receipt_path.exists():
         existing = json.loads(receipt_path.read_text(encoding="utf-8"))
@@ -1119,8 +1120,11 @@ def measure_case_current_repair(
             for item_shot, item_row in ROWS
             if f"{item_shot}/{item_row}" in rows_by_identity
         ]
+        in_progress_receipt = dict(existing)
+        in_progress_receipt["rows"] = rows
+        in_progress_receipt["progress"] = progress
         receipt_path.write_text(
-            json.dumps({"rows": rows, "progress": progress}, indent=2) + "\n",
+            json.dumps(in_progress_receipt, indent=2) + "\n",
             encoding="utf-8",
         )
     rows = [

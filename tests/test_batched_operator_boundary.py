@@ -97,7 +97,13 @@ def _read_carriers() -> tuple[
     return response, targets, metadata["rows"], arrays
 
 
-def _carrier_batch():
+def _synthetic_profile_batch():
+    """Build MAST-shaped members with independently varying numerical inputs.
+
+    The persisted bank has two arms for each of six source profiles.  This
+    fixture retains its MAST geometry, responses, and cached seeds while
+    synthesizing the member data that must vary across all twelve slices.
+    """
     response, targets, rows, arrays = _read_carriers()
     full_count = 33
     selection = np.arange(0, full_count, 4)
@@ -138,7 +144,14 @@ def _carrier_batch():
         )
         response_scale = 1.0 + index * np.finfo(np.float64).eps
         plasma_grid = response_scale * 1.0e-12 * np.eye(lattice.node_count)
-        plasma_wall = np.zeros((len(wall_coordinate), lattice.node_count))
+        plasma_wall = (
+            response_scale
+            * 1.0e-14
+            * np.outer(
+                np.linspace(1.0, 2.0, len(wall_coordinate)),
+                np.linspace(1.0, 2.0, lattice.node_count),
+            )
+        )
         ordinary_grid = grid_response[:, :1] * response_scale
         ordinary_wall = wall_response[:, :1] * response_scale
         prescribed = PrescribedCurrentField(
@@ -156,11 +169,14 @@ def _carrier_batch():
             source_radius, source_height, source_flux.T, kx=3, ky=3, s=0.0
         )
         wall_flux = spline.ev(wall_coordinate[:, 0], wall_coordinate[:, 1])
-        seed = np.r_[grid_flux, wall_flux]
-        axis_flux = float(np.min(grid_flux))
-        boundary_flux = float(arrays[f"arm_{index:02d}_binding_flux"])
+        seed_offset = (index + 1) * 1.0e-8
+        seed = np.r_[grid_flux, wall_flux] + seed_offset
+        axis_flux = float(np.min(grid_flux) + seed_offset)
+        boundary_flux = float(
+            arrays[f"arm_{index:02d}_binding_flux"] + (index + 1) * 1.0e-7
+        )
         if boundary_flux == axis_flux:
-            boundary_flux = float(np.max(grid_flux))
+            boundary_flux = float(np.max(grid_flux) + (index + 1) * 1.0e-7)
         operator = _ReferenceAnchoredOperator(
             grid=FluxTarget(
                 source_target=jnp.asarray(ordinary_grid),
@@ -189,11 +205,7 @@ def _carrier_batch():
         member_data.append(
             ForwardSolveMemberData(
                 seed_state=jnp.asarray(seed),
-                target_current=jnp.asarray(
-                    float(index + 1)
-                    if row["terminal_residual"] is None
-                    else abs(float(row["terminal_residual"]))
-                ),
+                target_current=jnp.asarray(float(index + 1)),
                 current=jnp.asarray([1.0e-3 + index * 1.0e-6]),
                 prescribed_current=prescribed.current,
             )
@@ -202,6 +214,41 @@ def _carrier_batch():
         lambda *values: jnp.stack(values), *member_data
     )
     return operators, stacked_data
+
+
+def _array_bytes(values) -> set[bytes]:
+    """Return the exact byte identities of a collection of numerical leaves."""
+    return {np.asarray(value).tobytes() for value in values}
+
+
+def _assert_member_data_varies(operators, member_data) -> None:
+    """Prove each contract-defined member input differs across the batch."""
+    assert (
+        len(_array_bytes([item.source.core.p_prime.values for item in operators]))
+        == WIDTH
+    )
+    assert (
+        len(_array_bytes([item.source.core.ff_prime.values for item in operators]))
+        == WIDTH
+    )
+    for blocks in (
+        [item.grid.source_target for item in operators],
+        [item.grid.plasma_target for item in operators],
+        [item.wall.source_target for item in operators],
+        [item.wall.plasma_target for item in operators],
+        [item.prescribed_current_field.response for item in operators],
+        [item.prescribed_current_field.current for item in operators],
+        [item.declared_axis_flux for item in operators],
+        [item.declared_boundary_flux for item in operators],
+    ):
+        assert len(_array_bytes(blocks)) == WIDTH
+    for leaves in (
+        member_data.seed_state,
+        member_data.target_current,
+        member_data.current,
+        member_data.prescribed_current,
+    ):
+        assert len(_array_bytes(leaves)) == WIDTH
 
 
 def _one_forward_iteration(operator, data):
@@ -282,9 +329,22 @@ def _rebuilt_diiid_source(template: ForwardFluxOperator) -> ForwardSource:
     )
 
 
+def test_persisted_mast_bank_has_six_profile_identities_for_twelve_arms():
+    """Keep the real-bank grouping measurement outside the synthetic fixture."""
+    _response, _targets, rows, _arrays = _read_carriers()
+    identities = {str(row["identity"]) for row in rows}
+
+    assert len(rows) == WIDTH
+    assert len(identities) == WIDTH // 2
+    assert all(
+        sum(str(row["identity"]) == identity for row in rows) == 2
+        for identity in identities
+    )
+
+
 def test_operator_pytree_contains_member_arrays_but_no_geometry_arrays():
     configure_dtypes()
-    operators, _member_data = _carrier_batch()
+    operators, _member_data = _synthetic_profile_batch()
     operator = operators[0]
     leaves = jax.tree_util.tree_leaves(operator)
 
@@ -327,7 +387,7 @@ def test_equivalent_diiid_bank_operators_stack_into_one_program():
 
 def test_different_static_profile_callables_take_sequential_fallback():
     configure_dtypes()
-    operators, _member_data = _carrier_batch()
+    operators, _member_data = _synthetic_profile_batch()
     first = operators[0]
     left = _operator_with_source(first, _static_profile(1.0))
     right = _operator_with_source(first, _static_profile(2.0))
@@ -349,7 +409,7 @@ def test_different_static_profile_callables_take_sequential_fallback():
 
 def test_geometry_mismatch_selects_sequential_compiled_fallback():
     configure_dtypes()
-    operators, member_data = _carrier_batch()
+    operators, member_data = _synthetic_profile_batch()
     first = operators[0]
     moved_wall = np.asarray(first.wall.coordinate).copy()
     moved_wall[0, 0] += 1.0e-6
@@ -385,7 +445,8 @@ def test_geometry_mismatch_selects_sequential_compiled_fallback():
 @pytest.mark.slow
 def test_width_twelve_mast_batch_has_no_member_constants_and_matches_width_one():
     configure_dtypes()
-    operators, member_data = _carrier_batch()
+    operators, member_data = _synthetic_profile_batch()
+    _assert_member_data_varies(operators, member_data)
     checked = stack_forward_operators(operators)
 
     assert checked.width == WIDTH

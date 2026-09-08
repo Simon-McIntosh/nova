@@ -17,6 +17,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 from scipy.constants import mu_0
+from scipy.interpolate import RegularGridInterpolator
 
 from nova.utilities.importmanager import skip_import
 
@@ -484,6 +485,7 @@ def test_synthetic_session_round_trips_bitwise(tmp_path) -> None:
 
     assert int(actual.attrs.get("cocos")) == COCOS
     assert actual.attrs["p_prime_source"] == "efm"
+    assert actual.attrs["flux_unit"] == "Wb"
     assert actual.sizes["time"] == 3
     _assert_dataset_variables_bitwise(expected, actual)
 
@@ -756,6 +758,69 @@ def test_labelled_points_outside_wall_receipt_counts_inclusion_and_proximity(
     )
     restored = read_session(filename="displaced-session", dirname=str(tmp_path))
     assert count_labelled_outside_wall(restored) == 3
+
+
+def test_frame_psi_at_the_axis_is_the_solve_axis_flux_in_wb(machine) -> None:
+    """The raster psi at the axis is the solve's total axis flux in Wb.
+
+    COCOS 17 carries the poloidal flux as the total flux in Wb (``e_Bp = 1``,
+    the 2 pi convention), so interpolating the frame's raster psi to the
+    magnetic axis returns the axis flux in Wb — not 2 pi times or a fraction
+    of it.  The axis is not a lattice node, so the interpolation carries its
+    own sub-cell underestimate; the one-percent tolerance absorbs it, while a
+    per-radian reading would sit a factor 2 pi away and fail.
+    """
+    profile, seed, _conductor_current = machine
+    radial_count = profile.lattice.radius.size
+    vertical_count = profile.lattice.height.size
+    psi = np.asarray(seed[: radial_count * vertical_count]).reshape(
+        radial_count, vertical_count
+    )
+    axis_flux = float(np.asarray(seed).max())
+    boundary_flux = axis_flux - SEED_SPAN
+    geometry = FluxSurfaceGeometry.internal_geometry(
+        profile.lattice,
+        np.asarray(psi),
+        source_field_function(profile.source, SEED_SPAN),
+        axis=(AXIS_RADIUS, 0.0),
+        boundary_flux=boundary_flux,
+        n_surface=11,
+        n_theta=64,
+        n_rho=25,
+    )
+    receipt = _receipt_for_geometry_assembly(
+        np.asarray(profile.lattice.radius),
+        np.asarray(profile.lattice.height),
+        psi,
+        geometry,
+        lcfs=None,
+    )
+    profile_psi_norm = np.linspace(0.0, 1.0, 65)
+    frame = assemble_frame(
+        receipt,
+        action=SteeringAction(
+            name="minor_radius",
+            delta=0.01,
+            commanded_control_points=np.asarray([[0.8, 0.0], [1.2, 0.0]]),
+        ),
+        carrier_identity="solovev-fixture",
+        applied_current=np.zeros(CONDUCTORS),
+        p_prime_psi_norm=profile_psi_norm,
+        p_prime=np.asarray(profile.source.core.p_prime(profile_psi_norm)),
+        ff_prime_psi_norm=profile_psi_norm,
+        ff_prime=np.asarray(profile.source.core.ff_prime(profile_psi_norm)),
+        p_prime_source="efm",
+        reference_centroid_z=0.0,
+        compensating_current=np.empty(0),
+        internal_geometry=geometry,
+    )
+    interpolant = RegularGridInterpolator(
+        (np.asarray(profile.lattice.radius), np.asarray(profile.lattice.height)),
+        np.asarray(frame.psi),
+        bounds_error=False,
+    )
+    at_axis = float(interpolant((AXIS_RADIUS, 0.0)))
+    assert at_axis == pytest.approx(axis_flux, rel=1e-2)
 
 
 def test_rastered_frame_keeps_its_raster_derived_polyline() -> None:

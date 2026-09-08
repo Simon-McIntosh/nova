@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 import gc
 import hashlib
@@ -58,6 +58,7 @@ from benchmarks.efit_forward_parity_slice import (
     NEWTON_STEPS,
     RELAXATION,
     STEP_CAP,
+    TOTAL_FLUX_FACTOR,
     WARMUP_SWEEPS,
     _mast_case_from_selection,
     _passive_inclusive_case,
@@ -68,7 +69,8 @@ from nova.equilibrium.fixed_point import FixedPointTerminationReason
 from nova.equilibrium.forward import SaddleSeedGeometry
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.forward_operator import stack_forward_operators
-from nova.equilibrium.solve_request import ForwardSolveMemberData
+from nova.equilibrium.solve_request import ForwardSolveMemberData, SampledFluxFunction
+from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
 from nova.jax.config import (
@@ -411,6 +413,26 @@ def _state_from_cached_grid(
     )
 
 
+def _mast_source_with_sampled_profiles(
+    source: ForwardSource, group: Any, row: int
+) -> ForwardSource:
+    """Carry one extracted MAST profile entirely as dynamic array leaves."""
+    psi_norm = np.asarray(group["psi_norm"], dtype=np.float64)
+    if psi_norm.shape != (65,) or not np.array_equal(
+        psi_norm, np.linspace(0.0, 1.0, 65)
+    ):
+        raise ValueError("efm/psi_norm is not the declared uniform 65-point base")
+    p_prime = -np.asarray(group["pprime"][row], dtype=np.float64) / TOTAL_FLUX_FACTOR
+    ff_prime = -np.asarray(group["ffprime"][row], dtype=np.float64) / TOTAL_FLUX_FACTOR
+    return replace(
+        source,
+        core=DomainProfile(
+            p_prime=SampledFluxFunction(psi_norm, p_prime),
+            ff_prime=SampledFluxFunction(psi_norm, ff_prime),
+        ),
+    )
+
+
 def _build_mast_members(
     state_cache: Path, *, member_count: int = 12
 ) -> tuple[list[Member], dict[str, Any]]:
@@ -450,6 +472,15 @@ def _build_mast_members(
             passive, profile, policy = _passive_inclusive_case(case, context, response)
             if int(policy["section_kernel_evaluations_this_shot"]) != 0:
                 raise RuntimeError("MAST profile entered a direct response builder")
+            source = _mast_source_with_sampled_profiles(
+                profile.operator.source, context["group"], context["row"]
+            )
+            operator = replace(
+                profile.operator,
+                source=source,
+                prescribed_current_field=profile.operator.prescribed_field,
+            )
+            profile = replace(profile, operator=operator)
             target = abs(float(passive["reference"]["plasma_current_a"]))
             profiles[identity] = (profile, passive["state"], target)
             print(
@@ -511,6 +542,9 @@ def _build_mast_members(
             ),
         },
         "rebuilt_profile_count": len(profiles),
+        "profile_representation": (
+            "six distinct 65-point MAST profile pairs carried as dynamic array leaves"
+        ),
         "member_count": len(members),
     }
 

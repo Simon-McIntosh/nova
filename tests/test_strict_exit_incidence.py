@@ -4,9 +4,13 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 
 from benchmarks import strict_exit_incidence as incidence
+from benchmarks.efit_forward_parity_slice import _profile_function
+from nova.equilibrium.solve_request import SampledFluxFunction
+from nova.equilibrium.source import DomainProfile, ForwardSource
 
 
 def test_batched_self_check_requires_explicit_batched_mode():
@@ -59,3 +63,43 @@ def test_cpu_self_check_requires_the_debug_allocation(monkeypatch):
     assert receipt["cpu_count"] == 4
     assert receipt["requested_memory_mib"] == 64 * 1024
     assert receipt["execution_mode"] == "slurm_cpu_self_check"
+
+
+def test_mast_profile_tables_become_dynamic_leaves_without_numerical_change():
+    psi_norm = np.linspace(0.0, 1.0, 65)
+    stored_p_prime = np.square(psi_norm)[None, :]
+    stored_ff_prime = np.sin(psi_norm)[None, :]
+    expected_p_prime = -stored_p_prime[0] / incidence.TOTAL_FLUX_FACTOR
+    expected_ff_prime = -stored_ff_prime[0] / incidence.TOTAL_FLUX_FACTOR
+    original = ForwardSource(
+        core=DomainProfile(
+            p_prime=_profile_function(psi_norm, expected_p_prime),
+            ff_prime=_profile_function(psi_norm, expected_ff_prime),
+        ),
+        boundary_pressure=3.0,
+        boundary_field_function=4.0,
+    )
+
+    sampled = incidence._mast_source_with_sampled_profiles(
+        original,
+        {
+            "psi_norm": psi_norm,
+            "pprime": stored_p_prime,
+            "ffprime": stored_ff_prime,
+        },
+        0,
+    )
+
+    assert isinstance(sampled.core.p_prime, SampledFluxFunction)
+    assert isinstance(sampled.core.ff_prime, SampledFluxFunction)
+    assert sampled.boundary_pressure == original.boundary_pressure
+    assert sampled.boundary_field_function == original.boundary_field_function
+    evaluation = incidence.jnp.linspace(-0.02, 1.02, 101)
+    np.testing.assert_array_equal(
+        np.asarray(sampled.core.p_prime(evaluation)),
+        np.asarray(original.core.p_prime(evaluation)),
+    )
+    np.testing.assert_array_equal(
+        np.asarray(sampled.core.ff_prime(evaluation)),
+        np.asarray(original.core.ff_prime(evaluation)),
+    )

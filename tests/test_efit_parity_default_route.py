@@ -34,6 +34,7 @@ def _replay_receipt() -> dict:
 
 def test_no_route_flag_selects_current_constrained_public_solve(monkeypatch) -> None:
     calls = []
+    checkout_root = Path.cwd().resolve()
 
     def current(store, bank, output, *, shots=None):
         calls.append(("current", store, bank, output, shots))
@@ -54,8 +55,8 @@ def test_no_route_flag_selects_current_constrained_public_solve(monkeypatch) -> 
         (
             "current",
             parity.SHOT_STORE,
-            parity.DECOMPOSITION_BANK,
-            parity.CURRENT_CONSTRAINED_OUTPUT,
+            checkout_root / parity.DECOMPOSITION_BANK,
+            checkout_root / parity.CURRENT_CONSTRAINED_OUTPUT,
             (21986,),
         )
     ]
@@ -63,6 +64,7 @@ def test_no_route_flag_selects_current_constrained_public_solve(monkeypatch) -> 
 
 def test_named_diagnostic_flag_selects_absolute_source_replay(monkeypatch) -> None:
     calls = []
+    checkout_root = Path.cwd().resolve()
 
     def replay(store, bank, output, shots=None):
         calls.append(("replay", store, bank, output, shots))
@@ -88,8 +90,8 @@ def test_named_diagnostic_flag_selects_absolute_source_replay(monkeypatch) -> No
         (
             "replay",
             parity.SHOT_STORE,
-            parity.DECOMPOSITION_BANK,
-            output,
+            checkout_root / parity.DECOMPOSITION_BANK,
+            checkout_root / output,
             (21986,),
         )
     ]

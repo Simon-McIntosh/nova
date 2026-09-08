@@ -1,0 +1,56 @@
+{
+ "n_rows": 43017,
+ "fitted_ratio_isol_per_kA": {
+  "slope": -0.013821226857584001,
+  "slope_se": 6.708724201892464e-05,
+  "r_squared": 0.49665749472551135,
+  "t_statistic": -206.01870700967513
+ },
+ "solenoid_response": {
+  "mean_beta_axis_wb_per_A": 7.233852431356641e-06,
+  "mean_beta_xp_efit_wb_per_A": 6.306329075284983e-06,
+  "mean_beta_xp_nova_wb_per_A": 6.560083673267294e-06,
+  "mean_delta_beta_nova_wb_per_A": -6.737687580893459e-07,
+  "mean_delta_beta_efit_wb_per_A": -9.275233560716576e-07
+ },
+ "candidate_a_direct_field": {
+  "method": "solenoid loop-flux per raw ampere at the boundary read point minus the axis, divided by the efm reference span; the full prediction removes the denominator's own walk with the same image at the efm X-point (common-mode cancellation)",
+  "predicted_slope_per_kA_naive_nova_only": -0.0020287018849546637,
+  "predicted_slope_per_kA_common_mode_net": -0.0004419627248237288,
+  "predicted_slope_per_kA_full": -5.056786925021677e-05
+ },
+ "candidate_b_saddle_vs_grid": {
+  "method": "path mediation: gamma_b = d(d_xp_grid)/d I_sol (marginal) times beta_b = d(ratio)/d d_xp_grid with I_sol held fixed",
+  "d_xp_grid_vs_isol_m_per_kA": -0.0006516541651912492,
+  "ratio_vs_d_xp_grid_per_m": -0.013206438784119817,
+  "predicted_slope_per_kA": 8.606030841014936e-06
+ },
+ "candidate_c_profile_interpolation": {
+  "method": "path mediation of the composite relative truncation error of the piecewise-linear reference-grid interpolation: gamma_c = d(error)/d I_sol times beta_c = d(ratio)/d error with I_sol held fixed",
+  "trunc_error_vs_isol_per_kA": -5.3132216800724586e-09,
+  "ratio_vs_trunc_per_unit": 5270.821599215085,
+  "predicted_slope_per_kA": -2.8005043592743778e-05
+ },
+ "fraction_of_fitted_slope": {
+  "a_direct_field_full": 0.0036587106029931852,
+  "a_direct_field_common_mode_net": 0.03197709793622369,
+  "a_direct_field_nova_only": 0.14678160671687926,
+  "b_saddle_vs_grid": -0.000622667649528712,
+  "c_profile_interpolation": 0.0020262342758216732
+ },
+ "carrier": "a_direct_field_nova_only",
+ "grid": {
+  "stored_axis_points": 65,
+  "mode": "stored_axis_stride_intervention",
+  "stored_axis_stride": 2,
+  "solve_node_count": 1089,
+  "solve_axis_counts": [
+   33,
+   33
+  ],
+  "radial_step_m": 0.0606249924749136,
+  "vertical_step_m": 0.125,
+  "uniform": true
+ },
+ "efit_span_isol_slope_wb_per_kA": -0.004418510036815408
+}

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T02:08:18",
+  "updated": "2026-09-08T02:20:25",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3835,9 +3835,11 @@
         "id": "s19-score-c5",
         "harness": "clive",
         "role": "review",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "f6ef57d4-0970-46b9-8ab2-e9ab1c336247",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":1016576}": "f6ef57d4-0970-46b9-8ab2-e9ab1c336247"
+        },
         "created": "2026-09-07"
       },
       {
@@ -124656,6 +124658,152 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T203202228202-score-pfs-session-wall-group",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "score-pfs-session-wall-group",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1099,
+                "cached_input_tokens": 611682,
+                "input_tokens": 612813,
+                "output_tokens": 1580,
+                "reasoning_output_tokens": 156,
+                "total_tokens": 614393,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/score-session-wall-group.md lists each requirement of the followup (the wall polygon as its own closed group written once per session with vertex count and source identity, the same convention and unit declarations as the rest of the schema, the schema header naming it as the containment reference, a per-shot receipt count of labelled points outside it, X-points tested by inclusion and strike points by proximity, the round-trip test to 1e-12 on a rasterless Solovev session, the count fixture with one out-of-vessel point and one on-boundary point) and of the handoff cautions (a tolerance argued from the discretisation or the physics rather than from the observed miss, applied to STRIKE_WALL_TOLERANCE_M = 0.05 m; naming hygiene; no plan labels in source) as one row each with pass or fail and the cited evidence from merge commit 7c8d92b9 on main and the log under ~/.config/reckon/crew/runs/r-20260907T164751222645-pfs-session-wall-group/; a verdict on whether git show --stat cc06321f matches the declared write paths; a note on whether the group layout could carry more than one limiter unit without a schema break; and a one-line overall score with the count of failing rows",
+          "estimated_hours": 0.3,
+          "goal": "A conformance score of the merged pfs-session-wall-group landing against its followup brief and the 2026-09-07 15:00Z session handoff",
+          "id": "score-pfs-session-wall-group",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T203202228202-score-pfs-session-wall-group/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/score-session-wall-group.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19-score-c5",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T20:32:12Z",
+        "completed_at": "2026-09-08T00:18:56.393Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 13380,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 13604,
+        "stalled": true,
+        "time_budget": "25m",
+        "base_sha": "d893138c54d541a8ae129e56eaaf535867c0ab57",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "conformance report with one row per requirement, the gate independently re-run at the merged head (16 passed), the git show --stat verdict and the multi-unit layout question",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/score-session-wall-group.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T203202228202-score-pfs-session-wall-group/manifest.md",
+        "scope_changed": false,
+        "session_id": "f6ef57d4-0970-46b9-8ab2-e9ab1c336247",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3772681,
+            "input_tokens_cumulative": 3772681,
+            "output_tokens": 28000,
+            "output_tokens_cumulative": 28000,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 13600.773,
+          "generated_tokens": 28000,
+          "generation_seconds": 13496.198,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 13.5,
+          "machine_seconds": 104.575,
+          "peak_input_tokens": 137397,
+          "tokens_per_second": 2.07,
+          "wall_tokens_per_second": 2.06
+        },
+        "follow_on_paths": [
+          "scripts/labeller_batch/shard.py::_write_session_file",
+          "scripts/labeller_batch/receipt.py"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "review-only node; its deliverable is the scoring report",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/score-pfs-session-wall-group",
+          "session_id": "f6ef57d4-0970-46b9-8ab2-e9ab1c336247",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T00:18:56.393Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -124968,6 +125116,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2090
+    "_version": 2092
   }
 }

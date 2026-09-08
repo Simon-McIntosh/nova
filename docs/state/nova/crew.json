@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T05:50:40",
+  "updated": "2026-09-08T05:54:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3829,9 +3829,11 @@
         "id": "s19-hygiene-c2",
         "harness": "clive",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "53c43593-992d-41d0-973f-ed8211952fc1",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "53c43593-992d-41d0-973f-ed8211952fc1"
+        },
         "created": "2026-09-07"
       },
       {
@@ -126487,6 +126489,152 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T221919432065-s19-hygiene-audit-report",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "s19-hygiene-audit-report",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 811,
+                "cached_input_tokens": 694278,
+                "input_tokens": 695121,
+                "output_tokens": 2150,
+                "reasoning_output_tokens": 623,
+                "total_tokens": 697271,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/hygiene-audit.md states from the logs under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/hygiene-audit-logs/ (read with grep and tail, never whole): the collected and selected counts per arm (after-head-52ca3c4e-run2-2000.log and base-e6884a69-run2-2000.log), that both full arms were cancelled at the one-hour limit with the last test file each reached, the per-file pass/fail results on the prefix both arms completed with the added-failure count on that common prefix as one number and the remainder named as unmeasured, the ten collection errors as pre-sprint (the missing _separatrix import introduced before e6884a69) with their files, the 13-error focus files at both revisions and the vessel-hex focus result with its failing test named; plus a table of every Python file added under nova/, scripts/, benchmarks/ and tests/ between e6884a69 and main (git diff --name-status --diff-filter=A) with a reachable, orphaned or superseded verdict and the importer or invoker for each reachable file found by grep; the tests/test_reduced_newton.py compilation-cache abort noted as infrastructure; no suite is run and no source file is changed; the report is under 250 lines",
+          "estimated_hours": 0.8,
+          "goal": "The sprint hygiene audit report written from the suite logs a previous worker captured plus a per-file reachability verdict for every Python file added since e6884a69, without re-running the suite",
+          "id": "s19-hygiene-audit-report",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T221919432065-s19-hygiene-audit-report/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/hygiene-audit.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "s19-hygiene-c2",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T22:19:29Z",
+        "completed_at": "2026-09-08T03:51:53.545Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 19704,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 19944,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "d4c89a9d4f08601da2c36809da5fff47206f6901",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "report from captured suite logs: denominators per arm, per-file results on the common prefix both arms completed, added-failure count, collection-error attribution, reachability verdict for 45 added Python files by grep",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/hygiene-audit.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T221919432065-s19-hygiene-audit-report/manifest.md",
+        "scope_changed": false,
+        "session_id": "53c43593-992d-41d0-973f-ed8211952fc1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6670672,
+            "input_tokens_cumulative": 6670672,
+            "output_tokens": 71829,
+            "output_tokens_cumulative": 71829,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 19940.494,
+          "generated_tokens": 71829,
+          "generation_seconds": 19767.191,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 18.4,
+          "machine_seconds": 173.303,
+          "peak_input_tokens": 187341,
+          "tokens_per_second": 3.63,
+          "wall_tokens_per_second": 3.6
+        },
+        "follow_on_paths": [
+          "data*/derived_",
+          "benchmarks/diiid_forward_gs_match.py"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "log-only report node; the suite evidence is the prior worker's captured logs",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/s19-hygiene-audit-report",
+          "session_id": "53c43593-992d-41d0-973f-ed8211952fc1",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T03:51:53.545Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -126799,6 +126947,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2119
+    "_version": 2121
   }
 }

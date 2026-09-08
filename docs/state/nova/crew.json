@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T12:10:42",
+  "updated": "2026-09-08T12:39:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -182,9 +182,11 @@
         "id": "bob-identity-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0807a-55e5-7b12-9877-7df4733dde0f",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a0807a-55e5-7b12-9877-7df4733dde0f"
+        },
         "created": "2026-09-08"
       },
       {
@@ -134104,6 +134106,177 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T085550836146-pfs-constrained-newton-globalisation",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-constrained-newton-globalisation",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1132,
+                "cached_input_tokens": 789813,
+                "input_tokens": 790977,
+                "output_tokens": 2420,
+                "reasoning_output_tokens": 346,
+                "total_tokens": 793397,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "Starting from the worktree at 9c9a60ad (which carries the implicit-function constraint Jacobian in 71e6e006 and the receipt runner benchmarks/constraint_jacobian_receipt.py; read the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/constraint-jacobian-plasma-response.md first): the constrained reduced-Newton route in nova/equilibrium/reduced_newton.py damps each constraint step by a merit line search on the constraint residual, caps the compensating-current change per trip (the cap and its physical reason stated in the module docstring), re-linearises the constraint Jacobian after every accepted step, and refuses with the reason when the merit cannot decrease; on 27079 row 96 a centroid target set to the height the banked +1 kA free solve reached (docs/figures/playable-forward-solve/compensator-jacobian/compensator-jacobian-response.json) converges to within 1 mm in at most eight constrained trips with the compensating current within 10 percent of 1 kA for p6_upper and for the antisymmetric pair; on row 16 the same target shape converges; on rows 15 to 17 with the EFIT centroid height as target (the placement test's cold conditioning, receipt under docs/figures/playable-forward-solve/early-frame-placement/) the iteration converges or refuses with the reason and never overshoots the target; a second observable row type, a boundary-flux value at a named point on the Solovev fixture standing in for a Thomson crossing, converges together with the centroid row through the same path and a test pins it; tests/test_reduced_newton_constraints.py green as fresh-process lanes of at most six tests on all_debug with --mem=64G; step counts before and after stated per row; receipts under docs/figures/playable-forward-solve/constraint-globalisation/ and the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/constrained-newton-globalisation.md with one table per row; all solves on all_debug with JAX_PLATFORMS=cpu and a per-job TMPDIR (use the H200 only if a row does not fit 55 minutes on the CPU, then one sbatch with an explicit --mem and a declared wait with all five wait fields: wait_condition, wait_probe as a JSON argv array printing only the state, wait_terminal as a JSON array of states, wait_started_at unquoted, resume_brief); diagnostic placement rows only, not shape control; no tolerance from observed values; every uv command carries --no-sync and nothing runs uv sync; commit at each deliverable with a conventional subject and body and no attribution trailer",
+          "estimated_hours": 3.0,
+          "goal": "The constrained reduced-Newton iteration converges a constraint row to its target on a nonlocal response: correct implicit-function Jacobian kept, constraint steps damped by a merit line search, capped per trip and re-linearised after acceptance, proven on the flat-top and early 27079 rows and on a second observable row type",
+          "id": "pfs-constrained-newton-globalisation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T085550836146-pfs-constrained-newton-globalisation/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "scripts/labeller_batch/shard.py",
+            "tests/test_reduced_newton_constraints.py",
+            "benchmarks/constraint_jacobian_receipt.py",
+            "docs/figures/playable-forward-solve/constraint-globalisation/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/constrained-newton-globalisation.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-cnk-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T08:56:07Z",
+        "completed_at": "2026-09-08T10:36:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 6050,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 6050,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "9c9a60ad307dbf7a8865767bda902c4836172202",
+        "commits": [
+          "c4c8cf2cc8f5cbe671103a9511321c884a7a69ad",
+          "1e9faae04e974bdddde15032debc93511566dc2b",
+          "59355d46c5f2dbb5f261e344e2d02c7dbb19527b",
+          "8c36da85fc19a7171053df6c1f2eb9edd1530b1e",
+          "c1842613b2f7c74fb636077f708f3e78c931def4",
+          "eed31aef0703fddecf7e8fe4e8f5c5c0cccfd2e3",
+          "e601aecd40bb46be35154639522e9f78cc1a611d",
+          "08da5421418cc6868ef81d87aa45be98343c0968",
+          "cd89586bf8af077542ab30dc7411807770e8a869"
+        ],
+        "changed_lines": {
+          "added": 2200,
+          "removed": 193,
+          "files": 6
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "gate_check": {
+          "command": "seven disjoint fresh-process all_debug lanes over tests/test_reduced_newton_constraints.py (20/20, no lane over six tests, JAX_PLATFORMS=cpu, 64G); MAST evidence job 1265960 on all_debug, 7/7 scientific payload",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/constrained-newton-globalisation.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T085550836146-pfs-constrained-newton-globalisation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0803b-5839-79b3-b76e-2d0cc0524925",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15782016,
+            "cached_input_tokens_cumulative": 15782016,
+            "input_tokens": 15933999,
+            "input_tokens_cumulative": 15933999,
+            "output_tokens": 44728,
+            "output_tokens_cumulative": 44728,
+            "reasoning_output_tokens": 12241,
+            "reasoning_output_tokens_cumulative": 12241
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T10:36:57Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 30.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T10:36:57Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 15782016,
+          "cumulative_input_tokens": 31716015,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 56969
+        },
+        "follow_on_paths": [],
+        "predecessor_run": "r-20260908T071242575641-pfs-constraint-jacobian-plasma-response",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-constrained-newton-globalisation",
+          "session_id": "01a0803b-5839-79b3-b76e-2d0cc0524925",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T10:36:57Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -134416,6 +134589,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2223
+    "_version": 2225
   }
 }

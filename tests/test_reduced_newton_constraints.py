@@ -505,6 +505,7 @@ def test_consecutive_moved_targets_share_one_compiled_program(steered):
             program=program,
             tolerance=SOLVE_TOLERANCE,
             newton_steps=NEWTON_STEPS,
+            constraint_current_step_cap=1.0e6,
         )
         assert result.converged
         reached.append(_centroid(profile, result.state) - commanded)

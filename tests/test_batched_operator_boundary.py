@@ -213,23 +213,31 @@ def _one_forward_iteration(operator, data):
 
 
 def _operator_with_source(
-    template: _ReferenceAnchoredOperator, source: ForwardSource
-) -> _ReferenceAnchoredOperator:
+    template: ForwardFluxOperator, source: ForwardSource
+) -> ForwardFluxOperator:
     """Keep one member's host geometry while replacing only its source profile."""
-    return _ReferenceAnchoredOperator(
-        grid=template.grid,
-        wall=template.wall,
-        source=source,
-        external_current=template.external_current,
-        area=template.area,
-        polarity=template.polarity,
-        inside_material=template.inside_material,
-        use_linear_moments=False,
-        prescribed_current_field=template.prescribed_current_field,
-        declared_axis_flux=template.declared_axis_flux,
-        declared_boundary_flux=template.declared_boundary_flux,
-        declared_support=template.declared_support,
-    )
+    arguments = {
+        "grid": template.grid,
+        "wall": template.wall,
+        "source": source,
+        "external_current": template.external_current,
+        "area": template.area,
+        "cell_average_stencil": template.cell_average_stencil,
+        "cell_average_weight": template.cell_average_weight,
+        "polarity": template.polarity,
+        "inside_material": template.inside_material,
+        "moment_geometry": template.moment_geometry,
+        "sample": template.sample,
+        "use_linear_moments": template.use_linear_moments,
+        "prescribed_current_field": template.prescribed_current_field,
+    }
+    if isinstance(template, _ReferenceAnchoredOperator):
+        arguments.update(
+            declared_axis_flux=template.declared_axis_flux,
+            declared_boundary_flux=template.declared_boundary_flux,
+            declared_support=template.declared_support,
+        )
+    return type(template)(**arguments)
 
 
 def _static_profile(scale: float) -> ForwardSource:

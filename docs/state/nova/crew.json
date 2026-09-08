@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T18:29:01",
+  "updated": "2026-09-08T19:09:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -220,6 +220,15 @@
         "sessions": {
           "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a0807a-55e5-7b12-9877-7df4733dde0f"
         },
+        "created": "2026-09-08"
+      },
+      {
+        "id": "bob-rebuild-fix-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-08"
       },
       {
@@ -3413,9 +3422,11 @@
         "id": "pfs-dtype-site-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a081d2-f4f1-7d72-a4ad-f5fdafadeb5e",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a081d2-f4f1-7d72-a4ad-f5fdafadeb5e"
+        },
         "created": "2026-09-08"
       },
       {
@@ -4347,6 +4358,15 @@
       {
         "id": "s19-hygiene-c3",
         "harness": "clive",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
+        "id": "s19-merged-head-t",
+        "harness": "codex-terra",
         "role": "test",
         "session_id": null,
         "session_model": null,
@@ -137550,6 +137570,475 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T161415284183-pfs-axis-flux-departure",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-axis-flux-departure",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 741,
+                "cached_input_tokens": 620288,
+                "input_tokens": 621031,
+                "output_tokens": 1773,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 622804,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "This is the aimed successor to a closed negative, so do not re-open what it settled. The fourth-channel node measured the diverted span-ratio slope at -0.0138212269 per kA with R-squared 0.4966575 over 43,017 rows, and excluded three candidates: prescribed profile amplitude at 0.54 percent of the slope, topology-selected boundary flux at -2.81 percent which OPPOSES it, and fitted-versus-transducer conductor source at 0.009 percent. It also rejected the reference-label explanation, because nova's solved span carries -0.0089039520 Wb/kA at R-squared 0.7588307 against EFIT's reference span at -0.0044185100 and 0.4813644, whose ratio reproduces the census value to 1.78e-15. So the dependence is solve-side and unattributed. WHAT IT LEFT YOU, measured rather than guessed: the nova-minus-EFIT AXIS-flux departure carries a solenoid slope of -0.0046764230 Wb/kA at R-squared 0.4505255, while the corresponding boundary-flux departure is only -0.0002032090 at 0.0173379, more than twenty times smaller and essentially uncorrelated. FIRST DELIVERABLE. Project the nova-minus-EFIT axis flux, and the internal current distribution, on the same 43,017 rows, as a paired projection in the same shape as the landed arms so the fractions are directly comparable with the three already measured. Report the fraction of the slope each accounts for with its own R-squared, and say plainly whether the axis-flux term closes the remainder, closes part of it, or does not. Reuse the instrument at ~/.config/reckon/crew/reports/nova/playable/solenoid-fourth-channel/measure.py rather than writing a new one, so the population and the projection are identical by construction; if you must change it, say exactly what you changed and why the fractions remain comparable. SECOND, if the axis-flux term does carry most of the remainder, ask what in the solve sets the axis flux as the solenoid current changes, and say which of three it is with evidence: a normalisation, the seed, or the current distribution itself. Do not answer that from the code alone; it needs a measurement that separates them. ONE CONNECTION TO CHECK BEFORE ASSUMING INDEPENDENCE. A separate defect was traced today in which an unqualified topology read publishes a nonfinite axis and the normalisation consumes it as if qualified, producing NaN flux spans on a diverted rung. That is also an axis-handling fault. Establish whether any of your 43,017 rows carries an unqualified or nonfinite axis read, report how many, and say whether the two findings are one mechanism or two. If they are one, that is the more valuable result and it should lead the report. Diagnosis only: change no solver source and read no PNG back. Run on all_debug at --time=00:59:00 with JAX_PLATFORMS=cpu. Export TMPDIR=/tmp both before submitting and inside the payload, because the scheduler consults the inherited login value before the payload runs. Assert x64 inside the measurement rather than trusting it. On a compute node call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH, never uv, running the payload from a file. Give each job its own log filename carrying its job id, and persist each arm as it lands. Never submit the same job twice; a different job later in the same turn is fine and there is no per-turn budget. If you park, write status waiting with all five wait fields and wait_started_at unquoted in UTC exactly like 2026-09-08T16:20:00Z.",
+          "estimated_hours": 2.0,
+          "goal": "The fraction of the diverted span-ratio slope carried by the axis-flux departure, projected on the same census rows as the landed arms",
+          "id": "pfs-axis-flux-departure",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/axis-flux-departure.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/axis-flux-departure"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-axisflux-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T16:14:27Z",
+        "completed_at": "2026-09-08T16:29:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 883,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 883,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "7c7b36e29db4fa7cf13ce817e07a684e3b0e95d5",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1267182: paired projection of the axis-flux and internal-distribution arms on the 43,017-row census, x64 asserted",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/axis-flux-departure/measurement-1267182.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/axis-flux-departure.md",
+        "scope_changed": false,
+        "session_id": "01a081cc-a462-7962-9c2e-764d581d43d7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10220544,
+            "cached_input_tokens_cumulative": 10220544,
+            "input_tokens": 10478209,
+            "input_tokens_cumulative": 10478209,
+            "output_tokens": 27391,
+            "output_tokens_cumulative": 27391,
+            "reasoning_output_tokens": 10203,
+            "reasoning_output_tokens_cumulative": 10203
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T16:29:10Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 48.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T16:29:10Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 10220544,
+          "cumulative_input_tokens": 20698753,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 37594
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "measurement node: the deliverable is four validated JSON receipts under the crew reports tree, and the brief forbade any solver change",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-axis-flux-departure",
+          "session_id": "01a081cc-a462-7962-9c2e-764d581d43d7",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T16:29:10Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T162109859051-pfs-parity-dtype-site",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-parity-dtype-site",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 656,
+                "cached_input_tokens": 637660,
+                "input_tokens": 638318,
+                "output_tokens": 2283,
+                "reasoning_output_tokens": 457,
+                "total_tokens": 640601,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "FIND THE SITE FIRST, because it is currently unknown and everything else is speculation until it is named. An eight-element geometric comparison has been observed failing at 9.5e-7 relative, with the actual side reading 200.000191 where 200.0 is expected. The array is geomspace from 1 to 200 in eight points, confirmed by its values 1, 2.13, 4.54, 9.69, 20.65, 44.01, 93.82, 200. Locate the gate that actually performs that comparison, name its file and line, and state the dtype of each side AT that line. A previous followup attributed the failure to a pair of mocked route tests in tests/test_efit_parity_default_route.py that do not execute the comparison at all, so do not start there; that attribution is already retracted. CORRECT MY OWN HYPOTHESIS RATHER THAN CONFIRMING IT. The plan currently says 200.000191 is the signature of a float32 value asserted against a float64 one, and I wrote that. It does not survive two direct tests I ran: a float32 storage round-trip of geomspace 1 to 200 in eight points returns exactly 200.0, and constructing the same array by exponentiating a float32 linear space also returns exactly 200.0. Neither reproduces the observed value. The relative error of 9.55e-7 is about eight times single-precision epsilon, so single precision remains plausible somewhere in the chain, but the simple storage and construction explanations are excluded. Find what actually produces it: accumulated single-precision arithmetic over a longer chain, a value transported through a serialised receipt, a different endpoint convention, or a genuinely different array. Report the mechanism with the arithmetic that reproduces the exact value, or say plainly that you could not reproduce it and give what you measured instead. CONTEXT THAT MAY OR MAY NOT BE RELATED, and treat it as a lead rather than an answer: the current-constrained scorecard committed at a0aee18c stores spatial, grid and coil-geometry arrays as float32 while its response and current coordinate arrays carry float64. That fact and the failing comparison have never been connected by measurement. Establish whether the failing comparison reads that scorecard at all before drawing any line between them. THEN DECIDE THE REPAIR, and do not widen a tolerance in either direction: if the receipt should hold double-precision spatial arrays, regenerate it under extended precision rather than relaxing the assertion; if single-precision storage is deliberate for those arrays, the comparison must read them at their stored precision, which is the rule the flux-lattice reconstruction already follows. A 9.5e-7 slack would hide a genuine single-precision leak everywhere else it occurs, which is why the tolerance is not the answer. Run on all_debug at --time=00:59:00 with JAX_PLATFORMS=cpu. Export TMPDIR=/tmp both before submitting and inside the payload. Assert x64 inside any measurement. On a compute node call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH, never uv, running the payload from a file. Give each job its own log filename carrying its job id. Never submit the same job twice; a different job later in the same turn is fine and there is no per-turn budget. If you park, write status waiting with all five wait fields and wait_started_at unquoted in UTC exactly like 2026-09-08T16:30:00Z.",
+          "estimated_hours": 1.5,
+          "goal": "The file and line where an eight-element geometric comparison fails at 9.5e-7, with the dtype on each side named",
+          "id": "pfs-parity-dtype-site",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/parity-dtype-site.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/parity-dtype-site"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-dtype-site-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T16:21:20Z",
+        "completed_at": "2026-09-08T16:45:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1440,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1440,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "7c7b36e29db4fa7cf13ce817e07a684e3b0e95d5",
+        "commits": [
+          "0ffdd6e4483928422fcac38a623d24a2ec8d8b7a"
+        ],
+        "changed_lines": {
+          "added": 9,
+          "removed": 3,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1267190: pytest tests/test_dimension_general_conditioning.py with the CPU platform pinned",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/parity-dtype-site/dtype-test-1267190.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/parity-dtype-site.md",
+        "scope_changed": false,
+        "session_id": "01a081d2-f4f1-7d72-a4ad-f5fdafadeb5e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4909312,
+            "cached_input_tokens_cumulative": 4909312,
+            "input_tokens": 5123778,
+            "input_tokens_cumulative": 5123778,
+            "output_tokens": 12940,
+            "output_tokens_cumulative": 12940,
+            "reasoning_output_tokens": 3909,
+            "reasoning_output_tokens_cumulative": 3909
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T16:45:20Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 48.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T16:45:20Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 4909312,
+          "cumulative_input_tokens": 10033090,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 16849
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": [
+          {
+            "path": "tests/test_dimension_general_conditioning.py",
+            "reason": "The node's brief scoped it to finding the site and said explicitly that it could edit the file once found, since no peer holds it; the file was unknown at dispatch because locating it was the deliverable, so it could not be named in the write paths."
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-parity-dtype-site",
+          "session_id": "01a081d2-f4f1-7d72-a4ad-f5fdafadeb5e",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T16:45:20Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T163816677723-s19-merged-head-integration",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a71",
+        "node": "s19-merged-head-integration",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1109,
+                "cached_input_tokens": 683482,
+                "input_tokens": 684593,
+                "output_tokens": 1522,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 686115,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "Seven merges landed into main today and no verification has run at the merged head, only inside each worktree before its merge. A worktree gate measures one change; this measures what they do together, which is the only thing a per-node gate cannot tell you. Verify at current main, changing nothing. THE SURFACE, derived from what the merges touched rather than from a plan: nova/equilibrium/solve_request.py carrying the sampled flux function and its new edge constants, nova/equilibrium/reduced_newton.py, benchmarks/diiid_forward_gs_match.py and benchmarks/strict_exit_incidence.py, and the test files tests/test_sampled_flux_batching.py, tests/test_batched_operator_boundary.py, tests/test_steering_frames.py, tests/test_forward_solve_request.py and tests/test_diiid_forward_gs_match.py. Run those test files at the merged head and report pass and fail counts per file with wall times. JUDGE BY DELTA, NOT BY ABSOLUTE GREEN. Record the revision you measured and the failure identifiers you find, and separate pre-existing failures from ones the merges introduced: for any failure, check whether it also fails at the parent of the first of today's merges, and label it accordingly. A pre-existing red is not this session's regression and must not be reported as one, and equally an added failure must not be lost among them. THREE THINGS YOU WILL MEET AND SHOULD NOT MISREPORT. tests/test_sampled_flux_batching.py contains a case marked as a strict expected failure naming an extra member axis in a derivative output; a strict marker turns an unexpected pass into a failure, so if it now passes that is a REAL and interesting signal meaning the defect it names is fixed, and you should report it as such rather than as a broken test. The reduced-Newton file was historically reported to abort after six passing tests inside the compilation cache, and that has been confirmed already repaired on the supported cache root, so treat any abort there as a genuine failure and report it rather than dismissing it as the known lane fault. And tests/test_steering_frames.py contains a slow fixture test that was red across several nodes and was repaired today, so its result is worth stating explicitly either way. Run each file in its own fresh process on all_debug at --time=00:59:00 with JAX_PLATFORMS=cpu, because combined lanes in this repository stall on accumulated compilation. Export TMPDIR=/tmp both before submitting and inside the payload. Assert x64 where a file asserts numerics. On a compute node call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH, never uv, running from a file rather than inline. Give each job its own log filename carrying its job id. Change no source and no test. If a file is too slow to finish, say which and report what completed rather than dropping it silently. Never submit the same job twice; a different job later in the same turn is fine and there is no per-turn budget. If you park, write status waiting with all five wait fields and wait_started_at unquoted in UTC exactly like 2026-09-08T16:45:00Z.",
+          "estimated_hours": 1.0,
+          "goal": "An integration verification at the merged head covering every file today's seven merges touched",
+          "id": "s19-merged-head-integration",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/merged-head-integration.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T163816677723-s19-merged-head-integration"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "s19-merged-head-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T16:38:26Z",
+        "completed_at": "2026-09-08T17:06:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1661,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1661,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "0fbb0d2402c6b97dbb87184eb8e8b36bde5eeac4",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "five independent all_debug CPU processes at 0fbb0d24, one per merge-touched test file, x64 and CPU platform asserted in every log",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T163816677723-s19-merged-head-integration/logs",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/merged-head-integration.md",
+        "scope_changed": false,
+        "session_id": "01a081e2-99c0-7cd2-80ae-db15ddef7bd4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6361344,
+            "cached_input_tokens_cumulative": 6361344,
+            "input_tokens": 6623796,
+            "input_tokens_cumulative": 6623796,
+            "output_tokens": 29857,
+            "output_tokens_cumulative": 29857,
+            "reasoning_output_tokens": 14130,
+            "reasoning_output_tokens_cumulative": 14130
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T17:06:07Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 49.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T17:06:07Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 6361344,
+          "cumulative_input_tokens": 12985140,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 43987
+        },
+        "follow_on_paths": [
+          "tests/test_sampled_flux_batching.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "verification node: it measures the merged head and changes nothing, and its brief forbade any source or test edit",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/s19-merged-head-integration",
+          "session_id": "01a081e2-99c0-7cd2-80ae-db15ddef7bd4",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T17:06:07Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -137862,6 +138351,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2281
+    "_version": 2287
   }
 }

@@ -33,7 +33,8 @@
 
   <section id="certificate">
     <h2>Retained Solovev certificate</h2>
-    <p>The retained H200 receipt <code>job 1267132</code> gives six terminal states. It records every one as <strong>converged = false</strong>; the maps are therefore diagnostic terminal fields, not promoted accuracy evidence. The first replayed contour uses the retained terminal residual below. The remaining retained rungs are listed now so no non-converged row is silently omitted while its individual contour render completes.</p>
+    <p><strong>The magnetic-axis error grows under refinement:</strong> on the exact-oracle weak-rotation case it is 13.352807 mm at 110 requested cells and 30.247708 mm at 300. A convergent spatial and nonlinear solve would instead drive that position error toward zero as resolution increases; growth is stronger evidence of a wrong terminal state than either residual in isolation. The 500-cell replay continues the trend at 52.413422 mm.</p>
+    <p>The retained H200 receipt <code>job 1267132</code> gives six terminal states. It records every one as <strong>converged = false</strong>; the maps are therefore diagnostic terminal fields, not promoted accuracy evidence. Each replayed contour uses the retained terminal residual below. All retained rungs are listed so no non-converged row is silently omitted while its individual contour render completes.</p>
     <table>
       <thead><tr><th>case</th><th>requested cells</th><th>retained residual</th><th>converged</th></tr></thead>
       <tbody>
@@ -53,7 +54,11 @@
       <img src="/nova/figures/null-identification-authority/gs-contour-evidence/certificate-weak-rotation-reactor-static-300.png" alt="Shared-level blue analytic and ochre terminal forward flux contours for the 300-cell weak-rotation Solovev certificate, with analytic boundary, wall and contained critical points.">
       <figcaption><strong>Weak rotation, reactor static, 300 requested cells; retained residual 5.559e-3, not converged.</strong> This panel answers the same three visual questions at the next rung: an offset red boundary means wrong edge placement; shifted or missing contained markers mean the critical read is wrong; any changed nesting, islands or contour crowding means the field is wrong even if the residual is numerically smaller.</figcaption>
     </figure>
-    <p><strong>Placeholder — renders in flight:</strong> the 500- and 1000-cell weak-rotation maps and the two moderate-rotation maps will be inserted as individual shared-level panels. This heading is not a completed finding until all six are present.</p>
+    <figure>
+      <img src="/nova/figures/null-identification-authority/gs-contour-evidence/certificate-weak-rotation-reactor-static-500.png" alt="Shared-level blue analytic and ochre terminal forward flux contours for the 500-cell weak-rotation Solovev certificate, with analytic boundary, wall and contained critical points.">
+      <figcaption><strong>Weak rotation, reactor static, 500 requested cells; retained residual 1.246e-3, not converged; axis error 52.413422 mm.</strong> This row has the smallest scalar residual, yet the axis is farther from the analytic answer than at either coarser rung. Correct convergence would make the marker and contour geometry approach the analytic field together; residual improvement with growing position error is a failed joint accuracy test.</figcaption>
+    </figure>
+    <p><strong>Placeholder — render in flight:</strong> the 1000-cell weak-rotation map will be inserted as its individual shared-level panel. The two moderate-rotation panels are rendered and follow below.</p>
   </section>
 
   <section id="clips">

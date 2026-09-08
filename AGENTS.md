@@ -95,6 +95,16 @@ add a hundred packages the environment never carried.
   which is the job `--directory` would otherwise do. The `uv run --no-sync`
   recipe above is for login-node work in a worktree, and only there.
 
+- **Set `TMPDIR=/tmp` in the SUBMIT environment as well as inside the payload.**
+  `slurmstepd` tries to create the *inherited* login-node value before the
+  payload's own `export` has run, so a job launched from a session where
+  `TMPDIR` points at `/run/user/<uid>` logs `Unable to create TMPDIR … Permission
+  denied` and falls back on its own. That fallback is usually harmless and it is
+  not always: pointing an `--output` path there gets the job cancelled in zero
+  seconds with an empty log, because `/run/user` is node-local tmpfs that does
+  not exist on a compute node. Export it before `sbatch`/`srun` and again inside
+  the payload; one of the two is not enough.
+
 ### Pre-commit Hooks Require Virtual Environment
 
 The pre-commit hook runs checks through `.venv/bin/python3`, so it needs the

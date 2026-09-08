@@ -75,6 +75,8 @@ polygon vertex count, ``nt`` the frame count).  All coordinates are COCOS 17
 | x_point_z                | (2, nt)         | float64 | m (primary first)  |
 | strike_points_r          | (2, nt)         | float64 | m (in/outboard)    |
 | strike_points_z          | (2, nt)         | float64 | m (in/outboard)    |
+| strike_segment           | (2, nt)         | int32   | wall segment index |
+| strike_parameter         | (2, nt)         | float64 | along segment      |
 | lcfs_r                   | (n_b, nt)       | float64 | m (NaN-padded)     |
 | lcfs_z                   | (n_b, nt)       | float64 | m (NaN-padded)     |
 | n_boundary_coords        | (nt,)           | int32   | vertices           |
@@ -117,9 +119,12 @@ The session carries the wall polygon as its own closed group
 (:data:`WALL_GROUP`), written once per session rather than per frame and
 closed by repeating the first vertex.  It is the containment reference for
 the labelled points: the magnetic axis and the X-points are tested against it
-by ray-cast point-in-polygon inclusion, and the strike points by proximity
-within :data:`STRIKE_WALL_TOLERANCE_M` metres (they land on the wall, where
-ray-cast inclusion is ambiguous).
+by ray-cast point-in-polygon inclusion, and each strike point by exact
+membership of its recorded wall segment - the point is rebuilt from the
+segment index and along-segment parameter carried on the labelled flux and
+must equal the recorded coordinates to round-off, because a strike point is
+the exact intersection of the boundary level curve with a wall segment and
+lies on the wall where ray-cast inclusion is ambiguous.
 :func:`count_labelled_outside_wall` returns the labeller receipt's count of
 labelled point slots judged outside it.
 """
@@ -158,12 +163,6 @@ SESSION_GROUP = "steering"
 #: The wall is session-scoped (written once per session, never per frame) and
 #: is the containment reference for the labelled points (see the docstring).
 WALL_GROUP = "wall"
-
-#: Metres of proximity a strike point may sit from the wall polygon and still
-#: count as on the boundary.  Strike points are wall crossings, so the
-#: tolerance absorbs the crossing numerics and only genuinely displaced
-#: strike points are judged outside in the containment receipt.
-STRIKE_WALL_TOLERANCE_M = 0.05
 
 #: Ordered point components ``finite_mask`` labels, one flag per component.
 #: A component is present (finite coordinate values and a True mask flag) or
@@ -259,6 +258,8 @@ _FIELD_TABLE: tuple[tuple[str, tuple[str, ...], str, str], ...] = (
     ("x_point_z", ("2", "nt"), "float64", "m"),
     ("strike_points_r", ("2", "nt"), "float64", "m"),
     ("strike_points_z", ("2", "nt"), "float64", "m"),
+    ("strike_segment", ("2", "nt"), "int32", "wall segment index"),
+    ("strike_parameter", ("2", "nt"), "float64", "along segment"),
     ("lcfs_r", ("n_b", "nt"), "float64", "m"),
     ("lcfs_z", ("n_b", "nt"), "float64", "m"),
     ("n_boundary_coords", ("nt",), "int32", "vertices"),
@@ -392,6 +393,12 @@ class SteeringFrame(NamedTuple):
     divertor_leg_r: object
     divertor_leg_z: object
     divertor_leg_finite: object
+    #: Wall segment index (2,) each strike point lies on, and the
+    #: along-segment parameter (2,) with
+    #: point = wall[segment] * (1 - parameter) + wall[segment + 1] * parameter.
+    #: ``None`` marks a frame authored without the recorded crossing geometry.
+    strike_segment: object = None
+    strike_parameter: object = None
 
 
 def _as_numpy(value) -> np.ndarray:
@@ -417,22 +424,6 @@ def _closed_wall_loop(wall) -> np.ndarray:
     if not np.all(loop[0] == loop[-1]):
         loop = np.vstack((loop, loop[:1]))
     return loop
-
-
-def _point_polygon_distance(point, vertices) -> float:
-    """Return the minimum Euclidean distance from a point to a polygon ring."""
-    point = np.asarray(point, dtype=np.float64).ravel()
-    vertices = np.asarray(vertices, dtype=np.float64)
-    if vertices.ndim != 2 or vertices.shape[1] != 2 or vertices.shape[0] < 2:
-        raise ValueError("the wall must be a polygon of R-Z vertex pairs")
-    delta = np.diff(vertices, axis=0)
-    length_squared = np.einsum("ij,ij->i", delta, delta)
-    offset = point - vertices[:-1]
-    with np.errstate(invalid="ignore", divide="ignore"):
-        fraction = np.einsum("ij,ij->i", offset, delta) / length_squared
-    fraction = np.clip(fraction, 0.0, 1.0)
-    closest = vertices[:-1] + fraction[:, None] * delta
-    return float(np.min(np.linalg.norm(closest - point, axis=1)))
 
 
 def policy_digest(policy: ForwardSolvePolicy) -> str:
@@ -695,6 +686,7 @@ def _trace_divertor_legs(
     boundary_flux: float,
     x_points: np.ndarray,
     wall,
+    strike_points: np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Trace separatrix branches and clip them at the supplied first wall."""
     result_r = np.full((N_DIVERTOR_LEGS, N_DIVERTOR_LEG_POINTS), np.nan)
@@ -732,6 +724,11 @@ def _trace_divertor_legs(
             if not branches:
                 continue
             branch = max(branches, key=lambda line: line.shape[0])
+            if slot == 0 and strike_points is not None:
+                strike = np.asarray(strike_points[side], dtype=float)
+                if np.all(np.isfinite(strike)):
+                    branch = branch.copy()
+                    branch[-1] = strike
             sampled = _resample_leg(branch, N_DIVERTOR_LEG_POINTS)
             if sampled is None:
                 continue
@@ -841,6 +838,12 @@ def assemble_frame(
     if primary.shape != expected_slots or secondary.shape != expected_slots:
         raise ValueError("X-point slots must each be an R-Z coordinate pair")
     strike = _as_numpy(labelled.strike_points)
+    strike_segment = getattr(labelled, "strike_segment", None)
+    strike_parameter = getattr(labelled, "strike_parameter", None)
+    if strike_segment is None:
+        strike_segment = np.full(N_STRIKE_POINTS, -1, dtype=np.int32)
+    if strike_parameter is None:
+        strike_parameter = np.full(N_STRIKE_POINTS, np.nan, dtype=np.float64)
     lcfs = _as_numpy(labelled.lcfs)
     if lcfs.ndim != 2 or lcfs.shape[1] != 2:
         raise ValueError("the LCFS polyline must be packed as (vertex, R-Z)")
@@ -878,6 +881,7 @@ def assemble_frame(
             float(np.asarray(equilibrium.topology.boundary_flux)),
             np.stack((primary, secondary)),
             wall,
+            strike,
         )
         geometry["divertor_leg_r"] = leg_r
         geometry["divertor_leg_z"] = leg_z
@@ -917,6 +921,8 @@ def assemble_frame(
         x_point_z=np.stack((primary[1], secondary[1])),
         strike_points_r=strike[:, 0],
         strike_points_z=strike[:, 1],
+        strike_segment=np.asarray(strike_segment, dtype=np.int32),
+        strike_parameter=np.asarray(strike_parameter, dtype=np.float64),
         lcfs_r=lcfs_r,
         lcfs_z=lcfs_z,
         n_boundary_coords=np.int32(boundary_count),
@@ -943,6 +949,19 @@ def assemble_frame(
 def _frame_stack(frames: Sequence[SteeringFrame], name: str) -> np.ndarray:
     """Return one field stacked over frames with time as the last axis."""
     return np.stack([_as_numpy(getattr(frame, name)) for frame in frames], axis=-1)
+
+
+def _strike_geometry_stack(
+    frames: Sequence[SteeringFrame], name: str, fill_value
+) -> np.ndarray:
+    """Return recorded strike geometry, masking frames without crossing data."""
+    values = []
+    for frame in frames:
+        value = getattr(frame, name)
+        if value is None:
+            value = np.full(N_STRIKE_POINTS, fill_value)
+        values.append(np.asarray(value))
+    return np.stack(values, axis=-1)
 
 
 def _assert_homogeneous(frames: Sequence[SteeringFrame]) -> None:
@@ -1071,6 +1090,14 @@ def session_dataset(
         "strike_points_z": (
             ("strike_slot", "time"),
             _frame_stack(frames, "strike_points_z"),
+        ),
+        "strike_segment": (
+            ("strike_slot", "time"),
+            _strike_geometry_stack(frames, "strike_segment", -1).astype(np.int32),
+        ),
+        "strike_parameter": (
+            ("strike_slot", "time"),
+            _strike_geometry_stack(frames, "strike_parameter", np.nan),
         ),
         "lcfs_r": (
             ("boundary_vertex", "time"),
@@ -1238,6 +1265,8 @@ def session_dataset(
             "x_point_z",
             "strike_points_r",
             "strike_points_z",
+            "strike_segment",
+            "strike_parameter",
             "lcfs_r",
             "lcfs_z",
             "coil_current",
@@ -1427,6 +1456,16 @@ def frames_from_session(dataset: xr.Dataset) -> list[SteeringFrame]:
                 x_point_z=np.asarray(frame["x_point_z"].values),
                 strike_points_r=np.asarray(frame["strike_points_r"].values),
                 strike_points_z=np.asarray(frame["strike_points_z"].values),
+                strike_segment=(
+                    np.asarray(frame["strike_segment"].values)
+                    if "strike_segment" in dataset.variables
+                    else None
+                ),
+                strike_parameter=(
+                    np.asarray(frame["strike_parameter"].values)
+                    if "strike_parameter" in dataset.variables
+                    else None
+                ),
                 lcfs_r=np.asarray(frame["lcfs_r"].values),
                 lcfs_z=np.asarray(frame["lcfs_z"].values),
                 n_boundary_coords=int(np.asarray(frame["n_boundary_coords"].values)),
@@ -1479,27 +1518,32 @@ def frames_from_session(dataset: xr.Dataset) -> list[SteeringFrame]:
 
 def count_labelled_outside_wall(
     dataset: xr.Dataset,
-    *,
-    strike_tolerance: float = STRIKE_WALL_TOLERANCE_M,
 ) -> int:
     """Return the labelled point slots judged outside the session's wall.
 
     The wall polygon is the containment reference for the labelled points
     (see the session schema): the magnetic axis and the X-points are tested by
-    ray-cast point-in-polygon inclusion, and the strike points by proximity to
-    the polygon within ``strike_tolerance`` metres, because a strike point
-    lands on the wall where ray-cast inclusion is ambiguous.  An absent
-    (NaN) slot never counts.  This is the count the labeller receipt records
-    — how many labelled points fall outside the vessel across every frame.
+    ray-cast point-in-polygon inclusion, and each strike point by rebuilding
+    its recorded wall segment from the labelled segment index and parameter.
+    A strike is accepted only when the rebuilt point equals its stored
+    coordinates exactly.  An absent (NaN) slot never counts.  This is the
+    count the labeller receipt records — how many labelled points fall outside
+    the vessel across every frame.
     """
     if "wall_r" not in dataset.variables or "wall_z" not in dataset.variables:
         raise ValueError(
             "the session carries no wall polygon to test the labelled points "
             "against (write it with write_session(..., wall=...))"
         )
+    if (
+        "strike_segment" not in dataset.variables
+        or "strike_parameter" not in dataset.variables
+    ):
+        raise ValueError("the session carries no recorded strike crossing geometry")
     wall_r = np.asarray(dataset["wall_r"].values)
     wall_z = np.asarray(dataset["wall_z"].values)
     wall_loop = np.column_stack((wall_r, wall_z))
+    segment_count = wall_loop.shape[0] - 1
     outside = 0
     for index in range(int(dataset.sizes["time"])):
         frame = dataset.isel(time=index)
@@ -1521,6 +1565,8 @@ def count_labelled_outside_wall(
                 np.asarray(frame["strike_points_z"].values),
             )
         )
+        segments = np.asarray(frame["strike_segment"].values, dtype=np.int32)
+        parameters = np.asarray(frame["strike_parameter"].values, dtype=np.float64)
         if not _point_absent(axis) and not bool(
             inside_polygon(axis[0], axis[1], wall_r, wall_z)
         ):
@@ -1530,10 +1576,16 @@ def count_labelled_outside_wall(
                 inside_polygon(x_point[0], x_point[1], wall_r, wall_z)
             ):
                 outside += 1
-        for strike in strikes:
-            if not _point_absent(strike) and (
-                _point_polygon_distance(strike, wall_loop) > strike_tolerance
-            ):
+        for strike, segment, parameter in zip(strikes, segments, parameters):
+            if _point_absent(strike):
+                continue
+            if not (0 <= segment < segment_count and 0.0 <= parameter <= 1.0):
+                outside += 1
+                continue
+            start = wall_loop[segment]
+            end = wall_loop[segment + 1]
+            reconstructed = start + parameter * (end - start)
+            if not np.allclose(strike, reconstructed, rtol=0.0, atol=1.0e-12):
                 outside += 1
     return int(outside)
 
@@ -1543,7 +1595,6 @@ __all__ = [
     "FINITE_MASK_COMPONENTS",
     "N_STRIKE_POINTS",
     "SESSION_GROUP",
-    "STRIKE_WALL_TOLERANCE_M",
     "SteeringAction",
     "SteeringFrame",
     "assemble_frame",

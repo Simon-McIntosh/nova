@@ -403,6 +403,8 @@ def _synthetic_frame(
         x_point_z=np.array([primary[1], secondary[1]]),
         strike_points_r=strike[:, 0],
         strike_points_z=strike[:, 1],
+        strike_segment=np.full(2, -1, dtype=np.int32),
+        strike_parameter=np.full(2, np.nan),
         lcfs_r=lcfs[:, 0],
         lcfs_z=lcfs[:, 1],
         n_boundary_coords=np.int32(valid_vertices),
@@ -717,15 +719,13 @@ def test_rasterless_solovev_session_wall_group_round_trips_closed(
     _assert_dataset_variables_bitwise(expected, actual)
 
 
-def test_labelled_points_outside_wall_receipt_counts_inclusion_and_proximity(
-    tmp_path,
-) -> None:
-    """The receipt counts an out-of-vessel X-point, not an on-boundary strike.
+def test_labelled_points_outside_wall_receipt_counts_segment_membership() -> None:
+    """The receipt counts an out-of-vessel X-point, not a recorded crossing.
 
     X-points and the magnetic axis are tested against the wall polygon by
-    ray-cast point-in-polygon inclusion; strike points, which land on the
-    wall, by proximity within the tolerance, so the on-boundary strike point
-    is not judged outside while a genuinely displaced one is.
+    ray-cast point-in-polygon inclusion.  Each strike point reconstructs from
+    the wall segment and along-segment parameter recorded with it, so a
+    genuinely displaced point is outside even when it remains near the wall.
     """
     operator_wall, _ = _wall_loop()
     primary_x = np.array([1.7, 0.0])  # beyond the outboard wall limit
@@ -734,30 +734,52 @@ def test_labelled_points_outside_wall_receipt_counts_inclusion_and_proximity(
             primary_x[0], primary_x[1], operator_wall[:, 0], operator_wall[:, 1]
         )
     )
+    strike_segment = np.array([0, 1], dtype=np.int32)
+    strike_parameter = np.array([0.25, 0.75])
+    strike = np.array(
+        [
+            operator_wall[index]
+            + parameter
+            * (
+                operator_wall[(index + 1) % operator_wall.shape[0]]
+                - operator_wall[index]
+            )
+            for index, parameter in zip(strike_segment, strike_parameter, strict=True)
+        ]
+    )
     frame = _synthetic_frame(0)._replace(
         x_point_r=np.array([primary_x[0], np.nan]),
         x_point_z=np.array([primary_x[1], np.nan]),
-        strike_points_r=operator_wall[[0, 1], 0],  # two wall vertices: on-boundary
-        strike_points_z=operator_wall[[0, 1], 1],
+        strike_points_r=strike[:, 0],
+        strike_points_z=strike[:, 1],
+        strike_segment=strike_segment,
+        strike_parameter=strike_parameter,
         finite_mask=np.array([True, True, False, True, True, True]),
     )
     dataset = session_dataset((frame,), wall=operator_wall)
     assert count_labelled_outside_wall(dataset) == 1
 
-    # positive control: displacing the strike points beyond the tolerance
-    # makes them count as outside too, and the round-tripped session agrees
+    # Positive control: moving one strike one millimetre off its segment makes
+    # exactly that otherwise-valid slot count outside.
     displaced = frame._replace(
-        strike_points_r=operator_wall[[0, 1], 0] + 0.5,
-        strike_points_z=operator_wall[[0, 1], 1] + 0.5,
+        strike_points_r=frame.strike_points_r + np.array([1.0e-3, 0.0]),
     )
-    write_session(
-        (displaced,),
-        filename="displaced-session",
-        dirname=str(tmp_path),
-        wall=operator_wall,
+    assert (
+        count_labelled_outside_wall(session_dataset((displaced,), wall=operator_wall))
+        == 2
     )
-    restored = read_session(filename="displaced-session", dirname=str(tmp_path))
-    assert count_labelled_outside_wall(restored) == 3
+
+    # Positive control: an invalid segment index cannot identify a wall
+    # segment, even when the stored point itself has valid coordinates.
+    invalid_segment = frame._replace(
+        strike_segment=np.array([operator_wall.shape[0], 1], dtype=np.int32),
+    )
+    assert (
+        count_labelled_outside_wall(
+            session_dataset((invalid_segment,), wall=operator_wall)
+        )
+        == 2
+    )
 
 
 def test_frame_psi_at_the_axis_is_the_solve_axis_flux_in_wb(machine) -> None:

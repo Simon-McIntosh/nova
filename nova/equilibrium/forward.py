@@ -174,6 +174,7 @@ __all__ = [
     "ForwardEquilibrium",
     "ForwardLabelledFlux",
     "ForwardRasterFlux",
+    "RasterFluxReceiptStatus",
     "ForwardPerturbedSeedReceipt",
     "ForwardPortfolio",
     "ForwardProfile",
@@ -296,6 +297,13 @@ class ForwardRasterFlux(NamedTuple):
     separatrix_vertex_count: jax.Array
 
 
+class RasterFluxReceiptStatus(IntEnum):
+    """Whether a solve receipt can carry a rectangular raster flux image."""
+
+    AVAILABLE = 0
+    UNAVAILABLE_NON_TENSOR_PRODUCT_GRID = 1
+
+
 class ForwardEquilibrium(NamedTuple):
     """Converged equilibrium and the receipts that qualify it."""
 
@@ -312,6 +320,7 @@ class ForwardEquilibrium(NamedTuple):
     continuation: ContinuationLedger
     finite: FiniteCheck
     raster_flux: ForwardRasterFlux | None = None
+    raster_flux_status: jax.Array | None = None
     labelled_flux: ForwardLabelledFlux | None = None
     constraints: tuple[ConstraintRecord, ...] = ()
 
@@ -1453,6 +1462,36 @@ class ForwardProfile:
             separatrix_vertex_count=vertex_count,
         )
 
+    def _raster_flux_receipt(
+        self,
+        current_moments: CellCurrentMoments,
+        masks: DomainMasks,
+        topology: ForwardTopologyState,
+        *,
+        current=None,
+        prescribed_current=None,
+    ) -> tuple[ForwardRasterFlux | None, jax.Array]:
+        """Return a raster image only for an operator with rectangular geometry."""
+
+        if getattr(self.operator, "_raster_shape", None) is None:
+            return (
+                None,
+                jnp.asarray(
+                    int(RasterFluxReceiptStatus.UNAVAILABLE_NON_TENSOR_PRODUCT_GRID),
+                    dtype=jnp.int8,
+                ),
+            )
+        return (
+            self._raster_flux(
+                current_moments,
+                masks,
+                topology,
+                current=current,
+                prescribed_current=prescribed_current,
+            ),
+            jnp.asarray(int(RasterFluxReceiptStatus.AVAILABLE), dtype=jnp.int8),
+        )
+
     def _receipt(
         self,
         flux: jax.Array,
@@ -1478,6 +1517,13 @@ class ForwardProfile:
             masks,
             topology.flux_span,
         )
+        raster_flux, raster_flux_status = self._raster_flux_receipt(
+            current_moments,
+            masks,
+            topology,
+            current=current,
+            prescribed_current=prescribed_current,
+        )
         return ForwardEquilibrium(
             flux=flux,
             cell_current=cell_current,
@@ -1498,13 +1544,8 @@ class ForwardProfile:
                 moments=jnp.all(jnp.isfinite(moments.stack())),
                 conservation=jnp.all(jnp.isfinite(jnp.stack([*conservation[:-1]]))),
             ),
-            raster_flux=self._raster_flux(
-                current_moments,
-                masks,
-                topology,
-                current=current,
-                prescribed_current=prescribed_current,
-            ),
+            raster_flux=raster_flux,
+            raster_flux_status=raster_flux_status,
             labelled_flux=self._labelled_flux(flux, masks, topology),
             constraints=constraints,
         )

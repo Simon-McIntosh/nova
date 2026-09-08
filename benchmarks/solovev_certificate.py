@@ -31,7 +31,11 @@ import numpy as np
 from scipy import stats
 
 from benchmarks.analytic_operator_ladder import _fit_order, _region_masks
-from benchmarks.diiid_forward_gs_match import candidate_flux_margins
+from benchmarks.diiid_forward_gs_match import (
+    banked_failed_read_summary,
+    banked_read_summary,
+    candidate_flux_margins,
+)
 from benchmarks.split_fit_jump_field import (
     BOUNDARY_BAND_PITCHES,
     _distance_to_boundary,
@@ -40,7 +44,12 @@ from benchmarks.split_fit_jump_field import (
     _polynomial_gradient,
     _polynomial_hessian,
 )
-from nova.equilibrium import ColdSeedConstruction, ForwardProfile, SaddleSeedGeometry
+from nova.equilibrium import (
+    ColdSeedConstruction,
+    ForwardProfile,
+    SaddleSeedGeometry,
+)
+from nova.equilibrium.forward import RasterFluxReceiptStatus
 from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
@@ -1621,6 +1630,34 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             else np.asarray(exact.magnetic_axis)
         )
         x_reference = X_POINT_M if case_name == "diverted-jump-bearing" else None
+        reference_x_points = (
+            np.asarray(x_reference, dtype=np.float64)[None, :]
+            if x_reference is not None
+            else np.empty((0, 2), dtype=np.float64)
+        )
+        if root_topology["read_status"] == "qualified_axis":
+            banked_read = banked_read_summary(
+                operator,
+                terminal_state,
+                axis_rz_m=root_topology["axis_rz_m"],
+                x_point_rz_m=root_topology["x_point_rz_m"],
+                axis_flux_wb=root_topology["axis_flux_wb"],
+                boundary_flux_wb=root_topology["boundary_flux_wb"],
+                reference_axis_rz_m=axis_reference,
+                reference_x_points_rz_m=reference_x_points,
+                read_status=root_topology["read_status"],
+                read_exception_text=root_topology["exception_text"],
+            )
+        else:
+            banked_read = banked_failed_read_summary(
+                axis_rz_m=root_topology["axis_rz_m"],
+                x_point_rz_m=root_topology["x_point_rz_m"],
+                axis_flux_wb=root_topology["axis_flux_wb"],
+                reference_axis_rz_m=axis_reference,
+                reference_x_points_rz_m=reference_x_points,
+                read_status=root_topology["read_status"],
+                read_exception_text=root_topology["exception_text"],
+            )
         x_error = None
         if x_reference is not None and root_topology["x_point_rz_m"] is not None:
             x_error = float(
@@ -1694,6 +1731,12 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             "qualification": qualification,
             "solve_wall_seconds": solve_seconds,
             "resolved_defaults": solve_receipt.resolved_defaults.to_dict(),
+            "raster_flux_receipt": {
+                "status": RasterFluxReceiptStatus(
+                    int(equilibrium.raster_flux_status)
+                ).name.lower(),
+                "available": equilibrium.raster_flux is not None,
+            },
             "seed": seed_receipt,
             "production_telemetry": production_solver,
             "lambda_amplitude_history": {
@@ -1752,6 +1795,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             "root_topology": root_topology,
             "exact_topology": exact_topology,
         },
+        "banked_read": banked_read,
         "figure": {
             "filesystem_path": str(figure.relative_to(ROOT)),
             "project_absolute_src": (

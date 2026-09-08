@@ -12,9 +12,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import platform
 import subprocess
+from time import perf_counter
 from typing import Any
 
 import jax
@@ -843,7 +845,69 @@ def _solve_case_current_state(
     return result
 
 
-def _case_current_repair_row(shot: int, row: int) -> dict[str, Any]:
+def _write_receipt_part(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    os.replace(temporary, path)
+
+
+def _case_current_part_path(output: Path, shot: int, row: int, name: str) -> Path:
+    return output / "parts" / f"{shot}-{row}-{name}.json"
+
+
+def _checkpointed_case_current_solve(
+    *,
+    output: Path,
+    shot: int,
+    row: int,
+    name: str,
+    profile,
+    seed,
+    target_current_a: float,
+    prescribed_current: np.ndarray,
+    request_identity: str,
+    seed_centroid: dict[str, float],
+    constraint_pair: ConstraintPair | None = None,
+) -> tuple[dict[str, Any], bool]:
+    """Return a prior result or atomically bank this solve before continuing."""
+
+    path = _case_current_part_path(output, shot, row, name)
+    if path.exists():
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if payload.get("request_identity") != request_identity:
+            raise RuntimeError(f"receipt part {path} has a different request identity")
+        result = payload.get("result")
+        if not isinstance(result, dict):
+            raise RuntimeError(f"receipt part {path} has no solve result")
+        return result, False
+    started = perf_counter()
+    result = _solve_case_current_state(
+        profile,
+        seed,
+        target_current_a,
+        prescribed_current,
+        request_identity,
+        seed_centroid,
+        constraint_pair,
+    )
+    result["subsolve_wall_s"] = perf_counter() - started
+    _write_receipt_part(
+        path,
+        {
+            "identity": f"{shot}/{row}",
+            "part": name,
+            "request_identity": request_identity,
+            "prescribed_current_digest_sha256": _current_digest(prescribed_current),
+            "result": result,
+        },
+    )
+    return result, True
+
+
+def _case_current_repair_row(
+    output: Path, shot: int, row: int, maximum_new_solves: int | None = None
+) -> tuple[dict[str, Any] | None, dict[str, Any]]:
     cache, carrier_evidence = settled._persisted_response_cache(
         settled.response_carrier.DEFAULT_CARRIER,
         settled.response_carrier.DEFAULT_RECEIPT,
@@ -870,50 +934,96 @@ def _case_current_repair_row(shot: int, row: int) -> dict[str, Any]:
         profile.operator.prescribed_current_field.current, dtype=np.float64
     )
     replacement, replacement_evidence = _case_replacement_current(shot, row, profile)
+    completed_parts: list[str] = []
+    new_solves = 0
+
+    def solve_part(
+        name: str,
+        prescribed_current: np.ndarray,
+        request_identity: str,
+        constraint_pair: ConstraintPair | None = None,
+    ) -> dict[str, Any] | None:
+        nonlocal new_solves
+        path = _case_current_part_path(output, shot, row, name)
+        if (
+            maximum_new_solves is not None
+            and new_solves >= maximum_new_solves
+            and not path.exists()
+        ):
+            return None
+        result, wrote = _checkpointed_case_current_solve(
+            output=output,
+            shot=shot,
+            row=row,
+            name=name,
+            profile=profile,
+            seed=seed,
+            target_current_a=target_current_a,
+            prescribed_current=prescribed_current,
+            request_identity=request_identity,
+            seed_centroid=seed_centroid,
+            constraint_pair=constraint_pair,
+        )
+        completed_parts.append(str(path.relative_to(output)))
+        new_solves += int(wrote)
+        return result
+
+    fitted_free_identity = f"mast:{shot}:{row}:case-current:fitted:free"
+    fitted_free = solve_part("fitted-free", fitted, fitted_free_identity)
+    if fitted_free is None:
+        return None, {
+            "identity": f"{shot}/{row}",
+            "completed_parts": completed_parts,
+            "new_solves": new_solves,
+            "complete": False,
+        }
+    measured_free_identity = f"mast:{shot}:{row}:case-current:measured:free"
+    measured_free = solve_part("measured-free", replacement, measured_free_identity)
+    if measured_free is None:
+        return None, {
+            "identity": f"{shot}/{row}",
+            "completed_parts": completed_parts,
+            "new_solves": new_solves,
+            "complete": False,
+        }
     free = {
-        "fitted_current_baseline": _solve_case_current_state(
-            profile,
-            seed,
-            target_current_a,
-            fitted,
-            f"mast:{shot}:{row}:case-current:fitted:free",
-            seed_centroid,
-        ),
-        "measured_case_current": _solve_case_current_state(
-            profile,
-            seed,
-            target_current_a,
-            replacement,
-            f"mast:{shot}:{row}:case-current:measured:free",
-            seed_centroid,
-        ),
+        "fitted_current_baseline": fitted_free,
+        "measured_case_current": measured_free,
     }
     scan = []
     for target_z_m in ELIMINATION_HEIGHTS_M:
         pair = _p6_constraint(
             profile, policy, target_z_m, float(passive_case["span_wb"])
         )
+        fitted_identity = f"mast:{shot}:{row}:case-current:fitted:z:{target_z_m:.9f}"
+        fitted_result = solve_part(
+            f"fitted-z-{target_z_m:.9f}", fitted, fitted_identity, pair
+        )
+        if fitted_result is None:
+            return None, {
+                "identity": f"{shot}/{row}",
+                "completed_parts": completed_parts,
+                "new_solves": new_solves,
+                "complete": False,
+            }
+        measured_identity = (
+            f"mast:{shot}:{row}:case-current:measured:z:{target_z_m:.9f}"
+        )
+        measured_result = solve_part(
+            f"measured-z-{target_z_m:.9f}", replacement, measured_identity, pair
+        )
+        if measured_result is None:
+            return None, {
+                "identity": f"{shot}/{row}",
+                "completed_parts": completed_parts,
+                "new_solves": new_solves,
+                "complete": False,
+            }
         scan.append(
             {
                 "target_centroid_z_m": target_z_m,
-                "fitted_current_baseline": _solve_case_current_state(
-                    profile,
-                    seed,
-                    target_current_a,
-                    fitted,
-                    f"mast:{shot}:{row}:case-current:fitted:z:{target_z_m:.9f}",
-                    seed_centroid,
-                    pair,
-                ),
-                "measured_case_current": _solve_case_current_state(
-                    profile,
-                    seed,
-                    target_current_a,
-                    replacement,
-                    f"mast:{shot}:{row}:case-current:measured:z:{target_z_m:.9f}",
-                    seed_centroid,
-                    pair,
-                ),
+                "fitted_current_baseline": fitted_result,
+                "measured_case_current": measured_result,
             }
         )
     measured_values = [
@@ -928,6 +1038,12 @@ def _case_current_repair_row(shot: int, row: int) -> dict[str, Any]:
         "policy": policy,
         "carrier_evidence": carrier_evidence,
         "minimum_measured_case_compensation_a": min(measured_values, key=abs),
+        "receipt_parts": completed_parts,
+    }, {
+        "identity": f"{shot}/{row}",
+        "completed_parts": completed_parts,
+        "new_solves": new_solves,
+        "complete": True,
     }
 
 
@@ -972,7 +1088,9 @@ def _draw_case_current_repair(rows: list[dict[str, Any]], path: Path) -> None:
 
 
 def measure_case_current_repair(
-    output: Path, requested_rows: tuple[tuple[int, int], ...] = ROWS
+    output: Path,
+    requested_rows: tuple[tuple[int, int], ...] = ROWS,
+    maximum_new_solves: int | None = None,
 ) -> dict[str, Any]:
     configure_dtypes()
     cache = configure_persistent_compilation_cache(
@@ -985,16 +1103,25 @@ def measure_case_current_repair(
         existing = json.loads(receipt_path.read_text(encoding="utf-8"))
         existing_rows = existing.get("rows", [])
     rows_by_identity = {row["identity"]: row for row in existing_rows}
+    progress = []
+    remaining_new_solves = maximum_new_solves
     for shot, row in requested_rows:
-        measured = _case_current_repair_row(shot, row)
-        rows_by_identity[measured["identity"]] = measured
+        measured, state = _case_current_repair_row(
+            output, shot, row, remaining_new_solves
+        )
+        progress.append(state)
+        if remaining_new_solves is not None:
+            remaining_new_solves -= int(state["new_solves"])
+        if measured is not None:
+            rows_by_identity[measured["identity"]] = measured
         rows = [
             rows_by_identity[f"{item_shot}/{item_row}"]
             for item_shot, item_row in ROWS
             if f"{item_shot}/{item_row}" in rows_by_identity
         ]
         receipt_path.write_text(
-            json.dumps({"rows": rows}, indent=2) + "\n", encoding="utf-8"
+            json.dumps({"rows": rows, "progress": progress}, indent=2) + "\n",
+            encoding="utf-8",
         )
     rows = [
         rows_by_identity[f"{shot}/{row}"]
@@ -1002,7 +1129,11 @@ def measure_case_current_repair(
         if f"{shot}/{row}" in rows_by_identity
     ]
     if len(rows) != len(ROWS):
-        return {"rows": rows}
+        return {
+            "rows": rows,
+            "progress": progress,
+            "verdict": {"complete": False},
+        }
     receipt = {
         "receipt": "free solve and elimination scan with measured coil-case currents",
         "source": {
@@ -1039,6 +1170,35 @@ def measure_case_current_repair(
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     _draw_case_current_repair(rows, output / "case-current-repair.png")
     return receipt
+
+
+def checkpoint_smoke(output: Path) -> dict[str, Any]:
+    """Exercise atomic part persistence without constructing a plasma solve."""
+
+    path = output / "parts" / "synthetic-checkpoint.json"
+    request_identity = "synthetic:case-current:checkpoint"
+    resumed = path.exists()
+    if resumed:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if payload.get("request_identity") != request_identity:
+            raise RuntimeError("synthetic checkpoint has a different request identity")
+    else:
+        payload = {
+            "identity": "synthetic/0",
+            "part": "synthetic-checkpoint",
+            "request_identity": request_identity,
+            "prescribed_current_digest_sha256": _current_digest(np.zeros(1)),
+            "result": {"subsolve_wall_s": 0.0, "synthetic": True},
+        }
+        _write_receipt_part(path, payload)
+    return {
+        "verdict": {
+            "part_written": path.exists(),
+            "resumed_existing_part": resumed,
+            "no_solver_constructed": True,
+        },
+        "part": str(path),
+    }
 
 
 def _scan_current(output: Path) -> dict[str, Any]:
@@ -1255,11 +1415,34 @@ def main() -> None:
         action="append",
         help="limit case-current repair to one missing shot and row",
     )
+    parser.add_argument(
+        "--case-current-part-limit",
+        type=int,
+        help="solve at most this many missing case-current receipt parts",
+    )
+    parser.add_argument(
+        "--case-current-checkpoint-smoke",
+        action="store_true",
+        help="write or resume a synthetic receipt part without constructing a solve",
+    )
     args = parser.parse_args()
-    if args.sensitivity_only and args.case_current_repair:
+    if (
+        sum(
+            (
+                args.sensitivity_only,
+                args.case_current_repair,
+                args.case_current_checkpoint_smoke,
+            )
+        )
+        > 1
+    ):
         raise ValueError("choose one focused measurement")
+    if args.case_current_part_limit is not None and args.case_current_part_limit < 1:
+        raise ValueError("case-current part limit must be positive")
     if args.sensitivity_only:
         receipt = measure_sensitivity(args.output)
+    elif args.case_current_checkpoint_smoke:
+        receipt = checkpoint_smoke(args.output)
     elif args.case_current_repair:
         requested_rows = (
             tuple(
@@ -1269,7 +1452,9 @@ def main() -> None:
             if args.case_current_identity
             else ROWS
         )
-        receipt = measure_case_current_repair(args.output, requested_rows)
+        receipt = measure_case_current_repair(
+            args.output, requested_rows, args.case_current_part_limit
+        )
     else:
         receipt = measure(args.output)
         receipt["sensitivity"] = measure_sensitivity(args.output)

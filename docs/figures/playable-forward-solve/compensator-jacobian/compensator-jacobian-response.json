@@ -1,0 +1,171 @@
+{
+  "schema": "compensator-jacobian-response",
+  "source_revision": "55af2b26db064a89a6d7b01f45bcbe985c2b5f5e",
+  "shot": 27079,
+  "rows": [
+    16,
+    96
+  ],
+  "delta_current_a": 1000.0,
+  "derivative_unit": "metres per ampere",
+  "route": "labeller seed and free reduced-Newton re-solve",
+  "receipt_path": "docs/figures/playable-forward-solve/compensator-jacobian/compensator-jacobian-response.json",
+  "table_path": "docs/figures/playable-forward-solve/compensator-jacobian/compensator-jacobian-response.csv",
+  "figure_path": "docs/figures/playable-forward-solve/compensator-jacobian/compensator-jacobian-response.svg",
+  "rows_detail": [
+    {
+      "row": 16,
+      "time_s": 0.03500000014901161,
+      "requested_class": "limited",
+      "plasma_current_a": 242862.765625,
+      "target_centroid_z_m": -0.02177450619637966,
+      "circuit": "p6_upper",
+      "direction": {
+        "family_weights": {
+          "p6_upper": 1.0
+        },
+        "delta_current_a": 1000.0
+      },
+      "constraint_jacobian_m_per_a": -2.39482593586082e-09,
+      "finite_difference_m_per_a": 1.8789911677036773e-08,
+      "finite_difference_to_jacobian_ratio": -7.846044840116007,
+      "comparison": "finite difference neither agrees within a factor of two nor exceeds by one order",
+      "perturbed_solves": {
+        "plus": {
+          "sign": "plus",
+          "current_delta_a": 1000.0,
+          "converged": true,
+          "terminal_residual": 1.411349687149094e-09,
+          "active_set_iterations": 1,
+          "centroid_z_m": -0.003355681418192911,
+          "exception": null
+        },
+        "minus": {
+          "sign": "minus",
+          "current_delta_a": -1000.0,
+          "converged": true,
+          "terminal_residual": 1.359017655987343e-09,
+          "active_set_iterations": 1,
+          "centroid_z_m": -0.0033932612415469845,
+          "exception": null
+        }
+      }
+    },
+    {
+      "row": 16,
+      "time_s": 0.03500000014901161,
+      "requested_class": "limited",
+      "plasma_current_a": 242862.765625,
+      "target_centroid_z_m": -0.02177450619637966,
+      "circuit": "p6_upper_minus_p6_lower",
+      "direction": {
+        "family_weights": {
+          "p6_upper": 1.0,
+          "p6_lower": -1.0
+        },
+        "delta_current_a": 1000.0
+      },
+      "constraint_jacobian_m_per_a": 6.744481189732816e-08,
+      "finite_difference_m_per_a": 4.136200170749122e-08,
+      "finite_difference_to_jacobian_ratio": 0.6132718076292801,
+      "comparison": "finite difference agrees with the constraint entry within a factor of two",
+      "perturbed_solves": {
+        "plus": {
+          "sign": "plus",
+          "current_delta_a": 1000.0,
+          "converged": true,
+          "terminal_residual": 1.2755385800745304e-09,
+          "active_set_iterations": 1,
+          "centroid_z_m": -0.0033318965424291485,
+          "exception": null
+        },
+        "minus": {
+          "sign": "minus",
+          "current_delta_a": -1000.0,
+          "converged": true,
+          "terminal_residual": 1.1444929587506334e-09,
+          "active_set_iterations": 1,
+          "centroid_z_m": -0.003414620545844131,
+          "exception": null
+        }
+      }
+    },
+    {
+      "row": 96,
+      "time_s": 0.4350000023841858,
+      "requested_class": "diverted",
+      "plasma_current_a": 425222.375,
+      "target_centroid_z_m": 0.0042351242154836655,
+      "circuit": "p6_upper",
+      "direction": {
+        "family_weights": {
+          "p6_upper": 1.0
+        },
+        "delta_current_a": 1000.0
+      },
+      "constraint_jacobian_m_per_a": 3.772294296815649e-07,
+      "finite_difference_m_per_a": 1.5272079829878644e-05,
+      "finite_difference_to_jacobian_ratio": 40.48485782981048,
+      "comparison": "finite difference exceeds the constraint entry by one order or more",
+      "perturbed_solves": {
+        "plus": {
+          "sign": "plus",
+          "current_delta_a": 1000.0,
+          "converged": true,
+          "terminal_residual": 1.4302602393490442e-09,
+          "active_set_iterations": 3,
+          "centroid_z_m": -0.010732132684235889,
+          "exception": null
+        },
+        "minus": {
+          "sign": "minus",
+          "current_delta_a": -1000.0,
+          "converged": true,
+          "terminal_residual": 1.584883575213853e-10,
+          "active_set_iterations": 3,
+          "centroid_z_m": -0.04127629234399318,
+          "exception": null
+        }
+      }
+    },
+    {
+      "row": 96,
+      "time_s": 0.4350000023841858,
+      "requested_class": "diverted",
+      "plasma_current_a": 425222.375,
+      "target_centroid_z_m": 0.0042351242154836655,
+      "circuit": "p6_upper_minus_p6_lower",
+      "direction": {
+        "family_weights": {
+          "p6_upper": 1.0,
+          "p6_lower": -1.0
+        },
+        "delta_current_a": 1000.0
+      },
+      "constraint_jacobian_m_per_a": 6.335681714039557e-07,
+      "finite_difference_m_per_a": 2.4658326595705504e-05,
+      "finite_difference_to_jacobian_ratio": 38.919768556339996,
+      "comparison": "finite difference exceeds the constraint entry by one order or more",
+      "perturbed_solves": {
+        "plus": {
+          "sign": "plus",
+          "current_delta_a": 1000.0,
+          "converged": true,
+          "terminal_residual": 6.155312153984278e-10,
+          "active_set_iterations": 4,
+          "centroid_z_m": -0.0024851538689018614,
+          "exception": null
+        },
+        "minus": {
+          "sign": "minus",
+          "current_delta_a": -1000.0,
+          "converged": true,
+          "terminal_residual": 1.1959749244666299e-09,
+          "active_set_iterations": 3,
+          "centroid_z_m": -0.05180180706031287,
+          "exception": null
+        }
+      }
+    }
+  ]
+}

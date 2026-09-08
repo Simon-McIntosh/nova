@@ -1,0 +1,35 @@
+{
+  "solver_source_revision": "40c2d4749469db4fa5fa45a85ffeb77c291aa975",
+  "certificate": [],
+  "clipped_cells": [],
+  "cold_start": {
+    "axis_admitted": false,
+    "connected_cell_count": 1,
+    "contour_levels_wb": [
+      -1.2778269396369464,
+      -1.2778269396369462,
+      -1.2778269396369457,
+      -1.2778269396369453,
+      -1.277826939636945,
+      -1.2778269396369448,
+      -1.2778269396369444,
+      -1.277826939636944,
+      -1.2778269396369437,
+      -1.2778269396369435,
+      -1.277826939636943,
+      -1.2778269396369426,
+      -1.2778269396369424,
+      -1.2778269396369422,
+      -1.2778269396369417
+    ],
+    "path": "docs/figures/null-identification-authority/gs-contour-evidence/cold-start-stationary-candidates.png",
+    "profile_participation_cell_count": 112,
+    "project_src": "/nova/figures/null-identification-authority/gs-contour-evidence/cold-start-stationary-candidates.png",
+    "raw_o_candidate_count": 0,
+    "raw_x_candidate_count": 0
+  },
+  "jax_enable_x64": true,
+  "jax_platform": "cpu",
+  "legend": "/nova/figures/null-identification-authority/gs-contour-evidence/marker-legend.png",
+  "renderer_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-poloidal-mechanism-evidence/docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+}

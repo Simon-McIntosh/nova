@@ -1,0 +1,157 @@
+{
+  "schema": "nova.forward-gs-contour-evidence.v1",
+  "status": "complete",
+  "document": "docs/evidence/forward-gs-contour-evidence.html",
+  "orientation_base_revision": "40c2d4749469db4fa5fa45a85ffeb77c291aa975",
+  "jax": {
+    "enable_x64": true,
+    "platform": "cpu"
+  },
+  "certificate": {
+    "retained_h200_job": 1267132,
+    "retained_receipt": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/rebank-certificate-and-bank/artifacts/job-1267132/measurement-summary.json",
+    "all_converged": false,
+    "records": [
+      {
+        "case": "weak-rotation-reactor-static",
+        "requested_cells": -110,
+        "terminal_residual": 0.007447526861632626,
+        "retained_h200_terminal_residual": 0.007447526861632619,
+        "axis_error_m": 0.013352807132301537,
+        "record": "certificate-110.json",
+        "figure": "certificate-weak-rotation-reactor-static-reduced.png",
+        "render_job": 1267270
+      },
+      {
+        "case": "weak-rotation-reactor-static",
+        "requested_cells": -300,
+        "terminal_residual": 0.005558930033419124,
+        "retained_h200_terminal_residual": 0.0055589300334190185,
+        "axis_error_m": 0.030247707777285762,
+        "record": "certificate-300.json",
+        "figure": "certificate-weak-rotation-reactor-static-300.png",
+        "render_job": 1267271
+      },
+      {
+        "case": "weak-rotation-reactor-static",
+        "requested_cells": -500,
+        "terminal_residual": 0.0012464509730622983,
+        "retained_h200_terminal_residual": 0.0012464509730622084,
+        "axis_error_m": 0.05241342150319195,
+        "record": "certificate-500.json",
+        "figure": "certificate-weak-rotation-reactor-static-500.png",
+        "render_job": 1267272
+      },
+      {
+        "case": "weak-rotation-reactor-static",
+        "requested_cells": -1000,
+        "terminal_residual": 0.005401442905483345,
+        "retained_h200_terminal_residual": 0.0054014429054834836,
+        "axis_error_m": 0.06265566620073094,
+        "record": "certificate-1000.json",
+        "figure": "certificate-weak-rotation-reactor-static-1000.png",
+        "render_job": 1267273
+      },
+      {
+        "case": "moderate-rotation-conventional-static",
+        "requested_cells": -110,
+        "terminal_residual": 0.012457640060526127,
+        "retained_h200_terminal_residual": 0.012457640060526081,
+        "axis_error_m": 0.002879850152418248,
+        "record": "certificate-moderate-110.json",
+        "figure": "certificate-moderate-rotation-conventional-static-reduced.png",
+        "render_job": 1267274
+      },
+      {
+        "case": "moderate-rotation-conventional-static",
+        "requested_cells": -300,
+        "terminal_residual": 0.008455791545012872,
+        "retained_h200_terminal_residual": 0.008455791545012673,
+        "axis_error_m": 0.010125642834494296,
+        "record": "certificate-moderate-300.json",
+        "figure": "certificate-moderate-rotation-conventional-static-300.png",
+        "render_job": 1267275
+      }
+    ]
+  },
+  "error_locality": {
+    "case": "weak-rotation-reactor-static",
+    "requested_cells": -500,
+    "outboard_midplane_window_domain_fraction": 0.014414414414414415,
+    "outboard_midplane_window_squared_error_fraction": 0.06325599795433055,
+    "top_five_percent_energy_fraction": 0.14109609531862694,
+    "minimum_node_fraction_for_ninety_percent_squared_error": 0.781981981981982,
+    "weighted_error_centre_rz_m": [6.311966424256254, 3.4633235557285786e-12],
+    "weighted_centre_boundary_distance_m": 1.4894248569681878,
+    "weighted_centre_wall_distance_m": 1.4893339810347284,
+    "weighted_centre_axis_distance_m": 0.11520734316813819,
+    "characteristic_pitch_m": 0.21860311650211722,
+    "nearest_named_mechanism": "flux-normalisation-anchor",
+    "localisation_verdict": "OUTBOARD_ENRICHED_BUT_BROADLY_DISTRIBUTED"
+  },
+  "boundary_cut_cells": {
+    "source_revision": "7cc2e06f518bdd0a7b8806983470f972659df4ec",
+    "source_status": "held-unmerged",
+    "regenerate_if_landed_or_superseded": true,
+    "main_failure": {
+      "job": 1267281,
+      "error": "CurrentNormalisationError: source amplitude nan",
+      "interpretation": "main reproduces the unqualified-axis consumption defect; this is not a renderer failure"
+    },
+    "records": [
+      {
+        "requested_cells": -110,
+        "boundary_cut_cells": 8,
+        "cell_current_agreement": "8/8",
+        "centroid_agreement": "8/8",
+        "net_current_relative_error": 0.0,
+        "terminal_residual": 0.021636666445981268,
+        "topology_trial_refusals": 256,
+        "absolute_area_difference_m2": 0.03724619433014991,
+        "cut_cell_area_fraction": 0.3057158886527822,
+        "maximum_cell_area_fraction": 0.9771639885379829,
+        "record": "clip-held-110.json",
+        "figure": "clipped-cells-110.png",
+        "render_job": 1267286
+      },
+      {
+        "requested_cells": -342,
+        "boundary_cut_cells": 20,
+        "cell_current_agreement": "20/20",
+        "centroid_agreement": "20/20",
+        "net_current_relative_error": 0.0,
+        "terminal_residual": 0.08946861339242938,
+        "topology_trial_refusals": 1,
+        "absolute_area_difference_m2": 0.040375391144657505,
+        "cut_cell_area_fraction": 0.3620020933258614,
+        "maximum_cell_area_fraction": 0.9646316593877593,
+        "record": "clip-held-342.json",
+        "figure": "clipped-cells-342.png",
+        "render_job": 1267285
+      }
+    ]
+  },
+  "cold_start": {
+    "record": "cold.json",
+    "figure": "cold-start-stationary-candidates.png",
+    "render_job": 1267278,
+    "axis_admitted": false,
+    "raw_o_candidate_count": 0,
+    "raw_x_candidate_count": 0,
+    "connected_cell_count": 1,
+    "profile_participation_cell_count": 112,
+    "strict_topology_trial_refusals": 256
+  },
+  "affine_round_trip": {
+    "case_count": 2,
+    "lattice_count": 3,
+    "bin_count": 24,
+    "exclusion_count": 0,
+    "p_prime": "binary64-noise",
+    "ff_prime": "uniform-second-order-radial-stencil-bias",
+    "worst_finest_relative_sup": 0.00008851872538089174,
+    "operator_composition_floor_fraction": 0.0011765249977300346,
+    "status": "WITHIN_MEASURED_OPERATOR_COMPOSITION_FLOOR_NOT_EXACT",
+    "forward_route_status": "UNAVAILABLE_NON_TENSOR_PRODUCT_GRID"
+  }
+}

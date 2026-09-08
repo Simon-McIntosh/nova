@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-evidence-for" content="null-identification-authority">
+  <meta name="plan-slug" content="null-identification-authority">
+  <meta name="plan-title" content="Forward GS contour evidence">
+  <meta name="plan-summary" content="Poloidal line-contour evidence for retained Solovev forward GS certificates, clipped hexagonal supports, and a cold-start topology refusal.">
+  <title>Forward GS contour evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan">
+  <header class="plan-hero">
+    <p class="eyebrow">Evidence · forward Grad-Shafranov contours</p>
+    <h1>Forward GS contour evidence</h1>
+    <p class="lede">The retained certificate is explicitly non-converged evidence. Every map uses unfilled poloidal-flux contours; a compared solved/reference pair receives one shared physical level array, so a mismatch cannot be hidden by independent colour scales. The wall, analytic boundary and containment-aware critical-point read stay on each frame.</p>
+  </header>
+
+  <section id="reading">
+    <h2>How to read every panel</h2>
+    <p>Blue contours are the analytic Solovev field and ochre contours are the terminal forward field, drawn at the same absolute flux levels. The red loop is the analytic separatrix and the dark vessel outline is the typed wall geometry. A solid triangle marks the magnetic axis and a filled cross an admitted saddle; containment is passed to the null painter, so a finite point outside the vessel is not allowed to impersonate an in-vessel X-point. The marker vocabulary matches the <a href="/nova/evidence/poloidal-convergence-atlas.html">poloidal convergence atlas</a>: solid triangle = magnetic axis; filled cross = admitted saddle; hollow circle = another qualified X-point inside the wall; hollow square = qualified X-point outside the wall.</p>
+    <p>A wrong answer is visible without a residual calculation: a red boundary that does not follow the terminal separatrix, a marker displaced from the corresponding reference critical region, a finite X marker against or beyond the vessel, or contour families with kinks, extra islands, or an implausible compression are each a topology or field-shape failure. A small scalar residual alone cannot exclude any of them.</p>
+    <figure>
+      <img src="/nova/figures/null-identification-authority/gs-contour-evidence/marker-legend.png" alt="Legend defining magnetic-axis, admitted-saddle, additional X-point, outside-wall X-point, and the two centroid markers.">
+      <figcaption><strong>Marker vocabulary.</strong> A wrong legend would conflate an admitted saddle with a merely qualified alternative or would display an out-of-vessel X-point as if it passed containment. The blue circle and black cross are the physical and direct clipped centroids; coincidence is evidence that the physical moments represent the clipped support.</figcaption>
+    </figure>
+  </section>
+
+  <section id="certificate">
+    <h2>Retained Solovev certificate</h2>
+    <p><strong>The magnetic-axis error grows under refinement:</strong> on the exact-oracle weak-rotation case it is 13.352807 mm at 110 requested cells and 30.247708 mm at 300. A convergent spatial and nonlinear solve would instead drive that position error toward zero as resolution increases; growth is stronger evidence of a wrong terminal state than either residual in isolation. The 500- and 1000-cell replays continue the trend at 52.413422 mm and 62.655666 mm.</p>
+    <p>The retained H200 receipt <code>job 1267132</code> gives six terminal states. It records every one as <strong>converged = false</strong>; the maps are therefore diagnostic terminal fields, not promoted accuracy evidence. Each replayed contour uses the retained terminal residual below. All retained rungs are listed so no non-converged row is silently omitted while its individual contour render completes.</p>
+    <table>
+      <thead><tr><th>case</th><th>requested cells</th><th>retained residual</th><th>converged</th></tr></thead>
+      <tbody>
+        <tr><td>weak rotation, reactor static</td><td>110</td><td>7.448e-3</td><td>false</td></tr>
+        <tr><td>weak rotation, reactor static</td><td>300</td><td>5.559e-3</td><td>false</td></tr>
+        <tr><td>weak rotation, reactor static</td><td>500</td><td>1.246e-3</td><td>false</td></tr>
+        <tr><td>weak rotation, reactor static</td><td>1000</td><td>5.401e-3</td><td>false</td></tr>
+        <tr><td>moderate rotation, conventional static</td><td>110</td><td>1.246e-2</td><td>false</td></tr>
+        <tr><td>moderate rotation, conventional static</td><td>300</td><td>8.456e-3</td><td>false</td></tr>
+      </tbody>
+    </table>
+    <figure>
+      <img src="/nova/figures/null-identification-authority/gs-contour-evidence/certificate-weak-rotation-reactor-static-reduced.png" alt="Shared-level blue analytic and ochre terminal forward flux contours for the 110-cell weak-rotation Solovev certificate, with analytic boundary, wall and contained critical points.">
+      <figcaption><strong>Weak rotation, reactor static, 110 requested cells; retained residual 7.448e-3, not converged.</strong> The blue analytic and ochre solved fields share every physical contour level. A wrong boundary answer would put the red loop away from the terminal separatrix; a wrong critical-point answer would displace the triangle or filled cross relative to the analytic field; a wrong field answer would produce a different contour topology, unwanted islands, or compressed contours rather than merely a larger scalar residual.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/null-identification-authority/gs-contour-evidence/certificate-weak-rotation-reactor-static-300.png" alt="Shared-level blue analytic and ochre terminal forward flux contours for the 300-cell weak-rotation Solovev certificate, with analytic boundary, wall and contained critical points.">
+      <figcaption><strong>Weak rotation, reactor static, 300 requested cells; retained residual 5.559e-3, not converged.</strong> This panel answers the same three visual questions at the next rung: an offset red boundary means wrong edge placement; shifted or missing contained markers mean the critical read is wrong; any changed nesting, islands or contour crowding means the field is wrong even if the residual is numerically smaller.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/null-identification-authority/gs-contour-evidence/certificate-weak-rotation-reactor-static-500.png" alt="Shared-level blue analytic and ochre terminal forward flux contours for the 500-cell weak-rotation Solovev certificate, with analytic boundary, wall and contained critical points.">
+      <figcaption><strong>Weak rotation, reactor static, 500 requested cells; retained residual 1.246e-3, not converged; axis error 52.413422 mm.</strong> This row has the smallest scalar residual, yet the axis is farther from the analytic answer than at either coarser rung. Correct convergence would make the marker and contour geometry approach the analytic field together; residual improvement with growing position error is a failed joint accuracy test.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/null-identification-authority/gs-contour-evidence/certificate-weak-rotation-reactor-static-1000.png" alt="Shared-level blue analytic and ochre terminal forward flux contours for the 1000-cell weak-rotation Solovev certificate, with analytic boundary, wall and contained critical points.">
+      <figcaption><strong>Weak rotation, reactor static, 1000 requested cells; retained residual 5.401e-3, not converged; axis error 62.655666 mm.</strong> The finest retained rung is not a recovery: the residual rebounds above the 500-cell value and the axis moves farther from the analytic point. A correct refinement ladder would contract both discrepancies and bring ochre contours toward blue; the observed sequence does neither monotonically.</figcaption>
+    </figure>
+    <p>All six retained certificate rungs are present. None passes the joint field, residual and topology reading, and none is hidden because its terminal map looks wrong.</p>
+    <figure>
+      <img src="/nova/figures/null-identification-authority/gs-contour-evidence/certificate-moderate-rotation-conventional-static-reduced.png" alt="Shared-level blue analytic and ochre terminal forward flux contours for the 110-cell moderate-rotation Solovev certificate, with analytic boundary, wall and contained critical points.">
+      <figcaption><strong>Moderate rotation, conventional static, 110 requested cells; retained residual 1.246e-2, not converged.</strong> A wrong result would separate the ochre terminal contours from the blue analytic family, place the red analytic boundary away from the terminal separatrix, or admit a critical marker on the wrong side of the wall. The relatively small 2.879850 mm axis error does not qualify the row while its terminal residual and full contour agreement fail.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/null-identification-authority/gs-contour-evidence/certificate-moderate-rotation-conventional-static-300.png" alt="Shared-level blue analytic and ochre terminal forward flux contours for the 300-cell moderate-rotation Solovev certificate, with analytic boundary, wall and contained critical points.">
+      <figcaption><strong>Moderate rotation, conventional static, 300 requested cells; retained residual 8.456e-3, not converged.</strong> A convergent refinement would reduce the axis error and align the terminal boundary and critical regions with the analytic contours. Here the axis error grows from 2.879850 mm to 10.125643 mm as the residual falls, so the same residual-versus-topology disagreement seen in the weak-rotation ladder survives the second analytic case.</figcaption>
+    </figure>
+  </section>
+
+  <section id="error-locality">
+    <h2>Where the weak-rotation error lives</h2>
+    <p><strong>The apparent outboard-midplane feature is enriched, but it is not the whole error.</strong> On the 500-cell weak-rotation row, the window R = 7.25–7.75 m and Z = 0–0.5 m contains 1.4414% of sampled nodes and 6.3256% of squared flux error, a 4.39-fold concentration over uniform support. Yet the largest-error 5.045% of nodes carry only 14.1096% of squared error, and 78.1982% of nodes are required to accumulate 90% of it. The numerical census therefore rejects the visual hypothesis that almost all error lives in one narrow outboard patch.</p>
+    <table>
+      <thead><tr><th>locality measure</th><th>result</th><th>reading</th></tr></thead>
+      <tbody>
+        <tr><td>outboard window domain / squared-error fraction</td><td>1.4414% / 6.3256%</td><td>locally enriched, not dominant</td></tr>
+        <tr><td>top 5% node support / squared-error fraction</td><td>5.0450% / 14.1096%</td><td>error remains broadly distributed</td></tr>
+        <tr><td>nodes required for 90% squared error</td><td>78.1982%</td><td>not a single structural hotspot</td></tr>
+        <tr><td>squared-error centre</td><td>R = 6.311966 m, Z ≈ 0</td><td>115.2 mm from the analytic axis</td></tr>
+        <tr><td>distance to analytic boundary / wall</td><td>1.489425 m / 1.489334 m</td><td>neither boundary contact nor limiter touch</td></tr>
+      </tbody>
+    </table>
+    <p>The characteristic cell pitch is 218.603 mm. The weighted error centre is within one pitch of the analytic magnetic axis, which is the flux-normalisation anchor, but more than six pitches from either the analytic separatrix or wall. Of the named mechanisms, the census therefore coincides with the normalisation anchor, not boundary contact or limiter touch. That is a spatial association, not proof of causation; the broad 90%-support fraction rules out describing it as an axis-only defect.</p>
+  </section>
+
+  <section id="clips">
+    <h2>Boundary-cut hexagonal supports</h2>
+    <p><strong>These figures are deliberately coupled to unmerged revision <code>7cc2e06f518bdd0a7b8806983470f972659df4ec</code>.</strong> They are rendered read-only from the held <code>nia-clipped-moment-repair</code> worktree and written here; neither that worktree nor Nova source was modified. The refusal that rejects an unqualified topology trial, and the clipping repair that produced these measurements, remain unmerged pending the lead decision about how iteration proceeds when a trial cannot provide an axis-normalised current. The two otherwise available choices are both known-bad: consuming the unqualified axis produces the NaN source amplitude reproduced on main by job 1267281, while carrying the previous qualified axis silently corrupted three certificate rungs. That main failure is therefore not a renderer fault; it faithfully exposes the defect the held work repairs.</p>
+    <p>The held receipt establishes why the geometry matters: every boundary-cut cell agrees on both physical current and centroid—8 of 8 on the diverted 110 rung and 20 of 20 on 342—with net-current relative error exactly zero on both. The coloured cell in each panel is the straight-edged support handed to <code>draw_plasma_cells</code>; the complete hexagon is only a grey provenance outline. The analytic separatrix is drawn across the same cells. A disagreement would appear as the blue physical-moment centroid outside its own clipped cell or on the wrong side of the separatrix, rather than coincident with the black direct-clipped centroid.</p>
+    <p>The calculation is intentionally mixed order. Each crossing on an atomic edge is a linear interpolation of flux on that edge, and the support is the polygon through those crossings. Area and current moments are analytic for that polygon and exact for cellwise-linear current density; <code>observation.clipped_support_quadrature</code> then fans the support into triangles under degree-fifteen Duffy quadrature. Thus the integration degree is fifteen while the boundary representation is first order. The plotted clip stays straight because that is what is computed, and the separately traced analytic separatrix makes the geometric discrepancy visible.</p>
+    <figure>
+      <img src="/nova/figures/null-identification-authority/gs-contour-evidence/clipped-cells-110.png" alt="Eight boundary-cut supports on the diverted 110-cell rung, showing complete hexagon outlines, straight clipped polygons, analytic separatrix, wall, contained nulls and coincident physical and direct centroids.">
+      <figcaption><strong>Diverted 110 rung: 8 of 8 cut cells agree on current and 8 of 8 on centroid; net-current relative error = 0 exactly; strict terminal residual 2.1637e-2 after 256 topology refusals.</strong> A failed surrogate would put the blue implied centroid outside its own coloured support or across the red separatrix from the black direct centroid. All eight pairs coincide to the recorded precision. The visible red-curve/straight-clip difference is real boundary-order error, not a plotting spline.</figcaption>
+    </figure>
+    <p><strong>The boundary representation is quantitatively comparable and large on this coarse rung.</strong> Summed absolute straight-versus-traced area difference is 3.7246194e-2 m², or 0.305716 of the full areas of the eight cut cells. That fraction is 24.54 times the largest retained certificate residual and 259.85 times the measured 1.176525e-3 operator-composition floor. These observables are not dimensionally identical error norms, so the ratios do not assign causation; they do show that first-order boundary geometry is too large to dismiss beside the solver-scale numbers.</p>
+    <table>
+      <thead><tr><th>110-rung cell</th><th>absolute area difference (m²)</th><th>fraction of full cell</th></tr></thead>
+      <tbody>
+        <tr><td>4</td><td>7.034811e-4</td><td>0.123991</td></tr>
+        <tr><td>18</td><td>1.637766e-4</td><td>0.010090</td></tr>
+        <tr><td>19</td><td>1.966586e-3</td><td>0.113424</td></tr>
+        <tr><td>20</td><td>1.694246e-2</td><td>0.977164</td></tr>
+        <tr><td>21</td><td>6.626625e-3</td><td>0.382194</td></tr>
+        <tr><td>22</td><td>7.946752e-3</td><td>0.458332</td></tr>
+        <tr><td>24</td><td>6.022880e-4</td><td>0.034737</td></tr>
+        <tr><td>25</td><td>2.294223e-3</td><td>0.173330</td></tr>
+      </tbody>
+    </table>
+    <figure>
+      <img src="/nova/figures/null-identification-authority/gs-contour-evidence/clipped-cells-342.png" alt="Twenty boundary-cut supports on the diverted 342-cell rung, showing complete hexagon outlines, straight clipped polygons, analytic separatrix, wall, contained nulls and coincident physical and direct centroids.">
+      <figcaption><strong>Diverted 342 rung: 20 of 20 cut cells agree on current and 20 of 20 on centroid; net-current relative error = 0 exactly; strict terminal residual 8.9469e-2 after one topology refusal.</strong> A failed surrogate would place an implied centroid outside its own coloured support or across the separatrix from the direct centroid. The worst plotted centroid separation is 6.94e-18 m—roundoff—so the two marker sets coincide while the straight support remains visibly distinct from the red analytic curve.</figcaption>
+    </figure>
+    <p><strong>Refinement does not make the boundary-order term negligible in this measure.</strong> Summed absolute straight-versus-traced area difference is 4.0375391e-2 m², or 0.362002 of the full areas of the twenty cut cells. The fraction is 29.06 times the largest retained certificate residual and 307.69 times the measured operator-composition floor; the maximum single-cell fraction is 0.964632. As above, these ratios compare dimensionless scales rather than identical norms, but the receipt itself classifies the boundary-area fraction as comparable to the certificate residual band.</p>
+    <table>
+      <thead><tr><th>342-rung cell</th><th>absolute area difference (m²)</th><th>fraction of full cell</th></tr></thead>
+      <tbody>
+        <tr><td>86</td><td>7.267066e-4</td><td>0.130312</td></tr>
+        <tr><td>87</td><td>4.875151e-3</td><td>0.874203</td></tr>
+        <tr><td>88</td><td>1.825186e-3</td><td>0.327289</td></tr>
+        <tr><td>89</td><td>2.187609e-3</td><td>0.392278</td></tr>
+        <tr><td>181</td><td>3.772967e-3</td><td>0.676562</td></tr>
+        <tr><td>184</td><td>9.274659e-4</td><td>0.166312</td></tr>
+        <tr><td>186</td><td>1.783966e-3</td><td>0.319898</td></tr>
+        <tr><td>188</td><td>5.940183e-4</td><td>0.106518</td></tr>
+        <tr><td>205</td><td>9.451672e-4</td><td>0.169486</td></tr>
+        <tr><td>207</td><td>3.676633e-3</td><td>0.659287</td></tr>
+        <tr><td>212</td><td>5.379441e-3</td><td>0.964632</td></tr>
+        <tr><td>213</td><td>1.142973e-3</td><td>0.204956</td></tr>
+        <tr><td>214</td><td>2.775494e-9</td><td>4.976966e-7</td></tr>
+        <tr><td>219</td><td>4.549006e-3</td><td>0.815719</td></tr>
+        <tr><td>220</td><td>3.476796e-3</td><td>0.623453</td></tr>
+        <tr><td>221</td><td>1.760934e-3</td><td>0.315768</td></tr>
+        <tr><td>222</td><td>1.201931e-3</td><td>0.215528</td></tr>
+        <tr><td>229</td><td>1.174741e-3</td><td>0.210652</td></tr>
+        <tr><td>341</td><td>3.711337e-4</td><td>0.066551</td></tr>
+        <tr><td>343</td><td>3.562677e-6</td><td>0.000639</td></tr>
+      </tbody>
+    </table>
+    <p>Both clip panels and all 28 per-cell area rows are now present. They must be regenerated if <code>7cc2e06f518bdd0a7b8806983470f972659df4ec</code> is superseded or lands in a different form; the transient worktree is not a publication identity, while the pinned commit is.</p>
+  </section>
+
+  <section id="cold-start">
+    <h2>Cold-start stationary candidates</h2>
+    <figure>
+      <img src="/nova/figures/null-identification-authority/gs-contour-evidence/cold-start-stationary-candidates.png" alt="110-cell diverted cold-start flux line contours and wall with no admitted stationary-point markers.">
+      <figcaption><strong>Diverted 110-cell cold first iterate; strict receipt: 256 refusals.</strong> This is not a plasma equilibrium: the cold seed is expected to have small-scale numerical structure before relaxation, and the important result is that the read refuses to promote it. It has <code>axis_admitted=false</code>, zero finite O candidates, zero finite X candidates, one connected cell and 112 profile-participating cells. A triangle or filled cross here would be wrong: it would mean an unqualified seed had been invented into a topology read or had bypassed wall containment.</figcaption>
+    </figure>
+  </section>
+
+  <section id="affine">
+    <h2>Affine flux-function round trip</h2>
+    <p>The retained analytic-raster result recovers constant p-prime at binary64 noise. FF-prime is not exact: it has a uniform second-order radial-stencil bias while bin-to-bin scatter stays at roundoff. Its worst finest relative sup error is <code>8.851872538089174e-5</code> over two cases, three lattices and 24 bins with zero exclusions, below the measured operator-composition floor <code>1.1765249977300346e-3</code> of span at 67 by 103. The route has a structural limitation rather than a failed numerical claim: extraction requires a rectangular flux lattice, while the forward Solovev receipts are unstructured hex maps and are explicitly unavailable as non-tensor-product input. No hex-to-raster interpolation is being inferred here.</p>
+  </section>
+
+  <section id="provenance">
+    <h2>Provenance and limits</h2>
+    <p>Rendering uses the retained certificate parameters with CPU float64 asserted before array construction, on the <code>all_debug</code> partition. The machine-readable figure receipt is <code>docs/figures/null-identification-authority/gs-contour-evidence/contour-evidence-receipt.json</code>. The certificate residual and convergence statements come from the H200 receipt; a current replay only provides the drawable terminal field and does not relabel a non-converged row as qualified.</p>
+  </section>
+</main>
+</body>
+</html>

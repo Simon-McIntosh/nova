@@ -1,0 +1,41 @@
+{
+  "solver_source_revision": "40c2d4749469db4fa5fa45a85ffeb77c291aa975",
+  "certificate": [
+    {
+      "analytic_boundary_flux_wb": 2.6722582192869963e-09,
+      "axis_error_m": 0.06265566620073094,
+      "case": "weak-rotation-reactor-static",
+      "converged": false,
+      "levels_wb": [
+        -62.95126022981018,
+        -54.887670935704875,
+        -46.82408164159956,
+        -38.76049234749425,
+        -30.696903053388944,
+        -22.63331375928363,
+        -14.569724465178325,
+        -13.708196774420752,
+        -6.506135171073019,
+        2.6722582192869963e-09,
+        1.5574541230322936,
+        9.621043417137606,
+        17.68463271124292,
+        25.748222005348218,
+        33.81181129945353,
+        41.875400593558844,
+        49.93898988766415
+      ],
+      "path": "docs/figures/null-identification-authority/gs-contour-evidence/certificate-weak-rotation-reactor-static-1000.png",
+      "project_src": "/nova/figures/null-identification-authority/gs-contour-evidence/certificate-weak-rotation-reactor-static-1000.png",
+      "requested_cells": -1000,
+      "retained_h200_terminal_residual": 0.0054014429054834836,
+      "root_boundary_flux_wb": -13.708196774420752,
+      "solve_seconds": 879.3633461240679,
+      "terminal_residual": 0.005401442905483345
+    }
+  ],
+  "clipped_cells": [],
+  "jax_enable_x64": true,
+  "jax_platform": "cpu",
+  "renderer_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-poloidal-mechanism-evidence/docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+}

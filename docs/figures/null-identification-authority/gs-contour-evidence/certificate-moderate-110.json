@@ -1,0 +1,41 @@
+{
+  "solver_source_revision": "40c2d4749469db4fa5fa45a85ffeb77c291aa975",
+  "certificate": [
+    {
+      "analytic_boundary_flux_wb": 6.797341160482088e-11,
+      "axis_error_m": 0.002879850152418248,
+      "case": "moderate-rotation-conventional-static",
+      "converged": false,
+      "levels_wb": [
+        -1.6786114265431533,
+        -1.4207687542962482,
+        -1.162926082049343,
+        -0.9050834098024381,
+        -0.6472407375555329,
+        -0.38939806530862775,
+        -0.13155539306172281,
+        6.797341160482088e-11,
+        0.0770090736929606,
+        0.12628727918518234,
+        0.3841299514320875,
+        0.6419726236789924,
+        0.8998152959258978,
+        1.1576579681728028,
+        1.4155006404197077,
+        1.673343312666613,
+        1.9311859849135182
+      ],
+      "path": "docs/figures/null-identification-authority/gs-contour-evidence/certificate-moderate-rotation-conventional-static-reduced.png",
+      "project_src": "/nova/figures/null-identification-authority/gs-contour-evidence/certificate-moderate-rotation-conventional-static-reduced.png",
+      "requested_cells": -110,
+      "retained_h200_terminal_residual": 0.012457640060526081,
+      "root_boundary_flux_wb": 0.0770090736929606,
+      "solve_seconds": 417.009883178398,
+      "terminal_residual": 0.012457640060526127
+    }
+  ],
+  "clipped_cells": [],
+  "jax_enable_x64": true,
+  "jax_platform": "cpu",
+  "renderer_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-poloidal-mechanism-evidence/docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+}

@@ -51,7 +51,7 @@ from bokeh.plotting import figure
 import numpy as np
 
 from nova.biot.contour import Contour
-from nova.equilibrium.wall_mask import inside_polygon
+from nova.media.sources.frame import coerce_wall_units, inside_wall_units
 
 # ---------------------------------------------------------------------------
 # locked style: weights follow pulse-design's plasma rendering and imas-ink's
@@ -334,7 +334,7 @@ def poloidal_channels(
     equilibrium,
     profile,
     *,
-    wall: np.ndarray,
+    wall,
     coils=(),
     n_contours: int = N_CONTOURS,
     surfaces: np.ndarray | None = None,
@@ -412,24 +412,19 @@ def poloidal_channels(
     strikes = np.reshape(labelled.strike_points, (-1, 2)).astype(float)
     finite_strikes = strikes[np.isfinite(strikes).all(axis=1)]
 
-    wall = close_outline(wall)
+    wall_units = coerce_wall_units(wall)
+    if not wall_units:
+        raise ValueError("the poloidal view requires at least one wall unit")
 
     def inside_wall(point: np.ndarray) -> bool:
-        """Return whether one finite point lies inside the closed first wall.
+        """Return whether one finite point lies in the occupiable wall.
 
-        Topology markers are drawn only inside the vessel so a limited fixture
-        never shows an off-vessel cross.
+        Topology markers use the same vessel-minus-material model as the
+        solver, including multi-unit limiter structures.
         """
         if not np.isfinite(point).all():
             return False
-        return bool(
-            inside_polygon(
-                np.asarray([float(point[0])]),
-                np.asarray([float(point[1])]),
-                wall[:, 0],
-                wall[:, 1],
-            )[0]
-        )
+        return bool(inside_wall_units(point[None, :], wall_units)[0])
 
     def finite_point(point: np.ndarray) -> tuple[list, list]:
         """Return (xs, zs) for one point, or empty lists when outside the wall."""
@@ -451,8 +446,21 @@ def poloidal_channels(
         coil_xs.append([outline[:, 0].tolist()])
         coil_zs.append([outline[:, 1].tolist()])
 
+    wall_lines = []
+    for unit in wall_units:
+        points = unit.vertices
+        if unit.closed and not np.allclose(points[0], points[-1]):
+            points = np.vstack((points, points[:1]))
+        wall_lines.append(points)
+    if len(wall_lines) == 1:
+        wall_x = wall_lines[0][:, 0].tolist()
+        wall_z = wall_lines[0][:, 1].tolist()
+    else:
+        wall_x = [line[:, 0].tolist() for line in wall_lines]
+        wall_z = [line[:, 1].tolist() for line in wall_lines]
+
     return {
-        "wall": {"x": wall[:, 0].tolist(), "z": wall[:, 1].tolist()},
+        "wall": {"x": wall_x, "z": wall_z},
         "coil": {"x": coil_xs, "z": coil_zs},
         "plasma": {"x": plasma_xs, "z": plasma_zs},
         "levelset": {"x": contour_xs, "z": contour_zs},

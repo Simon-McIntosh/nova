@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Iterable, Sequence
 import numpy as np
 
 from nova.media.ink import DEFAULT_INK, InkStyle
+from nova.media.sources.frame import coerce_wall_units, inside_wall_units
 
 if TYPE_CHECKING:
     import matplotlib
@@ -27,33 +28,53 @@ if TYPE_CHECKING:
 
 def draw_wall(
     axes: matplotlib.axes.Axes,
-    radius: Sequence[float],
-    height: Sequence[float],
+    radius: Sequence[float] | None = None,
+    height: Sequence[float] | None = None,
     style: InkStyle = DEFAULT_INK,
     close: bool = True,
+    units=None,
     **kwargs,
 ) -> None:
-    """Draw the first wall as one polyline.
+    """Draw every wall unit as its own polyline.
 
-    ``close`` repeats the first vertex when the stored outline does not, so a
-    limiter that is a closed loop in the machine is a closed loop on the page.
+    ``units`` carries the typed wall collection. The two coordinate arguments
+    remain the compatibility spelling for one closed or open polyline. Open
+    units are dashed and are never joined to a neighbouring unit.
     """
-    r = np.asarray(radius, dtype=float)
-    z = np.asarray(height, dtype=float)
-    finite = np.isfinite(r) & np.isfinite(z)
-    r, z = r[finite], z[finite]
-    if close and r.size and (r[0] != r[-1] or z[0] != z[-1]):
-        r = np.append(r, r[0])
-        z = np.append(z, z[0])
-    axes.plot(
-        r,
-        z,
-        color=kwargs.pop("color", style.wall_color),
-        linewidth=kwargs.pop("linewidth", style.wall_linewidth),
-        zorder=kwargs.pop("zorder", style.zorder_wall),
-        solid_joinstyle="round",
-        **kwargs,
-    )
+    if units is None:
+        if radius is None or height is None:
+            raise TypeError("draw_wall requires units or radius and height")
+        units = coerce_wall_units(np.column_stack((radius, height)))
+        if not close:
+            unit = units[0]
+            units = (
+                type(unit)(
+                    unit.r, unit.z, kind=unit.kind, closed=False, name=unit.name
+                ),
+            )
+    line_kwargs = dict(kwargs)
+    color = line_kwargs.pop("color", style.wall_color)
+    linewidth = line_kwargs.pop("linewidth", style.wall_linewidth)
+    zorder = line_kwargs.pop("zorder", style.zorder_wall)
+    linestyle = line_kwargs.pop("linestyle", None)
+    for unit in coerce_wall_units(units):
+        points = unit.vertices
+        finite = np.all(np.isfinite(points), axis=1)
+        points = points[finite]
+        if points.shape[0] < 2:
+            continue
+        if unit.closed and not np.allclose(points[0], points[-1]):
+            points = np.vstack((points, points[:1]))
+        axes.plot(
+            points[:, 0],
+            points[:, 1],
+            color=color,
+            linewidth=linewidth,
+            zorder=zorder,
+            linestyle=linestyle or ("solid" if unit.closed else "--"),
+            solid_joinstyle="round",
+            **line_kwargs,
+        )
 
 
 def draw_coils(
@@ -299,7 +320,7 @@ def draw_nulls(
     x_points: np.ndarray | None = None,
     strike_points: np.ndarray | None = None,
     style: InkStyle = DEFAULT_INK,
-    contain: np.ndarray | None = None,
+    contain=None,
 ) -> dict[str, int]:
     """Mark the O-point, the X-points and the strike points.
 
@@ -346,15 +367,14 @@ def draw_nulls(
         """Return the subset of ``points`` inside the containment polygon."""
         if contain is None:
             return points
-        from nova.equilibrium.wall_mask import inside_polygon
-
-        wall = np.asarray(contain, dtype=float).reshape(-1, 2)
-        keep = inside_polygon(points[:, 0], points[:, 1], wall[:, 0], wall[:, 1])
+        keep = inside_wall_units(points, contain)
         return points[np.asarray(keep, dtype=bool)]
 
     if magnetic_axis is not None:
         point = np.asarray(magnetic_axis, dtype=float).reshape(-1)[:2]
-        if np.all(np.isfinite(point)):
+        if np.all(np.isfinite(point)) and (
+            contain is None or bool(inside_wall_units(point[None, :], contain)[0])
+        ):
             axes.plot(
                 point[0],
                 point[1],

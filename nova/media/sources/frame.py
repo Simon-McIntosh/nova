@@ -20,6 +20,75 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from nova.equilibrium.wall_mask import WallUnit, vessel_unit
+
+
+def coerce_wall_units(wall) -> tuple[WallUnit, ...]:
+    """Return a wall source as typed units without joining its polylines.
+
+    Media callers historically passed one ``(n, 2)`` limiter array.  That
+    spelling remains a one closed vessel unit; machine records can now carry
+    the lossless ``WallUnit`` collection directly.
+    """
+    if isinstance(wall, WallUnit):
+        return (wall,)
+    if hasattr(wall, "wall_units"):
+        wall = wall.wall_units
+    elif hasattr(wall, "units") and not isinstance(wall, np.ndarray):
+        wall = wall.units
+    if isinstance(wall, np.ndarray):
+        points = np.asarray(wall, dtype=float).reshape(-1, 2)
+        return (vessel_unit(points[:, 0], points[:, 1]),)
+    units = tuple(wall)
+    if not units:
+        return ()
+    if all(isinstance(unit, WallUnit) for unit in units):
+        return units
+    return tuple(
+        vessel_unit(
+            np.asarray(unit, dtype=float).reshape(-1, 2)[:, 0],
+            np.asarray(unit, dtype=float).reshape(-1, 2)[:, 1],
+        )
+        for unit in units
+    )
+
+
+def inside_wall_units(points, wall) -> np.ndarray:
+    """Test points against the same vessel-minus-material wall semantics.
+
+    Closed vessel interiors are united, then closed material interiors are
+    removed. Open material units have no mathematical interior; their line is
+    therefore excluded only when a queried point lies on that line, matching
+    the zero-area geometric limit of the solver's raster model.
+    """
+    from nova.equilibrium.wall_mask import inside_polygon
+
+    query = np.asarray(points, dtype=float).reshape(-1, 2)
+    units = coerce_wall_units(wall)
+    result = np.zeros(query.shape[0], dtype=bool)
+    for unit in units:
+        if unit.kind == "vessel" and unit.closed:
+            result |= inside_polygon(query[:, 0], query[:, 1], unit.r, unit.z)
+    for unit in units:
+        if unit.kind != "material":
+            continue
+        if unit.closed:
+            result &= ~inside_polygon(query[:, 0], query[:, 1], unit.r, unit.z)
+            continue
+        for start, end in zip(unit.vertices[:-1], unit.vertices[1:], strict=True):
+            delta = end - start
+            length_squared = float(delta @ delta)
+            if length_squared == 0.0:
+                on_segment = np.all(np.isclose(query, start), axis=1)
+            else:
+                fraction = np.clip((query - start) @ delta / length_squared, 0.0, 1.0)
+                nearest = start + fraction[:, None] * delta
+                on_segment = np.isclose(
+                    np.linalg.norm(query - nearest, axis=1), 0.0, atol=1.0e-12
+                )
+            result &= ~on_segment
+    return result
+
 
 @dataclass(frozen=True)
 class EquilibriumFrame:
@@ -105,6 +174,17 @@ class MachineGeometry:
 
     limiter: np.ndarray
     coils: tuple[np.ndarray, ...] = ()
+    wall_units: tuple[WallUnit, ...] = ()
+
+    def __post_init__(self) -> None:
+        """Retain the full wall while keeping ``limiter`` for old callers."""
+        if self.wall_units:
+            units = coerce_wall_units(self.wall_units)
+        else:
+            points = np.asarray(self.limiter, dtype=float).reshape(-1, 2)
+            units = (vessel_unit(points[:, 0], points[:, 1]),)
+        object.__setattr__(self, "wall_units", units)
+        object.__setattr__(self, "limiter", np.asarray(self.limiter, dtype=float))
 
     def bounds(self) -> tuple[float, float, float, float]:
         """Return ``(r_min, r_max, z_min, z_max)`` over wall and conductors.
@@ -113,7 +193,7 @@ class MachineGeometry:
         them if the panel does; a bound taken from the wall alone would crop
         the coils a figure exists to show.
         """
-        stacked = [np.asarray(self.limiter, dtype=float).reshape(-1, 2)]
+        stacked = [unit.vertices for unit in self.wall_units]
         stacked += [np.asarray(coil, dtype=float).reshape(-1, 2) for coil in self.coils]
         points = np.vstack([block for block in stacked if block.size])
         finite = points[np.all(np.isfinite(points), axis=1)]

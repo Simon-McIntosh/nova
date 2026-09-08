@@ -23,10 +23,10 @@ from typing import Sequence
 
 import numpy as np
 
+from nova.media.sources.frame import coerce_wall_units
 
-def hex_mesh(
-    wall: np.ndarray, cells: int = 1200
-) -> tuple[tuple[np.ndarray, ...], dict]:
+
+def hex_mesh(wall, cells: int = 1200) -> tuple[tuple[np.ndarray, ...], dict]:
     """Return the wall-clipped hexagonal cell outlines and their provenance.
 
     ``cells`` is a target count, not a guarantee: the tessellation fits whole
@@ -35,7 +35,11 @@ def hex_mesh(
     """
     from nova.frame.coilset import CoilSet
 
-    outline = np.asarray(wall, dtype=float).reshape(-1, 2)
+    units = coerce_wall_units(wall)
+    vessels = tuple(unit for unit in units if unit.kind == "vessel" and unit.closed)
+    if not vessels:
+        raise ValueError("a plasma mesh needs a closed vessel wall unit")
+    outline = vessels[0].vertices
     finite = outline[np.all(np.isfinite(outline), axis=1)]
     if finite.shape[0] < 3:
         raise ValueError("a first wall needs at least three finite vertices")
@@ -51,15 +55,14 @@ def hex_mesh(
         "delivered_cells": len(outlines),
         "turn": "hex",
         "wall_clipped": True,
+        "wall_unit_count": len(units),
         "vertex_count_range": [int(vertex_counts.min()), int(vertex_counts.max())],
         "source": "nova.frame.firstwall.PlasmaGrid.insert",
         "coupling": "none; cell geometry only, no Biot build",
     }
 
 
-def clip_to_boundary(
-    cells: Sequence[np.ndarray], boundary: np.ndarray
-) -> tuple[np.ndarray, ...]:
+def clip_to_boundary(cells: Sequence[np.ndarray], boundary) -> tuple[np.ndarray, ...]:
     """Return the parts of ``cells`` inside ``boundary``, each already cut.
 
     A cell wholly outside the boundary is dropped and a cell straddling it is
@@ -69,11 +72,27 @@ def clip_to_boundary(
     """
     import shapely
 
-    loop = np.asarray(boundary, dtype=float).reshape(-1, 2)
-    loop = loop[np.all(np.isfinite(loop), axis=1)]
-    if loop.shape[0] < 3:
+    units = coerce_wall_units(boundary)
+    if not units:
         return ()
-    region = shapely.Polygon(loop)
+    if len(units) == 1:
+        loop = units[0].vertices
+        loop = loop[np.all(np.isfinite(loop), axis=1)]
+        if loop.shape[0] < 3:
+            return ()
+        region = shapely.Polygon(loop)
+    else:
+        vessels = [
+            shapely.Polygon(unit.vertices)
+            for unit in units
+            if unit.kind == "vessel" and unit.closed
+        ]
+        if not vessels:
+            return ()
+        region = shapely.unary_union(vessels)
+        for unit in units:
+            if unit.kind == "material" and unit.closed:
+                region = region.difference(shapely.Polygon(unit.vertices))
     if not region.is_valid:
         region = region.buffer(0.0)
     polygons = np.asarray(

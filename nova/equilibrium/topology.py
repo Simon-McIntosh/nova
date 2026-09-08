@@ -350,6 +350,17 @@ class Topology(Pytree):
             self.polish_valid = jnp.asarray(valid, dtype=bool)
 
     @jax.jit
+    def contained_x_candidates(self, vmap_x):
+        """Return finite saddle candidates within the first-wall polygon."""
+        finite = jnp.all(jnp.isfinite(vmap_x[:, :3]), axis=1)
+        return finite & _points_inside_polygon(
+            vmap_x[:, 0],
+            vmap_x[:, 1],
+            self.wall.coordinate[:, 0],
+            self.wall.coordinate[:, 1],
+        )
+
+    @jax.jit
     def x_point_index(self, vmap_x, polarity, o_psi):
         """Return index of primary x-point.
 
@@ -358,12 +369,7 @@ class Topology(Pytree):
         higher than the true separatrix on raw flux never wins by default.
         """
         x_psi = vmap_x[:, 2]
-        inside_wall = _points_inside_polygon(
-            vmap_x[:, 0],
-            vmap_x[:, 1],
-            self.wall.coordinate[:, 0],
-            self.wall.coordinate[:, 1],
-        )
+        inside_wall = self.contained_x_candidates(vmap_x)
         score = jnp.asarray(polarity * (x_psi - o_psi), dtype=self.grid.fit_dtype)
         return jnp.nanargmax(jnp.where(inside_wall, score, -jnp.inf))
 
@@ -371,7 +377,12 @@ class Topology(Pytree):
     def x_point_data(self, vmap_x, polarity, o_psi):
         """Return primary x-point data."""
         index = self.x_point_index(vmap_x, polarity, o_psi)
-        return vmap_x[index]
+        admitted = jnp.any(self.contained_x_candidates(vmap_x))
+        return jnp.where(
+            admitted,
+            vmap_x[index],
+            jnp.full_like(vmap_x[0], jnp.nan),
+        )
 
     @jax.jit
     def x_point(self, psi_grid, polarity):
@@ -490,7 +501,8 @@ class Topology(Pytree):
     def boundary(self, data_o, vmap_x, data_w, polarity):
         """Return boundary data structure."""
         # x-point vertical bounds
-        x_heights = vmap_x[:, 1]
+        contained_x = self.contained_x_candidates(vmap_x)
+        x_heights = jnp.where(contained_x, vmap_x[:, 1], jnp.nan)
         x_height_min = jnp.nanmin(x_heights)
         x_height_max = jnp.nanmax(x_heights)
         # select grid x-point

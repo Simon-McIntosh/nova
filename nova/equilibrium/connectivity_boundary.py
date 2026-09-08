@@ -1834,6 +1834,7 @@ def traced_boundary_read(
         "boundary_resolved": boundary_resolved,
         "x_binding_state": class_x_state,
         "class_margin": class_margin,
+        "classification_x_inside_wall": ing["class_x_inside_wall"],
         "u_wall": class_u_wall,
         "u_xpoint": class_u_x,
         "wall_shadowed": ing["class_wall_shadowed"],

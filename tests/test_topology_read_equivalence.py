@@ -77,6 +77,44 @@ def test_first_read_and_bracket_miss_use_the_cold_sweep():
     np.testing.assert_array_equal(missed["s_flood"], cold["s_flood"])
 
 
+def test_contained_saddle_admission_matches_the_trace_reader():
+    """Both readers expose the same polygon screen for a higher-flux outsider."""
+    configure_dtypes()
+    radius = np.linspace(0.5, 1.5, 17)
+    height = np.linspace(-0.5, 0.5, 17)
+    radial, vertical = np.meshgrid(radius, height)
+    field = -((radial - 1.0) ** 2 + vertical**2)
+    inside = ((radial - 1.0) / 0.4) ** 2 + (vertical / 0.3) ** 2 <= 1.0
+    wall = np.asarray([[0.6, -0.3], [1.4, -0.3], [1.4, 0.3], [0.6, 0.3]])
+    candidates = jnp.asarray(
+        [[1.0, -0.1, -0.01], [1.0, -0.4, 0.2], [jnp.nan, jnp.nan, jnp.nan]]
+    )
+    wall_flux = -((wall[:, 0] - 1.0) ** 2 + wall[:, 1] ** 2)
+
+    result = traced_boundary_read(
+        jnp.asarray(field),
+        jnp.asarray(radius),
+        jnp.asarray(height),
+        jnp.asarray(inside),
+        jnp.asarray(1.0),
+        jnp.asarray(0.0),
+        8,
+        4,
+        8,
+        jnp.linspace(0.0, 2.0 * jnp.pi, 8, endpoint=False),
+        wall_r=jnp.asarray(wall[:, 0]),
+        wall_z=jnp.asarray(wall[:, 1]),
+        wall_psi=jnp.asarray(wall_flux),
+        classification_x=candidates,
+        classification_wall=jnp.asarray([1.0, -0.3, wall_flux[0]]),
+    )
+
+    np.testing.assert_array_equal(
+        np.asarray(result["classification_x_inside_wall"]),
+        [True, False, False],
+    )
+
+
 def test_coarse_iteration_preserves_the_full_resolution_emit():
     configure_dtypes()
     rg, zg, inside, fields = _fixture_fields()

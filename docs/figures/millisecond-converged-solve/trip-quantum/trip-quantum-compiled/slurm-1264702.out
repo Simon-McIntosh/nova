@@ -1,0 +1,65 @@
+MEASUREMENT_START job=1264702 host=98dci4-gpu-0003.iter.org revision=e0d97e950218360e402041df037ac23ea4aad563
+SECTION WIDTH_ONE_START
+STAGE MAST_PROFILE_READY identity=21978/35 profiles=1/6 rss_mib=962.586
+STAGE MAST_MEMBER_READY member=1/12 rss_mib=962.590
+STAGE MAST_MEMBER_READY member=2/12 rss_mib=962.590
+STAGE MAST_PROFILE_READY identity=21983/35 profiles=2/6 rss_mib=969.609
+STAGE MAST_MEMBER_READY member=3/12 rss_mib=969.609
+STAGE MAST_MEMBER_READY member=4/12 rss_mib=969.609
+STAGE MAST_PROFILE_READY identity=21985/51 profiles=3/6 rss_mib=970.094
+STAGE MAST_MEMBER_READY member=5/12 rss_mib=970.094
+STAGE MAST_MEMBER_READY member=6/12 rss_mib=970.094
+STAGE MAST_PROFILE_READY identity=21986/46 profiles=4/6 rss_mib=974.953
+STAGE MAST_MEMBER_READY member=7/12 rss_mib=974.953
+STAGE MAST_MEMBER_READY member=8/12 rss_mib=974.953
+STAGE MAST_PROFILE_READY identity=21989/55 profiles=5/6 rss_mib=975.551
+STAGE MAST_MEMBER_READY member=9/12 rss_mib=975.551
+STAGE MAST_MEMBER_READY member=10/12 rss_mib=975.551
+STAGE MAST_PROFILE_READY identity=22086/43 profiles=6/6 rss_mib=975.961
+STAGE MAST_MEMBER_READY member=11/12 rss_mib=975.961
+STAGE MAST_MEMBER_READY member=12/12 rss_mib=975.961
+STAGE WIDTH_ONE_MEMBER_1_START identity='21978/35 pure' rss_mib=975.961
+STAGE WIDTH_ONE_MEMBER_1_DONE identity='21978/35 pure' host_trips=3 compiled_trips=3 rss_mib=2450.988
+STAGE WIDTH_ONE_MEMBER_2_START identity='21978/35 mixed' rss_mib=2450.988
+STAGE WIDTH_ONE_MEMBER_2_DONE identity='21978/35 mixed' host_trips=1 compiled_trips=1 rss_mib=2452.020
+STAGE WIDTH_ONE_MEMBER_3_START identity='21983/35 pure' rss_mib=2452.020
+STAGE WIDTH_ONE_MEMBER_3_DONE identity='21983/35 pure' host_trips=1 compiled_trips=1 rss_mib=2452.188
+STAGE WIDTH_ONE_MEMBER_4_START identity='21983/35 mixed' rss_mib=2452.188
+STAGE WIDTH_ONE_MEMBER_4_DONE identity='21983/35 mixed' host_trips=1 compiled_trips=1 rss_mib=2452.293
+STAGE WIDTH_ONE_MEMBER_5_START identity='21985/51 pure' rss_mib=2452.293
+STAGE WIDTH_ONE_MEMBER_5_DONE identity='21985/51 pure' host_trips=3 compiled_trips=3 rss_mib=2453.957
+STAGE WIDTH_ONE_MEMBER_6_START identity='21985/51 mixed' rss_mib=2453.957
+STAGE WIDTH_ONE_MEMBER_6_DONE identity='21985/51 mixed' host_trips=5 compiled_trips=5 rss_mib=2454.031
+STAGE WIDTH_ONE_MEMBER_7_START identity='21986/46 pure' rss_mib=2454.031
+STAGE WIDTH_ONE_MEMBER_7_DONE identity='21986/46 pure' host_trips=3 compiled_trips=3 rss_mib=2483.559
+STAGE WIDTH_ONE_MEMBER_8_START identity='21986/46 mixed' rss_mib=2483.559
+STAGE WIDTH_ONE_MEMBER_8_DONE identity='21986/46 mixed' host_trips=3 compiled_trips=3 rss_mib=2484.180
+STAGE WIDTH_ONE_MEMBER_9_START identity='21989/55 pure' rss_mib=2484.180
+STAGE WIDTH_ONE_MEMBER_9_DONE identity='21989/55 pure' host_trips=1 compiled_trips=1 rss_mib=2514.316
+STAGE WIDTH_ONE_MEMBER_10_START identity='21989/55 mixed' rss_mib=2514.316
+STAGE WIDTH_ONE_MEMBER_10_DONE identity='21989/55 mixed' host_trips=2 compiled_trips=2 rss_mib=2514.961
+STAGE WIDTH_ONE_MEMBER_11_START identity='22086/43 pure' rss_mib=2514.961
+STAGE WIDTH_ONE_MEMBER_11_DONE identity='22086/43 pure' host_trips=1 compiled_trips=1 rss_mib=2543.051
+STAGE WIDTH_ONE_MEMBER_12_START identity='22086/43 mixed' rss_mib=2543.051
+STAGE WIDTH_ONE_MEMBER_12_DONE identity='22086/43 mixed' host_trips=1 compiled_trips=1 rss_mib=2543.656
+SECTION WIDTH_ONE_DONE
+SECTION BASELINES_START
+COMPILE_START name=mask_reconciliation_gather_scatter_comparison
+COMPILE_DONE name=mask_reconciliation_gather_scatter_comparison seconds=1.788540
+STAGE SUBSTAGE_DONE name=mask_reconciliation_gather_scatter_comparison ms_per_member=1.754016
+COMPILE_START name=newton_relinearization
+COMPILE_DONE name=newton_relinearization seconds=4.527258
+STAGE SUBSTAGE_DONE name=newton_relinearization ms_per_member=1.754194
+COMPILE_START name=newton_relinearization_and_first_gmres_action
+COMPILE_DONE name=newton_relinearization_and_first_gmres_action seconds=3.468989
+STAGE SUBSTAGE_DONE name=newton_relinearization_and_first_gmres_action ms_per_member=1.787422
+SECTION MAP_AND_SUBSTAGES_DONE map_ms=1.756459
+STAGE FULL_TRIP_COMPILE_START
+STAGE FULL_TRIP_COMPILE_DONE seconds=20.872065
+STAGE FULL_TRIP_CONTROL_DONE quantum_ms=2.750082
+STAGE FULL_TRIP_SETTLED_DONE
+RECEIPT_WRITTEN=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/mcs-trip-quantum-compiled/docs/figures/millisecond-converged-solve/trip-quantum/width-one-compiled.json
+FIGURE_WRITTEN=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/mcs-trip-quantum-compiled/docs/figures/millisecond-converged-solve/trip-quantum/width-one-compiled.png
+REPORT_WRITTEN=/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/trip-quantum-compiled.md
+EXIT_MARKER=0
+MEASUREMENT_COMPLETE job=1264702

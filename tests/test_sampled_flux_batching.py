@@ -44,13 +44,89 @@ def _recording_function(function, batches: list[np.ndarray]):
     return recorded
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "custom vmap JVP output retains a member axis: shape (2, 3759) where "
-        "(3759,) is expected"
-    ),
-)
+def _sampled_flux_with_edges(
+    coordinate,
+    values,
+    edge_width,
+    lower_slope,
+    upper_slope,
+    psi_norm,
+):
+    """Evaluate the interpolant with edge quantities supplied by its owner."""
+    interior = jnp.interp(psi_norm, coordinate, values)
+    below = psi_norm < coordinate[0]
+    edge_value = jnp.where(below, values[0], values[-1])
+    outward_slope = jnp.where(below, -lower_slope, upper_slope)
+    outward_distance = jnp.where(
+        below,
+        coordinate[0] - psi_norm,
+        psi_norm - coordinate[-1],
+    )
+    parameter = jnp.clip(outward_distance / edge_width, 0.0, 1.0)
+    parameter_cubed = parameter * parameter * parameter
+    value_basis = 1.0 + parameter_cubed * (-10.0 + parameter * (15.0 - 6.0 * parameter))
+    slope_basis = parameter + parameter_cubed * (
+        -6.0 + parameter * (8.0 - 3.0 * parameter)
+    )
+    exterior = value_basis * edge_value + slope_basis * edge_width * outward_slope
+    return jnp.where(
+        (psi_norm >= coordinate[0]) & (psi_norm <= coordinate[-1]),
+        interior,
+        exterior,
+    )
+
+
+def _closed_sampled_flux(coordinate, values):
+    """Build the reference closure with its edge arithmetic evaluated once."""
+    grid = jnp.asarray(coordinate, dtype=jnp.float64)
+    samples = jnp.asarray(values, dtype=jnp.float64)
+    edge_width = grid[1] - grid[0]
+    lower_slope = (samples[1] - samples[0]) / edge_width
+    upper_slope = (samples[-1] - samples[-2]) / edge_width
+
+    def evaluate(psi_norm):
+        return _sampled_flux_with_edges(
+            grid,
+            samples,
+            edge_width,
+            lower_slope,
+            upper_slope,
+            psi_norm,
+        )
+
+    return evaluate
+
+
+def test_dynamic_edge_control_reproduces_batched_difference():
+    """Keep the historical control that identifies the edge-constant mechanism."""
+    assert jax.config.jax_enable_x64 is True
+    coordinate = np.linspace(0.0, 1.0, 65)
+    values = np.sin(coordinate) * 12345.6789
+    points = jnp.linspace(-0.02, 1.02, 3759, dtype=jnp.float64)
+    closure = _closed_sampled_flux(coordinate, values)
+
+    def dynamic_evaluate(grid, samples, psi_norm):
+        edge_width = grid[1] - grid[0]
+        lower_slope = (samples[1] - samples[0]) / edge_width
+        upper_slope = (samples[-1] - samples[-2]) / edge_width
+        return _sampled_flux_with_edges(
+            grid,
+            samples,
+            edge_width,
+            lower_slope,
+            upper_slope,
+            psi_norm,
+        )
+
+    batched = jax.jit(jax.vmap(dynamic_evaluate))(
+        jnp.stack((jnp.asarray(coordinate), jnp.asarray(coordinate))),
+        jnp.stack((jnp.asarray(values), jnp.asarray(values))),
+        jnp.stack((points, points)),
+    )
+    difference = np.asarray(jax.jit(closure)(points)) != np.asarray(batched[0])
+    assert int(np.count_nonzero(difference)) == 9
+
+
 def test_vmap_preserves_unbatched_sampled_values_and_state_derivatives():
     assert jax.config.jax_enable_x64 is True
     coordinate = np.linspace(0.0, 1.0, 65)
@@ -58,19 +134,20 @@ def test_vmap_preserves_unbatched_sampled_values_and_state_derivatives():
     sampled = SampledFluxFunction(coordinate, values)
     points = jnp.linspace(-0.02, 1.02, 3759, dtype=jnp.float64)
     tangents = jnp.linspace(0.5, 1.5, points.size, dtype=jnp.float64)
+    closure = _closed_sampled_flux(coordinate, values)
     batched_sampled = jax.tree_util.tree_map(
         lambda value: jnp.stack((value, value)), sampled
     )
     batched_points = jnp.stack((points, points))
     batched_tangents = jnp.stack((tangents, tangents))
 
-    expected = jax.jit(lambda function, argument: function(argument))(sampled, points)
+    expected = jax.jit(closure)(points)
     observed = jax.jit(jax.vmap(lambda function, argument: function(argument)))(
         batched_sampled, batched_points
     )
     expected_primal, expected_tangent = jax.jit(
-        lambda function, argument, tangent: jax.jvp(function, (argument,), (tangent,))
-    )(sampled, points, tangents)
+        lambda argument, tangent: jax.jvp(closure, (argument,), (tangent,))
+    )(points, tangents)
     observed_primal, observed_tangent = jax.jit(
         jax.vmap(
             lambda function, argument, tangent: jax.jvp(
@@ -79,13 +156,15 @@ def test_vmap_preserves_unbatched_sampled_values_and_state_derivatives():
         )
     )(batched_sampled, batched_points, batched_tangents)
 
-    np.testing.assert_array_equal(np.asarray(observed[0]), np.asarray(expected))
+    assert int(np.count_nonzero(np.asarray(observed[0]) != np.asarray(expected))) == 0
     np.testing.assert_array_equal(
         np.asarray(observed_primal[0]), np.asarray(expected_primal)
     )
     np.testing.assert_array_equal(
         np.asarray(observed_tangent[0]), np.asarray(expected_tangent)
     )
+    assert observed_primal[0].shape == expected_primal.shape
+    assert observed_tangent[0].shape == expected_tangent.shape
 
 
 def _compare_at_recorded_points(

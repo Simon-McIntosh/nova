@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, fields, replace
+from dataclasses import asdict, dataclass, field, fields, replace
 import os
 from pathlib import Path
 import socket
@@ -35,18 +35,25 @@ SolveRoute = Literal[
 JsonScalar = str | int | float | bool | None
 
 
-def _evaluate_sampled_flux_function_impl(coordinate, values, psi_norm):
-    """Evaluate one member without changing scalar interpolation arithmetic."""
-    grid = jnp.asarray(coordinate)
-    samples = jnp.asarray(values)
+def _evaluate_sampled_flux_function(
+    coordinate,
+    values,
+    edge_width,
+    lower_slope,
+    upper_slope,
+    lower_edge_increment,
+    upper_edge_increment,
+    psi_norm,
+):
+    """Evaluate a sampled flux function from its already-derived edge data."""
+    grid = coordinate
+    samples = values
     evaluation_coordinate = jnp.asarray(psi_norm)
-    edge_width = grid[1] - grid[0]
-    lower_slope = (samples[1] - samples[0]) / edge_width
-    upper_slope = (samples[-1] - samples[-2]) / edge_width
     interior = jnp.interp(evaluation_coordinate, grid, samples)
     below = evaluation_coordinate < grid[0]
     edge_value = jnp.where(below, samples[0], samples[-1])
-    outward_slope = jnp.where(below, -lower_slope, upper_slope)
+    del lower_slope, upper_slope
+    outward_increment = jnp.where(below, -lower_edge_increment, upper_edge_increment)
     outward_distance = jnp.where(
         below,
         grid[0] - evaluation_coordinate,
@@ -58,38 +65,12 @@ def _evaluate_sampled_flux_function_impl(coordinate, values, psi_norm):
     slope_basis = parameter + parameter_cubed * (
         -6.0 + parameter * (8.0 - 3.0 * parameter)
     )
-    exterior = value_basis * edge_value + slope_basis * edge_width * outward_slope
+    exterior = value_basis * edge_value + slope_basis * outward_increment
     return jnp.where(
         (evaluation_coordinate >= grid[0]) & (evaluation_coordinate <= grid[-1]),
         interior,
         exterior,
     )
-
-
-@jax.custom_batching.custom_vmap
-def _evaluate_sampled_flux_function(coordinate, values, psi_norm):
-    """Evaluate sampled flux with an explicit member-batching boundary."""
-    return _evaluate_sampled_flux_function_impl(coordinate, values, psi_norm)
-
-
-@_evaluate_sampled_flux_function.def_vmap
-def _evaluate_sampled_flux_function_vmap(axis_size, in_batched, *arguments):
-    """Map members sequentially while admitting unbatched derivative subtraces."""
-    if not any(in_batched):
-        return _evaluate_sampled_flux_function_impl(*arguments), False
-    mapped_arguments = tuple(
-        argument
-        if batched
-        else jnp.broadcast_to(argument, (axis_size, *jnp.shape(argument)))
-        for batched, argument in zip(in_batched, arguments, strict=True)
-    )
-    result = jax.lax.map(
-        lambda member_arguments: _evaluate_sampled_flux_function_impl(
-            *member_arguments
-        ),
-        mapped_arguments,
-    )
-    return result, True
 
 
 @jax.tree_util.register_pytree_node_class
@@ -106,6 +87,11 @@ class SampledFluxFunction:
 
     coordinate: object
     values: object
+    edge_width: object = field(init=False)
+    lower_slope: object = field(init=False)
+    upper_slope: object = field(init=False)
+    lower_edge_increment: object = field(init=False)
+    upper_edge_increment: object = field(init=False)
 
     def __post_init__(self) -> None:
         coordinate = np.asarray(self.coordinate, dtype=np.float64)
@@ -116,20 +102,45 @@ class SampledFluxFunction:
             raise ValueError("sampled flux values must match their coordinate")
         if not np.all(np.diff(coordinate) > 0.0):
             raise ValueError("sampled flux coordinate must increase strictly")
-        object.__setattr__(self, "coordinate", jnp.asarray(coordinate))
-        object.__setattr__(self, "values", jnp.asarray(values))
+        grid = jnp.asarray(coordinate)
+        samples = jnp.asarray(values)
+        edge_width = grid[1] - grid[0]
+        lower_slope = (samples[1] - samples[0]) / edge_width
+        upper_slope = (samples[-1] - samples[-2]) / edge_width
+        lower_edge_increment = edge_width * lower_slope
+        upper_edge_increment = edge_width * upper_slope
+        object.__setattr__(self, "coordinate", grid)
+        object.__setattr__(self, "values", samples)
+        object.__setattr__(self, "edge_width", edge_width)
+        object.__setattr__(self, "lower_slope", lower_slope)
+        object.__setattr__(self, "upper_slope", upper_slope)
+        object.__setattr__(self, "lower_edge_increment", lower_edge_increment)
+        object.__setattr__(self, "upper_edge_increment", upper_edge_increment)
 
     def __call__(self, psi_norm):
         """Evaluate the interpolant and its slope-matched compact end caps."""
         return _evaluate_sampled_flux_function(
             self.coordinate,
             self.values,
+            self.edge_width,
+            self.lower_slope,
+            self.upper_slope,
+            self.lower_edge_increment,
+            self.upper_edge_increment,
             psi_norm,
         )
 
     def tree_flatten(self):
-        """Return only the coordinate and values as dynamic leaves."""
-        return (self.coordinate, self.values), None
+        """Return profile tables and precomputed edge data as dynamic leaves."""
+        return (
+            self.coordinate,
+            self.values,
+            self.edge_width,
+            self.lower_slope,
+            self.upper_slope,
+            self.lower_edge_increment,
+            self.upper_edge_increment,
+        ), None
 
     @classmethod
     def tree_unflatten(cls, aux_data, children):
@@ -138,6 +149,11 @@ class SampledFluxFunction:
         instance = object.__new__(cls)
         object.__setattr__(instance, "coordinate", children[0])
         object.__setattr__(instance, "values", children[1])
+        object.__setattr__(instance, "edge_width", children[2])
+        object.__setattr__(instance, "lower_slope", children[3])
+        object.__setattr__(instance, "upper_slope", children[4])
+        object.__setattr__(instance, "lower_edge_increment", children[5])
+        object.__setattr__(instance, "upper_edge_increment", children[6])
         return instance
 
 

@@ -2,31 +2,31 @@
   "data": {
     "aggregate": {
       "all_figures_project_absolute": true,
-      "fail_count": 11,
+      "fail_count": 10,
       "frame_count": 11,
       "marginal_rows": [
         "21978/35 pure",
         "22086/43 pure"
       ],
-      "pass_count": 0,
+      "pass_count": 1,
       "verdict": "FAIL_ONE_OR_MORE_FRAMES_ABOVE_LABEL_GS_FLOOR_OR_UNCONVERGED"
     },
     "execution": {
       "allocation": {
-        "allocated_cpus": 4,
+        "allocated_cpus": 8,
         "jax_backend": "gpu",
         "jax_devices": [
           "cuda:0"
         ],
         "jax_platforms": "cuda,cpu",
-        "job_id": "1261006",
+        "job_id": "1264715",
         "node": "98dci4-gpu-0003",
         "partition": "betelgeuse",
         "reservation": "gpu_0003_grpA"
       },
       "compile_policy": "one process with the explicit versioned persistent JAX compilation cache; per-frame monitoring events distinguish hits from misses; recorded wall is per complete frame after preceding compilation state",
       "diiid_machine_artifact_cache": "/work/projects/imas_gpu/sophelio/diiid_machine_artifact_cache",
-      "driver_sha256": "e5a6b6d5b1fbcf9e0b1edb15a23484d1ffd3861c7bb672cd83e0c1fa7e542cb9",
+      "driver_sha256": "6e6010ca7b4aaa875c0b651608fcb597d8db0cbe4cd655bb0fae117c2b419ab0",
       "mast_response_carrier": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
       "persistent_compilation_cache": {
         "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
@@ -56,8 +56,8 @@
         "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
         "maximum_bytes": 8589934592,
         "minimum_compile_seconds": 1.0,
-        "observed_compile_time_saved_seconds": 0.0,
-        "observed_hits": 0,
+        "observed_compile_time_saved_seconds": 136.04406329710037,
+        "observed_hits": 63,
         "root": "/home/ITER/mcintos/.cache",
         "runtime_identity": {
           "backend": "gpu",
@@ -87,7 +87,7 @@
         "docs/research/forward-accuracy-reuse-map.html#efit-reproduction rows 50-55"
       ],
       "solver_source_modified": false,
-      "source_commit": "873cfba6f9a535a7733d87e4fd5159b35efec517",
+      "source_commit": "d5354a5a2323c912866735b6eb65595dff6d6f68",
       "zero_iteration_fields_sha256": "26f090510fb8c0abbc91df53270557073a1a7b3e55ec7fb851ce67c669846ebe",
       "zero_iteration_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T062947707320-sse-efit-reproduction-completion/job-output/zero_iteration_receipt.json",
       "zero_iteration_receipt_sha256": "7d8cf5d005b510fe2708767f078ad73528295083ea9327b97fbe2fe9ba42122f"
@@ -105,13 +105,44 @@
           "name": "edge-adjacent label interior",
           "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
         },
+        "banked_read": {
+          "nova_axis_flux_wb": 0.3142914939111875,
+          "nova_axis_rz_m": [
+            0.9049917162246323,
+            0.013105001981438468
+          ],
+          "nova_x_point_rz_m": [
+            0.5596012790217048,
+            1.264730597896397
+          ],
+          "o_candidate_count": 9,
+          "o_second_best_flux_margin_wb": 0.2694526990566237,
+          "read_exception_text": null,
+          "read_status": "qualified_axis",
+          "reference_axis_rz_m": [
+            0.9045118689537048,
+            0.0004183934652246535
+          ],
+          "reference_x_points_rz_m": [
+            [
+              0.5688938498497009,
+              -1.2379939556121826
+            ],
+            [
+              0.5643741488456726,
+              1.2358670234680176
+            ]
+          ],
+          "x_candidate_count": 5,
+          "x_second_best_flux_margin_wb": 0.004086363901628393
+        },
         "compile_cache": {
           "compile_time_saved_seconds": 0.0,
           "evidence": "JAX persistent compilation-cache monitoring events",
           "hit_count": 0,
           "status": "miss"
         },
-        "compile_warm_wall_seconds": 399.1852573119104,
+        "compile_warm_wall_seconds": 155.45493175182492,
         "figure_src": "/nova/figures/gs-absolute-accuracy/efit/mast-21978-row-35.png",
         "frame_identity": {
           "label": "21978/35 pure",
@@ -143,14 +174,14 @@
           "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
           "size_bytes": 645864,
           "stored_circuit_count": 101,
-          "warm_load_seconds": 0.009581835009157658
+          "warm_load_seconds": 0.01188045833259821
         },
         "solve_against_label": {
-          "additive_gauge_wb": -0.0001979854085443478,
+          "additive_gauge_wb": -0.00019803753017444206,
           "field_unit": "fraction of EFIT label peak-to-peak span",
           "name": "gauge-aligned solve-label RMS fraction of label span",
           "norm": "RMS over the complete registered solve grid",
-          "value": 0.0034123454567333033
+          "value": 0.0034126975233290534
         },
         "solver_qualification": {
           "achieved_class": "diverted",
@@ -164,21 +195,21 @@
           },
           "converged": false,
           "finite": true,
-          "fixed_point_residual": 0.0024509187258022736,
+          "fixed_point_residual": 0.0024506488565450143,
           "fixed_point_tolerance": 1e-08,
           "marginal_solver_basin": true,
           "requested_class": "diverted",
           "topology_consistent": true
         },
         "stage_timings_seconds": {
-          "comparison": 0.053389035165309906,
-          "figure": 0.4224072303622961,
-          "first_solve": 19.79546619206667,
-          "jit_compile": 363.9645644174889,
-          "mast_case_from_selection": 14.50084405951202,
-          "passive_inclusive_case": 0.4395182467997074,
-          "persisted_response_carrier_load": 0.011859848164021969,
-          "slice_selection": 0.005262500606477261
+          "comparison": 0.6654150281101465,
+          "figure": 0.4003403140231967,
+          "first_solve": 2.0741189727559686,
+          "jit_compile": 127.2179346466437,
+          "mast_case_from_selection": 17.999970277771354,
+          "passive_inclusive_case": 0.8949076989665627,
+          "persisted_response_carrier_load": 0.014949790202081203,
+          "slice_selection": 0.010802537202835083
         }
       },
       {
@@ -188,13 +219,44 @@
           "name": "edge-adjacent label interior",
           "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
         },
+        "banked_read": {
+          "nova_axis_flux_wb": 0.30706732315276825,
+          "nova_axis_rz_m": [
+            0.9050390714048313,
+            0.055218345563728004
+          ],
+          "nova_x_point_rz_m": [
+            0.5578389181304937,
+            1.2848419701283496
+          ],
+          "o_candidate_count": 9,
+          "o_second_best_flux_margin_wb": 0.31893091331915885,
+          "read_exception_text": null,
+          "read_status": "qualified_axis",
+          "reference_axis_rz_m": [
+            0.9043859839439392,
+            0.004791049286723137
+          ],
+          "reference_x_points_rz_m": [
+            [
+              0.5459407567977905,
+              -1.230005145072937
+            ],
+            [
+              0.5431188344955444,
+              1.236562728881836
+            ]
+          ],
+          "x_candidate_count": 7,
+          "x_second_best_flux_margin_wb": 0.0029868420388107324
+        },
         "compile_cache": {
           "compile_time_saved_seconds": 0.0,
           "evidence": "JAX persistent compilation-cache monitoring events",
           "hit_count": 0,
           "status": "miss"
         },
-        "compile_warm_wall_seconds": 459.4658215958625,
+        "compile_warm_wall_seconds": 137.27653575036675,
         "figure_src": "/nova/figures/gs-absolute-accuracy/efit/mast-21983-row-35.png",
         "frame_identity": {
           "label": "21983/35 pure",
@@ -226,35 +288,35 @@
           "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
           "size_bytes": 645864,
           "stored_circuit_count": 101,
-          "warm_load_seconds": 0.009581835009157658
+          "warm_load_seconds": 0.01188045833259821
         },
         "solve_against_label": {
-          "additive_gauge_wb": 0.00043996196260729617,
+          "additive_gauge_wb": -0.00019247612750768,
           "field_unit": "fraction of EFIT label peak-to-peak span",
           "name": "gauge-aligned solve-label RMS fraction of label span",
           "norm": "RMS over the complete registered solve grid",
-          "value": 0.008849986173509732
+          "value": 0.01238834636377499
         },
         "solver_qualification": {
           "achieved_class": "diverted",
           "basin_evidence": null,
           "converged": false,
           "finite": true,
-          "fixed_point_residual": 0.001601081351241986,
+          "fixed_point_residual": 0.005721084386852058,
           "fixed_point_tolerance": 1e-08,
           "marginal_solver_basin": false,
           "requested_class": "diverted",
           "topology_consistent": true
         },
         "stage_timings_seconds": {
-          "comparison": 0.010861675255000591,
-          "figure": 0.1597779979929328,
-          "first_solve": 66.08124986570328,
-          "jit_compile": 377.49358355253935,
-          "mast_case_from_selection": 15.659495607949793,
-          "passive_inclusive_case": 0.05328951124101877,
-          "persisted_response_carrier_load": 0.011859848164021969,
-          "slice_selection": 0.005262500606477261
+          "comparison": 0.0038363561034202576,
+          "figure": 0.161970186047256,
+          "first_solve": 2.980777133256197,
+          "jit_compile": 119.71281534526497,
+          "mast_case_from_selection": 13.646504769101739,
+          "passive_inclusive_case": 0.5820952039211988,
+          "persisted_response_carrier_load": 0.014949790202081203,
+          "slice_selection": 0.010802537202835083
         }
       },
       {
@@ -264,13 +326,44 @@
           "name": "edge-adjacent label interior",
           "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
         },
+        "banked_read": {
+          "nova_axis_flux_wb": 0.3372920677378074,
+          "nova_axis_rz_m": [
+            0.8988499786558051,
+            0.02667730632284062
+          ],
+          "nova_x_point_rz_m": [
+            0.5629563562851633,
+            1.1762929048269277
+          ],
+          "o_candidate_count": 9,
+          "o_second_best_flux_margin_wb": 0.3330874613141456,
+          "read_exception_text": null,
+          "read_status": "qualified_axis",
+          "reference_axis_rz_m": [
+            0.8993120789527893,
+            0.004633639473468065
+          ],
+          "reference_x_points_rz_m": [
+            [
+              0.5590311884880066,
+              -1.1253553628921509
+            ],
+            [
+              0.558182954788208,
+              1.1303188800811768
+            ]
+          ],
+          "x_candidate_count": 7,
+          "x_second_best_flux_margin_wb": 0.001185978193331971
+        },
         "compile_cache": {
           "compile_time_saved_seconds": 0.0,
           "evidence": "JAX persistent compilation-cache monitoring events",
           "hit_count": 0,
           "status": "miss"
         },
-        "compile_warm_wall_seconds": 449.4075253177434,
+        "compile_warm_wall_seconds": 143.87556549347937,
         "figure_src": "/nova/figures/gs-absolute-accuracy/efit/mast-21985-row-51.png",
         "frame_identity": {
           "label": "21985/51 pure",
@@ -302,35 +395,35 @@
           "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
           "size_bytes": 645864,
           "stored_circuit_count": 101,
-          "warm_load_seconds": 0.009581835009157658
+          "warm_load_seconds": 0.01188045833259821
         },
         "solve_against_label": {
-          "additive_gauge_wb": 0.0003493169418338622,
+          "additive_gauge_wb": 0.0005527329145205975,
           "field_unit": "fraction of EFIT label peak-to-peak span",
           "name": "gauge-aligned solve-label RMS fraction of label span",
           "norm": "RMS over the complete registered solve grid",
-          "value": 0.002691071250148193
+          "value": 0.005796656207784831
         },
         "solver_qualification": {
           "achieved_class": "diverted",
           "basin_evidence": null,
           "converged": false,
           "finite": true,
-          "fixed_point_residual": 0.000684449133016612,
+          "fixed_point_residual": 0.003028225782766708,
           "fixed_point_tolerance": 1e-08,
           "marginal_solver_basin": false,
           "requested_class": "diverted",
           "topology_consistent": true
         },
         "stage_timings_seconds": {
-          "comparison": 0.01444219145923853,
-          "figure": 0.1644265865907073,
-          "first_solve": 51.34948476124555,
-          "jit_compile": 381.9506533322856,
-          "mast_case_from_selection": 15.863343339413404,
-          "passive_inclusive_case": 0.05363074690103531,
-          "persisted_response_carrier_load": 0.011859848164021969,
-          "slice_selection": 0.005262500606477261
+          "comparison": 0.004721882753074169,
+          "figure": 0.16148323472589254,
+          "first_solve": 3.033300361596048,
+          "jit_compile": 126.66703521460295,
+          "mast_case_from_selection": 13.22628599125892,
+          "passive_inclusive_case": 0.6051893308758736,
+          "persisted_response_carrier_load": 0.014949790202081203,
+          "slice_selection": 0.010802537202835083
         }
       },
       {
@@ -340,13 +433,44 @@
           "name": "edge-adjacent label interior",
           "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
         },
+        "banked_read": {
+          "nova_axis_flux_wb": 0.3491084947695437,
+          "nova_axis_rz_m": [
+            0.9139210094251318,
+            0.056645627650801784
+          ],
+          "nova_x_point_rz_m": [
+            0.615549522612325,
+            1.1523493404625123
+          ],
+          "o_candidate_count": 9,
+          "o_second_best_flux_margin_wb": 0.33675734681836544,
+          "read_exception_text": null,
+          "read_status": "qualified_axis",
+          "reference_axis_rz_m": [
+            0.9118046164512634,
+            0.0794563964009285
+          ],
+          "reference_x_points_rz_m": [
+            [
+              0.5724796056747437,
+              -1.0747820138931274
+            ],
+            [
+              0.6237258315086365,
+              1.1930568218231201
+            ]
+          ],
+          "x_candidate_count": 7,
+          "x_second_best_flux_margin_wb": 0.0002495517110661285
+        },
         "compile_cache": {
           "compile_time_saved_seconds": 0.0,
           "evidence": "JAX persistent compilation-cache monitoring events",
           "hit_count": 0,
           "status": "miss"
         },
-        "compile_warm_wall_seconds": 486.60383690334857,
+        "compile_warm_wall_seconds": 144.77958267834038,
         "figure_src": "/nova/figures/gs-absolute-accuracy/efit/mast-21986-row-46.png",
         "frame_identity": {
           "label": "21986/46 pure",
@@ -378,35 +502,35 @@
           "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
           "size_bytes": 645864,
           "stored_circuit_count": 101,
-          "warm_load_seconds": 0.009581835009157658
+          "warm_load_seconds": 0.01188045833259821
         },
         "solve_against_label": {
-          "additive_gauge_wb": -0.0011619762331649191,
+          "additive_gauge_wb": -0.0011604143811658764,
           "field_unit": "fraction of EFIT label peak-to-peak span",
           "name": "gauge-aligned solve-label RMS fraction of label span",
           "norm": "RMS over the complete registered solve grid",
-          "value": 0.005915483143583045
+          "value": 0.005900783569062761
         },
         "solver_qualification": {
-          "achieved_class": "limited",
+          "achieved_class": "diverted",
           "basin_evidence": null,
           "converged": false,
           "finite": true,
-          "fixed_point_residual": 0.005887639830277983,
+          "fixed_point_residual": 0.005889860956803571,
           "fixed_point_tolerance": 1e-08,
           "marginal_solver_basin": false,
           "requested_class": "diverted",
-          "topology_consistent": false
+          "topology_consistent": true
         },
         "stage_timings_seconds": {
-          "comparison": 0.005600771866738796,
-          "figure": 0.17372995521873236,
-          "first_solve": 67.5239707166329,
-          "jit_compile": 385.2354441219941,
-          "mast_case_from_selection": 33.597243952564895,
-          "passive_inclusive_case": 0.05846915580332279,
-          "persisted_response_carrier_load": 0.011859848164021969,
-          "slice_selection": 0.005262500606477261
+          "comparison": 0.003977248445153236,
+          "figure": 0.15950120892375708,
+          "first_solve": 3.671345978975296,
+          "jit_compile": 126.71241268329322,
+          "mast_case_from_selection": 13.416906016878784,
+          "passive_inclusive_case": 0.6347525231540203,
+          "persisted_response_carrier_load": 0.014949790202081203,
+          "slice_selection": 0.010802537202835083
         }
       },
       {
@@ -416,13 +540,44 @@
           "name": "edge-adjacent label interior",
           "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
         },
+        "banked_read": {
+          "nova_axis_flux_wb": 0.33255609176243467,
+          "nova_axis_rz_m": [
+            0.9148750638753614,
+            0.040632356906693805
+          ],
+          "nova_x_point_rz_m": [
+            0.5799978252409393,
+            1.173085163564987
+          ],
+          "o_candidate_count": 9,
+          "o_second_best_flux_margin_wb": 0.29679454853884124,
+          "read_exception_text": null,
+          "read_status": "qualified_axis",
+          "reference_axis_rz_m": [
+            0.9149412512779236,
+            0.010957644321024418
+          ],
+          "reference_x_points_rz_m": [
+            [
+              0.5749794840812683,
+              -1.117248296737671
+            ],
+            [
+              0.5782567262649536,
+              1.134856939315796
+            ]
+          ],
+          "x_candidate_count": 7,
+          "x_second_best_flux_margin_wb": 0.0011284094118264526
+        },
         "compile_cache": {
           "compile_time_saved_seconds": 0.0,
           "evidence": "JAX persistent compilation-cache monitoring events",
           "hit_count": 0,
           "status": "miss"
         },
-        "compile_warm_wall_seconds": 495.33141483180225,
+        "compile_warm_wall_seconds": 147.11394896358252,
         "figure_src": "/nova/figures/gs-absolute-accuracy/efit/mast-21989-row-55.png",
         "frame_identity": {
           "label": "21989/55 pure",
@@ -454,35 +609,35 @@
           "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
           "size_bytes": 645864,
           "stored_circuit_count": 101,
-          "warm_load_seconds": 0.009581835009157658
+          "warm_load_seconds": 0.01188045833259821
         },
         "solve_against_label": {
-          "additive_gauge_wb": 0.0005304015899061272,
+          "additive_gauge_wb": 0.00016417399487595656,
           "field_unit": "fraction of EFIT label peak-to-peak span",
           "name": "gauge-aligned solve-label RMS fraction of label span",
           "norm": "RMS over the complete registered solve grid",
-          "value": 0.007055321366783535
+          "value": 0.007151401407152059
         },
         "solver_qualification": {
-          "achieved_class": "limited",
+          "achieved_class": "diverted",
           "basin_evidence": null,
           "converged": false,
           "finite": true,
-          "fixed_point_residual": 0.002856737994171574,
+          "fixed_point_residual": 0.0036467317741717123,
           "fixed_point_tolerance": 1e-08,
           "marginal_solver_basin": false,
           "requested_class": "diverted",
-          "topology_consistent": false
+          "topology_consistent": true
         },
         "stage_timings_seconds": {
-          "comparison": 0.01641793642193079,
-          "figure": 0.1730067478492856,
-          "first_solve": 66.13323912676424,
-          "jit_compile": 393.3262981791049,
-          "mast_case_from_selection": 35.62903262116015,
-          "passive_inclusive_case": 0.04838498588651419,
-          "persisted_response_carrier_load": 0.011859848164021969,
-          "slice_selection": 0.005262500606477261
+          "comparison": 0.004893669858574867,
+          "figure": 0.16853470355272293,
+          "first_solve": 1.6734951306134462,
+          "jit_compile": 128.4089527996257,
+          "mast_case_from_selection": 16.04669058136642,
+          "passive_inclusive_case": 0.6307666478678584,
+          "persisted_response_carrier_load": 0.014949790202081203,
+          "slice_selection": 0.010802537202835083
         }
       },
       {
@@ -492,13 +647,44 @@
           "name": "edge-adjacent label interior",
           "solve_mask": "complete registered MAST solve grid after additive gauge alignment"
         },
+        "banked_read": {
+          "nova_axis_flux_wb": 0.3415760976485158,
+          "nova_axis_rz_m": [
+            0.9033613059100172,
+            0.022469963516550017
+          ],
+          "nova_x_point_rz_m": [
+            0.5894869200738193,
+            1.2207780893371625
+          ],
+          "o_candidate_count": 9,
+          "o_second_best_flux_margin_wb": 0.2971742566899012,
+          "read_exception_text": null,
+          "read_status": "qualified_axis",
+          "reference_axis_rz_m": [
+            0.9052576422691345,
+            0.0034392368979752064
+          ],
+          "reference_x_points_rz_m": [
+            [
+              0.5856547355651855,
+              -1.196423053741455
+            ],
+            [
+              0.5821353197097778,
+              1.2025988101959229
+            ]
+          ],
+          "x_candidate_count": 5,
+          "x_second_best_flux_margin_wb": 0.015719771247361652
+        },
         "compile_cache": {
           "compile_time_saved_seconds": 0.0,
           "evidence": "JAX persistent compilation-cache monitoring events",
           "hit_count": 0,
           "status": "miss"
         },
-        "compile_warm_wall_seconds": 494.8410389609635,
+        "compile_warm_wall_seconds": 150.68866809364408,
         "figure_src": "/nova/figures/gs-absolute-accuracy/efit/mast-22086-row-43.png",
         "frame_identity": {
           "label": "22086/43 pure",
@@ -516,7 +702,7 @@
         },
         "machine": "MAST",
         "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
-        "passes": false,
+        "passes": true,
         "persisted_response_carrier": {
           "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
           "frozen_reference_count": 6,
@@ -530,14 +716,14 @@
           "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
           "size_bytes": 645864,
           "stored_circuit_count": 101,
-          "warm_load_seconds": 0.009581835009157658
+          "warm_load_seconds": 0.01188045833259821
         },
         "solve_against_label": {
-          "additive_gauge_wb": 0.0011740769786458087,
+          "additive_gauge_wb": 0.001477958299377581,
           "field_unit": "fraction of EFIT label peak-to-peak span",
           "name": "gauge-aligned solve-label RMS fraction of label span",
           "norm": "RMS over the complete registered solve grid",
-          "value": 0.004303969323326173
+          "value": 0.005380726489468769
         },
         "solver_qualification": {
           "achieved_class": "diverted",
@@ -549,23 +735,23 @@
             "source": "docs/figures/solver-convergence-regression/backend-divergence.json",
             "source_sha256": "213f1036c0ac8a880bb3bea0aeca37ab38770d83a75f2cee732c69210f32eebd"
           },
-          "converged": false,
+          "converged": true,
           "finite": true,
-          "fixed_point_residual": 0.00048023353539189173,
+          "fixed_point_residual": 6.029895644720964e-12,
           "fixed_point_tolerance": 1e-08,
           "marginal_solver_basin": true,
           "requested_class": "diverted",
           "topology_consistent": true
         },
         "stage_timings_seconds": {
-          "comparison": 0.013888102024793625,
-          "figure": 0.1625196598470211,
-          "first_solve": 58.00569169409573,
-          "jit_compile": 389.9974591117352,
-          "mast_case_from_selection": 46.59619456063956,
-          "passive_inclusive_case": 0.06333017814904451,
-          "persisted_response_carrier_load": 0.011859848164021969,
-          "slice_selection": 0.005262500606477261
+          "comparison": 0.0049384403973817825,
+          "figure": 0.16463069710880518,
+          "first_solve": 2.3075868720188737,
+          "jit_compile": 127.89105125330389,
+          "mast_case_from_selection": 19.499539178796113,
+          "passive_inclusive_case": 0.6370800081640482,
+          "persisted_response_carrier_load": 0.014949790202081203,
+          "slice_selection": 0.010802537202835083
         }
       },
       {
@@ -575,13 +761,40 @@
           "name": "core-coherent label interior",
           "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
         },
-        "compile_cache": {
-          "compile_time_saved_seconds": 0.0,
-          "evidence": "JAX persistent compilation-cache monitoring events",
-          "hit_count": 0,
-          "status": "miss"
+        "banked_read": {
+          "nova_axis_flux_wb": -0.08514908942359449,
+          "nova_axis_rz_m": [
+            1.242756279917246,
+            1.5239917715699
+          ],
+          "nova_x_point_rz_m": [
+            1.3355877286889701,
+            -0.26744498147158613
+          ],
+          "o_candidate_count": 5,
+          "o_second_best_flux_margin_wb": 1.6293951333883228,
+          "read_exception_text": null,
+          "read_status": "qualified_axis",
+          "reference_axis_rz_m": [
+            1.7736438512802124,
+            -0.030925704166293144
+          ],
+          "reference_x_points_rz_m": [
+            [
+              1.2828316688537598,
+              1.0984303951263428
+            ]
+          ],
+          "x_candidate_count": 1,
+          "x_second_best_flux_margin_wb": null
         },
-        "compile_warm_wall_seconds": 1382.8366059372202,
+        "compile_cache": {
+          "compile_time_saved_seconds": 72.61916166730225,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 36,
+          "status": "hit"
+        },
+        "compile_warm_wall_seconds": 381.67198416311294,
         "figure_src": "/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_00000c4a7b-frame-179.png",
         "frame_identity": {
           "frame": 179,
@@ -601,27 +814,27 @@
         "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
         "passes": false,
         "solve_against_label": {
-          "additive_gauge_wb": 1.760181388940456,
+          "additive_gauge_wb": 1.9188735440215905,
           "field_unit": "fraction of centred EFIT label RMS",
           "name": "gauge-aligned solve-label RMS over label-core variation",
           "norm": "fractional RMS on the score-blind labelled LCFS interior",
-          "value": 2.1311155848944874
+          "value": 1.8836358240990305
         },
         "solver_qualification": {
-          "achieved_topology_class": "limited",
+          "achieved_topology_class": "diverted",
           "converged": false,
           "finite": true,
-          "fixed_point_residual": 1.2865016612957264e-10,
+          "fixed_point_residual": 0.14838593470786732,
           "fixed_point_tolerance": 1e-06,
           "marginal_solver_basin": false,
           "termination": "public branch selector found no convergence-qualified diverted root"
         },
         "stage_timings_seconds": {
-          "comparison": 0.009956062771379948,
-          "figure": 0.1610428560525179,
-          "frame_selection": 1.0221245605498552,
-          "input_read": 0.11057898309081793,
-          "production_solve": 1382.5537025174126
+          "comparison": 0.004159961827099323,
+          "figure": 0.14863878302276134,
+          "frame_selection": 1.0845046434551477,
+          "input_read": 0.10322646424174309,
+          "production_solve": 381.4148603370413
         }
       },
       {
@@ -631,13 +844,37 @@
           "name": "core-coherent label interior",
           "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
         },
-        "compile_cache": {
-          "compile_time_saved_seconds": 0.0,
-          "evidence": "JAX persistent compilation-cache monitoring events",
-          "hit_count": 0,
-          "status": "miss"
+        "banked_read": {
+          "nova_axis_flux_wb": null,
+          "nova_axis_rz_m": null,
+          "nova_x_point_rz_m": [
+            1.0977829660492802,
+            1.5355766428738948
+          ],
+          "o_candidate_count": 4,
+          "o_second_best_flux_margin_wb": 0.2767286919892302,
+          "read_exception_text": null,
+          "read_status": "qualified_axis",
+          "reference_axis_rz_m": [
+            1.7179585695266724,
+            -0.050308577716350555
+          ],
+          "reference_x_points_rz_m": [
+            [
+              1.2949720621109009,
+              1.138399600982666
+            ]
+          ],
+          "x_candidate_count": 4,
+          "x_second_best_flux_margin_wb": 0.28871150080365116
         },
-        "compile_warm_wall_seconds": 1203.513161931187,
+        "compile_cache": {
+          "compile_time_saved_seconds": 7.436084634624422,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 1,
+          "status": "hit"
+        },
+        "compile_warm_wall_seconds": 171.03707321360707,
         "figure_src": "/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_0003ff34e7-frame-44.png",
         "frame_identity": {
           "frame": 44,
@@ -657,26 +894,26 @@
         "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
         "passes": false,
         "solve_against_label": {
-          "additive_gauge_wb": 0.2771412951159737,
+          "additive_gauge_wb": 1.7404711322738764,
           "field_unit": "fraction of centred EFIT label RMS",
           "name": "gauge-aligned solve-label RMS over label-core variation",
           "norm": "fractional RMS on the score-blind labelled LCFS interior",
-          "value": 1.139290889072396
+          "value": 1.5906039932455964
         },
         "solver_qualification": {
-          "achieved_topology_class": "diverted",
+          "achieved_topology_class": null,
           "converged": false,
-          "finite": true,
-          "fixed_point_residual": 0.08117000452284825,
+          "finite": false,
+          "fixed_point_residual": null,
           "fixed_point_tolerance": 1e-06,
           "marginal_solver_basin": false,
           "termination": "public branch selector found no convergence-qualified diverted root"
         },
         "stage_timings_seconds": {
-          "comparison": 0.0010869288817048073,
-          "figure": 0.2378738336265087,
-          "input_read": 0.17165220249444246,
-          "production_solve": 1203.1016268329695
+          "comparison": 0.0009507704526185989,
+          "figure": 0.1463189972564578,
+          "input_read": 0.14304665755480528,
+          "production_solve": 170.74594398308545
         }
       },
       {
@@ -686,13 +923,40 @@
           "name": "core-coherent label interior",
           "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
         },
-        "compile_cache": {
-          "compile_time_saved_seconds": 0.0,
-          "evidence": "JAX persistent compilation-cache monitoring events",
-          "hit_count": 0,
-          "status": "miss"
+        "banked_read": {
+          "nova_axis_flux_wb": 1.8729613771354015,
+          "nova_axis_rz_m": [
+            1.70522032121601,
+            0.09335881456632586
+          ],
+          "nova_x_point_rz_m": [
+            1.3922851466946577,
+            -0.9902829587556747
+          ],
+          "o_candidate_count": 5,
+          "o_second_best_flux_margin_wb": 1.374925020120977,
+          "read_exception_text": null,
+          "read_status": "qualified_axis",
+          "reference_axis_rz_m": [
+            1.7594630718231201,
+            0.013277635909616947
+          ],
+          "reference_x_points_rz_m": [
+            [
+              1.3818272352218628,
+              -1.060546636581421
+            ]
+          ],
+          "x_candidate_count": 2,
+          "x_second_best_flux_margin_wb": 0.007268380866564894
         },
-        "compile_warm_wall_seconds": 1210.8862581634894,
+        "compile_cache": {
+          "compile_time_saved_seconds": 9.33075781725347,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 3,
+          "status": "hit"
+        },
+        "compile_warm_wall_seconds": 185.59429472591728,
         "figure_src": "/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_001554e054-frame-144.png",
         "frame_identity": {
           "frame": 144,
@@ -712,26 +976,26 @@
         "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
         "passes": false,
         "solve_against_label": {
-          "additive_gauge_wb": 0.15111542465819622,
+          "additive_gauge_wb": 0.12284300961195191,
           "field_unit": "fraction of centred EFIT label RMS",
           "name": "gauge-aligned solve-label RMS over label-core variation",
           "norm": "fractional RMS on the score-blind labelled LCFS interior",
-          "value": 0.8195324440087708
+          "value": 0.3959733184054208
         },
         "solver_qualification": {
           "achieved_topology_class": "diverted",
           "converged": false,
           "finite": true,
-          "fixed_point_residual": 0.08838134940012617,
+          "fixed_point_residual": 0.018208502609628002,
           "fixed_point_tolerance": 1e-06,
           "marginal_solver_basin": false,
           "termination": "public branch selector found no convergence-qualified diverted root"
         },
         "stage_timings_seconds": {
-          "comparison": 0.0015509799122810364,
-          "figure": 0.15441197156906128,
-          "input_read": 0.15137688722461462,
-          "production_solve": 1210.5780146336183
+          "comparison": 0.000677129253745079,
+          "figure": 0.14686657208949327,
+          "input_read": 0.13759395945817232,
+          "production_solve": 185.3082052282989
         }
       },
       {
@@ -741,13 +1005,40 @@
           "name": "core-coherent label interior",
           "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
         },
-        "compile_cache": {
-          "compile_time_saved_seconds": 0.0,
-          "evidence": "JAX persistent compilation-cache monitoring events",
-          "hit_count": 0,
-          "status": "miss"
+        "banked_read": {
+          "nova_axis_flux_wb": 2.781694640896625,
+          "nova_axis_rz_m": [
+            1.691641858570635,
+            -0.22915341405721001
+          ],
+          "nova_x_point_rz_m": [
+            1.2816733338193538,
+            -1.3320101131736908
+          ],
+          "o_candidate_count": 4,
+          "o_second_best_flux_margin_wb": 2.8983374099682795,
+          "read_exception_text": null,
+          "read_status": "qualified_axis",
+          "reference_axis_rz_m": [
+            1.718023657798767,
+            -0.001327185658738017
+          ],
+          "reference_x_points_rz_m": [
+            [
+              1.2929953336715698,
+              -1.1911089420318604
+            ]
+          ],
+          "x_candidate_count": 2,
+          "x_second_best_flux_margin_wb": 0.9743279972602519
         },
-        "compile_warm_wall_seconds": 1179.204156843014,
+        "compile_cache": {
+          "compile_time_saved_seconds": 7.422238787636161,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 1,
+          "status": "hit"
+        },
+        "compile_warm_wall_seconds": 155.7454870333895,
         "figure_src": "/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_002495e835-frame-146.png",
         "frame_identity": {
           "frame": 146,
@@ -767,26 +1058,26 @@
         "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
         "passes": false,
         "solve_against_label": {
-          "additive_gauge_wb": 0.1151677317983415,
+          "additive_gauge_wb": 0.05094615193296477,
           "field_unit": "fraction of centred EFIT label RMS",
           "name": "gauge-aligned solve-label RMS over label-core variation",
           "norm": "fractional RMS on the score-blind labelled LCFS interior",
-          "value": 1.53529257532426
+          "value": 0.9573057366392401
         },
         "solver_qualification": {
           "achieved_topology_class": "diverted",
           "converged": false,
           "finite": true,
-          "fixed_point_residual": 0.058516982970557484,
+          "fixed_point_residual": 0.04696368424795906,
           "fixed_point_tolerance": 1e-06,
           "marginal_solver_basin": false,
           "termination": "public branch selector found no convergence-qualified diverted root"
         },
         "stage_timings_seconds": {
-          "comparison": 0.001504208892583847,
-          "figure": 0.27892549987882376,
-          "input_read": 0.1800384633243084,
-          "production_solve": 1178.7425589021295
+          "comparison": 0.0008868025615811348,
+          "figure": 0.1481787348166108,
+          "input_read": 0.15835651382803917,
+          "production_solve": 155.4371618060395
         }
       },
       {
@@ -796,13 +1087,40 @@
           "name": "core-coherent label interior",
           "solve_mask": "score-blind labelled LCFS interior on the registered stride-two solve grid"
         },
-        "compile_cache": {
-          "compile_time_saved_seconds": 0.0,
-          "evidence": "JAX persistent compilation-cache monitoring events",
-          "hit_count": 0,
-          "status": "miss"
+        "banked_read": {
+          "nova_axis_flux_wb": 2.83567983531367,
+          "nova_axis_rz_m": [
+            1.692898756337259,
+            -0.27361229888345096
+          ],
+          "nova_x_point_rz_m": [
+            1.2516707537350824,
+            -1.3655286471976573
+          ],
+          "o_candidate_count": 4,
+          "o_second_best_flux_margin_wb": 2.876048561674827,
+          "read_exception_text": null,
+          "read_status": "qualified_axis",
+          "reference_axis_rz_m": [
+            1.7231301069259644,
+            0.001690587610937655
+          ],
+          "reference_x_points_rz_m": [
+            [
+              1.2897911071777344,
+              -1.1884135007858276
+            ]
+          ],
+          "x_candidate_count": 2,
+          "x_second_best_flux_margin_wb": 1.2038791517262084
         },
-        "compile_warm_wall_seconds": 1226.6857939828187,
+        "compile_cache": {
+          "compile_time_saved_seconds": 8.35660862363875,
+          "evidence": "JAX persistent compilation-cache monitoring events",
+          "hit_count": 2,
+          "status": "hit"
+        },
+        "compile_warm_wall_seconds": 110.57397671230137,
         "figure_src": "/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_0040ca9bdc-frame-137.png",
         "frame_identity": {
           "frame": 137,
@@ -822,26 +1140,26 @@
         "pass_rule": "solver converged and solve_against_label.value <= label_gs_inconsistency.value",
         "passes": false,
         "solve_against_label": {
-          "additive_gauge_wb": -0.09524721941794177,
+          "additive_gauge_wb": 0.10005167080712198,
           "field_unit": "fraction of centred EFIT label RMS",
           "name": "gauge-aligned solve-label RMS over label-core variation",
           "norm": "fractional RMS on the score-blind labelled LCFS interior",
-          "value": 0.758437265959663
+          "value": 1.173895678399414
         },
         "solver_qualification": {
           "achieved_topology_class": "diverted",
           "converged": false,
           "finite": true,
-          "fixed_point_residual": 0.06053569152139815,
+          "fixed_point_residual": 0.07253986012318267,
           "fixed_point_tolerance": 1e-06,
           "marginal_solver_basin": false,
           "termination": "public branch selector found no convergence-qualified diverted root"
         },
         "stage_timings_seconds": {
-          "comparison": 0.0017330246046185493,
-          "figure": 0.1521182181313634,
-          "input_read": 0.5495374593883753,
-          "production_solve": 1225.9810765413567
+          "comparison": 0.0008056098595261574,
+          "figure": 0.14760379772633314,
+          "input_read": 0.1523410603404045,
+          "production_solve": 110.27214897517115
         }
       }
     ]

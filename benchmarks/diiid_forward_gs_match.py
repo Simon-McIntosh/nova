@@ -317,6 +317,7 @@ class FrameResult:
     resolved_defaults: dict[str, object] = field(default_factory=dict)
     solve_exception_class: str | None = None
     displacement_decomposition: DisplacementDecomposition | None = None
+    banked_read: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -645,6 +646,151 @@ def _array_sha256(values: np.ndarray) -> str:
     identity.update(json.dumps(array.shape).encode("ascii"))
     identity.update(array.tobytes())
     return identity.hexdigest()
+
+
+def candidate_flux_margins(
+    operator, physical: Any, *, polarity: float
+) -> dict[str, Any]:
+    """Return admitted O and X candidate counts and their second-best margins.
+
+    The census keeps one representative stationary point per containing cell
+    and ranks within its type by the polarity-signed flux.  The margin to the
+    second-best candidate is the signed-flux difference between the first and
+    second ranked retained candidates, positive by construction when two
+    admitted candidates exist.  With fewer than two candidates the margin is
+    null and the count stands.
+    """
+
+    grid_flux = operator.topology.split_flux_map(jnp.asarray(physical))[0]
+    table = operator._fixed_design_topology.grid
+    status = jax.device_get(table.candidate_table_status(grid_flux))
+    candidates = np.asarray(status["retained_candidate"], dtype=float)
+    valid = np.asarray(status["retained_valid"], dtype=bool)
+    count = np.asarray(status["candidate_count"], dtype=int)
+    names = ("o_candidate_count", "x_candidate_count")
+    margins: dict[str, Any] = {}
+    for kind, name in enumerate(names):
+        rows = candidates[kind][valid[kind]]
+        if rows.shape[0] < 2:
+            margins[f"{name[:1]}_second_best_flux_margin_wb"] = None
+            continue
+        psi = rows[:, 2]
+        signed = polarity * psi
+        order = np.argsort(signed)[::-1]
+        best, second = rows[order[:2]][:, 2]
+        margins[f"{name[:1]}_second_best_flux_margin_wb"] = float(
+            polarity * (best - second)
+        )
+    return {
+        names[0]: int(count[0]),
+        names[1]: int(count[1]),
+        **margins,
+    }
+
+
+def banked_read_summary(
+    operator,
+    physical: Any,
+    *,
+    axis_rz_m: Any,
+    x_point_rz_m: Any,
+    axis_flux_wb: float,
+    boundary_flux_wb: float,
+    reference_axis_rz_m: Any,
+    reference_x_points_rz_m: Any,
+    read_status: str,
+    read_exception_text: str | None = None,
+) -> dict[str, Any]:
+    """Assemble the per-row stationary-point banking block shared by receipts.
+
+    Nova axis and X-point positions and flux sit beside their reference
+    counterpart, the admitted O and X candidate counts, the second-best flux
+    margin, and the read status with its exception text on failure.  Positions
+    serialise as finite two-vectors or null; the reference X points as a list
+    of finite two-vectors or null.
+    """
+
+    def point(value: Any) -> list[float] | None:
+        try:
+            result = np.asarray(value, dtype=float)
+        except (TypeError, ValueError):
+            return None
+        return (
+            result.tolist()
+            if result.shape == (2,) and np.isfinite(result).all()
+            else None
+        )
+
+    try:
+        reference_points = np.asarray(reference_x_points_rz_m, dtype=float)
+    except (TypeError, ValueError):
+        reference_points = np.empty((0, 2), dtype=float)
+    if reference_points.ndim != 2 or reference_points.shape[1] != 2:
+        reference_points = np.empty((0, 2), dtype=float)
+    reference_points = reference_points[np.isfinite(reference_points).all(axis=1)]
+    polarity = 1.0 if boundary_flux_wb <= axis_flux_wb else -1.0
+    margins = candidate_flux_margins(operator, physical, polarity=polarity)
+    return {
+        "nova_axis_rz_m": point(axis_rz_m),
+        "nova_axis_flux_wb": (
+            float(axis_flux_wb) if np.isfinite(axis_flux_wb) else None
+        ),
+        "nova_x_point_rz_m": point(x_point_rz_m),
+        "reference_axis_rz_m": point(reference_axis_rz_m),
+        "reference_x_points_rz_m": reference_points.tolist(),
+        "o_candidate_count": margins["o_candidate_count"],
+        "x_candidate_count": margins["x_candidate_count"],
+        "o_second_best_flux_margin_wb": margins["o_second_best_flux_margin_wb"],
+        "x_second_best_flux_margin_wb": margins["x_second_best_flux_margin_wb"],
+        "read_status": read_status,
+        "read_exception_text": read_exception_text,
+    }
+
+
+def banked_failed_read_summary(
+    axis_rz_m: Any,
+    x_point_rz_m: Any,
+    axis_flux_wb: float,
+    reference_axis_rz_m: Any,
+    reference_x_points_rz_m: Any,
+    read_status: str,
+    read_exception_text: str | None,
+) -> dict[str, Any]:
+    """Assemble the banking block for a failed read with no census lineage."""
+
+    def point(value: Any) -> list[float] | None:
+        try:
+            result = np.asarray(value, dtype=float)
+        except (TypeError, ValueError):
+            return None
+        return (
+            result.tolist()
+            if result.shape == (2,) and np.isfinite(result).all()
+            else None
+        )
+
+    try:
+        reference_points = np.asarray(reference_x_points_rz_m, dtype=float)
+    except (TypeError, ValueError):
+        reference_points = np.empty((0, 2), dtype=float)
+    if reference_points.ndim != 2 or reference_points.shape[1] != 2:
+        reference_points = np.empty((0, 2), dtype=float)
+    reference_points = reference_points[np.isfinite(reference_points).all(axis=1)]
+    return {
+        "nova_axis_rz_m": point(axis_rz_m),
+        "nova_axis_flux_wb": (
+            float(axis_flux_wb) if np.isfinite(axis_flux_wb) else None
+        ),
+        "nova_x_point_rz_m": point(x_point_rz_m),
+        "reference_axis_rz_m": point(reference_axis_rz_m),
+        "reference_x_points_rz_m": reference_points.tolist(),
+        "o_candidate_count": None,
+        "x_candidate_count": None,
+        "o_second_best_flux_margin_wb": None,
+        "x_second_best_flux_margin_wb": None,
+        "read_status": read_status,
+        "read_exception_text": read_exception_text,
+    }
 
 
 def _physical_wall_ring(
@@ -1655,6 +1801,17 @@ def solve_frame(
         for value in np.asarray(equilibrium.fixed_point.trace, dtype=float)
         if np.isfinite(value)
     )
+    banked_read = banked_read_summary(
+        profile.operator,
+        equilibrium.flux,
+        axis_rz_m=np.asarray(topology.axis, dtype=float),
+        x_point_rz_m=np.asarray(topology.x_point, dtype=float),
+        axis_flux_wb=float(topology.axis_flux),
+        boundary_flux_wb=float(topology.boundary_flux),
+        reference_axis_rz_m=labelled_axis,
+        reference_x_points_rz_m=labelled_x_point[None, :],
+        read_status="qualified_axis",
+    )
     result = FrameResult(
         shot=Path(row["_source_path"]).name,
         frame=frame,
@@ -1705,6 +1862,7 @@ def solve_frame(
         conductor_current_receipt=current_receipt,
         resolved_defaults=resolved_defaults,
         displacement_decomposition=displacement_decomposition,
+        banked_read=banked_read,
     )
     fields = {
         "radius": np.asarray(radius),
@@ -1719,6 +1877,16 @@ def solve_frame(
         "pseudo_wall": wall,
     }
     return result, fields
+
+
+def _frame_reference_axis(row: dict[str, Any], frame: int) -> np.ndarray:
+    """Return the labelled EFIT magnetic axis for one frame when readable."""
+
+    radial_column = row.get("efit_r_axis")
+    vertical_column = row.get("efit_z_axis")
+    if radial_column is None or vertical_column is None:
+        return np.full(2, np.nan)
+    return np.asarray((radial_column[frame], vertical_column[frame]), dtype=float)
 
 
 def _retained_solve_failure(
@@ -1777,6 +1945,15 @@ def _retained_solve_failure(
         ),
         resolved_defaults=ResolvedForwardSolveDefaults.from_policy(policy).to_dict(),
         solve_exception_class=exception_class,
+        banked_read=banked_failed_read_summary(
+            axis_rz_m=None,
+            x_point_rz_m=None,
+            axis_flux_wb=float("nan"),
+            reference_axis_rz_m=_frame_reference_axis(row, frame),
+            reference_x_points_rz_m=None,
+            read_status=exception_class,
+            read_exception_text=str(error),
+        ),
     )
     return result, {"plot_unavailable_reason": exception_class}
 

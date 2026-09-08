@@ -31,6 +31,7 @@ import numpy as np
 from scipy import stats
 
 from benchmarks.analytic_operator_ladder import _fit_order, _region_masks
+from benchmarks.diiid_forward_gs_match import candidate_flux_margins
 from benchmarks.split_fit_jump_field import (
     BOUNDARY_BAND_PITCHES,
     _distance_to_boundary,
@@ -1311,7 +1312,7 @@ def _analytic_region_norms(
 def _topology(operator, state: np.ndarray) -> dict[str, Any]:
     try:
         _masks, topology = operator.read(jnp.asarray(state))
-    except NoQualifiedAxisError:
+    except NoQualifiedAxisError as error:
         return {
             "read_status": "no_qualified_axis",
             "class": None,
@@ -1320,8 +1321,20 @@ def _topology(operator, state: np.ndarray) -> dict[str, Any]:
             "boundary_flux_wb": None,
             "axis_flux_wb": None,
             "flux_span_wb": None,
+            "o_candidate_count": None,
+            "x_candidate_count": None,
+            "o_second_best_flux_margin_wb": None,
+            "x_second_best_flux_margin_wb": None,
+            "exception_text": str(error),
         }
     x_point = np.asarray(topology.x_point, dtype=np.float64)
+    margin_block = candidate_flux_margins(
+        operator,
+        state,
+        polarity=(
+            1.0 if float(topology.boundary_flux) <= float(topology.axis_flux) else -1.0
+        ),
+    )
     return {
         "read_status": "qualified_axis",
         "class": "diverted" if bool(topology.diverted) else "limited",
@@ -1330,6 +1343,11 @@ def _topology(operator, state: np.ndarray) -> dict[str, Any]:
         "boundary_flux_wb": float(topology.boundary_flux),
         "axis_flux_wb": float(topology.axis_flux),
         "flux_span_wb": float(topology.flux_span),
+        "o_candidate_count": margin_block["o_candidate_count"],
+        "x_candidate_count": margin_block["x_candidate_count"],
+        "o_second_best_flux_margin_wb": margin_block["o_second_best_flux_margin_wb"],
+        "x_second_best_flux_margin_wb": margin_block["x_second_best_flux_margin_wb"],
+        "exception_text": None,
     }
 
 
@@ -1344,6 +1362,11 @@ def _analytic_diverted_topology(coefficients: np.ndarray) -> dict[str, Any]:
         "boundary_flux_wb": boundary_flux,
         "axis_flux_wb": axis_flux,
         "flux_span_wb": axis_flux - boundary_flux,
+        "o_candidate_count": None,
+        "x_candidate_count": None,
+        "o_second_best_flux_margin_wb": None,
+        "x_second_best_flux_margin_wb": None,
+        "exception_text": None,
     }
 
 

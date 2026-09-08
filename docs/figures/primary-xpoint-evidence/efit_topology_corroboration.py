@@ -22,6 +22,10 @@ from matplotlib.lines import Line2D
 import numpy as np
 
 from benchmarks import mast_response_carrier_warm as response_carrier
+from benchmarks.diiid_forward_gs_match import (
+    banked_failed_read_summary,
+    banked_read_summary,
+)
 from benchmarks.efit_forward_parity_slice import (
     DECOMPOSITION_BANK,
     _mast_case_from_selection,
@@ -60,7 +64,7 @@ OUTPUT_JSON = HERE / "efit-topology-corroboration.json"
 CACHE_PATH = HERE / ".efit-topology-corroboration-cache.npz"
 REACHABILITY_SCRIPT = HERE / "real_equilibria_reachability.py"
 SELECTION_COMMIT = "80706f89"
-CACHE_SCHEMA_REVISION = 7
+CACHE_SCHEMA_REVISION = 8
 RESAMPLE_POINTS = 2000
 CURVE_SAMPLES_PER_SEGMENT = 9
 PUBLIC_ROUTE_POLICY = PerturbedSeedPolicy()
@@ -266,6 +270,17 @@ def _strict_value(value: float) -> float | None:
     return float(value) if np.isfinite(value) else None
 
 
+def _optional_strict(value: object) -> float | None:
+    """Convert a possibly-absent scalar for strict JSON, retaining null."""
+
+    if value is None:
+        return None
+    try:
+        return _strict_value(float(value))
+    except TypeError, ValueError:
+        return None
+
+
 def _post_cutover_geometry(profile, state, topology) -> dict[str, Any]:
     """Read the exact saddle-aware class operands used in production."""
 
@@ -321,7 +336,16 @@ def _post_cutover_geometry(profile, state, topology) -> dict[str, Any]:
         "class_margin": margin,
         "binding_flux": binding_flux,
         "selected_saddle": selected[:2],
+        "selected_saddle_flux_wb": (
+            float(selected[2]) if np.isfinite(selected[2]) else None
+        ),
         "limiter_coordinate": limiter,
+        "nova_axis_flux_wb": float(topology.axis_flux),
+        "nova_x_point_flux_wb": (
+            float(topology.x_point_flux)
+            if np.all(np.isfinite(np.asarray(topology.x_point)))
+            else None
+        ),
         "x_normalized_flux_operand": x_level,
         "wall_normalized_flux_operand": wall_level,
         "wall_normalized_flux_operand_before_shadow": rejected_wall_level,
@@ -345,8 +369,21 @@ def _attempted_terminal_geometry(profile, state) -> dict[str, np.ndarray]:
     }
 
 
-def _candidate_table_status(profile, state) -> dict[str, dict[str, int | bool]]:
-    """Serialize raw O- and X-candidate census capacity for one terminal map."""
+def _candidate_table_status(
+    profile, state, *, polarity: float | None = None
+) -> dict[str, dict[str, int | bool | float | None]]:
+    """Serialize the full raw O- and X-candidate census for one terminal map.
+
+    The banked status carries the admitted candidate count, the retained-root
+    telemetry (raw, polished, typed, same-root and retained counts), the
+    maximum candidate multiplicity, the unique representative-origin count and,
+    when a polarity is supplied, the retained flux margin to the second-best
+    candidate on each type.  The consistency block reports whether any cell
+    admitted both a saddle and an extremum, whether retained origins are unique
+    within each type, and whether the fixed work slots overflowed.  A null
+    polarity (the read has not yet resolved the boundary level) leaves both
+    margins null while keeping the counts.
+    """
 
     operator = profile.operator
     physical = jnp.asarray(state)[: operator.physical_node_number]
@@ -355,26 +392,108 @@ def _candidate_table_status(profile, state) -> dict[str, dict[str, int | bool]]:
         operator._fixed_design_topology.grid.candidate_table_status(grid_flux)
     )
     count = np.asarray(status["candidate_count"], dtype=int)
-    capacity = np.asarray(status["capacity"], dtype=int)
-    truncated = np.asarray(status["truncated"], dtype=bool)
-    if count.shape != (2,) or capacity.shape != (2,) or truncated.shape != (2,):
+    if count.shape != (2,):
         raise RuntimeError("candidate-table status must describe one O and one X row")
-    return {
-        name: {
+    capacities = np.asarray(status["capacity"], dtype=int)
+    truncated = np.asarray(status["truncated"], dtype=bool)
+    raw = np.asarray(status["raw_ring_count"], dtype=int)
+    polished = np.asarray(status["polished_count"], dtype=int)
+    typed = np.asarray(status["typed_count"], dtype=int)
+    same_root = np.asarray(status["same_root_count"], dtype=int)
+    retained = np.asarray(status["retained_count"], dtype=int)
+    multiplicity = np.asarray(status["retained_multiplicity"], dtype=int)
+    origins = np.asarray(status["retained_representative_origin_index"], dtype=int)
+    candidates = np.asarray(status["retained_candidate"], dtype=float)
+    valid = np.asarray(status["retained_valid"], dtype=bool)
+    ring_mask = np.asarray(status["ring_admitted_mask"], dtype=bool)
+    admitted = np.any(ring_mask, axis=0)
+    one_type_per_cell = not bool(np.any(np.all(ring_mask[:, admitted], axis=0)))
+    origins_unique = all(
+        int(np.unique(origins[kind][valid[kind]]).size) == int(retained[kind])
+        for kind in range(2)
+    )
+    census_slots_exhausted = bool(np.asarray(status["census_slots_exhausted"]))
+    fixed_slot_overflow = bool(np.any(np.asarray(status["overflow"])))
+    per_type: dict[str, dict[str, int | bool | float | None]] = {}
+    for index, name in enumerate(("o_point", "x_point")):
+        margin: float | None = None
+        if polarity is not None:
+            rows = candidates[index][valid[index]]
+            if rows.shape[0] >= 2:
+                psi = rows[:, 2]
+                order = np.argsort(polarity * psi)[::-1]
+                best, second = rows[order[:2]][:, 2]
+                margin = float(polarity * (best - second))
+        per_type[name] = {
             "candidate_count": int(count[index]),
-            "capacity": int(capacity[index]),
+            "capacity": int(capacities[index]),
+            "maximum_multiplicity": int(np.max(multiplicity[index])),
+            "polished_count": int(polished[index]),
+            "raw_ring_count": int(raw[index]),
+            "retained_count": int(retained[index]),
+            "retained_flux_margin_to_second_best_wb": margin,
+            "same_root_count": int(same_root[index]),
             "truncated": bool(truncated[index]),
+            "typed_count": int(typed[index]),
+            "unique_representative_origin_count": int(
+                np.unique(origins[index][valid[index]]).size
+            ),
         }
-        for index, name in enumerate(("o_point", "x_point"))
+    return {
+        "census_slots_exhausted": census_slots_exhausted,
+        "consistency": {
+            "census_slots_exhausted": census_slots_exhausted,
+            "fixed_slot_overflow": fixed_slot_overflow,
+            "one_null_type_per_containing_cell": one_type_per_cell,
+            "retained_origins_unique_within_type": origins_unique,
+            "ring_admission_rule": {
+                "extremum_crossings": 0,
+                "saddle_crossings": 4,
+            },
+        },
+        "o_point": per_type["o_point"],
+        "x_point": per_type["x_point"],
     }
 
 
-def _unavailable_candidate_table_status() -> dict[str, dict[str, None]]:
+def _unavailable_candidate_table_status() -> dict[str, Any]:
     """Represent census absence explicitly for legacy or synthetic operands."""
 
     return {
-        name: {"candidate_count": None, "capacity": None, "truncated": None}
-        for name in ("o_point", "x_point")
+        "census_slots_exhausted": None,
+        "consistency": {
+            "census_slots_exhausted": None,
+            "fixed_slot_overflow": None,
+            "one_null_type_per_containing_cell": None,
+            "retained_origins_unique_within_type": None,
+            "ring_admission_rule": None,
+        },
+        "o_point": {
+            "candidate_count": None,
+            "capacity": None,
+            "maximum_multiplicity": None,
+            "polished_count": None,
+            "raw_ring_count": None,
+            "retained_count": None,
+            "retained_flux_margin_to_second_best_wb": None,
+            "same_root_count": None,
+            "truncated": None,
+            "typed_count": None,
+            "unique_representative_origin_count": None,
+        },
+        "x_point": {
+            "candidate_count": None,
+            "capacity": None,
+            "maximum_multiplicity": None,
+            "polished_count": None,
+            "raw_ring_count": None,
+            "retained_count": None,
+            "retained_flux_margin_to_second_best_wb": None,
+            "same_root_count": None,
+            "truncated": None,
+            "typed_count": None,
+            "unique_representative_origin_count": None,
+        },
     }
 
 
@@ -429,6 +548,9 @@ def _write_operand_cache(
         metadata_row["candidate_table_status"] = row.get(
             "candidate_table_status", _unavailable_candidate_table_status()
         )
+        metadata_row["read_status"] = row.get("read_status")
+        metadata_row["read_exception_text"] = row.get("read_exception_text")
+        metadata_row["banked_read"] = row.get("banked_read")
         metadata_row["active_set_iterations"] = int(row.get("active_set_iterations", 0))
         metadata_rows.append(metadata_row)
         for name in (
@@ -448,6 +570,8 @@ def _write_operand_cache(
             "efit_lcfs",
             "efit_x_points",
             "efit_axis",
+            "nova_axis_flux_wb",
+            "nova_x_point_flux_wb",
             "active_set_residuals",
             "active_set_mask_differences",
             "active_set_cycle_damping_activations",
@@ -456,6 +580,8 @@ def _write_operand_cache(
                 default = ()
             elif name == "efit_axis":
                 default = np.full(2, np.nan)
+            elif name in ("nova_axis_flux_wb", "nova_x_point_flux_wb"):
+                default = np.asarray(np.nan)
             elif name == "wall_candidate_present":
                 default = np.asarray(False)
             else:
@@ -523,6 +649,8 @@ def _read_operand_cache(
                 "efit_lcfs",
                 "efit_x_points",
                 "efit_axis",
+                "nova_axis_flux_wb",
+                "nova_x_point_flux_wb",
                 "active_set_residuals",
                 "active_set_mask_differences",
                 "active_set_cycle_damping_activations",
@@ -738,10 +866,39 @@ def _build_arm_operand(
         if has_terminal_census
         else _unavailable_candidate_table_status()
     )
+    reference_axis_value = np.asarray(common["efit_axis"], dtype=float).reshape(2)
     try:
         geometry = reachability._grid_geometry(profile, state)
         _masks, topology = profile.operator.read(state)
         post_cutover = _post_cutover_geometry(profile, state, topology)
+        polarity = (
+            1.0 if float(topology.boundary_flux) <= float(topology.axis_flux) else -1.0
+        )
+        if has_terminal_census:
+            candidate_table_status = _candidate_table_status(
+                profile, state, polarity=polarity
+            )
+            banked_read = banked_read_summary(
+                profile.operator,
+                state,
+                axis_rz_m=np.asarray(topology.axis, dtype=float),
+                x_point_rz_m=np.asarray(topology.x_point, dtype=float),
+                axis_flux_wb=float(topology.axis_flux),
+                boundary_flux_wb=float(topology.boundary_flux),
+                reference_axis_rz_m=reference_axis_value,
+                reference_x_points_rz_m=common["efit_x_points"],
+                read_status="qualified_axis",
+            )
+        else:
+            banked_read = banked_failed_read_summary(
+                axis_rz_m=np.asarray(topology.axis, dtype=float),
+                x_point_rz_m=np.asarray(topology.x_point, dtype=float),
+                axis_flux_wb=float(topology.axis_flux),
+                reference_axis_rz_m=reference_axis_value,
+                reference_x_points_rz_m=common["efit_x_points"],
+                read_status="qualified_axis",
+                read_exception_text=None,
+            )
     except (NoQualifiedAxisError, ConstraintViolationError) as error:
         exception_class = type(error).__name__
         return common | {
@@ -749,7 +906,11 @@ def _build_arm_operand(
             "terminal_residual": None,
             "termination_reason": exception_class,
             "failure_exception_class": exception_class,
+            "read_status": exception_class,
+            "read_exception_text": str(error),
             "nova_achieved_class": None,
+            "nova_axis_flux_wb": np.asarray(np.nan),
+            "nova_x_point_flux_wb": np.asarray(np.nan),
             "radius": (
                 attempted_geometry["radius"] if attempted_geometry else np.empty(0)
             ),
@@ -772,13 +933,26 @@ def _build_arm_operand(
             "wall_normalized_flux_operand_before_shadow": np.asarray(np.nan),
             "wall_candidate_present": np.asarray(False),
             "candidate_table_status": candidate_table_status,
+            "banked_read": banked_failed_read_summary(
+                axis_rz_m=None,
+                x_point_rz_m=None,
+                axis_flux_wb=float("nan"),
+                reference_axis_rz_m=reference_axis_value,
+                reference_x_points_rz_m=common["efit_x_points"],
+                read_status=exception_class,
+                read_exception_text=str(error),
+            ),
         }
     return common | {
         "converged": arm_result.converged,
         "terminal_residual": arm_result.terminal_residual,
         "termination_reason": arm_result.termination_reason,
         "failure_exception_class": None,
+        "read_status": "qualified_axis",
+        "read_exception_text": None,
         "nova_achieved_class": post_cutover["achieved_class"],
+        "nova_axis_flux_wb": post_cutover["nova_axis_flux_wb"],
+        "nova_x_point_flux_wb": post_cutover["nova_x_point_flux_wb"],
         "radius": geometry["radius"],
         "height": geometry["height"],
         "flux": geometry["flux"],
@@ -795,6 +969,7 @@ def _build_arm_operand(
         ],
         "wall_candidate_present": post_cutover["wall_candidate_present"],
         "candidate_table_status": candidate_table_status,
+        "banked_read": banked_read,
     }
 
 
@@ -894,6 +1069,26 @@ def _axis_distance_m(nova_axis: object, efit_axis: object) -> float | None:
     return _strict_value(
         float(np.linalg.norm(np.asarray(nova_point) - np.asarray(efit_point)))
     )
+
+
+def _component_displacement_mm(
+    nova_point: object, reference_points: object
+) -> list[float] | None:
+    """Return per-component North-east displacement to the nearest reference."""
+
+    nova = _finite_point_list(nova_point)
+    reference = _finite_points(reference_points)
+    if nova is None or len(reference) == 0:
+        return None
+    nearest = reference[
+        int(
+            np.argmin(np.linalg.norm(reference - np.asarray(nova, dtype=float), axis=1))
+        )
+    ]
+    return [
+        1000.0 * (float(nova[0]) - float(nearest[0])),
+        1000.0 * (float(nova[1]) - float(nearest[1])),
+    ]
 
 
 def _finite_point_list(point: object) -> list[float] | None:
@@ -1025,9 +1220,13 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
             "tolerance": tolerance,
             "termination_reason": termination_reason,
             "failure_exception_class": failure_exception_class,
+            "read_status": operand.get("read_status") or failure_exception_class,
+            "read_exception_text": operand.get("read_exception_text"),
             "qualified_terminal": False,
             "efit_label": operand.get("efit_label"),
             "nova_achieved_class": None,
+            "nova_axis_flux_wb": None,
+            "nova_x_point_flux_wb": None,
             "nova_post_cutover_class_margin": None,
             "nova_post_cutover_class_margin_nonfinite": None,
             "nova_post_cutover_class_margin_finite": None,
@@ -1043,6 +1242,8 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
             "nova_axis_m": None,
             "efit_axis_m": _finite_point_list(operand.get("efit_axis")),
             "axis_distance_m": None,
+            "axis_displacement_components_mm": None,
+            "saddle_displacement_components_mm": None,
             "comparison_failures": [
                 f"arm_geometry_exception:{failure_exception_class}"
             ],
@@ -1054,6 +1255,7 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
             "nova_open_legs_m": None,
             "efit_lcfs_m": None,
             "wall_m": None,
+            "banked_read": operand.get("banked_read"),
         }
 
     geometry = {
@@ -1113,9 +1315,13 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
         "tolerance": tolerance,
         "termination_reason": termination_reason,
         "failure_exception_class": None,
+        "read_status": "qualified_axis",
+        "read_exception_text": None,
         "qualified_terminal": qualified_terminal,
         "efit_label": reference_class,
         "nova_achieved_class": achieved_class,
+        "nova_axis_flux_wb": _optional_strict(operand.get("nova_axis_flux_wb")),
+        "nova_x_point_flux_wb": _optional_strict(operand.get("nova_x_point_flux_wb")),
         "nova_post_cutover_class_margin": _strict_value(margin),
         "nova_post_cutover_class_margin_nonfinite": (
             "positive_infinity"
@@ -1151,6 +1357,12 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
         "axis_distance_m": _axis_distance_m(
             operand.get("axis"), operand.get("efit_axis")
         ),
+        "axis_displacement_components_mm": _component_displacement_mm(
+            operand.get("axis"), operand.get("efit_axis")
+        ),
+        "saddle_displacement_components_mm": _component_displacement_mm(
+            operand.get("selected_saddle"), operand.get("efit_x_points")
+        ),
         "comparison_failures": list(comparison.failures),
         "nova_limiter_point_m": limiter,
         "efit_boundary_wall_contacts_m": contacts.tolist(),
@@ -1171,6 +1383,7 @@ def _score_operand(operand: dict[str, Any]) -> dict[str, Any]:
         "nova_open_legs_m": [leg.tolist() for leg in open_legs],
         "efit_lcfs_m": efit_lcfs.tolist(),
         "wall_m": wall.tolist(),
+        "banked_read": operand.get("banked_read"),
     }
 
 
@@ -1333,6 +1546,17 @@ def run() -> dict[str, Any]:
                 "nova_post_cutover_class_margin_finite_wall_source records "
                 "whether the accepted reachable wall minimum or the rejected "
                 "supplied wall candidate supplied the visible wall level."
+            ),
+            "banked_read": (
+                "every row carries a banked_read block with Nova's axis and "
+                "X-point positions and flux, the EFIT reference counterpart, "
+                "the admitted O and X candidate counts, the retained flux "
+                "margin to the second-best candidate on each type, and the "
+                "read status with its exception text on failure. The counts "
+                "and margins are also readable in candidate_table_status per "
+                "point type; axis and saddle displacement components in "
+                "millimetres are banked in axis_displacement_components_mm "
+                "and saddle_displacement_components_mm."
             ),
         },
         "distance_method": {

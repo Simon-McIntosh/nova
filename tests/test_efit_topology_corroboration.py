@@ -355,6 +355,10 @@ def test_post_cutover_geometry_routes_class_through_public_classifier(monkeypatc
         wall_point=jnp.asarray((0.4, 1.1)),
         wall_point_flux=jnp.asarray(2.0),
         axis=jnp.asarray((0.5, 0.5)),
+        axis_flux=jnp.asarray(0.1),
+        boundary_flux=jnp.asarray(0.5),
+        x_point=jnp.asarray((0.8, -0.6)),
+        x_point_flux=jnp.asarray(0.5),
     )
 
     result = adapter._post_cutover_geometry(profile, jnp.arange(4.0), topology)
@@ -396,7 +400,13 @@ def test_named_arm_failure_retains_twelve_row_census(
     def operator_read(state):
         if state == 5 and exception_type == "ConstraintViolationError":
             raise exception_class("synthetic constraint violation")
-        return None, SimpleNamespace()
+        return None, SimpleNamespace(
+            axis=jnp.asarray((0.5, 0.5)),
+            axis_flux=jnp.asarray(0.1),
+            boundary_flux=jnp.asarray(0.5),
+            x_point=jnp.asarray((1.0, 0.0)),
+            x_point_flux=jnp.asarray(0.5),
+        )
 
     reachability = SimpleNamespace(_grid_geometry=grid_geometry)
     profile = SimpleNamespace(operator=SimpleNamespace(read=operator_read))
@@ -407,8 +417,11 @@ def test_named_arm_failure_retains_twelve_row_census(
             "achieved_class": "diverted",
             "binding_flux": 0.0,
             "selected_saddle": np.asarray((1.0, 0.0)),
+            "selected_saddle_flux_wb": 0.5,
             "limiter_coordinate": np.asarray((0.0, 1.0)),
             "class_margin": 0.25,
+            "nova_axis_flux_wb": 0.1,
+            "nova_x_point_flux_wb": 0.5,
             "x_normalized_flux_operand": 1.0,
             "wall_normalized_flux_operand": 1.25,
             "wall_normalized_flux_operand_before_shadow": 1.5,

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T10:37:39",
+  "updated": "2026-09-08T10:52:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -140,9 +140,11 @@
         "id": "bob-cache-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a08017-7ad3-7ae3-85f9-8e8af38d4585",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a08017-7ad3-7ae3-85f9-8e8af38d4585"
+        },
         "created": "2026-09-08"
       },
       {
@@ -2429,9 +2431,11 @@
         "id": "nia-drift-t",
         "harness": "codex-terra",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a08013-00b0-7163-88cd-e852cb20f0bf",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a08013-00b0-7163-88cd-e852cb20f0bf"
+        },
         "created": "2026-09-08"
       },
       {
@@ -133041,6 +133045,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2201
+    "_version": 2203
   }
 }

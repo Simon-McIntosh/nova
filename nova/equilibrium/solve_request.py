@@ -9,6 +9,10 @@ import socket
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, Mapping
 
+import jax
+import jax.numpy as jnp
+import numpy as np
+
 from nova import __version__ as NOVA_VERSION
 
 if TYPE_CHECKING:
@@ -29,6 +33,98 @@ SolveRoute = Literal[
     "reduced_newton",
 ]
 JsonScalar = str | int | float | bool | None
+
+
+@jax.tree_util.register_pytree_node_class
+@dataclass(frozen=True, slots=True)
+class SampledFluxFunction:
+    """A member-varying flux function carried entirely by array leaves.
+
+    Values interpolate on a strictly increasing normalized-flux coordinate.
+    Outside that coordinate, a quintic end cap preserves the edge value and
+    slope before reaching zero one edge interval away. The representation is
+    the array-owned equivalent of a closure around ``jnp.interp`` and can be
+    stacked without closing any member's table into a compiled program.
+    """
+
+    coordinate: object
+    values: object
+
+    def __post_init__(self) -> None:
+        coordinate = np.asarray(self.coordinate, dtype=np.float64)
+        values = np.asarray(self.values, dtype=np.float64)
+        if coordinate.ndim != 1 or coordinate.size < 2:
+            raise ValueError("sampled flux coordinate needs at least two points")
+        if values.shape != coordinate.shape:
+            raise ValueError("sampled flux values must match their coordinate")
+        if not np.all(np.diff(coordinate) > 0.0):
+            raise ValueError("sampled flux coordinate must increase strictly")
+        object.__setattr__(self, "coordinate", jnp.asarray(coordinate))
+        object.__setattr__(self, "values", jnp.asarray(values))
+
+    def __call__(self, psi_norm):
+        """Evaluate the interpolant and its slope-matched compact end caps."""
+        grid = jnp.asarray(self.coordinate)
+        samples = jnp.asarray(self.values)
+        coordinate = jnp.asarray(psi_norm)
+        edge_width = grid[1] - grid[0]
+        lower_slope = (samples[1] - samples[0]) / edge_width
+        upper_slope = (samples[-1] - samples[-2]) / edge_width
+        interior = jnp.interp(coordinate, grid, samples)
+        below = coordinate < grid[0]
+        edge_value = jnp.where(below, samples[0], samples[-1])
+        outward_slope = jnp.where(below, -lower_slope, upper_slope)
+        outward_distance = jnp.where(below, grid[0] - coordinate, coordinate - grid[-1])
+        parameter = jnp.clip(outward_distance / edge_width, 0.0, 1.0)
+        parameter_cubed = parameter * parameter * parameter
+        value_basis = 1.0 + parameter_cubed * (
+            -10.0 + parameter * (15.0 - 6.0 * parameter)
+        )
+        slope_basis = parameter + parameter_cubed * (
+            -6.0 + parameter * (8.0 - 3.0 * parameter)
+        )
+        exterior = value_basis * edge_value + slope_basis * edge_width * outward_slope
+        return jnp.where(
+            (coordinate >= grid[0]) & (coordinate <= grid[-1]), interior, exterior
+        )
+
+    def tree_flatten(self):
+        """Return only the coordinate and values as dynamic leaves."""
+        return (self.coordinate, self.values), None
+
+    @classmethod
+    def tree_unflatten(cls, aux_data, children):
+        """Rebuild without asking NumPy to inspect traced member arrays."""
+        del aux_data
+        instance = object.__new__(cls)
+        object.__setattr__(instance, "coordinate", children[0])
+        object.__setattr__(instance, "values", children[1])
+        return instance
+
+
+@jax.tree_util.register_pytree_node_class
+@dataclass(frozen=True, slots=True)
+class ForwardSolveMemberData:
+    """Per-member solve inputs that gain a leading batch axis together."""
+
+    seed_state: object
+    target_current: object | None = None
+    current: object | None = None
+    prescribed_current: object | None = None
+
+    def tree_flatten(self):
+        """Return every numerical solve input as a dynamic leaf."""
+        return (
+            self.seed_state,
+            self.target_current,
+            self.current,
+            self.prescribed_current,
+        ), None
+
+    @classmethod
+    def tree_unflatten(cls, aux_data, children):
+        del aux_data
+        return cls(*children)
 
 
 def default_forward_compilation_cache_root() -> Path:
@@ -411,10 +507,12 @@ class ForwardSolveReceipt:
 __all__ = [
     "ExplicitSolveSeed",
     "FORWARD_SOLVE_DEFAULTS",
+    "ForwardSolveMemberData",
     "ForwardSolvePolicy",
     "ForwardSolveReceipt",
     "ForwardSolveRequest",
     "ResolvedForwardSolveDefaults",
+    "SampledFluxFunction",
     "SolveRoute",
     "declared_forward_solve_policy",
     "default_forward_compilation_cache_root",

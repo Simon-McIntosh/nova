@@ -14,11 +14,12 @@ unchanged. A caller may instead declare a scalar plasma current; the operator
 then eliminates one common profile amplitude from the exact clipped current
 moments and applies it to every component before forming the flux image.
 
-The operator is immutable host-and-device state that the traced maps close
-over rather than a traced argument, so a flux function may be any callable —
-an interpolant carrying device arrays or a closed-form profile. Everything
-that varies across a batch (the trial flux, the conductor currents) is an
-explicit argument, which is what ``jit``, ``vmap`` and ``grad`` need.
+The operator is a pytree with an explicit ownership boundary. Mesh and
+connectivity geometry remain host NumPy state in the pytree definition, while
+coupling blocks, prescribed responses, source tables, boundary primitives and
+currents are dynamic leaves. A heterogeneous batch can therefore map one
+program over member data without tracing a coordinate read or baking one
+member's numerical state into the executable.
 
 All fluxes are total poloidal fluxes, :math:`\Phi = 2 \pi R A_\phi` in Wb,
 concatenated over the plasma grid nodes, wall nodes and, when present, the
@@ -30,6 +31,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import InitVar, dataclass, field
 from functools import cached_property
+import hashlib
 from typing import NamedTuple
 
 import jax
@@ -55,6 +57,7 @@ from nova.equilibrium.observation import (
 from nova.equilibrium.source import (
     SCALAR_CURRENT_AMPLITUDE_BAND,
     CurrentNormalisationError,
+    DomainProfile,
     ForwardSource,
 )
 from nova.equilibrium.stencil_mesh import (
@@ -70,9 +73,11 @@ from nova.equilibrium.topology import (
 
 __all__ = [
     "axis_cell_seed",
+    "ForwardOperatorBatch",
     "ForwardFluxOperator",
     "ForwardTopologyState",
     "PrescribedCurrentField",
+    "stack_forward_operators",
 ]
 
 _PRODUCTION_STATIONARY_POINT_CAPACITY = 30
@@ -838,6 +843,281 @@ class PrescribedCurrentField:
         return self.response @ delta
 
 
+def _host_array(value, *, dtype=None) -> np.ndarray:
+    """Return one immutable contiguous host copy of geometric data."""
+    array = np.array(value, dtype=dtype, copy=True, order="C")
+    if array.ndim:
+        array = np.ascontiguousarray(array)
+    array.setflags(write=False)
+    return array
+
+
+def _host_tree(value):
+    """Move every array leaf of a geometry pytree onto the host."""
+    return jax.tree_util.tree_map(_host_array, value)
+
+
+def _digest_array(digest: hashlib._Hash, name: str, value) -> None:
+    """Add one typed, shaped array to a semantic geometry digest."""
+    array = np.ascontiguousarray(np.asarray(value))
+    digest.update(name.encode("utf-8"))
+    digest.update(array.dtype.str.encode("ascii"))
+    digest.update(np.asarray(array.shape, dtype=np.int64).tobytes())
+    digest.update(array.tobytes())
+
+
+def _digest_static_value(
+    digest: hashlib._Hash, name: str, value, seen: set[int]
+) -> None:
+    """Digest nested host geometry without relying on array equality."""
+    if value is None or isinstance(value, str | bytes | int | float | bool):
+        digest.update(f"{name}:{value!r}".encode("utf-8"))
+        return
+    if hasattr(value, "dtype") and hasattr(value, "shape"):
+        _digest_array(digest, name, value)
+        return
+    identity = id(value)
+    if identity in seen:
+        return
+    seen.add(identity)
+    digest.update(
+        f"{name}:{type(value).__module__}.{type(value).__qualname__}".encode("utf-8")
+    )
+    if isinstance(value, dict):
+        for key in sorted(value, key=str):
+            _digest_static_value(digest, f"{name}.{key}", value[key], seen)
+        return
+    if isinstance(value, tuple | list):
+        for index, item in enumerate(value):
+            _digest_static_value(digest, f"{name}[{index}]", item, seen)
+        return
+    if hasattr(value, "__dict__"):
+        for key, item in sorted(vars(value).items()):
+            _digest_static_value(digest, f"{name}.{key}", item, seen)
+        return
+    digest.update(repr(value).encode("utf-8"))
+
+
+@dataclass(frozen=True, eq=False)
+class _CallableLayout:
+    """Static callable structure plus the positions of its dynamic arrays."""
+
+    identity: str
+    tree: object | None = field(default=None, compare=False, repr=False)
+    static: Callable | None = field(default=None, compare=False, repr=False)
+
+    def __hash__(self) -> int:
+        return hash(self.identity)
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, _CallableLayout) and self.identity == other.identity
+
+    @classmethod
+    def flatten(cls, function: Callable) -> tuple[_CallableLayout, tuple[object, ...]]:
+        leaves, tree = jax.tree_util.tree_flatten(function)
+        dynamic = not (len(leaves) == 1 and leaves[0] is function)
+        if dynamic and all(hasattr(leaf, "shape") for leaf in leaves):
+            identity = (
+                f"dynamic:{type(function).__module__}.{type(function).__qualname__}:"
+                f"{tree}"
+            )
+            return cls(identity=identity, tree=tree), tuple(leaves)
+        identity = (
+            f"static:{type(function).__module__}.{type(function).__qualname__}:"
+            f"{id(function)}"
+        )
+        return cls(identity=identity, static=function), ()
+
+    def rebuild(self, leaves: tuple[object, ...]) -> Callable:
+        if self.tree is None:
+            if self.static is None:
+                raise TypeError("static profile callable is unavailable")
+            return self.static
+        return jax.tree_util.tree_unflatten(self.tree, leaves)
+
+
+@dataclass(frozen=True, eq=False)
+class _SourceLayout:
+    """Static source structure separated from member-varying profile arrays."""
+
+    identity: str
+    source_type: type = field(compare=False, repr=False)
+    core_type: type | None = field(compare=False, repr=False)
+    pressure_layout: _CallableLayout | None = field(compare=False, repr=False)
+    field_layout: _CallableLayout | None = field(compare=False, repr=False)
+    pressure_leaf_count: int = field(compare=False, repr=False)
+    static_source: object | None = field(compare=False, repr=False)
+    common_sol: object | None = field(compare=False, repr=False)
+    private_flux: object | None = field(compare=False, repr=False)
+    normalisation: object | None = field(compare=False, repr=False)
+
+    def __hash__(self) -> int:
+        return hash(self.identity)
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, _SourceLayout) and self.identity == other.identity
+
+    @classmethod
+    def flatten(cls, source: object) -> tuple[_SourceLayout, tuple[object, ...]]:
+        if type(source) is not ForwardSource or type(source.core) is not DomainProfile:
+            identity = (
+                f"static:{type(source).__module__}.{type(source).__qualname__}:"
+                f"{id(source)}"
+            )
+            return (
+                cls(
+                    identity=identity,
+                    source_type=type(source),
+                    core_type=None,
+                    pressure_layout=None,
+                    field_layout=None,
+                    pressure_leaf_count=0,
+                    static_source=source,
+                    common_sol=None,
+                    private_flux=None,
+                    normalisation=None,
+                ),
+                (),
+            )
+        pressure_layout, pressure_leaves = _CallableLayout.flatten(source.core.p_prime)
+        field_layout, field_leaves = _CallableLayout.flatten(source.core.ff_prime)
+        identity = ":".join(
+            (
+                f"{type(source).__module__}.{type(source).__qualname__}",
+                f"{type(source.core).__module__}.{type(source.core).__qualname__}",
+                pressure_layout.identity,
+                field_layout.identity,
+                str(int(source.normalisation)),
+                f"common={id(source.common_sol)}",
+                f"private={id(source.private_flux)}",
+            )
+        )
+        layout = cls(
+            identity=identity,
+            source_type=type(source),
+            core_type=type(source.core),
+            pressure_layout=pressure_layout,
+            field_layout=field_layout,
+            pressure_leaf_count=len(pressure_leaves),
+            static_source=None,
+            common_sol=source.common_sol,
+            private_flux=source.private_flux,
+            normalisation=source.normalisation,
+        )
+        children = (
+            source.boundary_pressure,
+            source.boundary_field_function,
+            *pressure_leaves,
+            *field_leaves,
+        )
+        return layout, children
+
+    def rebuild(self, leaves: tuple[object, ...]) -> object:
+        if self.static_source is not None:
+            return self.static_source
+        boundary_pressure, boundary_field_function, *profile_leaves = leaves
+        pressure_leaves = tuple(profile_leaves[: self.pressure_leaf_count])
+        field_leaves = tuple(profile_leaves[self.pressure_leaf_count :])
+        core = object.__new__(self.core_type)
+        object.__setattr__(
+            core, "p_prime", self.pressure_layout.rebuild(pressure_leaves)
+        )
+        object.__setattr__(core, "ff_prime", self.field_layout.rebuild(field_leaves))
+        source = object.__new__(self.source_type)
+        object.__setattr__(source, "core", core)
+        object.__setattr__(source, "boundary_pressure", boundary_pressure)
+        object.__setattr__(source, "boundary_field_function", boundary_field_function)
+        object.__setattr__(source, "common_sol", self.common_sol)
+        object.__setattr__(source, "private_flux", self.private_flux)
+        object.__setattr__(source, "normalisation", self.normalisation)
+        return source
+
+
+@dataclass(frozen=True, eq=False)
+class _OperatorPytreeAux:
+    """Hashable geometry identity with the first member's host payload."""
+
+    identity: str
+    geometry_identity: str
+    operator_type: type = field(compare=False, repr=False)
+    source_layout: _SourceLayout = field(compare=False, repr=False)
+    static_state: dict[str, object] = field(compare=False, repr=False)
+    grid_null: object = field(compare=False, repr=False)
+    wall_null: object = field(compare=False, repr=False)
+    sample_null: object | None = field(compare=False, repr=False)
+    dynamic_extra_names: tuple[str, ...] = field(compare=False, repr=False)
+    prescribed: bool = field(compare=False, repr=False)
+    sample: bool = field(compare=False, repr=False)
+
+    def __hash__(self) -> int:
+        return hash(self.identity)
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, _OperatorPytreeAux) and self.identity == other.identity
+
+
+@dataclass(frozen=True)
+class ForwardOperatorBatch:
+    """A checked collection of forward operators and its execution route.
+
+    Operators with one geometry identity are stacked as a pytree for ``vmap``.
+    If identities differ, :meth:`map` runs the members sequentially through one
+    jitted callable; members sharing an identity reuse that callable's compiled
+    program while genuinely different geometries compile independently.
+    """
+
+    operators: tuple[ForwardFluxOperator, ...]
+    geometry_groups: tuple[tuple[int, ...], ...] = field(init=False)
+    stacked: ForwardFluxOperator | None = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        if not self.operators:
+            raise ValueError("an operator batch needs at least one member")
+        if not all(isinstance(item, ForwardFluxOperator) for item in self.operators):
+            raise TypeError("operator batch members must be ForwardFluxOperator values")
+        groups: dict[str, list[int]] = {}
+        for index, operator in enumerate(self.operators):
+            groups.setdefault(operator.geometry_identity, []).append(index)
+        object.__setattr__(
+            self, "geometry_groups", tuple(tuple(group) for group in groups.values())
+        )
+        stacked = None
+        if len(groups) == 1:
+            stacked = jax.tree_util.tree_map(
+                lambda *values: jnp.stack(values), *self.operators
+            )
+        object.__setattr__(self, "stacked", stacked)
+
+    @property
+    def geometry_identical(self) -> bool:
+        """Return whether all members share exactly one host geometry."""
+        return len(self.geometry_groups) == 1
+
+    @property
+    def width(self) -> int:
+        """Return the number of member operators."""
+        return len(self.operators)
+
+    def map(self, function: Callable, *member_arguments):
+        """Map one member solve over the checked operator collection."""
+        if self.stacked is not None:
+            return jax.vmap(function)(self.stacked, *member_arguments)
+        compiled = jax.jit(function)
+        results = []
+        for index, operator in enumerate(self.operators):
+            arguments = jax.tree_util.tree_map(
+                lambda value: value[index], member_arguments
+            )
+            results.append(compiled(operator, *arguments))
+        return tuple(results)
+
+
+def stack_forward_operators(operators) -> ForwardOperatorBatch:
+    """Assert batch geometry and select stacked or sequential execution."""
+    return ForwardOperatorBatch(tuple(operators))
+
+
+@jax.tree_util.register_pytree_node_class
 @dataclass
 class ForwardFluxOperator:
     """Map a trial poloidal flux to the flux its plasma current generates."""
@@ -859,22 +1139,44 @@ class ForwardFluxOperator:
         init=False, repr=False, default=None
     )
 
+    def __init_subclass__(cls, **kwargs):
+        """Give operator specialisations the same host/member pytree boundary."""
+        super().__init_subclass__(**kwargs)
+        jax.tree_util.register_pytree_node_class(cls)
+
     def __post_init__(self, prescribed_current_field: PrescribedCurrentField | None):
         """Build the topology read and default the material mask."""
         self.prescribed_field = prescribed_current_field
         self.external_current = jnp.asarray(self.external_current)
-        self.area = jnp.asarray(self.area)
-        if self.cell_average_stencil is not None:
-            self.cell_average_stencil = jnp.asarray(
-                self.cell_average_stencil, dtype=jnp.int32
+        if type(self.source) is ForwardSource:
+            object.__setattr__(
+                self.source,
+                "boundary_pressure",
+                jnp.asarray(self.source.boundary_pressure),
             )
-            self.cell_average_weight = jnp.asarray(
+            object.__setattr__(
+                self.source,
+                "boundary_field_function",
+                jnp.asarray(self.source.boundary_field_function),
+            )
+        self.area = _host_array(self.area, dtype=np.float64)
+        self.grid.null = _host_tree(self.grid.null)
+        self.wall.null = _host_tree(self.wall.null)
+        if self.sample is not None:
+            self.sample.null = _host_tree(self.sample.null)
+        if self.cell_average_stencil is not None:
+            self.cell_average_stencil = _host_array(
+                self.cell_average_stencil, dtype=np.int32
+            )
+            self.cell_average_weight = _host_array(
                 self.cell_average_weight, dtype=self.area.dtype
             )
         if self.inside_material is None:
-            self.inside_material = jnp.ones(self.grid.node_number, dtype=bool)
+            self.inside_material = _host_array(
+                np.ones(self.grid.node_number, dtype=bool)
+            )
         else:
-            self.inside_material = jnp.asarray(self.inside_material, dtype=bool)
+            self.inside_material = _host_array(self.inside_material, dtype=bool)
         try:
             raster_radius, raster_height = _structured_grid_axes(self.grid.coordinate)
         except ValueError:
@@ -882,8 +1184,8 @@ class ForwardFluxOperator:
             self._raster_height = None
             self._raster_shape = None
         else:
-            self._raster_radius = jnp.asarray(raster_radius, dtype=jnp.float64)
-            self._raster_height = jnp.asarray(raster_height, dtype=jnp.float64)
+            self._raster_radius = _host_array(raster_radius, dtype=np.float64)
+            self._raster_height = _host_array(raster_height, dtype=np.float64)
             self._raster_shape = (raster_radius.size, raster_height.size)
         if self.area.shape != (self.grid.node_number,):
             raise ValueError("area must carry one control area per grid node")
@@ -905,7 +1207,7 @@ class ForwardFluxOperator:
             if material_flag.any()
             else grid_coordinate_host.mean(axis=0)
         )
-        self._material_centroid = jnp.asarray(centroid, dtype=jnp.float64)
+        self._material_centroid = _host_array(centroid, dtype=np.float64)
         polygons = (
             self.moment_geometry.polygons
             if self.moment_geometry is not None
@@ -927,20 +1229,24 @@ class ForwardFluxOperator:
         edge_gather = edge_stencil.gather_index.reshape((*edge_points.shape[:-1], -1))
         edge_weight = edge_stencil.weight.reshape((*edge_points.shape[:-1], -1))
         topology_geometry = {
-            "connectivity_rings": jnp.asarray(partition_rings, dtype=jnp.int32),
-            "connectivity_shared_edges": jnp.asarray(partition_edges),
-            "connectivity_coordinate": jnp.asarray(self.grid.coordinate),
-            "connectivity_edge_gather": jnp.asarray(edge_gather, dtype=jnp.int32),
-            "connectivity_edge_weight": jnp.asarray(edge_weight),
+            "connectivity_rings": _host_array(partition_rings, dtype=np.int32),
+            "connectivity_shared_edges": _host_array(partition_edges),
+            "connectivity_coordinate": _host_array(self.grid.coordinate),
+            "connectivity_edge_gather": _host_array(edge_gather, dtype=np.int32),
+            "connectivity_edge_weight": _host_array(edge_weight),
         }
-        self.topology = Topology(self.grid.null, self.wall.null, **topology_geometry)
+        self.topology = _host_tree(
+            Topology(self.grid.null, self.wall.null, **topology_geometry)
+        )
         production_locator = self.grid.null.with_capacity(
             max(self.grid.null.maxsize, _PRODUCTION_STATIONARY_POINT_CAPACITY)
         )
-        self._fixed_design_topology = Topology(
-            _FixedDesignNull2D.from_locator(production_locator, self.polarity),
-            self.wall.null,
-            **topology_geometry,
+        self._fixed_design_topology = _host_tree(
+            Topology(
+                _FixedDesignNull2D.from_locator(production_locator, self.polarity),
+                self.wall.null,
+                **topology_geometry,
+            )
         )
         wall_to_cell_distance = np.sum(
             (
@@ -950,13 +1256,13 @@ class ForwardFluxOperator:
             ** 2,
             axis=-1,
         )
-        self._wall_carrier_index = jnp.asarray(
-            np.argmin(wall_to_cell_distance, axis=1), dtype=jnp.int32
+        self._wall_carrier_index = _host_array(
+            np.argmin(wall_to_cell_distance, axis=1), dtype=np.int32
         )
         wall_heights = np.unique(np.asarray(self.wall.coordinate[:, 1]))
         wall_steps = np.diff(wall_heights)
         positive_steps = wall_steps[wall_steps > 0.0]
-        self._wall_height_hysteresis = jnp.asarray(
+        self._wall_height_hysteresis = _host_array(
             0.25 * np.min(positive_steps)
             if positive_steps.size
             else np.sqrt(np.finfo(np.float64).eps),
@@ -968,7 +1274,7 @@ class ForwardFluxOperator:
         grid_steps = np.concatenate(
             (radial_steps[radial_steps > 0.0], vertical_steps[vertical_steps > 0.0])
         )
-        self._x_qualification_distance = jnp.asarray(
+        self._x_qualification_distance = _host_array(
             1.5 * np.max(grid_steps) if grid_steps.size else 0.0,
             dtype=self.area.dtype,
         )
@@ -996,6 +1302,203 @@ class ForwardFluxOperator:
                     "direct sample target rows must match the moment sampling nodes"
                 )
             self._build_support_moment_stencils()
+        for name in self._dynamic_extra_names():
+            setattr(self, name, jnp.asarray(getattr(self, name)))
+
+    def _dynamic_extra_names(self) -> tuple[str, ...]:
+        """Return specialised member scalars that must enter the trace as data."""
+        return tuple(
+            name
+            for name in ("declared_axis_flux", "declared_boundary_flux")
+            if name in self.__dict__
+        )
+
+    def _compute_geometry_identity(self) -> str:
+        """Return an exact digest of every host-owned geometry input."""
+        digest = hashlib.sha256()
+        digest.update(
+            f"{type(self).__module__}.{type(self).__qualname__}".encode("utf-8")
+        )
+        geometry = {
+            "grid_null": self.grid.null,
+            "wall_null": self.wall.null,
+            "sample_null": None if self.sample is None else self.sample.null,
+            "area": self.area,
+            "cell_average_stencil": self.cell_average_stencil,
+            "cell_average_weight": self.cell_average_weight,
+            "inside_material": self.inside_material,
+            "moment_geometry": self.moment_geometry,
+            "polarity": self.polarity,
+            "use_linear_moments": self.use_linear_moments,
+        }
+        dynamic_extras = set(self._dynamic_extra_names())
+        base_fields = {
+            "grid",
+            "wall",
+            "source",
+            "external_current",
+            "area",
+            "cell_average_stencil",
+            "cell_average_weight",
+            "polarity",
+            "inside_material",
+            "moment_geometry",
+            "sample",
+            "use_linear_moments",
+            "prescribed_field",
+        }
+        geometry["specialisation"] = {
+            name: value
+            for name, value in self.__dict__.items()
+            if name not in base_fields
+            and name not in dynamic_extras
+            and not name.startswith("_")
+        }
+        _digest_static_value(digest, "operator_geometry", geometry, set())
+        return digest.hexdigest()
+
+    @property
+    def geometry_identity(self) -> str:
+        """Return the exact identity used to admit a stacked member batch."""
+        return self._compute_geometry_identity()
+
+    def tree_flatten(self):
+        """Separate dynamic member arrays from immutable host geometry."""
+        source_layout, source_children = _SourceLayout.flatten(self.source)
+        dynamic_extra_names = self._dynamic_extra_names()
+        excluded = {
+            "grid",
+            "wall",
+            "sample",
+            "source",
+            "external_current",
+            "prescribed_field",
+            *dynamic_extra_names,
+        }
+        static_state = {
+            name: value for name, value in self.__dict__.items() if name not in excluded
+        }
+        prescribed = self.prescribed_field is not None
+        sample = self.sample is not None
+        geometry_identity = self.geometry_identity
+        identity = ":".join(
+            (
+                geometry_identity,
+                source_layout.identity,
+                f"prescribed={prescribed}",
+                f"sample={sample}",
+            )
+        )
+        aux = _OperatorPytreeAux(
+            identity=identity,
+            geometry_identity=geometry_identity,
+            operator_type=type(self),
+            source_layout=source_layout,
+            static_state=static_state,
+            grid_null=self.grid.null,
+            wall_null=self.wall.null,
+            sample_null=None if self.sample is None else self.sample.null,
+            dynamic_extra_names=dynamic_extra_names,
+            prescribed=prescribed,
+            sample=sample,
+        )
+        sample_children = (
+            (None, None, None, None)
+            if self.sample is None
+            else (
+                self.sample.source_target,
+                self.sample.plasma_target,
+                self.sample.plasma_target_r,
+                self.sample.plasma_target_z,
+            )
+        )
+        prescribed_children = (
+            (None, None)
+            if self.prescribed_field is None
+            else (self.prescribed_field.response, self.prescribed_field.current)
+        )
+        children = (
+            self.grid.source_target,
+            self.grid.plasma_target,
+            self.grid.plasma_target_r,
+            self.grid.plasma_target_z,
+            self.wall.source_target,
+            self.wall.plasma_target,
+            self.wall.plasma_target_r,
+            self.wall.plasma_target_z,
+            *sample_children,
+            self.external_current,
+            *prescribed_children,
+            *source_children,
+            *(getattr(self, name) for name in dynamic_extra_names),
+        )
+        return children, aux
+
+    @classmethod
+    def tree_unflatten(cls, aux: _OperatorPytreeAux, children):
+        """Rebuild a traced member while reusing the first member's geometry."""
+        del cls
+        (
+            grid_source,
+            grid_plasma,
+            grid_plasma_r,
+            grid_plasma_z,
+            wall_source,
+            wall_plasma,
+            wall_plasma_r,
+            wall_plasma_z,
+            sample_source,
+            sample_plasma,
+            sample_plasma_r,
+            sample_plasma_z,
+            external_current,
+            prescribed_response,
+            prescribed_current,
+            *tail,
+        ) = children
+        extra_count = len(aux.dynamic_extra_names)
+        source_tail = tuple(tail[:-extra_count] if extra_count else tail)
+        extra_values = tuple(tail[-extra_count:] if extra_count else ())
+        instance = object.__new__(aux.operator_type)
+        for name, value in aux.static_state.items():
+            setattr(instance, name, value)
+        instance.grid = FluxTarget(
+            grid_source,
+            grid_plasma,
+            aux.grid_null,
+            grid_plasma_r,
+            grid_plasma_z,
+        )
+        instance.wall = FluxTarget(
+            wall_source,
+            wall_plasma,
+            aux.wall_null,
+            wall_plasma_r,
+            wall_plasma_z,
+        )
+        instance.sample = (
+            FluxTarget(
+                sample_source,
+                sample_plasma,
+                aux.sample_null,
+                sample_plasma_r,
+                sample_plasma_z,
+            )
+            if aux.sample
+            else None
+        )
+        instance.source = aux.source_layout.rebuild(source_tail)
+        instance.external_current = external_current
+        if aux.prescribed:
+            prescribed_field = object.__new__(PrescribedCurrentField)
+            object.__setattr__(prescribed_field, "response", prescribed_response)
+            object.__setattr__(prescribed_field, "current", prescribed_current)
+            instance.prescribed_field = prescribed_field
+        else:
+            instance.prescribed_field = None
+        for name, value in zip(aux.dynamic_extra_names, extra_values, strict=True):
+            setattr(instance, name, value)
+        return instance
 
     def _build_support_moment_stencils(self) -> None:
         """Build the fixed own-node projection for every support."""

@@ -425,33 +425,19 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
         raise RuntimeError(
             f"the corrected-bank mixed arm did not converge: {mixed_residual:.6g}"
         )
-    endpoint_current = base_current.copy()
-    endpoint_current[circuit_index] *= 1.0 + SWEEP_FRACTIONS[0]
-    endpoint_seed = profile.solve_branch(
-        mixed_seed.state,
-        TopologyClass.DIVERTED,
-        route="newton_krylov",
-        prescribed_current=jnp.asarray(endpoint_current),
-        target_current=target_current,
-        tolerance=parity.FIXED_POINT_CRITERION,
-        newton_steps=parity.NEWTON_STEPS,
-        gmres_iterations=parity.GMRES_ITERATIONS,
-        warmup=parity.WARMUP_SWEEPS,
-        relaxation=parity.RELAXATION,
-        step_cap=parity.STEP_CAP,
+    # The sweep seeds from the converged base frame and every measured edit is
+    # a compiled-slice warm solve from the preceding terminal state; the only
+    # Newton-Krylov call left is this off-clock base-frame preparation, and it
+    # is not part of the interactive path the receipt measures.
+    reference_read = profile.operator.read(mixed_seed.state, TopologyClass.DIVERTED)
+    reference_masks, reference_topology = reference_read
+    reference_labelled = profile._labelled_flux(
+        mixed_seed.state, reference_masks, reference_topology
     )
-    jax.block_until_ready(endpoint_seed)
-    endpoint_residual = float(np.asarray(endpoint_seed.residual))
-    if not bool(np.asarray(endpoint_seed.converged)):
-        raise RuntimeError(
-            f"the minus-twenty-percent endpoint did not converge: "
-            f"{endpoint_residual:.6g}"
-        )
-    endpoint_labelled = endpoint_seed.equilibrium.labelled_flux
-    endpoint_lcfs_count = int(np.asarray(endpoint_labelled.lcfs_vertex_count))
+    reference_lcfs_count = int(np.asarray(reference_labelled.lcfs_vertex_count))
     prepared = {
-        "initial": endpoint_seed.equilibrium.flux,
-        "reference_lcfs": np.asarray(endpoint_labelled.lcfs)[:endpoint_lcfs_count],
+        "initial": mixed_seed.state,
+        "reference_lcfs": np.asarray(reference_labelled.lcfs)[:reference_lcfs_count],
         "prescribed_current": jnp.asarray(base_current),
         "target_current": target_current,
         "circuit_index": circuit_index,
@@ -465,17 +451,12 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
                 "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json"
             ),
         },
-        "endpoint_seed": {
-            "edit_fraction": float(SWEEP_FRACTIONS[0]),
-            "terminal_residual": endpoint_residual,
+        "sweep_seed": {
+            "edit_fraction": 0.0,
+            "terminal_residual": mixed_residual,
             "converged": True,
-            "trip_count": int(
-                np.asarray(endpoint_seed.equilibrium.fixed_point.active_set_iterations)
-            ),
-            "termination": _termination_name(
-                endpoint_seed.equilibrium.fixed_point.termination_reason
-            ),
-            "route": "production newton_krylov branch solve",
+            "route": "converged corrected-bank mixed frame at the shot current",
+            "reference_lcfs_vertex_count": reference_lcfs_count,
         },
         "reference": case["reference"],
         "policy": policy,
@@ -702,7 +683,7 @@ def run(
                 "boundary_displacement_m": boundary_displacement,
                 "boundary_displacement_source": displacement_source,
                 "warm_seed_source": (
-                    "minus-twenty-percent endpoint terminal state"
+                    "converged base frame at the shot current"
                     if index == 0
                     else "previous edit terminal state"
                 ),
@@ -887,13 +868,13 @@ def run(
                 "slice_index": SLICE_INDEX,
                 "time_s": float(prepared["reference"]["time_s"]),
                 "seed_policy": (
-                    "the converged corrected-bank mixed arm prepares the minus-"
-                    "twenty-percent endpoint; each of twenty two-percent edits "
-                    "starts from the preceding edit's terminal flux and re-enters "
-                    "the once-built compiled slice program"
+                    "the converged corrected-bank mixed frame at the shot current "
+                    "starts the sweep; each edit moves the position coil and "
+                    "re-enters the once-built compiled slice program from the "
+                    "preceding terminal flux"
                 ),
                 "seed_arm": prepared["mixed_seed"],
-                "sweep_start_endpoint": prepared["endpoint_seed"],
+                "sweep_seed": prepared["sweep_seed"],
                 "route": "compiled slice (reduced_newton compiled)",
                 "solver_policy": {
                     "tolerance": COMPILED_SLICE_TOLERANCE,

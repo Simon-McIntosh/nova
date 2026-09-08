@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-modified" content="2026-09-08">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 </head>
 <body>
 <main class="plan-doc">
@@ -95,9 +95,15 @@
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mulw-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-08" data-recommends-skill="/reckon-ship multi-unit-limiter-wall" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mulw-001" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-08" data-recommends-skill="/reckon-ship multi-unit-limiter-wall" data-resolved-at="2026-09-08T14:18:58+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Read the wall losslessly, then move the session to a reference, then make the solver&#x27;s consumers unit-aware</h4>
     <div class="r-fu-body">Order: §2 readers and fixtures with the ITER occurrence count as the first step; §4 the session reference in one schema move before any corpus relabel; §3 the solver consumers held for the lead; §5 the painters. Every node keeps the single-closed-ring machines bit-identical and exercises the JT-60SA and ITER descriptions plus the synthetic two-unit fixture as positive controls.</div>
+    <pre class="r-fu-prompt">/reckon-ship multi-unit-limiter-wall</pre>
+    <p class="r-fu-outcome">Three of the four ordered steps have landed and only the solver consumers remain, so this followup is superseded by one that carries just that. Section 2, readers and fixtures, landed as run r-20260908T030012137936: WallUnit gained vertex and closure validation, pack_wall_units keeps unit boundaries with offsets and inserts no joining edge, wall_units_from_ids reads every limiter unit with the IDS closure flag and endpoint identity as its fallback, Wall.boundary returns the sole vessel unit and refuses otherwise, and the fixtures carry JT-60SA at five units and the default ITER two with the four extra occurrences counted. Section 4, the session reference, landed at a505f8cb as run r-20260908T093126518146: the session now writes a wall reference group once per session recording the machine, the immutable description source and digest, the dictionary version and a coordinate-free table of unit shapes, and it never copies wall coordinates, with the containment receipt derived from that reference and strikes rebuilt from a segment index and along-segment parameter. Section 5, the painters, landed as run r-20260908T094018702518. The single-closed-ring machines stay bit-identical throughout, which was the regression contract.</p>
+    </article>
+<article class="r-fu" data-id="f-20260908T141858218363" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-08T14:19:00Z" data-recommends-skill="/reckon-ship multi-unit-limiter-wall" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make the solver&#x27;s consumers unit-aware, once the lead has said what an open limiter unit is allowed to do</h4>
+    <div class="r-fu-body">The last section of this plan, and the only one still open. It cannot be dispatched until the lead answers the plan's open question, because the answer decides what the node builds rather than merely how it is gated. The question is whether open limiter structures are admissible first-contact anchors for the limited boundary and whether their segments cast wall-height shadows like the vessel, or whether only the closed vessel ring is the anchor set. The coordinator's reading, offered for the lead to accept or overturn, is that a limiter is by definition where the plasma is limited, so its nodes are admissible anchors and its segments shadow like any other wall, with the unit index recorded on the receipt so it states which structure limited the plasma. If the lead takes the narrow reading instead, that a limiter unit is geometry the plasma must stay outside but never an anchor, then the consumers only need containment against the occupiable region and the anchor set is unchanged, which is a materially smaller node. Whichever way it goes, the node keeps every single-closed-ring machine bit-identical, exercises the JT-60SA five-unit and ITER two-unit descriptions plus the synthetic two-unit fixture as positive controls, and records the limiting unit index in the receipt so a later reader can tell which structure was responsible. The readers, the session reference and the painters are all landed, so nothing else blocks it.</div>
     <pre class="r-fu-prompt">/reckon-ship multi-unit-limiter-wall</pre>
     </article>
 </section>

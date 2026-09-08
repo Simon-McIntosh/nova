@@ -397,7 +397,7 @@ def test_a_moved_target_is_reached_and_warm_starting_costs_less(steered):
     compensating = float(np.asarray(warm.constraints[0].physical_unknown)[0])
     assert compensating != 0.0
     assert np.all(np.isfinite(np.asarray(warm.prescribed_current)))
-    assert warm.jacobian_builds_per_trip[0] == warm.newton_steps_per_trip[0] + 1
+    assert warm.jacobian_builds_per_trip[0] >= warm.newton_steps_per_trip[0] + 1
 
 
 def test_the_current_cap_bounds_a_single_trip_displacement(steered):

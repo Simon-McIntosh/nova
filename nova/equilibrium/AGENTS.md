@@ -161,3 +161,28 @@ Isolation and keying argument, kept here because it governs every consumer:
 Measurements of the root choice (node-local `/tmp` premise, cold-versus-warm
 compile wall across two allocations on the same host) live under
 `docs/figures/playable-forward-solve/compilation-cache/`.
+
+## Debug-lane handling for cache-sensitive reduced-state tests
+
+Run a named `tests/test_reduced_newton.py` case in one `all_debug` allocation
+when investigating a compilation-cache failure.  The allocation's shell
+script exports `TMPDIR=/tmp`, `JAX_PLATFORMS=cpu`, and the worktree on
+`PYTHONPATH`, then calls `/home/ITER/mcintos/Code/nova/.venv/bin/python -m
+pytest` directly; it never invokes `uv` on the compute node.  Give the script
+one test node ID and write its output to a file whose name includes
+`$SLURM_JOB_ID`.
+
+Normal measurements leave `NOVA_FORWARD_COMPILATION_CACHE_ROOT`,
+`JAX_COMPILATION_CACHE_DIR`, and `JAX_ENABLE_COMPILATION_CACHE` unset.  That
+selects the supported per-user, per-host cache under `~/.cache/nova`, where
+JAX can resolve cache-file group metadata while it evicts entries.  Do not
+point this lane at `/tmp` merely to make its cache private: that changes the
+cache lifetime and does not diagnose a program failure.
+
+For a cache-versus-program discriminator, additionally export
+`JAX_ENABLE_COMPILATION_CACHE=0` in that one-test allocation.  This disables
+the JAX compilation-cache read and write path; unsetting a cache-root override
+alone does not disable it because Nova supplies its supported default.  A test
+that passes in this mode but aborts with caching enabled is cache-path
+evidence, while a failure in both modes belongs to the test or its compiled
+program rather than the persistent cache.

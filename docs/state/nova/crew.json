@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T07:46:24",
+  "updated": "2026-09-08T08:10:43",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -128456,6 +128456,952 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T210150898056-pfs-solenoid-span-attribution",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-solenoid-span-attribution",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1811,
+                "cached_input_tokens": 651972,
+                "input_tokens": 653815,
+                "output_tokens": 672,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 654487,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/../playable/solenoid-span-attribution.md states, for the census rows already under docs/figures/playable-forward-solve/diverted-drift/ and docs/figures/limited-boundary-census/, the fraction of the fitted span-ratio slope against solenoid current accounted for by (a) the solenoid's direct flux image at the X-point and along the boundary per ampere from the vacuum response, (b) the saddle position relative to the grid's refined region as the solenoid ramps, and (c) the p_prime and ff_prime interpolation from the reference psi_norm grid onto nova's, each with the numbers and the method, and names the carrier or states plainly that none of the three carries it; the receipt under docs/figures/playable-forward-solve/solenoid-span/ carries the per-candidate tables; any vacuum-response solve runs on a debug partition with a per-job TMPDIR; no repair, no PNG read back, no tolerance from observed values",
+          "estimated_hours": 1.2,
+          "goal": "An attribution of the diverted span ratio's dependence on the solenoid current across the three named candidates, reported as the fraction of the fitted slope each accounts for",
+          "id": "pfs-solenoid-span-attribution",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T210150898056-pfs-solenoid-span-attribution/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/solenoid_span_attribution.py",
+            "docs/figures/playable-forward-solve/solenoid-span/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/solenoid-span-attribution.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-solenoid-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T21:02:00Z",
+        "completed_at": "2026-09-08T05:55:53.745Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 31850,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 32033,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "a23ac832fe27fd9fbea46773c9f18d3809164ebd",
+        "commits": [
+          "d2b0939295546f994298ae225b624dbb8de704a2"
+        ],
+        "changed_lines": {
+          "added": 672,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug benchmarks/solenoid_span_attribution.py (row census plus vacuum-response projection) EXIT=0; ruff check and format clean",
+          "exit_status": 0,
+          "log_path": "/tmp/saa_run.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T210150898056-pfs-solenoid-span-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "e5a3ae2c-671c-46e1-96d7-7e5f102b2fdf",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 23538447,
+            "input_tokens_cumulative": 23538447,
+            "output_tokens": 99943,
+            "output_tokens_cumulative": 99943,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 32029.673,
+          "generated_tokens": 99943,
+          "generation_seconds": 30621.491,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 24.8,
+          "machine_seconds": 1408.182,
+          "peak_input_tokens": 251655,
+          "tokens_per_second": 3.26,
+          "wall_tokens_per_second": 3.12
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-solenoid-span-attribution",
+          "session_id": "e5a3ae2c-671c-46e1-96d7-7e5f102b2fdf",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T05:55:53.745Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260908T054626462406-bob-merged-head-gate",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a71",
+        "node": "bob-merged-head-gate",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2520,
+                "cached_input_tokens": 313243,
+                "input_tokens": 315795,
+                "output_tokens": 3170,
+                "reasoning_output_tokens": 858,
+                "total_tokens": 318965,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "At the merged head of main (22c92f9c or later), the files tests/test_forward_operator_axes.py, tests/test_forward_operator_tangent.py, tests/test_batched_operator_boundary.py, tests/test_default_wiring.py, tests/test_forward_census.py, tests/test_route_solve_requests.py, tests/test_oracle_axis_admission.py and tests/test_stencil_mesh.py (skip any that does not exist and say so) each run as one fresh-process lane on a debug partition (one srun per file, --mem=48G, --cpus-per-task=4, TMPDIR=/tmp, UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider -m 'not slow', JAX_PLATFORMS=cpu), logs captured once under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/bob-merged-head-logs/; tests/test_equilibrium_forward_solve.py runs through scripts/h200_test_lane/run.sh --log /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/bob-merged-head-logs/forward-solve-h200.log --wait; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/bob-merged-head-gate.md tabulates per file collected, passed, failed, skipped, wall and exit status, names every failure with its first assertion line, and states for each whether it also fails at base 6fce8753 (compare against the pre-merge log if one exists in a run directory under ~/.config/reckon/crew/runs, otherwise state that the base comparison was not made); a lane that collects zero tests or skips on a missing-jax message is re-run with the environment fixed, never reported as green; no source or test file is changed",
+          "estimated_hours": 1.0,
+          "goal": "The operator geometry and member-data boundary verified at the merged head across the forward-operator test surface, judged by delta against the pre-merge base",
+          "id": "bob-merged-head-gate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T054626462406-bob-merged-head-gate/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/bob-merged-head-gate.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/bob-merged-head-logs/"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "bob-gate-t",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T05:46:41Z",
+        "completed_at": "2026-09-08T05:58:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 728,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 728,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "3492d9e30045e1a4ecab6e8860f4e5fa98410b20",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "seven CPU lanes on sirius_debug (none collected the target file) and scripts/h200_test_lane/run.sh on tests/test_equilibrium_forward_solve.py (29 collected, 3 passed, 26 errors: no CUDA backend)",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/bob-merged-head-logs/forward-solve-h200.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T054626462406-bob-merged-head-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07f8d-ea1c-78e2-9df2-b6375dd145ac",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2009600,
+            "cached_input_tokens_cumulative": 2009600,
+            "input_tokens": 2104250,
+            "input_tokens_cumulative": 2104250,
+            "output_tokens": 17526,
+            "output_tokens_cumulative": 17526,
+            "reasoning_output_tokens": 5839,
+            "reasoning_output_tokens_cumulative": 5839
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 23365,
+          "peak_input_tokens": 4113850
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "test role; no code change intended",
+        "resume_waiver": {
+          "session_id": "01a07f8d-ea1c-78e2-9df2-b6375dd145ac",
+          "source": "stream",
+          "reason": "the worker's two-attempt stop fired on two environment faults (an inherited UV_RUN_RECURSION_DEPTH duplicating --no-sync, then a quoting slip) and the shared environment had lost its CUDA JAX plugin to a peer's exact sync; the environment is repaired and a fresh node with a script-based lane recipe re-runs the gate"
+        },
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-merged-head-gate",
+          "session_id": "01a07f8d-ea1c-78e2-9df2-b6375dd145ac",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T05:58:49Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260908T053828973932-pfs-imas-position-reads",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-imas-position-reads",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1476,
+                "cached_input_tokens": 292599,
+                "input_tokens": 294107,
+                "output_tokens": 548,
+                "reasoning_output_tokens": 153,
+                "total_tokens": 294655,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "shadow-r-20260907T164832004647-pfs-imas-position-reads-claude-haiku"
+          },
+          "done_when": "Each of nova/imas/mast_chain_factory.py:174, nova/imas/diiid_machine_ids.py:158 and nova/imas/machine.py:1226 carries either a count check that raises or a one-sentence justification recorded in the report; one test per added guard proves a synthetic two-unit or two-description container raises rather than selecting silently; the existing MAST and DIII-D machine-description tests are unchanged and green; the exposure count of reads that were passing only because nothing checked is stated as a number; the report states what MAST's wall IDS contains",
+          "estimated_hours": 0.8,
+          "goal": "A verdict per position-selected read in nova/imas with a loud count guard where one belongs and the MAST wall IDS contents reported",
+          "id": "pfs-imas-position-reads",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T053828973932-pfs-imas-position-reads/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/imas/mast_chain_factory.py",
+            "nova/imas/diiid_machine_ids.py",
+            "nova/imas/machine.py",
+            "tests/test_imas_position_reads.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/imas-position-reads.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "shadow-haiku-1",
+        "backend": "claude-haiku",
+        "local": false,
+        "agent": {
+          "alias": "haiku 4.5",
+          "backend": "claude-haiku",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-haiku-4-5-20251001",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T05:38:35Z",
+        "completed_at": "2026-09-08T05:43:52.255Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 306,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 317,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [],
+        "changed_lines": {
+          "added": 147,
+          "removed": 3,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_imas.py tests/test_imas_position_reads.py on the login node: 10 passed, 8 skipped",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/shadow-r-20260907T164832004647-pfs-imas-position-reads-claude-haiku/pfs-imas-position-reads/test_position_reads.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "claude-haiku shadow of pfs-imas-position-reads (primary 7cb3b0fe): independent text, 28+3 source lines guarding the same three sites with count checks, six synthetic refusal tests passing; the existing machine-description checks it ran were 8 skipped of 12 on the login node, so the MAST and DIII-D reproduction tests did not execute (the primary's gate ran 24 unchanged plus 30 after with none skipped); MAST wall contents stated (one description, one limiter unit). No read of the landed commit (git diff of its own tree only). Wrote its report to the primary's report path, overwriting it (a shadow write-path defect shared with the terra and luna shadows). 5 min wall, load 11 at launch with 28 peer sessions.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T053828973932-pfs-imas-position-reads/manifest.md",
+        "scope_changed": false,
+        "session_id": "5ba5f600-9367-4ea0-b46c-6b1796bed143",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 87.0,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-10T18:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 81234,
+            "cache_creation_input_tokens_cumulative": 81234,
+            "cache_read_input_tokens": 3721851,
+            "cache_read_input_tokens_cumulative": 3721851,
+            "inference_geo": "not_available",
+            "input_tokens": 419,
+            "input_tokens_cumulative": 419,
+            "output_tokens": 19942,
+            "output_tokens_cumulative": 19942,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.6347821,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 0.6347821
+        },
+        "lineage": {
+          "configuration": {
+            "inherited": {
+              "effort": "high",
+              "launch": "cli",
+              "sandbox": "worktree-full",
+              "time_budget": "45m"
+            },
+            "substituted": {
+              "backend": {
+                "primary": "clive",
+                "shadow": "claude-haiku",
+                "via": "backend"
+              },
+              "model": {
+                "primary": "deepseek-v4-flash",
+                "shadow": "claude-haiku-4-5-20251001",
+                "via": "backend"
+              }
+            }
+          },
+          "kind": "shadow",
+          "primary_run_id": "r-20260907T164832004647-pfs-imas-position-reads"
+        },
+        "shadow_controlled": true,
+        "shadow_patch": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T053828973932-pfs-imas-position-reads/shadow.patch",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 313.912,
+          "generated_tokens": 19942,
+          "generation_seconds": 238.277,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 47.7,
+          "machine_seconds": 75.635,
+          "peak_input_tokens": 95388,
+          "tokens_per_second": 83.69,
+          "wall_tokens_per_second": 63.53
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "shadow",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/shadow-r-20260907T164832004647-pfs-imas-position-reads-claude-haiku/pfs-imas-position-reads",
+          "session_id": "5ba5f600-9367-4ea0-b46c-6b1796bed143",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T05:43:52.255Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260908T053945581129-pfs-psi-unit-label",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-psi-unit-label",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1476,
+                "cached_input_tokens": 292599,
+                "input_tokens": 294107,
+                "output_tokens": 548,
+                "reasoning_output_tokens": 153,
+                "total_tokens": 294655,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "shadow-r-20260907T203301948932-pfs-psi-unit-label-claude-haiku"
+          },
+          "done_when": "A test on the Solovev fixture asserts the frame's psi at the axis equals the solve's axis flux in Wb; the schema variable table, the netCDF attributes and the module header of nova/equilibrium/steering_frames.py state one unit (Wb, total flux, COCOS 17) with the per-radian wording removed everywhere; tests/test_steering_frames.py green in the default lane",
+          "estimated_hours": 0.4,
+          "goal": "One psi unit label in the session schema, settled from the values under COCOS 17",
+          "id": "pfs-psi-unit-label",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T053945581129-pfs-psi-unit-label/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "nova/equilibrium/steering_frames.py",
+            "tests/test_steering_frames.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "shadow-haiku-2",
+        "backend": "claude-haiku",
+        "local": false,
+        "agent": {
+          "alias": "haiku 4.5",
+          "backend": "claude-haiku",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-haiku-4-5-20251001",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T05:39:51Z",
+        "completed_at": "2026-09-08T05:46:19.268Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 379,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 388,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "d893138c54d541a8ae129e56eaaf535867c0ab57",
+        "commits": [],
+        "changed_lines": {
+          "added": 17,
+          "removed": 4,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/test_steering_frames.py -m 'not slow' on the login node: 17 passed, 1 deselected",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T053945581129-pfs-psi-unit-label/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "work-rejected",
+        "outcome": "claude-haiku shadow of pfs-psi-unit-label (primary 2e207735): relabelled the header, table and field registry to Wb and added a flux_unit attribute with an attribute-presence test (17 passed, 1 deselected), but did not write the observed axis-flux assertion the done-when names (psi at the axis equals the solve's axis flux in Wb), so the settled unit is asserted by label only; committed inside the shadow worktree against the no-commit contract; wrote a free-form markdown manifest whose status line the ledger could not parse, so the run read as abandoned. The attribute name flux_unit matches the primary's exactly; the stream shows no git show of the landed commit but the plan's run comments describing the landing were in its prompt. 6.5 min wall.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T053945581129-pfs-psi-unit-label/manifest.md",
+        "scope_changed": false,
+        "session_id": "b43dd513-23b8-47cb-b159-4d555f9de153",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 87.0,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-10T18:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 96213,
+            "cache_creation_input_tokens_cumulative": 96213,
+            "cache_read_input_tokens": 3806912,
+            "cache_read_input_tokens_cumulative": 3806912,
+            "inference_geo": "not_available",
+            "input_tokens": 379,
+            "input_tokens_cumulative": 379,
+            "output_tokens": 16263,
+            "output_tokens_cumulative": 16263,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.6548112000000001,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 0.6548112000000001
+        },
+        "lineage": {
+          "configuration": {
+            "inherited": {
+              "effort": "high",
+              "launch": "cli",
+              "sandbox": "worktree-full",
+              "time_budget": "30m"
+            },
+            "substituted": {
+              "backend": {
+                "primary": "clive",
+                "shadow": "claude-haiku",
+                "via": "backend"
+              },
+              "model": {
+                "primary": "deepseek-v4-flash",
+                "shadow": "claude-haiku-4-5-20251001",
+                "via": "backend"
+              }
+            }
+          },
+          "kind": "shadow",
+          "primary_run_id": "r-20260907T203301948932-pfs-psi-unit-label"
+        },
+        "shadow_controlled": true,
+        "shadow_patch": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T053945581129-pfs-psi-unit-label/shadow.patch",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 384.749,
+          "generated_tokens": 16263,
+          "generation_seconds": 217.589,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 57.1,
+          "machine_seconds": 167.16,
+          "peak_input_tokens": 114223,
+          "tokens_per_second": 74.74,
+          "wall_tokens_per_second": 42.27
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "shadow",
+        "no_commit": "shadow evidence never merges; the worker's commit 33a9fa25 stays in the shadow worktree",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/shadow-r-20260907T203301948932-pfs-psi-unit-label-claude-haiku/pfs-psi-unit-label",
+          "session_id": "b43dd513-23b8-47cb-b159-4d555f9de153",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T05:46:19.268Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260908T054059892165-pfs-session-wall-group",
+        "plan": "playable-forward-solve",
+        "section": "\u00a75",
+        "node": "pfs-session-wall-group",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1476,
+                "cached_input_tokens": 292599,
+                "input_tokens": 294107,
+                "output_tokens": 548,
+                "reasoning_output_tokens": 153,
+                "total_tokens": 294655,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "shadow-r-20260907T164751222645-pfs-session-wall-group-claude-haiku"
+          },
+          "done_when": "tests/test_steering_frames.py gains a test on a rasterless Solovev session asserting the wall group round-trips closed against the operator's own vertices to 1e-12 and a count assertion on a fixture carrying one out-of-vessel X-point and one on-boundary strike point (X-points tested by inclusion, strike points by proximity within a tolerance), both green in the default lane; the schema header names the polygon as the containment reference for the labelled points",
+          "estimated_hours": 0.8,
+          "goal": "The labeller session carries the wall polygon as its own closed group written once per session, with the receipt counting labelled points outside it",
+          "id": "pfs-session-wall-group",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T054059892165-pfs-session-wall-group/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/equilibrium/steering_frames.py",
+            "tests/test_steering_frames.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "shadow-haiku-3",
+        "backend": "claude-haiku",
+        "local": false,
+        "agent": {
+          "alias": "haiku 4.5",
+          "backend": "claude-haiku",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-haiku-4-5-20251001",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T05:41:07Z",
+        "completed_at": "2026-09-08T05:49:17.422Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 480,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 490,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [],
+        "changed_lines": {
+          "added": 68,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "uv run pytest tests/test_steering_frames.py -k 'not fixture_frame_carries' -xvs on the login node: 15 passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T054059892165-pfs-session-wall-group/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "work-rejected",
+        "outcome": "claude-haiku shadow of pfs-session-wall-group (primary cc06321f): stores the wall as session-level wall_r and wall_z variables with a closed-polygon check and a wall_from_session reader, round-trip test green (15 passed excluding the pre-existing fixture failure), 35+35 lines, independent design (the primary writes a wall group named as the containment reference); but the done-when's second half, a count assertion on a fixture carrying one out-of-vessel X-point and one on-boundary strike point, is absent, so the node is half delivered and reported complete. No read of the landed commit. 8 min wall. Its bare uv command from the worktree repointed the shared editable install at itself (repaired by the coordinator).",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T054059892165-pfs-session-wall-group/manifest.md",
+        "scope_changed": false,
+        "session_id": "6db52e1a-e3f2-40f4-9798-0cb84223c746",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 88.0,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-10T18:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 130435,
+            "cache_creation_input_tokens_cumulative": 130435,
+            "cache_read_input_tokens": 6071800,
+            "cache_read_input_tokens_cumulative": 6071800,
+            "inference_geo": "not_available",
+            "input_tokens": 459,
+            "input_tokens_cumulative": 459,
+            "output_tokens": 22207,
+            "output_tokens_cumulative": 22207,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.9795439999999996,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 0.9795439999999996
+        },
+        "lineage": {
+          "configuration": {
+            "inherited": {
+              "effort": "high",
+              "launch": "cli",
+              "sandbox": "worktree-full",
+              "time_budget": "45m"
+            },
+            "substituted": {
+              "backend": {
+                "primary": "clive",
+                "shadow": "claude-haiku",
+                "via": "backend"
+              },
+              "model": {
+                "primary": "deepseek-v4-flash",
+                "shadow": "claude-haiku-4-5-20251001",
+                "via": "backend"
+              }
+            }
+          },
+          "kind": "shadow",
+          "primary_run_id": "r-20260907T164751222645-pfs-session-wall-group"
+        },
+        "shadow_controlled": true,
+        "shadow_patch": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T054059892165-pfs-session-wall-group/shadow.patch",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 487.083,
+          "generated_tokens": 22207,
+          "generation_seconds": 280.052,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 74.2,
+          "machine_seconds": 207.031,
+          "peak_input_tokens": 148445,
+          "tokens_per_second": 79.3,
+          "wall_tokens_per_second": 45.59
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "shadow",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/shadow-r-20260907T164751222645-pfs-session-wall-group-claude-haiku/pfs-session-wall-group",
+          "session_id": "6db52e1a-e3f2-40f4-9798-0cb84223c746",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T05:49:17.422Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260907T212948474069-pfs-early-frame-placement-test",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-early-frame-placement-test",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1504,
+                "cached_input_tokens": 680631,
+                "input_tokens": 682167,
+                "output_tokens": 2153,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 684320,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/early-frame-placement-test.md tabulates for rows 15, 16 and 17 of 27079 (and rows 11 to 14 as unconverged controls) the free solve and the conditioned solve with the vertical current-centroid row imposed at efm current_centrd_z, each with the solve's axis R and Z beside EFIT's rmaxis and zmaxis, the wall node of first contact with its flux distance from the axis, and the enclosed-area ratio against the reconstruction, using the labeller's existing conditioning path and the candidate instrument in benchmarks/limited_anchor_containment.py rather than new machinery; it states whether the conditioned equilibrium contacts the lower wall near node 25 at a ratio near one or still contacts the upper wall; the receipt under docs/figures/playable-forward-solve/early-frame-placement/ carries the table; solves run on one card or a debug partition with at most 4 cores, a per-job TMPDIR and the persistent cache; no repair, no structure excluded by name, no PNG read back",
+          "estimated_hours": 1.2,
+          "goal": "A placement test on 27079 rows 15 to 17: the conditioned re-solve with the centroid row at EFIT's height read for its axis, first wall contact and enclosed area beside the free solve",
+          "id": "pfs-early-frame-placement-test",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T212948474069-pfs-early-frame-placement-test/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/early_frame_placement_test.py",
+            "docs/figures/playable-forward-solve/early-frame-placement/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/early-frame-placement-test.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-placement-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T21:29:59Z",
+        "completed_at": "2026-09-08T06:08:14.695Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 30831,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 31095,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "fe37623e1c8f3eba3216b47007eb1a5595d592ac",
+        "commits": [
+          "a696f48cae368f1ea6c5d1e70f0e2caa4bd53f00"
+        ],
+        "changed_lines": {
+          "added": 6040,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "SLURM job 1264748 on all_debug running benchmarks/early_frame_placement_test.py (7 rows by 3 arms) EXIT=0; import smoke and ruff check clean",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-early-frame-placement-test/docs/figures/playable-forward-solve/early-frame-placement/job.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T212948474069-pfs-early-frame-placement-test/manifest.md",
+        "scope_changed": false,
+        "session_id": "c49c8e26-b5a2-4d74-b99f-53d3f439c41e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 22000512,
+            "input_tokens_cumulative": 22000512,
+            "output_tokens": 102232,
+            "output_tokens_cumulative": 102232,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 22517025,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 31092.402,
+          "generated_tokens": 102232,
+          "generation_seconds": 29792.306,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 26.3,
+          "machine_seconds": 1300.096,
+          "peak_input_tokens": 267809,
+          "tokens_per_second": 3.43,
+          "wall_tokens_per_second": 3.29
+        },
+        "follow_on_paths": [
+          "15/17"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-early-frame-placement-test",
+          "session_id": "c49c8e26-b5a2-4d74-b99f-53d3f439c41e",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T06:08:14.695Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -128768,6 +129714,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2151
+    "_version": 2157
   }
 }

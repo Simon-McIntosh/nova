@@ -814,11 +814,14 @@ def test_legacy_copied_ring_reads_as_a_flagged_unknown_reference(tmp_path) -> No
     """An inline historical ring is exposed as one flagged vessel reference."""
 
     wall, _ = _wall_loop()
-    legacy = session_dataset((_synthetic_frame(0),)).assign(
-        wall_r=("wall_vertex", wall[:, 0]),
-        wall_z=("wall_vertex", wall[:, 1]),
-    )
+    legacy = session_dataset((_synthetic_frame(0),))
     legacy.to_netcdf(tmp_path / "legacy.nc", mode="w", group="steering")
+    xr.Dataset(
+        {
+            "wall_r": ("wall_vertex", wall[:, 0]),
+            "wall_z": ("wall_vertex", wall[:, 1]),
+        }
+    ).to_netcdf(tmp_path / "legacy.nc", mode="a", group=f"steering/{WALL_GROUP}")
 
     restored = read_session(filename="legacy", dirname=str(tmp_path))
     reference = wall_reference_from_session(restored)

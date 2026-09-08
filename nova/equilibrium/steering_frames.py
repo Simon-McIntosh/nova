@@ -1549,7 +1549,7 @@ def _reference_from_group(dataset: xr.Dataset) -> WallReference:
 
 
 def _read_wall_group(store: netCDF) -> WallReference | None:
-    """Return the session's coordinate-free wall reference, if present."""
+    """Return the current reference or convert an older copied subgroup."""
 
     subgroup = store.subgroup(WALL_GROUP)
     if subgroup is None:
@@ -1559,17 +1559,19 @@ def _read_wall_group(store: netCDF) -> WallReference | None:
             wall.load()
     except OSError, ValueError, KeyError:
         return None
+    if {"wall_r", "wall_z"}.issubset(wall.variables):
+        return _legacy_wall_reference_from_coordinates(
+            np.asarray(wall["wall_r"].values), np.asarray(wall["wall_z"].values)
+        )
     return _reference_from_group(wall)
 
 
-def _legacy_wall_reference(dataset: xr.Dataset) -> WallReference | None:
-    """Represent an inline copied ring as the flagged unknown-source legacy form."""
+def _legacy_wall_reference_from_coordinates(wall_r, wall_z) -> WallReference:
+    """Represent copied ring coordinates as the flagged unknown-source form."""
 
-    if "wall_r" not in dataset.variables or "wall_z" not in dataset.variables:
-        return None
     unit = WallUnit(
-        r=np.asarray(dataset["wall_r"].values),
-        z=np.asarray(dataset["wall_z"].values),
+        r=np.asarray(wall_r),
+        z=np.asarray(wall_z),
         kind="vessel",
         closed=True,
         name="legacy copied wall",
@@ -1585,6 +1587,16 @@ def _legacy_wall_reference(dataset: xr.Dataset) -> WallReference | None:
         unit_closed_flags=(True,),
         unit_kinds=("vessel",),
         legacy_copied_wall=True,
+    )
+
+
+def _legacy_wall_reference(dataset: xr.Dataset) -> WallReference | None:
+    """Represent an inline copied ring as the flagged unknown-source legacy form."""
+
+    if "wall_r" not in dataset.variables or "wall_z" not in dataset.variables:
+        return None
+    return _legacy_wall_reference_from_coordinates(
+        dataset["wall_r"].values, dataset["wall_z"].values
     )
 
 

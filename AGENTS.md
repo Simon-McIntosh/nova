@@ -75,9 +75,25 @@ add a hundred packages the environment never carried.
   before pytest because an inherited `UV_NO_SYNC` or `UV_RUN_RECURSION_DEPTH`
   duplicated their explicit `--no-sync`. A lane script therefore begins with
   `unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH` and then passes `--no-sync`
-  explicitly, so the recipe does not depend on the launcher's environment. On
-  the H200 node the `uv` wrapper injects `--no-sync` itself, so payloads there
-  run the root `.venv` python directly rather than through `uv run`.
+  explicitly, so the recipe does not depend on the launcher's environment.
+
+- **On any SLURM compute node, do not invoke `uv` at all.** The wrapper there
+  injects `--no-sync` itself, so a payload that also passes the flag dies before
+  Python starts and the job log is empty. This is not an H200 quirk: two workers
+  lost an allocation to it on `all_debug` in one wave, each reporting only that
+  the allocation exited before pytest. Run the shared environment's interpreter
+  directly and set the rest through the environment:
+
+  ```bash
+  srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=64G \
+    bash -lc 'export TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=<worktree>; \
+      /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest \
+        -p no:cacheprovider <targets>' > <log> 2>&1; echo EXIT=$?
+  ```
+
+  `PYTHONPATH` is what makes the worktree's code shadow the editable install,
+  which is the job `--directory` would otherwise do. The `uv run --no-sync`
+  recipe above is for login-node work in a worktree, and only there.
 
 ### Pre-commit Hooks Require Virtual Environment
 

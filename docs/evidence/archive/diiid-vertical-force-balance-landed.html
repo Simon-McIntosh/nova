@@ -165,6 +165,13 @@
     axis motion on 179 and 44 with the X-point moving the other way points at the solver's branch and vertical-mode behaviour, which section 3 takes up on the
     corrected topology read.</p>
   </section>
+<section id="frame-144-stalls-on-the-diverted-branch-with-its-landmarks-retained"><h2>Frame 144 stalls on the diverted branch with its landmarks retained (2026-09-08 07:26Z)</h2>
+<p>Node <code>dvf-frame144-two-field-gate</code> (codex-terra, spec guided; commits <code>8f0325bf</code>, <code>37fecec7</code>, merged at <code>b3012bd1</code>).</p>
+<p><strong>Result.</strong> The eleven-frame single-shot gate reports residual convergence and branch persistence as two separate fields per row, each machine's error column labelled with its own denominator (MAST: EFIT label peak-to-peak span; DIII-D: centred EFIT label RMS) and cross-machine comparison forbidden, and refuses any run whose rows lost the banked topology read. Rerun on the H200 (job 1264901, 33 minutes, 55 compilation-cache hits): one of eleven rows residual-converged, none of the five DIII-D rows; persistence is unevaluable on an isolated static solve and never turns a converged frame into a nonconverged one.</p>
+<p><strong>Frame 144.</strong> Under the contained X-point read the frame is diverted, not limited. Its single-shot residual is 0.018 against a tolerance of 1e-6 and its solve-against-label error 4.8 times the banked label Grad-Shafranov floor. The dual-branch diagnostic shows the diverted branch stalling at residual 5.9 and the limited branch at 0.020, so neither branch is valid, while the terminal axis and X-point keep the EFIT-seeded landmarks to round-off and the terminal-boundary centroid moves 0.17 m: a boundary-shape change under residual stall. All five DIII-D frames classify inside the label Grad-Shafranov inconsistency, so the missing-external-field hypothesis stays unsupported and the prescribed-profile prototype is the live line.</p>
+<figure><img src="/nova/figures/diiid-vertical-force-balance/two-field-gate/frames/diiid-d3d_shot_001554e054-frame-144.png" alt="Frame 144 of the DIII-D gate: solved boundary against the EFIT label with the retained axis and X-point"><figcaption>Frame 144: the solved boundary against the EFIT label, axis and X-point retained while the boundary centroid drops.</figcaption></figure>
+<p>Receipt: <code>docs/figures/diiid-vertical-force-balance/two-field-gate/single_shot_gate_receipt.json</code> (sha256 521a3ffd). Report: <code>~/.config/reckon/crew/reports/nova/s19-labeller/frame144-two-field-gate.md</code>.</p>
+</section>
 </main>
 </body>
 </html>

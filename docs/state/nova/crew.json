@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T18:10:56",
+  "updated": "2026-09-08T18:29:01",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3182,6 +3182,15 @@
         "created": "2026-09-07"
       },
       {
+        "id": "pfs-axisflux-l",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "pfs-batch-l",
         "harness": "codex",
         "role": "implement",
@@ -3399,6 +3408,15 @@
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07da1-e5df-75f2-9197-2e84b0dfdfc7"
         },
         "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-dtype-site-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "pfs-engine-l",
@@ -137220,6 +137238,318 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T150423545563-nia-rebank-certificate-and-bank",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-rebank-certificate-and-bank",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 748,
+                "cached_input_tokens": 525568,
+                "input_tokens": 526318,
+                "output_tokens": 2733,
+                "reasoning_output_tokens": 654,
+                "total_tokens": 529051,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "SUBMIT THE ALLOCATION EARLY. A separate instrumentation session is watching for this job to appear in the queue, so once you have confirmed the two drivers exist and your launch script is written, submit it as your first substantive action rather than after extended preparation. Do the reading and the receipt assembly while it runs. THE SHAPE OF THE JOB, which is fixed by the reservation and must not be widened. Exactly ONE allocation on partition betelgeuse under reservation gpu_0003_grpA with --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=01:00:00. Never --mem=0, which SLURM reads as the whole 1.5 TB and leaves the job pending on Resources while blocking the queue behind it. Do not ask for more than one card or more than eight cores: three cards are free and the reservation's thirty-core budget already carries twenty-one cores of serving jobs, so eight is what fits and a larger request would pend and block others. THE MEASUREMENT. Regenerate both at current main, which is at or after 82949087, with the pre-settlement acceptance default and the persistent compilation cache ON through nova.equilibrium.solve_request.default_forward_compilation_cache_root exactly as the benchmarks do. The sixteen certificate rungs come from benchmarks/solovev_certificate.py and the twelve-row MAST bank from docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py. Expected on the bank: 21985 slice 51 axes at R about 0.90 m and no row raising NoQualifiedAxisError. Report per rung and per row the terminal residual, the source amplitude, the converged flag, and whether either raised. ONE COST WARNING that decides how you split the work. The carry repair at 8c2c4b27 is in main and raised a diverted -110 trip from 48.07 to 283.17 seconds on CPU, a factor of 5.89, which timed out every repaired MAST producer job at 55:19 on all_debug. The card should absorb that, but if the twelve bank rows will not fit inside the hour alongside the certificate, run the certificate first, persist it, and say plainly that the bank did not fit and why. Persist each rung and each row to its own JSON the moment it lands so a timeout loses only the remainder. LAUNCH MECHANICS that have each cost an allocation today. Pass JAX_PLATFORMS=cuda,cpu inside the wrapped command or the payload script, never through --export, which splits on commas and delivers only cuda plus an empty variable named cpu. Export TMPDIR=/tmp inside the job and never a path under /run/user, which is node-local to the login node and cannot be created on a compute node. Use --chdir on your worktree and pass the checkout root explicitly, because sbatch spools the script so a root derived from BASH_SOURCE resolves into the spool directory. Do not invoke uv on the compute node at all, because its wrapper injects --no-sync and a second one kills the job before Python starts: call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH. Write the payload to a file and run it by path rather than inline, because an escape character leaking through shell quoting killed one job today. Give the log a filename carrying the job id. Assert x64 is enabled inside the measurement rather than trusting it. Never submit the same job twice; check squeue before relaunching one that appears to have failed. AFTER SUBMITTING, park rather than poll: write the manifest with status waiting and all five wait fields, wait_condition as one line naming the job, wait_probe as a JSON argv array printing only the state such as [\"sacct\",\"-j\",\"1234\",\"-n\",\"-X\",\"-o\",\"State\"], wait_terminal as a JSON array [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"], wait_started_at as an unquoted UTC ISO stamp, and resume_brief; then end your turn.",
+          "estimated_hours": 2.0,
+          "goal": "One H200 measurement regenerating the sixteen-row Solovev certificate together with the twelve-row MAST corroboration bank at current main",
+          "id": "nia-rebank-certificate-and-bank",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/rebank-certificate-and-bank.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/rebank-certificate-and-bank"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "nia-rebank-h200-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T15:04:34Z",
+        "completed_at": "2026-09-08T16:21:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4645,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4645,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "76b74ce3a8ad3f9b61178a1e651aa30c76e31644",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sbatch betelgeuse gpu_0003_grpA gpu:1 8 cores 128G 01:00:00, job 1267132, certificate-only payload with partial aggregation and validation",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/rebank-certificate-and-bank/logs/rebank-1267132.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/triage/rebank-certificate-and-bank.md",
+        "scope_changed": false,
+        "session_id": "01a0818c-aad0-7331-afea-e209eb2a2200",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1083264,
+            "cached_input_tokens_cumulative": 1083264,
+            "input_tokens": 1248037,
+            "input_tokens_cumulative": 1248037,
+            "output_tokens": 6902,
+            "output_tokens_cumulative": 6902,
+            "reasoning_output_tokens": 1902,
+            "reasoning_output_tokens_cumulative": 1902
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T16:21:59Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 47.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T16:21:59Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 1083264,
+          "cumulative_input_tokens": 2331301,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 8804
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "scope_acceptances": null,
+        "no_commit": "measurement node: the deliverable is six per-rung receipts, a schema-valid partial certificate, a timing record and figures under the crew reports tree, and the brief forbade any source change",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-rebank-certificate-and-bank",
+          "session_id": "01a0818c-aad0-7331-afea-e209eb2a2200",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T16:21:59Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T144426818608-bob-edge-constants-batching-invariant",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a71",
+        "node": "bob-edge-constants-batching-invariant",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 265,
+                "cached_input_tokens": 478230,
+                "input_tokens": 478497,
+                "output_tokens": 1866,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 480363,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The diagnosis is finished and this node is the aimed repair that follows from it, so do not re-derive it and do not reach for a custom batching rule: three were tried, each failed differently, and a sequential rule would preserve the bits by declining to batch, which buys identity at the cost of the property this plan exists to deliver. THE MECHANISM, already measured. The closure receives the edge width and both edge slopes as CLOSED CONSTANTS, precomputed once. The ordinary batched dynamic-leaf program instead derives them per member inside the mapped region, adding three subtractions and two floating-point divisions. At the first differing index 3687, at the point 1.0003512506652474 which lies above the upper boundary, the differing operation is the batched upper-edge-slope division, and its result differs from the carried constant by exactly one binary64 unit in the last place: closure bits 4666937442140132115 against batched bits 4666937442140132114. Nine of 3759 outputs differ, at a maximum absolute difference of 1.8189894035458565e-12, and those last bits carry the MAST pure-member terminal hash from 69309c0b to 8edbf1d1. Neither side is more accurate than the other. THE REPAIR. Derive the edge width and both edge slopes once, in one place, so that both the unbatched and the batched paths consume the same values rather than one recomputing what the other carried in. Whatever form that takes, the test is that the mapped region performs no arithmetic to obtain a quantity the unbatched path received ready-made. Fix the second defect in the same node, since it lives in the same seam: the derivative path currently leaks an extra member axis and returns shape (2,3759) where (3759,) is expected, and that case is presently marked as a strict expected failure in tests/test_sampled_flux_batching.py. When you fix it, remove the expected-failure marker rather than leaving it, because a strict marker turns an unexpected pass into a failure. GATES, in this order. First the nine differences must go to zero against the same correct control, which compares the original closure with its grid and values closed over as constants against the ordinary batched dynamic-leaf evaluator; that control is only valid if it reproduces the nine differences BEFORE your change, so run it first and report that it did. Second, the twelve MAST bank members must be bit-identical between the compiled and host routes. Third, both MAST terminal hashes must match the closure receipt, the pure member returning to 69309c0b and the mixed member staying at f7a52009. Assert inside the measurement that x64 is enabled rather than trusting the environment, because nova enables it lazily through configure_dtypes in nova/jax/config.py and two allocations were lost to a standalone script silently running in single precision, which would make every comparison here meaningless. Run on all_debug at --time=00:59:00 with JAX_PLATFORMS=cpu, never the login node, and no H200 at any point. On a compute node do not invoke uv at all, because its wrapper injects --no-sync and a second one kills the job before Python starts: call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH. Write any measurement script to a file and run it by path rather than passing it inline, because an escape character leaking through shell quoting killed one allocation. Never call sbatch or srun twice for the same job, checking squeue before relaunching one that appears to have failed; launching a different job later in the same turn is fine and there is no per-turn budget.",
+          "estimated_hours": 2.5,
+          "goal": "Sampled interpolation whose arithmetic is identical whether or not it is batched, with the derivative path returning the unbatched shape",
+          "id": "bob-edge-constants-batching-invariant",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/edge-constants-batching-invariant.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/solve_request.py",
+            "tests/test_sampled_flux_batching.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "bob-edgeconst-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T14:44:36Z",
+        "completed_at": "2026-09-08T16:25:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 6047,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 6047,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "54b262eabb3f8eb40d378b4608ce3a61afdf2079",
+        "commits": [
+          "422633c39aeae8a13146cbe697054caa2b26d417",
+          "99d12d30e7a8cc2f458514de83ba92da8a25dcde"
+        ],
+        "changed_lines": {
+          "added": 146,
+          "removed": 51,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "failed",
+        "gate_check": {
+          "command": "all_debug job 1267171: same-process width-one MAST pure and mixed members through the closure and sampled routes, terminal state hashes compared",
+          "exit_status": 1,
+          "log_path": null,
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/edge-constants-batching-invariant.md",
+        "scope_changed": false,
+        "session_id": "01a0817a-6574-7b63-9245-a6b14f4b7d8b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 714624,
+            "cached_input_tokens_cumulative": 714624,
+            "input_tokens": 957853,
+            "input_tokens_cumulative": 957853,
+            "output_tokens": 4657,
+            "output_tokens_cumulative": 4657,
+            "reasoning_output_tokens": 882,
+            "reasoning_output_tokens_cumulative": 882
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T16:25:23Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 47.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T16:25:23Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 714624,
+          "cumulative_input_tokens": 1672477,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 5539
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-edge-constants-batching-invariant",
+          "session_id": "01a0817a-6574-7b63-9245-a6b14f4b7d8b",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T16:25:23Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -137532,6 +137862,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2277
+    "_version": 2281
   }
 }

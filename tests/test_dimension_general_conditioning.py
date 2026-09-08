@@ -15,14 +15,18 @@ with skip_import("jax"):
     import jax.numpy as jnp
 
     from nova.equilibrium.fixed_point import newton_krylov
+    from nova.jax.config import Precision, configure_dtypes
 
 
 def _diagonal_fixed_point(condition: float, dimension: int):
     """Return a linear map with a logarithmically distributed action spectrum."""
-    diagonal = jnp.exp(jnp.linspace(0.0, -jnp.log(condition), dimension))
+    configure_dtypes()
+    dtype = jnp.float64
+    condition = jnp.asarray(condition, dtype=dtype)
+    diagonal = jnp.exp(jnp.linspace(0.0, -jnp.log(condition), dimension, dtype=dtype))
     action = jnp.diag(diagonal)
-    tangent = jnp.eye(dimension) - action
-    offset = jnp.ones(dimension)
+    tangent = jnp.eye(dimension, dtype=dtype) - action
+    offset = jnp.ones(dimension, dtype=dtype)
     return lambda state: tangent @ state + offset
 
 
@@ -36,6 +40,7 @@ def _solve(condition: float, dimension: int, *, ratio_limit: float = math.e):
         warmup=0,
         step_cap=1.0e6,
         krylov_condition_limit=ratio_limit,
+        precision=Precision.DOUBLE,
     )
 
 
@@ -54,6 +59,7 @@ def test_resolved_spectral_ratio_stays_undamped_at_every_dimension(dimension: in
         float(conditioned.maximum_projected_krylov_condition), 200.0, rtol=3.0e-6
     )
     # A trusted linear solve stays undamped; only an unresolved solve may condition.
+    assert conditioned.state.dtype == control.state.dtype == jnp.float64
     np.testing.assert_array_equal(conditioned.state, control.state)
 
 

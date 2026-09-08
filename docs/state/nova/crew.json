@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T09:03:30",
+  "updated": "2026-09-08T09:10:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4108,9 +4108,11 @@
         "id": "scr-casecurrent-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07fd5-4fb9-7a21-bb0f-c4109d8b6884",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a07fd5-4fb9-7a21-bb0f-c4109d8b6884"
+        },
         "created": "2026-09-07"
       },
       {
@@ -130385,6 +130387,152 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T064857170343-pfs-compensator-jacobian-response",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-compensator-jacobian-response",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2222,
+                "cached_input_tokens": 514175,
+                "input_tokens": 516429,
+                "output_tokens": 2734,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 519163,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "A benchmark under benchmarks/compensator_jacobian_response.py, run on a debug partition with a per-job TMPDIR and JAX_PLATFORMS=cpu, takes MAST 27079 row 16 and flat-top row 96 and, for the circuit p6_upper and for the antisymmetric p6 combination (p6_upper minus p6_lower), reports side by side (a) the constraint Jacobian entry d centroid_z / d I that the labeller's _centroid_pair machinery in scripts/labeller_batch/shard.py produces at the frame's seed (read and call that code, do not re-implement it; the compensator-authority receipt under docs/figures/playable-forward-solve/compensator-authority/ shows how) and (b) the finite-difference response obtained by re-solving the free equilibrium through the same route the labeller uses with that circuit's prescribed current perturbed by plus and minus 1 kA, everything else held fixed, reading the current centroid height from each converged solve and dividing the central difference by 2 kA, with the convergence status and residual of each perturbed solve stated; the receipt under docs/figures/playable-forward-solve/compensator-jacobian/ tabulates per row and circuit both derivatives and their ratio; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/compensator-jacobian-response.md states plainly whether the finite-difference response exceeds the Jacobian entry by one order or more (the Jacobian omits the plasma response) or agrees within a factor of two (the centroid is genuinely insensitive), with the numbers; if a perturbed solve does not converge, say so and report the derivative from the converged pair only or state that no pair converged; no repair; no PNG read back; no tolerance set from observed values; every uv command carries --no-sync and nothing runs uv sync",
+          "estimated_hours": 1.5,
+          "goal": "Whether the centroid compensator Jacobian carries the plasma's free vertical response, decided by a finite-difference re-solve against the constraint's own Jacobian entry on two frames",
+          "id": "pfs-compensator-jacobian-response",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T064857170343-pfs-compensator-jacobian-response/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/compensator_jacobian_response.py",
+            "docs/figures/playable-forward-solve/compensator-jacobian/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/compensator-jacobian-response.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-jacobian-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T06:49:43Z",
+        "completed_at": "2026-09-08T07:04:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 915,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 915,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "55af2b26db064a89a6d7b01f45bcbe985c2b5f5e",
+        "commits": [
+          "6a978cb0d792f3b21e120977d6c3831c7125b9ed"
+        ],
+        "changed_lines": {
+          "added": 2369,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug --cpus-per-task=4 TMPDIR=/tmp JAX_PLATFORMS=cpu benchmarks/compensator_jacobian_response.py (job 1264929, 3 min, exit 0); ruff check and py_compile",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-compensator-jacobian-response/docs/figures/playable-forward-solve/compensator-jacobian/compensator-jacobian-response.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T064857170343-pfs-compensator-jacobian-response/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07fc7-a10d-72c2-96e7-7ebc049d9710",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6699264,
+            "cached_input_tokens_cumulative": 6699264,
+            "input_tokens": 6910617,
+            "input_tokens_cumulative": 6910617,
+            "output_tokens": 26950,
+            "output_tokens_cumulative": 26950,
+            "reasoning_output_tokens": 6576,
+            "reasoning_output_tokens_cumulative": 6576
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 6699264,
+          "cumulative_input_tokens": 13609881,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 33526
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-compensator-jacobian-response",
+          "session_id": "01a07fc7-a10d-72c2-96e7-7ebc049d9710",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T07:04:58Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -130697,6 +130845,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2172
+    "_version": 2174
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T17:58:22",
+  "updated": "2026-09-08T18:10:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -136742,6 +136742,484 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T154731392311-pfs-frame-fixture-green",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-frame-fixture-green",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3330,
+                "cached_input_tokens": 555690,
+                "input_tokens": 559022,
+                "output_tokens": 1271,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 560293,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The named test in tests/test_steering_frames.py that checks a fixture frame carries every decoder field fails on the debug partition because the Solovev fixture solve it builds its frame from does not converge, so the assertion on convergence fires before any frame-assembly code runs at all. The same test was red earlier in the sprint on a different assertion, a malformed flux-surface equality, so this file has carried a red slow test across several nodes and every node since has had to argue causal isolation instead of reading a delta. That is the real cost and why this is worth a node. Settle it. Run the test alone on all_debug with the persistent compilation cache on, and answer the question the test is currently begging: is the fixture solve EXPECTED to converge under the current promotion policy? If it is expected to converge and does not, that is a solver finding and you should report it as one rather than adjusting the test. If it is not expected to converge, then the test is asserting the wrong thing, because it exists to check that a frame carries every decoder field and not to re-litigate convergence, so it should assert the receipt it actually wants and build its frame from a state that is legitimately reachable. Say which of those two it is with the evidence before changing anything. Then fix whichever is wrong, the test or the fixture, and record the wall time so the file has a green slow lane again and the next node can read a delta. Do not weaken an assertion merely to get green: if the frame genuinely does not carry every decoder field, that is the finding and the test is doing its job. Change no solver source. Run on all_debug with --time=00:59:00, JAX_PLATFORMS=cpu, TMPDIR exported as /tmp inside the job and never a path under /run/user. Assert x64 is enabled inside the measurement rather than trusting it. On a compute node call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH, never uv, running any payload from a file rather than inline. Give each job its own log filename carrying its job id. Never submit the same job twice; a different job later in the same turn is fine and there is no per-turn budget. If you park, write status waiting with all five wait fields and wait_started_at unquoted in UTC exactly like 2026-09-08T16:00:00Z, because a quoted or offset stamp makes the whole declaration unreadable.",
+          "estimated_hours": 1.5,
+          "goal": "A green slow lane for the steering-frames file, with the fixture test asserting the thing it actually wants",
+          "id": "pfs-frame-fixture-green",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/frame-fixture-green.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "tests/test_steering_frames.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-framefixture-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T15:47:43Z",
+        "completed_at": "2026-09-08T16:00:09Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 746,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 746,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9e38c86282029da442bc6b25f89fb01d40a03865",
+        "commits": [
+          "912d2287fd8e55e81c7fe0f1c67341e7d391edcc",
+          "a57f4c009f7c0e91b788922bec389999ff1446fa"
+        ],
+        "changed_lines": {
+          "added": 13,
+          "removed": 12,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug job 1267169: pytest tests/test_steering_frames.py::test_fixture_frame_carries_every_decoder_field with x64 asserted in the driver",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T154731392311-pfs-frame-fixture-green/steering-frame-fixture-1267169.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/frame-fixture-green.md",
+        "scope_changed": false,
+        "session_id": "01a081b4-2ad3-7f20-bead-fa00ac771936",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8910592,
+            "cached_input_tokens_cumulative": 8910592,
+            "input_tokens": 9137044,
+            "input_tokens_cumulative": 9137044,
+            "output_tokens": 26976,
+            "output_tokens_cumulative": 26976,
+            "reasoning_output_tokens": 8160,
+            "reasoning_output_tokens_cumulative": 8160
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T16:00:09Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 46.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T16:00:09Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 8910592,
+          "cumulative_input_tokens": 18047636,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 35136
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "Run the test",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-frame-fixture-green",
+          "session_id": "01a081b4-2ad3-7f20-bead-fa00ac771936",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T16:00:09Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T145026573996-dvf-frame144-two-field-gate-2",
+        "plan": "diiid-vertical-force-balance",
+        "section": "\u00a73",
+        "node": "dvf-frame144-two-field-gate-2",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1115,
+                "cached_input_tokens": 491979,
+                "input_tokens": 493096,
+                "output_tokens": 1834,
+                "reasoning_output_tokens": 362,
+                "total_tokens": 494930,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "Two parts on one driver, benchmarks/diiid_forward_gs_match.py, now that the containment-aware topology read has landed. FIRST, root-cause why frame 144 reads limited on the corrected topology read and name the mechanism, judged against the verdict that section 2 of null-identification-authority reached. A named mechanism means the specific geometric or flux condition that makes the read choose limited, stated with the numbers that show it, not a restatement that it chose limited. SECOND, split the gate into two fields per frame rather than one verdict: residual convergence and branch persistence are different failures and a single column cannot express a frame that converges on the wrong branch or persists on the right one without converging. Report both per frame across the eleven frames. Normalise the MAST and DIII-D error columns onto one stated denominator, or label each column with its own denominator, but do not leave them silently different, because a reader comparing two columns normalised differently draws a conclusion neither supports. State the normalisation per row. One thing to know before you measure, so a surprise is not misdiagnosed. That driver now builds its profile through the sampled flux representation rather than a closure, which was landed deliberately so profiles are member data rather than static operator identity. That representation carries a known batching defect currently under repair in a separate node: derived per member, its edge slope differs from the closure's carried constant by one unit in the last place, moving nine of 3759 outputs by up to 1.8e-12. A single-frame gate should not batch and so should not see it, but if you meet a last-bit difference of that size, report it as the known defect rather than as your finding, and say which. Run every gate on all_debug at --time=00:59:00 with JAX_PLATFORMS=cpu, never the login node, exporting TMPDIR=/tmp inside the job and never a path under /run/user, which is node-local to the login node and cannot be created on a compute node. Assert x64 is enabled inside the measurement rather than trusting the environment, because nova enables it lazily through configure_dtypes in nova/jax/config.py. On a compute node do not invoke uv at all: call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH. Give every job its own log filename carrying its job id so a retry cannot overwrite the record of the attempt before it, and persist each frame's result as it lands. Never call sbatch or srun twice for the same job; launching a different job later in the same turn is fine and there is no per-turn budget.",
+          "estimated_hours": 2.5,
+          "goal": "A named mechanism for frame 144's limited reading, with the gate reporting residual convergence and branch persistence as separate fields per frame",
+          "id": "dvf-frame144-two-field-gate-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/diiid/frame144-two-field-gate.md",
+          "plan": "diiid-vertical-force-balance",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/diiid_forward_gs_match.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "dvf-frame144-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T14:50:36Z",
+        "completed_at": "2026-09-08T16:00:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4218,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4218,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "65f776ad2b4f193aaf0400c9359d8a76e5a803de",
+        "commits": [
+          "d3ac6b1d89ac209e90d276797f559cff5ffdf074"
+        ],
+        "changed_lines": {
+          "added": 4,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused pytest tests/test_diiid_forward_gs_match.py (8 passed) plus the StableHLO lowering probe job 1267136",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/diiid/mast-stablehlo-1267136.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/diiid/frame144-two-field-gate.md",
+        "scope_changed": false,
+        "session_id": "01a0817f-e23e-7e32-b9a8-4a24361bc825",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2455168,
+            "cached_input_tokens_cumulative": 2455168,
+            "input_tokens": 2469072,
+            "input_tokens_cumulative": 2469072,
+            "output_tokens": 8048,
+            "output_tokens_cumulative": 8048,
+            "reasoning_output_tokens": 1652,
+            "reasoning_output_tokens_cumulative": 1652
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T16:00:54Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 46.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T16:00:54Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2455168,
+          "cumulative_input_tokens": 4924240,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 9700
+        },
+        "follow_on_paths": [
+          "tests/test_diiid_forward_gs_match.py",
+          "/tmp",
+          "/run/user/39486",
+          "/tmp;",
+          "TMPDIR=/tmp",
+          "/run/user."
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/dvf-frame144-two-field-gate-2",
+          "session_id": "01a0817f-e23e-7e32-b9a8-4a24361bc825",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T16:00:54Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T141348272492-pfs-solenoid-fourth-channel",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-solenoid-fourth-channel",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1835,
+                "cached_input_tokens": 363409,
+                "input_tokens": 365246,
+                "output_tokens": 2079,
+                "reasoning_output_tokens": 701,
+                "total_tokens": 367325,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The diverted span ratio depends on solenoid current with an R-squared of 0.497 over 43,017 census rows, and three candidates have already been excluded at under one percent of the fitted slope each: the direct solenoid image, the grid, and the profile interpolation. What remains must sit in how the forward-solved equilibrium itself departs from the EFIT reference as the discharge evolves. Test three candidates. The prescribed profile amplitude against the declared plasma current. The boundary flux selected by the topology read. The conductor-current source, fitted against transducer, which the case-current work on solver-convergence-regression already measured as reducing minimum compensation from 1775.02 A to 1313.57 A. Design it as a paired projection in the same shape as the landed benchmark, on the same census rows, holding the solenoid current fixed within each arm so the arms differ only in the candidate. Report the fraction of the slope each candidate accounts for, with its own R-squared, and say plainly whether they sum to the slope or leave a remainder. A fourth outcome is legitimate and must be reported as readily as the others: that the slope is a property of the reference labels rather than of the solve, in which case say what evidence distinguishes that from a solve-side cause. This is diagnosis only, so change no solver source, and never read a PNG back. Run on all_debug at --time=00:59:00 with JAX_PLATFORMS=cpu, never the login node. On a compute node do not invoke uv at all, because its wrapper injects --no-sync and a second one kills the job before Python starts: call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH. Assert x64 is on inside the measurement rather than trusting the environment, because nova enables it lazily through configure_dtypes in nova/jax/config.py and a standalone script that never reaches a caller runs in float32. Call sbatch or srun exactly once in a turn: that is an idempotency guard, not a budget for the node, and a resume grants a fresh allocation. Persist each arm as its own JSON as it lands.",
+          "estimated_hours": 2.0,
+          "goal": "The fraction of the diverted span-ratio slope on solenoid current that each remaining candidate accounts for",
+          "id": "pfs-solenoid-fourth-channel",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/solenoid-fourth-channel.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/solenoid-fourth-channel"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-solenoid4-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T14:13:59Z",
+        "completed_at": "2026-09-08T16:08:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 6896,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "fb62fb294de384997706b405ac41f85cbb581e04",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug paired-projection arms: jobs 1267053 profile, 1267115 boundary, 1267123 conductor, 1267176 summary, x64 asserted in every receipt",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/solenoid-fourth-channel/measurement-1267123.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/solenoid-fourth-channel.md",
+        "scope_changed": false,
+        "session_id": "01a0815e-5aa2-7470-8fdc-4738908a8241",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 34952960,
+            "cached_input_tokens_cumulative": 34952960,
+            "input_tokens": 35784508,
+            "input_tokens_cumulative": 35784508,
+            "output_tokens": 53413,
+            "output_tokens_cumulative": 53413,
+            "reasoning_output_tokens": 8758,
+            "reasoning_output_tokens_cumulative": 8758
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T16:08:55Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 47.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T16:08:55Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 34952960,
+          "cumulative_input_tokens": 70737468,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 62171
+        },
+        "follow_on_paths": [
+          "axis-flux/current-distribution"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": "measurement node: the deliverable is a summary receipt plus three per-arm JSON files under the crew reports tree, and the brief forbade any solver change",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-solenoid-fourth-channel",
+          "session_id": "01a0815e-5aa2-7470-8fdc-4738908a8241",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T16:08:55Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -137054,6 +137532,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2274
+    "_version": 2277
   }
 }

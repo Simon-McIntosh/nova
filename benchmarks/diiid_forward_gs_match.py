@@ -713,7 +713,7 @@ def banked_read_summary(
     def point(value: Any) -> list[float] | None:
         try:
             result = np.asarray(value, dtype=float)
-        except TypeError | ValueError:
+        except (TypeError, ValueError):
             return None
         return (
             result.tolist()
@@ -723,7 +723,7 @@ def banked_read_summary(
 
     try:
         reference_points = np.asarray(reference_x_points_rz_m, dtype=float)
-    except TypeError | ValueError:
+    except (TypeError, ValueError):
         reference_points = np.empty((0, 2), dtype=float)
     if reference_points.ndim != 2 or reference_points.shape[1] != 2:
         reference_points = np.empty((0, 2), dtype=float)
@@ -761,7 +761,7 @@ def banked_failed_read_summary(
     def point(value: Any) -> list[float] | None:
         try:
             result = np.asarray(value, dtype=float)
-        except TypeError | ValueError:
+        except (TypeError, ValueError):
             return None
         return (
             result.tolist()
@@ -771,7 +771,7 @@ def banked_failed_read_summary(
 
     try:
         reference_points = np.asarray(reference_x_points_rz_m, dtype=float)
-    except TypeError | ValueError:
+    except (TypeError, ValueError):
         reference_points = np.empty((0, 2), dtype=float)
     if reference_points.ndim != 2 or reference_points.shape[1] != 2:
         reference_points = np.empty((0, 2), dtype=float)

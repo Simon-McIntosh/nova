@@ -172,3 +172,23 @@ def test_banked_failed_read_summary_carries_exception_text():
     assert block["read_exception_text"] == "synthetic axis disqualification"
     serialized = json.dumps(block, allow_nan=False)
     assert "synthetic axis disqualification" in serialized
+
+
+def test_banked_failed_read_summary_serialises_malformed_reference_as_null():
+    """A non-numeric reference point must fall back to a null position.
+
+    The reference serialisation catches the conversion failure and emits null
+    rather than letting a malformed point crash the receipt row.
+    """
+    block = banked_failed_read_summary(
+        axis_rz_m=None,
+        x_point_rz_m=None,
+        axis_flux_wb=float("nan"),
+        reference_axis_rz_m="bad",
+        reference_x_points_rz_m="bad",
+        read_status="NoQualifiedAxisError",
+        read_exception_text="synthetic axis disqualification",
+    )
+    assert block["reference_axis_rz_m"] is None
+    assert block["reference_x_points_rz_m"] == []
+    json.dumps(block, allow_nan=False)

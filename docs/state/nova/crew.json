@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T16:24:06",
+  "updated": "2026-09-08T16:42:59",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3265,9 +3265,11 @@
         "id": "pfs-centroid4cm-l",
         "harness": "codex-luna",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a08160-3a4f-7b60-8e50-13f23c3c009d",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a08160-3a4f-7b60-8e50-13f23c3c009d"
+        },
         "created": "2026-09-08"
       },
       {
@@ -136180,6 +136182,197 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T105718217333-bob-exit-incidence-batch-4",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a72",
+        "node": "bob-exit-incidence-batch-4",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2115,
+                "cached_input_tokens": 843756,
+                "input_tokens": 845873,
+                "output_tokens": 1534,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 847407,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The semantic operator identity landed at 811148e7 removes the pytree metadata mismatch that stopped the DIII-D pair stacking; benchmarks/strict_exit_incidence.py already carries the batched mode, the unified cache-against-bank comparison and the allocation-free self-check from commits 77b12a4e and 773c768e, which you should read from the git history of this file rather than rebuild. FIRST, with JAX_PLATFORMS=cpu and no allocation, rerun the reduced-width self-check at the current head, at least two MAST members and two DIII-D members with both strict-exit passes, and confirm the DIII-D program now compiles as one program rather than falling back; fix and commit any defect it exposes, and state in the report which defects the CPU proof caught this time. ONLY AFTER that passes, submit ONE H200 allocation for the real widths (MAST twelve, DIII-D five) as one sbatch on betelgeuse under gpu_0003_grpA with --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:55:00, TMPDIR=/tmp, JAX_PLATFORMS=cuda,cpu, the persistent compilation cache, invoking /home/ITER/mcintos/Code/nova/.venv/bin/python directly; call sbatch exactly once in the turn and if you have already called it never call it again whatever the shell returned; park immediately with all five wait fields (wait_condition naming the job, wait_probe as a JSON argv array printing only the state via sacct with the job number and the flags -n -X -o State, wait_terminal as the JSON array of COMPLETED FAILED CANCELLED TIMEOUT OUT_OF_MEMORY NODE_FAIL, wait_started_at unquoted UTC ISO, resume_brief) and end your turn. The receipt under docs/figures/batched-operator-boundary/exit-incidence/ records per program and per pass the compile seconds and compile count, peak host RSS per stage from resource.getrusage with the verdict against 16 GB, per-member firing trip, and milliseconds per member beside the sequential width-one figure in docs/figures/millisecond-converged-solve/strict-exit-incidence.json; the memory verdict is a headline result rather than a footnote, because the identity node measured DIII-D member construction at 2.14 to 4.31 GiB and the CPU proof measured width-two MAST at 4449 MiB, so whether width twelve holds under 16 GB is genuinely open; a member falling back to the sequential route names its geometry digest. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/exit-incidence-batch.md. No PNG read back; no tolerance from observed values; every uv command on the login node carries --no-sync and nothing runs uv sync; commit at each deliverable with a conventional subject and body and no attribution trailer",
+          "estimated_hours": 2.0,
+          "goal": "The strict-exit incidence measured at the real bank widths on one H200 allocation, with the CPU proof rerun first now that operator identity is semantic",
+          "id": "bob-exit-incidence-batch-4",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T105718217333-bob-exit-incidence-batch-4/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/strict_exit_incidence.py",
+            "tests/test_strict_exit_incidence.py",
+            "docs/figures/batched-operator-boundary/exit-incidence/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/batched-operator-boundary/exit-incidence-batch.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "bob-batch4-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T10:57:27Z",
+        "completed_at": "2026-09-08T14:39:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 13348,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "7c7fea1a97ae30f10530b1b5518b0454567459fe",
+        "commits": [
+          "463dd0609b522b9fa3f41ff716b9236bef818fa2",
+          "2270673f9b0f5f93e7fb388f4938194fadc5bc7c",
+          "3467a104dd328206ba73defaa0e29df9ee847ef4",
+          "62562397d2ceb5853cbeb1787ab17ee68b7ce6c3",
+          "f1f65a7a57c2dca2a48dd42caf1d2662168edcd7",
+          "84f2401de7662ea04f84618229ec99dd64b97401",
+          "f5de60dc53b61dec13475120ddb5deb33c06f190",
+          "1325268b2c0ea14c7612b4fb833504e3f1d00908",
+          "cc1f6bb1749ce6bd9abf5f130ed6b8ccec0f5fe9",
+          "c732dd5c2dacbb57b191cdf1b1f43fb4ac7adf82",
+          "472f327b121173df7ec3963ae694c72755561ffc",
+          "60e61811c124091eece41eeb09c18e0362c3f517",
+          "46087af9a1777e24364f96b7da71fa9472631d2e",
+          "fb73b408f8b642e7832f734cc811ed3c0eaddbb2",
+          "6c788e6a4fd81a055c60c54cb6972f6eceb873c1",
+          "03bcc887c9ad2a7d06899979c8570a13186c29a7"
+        ],
+        "changed_lines": {
+          "added": 1751,
+          "removed": 57,
+          "files": 7
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug direct-python state check: pytest tests/test_forward_solve_request.py plus the correct-control jaxpr diagnostic",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T105718217333-bob-exit-incidence-batch-4/logs/sampled-profile-final-diagnostic.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T105718217333-bob-exit-incidence-batch-4/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a080aa-6e78-7f11-8a0d-97c82c048d7a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2557824,
+            "cached_input_tokens_cumulative": 2557824,
+            "input_tokens": 2566484,
+            "input_tokens_cumulative": 2566484,
+            "output_tokens": 4280,
+            "output_tokens_cumulative": 4280,
+            "reasoning_output_tokens": 383,
+            "reasoning_output_tokens_cumulative": 383
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T14:39:55Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 40.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T14:39:55Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2557824,
+          "cumulative_input_tokens": 5124308,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 4663
+        },
+        "follow_on_paths": [
+          "tests/test_batched_operator_boundary.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 23,
+        "scope_acceptances": [
+          {
+            "path": "benchmarks/diiid_forward_gs_match.py",
+            "reason": "Central to the node's own purpose rather than incidental: it routes the DIII-D profile tables through the sampled representation so profiles become member data instead of static operator identity, which is the section-1 contract this node exists to prove."
+          },
+          {
+            "path": "nova/equilibrium/solve_request.py",
+            "reason": "Scope extension I granted mid-flight when the node proved the terminal-hash move lives in the batching of the sampled flux function rather than in its values; this file holds that function and the three attempted batching rules."
+          },
+          {
+            "path": "tests/test_sampled_flux_batching.py",
+            "reason": "Granted with the same extension as the new characterisation test for that seam; it now carries the x64 assertion and the strict expected failure naming the residual derivative axis defect."
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-exit-incidence-batch-4",
+          "session_id": "01a080aa-6e78-7f11-8a0d-97c82c048d7a",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T14:39:55Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -136492,6 +136685,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2261
+    "_version": 2263
   }
 }

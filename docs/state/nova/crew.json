@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T16:48:00",
+  "updated": "2026-09-08T17:45:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -182,9 +182,11 @@
         "id": "bob-edgeconst-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0817a-6574-7b63-9245-a6b14f4b7d8b",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a0817a-6574-7b63-9245-a6b14f4b7d8b"
+        },
         "created": "2026-09-08"
       },
       {
@@ -1193,6 +1195,17 @@
         "session_id": null,
         "session_model": null,
         "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
+        "id": "dvf-frame144-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": "01a0817f-e23e-7e32-b9a8-4a24361bc825",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a0817f-e23e-7e32-b9a8-4a24361bc825"
+        },
         "created": "2026-09-08"
       },
       {
@@ -2852,6 +2865,17 @@
         "created": "2026-09-05"
       },
       {
+        "id": "nia-rebank-h200-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": "01a0818c-aad0-7331-afea-e209eb2a2200",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a0818c-aad0-7331-afea-e209eb2a2200"
+        },
+        "created": "2026-09-08"
+      },
+      {
         "id": "nia-rebank-x3",
         "harness": "codex",
         "role": "implement",
@@ -3200,6 +3224,15 @@
         "created": "2026-09-07"
       },
       {
+        "id": "pfs-cacheabort-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "pfs-cacheloc-c",
         "harness": "clive",
         "role": "implement",
@@ -3377,6 +3410,15 @@
           "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a07837-6c8b-7813-b2fb-05dd9564b40a"
         },
         "created": "2026-09-06"
+      },
+      {
+        "id": "pfs-framefixture-l",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "pfs-frames-x",
@@ -3847,9 +3889,11 @@
         "id": "pfs-solenoid4-l",
         "harness": "codex-luna",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0815e-5aa2-7470-8fdc-4738908a8241",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a0815e-5aa2-7470-8fdc-4738908a8241"
+        },
         "created": "2026-09-08"
       },
       {
@@ -136848,6 +136892,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2265
+    "_version": 2273
   }
 }

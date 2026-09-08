@@ -33,7 +33,9 @@ from benchmarks.mast_response_carrier_warm import (
     DEFAULT_CARRIER as DEFAULT_MAST_RESPONSE_CARRIER,
 )
 from benchmarks.mast_response_carrier_warm import load_carrier
-from nova.equilibrium.topology import TopologyClass
+from nova.equilibrium.observation import ConstraintViolationError
+from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
+from nova.imas.mast_efit_referee import read_efit_referee
 from nova.jax.config import (
     configure_persistent_compilation_cache,
     default_persistent_compilation_cache_root,
@@ -496,6 +498,33 @@ def _mast_rows(
             value = float(np.sqrt(np.mean(field**2)))
         shot = int(reference["shot"])
         slice_index = int(reference["slice_index"])
+        referee = read_efit_referee(shot, store=mast.SHOT_STORE)
+        referee_axis = np.asarray(referee.magnetic_axis_m[slice_index], dtype=float)
+        referee_x_points = np.asarray(referee.x_points_m[slice_index], dtype=float)
+        referee_x_points = referee_x_points[np.isfinite(referee_x_points).all(axis=1)]
+        try:
+            read_topology = profile.operator.read(equilibrium.flux)[1]
+            banked_read = diiid.banked_read_summary(
+                profile.operator,
+                equilibrium.flux,
+                axis_rz_m=np.asarray(read_topology.axis, dtype=float),
+                x_point_rz_m=np.asarray(read_topology.x_point, dtype=float),
+                axis_flux_wb=float(read_topology.axis_flux),
+                boundary_flux_wb=float(read_topology.boundary_flux),
+                reference_axis_rz_m=referee_axis,
+                reference_x_points_rz_m=referee_x_points,
+                read_status="qualified_axis",
+            )
+        except (NoQualifiedAxisError, ConstraintViolationError) as error:
+            banked_read = diiid.banked_failed_read_summary(
+                axis_rz_m=None,
+                x_point_rz_m=None,
+                axis_flux_wb=float("nan"),
+                reference_axis_rz_m=referee_axis,
+                reference_x_points_rz_m=referee_x_points,
+                read_status=type(error).__name__,
+                read_exception_text=str(error),
+            )
         name = f"mast-{shot}-row-{slice_index}.png"
         with _timed_stage("figure", stage_timings, frame=frame_label, visible=visible):
             _plot_pair(
@@ -550,6 +579,7 @@ def _mast_rows(
                     ),
                 },
                 "solver_qualification": solver_qualification,
+                "banked_read": banked_read,
                 "compile_warm_wall_seconds": elapsed,
                 "stage_timings_seconds": stage_timings,
                 "compile_cache": compile_cache,
@@ -673,6 +703,7 @@ def _diiid_rows(
                     "termination": result.solver_termination,
                     "marginal_solver_basin": False,
                 },
+                "banked_read": result.banked_read,
                 "compile_warm_wall_seconds": elapsed,
                 "stage_timings_seconds": stage_timings,
                 "compile_cache": compile_cache,

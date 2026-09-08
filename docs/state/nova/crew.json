@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T04:19:13",
+  "updated": "2026-09-08T04:28:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1897,6 +1897,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "mcs-quantum-c2",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "mcs-quantum-remeasure",
         "harness": "codex",
         "role": "implement",
@@ -1914,7 +1923,8 @@
         "session_id": "bf6f1c25-dc0a-4d5d-a3b9-e14bc2bcaf7e",
         "session_model": "deepseek-v4-flash",
         "sessions": {
-          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "bf6f1c25-dc0a-4d5d-a3b9-e14bc2bcaf7e"
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "bf6f1c25-dc0a-4d5d-a3b9-e14bc2bcaf7e",
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "0ad17f75-2969-487b-8fba-ad34bcb34806"
         },
         "created": "2026-09-06"
       },
@@ -4761,6 +4771,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-07"
+      },
+      {
+        "id": "wall-units-x",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "warm-neighbour",
@@ -125125,6 +125144,290 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T165338820236-mcs-trip-quantum-compiled",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "mcs-trip-quantum-compiled",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 963,
+                "cached_input_tokens": 372762,
+                "input_tokens": 373757,
+                "output_tokens": 268,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 374025,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "benchmarks/trip_quantum_width_one.py runs the host route and the compiled slice route (solve_reduced_newton_compiled) as two arms in one H200 job with the persistent compilation cache on and a per-job TMPDIR; the receipt under docs/figures/millisecond-converged-solve/trip-quantum/ reports per member wall a solve, trips and the boundary against synchronisation split for both routes plus the width-1024 baselines; the compiled route shows one boundary cost per solve rather than per trip or the deviation is stated",
+          "estimated_hours": 1.0,
+          "goal": "The per-trip quantum re-measured at width one with the compiled slice route as a second arm in the same H200 job",
+          "id": "mcs-trip-quantum-compiled",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165338820236-mcs-trip-quantum-compiled/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "benchmarks/trip_quantum_width_one.py",
+            "docs/figures/millisecond-converged-solve/trip-quantum/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/trip-quantum-compiled.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "mcs-quantum-x",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T16:53:45Z",
+        "completed_at": "2026-09-08T02:23:38.400Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 34172,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 34193,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [
+          "4b7179c3e0b41ba5e06c149d224d806f604bee17",
+          "e0d97e950218360e402041df037ac23ea4aad563",
+          "2456c03f527d6d2e18eb9c3e43cd37d5d7d7795b"
+        ],
+        "changed_lines": {
+          "added": 3979,
+          "removed": 80,
+          "files": 9
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165338820236-mcs-trip-quantum-compiled/manifest.md",
+        "scope_changed": false,
+        "session_id": "0ad17f75-2969-487b-8fba-ad34bcb34806",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 0,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 0,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 9.82,
+          "generated_tokens": 0,
+          "generation_seconds": 0.0,
+          "machine_seconds": 9.82,
+          "wall_tokens_per_second": 0.0
+        },
+        "follow_on_paths": [
+          "nova/equilibrium/reduced_newton.py",
+          "21989/55",
+          "22086/43"
+        ],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/mcs-trip-quantum-compiled",
+          "session_id": "0ad17f75-2969-487b-8fba-ad34bcb34806",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T02:23:38.400Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260907T192425446804-wall-units-scout",
+        "plan": "null-identification-authority",
+        "section": "\u00a72",
+        "node": "wall-units-scout",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2953,
+                "cached_input_tokens": 543622,
+                "input_tokens": 546577,
+                "output_tokens": 2918,
+                "reasoning_output_tokens": 1660,
+                "total_tokens": 549495,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/wall-units-scout.md written incrementally from the first grep lists (a) every site in nova/ scripts/ benchmarks/ apps/ that indexes description_2d or limiter.unit or consumes the wall outline as one closed polygon, each with file:line and its role (IMAS reader, wall node set for the wall-extremum anchor rule, shadow mask, polygon containment, session schema wall group, poloidal painter, FrameSpace first wall), (b) how the vessel accessor already iterates units, (c) for each machine description reachable on this workstation (nova imasdb entries, the persisted DIII-D machine description netCDF, the MAST wall IDS, the imas-ambix challenge corpus and any ITER description) the count of description_2d entries and limiter units and whether the units are closed or open polylines, obtained by opening the IDS with imas-python or reading the persisted netCDF and never by guessing, and (d) a one-line fitness verdict per consumer on what multi-unit support would require; no file read in full, no plan HTML read, report under 200 lines",
+          "estimated_hours": 0.6,
+          "goal": "An inventory of every consumer of the single-limiter-polygon assumption in nova and of the machines in reach whose wall IDS stores the first wall as multiple limiter units",
+          "id": "wall-units-scout",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T192425446804-wall-units-scout/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/wall-units-scout.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "wall-units-scout-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T19:24:41Z",
+        "completed_at": "2026-09-08T02:23:56.584Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 24938,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 25155,
+        "stalled": true,
+        "time_budget": "30m",
+        "base_sha": "d1e5e03dadb3bac362a10e4b079a93af0beb42ae",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T192425446804-wall-units-scout/manifest.md",
+        "scope_changed": false,
+        "session_id": "448a2157-014e-4354-b339-cf1a2a421be1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 11623411,
+            "input_tokens_cumulative": 11623411,
+            "output_tokens": 44931,
+            "output_tokens_cumulative": 44931,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 25152.021,
+          "generated_tokens": 44931,
+          "generation_seconds": 25064.585,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 18.0,
+          "machine_seconds": 87.436,
+          "peak_input_tokens": 182618,
+          "tokens_per_second": 1.79,
+          "wall_tokens_per_second": 1.79
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/wall-units-scout",
+          "session_id": "448a2157-014e-4354-b339-cf1a2a421be1",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T02:23:56.584Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -125437,6 +125740,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2098
+    "_version": 2103
   }
 }

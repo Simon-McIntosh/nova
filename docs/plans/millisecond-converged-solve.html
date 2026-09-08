@@ -22,8 +22,8 @@
 <title>Millisecond converged solve | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-07">
-<meta name="plan-version" content="37">
+<meta name="plan-modified" content="2026-09-08">
+<meta name="plan-version" content="38">
 <meta name="plan-impl" content="0.5">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd">
 </head>
@@ -139,6 +139,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260906T155154456153-msc-frozen-partition-hooks" data-who="msc-hooks-l" data-when="2026-09-07T05:11:33Z">
     <div class="r-comment-body"><p>frozen-partition hooks made reachable on the public bank-row route (main merge of abb502b1): flux_map_with_shadow attaches the read and map hooks for point-current maps without linear moments (the construction that keeps the moment geometry independent of the revaluation); paired H200 measurement in one job over the four rows: 67 s with hooks against 1,231 s without (94.5 percent saving, 94 to 95 per row), converged flags and terminal residuals unchanged (all four end on the active-set budget or a cycle in both arms); tests/test_recovery_frozen_partition.py and tests/test_one_read_per_trip.py 6 passed with a durable interruption checkpoint; codex luna high, 15 h wall with three H200 jobs (a spooled-script root failure, a 45 min timeout on compile, then per-row persistence) and 6 h held behind the corpus</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260907T165338820236-mcs-trip-quantum-compiled" data-who="mcs-quantum-x" data-when="2026-09-08T02:23:38.400Z">
+    <div class="r-comment-body"><p>The compiled-slice arm was added to benchmarks/trip_quantum_width_one.py (two commits) and its H200 job 1264702 completed in 11 min writing width-one-compiled.json (head quantum 2.75 ms against the stale 25.0 ms baseline, head map 1.76 ms against 0.78 ms), but the worker&#x27;s declared wait resumed into a session that died at once on the lane; receipt, figure and job logs rescued as 2456c03f527d6d2e18eb9c3e43cd37d5d7d7795b and a fresh member verifies and reports them</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T163422200795" data-who="coordinator" data-when="2026-09-04T16:36:00Z">
     <div class="r-comment-body"><p>§2 first restructure landed on solver-convergence-regression at <code>72ae8431</code>: one topology read per active-set trip (receipt <code>docs/figures/millisecond-converged-solve/trip-quantum/one-read/profile.json</code>, H200 job 1262715). It is behaviour-preserving and removes the redundant reads, but it does not move the per-trip wall: 5.83 s against 5.85 s on 22086/43 pure. The trip-quantum picture changes accordingly: the isolated components (84 residual evaluations, 144 Jacobian-vector products, one read, GMRES, line search) sum to 0.20 s per trip, and 5.63 s (96.6 percent) is a fused-device or synchronisation remainder the isolated probes cannot see; the earlier 63 percent topology attribution is withdrawn. The closed jaxpr has zero host callbacks, the static census gives an 0.09 s scan floor, and the CUPTI replay dies inside the Jacobi SVD, so the candidates are recompilation per trip, dynamic while loops far beyond the static count, and the 126 SVDs per trip. <code>msc-trip-remainder-attribution</code> measures which with an nsys device trace, an ablation ladder (condition estimates, line-search grades, flood and reachability loops) and a recompile count, so the repair toward one millisecond per fixed point is aimed by measurement.</p></div>

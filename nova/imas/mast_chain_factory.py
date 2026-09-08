@@ -11,7 +11,12 @@ from nova.equilibrium.connectivity_boundary import LCFS_ANGLES, host_boundary_re
 from nova.equilibrium.measurement import Magnetics
 from nova.equilibrium.moment import CurrentCells, ReconstructMoment
 from nova.equilibrium.profile import ProfileDegrees, ReconstructProfile
-from nova.equilibrium.wall_mask import inside_polygon
+from nova.equilibrium.wall_mask import (
+    WallUnit,
+    build_wall_mask,
+    pack_wall_units,
+    wall_units_from_ids,
+)
 from nova.imas.mast_parity_chain import TopologyLabels
 from nova.imas.mast_solve_input_ids import open_description
 from nova.imas.mast_solve_inputs import (
@@ -56,6 +61,8 @@ class _Grid:
     wall_r: np.ndarray
     wall_z: np.ndarray
     r0: float
+    wall_units: tuple[WallUnit, ...]
+    wall_unit_offsets: np.ndarray
 
 
 @dataclass(frozen=True)
@@ -172,25 +179,31 @@ class MastCurrentDiffusion(CurrentDiffusion):
 
 def _wall_grid(ids, radial_points: int, vertical_points: int) -> _Grid:
     wall = ids["wall"]
-    if len(wall.description_2d) != 1:
-        raise ValueError("expected exactly one wall description")
-    limiter = wall.description_2d[0].limiter
-    if len(limiter.unit) != 1:
-        raise ValueError("expected exactly one limiter unit")
-    unit = limiter.unit[0]
-    limiter_r = np.asarray(unit.outline.r, dtype=float)
-    limiter_z = np.asarray(unit.outline.z, dtype=float)
+    units = wall_units_from_ids(wall)
+    wall_nodes, offsets = pack_wall_units(units)
+    limiter_r = wall_nodes[:, 0]
+    limiter_z = wall_nodes[:, 1]
     margin = 0.02
     rg = np.linspace(limiter_r.min() - margin, limiter_r.max() + margin, radial_points)
     zg = np.linspace(
         limiter_z.min() - margin, limiter_z.max() + margin, vertical_points
     )
-    radius, height = np.meshgrid(rg, zg)
-    inside = inside_polygon(
-        radius.ravel(), height.ravel(), limiter_r, limiter_z
-    ).reshape(radius.shape)
-    r0 = float(0.5 * (limiter_r.min() + limiter_r.max()))
-    return _Grid(rg, zg, inside, limiter_r, limiter_z, limiter_r, limiter_z, r0)
+    inside, _diagnostics = build_wall_mask(rg, zg, list(units))
+    vessels = [unit for unit in units if unit.kind == "vessel"]
+    support = np.concatenate([unit.r for unit in vessels]) if vessels else limiter_r
+    r0 = float(0.5 * (support.min() + support.max()))
+    return _Grid(
+        rg,
+        zg,
+        inside,
+        limiter_r,
+        limiter_z,
+        wall_nodes[:, 0],
+        wall_nodes[:, 1],
+        r0,
+        units,
+        offsets,
+    )
 
 
 def _sensor_geometry(inputs, machine, shot: int, store: Path | str) -> Magnetics:

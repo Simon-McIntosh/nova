@@ -17,6 +17,7 @@ import imas
 import numpy as np
 from imas.dd_zip import dd_xml_versions
 
+from nova.equilibrium.wall_mask import WallUnit, wall_units_from_ids
 from nova.imas.machine import DiagnosticSightline, StaticMachineDescription
 
 
@@ -158,13 +159,8 @@ class DiiidMachineIds:
         wall = self.ids["wall"]
         if len(wall.description_2d) != 1:
             raise ValueError("expected exactly one wall description")
-        limiter = wall.description_2d[0].limiter
-        if len(limiter.unit) != 1:
-            raise ValueError("expected exactly one limiter unit")
-        outline = limiter.unit[0].outline
-        ring = np.column_stack(
-            (np.asarray(outline.r, dtype=float), np.asarray(outline.z, dtype=float))
-        )
+        units = wall_units_from_ids(wall)
+        ring = units[0].vertices
         polygon = Polygon(ring[:-1] if np.array_equal(ring[0], ring[-1]) else ring)
         if not polygon.is_valid or not polygon.exterior.is_simple:
             raise ValueError("published limiter must be a valid simple ring")
@@ -185,6 +181,7 @@ class SourceMachineDescription:
     flux_loops: tuple[Mapping[str, Any], ...]
     dd_version: str
     limiter_repair: LimiterRepair
+    wall_units: tuple[WallUnit, ...]
 
 
 def _chain_sha256(vertices: np.ndarray) -> str:
@@ -405,16 +402,20 @@ def _read_source_description(source_path: Path) -> SourceMachineDescription:
     if len(wall_ids.description_2d) != 1:
         raise ValueError("expected exactly one wall description")
     source_wall = wall_ids.description_2d[0]
-    if len(source_wall.limiter.unit) != 1:
-        raise ValueError("expected exactly one limiter unit")
+    source_units = wall_units_from_ids(wall_ids)
     source_limiter = source_wall.limiter.unit[0]
-    source_contour = np.column_stack(
-        (
-            np.asarray(source_limiter.outline.r, dtype=float),
-            np.asarray(source_limiter.outline.z, dtype=float),
-        )
-    )
+    source_contour = source_units[0].vertices
     repaired_contour, limiter_repair = repair_limiter_ring(source_contour)
+    wall_units = (
+        WallUnit(
+            r=repaired_contour[:, 0],
+            z=repaired_contour[:, 1],
+            kind=source_units[0].kind,
+            closed=True,
+            name=source_units[0].name,
+        ),
+        *source_units[1:],
+    )
     contour = {
         "kind": "limiter",
         "r": repaired_contour[:, 0],
@@ -511,6 +512,7 @@ def _read_source_description(source_path: Path) -> SourceMachineDescription:
             "pf_active": active_records,
             "pf_passive_loop_count": 0,
             "tf_coil_count": 0,
+            "wall_units": wall_units,
         }
     )
     return SourceMachineDescription(
@@ -526,6 +528,7 @@ def _read_source_description(source_path: Path) -> SourceMachineDescription:
         flux_loops=tuple(flux_loops),
         dd_version=source_dd_version,
         limiter_repair=limiter_repair,
+        wall_units=wall_units,
     )
 
 

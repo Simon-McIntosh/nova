@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T13:38:56",
+  "updated": "2026-09-08T14:29:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2515,6 +2515,24 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-clip-t",
+        "harness": "codex-terra",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
+        "id": "nia-clipmeas-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "nia-drift-t",
         "harness": "codex-terra",
         "role": "test",
@@ -2847,9 +2865,11 @@
         "id": "nia-target2-l",
         "harness": "codex-luna",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a080b0-7c5c-7423-9eff-ce6e5761555f",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a080b0-7c5c-7423-9eff-ce6e5761555f"
+        },
         "created": "2026-09-08"
       },
       {
@@ -134954,6 +134974,165 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T121543457556-nia-clipped-support-and-lambda-pinning",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-clipped-support-and-lambda-pinning",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1942,
+                "cached_input_tokens": 908658,
+                "input_tokens": 910602,
+                "output_tokens": 1604,
+                "reasoning_output_tokens": 242,
+                "total_tokens": 912206,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The design intent is that our methods transfer smoothly across cells, because the support is clipped and the current allocation is quadratic, and that the net plasma current stays pinned by the lambda factor. A companion node measured that the exact Solovev diverted -110 oracle target moved by 210.29568259126972 A, from 804089.1446464028 A to 803878.8489638115 A, while the integrated support held 135 cells on BOTH sides, the old support excluding cell 105 and the new one excluding cell 92: a one-cell substitution, not a broadening. That does not look like a smooth transfer, so measure both mechanisms on the current head. FIRST, is the target integrated over a clipped support with fractional boundary weights, through clipped_support_quadrature at nova/equilibrium/forward_operator.py line 2040 and the quadrature it feeds, or over a boolean cell mask? Report the quadrature weight and the current contribution of cell 92 and of cell 105 individually, with their lattice coordinates and their distance from the selected boundary; if both carry near-unit weight the support is effectively boolean on this path and a cell crossing the boundary produces a discrete jump where the design intends a continuous one, which makes the 210.3 A the measure of that defect. SECOND, is the lambda pinning intact: does current_normalisation_amplitude leave the solved equilibrium's integrated plasma current equal to the target it was given? Report the solved net current against the target for the diverted -110 rung at head, and state whether a moved target moves the reference cleanly or breaks the normalisation. THIRD, state whether the same clipping question applies to the twelve MAST bank rows or only to the Solovev oracle path, naming the file and line where each takes its support. Read-only: change no repository file; run any solve on a debug partition (srun all_debug, --cpus-per-task=4 --mem=64G, TMPDIR=/tmp, JAX_PLATFORMS=cpu, no explicit --no-sync on the compute node) and never on the login node; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-support-and-lambda.md is the deliverable and must separate what you measured from what you inferred. Every uv command on the login node carries --no-sync and nothing runs uv sync",
+          "estimated_hours": 1.0,
+          "goal": "Whether the oracle target current integrates over a clipped support with quadratic allocation and whether the lambda factor pins the solved net plasma current, measured rather than assumed",
+          "id": "nia-clipped-support-and-lambda-pinning",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T121543457556-nia-clipped-support-and-lambda-pinning/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-support-and-lambda.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-support/"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "nia-clip-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-08T12:15:53Z",
+        "completed_at": "2026-09-08T12:26:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 642,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 642,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "98202ddc6b0cf5ba90300fb40f915acd75cc6a0e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "static source trace at head; py_compile of the prepared measurement script; two SLURM launch attempts refused by the sandbox before allocation",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-support-and-lambda.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T121543457556-nia-clipped-support-and-lambda-pinning/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a080f2-3cd8-7db2-a6e7-c227e0f23a32",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7817216,
+            "cached_input_tokens_cumulative": 7817216,
+            "input_tokens": 8111167,
+            "input_tokens_cumulative": 8111167,
+            "output_tokens": 27174,
+            "output_tokens_cumulative": 27174,
+            "reasoning_output_tokens": 10419,
+            "reasoning_output_tokens_cumulative": 10419
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T12:26:35Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 34.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T12:26:35Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 7817216,
+          "cumulative_input_tokens": 15928383,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 37593
+        },
+        "follow_on_paths": [
+          "head-diverted-110.json"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "investigate role; the static audit and the prepared measurement script are the artifacts",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-clipped-support-and-lambda-pinning",
+          "session_id": "01a080f2-3cd8-7db2-a6e7-c227e0f23a32",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T12:26:35Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "01a080f2-3cd8-7db2-a6e7-c227e0f23a32",
+          "source": "stream",
+          "reason": "the role itself is the blocker: a read-only sandbox cannot reach SLURM and no advice changes that, so the measurement continues as a compute-capable node from the artifacts this one prepared"
+        },
+        "watch_override": null
       }
     ],
     "holds": [
@@ -135266,6 +135445,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2234
+    "_version": 2238
   }
 }

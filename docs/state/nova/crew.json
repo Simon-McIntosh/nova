@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T05:04:18",
+  "updated": "2026-09-08T05:09:59",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2884,9 +2884,11 @@
         "id": "pfs-cachelock-c",
         "harness": "clive",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "672fcdd4-548c-4c10-bfe3-f54ffca6ecc3",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "672fcdd4-548c-4c10-bfe3-f54ffca6ecc3"
+        },
         "created": "2026-09-08"
       },
       {
@@ -3258,9 +3260,11 @@
         "id": "pfs-reversed-c2",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "36faa4a5-6144-44a2-9fec-d54a1f11dcd9",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "36faa4a5-6144-44a2-9fec-d54a1f11dcd9"
+        },
         "created": "2026-09-07"
       },
       {
@@ -125884,6 +125888,300 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260908T011645357775-pfs-cache-concurrent-writers",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-cache-concurrent-writers",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2531,
+                "cached_input_tokens": 750204,
+                "input_tokens": 752737,
+                "output_tokens": 889,
+                "reasoning_output_tokens": 103,
+                "total_tokens": 753626,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/cache-concurrent-writers.md states, from two debug-partition jobs submitted together onto the same node (four cores each, JAX_PLATFORMS=cpu, the cache root's host subtree cleared first and the two jobs pinned to one node with --nodelist or a shared reservation so they overlap), each cold-compiling the playable Solovev program the reuse receipt used (docs/figures/playable-forward-solve/compilation-cache/measure_compile_wall.py on main, run in place and not modified), with both logs captured once under /home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/cache-concurrent-writers-logs/: whether both jobs completed, whether either aborted inside the cache write, the entry count in the root afterwards against the single-allocation 28, and each job's compile wall; it concludes whether the per-job TMPDIR instruction can be retired for the cache's sake or whether the root needs an entry-lock strategy; no repository file is written",
+          "estimated_hours": 0.7,
+          "goal": "A measurement of two simultaneous allocations cold-compiling the same forward program against the shared compilation cache root on one node",
+          "id": "pfs-cache-concurrent-writers",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T011645357775-pfs-cache-concurrent-writers/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/cache-concurrent-writers.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/cache-concurrent-writers-logs/"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "pfs-cachelock-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-08T01:16:55Z",
+        "completed_at": "2026-09-08T03:03:38.219Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6287,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6403,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "fd3fa22e678d1d84430328b985529e50cc2ee602",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "two debug-partition jobs pinned to one idle node (vega_debug, 98dci4-clu-4073) cold-compiling the same forward program simultaneously against the shared cache root with the host subtree cleared first",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/cache-concurrent-writers.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T011645357775-pfs-cache-concurrent-writers/manifest.md",
+        "scope_changed": false,
+        "session_id": "672fcdd4-548c-4c10-bfe3-f54ffca6ecc3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2171644,
+            "input_tokens_cumulative": 2171644,
+            "output_tokens": 24437,
+            "output_tokens_cumulative": 24437,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 6399.537,
+          "generated_tokens": 24437,
+          "generation_seconds": 6187.297,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 11.6,
+          "machine_seconds": 212.24,
+          "peak_input_tokens": 117585,
+          "tokens_per_second": 3.95,
+          "wall_tokens_per_second": 3.82
+        },
+        "follow_on_paths": [
+          "/"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "measurement node; its deliverables are the report and the two job logs and receipts outside the repository",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-cache-concurrent-writers",
+          "session_id": "672fcdd4-548c-4c10-bfe3-f54ffca6ecc3",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T03:03:38.219Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260907T233423452987-pfs-reversed-current-guard-report",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-reversed-current-guard-report",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2109,
+                "cached_input_tokens": 721128,
+                "input_tokens": 723269,
+                "output_tokens": 1809,
+                "reasoning_output_tokens": 308,
+                "total_tokens": 725078,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/reversed-current-guard.md exists and states, from /home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165209580736-pfs-reversed-current-guard/diagnosis.json, /home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165209580736-pfs-reversed-current-guard/diagnosis-row30.json and /home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T165209580736-pfs-reversed-current-guard/diagnosis-row55.json (read with jq or python, never a PNG), for each slice: the shot and row, the free solve's achieved centroid against the EFIT target with its signed error or the reason it is unavailable, the residual across Newton steps, the achieved against requested topology class, whether the conditioned re-solve was entered and what it did, and the guard's sign convention under reversed current as the receipt records it (guard_uses_absolute_value, guard_signed_lower, guard_signed_upper); it then states which of the three outcomes holds (converges to a different equilibrium, fails to contract, or is measured wrongly by the guard) with the receipt fields that decide it, and notes any slice where the guard was never evaluated because the free solve did not converge; the manifest cites the base commit 88d40e09 as the delivered driver and figures; no PNG is read, no solve is re-run, no source file is changed; the report is under 200 lines",
+          "estimated_hours": 0.4,
+          "goal": "The reversed-current guard diagnosis report written from the three slice receipts a previous worker already computed, with the driver and figures already committed at the worktree base",
+          "id": "pfs-reversed-current-guard-report",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T233423452987-pfs-reversed-current-guard-report/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/reversed-current-guard.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "pfs-reversed-c2",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T23:34:35Z",
+        "completed_at": "2026-09-08T03:06:10.573Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 12545,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 12695,
+        "stalled": true,
+        "time_budget": "30m",
+        "base_sha": "88d40e09384fc8d7d67a56c7aaa500d1ec8bc0e0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "receipt-to-report transcription of diagnosis.json, diagnosis-row30.json and diagnosis-row55.json with the deciding fields cited per slice",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/reversed-current-guard.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T233423452987-pfs-reversed-current-guard-report/manifest.md",
+        "scope_changed": false,
+        "session_id": "36faa4a5-6144-44a2-9fec-d54a1f11dcd9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2526610,
+            "input_tokens_cumulative": 2526610,
+            "output_tokens": 21441,
+            "output_tokens_cumulative": 21441,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 12692.277,
+          "generated_tokens": 26881,
+          "generation_seconds": 12684.884,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 12.4,
+          "machine_seconds": 7.393,
+          "peak_input_tokens": 125968,
+          "tokens_per_second": 2.12,
+          "wall_tokens_per_second": 2.12
+        },
+        "follow_on_paths": [
+          "22475/30",
+          "0.99",
+          "solver/admission"
+        ],
+        "predecessor_run": "r-20260907T165209580736-pfs-reversed-current-guard",
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "report-only node; the driver and figures are the rescue commit 88d40e09 merged alongside",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-reversed-current-guard-report",
+          "session_id": "36faa4a5-6144-44a2-9fec-d54a1f11dcd9",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T03:06:10.573Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -126196,6 +126494,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2111
+    "_version": 2115
   }
 }

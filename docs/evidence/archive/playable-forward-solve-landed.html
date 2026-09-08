@@ -1458,6 +1458,31 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     <code>~/.config/reckon/crew/reports/nova/playable/compilation-cache-root.md</code>; receipts and figure under
     <code>docs/figures/playable-forward-solve/compilation-cache/</code>.</p>
   </section>
+  <section id="two-simultaneous-writers-share-the-cache-root-cleanly">
+    <h2>Two simultaneous cold compiles share the cache root cleanly, so the per-job TMPDIR is retired for the cache's sake (2026-09-08 03:00Z)</h2>
+    <p>Node <code>pfs-cache-concurrent-writers</code> (local lane, test role, spec exact; report and two job logs with JSON receipts outside the
+    repository). The claim the cache-root landing asserted but had not measured: two allocations on one node compiling the same program at the
+    same time are serialised by JAX's per-entry lock. Measured on an idle debug node with both jobs pinned to it and the host subtree of the root
+    cleared first, the two cold compiles overlapped for their whole window, both completed, neither aborted inside the cache write, and the root
+    held 28 entries afterwards, the same count a single allocation writes. So the collision the per-job TMPDIR in every brief was protecting
+    against does not occur on the shared root for two same-node writers, and that instruction is retired for the cache's sake; the earlier aborts
+    inside the cache write on the old node-local root remain attributed to that root's other faults (the unresolvable setgid group being the
+    one this plan measured) rather than to concurrency. Report at <code>~/.config/reckon/crew/reports/nova/playable/cache-concurrent-writers.md</code>.</p>
+  </section>
+  <section id="the-reversed-current-block-fails-before-the-guard">
+    <h2>The reversed-current block fails before the guard: no contraction or no admitted axis, never a sign fault (2026-09-08 03:02Z)</h2>
+    <p>Nodes <code>pfs-reversed-current-guard</code> (local lane; died after producing its receipts, driver and three figures rescued as
+    <code>88d40e09</code> and merged) and <code>pfs-reversed-current-guard-report</code> (wrote the diagnosis from the receipts). On three sampled
+    slices of shot 22475 the writer's branch guard is never numerically evaluated. Rows 50 and 55 fail to contract: the free solve ends unconverged
+    with the active set settled after seven trips, and the conditioned re-solve, entered because the free solve did not converge, raises with no
+    qualified axis. Row 30 converges to a zero residual but its achieved state is refused before any centroid exists to compare. The guard
+    convention is recorded on all three: an absolute-valued comparison of achieved against target within 50 mm, with no signed bounds, so a
+    reversed sign could only enter through the achieved centroid itself, and no slice ever reaches that comparison. The hypothesis the followup
+    named, a guard measuring a correct solve wrongly under reversed polarity, is refuted; the block's zero converged fraction is a reversed-polarity
+    convergence and admission failure that belongs with the early-frame placement and cold-limited work, not with the guard. Report at
+    <code>~/.config/reckon/crew/reports/nova/playable/reversed-current-guard.md</code>; figures under
+    <code>docs/figures/playable-forward-solve/reversed-current-guard/</code>.</p>
+  </section>
 </main>
 </body>
 </html>

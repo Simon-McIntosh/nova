@@ -386,6 +386,133 @@ def test_ladder_scoring_evaluates_one_map_per_accepted_step(machine):
 
 
 @pytest.mark.slow
+def test_threshold_one_reproduces_the_refusal_only_policy(machine):
+    """At threshold one the adaptive branch never fires on this machine.
+
+    The contraction-refresh branch rebuilds the dense Jacobian when the
+    contraction factor of the last accepted step exceeds the threshold.  At
+    one that means an accepted step grew the reduced residual, which never
+    happens on this machine, so the route is bit-identical to the strict
+    refusal-only policy (``jacobian_refresh_threshold=None``) on every step
+    record, census, mask history and terminal value.
+    """
+    profile, seed = machine
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=REDUCED_NEWTON_STEPS,
+        active_set_steps=reduced_newton.ACTIVE_SET_STEPS,
+        trip_boundary=reduced_newton.TRIP_BOUNDARY,
+    )
+    refusal_only = reduced_newton.solve_reduced_newton(
+        profile.operator, seed, jacobian_refresh_threshold=None, **common
+    )
+    threshold_one = reduced_newton.solve_reduced_newton(
+        profile.operator, seed, **common
+    )
+    assert np.array_equal(
+        np.asarray(threshold_one.state), np.asarray(refusal_only.state)
+    )
+    assert threshold_one.terminal_residual == refusal_only.terminal_residual
+    assert threshold_one.converged == refusal_only.converged
+    assert threshold_one.termination_reason == refusal_only.termination_reason
+    assert threshold_one.newton_steps_per_trip == refusal_only.newton_steps_per_trip
+    assert (
+        threshold_one.jacobian_builds_per_trip
+        == refusal_only.jacobian_builds_per_trip
+    )
+    assert (
+        threshold_one.contraction_refreshes_per_trip
+        == refusal_only.contraction_refreshes_per_trip
+    )
+    assert (
+        threshold_one.rejected_steps_per_trip
+        == refusal_only.rejected_steps_per_trip
+    )
+    assert (
+        threshold_one.active_set_mask_differences
+        == refusal_only.active_set_mask_differences
+    )
+    assert len(threshold_one.steps) == len(refusal_only.steps)
+    for taken, reference in zip(threshold_one.steps, refusal_only.steps, strict=True):
+        assert taken._replace(wall_s=0.0) == reference._replace(wall_s=0.0)
+
+
+def test_threshold_one_reproduces_the_refusal_only_policy_on_the_default_lane(machine):
+    """The threshold-one identity also runs on a bounded slice by default."""
+    profile, seed = machine
+    common = dict(
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=8,
+        active_set_steps=3,
+        trip_boundary=reduced_newton.TRIP_BOUNDARY,
+    )
+    refusal_only = reduced_newton.solve_reduced_newton(
+        profile.operator, seed, jacobian_refresh_threshold=None, **common
+    )
+    threshold_one = reduced_newton.solve_reduced_newton(
+        profile.operator, seed, **common
+    )
+    assert threshold_one.converged == refusal_only.converged
+    assert np.array_equal(
+        np.asarray(threshold_one.state), np.asarray(refusal_only.state)
+    )
+    assert (
+        threshold_one.contraction_refreshes_per_trip
+        == refusal_only.contraction_refreshes_per_trip
+    )
+    assert threshold_one.newton_steps_per_trip == refusal_only.newton_steps_per_trip
+    assert len(threshold_one.steps) == len(refusal_only.steps)
+    for taken, reference in zip(threshold_one.steps, refusal_only.steps, strict=True):
+        assert taken._replace(wall_s=0.0) == reference._replace(wall_s=0.0)
+
+
+@pytest.mark.slow
+def test_adaptive_refresh_keeps_the_synthetic_machine_within_the_production_budget(
+    machine,
+):
+    """A contraction-firing threshold stays inside the production step budget.
+
+    At threshold zero every accepted chord step re-linearises, so the inner
+    iteration becomes plain Newton: it reaches the same fixed point in fewer
+    steps than the refusal-only chord and stays inside the twelve-step budget
+    the four-row measurement gives a production solve.  The refusal-only chord
+    already converged here in fewer than twelve, so the bound is a regression
+    pin: a machine that ever needs the wider twenty-four-step chord budget is
+    caught by it, and the adaptive refresh must never need more steps than the
+    chord it replaces.
+    """
+    profile, seed = machine
+    chord = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=REDUCED_NEWTON_STEPS,
+        jacobian_refresh_threshold=None,
+    )
+    adaptive = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=PRODUCTION_NEWTON_STEPS,
+        jacobian_refresh_threshold=0.0,
+    )
+    assert chord.converged
+    assert adaptive.converged
+    assert adaptive.termination_name == "converged"
+    adaptive_steps = sum(adaptive.newton_steps_per_trip)
+    chord_steps = sum(chord.newton_steps_per_trip)
+    assert adaptive_steps <= PRODUCTION_NEWTON_STEPS
+    assert adaptive_steps <= chord_steps
+    # The threshold fired: a threshold of zero re-linearises after every
+    # accepted step, so the trip paid more than its one opening build.
+    assert sum(adaptive.contraction_refreshes_per_trip) >= 1
+    assert sum(adaptive.jacobian_builds_per_trip) > len(adaptive.newton_steps_per_trip)
+    span = float(jnp.max(jnp.abs(chord.state)))
+    difference = float(jnp.max(jnp.abs(adaptive.state - chord.state)))
+    assert difference <= FIXED_POINT_AGREEMENT * span
+
+
+@pytest.mark.slow
 def test_fused_trip_boundary_reproduces_the_dispatched_boundary(machine):
     """One compiled trip close returns what the separate calls returned.
 

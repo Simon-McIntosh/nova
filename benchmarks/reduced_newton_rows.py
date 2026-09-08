@@ -8,7 +8,12 @@ the banked receipt beside this one recorded, so it re-derives that receipt's
 terminal flux in the same job and the fast route's terminal flux is compared
 against it row by row; the serial route is the route the batched tail
 replaces, so the two stand side by side in the same job and the batched tail
-is judged a strict improvement or not on the rows that refuse grades.
+is judged a strict improvement or not on the rows that refuse grades.  The
+three reproduction routes pin the strict refusal-only Jacobian policy, so
+they reproduce the banked route the adaptive policy replaces; two adaptive
+arms re-solve each row with the contraction-factor refresh threshold at the
+documented default of one and at one half, and each is read against the
+refusal-only chord in the same job.
 Optionally each row is also solved through the production public route,
 ``ForwardProfile.solve_branch(newton_krylov)``.
 
@@ -87,21 +92,46 @@ PREVIOUS_RECEIPT = (
 #: reassociation is carried through the trips that follow it.
 CONVERGED_FLUX_AGREEMENT = 1.0e-9
 SETTLED_FLUX_AGREEMENT = 1.0e-6
+#: The adaptive Jacobian-refresh thresholds the new arm measures beside the
+#: refusal-only chord.  The first is the documented default of the solve
+#: parameter, which fires only where an accepted step grew the reduced
+#: residual; the second fires where the chord's accepted steps contract worse
+#: than a factor of a half, which is the setting that should cut a slowly
+#: contracting chord's step budget.  On the CPU referee both are inert because
+#: no accepted step's contraction factor reaches them, so the adaptive arm and
+#: the refusal-only arm agree there bit for bit.
+ADAPTIVE_REFRESH_THRESHOLDS = (reduced_newton.JACOBIAN_REFRESH_THRESHOLD, 0.5)
 #: Every prototype route, named by the mechanism each measures, in the order
 #: they are solved: a job that runs out of wall clock delivers the batched
-#: tail and the route it replaces before it reaches the eager reference.
+#: tail and the route it replaces before it reaches the eager reference.  The
+#: three reproduction routes pin the strict refusal-only policy so the banked
+#: receipt the eager arm re-derives is the pre-adaptive route; the adaptive
+#: routes measure the new policy beside it in the same job.
 PROTOTYPE_ROUTES = {
     "prototype": {
         "ladder_scoring": reduced_newton.LADDER_SCORING,
         "trip_boundary": reduced_newton.TRIP_BOUNDARY,
+        "jacobian_refresh_threshold": None,
     },
     "serial_prototype": {
         "ladder_scoring": reduced_newton.SERIAL_LADDER_SCORING,
         "trip_boundary": reduced_newton.TRIP_BOUNDARY,
+        "jacobian_refresh_threshold": None,
+    },
+    "adaptive_prototype": {
+        "ladder_scoring": reduced_newton.LADDER_SCORING,
+        "trip_boundary": reduced_newton.TRIP_BOUNDARY,
+        "jacobian_refresh_threshold": ADAPTIVE_REFRESH_THRESHOLDS[0],
+    },
+    "adaptive_half_prototype": {
+        "ladder_scoring": reduced_newton.LADDER_SCORING,
+        "trip_boundary": reduced_newton.TRIP_BOUNDARY,
+        "jacobian_refresh_threshold": ADAPTIVE_REFRESH_THRESHOLDS[1],
     },
     "eager_prototype": {
         "ladder_scoring": reduced_newton.EAGER_LADDER_SCORING,
         "trip_boundary": reduced_newton.DISPATCHED_TRIP_BOUNDARY,
+        "jacobian_refresh_threshold": None,
     },
 }
 PUBLIC_ROUTE_POLICY = PerturbedSeedPolicy()
@@ -251,6 +281,55 @@ def _tail_comparison(fast, serial, eager) -> dict[str, Any]:
     }
 
 
+def _adaptive_comparison(adaptive, reference) -> dict[str, Any]:
+    """Read one adaptive arm against the refusal-only chord it replaces.
+
+    The adaptive policy shares the refusal path with the chord and adds
+    Jacobian rebuilds where an accepted step's contraction factor exceeds the
+    threshold.  The comparison records the trip census, the per-trip steps and
+    the terminal residual beside the extra Jacobian builds and the walls, and
+    calls out whether any decision changed: a changed census is the measured
+    effect of re-linearising mid-chord, not a defect, which is why it is
+    recorded rather than asserted away.
+    """
+    fast_flux = jnp.asarray(adaptive["flux"])
+    reference_flux = jnp.asarray(reference["flux"])
+    span = float(jnp.max(jnp.abs(reference_flux)))
+    difference = float(jnp.max(jnp.abs(fast_flux - reference_flux)))
+    return {
+        "reference_route": "refusal-only chord, fused boundary",
+        "identical_trip_census": (
+            adaptive["active_set_iterations"]
+            == reference["active_set_iterations"]
+            and adaptive["newton_steps_per_trip"]
+            == reference["newton_steps_per_trip"]
+            and adaptive["active_set_mask_differences"]
+            == reference["active_set_mask_differences"]
+        ),
+        "newton_steps_before": sum(reference["newton_steps_per_trip"]),
+        "newton_steps_after": sum(adaptive["newton_steps_per_trip"]),
+        "newton_steps_delta": sum(adaptive["newton_steps_per_trip"])
+        - sum(reference["newton_steps_per_trip"]),
+        "jacobian_builds_before": sum(reference["jacobian_builds_per_trip"]),
+        "jacobian_builds_after": sum(adaptive["jacobian_builds_per_trip"]),
+        "jacobian_builds_delta": sum(adaptive["jacobian_builds_per_trip"])
+        - sum(reference["jacobian_builds_per_trip"]),
+        "contraction_refreshes_per_trip": (
+            adaptive["contraction_refreshes_per_trip"]
+        ),
+        "terminal_residual_before": reference["terminal_residual"],
+        "terminal_residual_after": adaptive["terminal_residual"],
+        "sup_flux_difference_wb": difference,
+        "sup_flux_difference_fraction_of_span": difference / max(span, 1.0e-30),
+        "whole_trip_wall_before_s": reference["wall_s"],
+        "whole_trip_wall_after_s": adaptive["wall_s"],
+        "warm_step_wall_before_s": reference["median_warm_step_wall_s"],
+        "warm_step_wall_after_s": adaptive["median_warm_step_wall_s"],
+        "warm_jacobian_wall_before_s": reference["median_warm_jacobian_wall_s"],
+        "warm_jacobian_wall_after_s": adaptive["median_warm_jacobian_wall_s"],
+    }
+
+
 def _speedup(fast, eager) -> dict[str, Any]:
     """Rank what the two repairs removed from the warm step and the trip."""
 
@@ -359,6 +438,7 @@ def _prototype_arm(
         "route": "reduced_newton.solve_reduced_newton",
         "ladder_scoring": route["ladder_scoring"],
         "trip_boundary": route["trip_boundary"],
+        "jacobian_refresh_threshold": route.get("jacobian_refresh_threshold"),
         "support_policy": policy,
         "reduced_dimension": result.reduced_dimension,
         "support_cells": result.support_cells,
@@ -374,6 +454,7 @@ def _prototype_arm(
         "newton_steps_per_trip": result.newton_steps_per_trip,
         "jacobian_builds_per_trip": result.jacobian_builds_per_trip,
         "rejected_steps_per_trip": result.rejected_steps_per_trip,
+        "contraction_refreshes_per_trip": result.contraction_refreshes_per_trip,
         "map_evaluations_per_trip": result.map_evaluations_per_trip,
         "jacobian_wall_per_trip_s": result.jacobian_wall_per_trip,
         "newton_wall_per_trip_s": result.newton_wall_per_trip,
@@ -461,8 +542,8 @@ def _fixed_point_agreement(operator, production, prototype, target_current):
 
 
 def _draw(rows: list[dict[str, Any]], figure_path: Path) -> None:
-    """Plot the warm step, the warm trip and the map evaluations, before/after."""
-    figure, axes = plt.subplots(1, 4, figsize=(18.0, 4.4))
+    """Plot the warm step, trip, map evaluations and refresh census."""
+    figure, axes = plt.subplots(1, 5, figsize=(22.0, 4.4))
     identities = [row["identity"] for row in rows]
     index = np.arange(len(rows))
     before = "#c0504d"
@@ -561,6 +642,29 @@ def _draw(rows: list[dict[str, Any]], figure_path: Path) -> None:
     axes[3].set_ylabel("median warm refused step wall [s]")
     axes[3].set_title("a refused grade ladder, per route")
     axes[3].legend(fontsize=7)
+
+    def builds(name):
+        """Return one per-row total Jacobian build count of one route."""
+        return [
+            sum(row[name]["jacobian_builds_per_trip"]) if row.get(name) else np.nan
+            for row in rows
+        ]
+
+    for offset, name, label, colour in (
+        (-0.27, "prototype", "refusal-only", before),
+        (0.0, "adaptive_prototype", "adaptive, threshold 1", middle),
+        (0.27, "adaptive_half_prototype", "adaptive, threshold 0.5", after),
+    ):
+        axes[4].bar(
+            index + offset,
+            builds(name),
+            0.26,
+            label=label,
+            color=colour,
+        )
+    axes[4].set_ylabel("Jacobian builds per solve")
+    axes[4].set_title("dense Jacobian builds, per route")
+    axes[4].legend(fontsize=7)
 
     for axis in axes:
         axis.set_xticks(index)
@@ -733,6 +837,13 @@ def measure(
         row["batched_tail"] = _tail_comparison(
             arms["prototype"], arms["serial_prototype"], arms["eager_prototype"]
         )
+        row["adaptive"] = {
+            name: _adaptive_comparison(arms[key], arms["prototype"])
+            for key, name in (
+                ("adaptive_prototype", "threshold_one"),
+                ("adaptive_half_prototype", "threshold_half"),
+            )
+        }
         terminal_flux[f"{identity} fast"] = np.asarray(arms["prototype"]["flux"])
         terminal_flux[f"{identity} serial"] = np.asarray(
             arms["serial_prototype"]["flux"]
@@ -866,6 +977,29 @@ def measure(
             )
             for row in published
         ),
+        "adaptive_rows_with_identical_census": {
+            name: sum(
+                row.get("adaptive", {})
+                .get(name, {})
+                .get("identical_trip_census", False)
+                for row in published
+            )
+            for name in ("threshold_one", "threshold_half")
+        },
+        "adaptive_total_jacobian_builds_delta": {
+            name: sum(
+                row.get("adaptive", {}).get(name, {}).get("jacobian_builds_delta", 0)
+                for row in published
+            )
+            for name in ("threshold_one", "threshold_half")
+        },
+        "adaptive_total_newton_steps_delta": {
+            name: sum(
+                row.get("adaptive", {}).get(name, {}).get("newton_steps_delta", 0)
+                for row in published
+            )
+            for name in ("threshold_one", "threshold_half")
+        },
         "terminal_flux": str(output.with_name(output.stem + "-terminal-flux.npz")),
     }
     _write(receipt, output)

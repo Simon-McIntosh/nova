@@ -19,8 +19,14 @@ changing it.  It reuses the production merit, the production backtracking
 grades, the trip structure of one topology read per active-set trip, the
 settled exit and the incumbent-mask acceptance, and replaces only the inner
 solve: a dense ``jax.jacfwd`` Jacobian formed once per trip, a dense linear
-solve per Newton step, and a backtracking line search that refreshes the
-Jacobian when a whole grade ladder is rejected.
+solve per Newton step, and a backtracking line search.  The Jacobian is
+refreshed when a whole grade ladder is rejected, and additionally when the
+contraction factor of the last accepted step exceeds a threshold: the ratio of
+successive reduced-residual sup norms measured the moment the next step opens,
+so a chord that is contracting poorly is re-linearised before the next
+direction is taken.  The threshold is a solve parameter whose default leaves
+the chord's rejection-only policy in force wherever accepted steps never grow
+the reduced residual, which is exactly the referee fixtures.
 
 Three costs of driving that solve from the host are removed rather than
 paid.  Scoring stops at the first grade below the incumbent merit, which is
@@ -87,6 +93,7 @@ from nova.equilibrium.fixed_point import (
 
 __all__ = [
     "ConstrainedReducedNewtonResult",
+    "JACOBIAN_REFRESH_THRESHOLD",
     "ReducedProgram",
     "ReducedCoordinates",
     "ReducedNewtonResult",
@@ -104,6 +111,15 @@ ACTIVE_SET_STEPS = 16
 NEWTON_STEPS = 12
 SUPPORT_POLICY = "participation"
 _ACTIVE_SUPPORT_FLOOR = 0.0
+
+#: Default Jacobian-refresh threshold, in units of the contraction factor of
+#: the last accepted step.  The dense Jacobian is rebuilt when that factor
+#: exceeds the threshold, or when a whole grade ladder is refused.  At one the
+#: contraction branch fires only when an accepted step grew the reduced
+#: residual, which never happens on the referee fixtures, so the chord's
+#: refusal-only policy is recovered exactly; ``None`` disables the contraction
+#: branch outright and is the strict refusal-only reference.
+JACOBIAN_REFRESH_THRESHOLD: float = 1.0
 
 #: Optional per-solve stage recording for the keyframe driver.  When enabled,
 #: the host loop records named boundaries (``convert``, ``shadow``, ``bind``,
@@ -240,6 +256,7 @@ class ReducedNewtonResult:
     newton_steps_per_trip: list[int] = field(default_factory=list)
     jacobian_builds_per_trip: list[int] = field(default_factory=list)
     rejected_steps_per_trip: list[int] = field(default_factory=list)
+    contraction_refreshes_per_trip: list[int] = field(default_factory=list)
     jacobian_wall_per_trip: list[float] = field(default_factory=list)
     newton_wall_per_trip: list[float] = field(default_factory=list)
     boundary_wall_per_trip: list[float] = field(default_factory=list)
@@ -983,18 +1000,26 @@ def _plain_newton_trip(
     tolerance: float,
     steps: list[ReducedNewtonStep],
     scoring: str = LADDER_SCORING,
+    refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
 ) -> tuple[jax.Array, dict[str, float]]:
     """Take plain Newton steps on the reduced state of one frozen trip.
 
-    The Jacobian is formed once, reused while its steps are accepted, and
-    refreshed only when a whole backtracking ladder is refused.  A ladder
-    refused by a freshly built Jacobian ends the trip.
+    The Jacobian is formed once and reused while its steps are accepted.  It
+    is rebuilt when a whole backtracking ladder is refused, and, at the moment
+    the next step opens, when the contraction factor of the last accepted step
+    - the ratio of the incumbent reduced-residual sup norm to the norm at the
+    state that step left - exceeds ``refresh_threshold``.  A ladder refused by
+    a freshly built Jacobian ends the trip either way.  ``None`` leaves the
+    refusal path as the only refresh, which is the chord policy this adaptive
+    rule replaces; a threshold of one fires additionally only where an
+    accepted step grew the reduced residual.
     """
     jacobian, jacobian_wall = _timed(kernels["jacobian"], reduced, shadow, base_state)
     census = {
         "steps": 0,
         "jacobian_builds": 1,
         "rejected": 0,
+        "contraction_refreshes": 0,
         "jacobian_wall": jacobian_wall,
         "newton_wall": 0.0,
         "map_evaluations": 0,
@@ -1004,6 +1029,7 @@ def _plain_newton_trip(
     factors = _BACKTRACKING_FACTORS
     fresh = True
     carried: ReducedScores | None = None
+    accepted_norm: float | None = None
     for index in range(newton_steps):
         started = time.perf_counter()
         before = census["map_evaluations"]
@@ -1017,8 +1043,32 @@ def _plain_newton_trip(
             break
         accepted = -1
         refreshed = False
+        refusal_refresh = False
         direction = None
         promotion = None
+        # Adaptive re-linearisation: the contraction factor of the last
+        # accepted step is the incumbent norm over the norm of the state that
+        # step left.  When it exceeds the threshold the linearisation is stale
+        # and is rebuilt before the next direction is taken, which is what lets
+        # a slowly-contracting chord fall back onto a tangent at the current
+        # point.  A freshly built Jacobian then suffers the same refusal
+        # contract as a trip-opener: a ladder it cannot satisfy ends the trip.
+        if (
+            refresh_threshold is not None
+            and accepted_norm is not None
+            and np.isfinite(accepted_norm)
+            and accepted_norm > 0.0
+            and not fresh
+            and scores.residual_norm / accepted_norm > refresh_threshold
+        ):
+            jacobian, refresh_wall = _timed(
+                kernels["jacobian"], reduced, shadow, base_state
+            )
+            census["jacobian_builds"] += 1
+            census["jacobian_wall"] += refresh_wall
+            census["contraction_refreshes"] += 1
+            fresh = True
+            refreshed = True
         for _attempt in range(2):
             if eager:
                 direction, _ = _timed(kernels["direction"], jacobian, scores.residual)
@@ -1039,6 +1089,7 @@ def _plain_newton_trip(
             census["jacobian_wall"] += refresh_wall
             fresh = True
             refreshed = True
+            refusal_refresh = True
         wall = time.perf_counter() - started
         census["newton_wall"] += wall
         record = ReducedNewtonStep(
@@ -1049,9 +1100,9 @@ def _plain_newton_trip(
             merit=scores.merit,
             accepted_factor=None if accepted < 0 else float(factors[accepted]),
             grades_tried=(
-                len(factors) * (2 if refreshed else 1)
+                len(factors) * (2 if refusal_refresh else 1)
                 if accepted < 0
-                else accepted + 1 + len(factors) * refreshed
+                else accepted + 1 + len(factors) * refusal_refresh
             ),
             map_evaluations=census["map_evaluations"] - before,
             jacobian_refreshed=refreshed,
@@ -1066,6 +1117,7 @@ def _plain_newton_trip(
             reduced, carried = promotion
         fresh = False
         census["steps"] += 1
+        accepted_norm = scores.residual_norm
     return reduced, census
 
 
@@ -1080,6 +1132,7 @@ def _drive_trips(
     active_set_steps: int,
     fused: bool,
     scoring: str,
+    refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
     regather: Callable[[jax.Array], jax.Array],
     dispatched_boundary: Callable[..., Any],
     stream: bool,
@@ -1100,6 +1153,7 @@ def _drive_trips(
     per_trip_steps: list[int] = []
     per_trip_builds: list[int] = []
     per_trip_rejected: list[int] = []
+    per_trip_contraction: list[int] = []
     per_trip_jacobian_wall: list[float] = []
     per_trip_newton_wall: list[float] = []
     per_trip_boundary_wall: list[float] = []
@@ -1126,10 +1180,12 @@ def _drive_trips(
             tolerance=tolerance,
             steps=steps,
             scoring=scoring,
+            refresh_threshold=refresh_threshold,
         )
         per_trip_steps.append(int(census["steps"]))
         per_trip_builds.append(int(census["jacobian_builds"]))
         per_trip_rejected.append(int(census["rejected"]))
+        per_trip_contraction.append(int(census["contraction_refreshes"]))
         per_trip_jacobian_wall.append(float(census["jacobian_wall"]))
         per_trip_newton_wall.append(float(census["newton_wall"]))
         per_trip_maps.append(int(census["map_evaluations"]))
@@ -1180,6 +1236,7 @@ def _drive_trips(
         "newton_steps_per_trip": per_trip_steps,
         "jacobian_builds_per_trip": per_trip_builds,
         "rejected_steps_per_trip": per_trip_rejected,
+        "contraction_refreshes_per_trip": per_trip_contraction,
         "jacobian_wall_per_trip": per_trip_jacobian_wall,
         "newton_wall_per_trip": per_trip_newton_wall,
         "boundary_wall_per_trip": per_trip_boundary_wall,
@@ -1441,6 +1498,7 @@ def solve_reduced_newton(
     support_floor: float = _ACTIVE_SUPPORT_FLOOR,
     ladder_scoring: str = LADDER_SCORING,
     trip_boundary: str = TRIP_BOUNDARY,
+    jacobian_refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
     program: "ReducedProgram | None" = None,
     stream: bool = False,
 ) -> ReducedNewtonResult:
@@ -1459,6 +1517,14 @@ def solve_reduced_newton(
     selects between closing a trip in one compiled program and closing it
     through separate calls.  The alternatives compute the same decisions and
     exist so a measurement can read one against the other.
+
+    ``jacobian_refresh_threshold`` steers when the trip's dense Jacobian is
+    rebuilt: the chord refreshes only when a whole grade ladder is refused, and
+    additionally this route rebuilds when the contraction factor of the last
+    accepted step exceeds the threshold.  The default of one fires only where
+    an accepted step grew the reduced residual, which never happens on the
+    referee fixtures, so the refusal-only policy is recovered exactly; passing
+    ``None`` disables the contraction branch outright.
     """
     state = jnp.asarray(initial)
     target_current_value = (
@@ -1571,6 +1637,7 @@ def solve_reduced_newton(
         active_set_steps=active_set_steps,
         fused=fused,
         scoring=ladder_scoring,
+        refresh_threshold=jacobian_refresh_threshold,
         regather=regather,
         dispatched_boundary=dispatched_boundary,
         stream=stream,
@@ -1586,6 +1653,7 @@ def solve_reduced_newton(
         newton_steps_per_trip=driven["newton_steps_per_trip"],
         jacobian_builds_per_trip=driven["jacobian_builds_per_trip"],
         rejected_steps_per_trip=driven["rejected_steps_per_trip"],
+        contraction_refreshes_per_trip=driven["contraction_refreshes_per_trip"],
         jacobian_wall_per_trip=driven["jacobian_wall_per_trip"],
         newton_wall_per_trip=driven["newton_wall_per_trip"],
         boundary_wall_per_trip=driven["boundary_wall_per_trip"],
@@ -1826,6 +1894,7 @@ def solve_constrained_reduced_newton(
     support_floor: float = _ACTIVE_SUPPORT_FLOOR,
     ladder_scoring: str = LADDER_SCORING,
     trip_boundary: str = TRIP_BOUNDARY,
+    jacobian_refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
     row_arguments: str = TRACED_ROWS,
     program: ReducedProgram | None = None,
     stream: bool = False,
@@ -1868,6 +1937,11 @@ def solve_constrained_reduced_newton(
     again, so the reduced state stays in the cells the program was built
     around.  The result carries its program either way, so a loop is a chain
     of calls each passing the last one's.
+
+    ``jacobian_refresh_threshold`` steers when the trip's dense Jacobian is
+    rebuilt, exactly as :func:`solve_reduced_newton` documents: the default of
+    one leaves the refusal-only chord on the referee fixtures, and ``None``
+    disables the contraction branch outright.
     """
     operator = profile.operator
     state = jnp.asarray(initial)
@@ -2033,6 +2107,7 @@ def solve_constrained_reduced_newton(
         active_set_steps=active_set_steps,
         fused=fused,
         scoring=ladder_scoring,
+        refresh_threshold=jacobian_refresh_threshold,
         regather=regather,
         dispatched_boundary=dispatched_boundary,
         stream=stream,
@@ -2078,6 +2153,7 @@ def solve_constrained_reduced_newton(
         newton_steps_per_trip=driven["newton_steps_per_trip"],
         jacobian_builds_per_trip=driven["jacobian_builds_per_trip"],
         rejected_steps_per_trip=driven["rejected_steps_per_trip"],
+        contraction_refreshes_per_trip=driven["contraction_refreshes_per_trip"],
         jacobian_wall_per_trip=driven["jacobian_wall_per_trip"],
         newton_wall_per_trip=driven["newton_wall_per_trip"],
         boundary_wall_per_trip=driven["boundary_wall_per_trip"],

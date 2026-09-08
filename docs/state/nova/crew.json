@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T14:29:19",
+  "updated": "2026-09-08T14:40:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2444,9 +2444,11 @@
         "id": "nia-census-l",
         "harness": "codex-luna",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a080c3-451a-7783-8a52-aca150d2830d",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a080c3-451a-7783-8a52-aca150d2830d"
+        },
         "created": "2026-09-08"
       },
       {
@@ -135133,6 +135135,159 @@
           "reason": "the role itself is the blocker: a read-only sandbox cannot reach SLURM and no advice changes that, so the measurement continues as a compute-capable node from the artifacts this one prepared"
         },
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T110354534931-nia-second-target-movement",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-second-target-movement",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2556,
+                "cached_input_tokens": 851849,
+                "input_tokens": 854407,
+                "output_tokens": 2477,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 856884,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The diverted -110 oracle target moved twice: to 804089.1446464028 A at a3fa8b9b, whose mechanism is the traced separatrix support moving onto the tensor spline, and by a further 210.29568259126972 A to the head value 803878.8489638115 A with no attribution. Continue exactly the method recorded in /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/certificate-bracket-closure.md and its predecessor certificate-drift-attribution.md, which carry the archive layout, the backported receipt guard and the lane recipe: fresh-process all_debug lanes, --cpus-per-task=4 --mem=64G, TMPDIR=/tmp, JAX_PLATFORMS=cpu, JAX_ENABLE_COMPILATION_CACHE=0, git archives, every affected row labelled mixed-code, and no explicit --no-sync on the compute node because its uv wrapper already supplies one. Binary-search the commits between a3fa8b9b and the current head of main, at most eight probes, to name the single commit that produces the second movement; then read its diff and state the mechanism in the same terms, which cells or which support the integration now covers. Report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/second-target-movement.md with the measured target either side of the named commit, and recommend whether the certificate should be re-based at head with both movements attributed or whether this movement is an unintended narrowing needing repair; recommend, do not decide. Change no source file. If the bracket cannot be closed within the probe cap, report the narrowest reached",
+          "estimated_hours": 1.0,
+          "goal": "The commit behind the second exact-oracle target movement named, with its mechanism read from the diff",
+          "id": "nia-second-target-movement",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T110354534931-nia-second-target-movement/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/second-target-movement.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/second-target/"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "nia-target2-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T11:04:04Z",
+        "completed_at": "2026-09-08T12:37:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5634,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5634,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "9f1d0db0eadd792546e60ad4ce7f2a574a19259c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sixteen construction-only fresh-process all_debug probes over git archives, --cpus-per-task=4 --mem=64G, JAX_PLATFORMS=cpu, compilation cache disabled, every mixed-code row labelled",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/second-target-movement.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T110354534931-nia-second-target-movement/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a080b0-7c5c-7423-9eff-ce6e5761555f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7993856,
+            "cached_input_tokens_cumulative": 7993856,
+            "input_tokens": 8206483,
+            "input_tokens_cumulative": 8206483,
+            "output_tokens": 40656,
+            "output_tokens_cumulative": 40656,
+            "reasoning_output_tokens": 15630,
+            "reasoning_output_tokens_cumulative": 15630
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T12:37:58Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 35.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T12:37:58Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 7993856,
+          "cumulative_input_tokens": 16200339,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 56286
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": "test role; the attribution report and its lane logs are the deliverable",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-second-target-movement",
+          "session_id": "01a080b0-7c5c-7423-9eff-ce6e5761555f",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T12:37:58Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -135445,6 +135600,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2238
+    "_version": 2240
   }
 }

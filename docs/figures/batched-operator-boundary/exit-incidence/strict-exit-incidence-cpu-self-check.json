@@ -1,35 +1,35 @@
 {
   "configuration": {
     "host_memory_limit_mib": 16384,
-    "host_memory_peak_mib": 6073.44921875,
+    "host_memory_peak_mib": 5413.53515625,
     "host_memory_stages": [
       {
-        "current_rss_mib": 667.6796875,
-        "resource_peak_rss_mib": 667.6796875,
+        "current_rss_mib": 637.4140625,
+        "resource_peak_rss_mib": 637.4140625,
         "resource_peak_scope": "process lifetime through this stage",
         "stage": "INPUT_BUILD_START"
       },
       {
-        "current_rss_mib": 893.0,
-        "resource_peak_rss_mib": 1475.6953125,
+        "current_rss_mib": 865.15625,
+        "resource_peak_rss_mib": 1451.12109375,
         "resource_peak_scope": "process lifetime through this stage",
         "stage": "MAST_INPUT_BUILD_DONE"
       },
       {
-        "current_rss_mib": 3879.1640625,
-        "resource_peak_rss_mib": 4146.73828125,
+        "current_rss_mib": 3765.37109375,
+        "resource_peak_rss_mib": 4195.21875,
         "resource_peak_scope": "process lifetime through this stage",
         "stage": "MAST_INPUT_RELEASED"
       },
       {
-        "current_rss_mib": 4455.9765625,
-        "resource_peak_rss_mib": 4497.53515625,
+        "current_rss_mib": 4038.2890625,
+        "resource_peak_rss_mib": 4295.18359375,
         "resource_peak_scope": "process lifetime through this stage",
         "stage": "DIIID_INPUT_BUILD_DONE"
       },
       {
-        "current_rss_mib": 5896.1484375,
-        "resource_peak_rss_mib": 6073.44921875,
+        "current_rss_mib": 5077.16796875,
+        "resource_peak_rss_mib": 5413.53515625,
         "resource_peak_scope": "process lifetime through this stage",
         "stage": "DIIID_INPUT_RELEASED"
       }
@@ -57,8 +57,10 @@
       "corpus_root": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train",
       "machine_artifact": {
         "cache": "/run/user/39486/reckon-artifact-repaired-ring-cache",
+        "coordinate_transport": "digest-qualified wall coordinates supplied to the compute node",
         "digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
-        "manifest_sha256": "c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e"
+        "manifest_sha256": "c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
+        "wall_coordinate_sha256": "a45135511161237ad38db8e6515b66bf79471b9eb719779281a37dbda9bfffd8"
       },
       "member_count": 2
     },
@@ -74,6 +76,7 @@
         "sha256": "cfd674117abc756f4ad8305904d0c4e2e1056c20debbfa12f970de74f60a3a31"
       },
       "member_count": 2,
+      "profile_representation": "six distinct 65-point MAST profile pairs carried as dynamic array leaves",
       "rebuilt_profile_count": 1,
       "response_carrier": {
         "carrier": {
@@ -89,13 +92,13 @@
           "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
           "size_bytes": 645864,
           "stored_circuit_count": 101,
-          "warm_load_seconds": 0.006257717031985521
+          "warm_load_seconds": 0.007246663793921471
         },
         "loaded_from_persisted_carrier": true,
         "named_cache_only_check": {
           "command": [
-            "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-            "/home/ITER/mcintos/Code/nova/benchmarks/mast_response_carrier_warm.py",
+            "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
+            "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-exit-incidence-batch-4/benchmarks/mast_response_carrier_warm.py",
             "check",
             "--carrier",
             "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -104,7 +107,7 @@
           ],
           "direct_green_operator_builder_entries": 0,
           "passes": true,
-          "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.019352 direct_builders=0 verdict=PASS"
+          "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.019718 direct_builders=0 verdict=PASS"
         }
       },
       "state_cache": {
@@ -124,24 +127,24 @@
   },
   "execution": {
     "attempt": 0,
-    "cpu_count": 1,
+    "cpu_count": 4,
     "device": "cpu",
-    "elapsed_seconds": 376.7817685119808,
-    "execution_mode": "allocation_free_cpu_self_check",
+    "elapsed_seconds": 1256.9537497926503,
+    "execution_mode": "slurm_cpu_self_check",
     "exit_marker": 0,
     "gpu_count": 0,
-    "host": "98dci4-srv-1006.iter.org",
+    "host": "98dci4-clu-3141.iter.org",
     "input_build_seconds": {
-      "DIII-D": 115.39396444195881,
-      "MAST": 16.40630018291995
+      "DIII-D": 155.2024431452155,
+      "MAST": 22.13291092030704
     },
     "jax_platforms": [
       "cpu"
     ],
-    "job_id": null,
-    "job_name": null,
-    "node": "98dci4-srv-1006.iter.org",
-    "partition": null,
+    "job_id": 1266904,
+    "job_name": "bash",
+    "node": "98dci4-clu-3141.iter.org",
+    "partition": "all_debug",
     "persistent_compilation_cache": {
       "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
       "entry_key_fields": [
@@ -196,36 +199,34 @@
       "version_key": "runtime-ea5c55820be3d80549fe"
     },
     "prior_job_id": null,
-    "requested_memory_mib": null,
+    "requested_memory_mib": 65536,
     "requested_time_limit": null,
     "reservation": null,
-    "tmpdir": "/run/user/39486"
+    "tmpdir": "/tmp"
   },
   "machines": {
     "DIII-D": {
-      "compile_seconds": null,
+      "compile_seconds": 203.79297914728522,
       "execution_contract": {
         "arm_order": [
           "without_exit",
           "with_exit"
         ],
-        "compile_count_per_pass": 4,
-        "compiled_once": false,
+        "compile_count_per_pass": 1,
+        "compiled_once": true,
         "declared_member_count": 2,
-        "execution_route": "sequential_jitted_geometry_fallback",
+        "execution_route": "one_stacked_vmap_program",
         "geometry_digests": [
           "1a91f6e0c6bae79a2ba32a7d851b8a1152d7675df47ccba57d2999baf64195ed",
           "1a91f6e0c6bae79a2ba32a7d851b8a1152d7675df47ccba57d2999baf64195ed"
         ],
         "geometry_groups": [
           [
-            0
-          ],
-          [
+            0,
             1
           ]
         ],
-        "geometry_identical": false,
+        "geometry_identical": true,
         "same_arguments_for_exit_passes": true,
         "settlement_flag_is_member_runtime_argument": true,
         "width": 2
@@ -235,113 +236,125 @@
           "identity": "d3d_shot_00000c4a7b.parquet frame 179",
           "initial_state_sha256": "05aa45e5e56e510ce1a1e96af48418687627707c112a2f63368ce50f915decb1",
           "state_authority": "production cold diverted seed for committed frame",
-          "strict_qualification": "fired",
-          "strict_qualification_firing_trip": 4,
-          "terminal_state_bit_identical_where_exit_fired": true,
+          "strict_qualification": "never",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
           "with_exit": {
-            "batch_elapsed_ms": 62096.412423,
-            "batched_ms_per_member": 31048.2062115,
-            "executed_trips": 4,
-            "no_op_trips": 12,
-            "terminal_residual": 0.2176936320990389,
-            "terminal_state_sha256": "1cc8d12b0963022efc99ded5757fc653f9e75821b77d1f6d62b58cf9c1317bb3",
-            "termination": "active_set_settled"
+            "batch_elapsed_ms": 360148.393338,
+            "batched_ms_per_member": 180074.196669,
+            "executed_trips": 3,
+            "no_op_trips": 13,
+            "terminal_residual": 0.07829712103171928,
+            "terminal_state_sha256": "2dae454334ca80ba7ad245e77fa0816c855136ff3d1e273ddf9140ef55228913",
+            "termination": "active_set_cycle_detected"
           },
           "without_exit": {
-            "batch_elapsed_ms": 79854.674255,
-            "batched_ms_per_member": 39927.3371275,
-            "executed_trips": 4,
-            "no_op_trips": 12,
-            "terminal_residual": 0.2176936320990389,
-            "terminal_state_sha256": "1cc8d12b0963022efc99ded5757fc653f9e75821b77d1f6d62b58cf9c1317bb3",
-            "termination": "active_set_stagnated"
+            "batch_elapsed_ms": 367840.075765,
+            "batched_ms_per_member": 183920.0378825,
+            "executed_trips": 3,
+            "no_op_trips": 13,
+            "terminal_residual": 0.07829712103171928,
+            "terminal_state_sha256": "2dae454334ca80ba7ad245e77fa0816c855136ff3d1e273ddf9140ef55228913",
+            "termination": "active_set_cycle_detected"
           }
         },
         {
           "identity": "d3d_shot_0003ff34e7.parquet frame 44",
           "initial_state_sha256": "962bd6518b25abe8c92b647d57100013b8735c1c998acd75ac9f8e4603dd301d",
           "state_authority": "production cold diverted seed for committed frame",
-          "strict_qualification": "never",
-          "strict_qualification_firing_trip": null,
-          "terminal_state_bit_identical_where_exit_fired": null,
+          "strict_qualification": "fired",
+          "strict_qualification_firing_trip": 3,
+          "terminal_state_bit_identical_where_exit_fired": true,
           "with_exit": {
-            "batch_elapsed_ms": 62096.412423,
-            "batched_ms_per_member": 31048.2062115,
-            "executed_trips": 16,
-            "no_op_trips": 0,
-            "terminal_residual": 0.31389367363778153,
-            "terminal_state_sha256": "053bac0257a22a2b9a1d3e0c222ba650c3d9794b20157e7495799deedf8c4c00",
-            "termination": "active_set_iteration_budget_exhausted"
+            "batch_elapsed_ms": 360148.393338,
+            "batched_ms_per_member": 180074.196669,
+            "executed_trips": 3,
+            "no_op_trips": 13,
+            "terminal_residual": 0.8025746107255938,
+            "terminal_state_sha256": "210ce72b11587e0cd19497a816f694590ad19b6779e367c72b3f2e4bac1b2a38",
+            "termination": "active_set_settled"
           },
           "without_exit": {
-            "batch_elapsed_ms": 79854.674255,
-            "batched_ms_per_member": 39927.3371275,
-            "executed_trips": 16,
-            "no_op_trips": 0,
-            "terminal_residual": 0.31389367363778153,
-            "terminal_state_sha256": "053bac0257a22a2b9a1d3e0c222ba650c3d9794b20157e7495799deedf8c4c00",
-            "termination": "active_set_iteration_budget_exhausted"
+            "batch_elapsed_ms": 367840.075765,
+            "batched_ms_per_member": 183920.0378825,
+            "executed_trips": 3,
+            "no_op_trips": 13,
+            "terminal_residual": 0.8025746107255938,
+            "terminal_state_sha256": "210ce72b11587e0cd19497a816f694590ad19b6779e367c72b3f2e4bac1b2a38",
+            "termination": "active_set_stagnated"
           }
         }
       ],
       "stage_host_memory": [
         {
-          "current_rss_mib": 4379.015625,
-          "resource_peak_rss_mib": 4497.53515625,
+          "current_rss_mib": 4011.23046875,
+          "resource_peak_rss_mib": 4295.18359375,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "DIIID_BATCH_READY"
         },
         {
-          "current_rss_mib": 4379.015625,
-          "resource_peak_rss_mib": 4497.53515625,
+          "current_rss_mib": 4011.23046875,
+          "resource_peak_rss_mib": 4295.18359375,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "DIIID_BATCH_COMPILE_START"
+        },
+        {
+          "current_rss_mib": 5223.4140625,
+          "resource_peak_rss_mib": 5413.53515625,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "DIIID_BATCH_COMPILE_DONE"
+        },
+        {
+          "current_rss_mib": 5223.4140625,
+          "resource_peak_rss_mib": 5413.53515625,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "DIIID_WITHOUT_EXIT_START"
         },
         {
-          "current_rss_mib": 6012.1953125,
-          "resource_peak_rss_mib": 6073.44921875,
+          "current_rss_mib": 5385.76953125,
+          "resource_peak_rss_mib": 5413.53515625,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "DIIID_WITHOUT_EXIT_DONE"
         },
         {
-          "current_rss_mib": 6012.1953125,
-          "resource_peak_rss_mib": 6073.44921875,
+          "current_rss_mib": 5385.76953125,
+          "resource_peak_rss_mib": 5413.53515625,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "DIIID_WITH_EXIT_START"
         },
         {
-          "current_rss_mib": 6013.81640625,
-          "resource_peak_rss_mib": 6073.44921875,
+          "current_rss_mib": 5386.75390625,
+          "resource_peak_rss_mib": 5413.53515625,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "DIIID_WITH_EXIT_DONE"
         },
         {
-          "current_rss_mib": 6013.81640625,
-          "resource_peak_rss_mib": 6073.44921875,
+          "current_rss_mib": 5229.3046875,
+          "resource_peak_rss_mib": 5413.53515625,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "DIIID_BATCH_COMPLETE"
         },
         {
-          "current_rss_mib": 5896.1484375,
-          "resource_peak_rss_mib": 6073.44921875,
+          "current_rss_mib": 5079.13671875,
+          "resource_peak_rss_mib": 5413.53515625,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "DIIID_BATCH_RELEASED"
         }
       ],
       "summary": {
         "batched_ms_per_member": {
-          "with_exit": 31048.2062115,
-          "without_exit": 39927.3371275
+          "with_exit": 180074.196669,
+          "without_exit": 183920.0378825
         },
         "bit_identical_fired_members": 1,
         "declared_members": 2,
-        "peak_host_rss_mib": 6073.44921875,
+        "peak_host_rss_mib": 5413.53515625,
         "strict_exit_fired_members": 1,
         "strict_exit_never_members": 1
       }
     },
     "MAST": {
-      "compile_seconds": 21.720296530984342,
+      "compile_seconds": 31.11956937983632,
       "execution_contract": {
         "arm_order": [
           "without_exit",
@@ -375,21 +388,21 @@
           "strict_qualification_firing_trip": null,
           "terminal_state_bit_identical_where_exit_fired": null,
           "with_exit": {
-            "batch_elapsed_ms": 36495.038997,
-            "batched_ms_per_member": 18247.5194985,
+            "batch_elapsed_ms": 52614.920775,
+            "batched_ms_per_member": 26307.4603875,
             "executed_trips": 1,
             "no_op_trips": 15,
-            "terminal_residual": 3.8573444747968555e-16,
-            "terminal_state_sha256": "69309c0b6c2d617a1d9598df807d7f69a8343cf6944b38165c5a92e587a0ea32",
+            "terminal_residual": 4.408393685482121e-16,
+            "terminal_state_sha256": "8edbf1d15ab88c2b363e86730d872d03d03c65a914b057686100ca30b8b681d8",
             "termination": "converged"
           },
           "without_exit": {
-            "batch_elapsed_ms": 36870.28471,
-            "batched_ms_per_member": 18435.142355,
+            "batch_elapsed_ms": 53093.147783,
+            "batched_ms_per_member": 26546.5738915,
             "executed_trips": 1,
             "no_op_trips": 15,
-            "terminal_residual": 3.8573444747968555e-16,
-            "terminal_state_sha256": "69309c0b6c2d617a1d9598df807d7f69a8343cf6944b38165c5a92e587a0ea32",
+            "terminal_residual": 4.408393685482121e-16,
+            "terminal_state_sha256": "8edbf1d15ab88c2b363e86730d872d03d03c65a914b057686100ca30b8b681d8",
             "termination": "converged"
           }
         },
@@ -401,8 +414,8 @@
           "strict_qualification_firing_trip": null,
           "terminal_state_bit_identical_where_exit_fired": null,
           "with_exit": {
-            "batch_elapsed_ms": 36495.038997,
-            "batched_ms_per_member": 18247.5194985,
+            "batch_elapsed_ms": 52614.920775,
+            "batched_ms_per_member": 26307.4603875,
             "executed_trips": 1,
             "no_op_trips": 15,
             "terminal_residual": 3.3062952641115905e-16,
@@ -410,8 +423,8 @@
             "termination": "converged"
           },
           "without_exit": {
-            "batch_elapsed_ms": 36870.28471,
-            "batched_ms_per_member": 18435.142355,
+            "batch_elapsed_ms": 53093.147783,
+            "batched_ms_per_member": 26546.5738915,
             "executed_trips": 1,
             "no_op_trips": 15,
             "terminal_residual": 3.3062952641115905e-16,
@@ -422,68 +435,68 @@
       ],
       "stage_host_memory": [
         {
-          "current_rss_mib": 955.21484375,
-          "resource_peak_rss_mib": 1475.6953125,
+          "current_rss_mib": 924.734375,
+          "resource_peak_rss_mib": 1451.12109375,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "MAST_BATCH_READY"
         },
         {
-          "current_rss_mib": 958.046875,
-          "resource_peak_rss_mib": 1475.6953125,
+          "current_rss_mib": 927.56640625,
+          "resource_peak_rss_mib": 1451.12109375,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "MAST_BATCH_COMPILE_START"
         },
         {
-          "current_rss_mib": 3909.17578125,
-          "resource_peak_rss_mib": 4146.73828125,
+          "current_rss_mib": 3843.8046875,
+          "resource_peak_rss_mib": 4195.21875,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "MAST_BATCH_COMPILE_DONE"
         },
         {
-          "current_rss_mib": 3909.17578125,
-          "resource_peak_rss_mib": 4146.73828125,
+          "current_rss_mib": 3843.8046875,
+          "resource_peak_rss_mib": 4195.21875,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "MAST_WITHOUT_EXIT_START"
         },
         {
-          "current_rss_mib": 4125.796875,
-          "resource_peak_rss_mib": 4146.73828125,
+          "current_rss_mib": 4012.18359375,
+          "resource_peak_rss_mib": 4195.21875,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "MAST_WITHOUT_EXIT_DONE"
         },
         {
-          "current_rss_mib": 4125.796875,
-          "resource_peak_rss_mib": 4146.73828125,
+          "current_rss_mib": 4012.18359375,
+          "resource_peak_rss_mib": 4195.21875,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "MAST_WITH_EXIT_START"
         },
         {
-          "current_rss_mib": 4128.5390625,
-          "resource_peak_rss_mib": 4146.73828125,
+          "current_rss_mib": 4013.58984375,
+          "resource_peak_rss_mib": 4195.21875,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "MAST_WITH_EXIT_DONE"
         },
         {
-          "current_rss_mib": 3978.13671875,
-          "resource_peak_rss_mib": 4146.73828125,
+          "current_rss_mib": 3863.09375,
+          "resource_peak_rss_mib": 4195.21875,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "MAST_BATCH_COMPLETE"
         },
         {
-          "current_rss_mib": 3944.5078125,
-          "resource_peak_rss_mib": 4146.73828125,
+          "current_rss_mib": 3831.66796875,
+          "resource_peak_rss_mib": 4195.21875,
           "resource_peak_scope": "process lifetime through this stage",
           "stage": "MAST_BATCH_RELEASED"
         }
       ],
       "summary": {
         "batched_ms_per_member": {
-          "with_exit": 18247.5194985,
-          "without_exit": 18435.142355
+          "with_exit": 26307.4603875,
+          "without_exit": 26546.5738915
         },
         "bit_identical_fired_members": 0,
         "declared_members": 2,
-        "peak_host_rss_mib": 4146.73828125,
+        "peak_host_rss_mib": 4195.21875,
         "strict_exit_fired_members": 0,
         "strict_exit_never_members": 2
       }
@@ -492,12 +505,12 @@
   "measurement_state": "complete",
   "observations": {
     "batch_compile_count_per_pass": {
-      "DIII-D": 4,
+      "DIII-D": 1,
       "MAST": 1
     },
     "geometry_fallbacks": {
       "DIII-D": {
-        "fallback": true,
+        "fallback": false,
         "geometry_digests": [
           "1a91f6e0c6bae79a2ba32a7d851b8a1152d7675df47ccba57d2999baf64195ed",
           "1a91f6e0c6bae79a2ba32a7d851b8a1152d7675df47ccba57d2999baf64195ed"
@@ -513,7 +526,7 @@
     },
     "mast_compiled_once": true
   },
-  "recorded_at": "2026-09-08T11:24:19.154692+00:00",
+  "recorded_at": "2026-09-08T13:16:02.968959+00:00",
   "schema": "nova.strict-exit-incidence/2",
   "sequential_width_one_comparison": {
     "DIII-D": {
@@ -533,9 +546,9 @@
   },
   "source": {
     "driver": "benchmarks/strict_exit_incidence.py",
-    "driver_sha256": "55925b19f5657300e44733581c2d821704ac01dc4b905136ebe21530556c0bf5",
+    "driver_sha256": "74c2365735cf883e6ca9c54a596b717eb028cf60d37c016ed26ea317d26a4abe",
     "required_ancestor": "588578a0",
-    "revision": "2270673f9b0f5f93e7fb388f4938194fadc5bc7c",
+    "revision": "f5de60dc53b61dec13475120ddb5deb33c06f190",
     "solver_source_modified": false
   }
 }

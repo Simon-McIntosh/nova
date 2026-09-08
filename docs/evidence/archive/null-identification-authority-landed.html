@@ -627,6 +627,12 @@
     painter's containment filter drops out-of-vessel candidates, so the atlas keeps its own null painter that shows them. Figures under
     <code>docs/figures/null-identification-authority/convergence-atlas/</code> with a JSON receipt.</p>
   </section>
+<section id="the-x-point-read-is-contained-on-the-solve-path"><h2>The X-point read is contained on the solve path (2026-09-08 05:21Z)</h2>
+<p>Node <code>nia-x-containment-read-path</code> (codex-terra, spec exact; commit <code>54e8911b</code>, merged at <code>13bbdac4</code>).</p>
+<p><strong>Result.</strong> One finite in-wall saddle screen, <code>Topology.contained_x_candidates</code>, now governs both the primary X-point selection and the wall-shadow height band, and <code>traced_boundary_read</code> publishes the same screen as <code>classification_x_inside_wall</code>. When no candidate lies inside the first wall the read returns NaN instead of the first table row, so an out-of-vessel saddle can no longer alter the solve read silently.</p>
+<p><strong>Measure.</strong> Focused CPU lane 20 passed, 1 deselected. The exact 49-case compatibility selector on <code>all_debug</code> returned 45 passed at base <code>6fce8753</code> and 45 passed at the candidate with the same four reds, all from a route-test file that lives only in the held boundary-routing prototype tree, so the change adds zero failures. A CPU replay of the twelve committed bank rows (operand sha256 <code>59460a26</code>) changed 0 of 12 selected saddles, 0 of 12 boundary fluxes and 0 of 12 complete 1089-cell trip-one partitions: the containment screen fires on none of the banked rows, and the twelve topology-boundary identities, the Solov'ev certificate, the pinned diverted selection and referee, the six hex references, the wall shadow, own-mask, fixed-point and continuation cases keep their exact asserted CPU values.</p>
+<p><strong>Lesson.</strong> A compatibility list is a coordinator artefact and can name a file that is not on the base; the worker's blocked report was the correct reading of the literal brief, and the acceptance that should have been written is zero added failures against the stated base. Report: <code>~/.config/reckon/crew/reports/nova/null-identification/x-containment-read-path.md</code>.</p>
+</section>
 </main>
 </body>
 </html>

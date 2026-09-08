@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T07:18:29",
+  "updated": "2026-09-08T07:21:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -127804,6 +127804,151 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260908T043614895988-nia-x-containment-read-path",
+        "plan": "null-identification-authority",
+        "section": "\u00a72",
+        "node": "nia-x-containment-read-path",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1790,
+                "cached_input_tokens": 936042,
+                "input_tokens": 937864,
+                "output_tokens": 2343,
+                "reasoning_output_tokens": 158,
+                "total_tokens": 940207,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "Topology.read_qualification in nova/equilibrium/topology.py applies the polygon containment already used by traced_boundary_read to the X candidate set before the polarity-signed flux ranking and keeps the wall-extremum comparison on the contained set; a regression test builds a flux map where an out-of-vessel saddle outscores the true X-point on flux and asserts the qualification's x_point is the in-vessel one; an end-to-end parity test between read_qualification and traced_boundary_read runs on a battery that includes an out-of-vessel saddle; both tests green in the default lane, the seven referee tests green, and the twelve positive-current bank rows, the Solovev certificate and the pinned diverted read bit-identical on the CPU fixtures (the H200 bank regeneration belongs to the banked-reads node and is not repeated here); the report states which bank rows would change selected saddle, boundary flux or trip-1 partition under the contained read if any, from the CPU replay; every deliverable committed as it lands and the manifest written before any long output; no structure excluded by name",
+          "estimated_hours": 2.5,
+          "goal": "The X-point selection on the read the solve uses screens its candidate set by polygon containment before the flux ranking, with the regression and the reader parity test the section names",
+          "id": "nia-x-containment-read-path",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T043614895988-nia-x-containment-read-path/manifest.md",
+          "plan": "null-identification-authority",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/connectivity_boundary.py",
+            "tests/test_topology_qualified_admission.py",
+            "tests/test_topology_read_equivalence.py",
+            "tests/test_x_point_containment_read.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/x-containment-read-path.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-xcontain-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T04:36:31Z",
+        "completed_at": "2026-09-08T05:18:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2544,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2544,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "6fce8753af842d6a7eecf635a9b277157a3e9e18",
+        "commits": [
+          "54e8911bebec0e40b6d115d5a67ca7d9db60cc2c"
+        ],
+        "changed_lines": {
+          "added": 113,
+          "removed": 8,
+          "files": 4
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu pytest focused topology and containment tests on the CPU lane (20 passed, 1 deselected); exact prior 49-case compatibility selector on all_debug at base 6fce8753 and candidate 54e8911b (45 passed, 4 held-route reds at both); CPU committed-operand replay of the twelve bank rows",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T043614895988-nia-x-containment-read-path/focused-topology-cpu.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T043614895988-nia-x-containment-read-path/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07f4d-acdb-7c50-9dfc-62a9fa18b7cd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11418752,
+            "cached_input_tokens_cumulative": 11418752,
+            "input_tokens": 11819603,
+            "input_tokens_cumulative": 11819603,
+            "output_tokens": 36331,
+            "output_tokens_cumulative": 36331,
+            "reasoning_output_tokens": 13007,
+            "reasoning_output_tokens_cumulative": 13007
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 49338,
+          "peak_input_tokens": 23238355
+        },
+        "follow_on_paths": [
+          "nova/equilibrium/forward_operator.py",
+          "scripts/labeller_batch/shard.py",
+          "tests/test_boundary_read_routing.py"
+        ],
+        "dispute_count": 0,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-x-containment-read-path",
+          "session_id": "01a07f4d-acdb-7c50-9dfc-62a9fa18b7cd",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T05:18:55Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -128116,6 +128261,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2140
+    "_version": 2141
   }
 }

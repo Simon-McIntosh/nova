@@ -52,7 +52,7 @@ def test_solovev_strike_points_are_exact_wall_level_intersections() -> None:
     assert np.array_equal(segments, np.array([0, 1], dtype=np.int32))
     for point, segment, parameter in zip(points, segments, parameters, strict=True):
         following = (int(segment) + 1) % wall.shape[0]
-        expected = wall[segment] * (1.0 - parameter) + wall[following] * parameter
+        expected = wall[segment] + parameter * (wall[following] - wall[segment])
         psi_at_point = (
             psi_norm[segment] * (1.0 - parameter) + psi_norm[following] * parameter
         )

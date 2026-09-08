@@ -719,9 +719,7 @@ def test_rasterless_solovev_session_wall_group_round_trips_closed(
     _assert_dataset_variables_bitwise(expected, actual)
 
 
-def test_labelled_points_outside_wall_receipt_counts_segment_membership(
-    tmp_path,
-) -> None:
+def test_labelled_points_outside_wall_receipt_counts_segment_membership() -> None:
     """The receipt counts an out-of-vessel X-point, not a recorded crossing.
 
     X-points and the magnetic axis are tested against the wall polygon by
@@ -740,8 +738,12 @@ def test_labelled_points_outside_wall_receipt_counts_segment_membership(
     strike_parameter = np.array([0.25, 0.75])
     strike = np.array(
         [
-            operator_wall[index] * (1.0 - parameter)
-            + operator_wall[(index + 1) % operator_wall.shape[0]] * parameter
+            operator_wall[index]
+            + parameter
+            * (
+                operator_wall[(index + 1) % operator_wall.shape[0]]
+                - operator_wall[index]
+            )
             for index, parameter in zip(strike_segment, strike_parameter, strict=True)
         ]
     )
@@ -757,20 +759,27 @@ def test_labelled_points_outside_wall_receipt_counts_segment_membership(
     dataset = session_dataset((frame,), wall=operator_wall)
     assert count_labelled_outside_wall(dataset) == 1
 
-    # Positive control: a displaced point has the same crossing metadata but
-    # cannot equal the point rebuilt from it.
+    # Positive control: moving one strike one millimetre off its segment makes
+    # exactly that otherwise-valid slot count outside.
     displaced = frame._replace(
-        strike_points_r=operator_wall[[0, 1], 0] + 0.5,
-        strike_points_z=operator_wall[[0, 1], 1] + 0.5,
+        strike_points_r=frame.strike_points_r + np.array([1.0e-3, 0.0]),
     )
-    write_session(
-        (displaced,),
-        filename="displaced-session",
-        dirname=str(tmp_path),
-        wall=operator_wall,
+    assert (
+        count_labelled_outside_wall(session_dataset((displaced,), wall=operator_wall))
+        == 2
     )
-    restored = read_session(filename="displaced-session", dirname=str(tmp_path))
-    assert count_labelled_outside_wall(restored) == 3
+
+    # Positive control: an invalid segment index cannot identify a wall
+    # segment, even when the stored point itself has valid coordinates.
+    invalid_segment = frame._replace(
+        strike_segment=np.array([operator_wall.shape[0], 1], dtype=np.int32),
+    )
+    assert (
+        count_labelled_outside_wall(
+            session_dataset((invalid_segment,), wall=operator_wall)
+        )
+        == 2
+    )
 
 
 def test_frame_psi_at_the_axis_is_the_solve_axis_flux_in_wb(machine) -> None:

@@ -1584,8 +1584,8 @@ def count_labelled_outside_wall(
                 continue
             start = wall_loop[segment]
             end = wall_loop[segment + 1]
-            reconstructed = start * (1.0 - parameter) + end * parameter
-            if not np.array_equal(strike, reconstructed):
+            reconstructed = start + parameter * (end - start)
+            if not np.allclose(strike, reconstructed, rtol=0.0, atol=1.0e-12):
                 outside += 1
     return int(outside)
 

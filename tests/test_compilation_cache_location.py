@@ -63,7 +63,7 @@ def _run_concurrent_cache_writers(
     environment.update(
         JAX_ENABLE_X64="true",
         JAX_PLATFORMS="cpu",
-        TMPDIR=str(cache_base),
+        NOVA_FORWARD_COMPILATION_CACHE_ROOT=str(cache_base),
     )
     processes = tuple(
         subprocess.Popen(
@@ -118,14 +118,11 @@ def test_default_cache_root_is_scoped_to_user_and_host(
     monkeypatch,
     tmp_path: Path,
 ) -> None:
-    monkeypatch.setenv("TMPDIR", str(tmp_path))
+    monkeypatch.setenv("NOVA_FORWARD_COMPILATION_CACHE_ROOT", str(tmp_path))
     monkeypatch.setattr(socket, "gethostname", lambda: "cpu-node.example")
 
     assert default_forward_compilation_cache_root() == (
-        tmp_path
-        / "nova-forward-cache"
-        / f"user-{os.getuid()}"
-        / "host-cpu-node.example"
+        tmp_path / f"user-{os.getuid()}" / "host-cpu-node.example"
     )
 
 
@@ -184,8 +181,8 @@ def test_public_solve_preserves_an_explicit_launcher_cache(
     )
 
 
-def test_two_processes_compile_into_one_node_local_default(tmp_path: Path) -> None:
-    cache_base = tmp_path / "temporary-runtime"
+def test_two_processes_compile_into_one_shared_default(tmp_path: Path) -> None:
+    cache_base = tmp_path / "shared-cache"
     results = _run_concurrent_cache_writers(cache_base, tmp_path / "coordination")
 
     assert [result.returncode for result in results] == [0, 0], [
@@ -194,5 +191,6 @@ def test_two_processes_compile_into_one_node_local_default(tmp_path: Path) -> No
     directories = {result.stdout.strip() for result in results}
     assert len(directories) == 1
     directory = Path(directories.pop())
-    assert directory.is_relative_to(cache_base)
+    shared_root = cache_base / f"user-{os.getuid()}" / f"host-{socket.gethostname()}"
+    assert directory.is_relative_to(shared_root)
     assert list(directory.glob("*-cache"))

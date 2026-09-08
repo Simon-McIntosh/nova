@@ -24,6 +24,61 @@ UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH="$PWD" \
   uv run --no-sync pytest <targets>
 ```
 
+### An exact sync strips the extras (binding)
+
+**No worker ever runs `uv sync`, and every `uv run` in a worktree carries
+`--no-sync`.** A plain `uv sync`, or a `uv run` without `--no-sync`, resolves
+the lock's *default* dependency set into whatever environment
+`UV_PROJECT_ENVIRONMENT` names and removes everything outside that set. Pointed
+at the shared root `.venv` it does two things at once: it repoints the editable
+install (`.venv/lib/python3.14/site-packages/_editable_impl_nova_stella.pth`)
+at the caller's worktree, so every process without `PYTHONPATH` imports that
+worktree's code; and it uninstalls every extra the default set does not carry:
+`gpu` (the CUDA plugin and the `nvidia-*` libraries), `schema` (linkml, whose
+`jsonschema` the DIII-D H200 gate imports), and the rest.
+
+Measured 2026-09-08: four worker repoints in one morning (three shadow workers
+and one implement worker, on three different lanes) and one strip. The strip
+came from a worker "repairing" the pointer with a bare `uv sync` from the main
+checkout; two hours later the H200 lane reported no CUDA backend (29 collected,
+26 errors) and a second gate stopped on a missing `jsonschema`. Neither symptom
+named the cause. `uv sync --all-extras` is not the prior state either: it would
+add a hundred packages the environment never carried.
+
+- **After every worker landing, the coordinator checks two things** from the
+  main checkout:
+
+  ```bash
+  cat .venv/lib/python3.14/site-packages/_editable_impl_nova_stella.pth   # /home/ITER/mcintos/Code/nova
+  ls .venv/lib/python3.14/site-packages | grep -c jax_cuda12_plugin          # 2
+  ```
+
+- **Repair with an inexact sync of every extra, from the main checkout only:**
+
+  ```bash
+  uv sync --inexact --all-extras    # adds what is missing, removes nothing, repoints the editable
+  .venv/bin/python -c "import jsonschema, vedo, linkml_runtime"
+  ```
+
+  `--inexact` is the load-bearing flag: without it the sync is exact and
+  strips again. Dry-run first (`--dry-run`); the expected delta is one
+  uninstall and one install of `nova-stella` plus whatever extras' packages
+  are absent. A GPU device only shows on a compute node, so verify CUDA
+  through the next H200 lane's log header, not from the login node.
+
+- **Workers repair nothing in the shared environment.** A worker that finds the
+  pointer wrong or a package missing reports it as a blocker and stops; the
+  brief says so in one line: "every uv command carries `--no-sync` and nothing
+  runs `uv sync`".
+
+- **Inherited variables collide with the explicit flag.** Three workers died
+  before pytest because an inherited `UV_NO_SYNC` or `UV_RUN_RECURSION_DEPTH`
+  duplicated their explicit `--no-sync`. A lane script therefore begins with
+  `unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH` and then passes `--no-sync`
+  explicitly, so the recipe does not depend on the launcher's environment. On
+  the H200 node the `uv` wrapper injects `--no-sync` itself, so payloads there
+  run the root `.venv` python directly rather than through `uv run`.
+
 ### Pre-commit Hooks Require Virtual Environment
 
 The pre-commit hook runs checks through `.venv/bin/python3`, so it needs the

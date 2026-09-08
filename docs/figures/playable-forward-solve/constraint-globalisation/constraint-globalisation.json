@@ -1,0 +1,184 @@
+{
+  "schema": "constraint-globalisation",
+  "source_revision": "08da5421418cc6868ef81d87aa45be98343c0968",
+  "shot": 27079,
+  "current_step_cap_a": 1000.0,
+  "centroid_tolerance_m": 0.001,
+  "active_set_trip_limit": 8,
+  "banked_receipt": "docs/figures/playable-forward-solve/compensator-jacobian/compensator-jacobian-response.json",
+  "passed": true,
+  "cases": [
+    {
+      "row": 16,
+      "target_source": "banked plus 1 kA free solve",
+      "circuit": "p6_upper",
+      "accepted": true,
+      "flat_top_current_within_ten_percent": null,
+      "converged": true,
+      "termination_reason": "converged",
+      "initial_centroid_z_m": -0.0033733404103406415,
+      "target_centroid_z_m": -0.003355681418192911,
+      "final_centroid_z_m": -0.0033556814180745378,
+      "centroid_error_m": 1.1837319319196737e-13,
+      "overshot": true,
+      "trip_count": 1,
+      "newton_steps": 3,
+      "newton_steps_per_trip": [
+        3
+      ],
+      "jacobian_builds_per_trip": [
+        4
+      ],
+      "compensating_current_a": 999.9999989949605,
+      "constraint_residual_m": 1.1837319319196737e-13
+    },
+    {
+      "row": 16,
+      "target_source": "banked plus 1 kA free solve",
+      "circuit": "p6_upper_minus_p6_lower",
+      "accepted": true,
+      "flat_top_current_within_ten_percent": null,
+      "converged": true,
+      "termination_reason": "converged",
+      "initial_centroid_z_m": -0.0033733404103406415,
+      "target_centroid_z_m": -0.0033318965424291485,
+      "final_centroid_z_m": -0.003331896536929399,
+      "centroid_error_m": 5.4997495273212404e-12,
+      "overshot": true,
+      "trip_count": 1,
+      "newton_steps": 2,
+      "newton_steps_per_trip": [
+        2
+      ],
+      "jacobian_builds_per_trip": [
+        3
+      ],
+      "compensating_current_a": 1000.0,
+      "constraint_residual_m": 5.4997495273212404e-12
+    },
+    {
+      "row": 96,
+      "target_source": "banked plus 1 kA free solve",
+      "circuit": "p6_upper",
+      "accepted": true,
+      "flat_top_current_within_ten_percent": true,
+      "converged": true,
+      "termination_reason": "converged",
+      "initial_centroid_z_m": -0.030375004621754267,
+      "target_centroid_z_m": -0.010732132684235889,
+      "final_centroid_z_m": -0.010732134962279292,
+      "centroid_error_m": -2.2780434032199093e-09,
+      "overshot": false,
+      "trip_count": 2,
+      "newton_steps": 3,
+      "newton_steps_per_trip": [
+        3,
+        0
+      ],
+      "jacobian_builds_per_trip": [
+        4,
+        1
+      ],
+      "compensating_current_a": 999.9997714307201,
+      "constraint_residual_m": -2.2780434032199093e-09
+    },
+    {
+      "row": 96,
+      "target_source": "banked plus 1 kA free solve",
+      "circuit": "p6_upper_minus_p6_lower",
+      "accepted": true,
+      "flat_top_current_within_ten_percent": true,
+      "converged": true,
+      "termination_reason": "converged",
+      "initial_centroid_z_m": -0.030375004621754267,
+      "target_centroid_z_m": -0.0024851538689018614,
+      "final_centroid_z_m": -0.002485154673224305,
+      "centroid_error_m": -8.043224437176422e-10,
+      "overshot": false,
+      "trip_count": 2,
+      "newton_steps": 3,
+      "newton_steps_per_trip": [
+        3,
+        0
+      ],
+      "jacobian_builds_per_trip": [
+        4,
+        1
+      ],
+      "compensating_current_a": 1000.0,
+      "constraint_residual_m": -8.043224437176422e-10
+    },
+    {
+      "row": 15,
+      "target_source": "EFIT current centroid",
+      "circuit": "implicit-response selection",
+      "selected_rule": "dominant_authority",
+      "accepted": true,
+      "converged": false,
+      "termination_reason": "sufficient_decrease_refused",
+      "initial_centroid_z_m": -0.0034519676654326532,
+      "target_centroid_z_m": -0.018364788964390755,
+      "final_centroid_z_m": -0.003451967666125289,
+      "centroid_error_m": 0.014912821298265466,
+      "overshot": false,
+      "trip_count": 1,
+      "newton_steps": 0,
+      "newton_steps_per_trip": [
+        0
+      ],
+      "jacobian_builds_per_trip": [
+        1
+      ],
+      "compensating_current_a": 0.0,
+      "constraint_residual_m": 0.014912821298265466
+    },
+    {
+      "row": 16,
+      "target_source": "EFIT current centroid",
+      "circuit": "implicit-response selection",
+      "selected_rule": "dominant_authority",
+      "accepted": true,
+      "converged": false,
+      "termination_reason": "sufficient_decrease_refused",
+      "initial_centroid_z_m": -0.0033733404103406415,
+      "target_centroid_z_m": -0.02177450619637966,
+      "final_centroid_z_m": -0.00337334041015635,
+      "centroid_error_m": 0.018401165786223313,
+      "overshot": false,
+      "trip_count": 1,
+      "newton_steps": 0,
+      "newton_steps_per_trip": [
+        0
+      ],
+      "jacobian_builds_per_trip": [
+        1
+      ],
+      "compensating_current_a": 0.0,
+      "constraint_residual_m": 0.018401165786223313
+    },
+    {
+      "row": 17,
+      "target_source": "EFIT current centroid",
+      "circuit": "implicit-response selection",
+      "selected_rule": "dominant_authority",
+      "accepted": true,
+      "converged": false,
+      "termination_reason": "sufficient_decrease_refused",
+      "initial_centroid_z_m": -0.0032557860318948467,
+      "target_centroid_z_m": -0.024656400084495544,
+      "final_centroid_z_m": -0.0032557860319204946,
+      "centroid_error_m": 0.02140061405257505,
+      "overshot": false,
+      "trip_count": 1,
+      "newton_steps": 0,
+      "newton_steps_per_trip": [
+        0
+      ],
+      "jacobian_builds_per_trip": [
+        1
+      ],
+      "compensating_current_a": 0.0,
+      "constraint_residual_m": 0.02140061405257505
+    }
+  ]
+}

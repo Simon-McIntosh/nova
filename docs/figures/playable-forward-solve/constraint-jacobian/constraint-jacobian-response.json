@@ -1,0 +1,184 @@
+{
+  "schema": "constraint-fixed-point-response",
+  "source_revision": "71e6e00602e0077d4baae3399cccfc37898d3756",
+  "shot": 27079,
+  "rows": [
+    16,
+    96
+  ],
+  "derivative_unit": "metres per ampere",
+  "banked_receipt": "docs/figures/playable-forward-solve/compensator-jacobian/compensator-jacobian-response.json",
+  "passed": false,
+  "rows_detail": [
+    {
+      "row": 16,
+      "circuit": "p6_upper",
+      "requested_class": "limited",
+      "linearized_jacobian_m_per_a": 1.8325039734461408e-08,
+      "direct_image_jacobian_m_per_a": 1.8515668149247895e-08,
+      "banked_direct_image_jacobian_m_per_a": -2.39482593586082e-09,
+      "banked_finite_difference_m_per_a": 1.8789911677036773e-08,
+      "physical_acceptance": {
+        "ratio": 0.9752594929361224,
+        "relative_error": null,
+        "criterion": "signed ratio between 0.5 and 2.0",
+        "passed": true
+      },
+      "constrained_newton_steps": null,
+      "banked_perturbed_solves": {
+        "plus": {
+          "sign": "plus",
+          "current_delta_a": 1000.0,
+          "converged": true,
+          "terminal_residual": 1.411349687149094e-09,
+          "active_set_iterations": 1,
+          "centroid_z_m": -0.003355681418192911,
+          "exception": null
+        },
+        "minus": {
+          "sign": "minus",
+          "current_delta_a": -1000.0,
+          "converged": true,
+          "terminal_residual": 1.359017655987343e-09,
+          "active_set_iterations": 1,
+          "centroid_z_m": -0.0033932612415469845,
+          "exception": null
+        }
+      }
+    },
+    {
+      "row": 16,
+      "circuit": "p6_upper_minus_p6_lower",
+      "requested_class": "limited",
+      "linearized_jacobian_m_per_a": 4.031373750403824e-08,
+      "direct_image_jacobian_m_per_a": 4.089707398117401e-08,
+      "banked_direct_image_jacobian_m_per_a": 6.744481189732816e-08,
+      "banked_finite_difference_m_per_a": 4.136200170749122e-08,
+      "physical_acceptance": {
+        "ratio": 0.9746563473676585,
+        "relative_error": null,
+        "criterion": "signed ratio between 0.5 and 2.0",
+        "passed": true
+      },
+      "constrained_newton_steps": null,
+      "banked_perturbed_solves": {
+        "plus": {
+          "sign": "plus",
+          "current_delta_a": 1000.0,
+          "converged": true,
+          "terminal_residual": 1.2755385800745304e-09,
+          "active_set_iterations": 1,
+          "centroid_z_m": -0.0033318965424291485,
+          "exception": null
+        },
+        "minus": {
+          "sign": "minus",
+          "current_delta_a": -1000.0,
+          "converged": true,
+          "terminal_residual": 1.1444929587506334e-09,
+          "active_set_iterations": 1,
+          "centroid_z_m": -0.003414620545844131,
+          "exception": null
+        }
+      }
+    },
+    {
+      "row": 96,
+      "circuit": "p6_upper",
+      "requested_class": "diverted",
+      "linearized_jacobian_m_per_a": 9.516031713589172e-07,
+      "direct_image_jacobian_m_per_a": 4.4779245126636975e-07,
+      "banked_direct_image_jacobian_m_per_a": 3.772294296815649e-07,
+      "banked_finite_difference_m_per_a": 1.5272079829878644e-05,
+      "physical_acceptance": {
+        "ratio": 0.06230999195651001,
+        "relative_error": 0.93769000804349,
+        "criterion": "relative error at most 20 percent",
+        "passed": false
+      },
+      "constrained_newton_steps": {
+        "direct_image": {
+          "newton_steps": 5,
+          "converged": true,
+          "terminal_residual": 5.377502297116956e-10,
+          "exception": null
+        },
+        "linearized": {
+          "newton_steps": 7,
+          "converged": true,
+          "terminal_residual": 1.7683517862497652e-10,
+          "exception": null
+        }
+      },
+      "banked_perturbed_solves": {
+        "plus": {
+          "sign": "plus",
+          "current_delta_a": 1000.0,
+          "converged": true,
+          "terminal_residual": 1.4302602393490442e-09,
+          "active_set_iterations": 3,
+          "centroid_z_m": -0.010732132684235889,
+          "exception": null
+        },
+        "minus": {
+          "sign": "minus",
+          "current_delta_a": -1000.0,
+          "converged": true,
+          "terminal_residual": 1.584883575213853e-10,
+          "active_set_iterations": 3,
+          "centroid_z_m": -0.04127629234399318,
+          "exception": null
+        }
+      }
+    },
+    {
+      "row": 96,
+      "circuit": "p6_upper_minus_p6_lower",
+      "requested_class": "diverted",
+      "linearized_jacobian_m_per_a": 2.1502045850789343e-06,
+      "direct_image_jacobian_m_per_a": 8.63038671104465e-07,
+      "banked_direct_image_jacobian_m_per_a": 6.335681714039557e-07,
+      "banked_finite_difference_m_per_a": 2.4658326595705504e-05,
+      "physical_acceptance": {
+        "ratio": 0.08719993940924661,
+        "relative_error": 0.9128000605907534,
+        "criterion": "relative error at most 20 percent",
+        "passed": false
+      },
+      "constrained_newton_steps": {
+        "direct_image": {
+          "newton_steps": 5,
+          "converged": true,
+          "terminal_residual": 5.377502297116956e-10,
+          "exception": null
+        },
+        "linearized": {
+          "newton_steps": 7,
+          "converged": true,
+          "terminal_residual": 1.7683517862497652e-10,
+          "exception": null
+        }
+      },
+      "banked_perturbed_solves": {
+        "plus": {
+          "sign": "plus",
+          "current_delta_a": 1000.0,
+          "converged": true,
+          "terminal_residual": 6.155312153984278e-10,
+          "active_set_iterations": 4,
+          "centroid_z_m": -0.0024851538689018614,
+          "exception": null
+        },
+        "minus": {
+          "sign": "minus",
+          "current_delta_a": -1000.0,
+          "converged": true,
+          "terminal_residual": 1.1959749244666299e-09,
+          "active_set_iterations": 3,
+          "centroid_z_m": -0.05180180706031287,
+          "exception": null
+        }
+      }
+    }
+  ]
+}

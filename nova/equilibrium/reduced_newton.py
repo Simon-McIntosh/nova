@@ -57,6 +57,20 @@ reduced route also publishes ``soft_mode_projection`` as ``None`` rather than
 ``NaN`` because a dense route carries no soft-mode projection, and refuses a
 constrained solve that has no prescribed current to fold its compensating
 currents into.
+
+Constrained trips additionally bound each compensating-current displacement
+to one kiloampere.  The bound is a physical stability limit rather than a
+numerical scale: a larger one-shot circuit displacement can change the plasma
+response regime that supplied the local implicit-function Jacobian.  The
+augmented merit line search therefore tests only bounded candidates, and a
+fresh Jacobian is formed after every accepted constrained candidate before the
+next direction is taken.  If no bounded grade lowers the augmented merit, the
+trip reports a sufficient-decrease refusal instead of applying a current that
+increases the constraint residual.  Mandatory re-linearisation also removes
+the stale-chord history that a cold start can otherwise spend extra iterations
+discarding, so warm and cold constrained starts may legitimately take the same
+number of Newton steps.  Warm starting remains useful because it begins with a
+smaller constraint residual and is required never to cost more steps or trips.
 """
 
 from __future__ import annotations
@@ -74,11 +88,13 @@ import numpy as np
 
 from nova.equilibrium.constraint import (
     CircuitCurrentUnknown,
+    CompensatorRule,
     ConstraintContext,
     ConstraintPair,
     ConstraintRecord,
     constraint_records,
     constraint_row_slices,
+    select_compensating_directions,
 )
 from nova.equilibrium.forward_operator import CellCurrentMoments
 from nova.equilibrium.fixed_point import (
@@ -99,6 +115,8 @@ __all__ = [
     "ReducedNewtonResult",
     "ReducedScores",
     "ReducedTrip",
+    "derive_reduced_constraint_pairs",
+    "linearized_constraint_response_matrix",
     "reduced_coordinates",
     "solve_constrained_reduced_newton",
     "solve_constrained_reduced_newton_compiled",
@@ -120,6 +138,13 @@ _ACTIVE_SUPPORT_FLOOR = 0.0
 #: refusal-only policy is recovered exactly; ``None`` disables the contraction
 #: branch outright and is the strict refusal-only reference.
 JACOBIAN_REFRESH_THRESHOLD: float = 1.0
+
+#: Largest physical compensating-current displacement admitted within one
+#: frozen-topology trip.  A local response derivative is not a licence for an
+#: arbitrarily large command: beyond this interval the plasma can move into a
+#: different response regime, so the next accepted candidate must be
+#: re-linearised before it supplies another Newton direction.
+CONSTRAINT_CURRENT_CHANGE_CAP = 1_000.0
 
 #: Optional per-solve stage recording for the keyframe driver.  When enabled,
 #: the host loop records named boundaries (``convert``, ``shadow``, ``bind``,
@@ -889,21 +914,43 @@ def _lowers(merit: float, incumbent: float) -> bool:
     return bool(np.isfinite(merit)) and merit < incumbent
 
 
-def _score_grade(kernels, reduced, direction, factor, shadow, base_state, census):
+def _score_grade(
+    kernels,
+    reduced,
+    direction,
+    factor,
+    shadow,
+    base_state,
+    census,
+    *,
+    project_candidate=None,
+):
     """Score one backtracking grade and read its scalars to the host."""
-    candidate, scores = kernels["grade"](
-        reduced,
-        direction,
-        jnp.asarray(factor, dtype=reduced.dtype),
-        shadow,
-        base_state,
-    )
+    if project_candidate is None:
+        candidate, scores = kernels["grade"](
+            reduced,
+            direction,
+            jnp.asarray(factor, dtype=reduced.dtype),
+            shadow,
+            base_state,
+        )
+    else:
+        candidate = project_candidate(reduced + factor * direction)
+        scores = kernels["step_scores"](candidate, shadow, base_state)
     census["map_evaluations"] += 1
     return candidate, _host_scores(scores)
 
 
 def _first_accept_grades(
-    kernels, reduced, direction, merit, shadow, base_state, census
+    kernels,
+    reduced,
+    direction,
+    merit,
+    shadow,
+    base_state,
+    census,
+    *,
+    project_candidate=None,
 ):
     """Score grades in order and stop at the first that lowers the merit.
 
@@ -915,7 +962,14 @@ def _first_accept_grades(
     """
     for index, factor in enumerate(_BACKTRACKING_FACTORS):
         candidate, scores = _score_grade(
-            kernels, reduced, direction, factor, shadow, base_state, census
+            kernels,
+            reduced,
+            direction,
+            factor,
+            shadow,
+            base_state,
+            census,
+            project_candidate=project_candidate,
         )
         if _lowers(scores.merit, merit):
             return index, index + 1, (candidate, scores)
@@ -1001,6 +1055,8 @@ def _plain_newton_trip(
     steps: list[ReducedNewtonStep],
     scoring: str = LADDER_SCORING,
     refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
+    project_candidate=None,
+    relinearize_after_accept: bool = False,
 ) -> tuple[jax.Array, dict[str, float]]:
     """Take plain Newton steps on the reduced state of one frozen trip.
 
@@ -1074,9 +1130,27 @@ def _plain_newton_trip(
                 direction, _ = _timed(kernels["direction"], jacobian, scores.residual)
             else:
                 direction = kernels["direction"](jacobian, scores.residual)
-            accepted, _tried, promotion = grader(
-                kernels, reduced, direction, scores.merit, shadow, base_state, census
-            )
+            if project_candidate is None:
+                accepted, _tried, promotion = grader(
+                    kernels,
+                    reduced,
+                    direction,
+                    scores.merit,
+                    shadow,
+                    base_state,
+                    census,
+                )
+            else:
+                accepted, _tried, promotion = _first_accept_grades(
+                    kernels,
+                    reduced,
+                    direction,
+                    scores.merit,
+                    shadow,
+                    base_state,
+                    census,
+                    project_candidate=project_candidate,
+                )
             if accepted >= 0:
                 break
             census["rejected"] += 1
@@ -1115,7 +1189,16 @@ def _plain_newton_trip(
             reduced = reduced + factors[accepted] * direction
         else:
             reduced, carried = promotion
-        fresh = False
+        if relinearize_after_accept:
+            jacobian, refresh_wall = _timed(
+                kernels["jacobian"], reduced, shadow, base_state
+            )
+            census["jacobian_builds"] += 1
+            census["jacobian_wall"] += refresh_wall
+            census["contraction_refreshes"] += 1
+            fresh = True
+        else:
+            fresh = False
         census["steps"] += 1
         accepted_norm = scores.residual_norm
     return reduced, census
@@ -1133,6 +1216,9 @@ def _drive_trips(
     fused: bool,
     scoring: str,
     refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
+    project_candidate_factory: Callable[[jax.Array], Callable[[jax.Array], jax.Array]]
+    | None = None,
+    relinearize_after_accept: bool = False,
     regather: Callable[[jax.Array], jax.Array],
     dispatched_boundary: Callable[..., Any],
     stream: bool,
@@ -1181,6 +1267,12 @@ def _drive_trips(
             steps=steps,
             scoring=scoring,
             refresh_threshold=refresh_threshold,
+            project_candidate=(
+                None
+                if project_candidate_factory is None
+                else project_candidate_factory(reduced)
+            ),
+            relinearize_after_accept=relinearize_after_accept,
         )
         per_trip_steps.append(int(census["steps"]))
         per_trip_builds.append(int(census["jacobian_builds"]))
@@ -1222,7 +1314,11 @@ def _drive_trips(
             reason = FixedPointTerminationReason.CONVERGED
             break
         if difference == 0:
-            reason = FixedPointTerminationReason.ACTIVE_SET_SETTLED
+            reason = (
+                FixedPointTerminationReason.SUFFICIENT_DECREASE_REFUSED
+                if census["rejected"] and not census["steps"]
+                else FixedPointTerminationReason.ACTIVE_SET_SETTLED
+            )
             break
 
     return {
@@ -1878,6 +1974,216 @@ def _row_augmentation(
     )
 
 
+class _LinearizedFixedPointResponse(NamedTuple):
+    """Reduced tangent data carried into physical constraint observations."""
+
+    state: jax.Array
+    shadow: jax.Array
+    state_response: jax.Array
+    residual_jacobian: jax.Array
+    current_tangent: jax.Array
+    amplitude_response: jax.Array
+    circuit_indices: np.ndarray
+    circuit_count: int
+
+
+def _linearized_fixed_point_response(
+    profile,
+    flux,
+    *,
+    requested_class=None,
+    target_current=None,
+    prescribed_current=None,
+    program: ReducedProgram | None = None,
+    circuits=None,
+) -> _LinearizedFixedPointResponse:
+    """Solve the reduced residual's implicit circuit-current derivative."""
+    operator = profile.operator
+    field = operator.prescribed_current_field
+    if field is None:
+        raise ValueError("a linearized response needs a prescribed current field")
+    state = jnp.ravel(jnp.asarray(flux))
+    target_value = None if target_current is None else jnp.asarray(target_current)
+    external = operator.external(None, prescribed_current)
+    shadow = jnp.ravel(
+        jnp.asarray(operator.residual_shadow_mask(state, requested_class), dtype=bool)
+    )
+    if program is None:
+        coordinates = reduced_coordinates(
+            operator,
+            state,
+            requested_class=requested_class,
+            target_current=target_value,
+        )
+        kernels = _reduced_kernels(
+            operator,
+            coordinates,
+            external,
+            requested_class,
+            target_value,
+        )
+    else:
+        if program.operator_identity != id(operator) or program.row_count != 0:
+            raise ValueError("the linearized response needs this free solve's program")
+        coordinates = program.coordinates
+        kernels = program.kernels
+    reduced = kernels["initial_gather"](state)
+    residual = kernels["reduced_residual"]
+    residual_jacobian = kernels["jacobian"](reduced, shadow, state)
+    full_external_response = jnp.asarray(field.response)
+    circuit_indices = (
+        np.arange(full_external_response.shape[1], dtype=int)
+        if circuits is None
+        else np.unique(np.asarray(circuits, dtype=int))
+    )
+    if circuit_indices.size == 0:
+        raise ValueError("a linearized response needs at least one circuit")
+    external_response = full_external_response[:, circuit_indices]
+
+    def residual_from_external(value):
+        return residual(reduced, shadow, state, external_value=value)
+
+    residual_external = jax.jacfwd(residual_from_external)(external)
+    current_tangent = residual_external @ external_response
+    amplitude_response = -jnp.linalg.solve(residual_jacobian, current_tangent)
+
+    def reconstructed(reduced_value, external_value):
+        return kernels["reconstruct"](
+            reduced_value, shadow, state, external_value=external_value
+        )
+
+    state_from_amplitudes = jax.jacfwd(reconstructed, argnums=0)(reduced, external)
+    state_from_external = jax.jacfwd(reconstructed, argnums=1)(reduced, external)
+    state_response = (
+        state_from_amplitudes @ amplitude_response
+        + state_from_external @ external_response
+    )
+    return _LinearizedFixedPointResponse(
+        state,
+        shadow,
+        state_response,
+        residual_jacobian,
+        current_tangent,
+        amplitude_response,
+        circuit_indices,
+        full_external_response.shape[1],
+    )
+
+
+def linearized_constraint_response_matrix(
+    profile,
+    pairs: tuple[ConstraintPair, ...],
+    flux,
+    *,
+    requested_class=None,
+    target_current=None,
+    prescribed_current=None,
+    program: ReducedProgram | None = None,
+    circuits=None,
+) -> jax.Array:
+    """Return row sensitivities after the reduced fixed point responds.
+
+    A circuit changes the external flux directly, but it also changes the
+    converged plasma amplitudes.  The latter is the vertical response that a
+    centroid constraint must use when selecting and scaling its compensator.
+    The reduced residual supplies both fixed-point tangents.  The amplitudes
+    then follow from the implicit solve ``du/dI = -F_u^-1 F_I``.
+    """
+    pairs = tuple(pairs)
+    if not pairs:
+        raise ValueError("a linearized response needs at least one constraint pair")
+    target_value = None if target_current is None else jnp.asarray(target_current)
+    linearized = _linearized_fixed_point_response(
+        profile,
+        flux,
+        requested_class=requested_class,
+        target_current=target_value,
+        prescribed_current=prescribed_current,
+        program=program,
+        circuits=circuits,
+    )
+    context = ConstraintContext(
+        linearized.state, requested_class, target_value, linearized.shadow
+    )
+    blocks = []
+    for pair in pairs:
+
+        def observe(value, pair=pair):
+            return jnp.atleast_1d(
+                pair.functional.observed(
+                    profile, context._replace(flux=value), pair.binding.payload
+                )
+            )
+
+        observation = jax.jacfwd(observe)(linearized.state)
+        selected = observation @ linearized.state_response
+        block = (
+            jnp.zeros((pair.row_count, linearized.circuit_count), dtype=selected.dtype)
+            .at[:, linearized.circuit_indices]
+            .set(selected)
+        )
+        blocks.append(block)
+    return jnp.concatenate(blocks, axis=0)
+
+
+def derive_reduced_constraint_pairs(
+    profile,
+    pairs: tuple[ConstraintPair, ...],
+    flux,
+    *,
+    requested_class=None,
+    target_current=None,
+    prescribed_current=None,
+    circuits=None,
+    program: ReducedProgram | None = None,
+) -> tuple[tuple[ConstraintPair, ...], Any]:
+    """Select circuit compensators from the reduced fixed-point response."""
+    pairs = tuple(pairs)
+    response = np.asarray(
+        linearized_constraint_response_matrix(
+            profile,
+            pairs,
+            flux,
+            requested_class=requested_class,
+            target_current=target_current,
+            prescribed_current=prescribed_current,
+            program=program,
+            circuits=circuits,
+        ),
+        dtype=float,
+    )
+    row_slices = constraint_row_slices(pairs)
+    scales = np.concatenate(
+        tuple(np.ravel(np.asarray(pair.binding.scale, dtype=float)) for pair in pairs)
+    )
+    selection = select_compensating_directions(
+        response / scales[:, None], circuits=circuits
+    )._replace(response=response)
+    derived = []
+    for pair, row_slice in zip(pairs, row_slices, strict=True):
+        authority = selection.direction_authority[row_slice]
+        ampere_scale = (
+            jnp.asarray(pair.unknown.ampere_scale)
+            if isinstance(pair.unknown, CircuitCurrentUnknown)
+            and pair.unknown.rule == CompensatorRule.EXPLICIT
+            else jnp.asarray(1.0 / authority)
+        )
+        derived.append(
+            ConstraintPair(
+                functional=pair.functional,
+                unknown=CircuitCurrentUnknown(
+                    direction=jnp.asarray(selection.directions[:, row_slice]),
+                    ampere_scale=ampere_scale,
+                    singular_values=jnp.asarray(selection.singular_values),
+                    authority=jnp.asarray(authority),
+                    rule=selection.rule,
+                ),
+                binding=pair.binding,
+            )
+        )
+    return tuple(derived), selection
+
+
 def solve_constrained_reduced_newton(
     profile,
     initial,
@@ -1895,6 +2201,7 @@ def solve_constrained_reduced_newton(
     ladder_scoring: str = LADDER_SCORING,
     trip_boundary: str = TRIP_BOUNDARY,
     jacobian_refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
+    constraint_current_step_cap: float = CONSTRAINT_CURRENT_CHANGE_CAP,
     row_arguments: str = TRACED_ROWS,
     program: ReducedProgram | None = None,
     stream: bool = False,
@@ -1942,6 +2249,14 @@ def solve_constrained_reduced_newton(
     rebuilt, exactly as :func:`solve_reduced_newton` documents: the default of
     one leaves the refusal-only chord on the referee fixtures, and ``None``
     disables the contraction branch outright.
+
+    ``constraint_current_step_cap`` is the maximum physical compensating
+    current displacement, in amperes, within one active-set trip.  It is
+    applied to every backtracking candidate before that candidate's augmented
+    merit is scored.  The cap keeps a local implicit-function derivative from
+    taking a one-shot command across a nonlinear plasma-response regime; after
+    every accepted constrained candidate the dense Jacobian is rebuilt at the
+    accepted state before another direction is formed.
     """
     operator = profile.operator
     state = jnp.asarray(initial)
@@ -1980,6 +2295,8 @@ def solve_constrained_reduced_newton(
         )
     if row_arguments not in (TRACED_ROWS, CAPTURED_ROWS):
         raise ValueError(f"unknown row arguments {row_arguments!r}")
+    if pairs and constraint_current_step_cap <= 0.0:
+        raise ValueError("constraint current step cap must be positive")
     shadow = jnp.ravel(
         jnp.asarray(operator.residual_shadow_mask(state, requested_class), dtype=bool)
     )
@@ -2056,6 +2373,31 @@ def solve_constrained_reduced_newton(
     )
     _stage_mark("bind")
 
+    if augmentation is None:
+        project_candidate_factory = None
+    else:
+        ampere_scale = jnp.concatenate(
+            tuple(jnp.ravel(jnp.asarray(pair.unknown.ampere_scale)) for pair in pairs)
+        )
+        normalized_cap = (
+            jnp.asarray(constraint_current_step_cap, dtype=state.dtype) / ampere_scale
+        )
+
+        def project_candidate_factory(trip_origin):
+            """Keep a trip's compensating-current move in its local regime."""
+            origin_unknown = trip_origin[coordinates.size :]
+
+            def project(candidate):
+                unknown = candidate[coordinates.size :]
+                bounded = jnp.clip(
+                    unknown,
+                    origin_unknown - normalized_cap,
+                    origin_unknown + normalized_cap,
+                )
+                return candidate.at[coordinates.size :].set(bounded)
+
+            return project
+
     def regather(state):
         """Return the amplitudes one flux state drives, outside a program."""
         moments = _current_moments(operator, state, requested_class, target_current)
@@ -2108,6 +2450,8 @@ def solve_constrained_reduced_newton(
         fused=fused,
         scoring=ladder_scoring,
         refresh_threshold=jacobian_refresh_threshold,
+        project_candidate_factory=project_candidate_factory,
+        relinearize_after_accept=augmentation is not None,
         regather=regather,
         dispatched_boundary=dispatched_boundary,
         stream=stream,

@@ -42,9 +42,11 @@ with skip_import("jax"):
     from nova.equilibrium import reduced_newton
     from nova.equilibrium.constraint import (
         ConstraintBinding,
+        ConstraintContext,
         ConstraintMultiplier,
         ConstraintPair,
         CurrentCentroidConstraint,
+        IsofluxConstraint,
         ProfileAmplitudeUnknown,
     )
     from nova.equilibrium.fixed_point import _relative_residual
@@ -308,25 +310,74 @@ def test_the_row_response_matches_a_central_difference(steered):
     assert abs(tangent - difference) <= RESPONSE_AGREEMENT * abs(difference)
 
 
-def test_a_moved_target_is_reached_and_warm_starting_costs_less(steered):
-    """A commanded centimetre is delivered, and the warm start is cheaper.
+def test_the_reduced_linearisation_carries_the_plasma_response(steered):
+    """The implicit amplitude tangent closes the linearised residual."""
+    profile, _seed, free = steered
+    achieved = _centroid(profile, free.state)
+    pair, _selection = _centroid_pair(profile, free.state, achieved)
+    field = profile.operator.prescribed_current_field
+    direction = np.asarray(pair.unknown.direction)[:, 0]
+    circuit_indices = np.flatnonzero(direction)
+    selected_direction = direction[circuit_indices]
+    linearized = reduced_newton._linearized_fixed_point_response(
+        profile,
+        free.state,
+        prescribed_current=field.current,
+        program=free.program,
+        circuits=circuit_indices,
+    )
+    residual = (
+        np.asarray(linearized.residual_jacobian)
+        @ np.asarray(linearized.amplitude_response)
+        + np.asarray(linearized.current_tangent)
+    ) @ selected_direction
+    tangent_scale = max(
+        1.0,
+        float(
+            np.max(np.abs(np.asarray(linearized.current_tangent) @ selected_direction))
+        ),
+    )
+    roundoff = (
+        256.0
+        * np.finfo(np.asarray(linearized.residual_jacobian).dtype).eps
+        * tangent_scale
+    )
+    assert np.max(np.abs(residual)) <= roundoff
+    response = np.asarray(
+        reduced_newton.linearized_constraint_response_matrix(
+            profile,
+            (pair,),
+            free.state,
+            prescribed_current=field.current,
+            program=free.program,
+            circuits=circuit_indices,
+        )
+    )
+    tangent = float(np.ravel(response @ direction)[0])
+    assert np.isfinite(tangent)
+    assert tangent != 0.0
+
+
+def test_a_moved_target_is_reached_and_warm_starting_is_no_worse(steered):
+    """A commanded centimetre is delivered from a strictly closer warm state.
 
     The same moved target is solved twice: once from the converged free
     equilibrium the previous keyframe left behind, and once from the cold
-    analytic seed.  Both must land on the commanded centroid, and the warm
-    start must cost less to get there, which is the whole reason a steered
-    session re-solves from its own previous state.
+    analytic seed.  Both must land on the commanded centroid.  The warm state
+    must begin with a strictly smaller constraint residual and must cost no
+    more trips or Newton steps, which pins its value without requiring
+    stale-chord work from the cold arm.
 
-    Cheaper is counted in Newton steps rather than in active-set trips.  A
-    trip ends when the residual shadow stops moving, and on this machine the
-    shadow the analytic seed induces is already the converged one, so both
-    arms settle in a single trip and the trip count cannot separate them; the
-    dense Newton steps inside that trip are where the difference lives.  The
-    trip count is still required not to grow, so a warm start that moved the
-    shadow would be caught.
+    Rebuilding the Jacobian after every accepted step removes the stale chord
+    that previously made the cold arm pay extra work, so equality in step
+    count is expected.  A warm start that begins no closer, moves the shadow,
+    or takes extra dense work is still caught.
     """
     profile, seed, free = steered
     commanded = _centroid(profile, free.state) + CENTROID_MOVE
+    warm_initial_residual = abs(_centroid(profile, free.state) - commanded)
+    cold_initial_residual = abs(_centroid(profile, seed) - commanded)
+    assert warm_initial_residual < cold_initial_residual
     pair, _selection = _centroid_pair(profile, free.state, commanded)
     common = dict(
         constraint_pairs=(pair,),
@@ -345,10 +396,100 @@ def test_a_moved_target_is_reached_and_warm_starting_costs_less(steered):
             <= CENTROID_AGREEMENT
         )
     assert warm.active_set_iterations <= cold.active_set_iterations
-    assert sum(warm.newton_steps_per_trip) < sum(cold.newton_steps_per_trip)
+    assert sum(warm.newton_steps_per_trip) <= sum(cold.newton_steps_per_trip)
     compensating = float(np.asarray(warm.constraints[0].physical_unknown)[0])
     assert compensating != 0.0
     assert np.all(np.isfinite(np.asarray(warm.prescribed_current)))
+    assert warm.jacobian_builds_per_trip[0] >= warm.newton_steps_per_trip[0] + 1
+
+
+def test_the_current_cap_bounds_a_single_trip_displacement(steered):
+    """A bounded trial never applies more current than one trip admits."""
+    profile, _seed, free = steered
+    commanded = _centroid(profile, free.state) + CENTROID_MOVE
+    pair, _selection = _centroid_pair(profile, free.state, commanded)
+    cap = 1.0e-3
+    result = reduced_newton.solve_constrained_reduced_newton(
+        profile,
+        free.state,
+        constraint_pairs=(pair,),
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=NEWTON_STEPS,
+        active_set_steps=1,
+        constraint_current_step_cap=cap,
+    )
+    assert result.newton_steps_per_trip[0] >= 1
+    assert abs(float(np.asarray(result.constraints[0].physical_unknown)[0])) <= cap
+
+
+def test_centroid_and_named_boundary_flux_rows_converge_together(steered):
+    """One globalised solve closes placement and a diagnostic flux crossing."""
+    profile, _seed, free = steered
+    field = profile.operator.prescribed_current_field
+    _masks, topology = profile.operator.read(jnp.asarray(free.state))
+    axis = jnp.asarray(topology.axis)
+    boundary = jnp.asarray(topology.boundary)
+    diagnostic_crossing = axis + 0.65 * (boundary - axis)
+    boundary_reference = boundary
+    flux_payload = jnp.stack((diagnostic_crossing, boundary_reference))
+    flux_functional = IsofluxConstraint(point_count=1, reference="reference_point")
+    context = ConstraintContext(jnp.asarray(free.state), None, None, None)
+    achieved_flux = jnp.atleast_1d(
+        flux_functional.observed(profile, context, flux_payload)
+    )
+    flux_span = abs(float(np.asarray(topology.flux_span)))
+    centroid_scale = float(np.ptp(np.asarray(profile.lattice.height)))
+    centroid_target = _centroid(profile, free.state) + 1.0e-3
+    flux_target = achieved_flux + 1.0e-4 * flux_span
+    seeded = (
+        ConstraintPair(
+            functional=CurrentCentroidConstraint(
+                components=("centroid_z",),
+                support=MomentIntegralSupport.ALL_DOMAIN,
+            ),
+            unknown=ConstraintMultiplier(multiplier_scale=jnp.asarray([1.0])),
+            binding=ConstraintBinding(
+                target=jnp.asarray([centroid_target]),
+                tolerance=jnp.asarray([CENTROID_AGREEMENT]),
+                scale=jnp.asarray([centroid_scale]),
+                initial_unknown=jnp.asarray([0.0]),
+            ),
+        ),
+        ConstraintPair(
+            functional=flux_functional,
+            unknown=ConstraintMultiplier(multiplier_scale=jnp.asarray([1.0])),
+            binding=ConstraintBinding(
+                target=flux_target,
+                tolerance=jnp.asarray([1.0e-6 * flux_span]),
+                scale=jnp.asarray([flux_span]),
+                initial_unknown=jnp.asarray([0.0]),
+                payload=flux_payload,
+            ),
+        ),
+    )
+    pairs, _selection = reduced_newton.derive_reduced_constraint_pairs(
+        profile,
+        seeded,
+        free.state,
+        prescribed_current=field.current,
+        program=free.program,
+    )
+    result = reduced_newton.solve_constrained_reduced_newton(
+        profile,
+        free.state,
+        constraint_pairs=pairs,
+        prescribed_current=field.current,
+        tolerance=SOLVE_TOLERANCE,
+        newton_steps=NEWTON_STEPS,
+    )
+    assert result.converged
+    assert result.row_count == 2
+    assert all(bool(np.asarray(record.qualified)[0]) for record in result.constraints)
+    assert abs(_centroid(profile, result.state) - centroid_target) <= CENTROID_AGREEMENT
+    assert (
+        abs(float(np.asarray(result.constraints[1].physical_residual)[0]))
+        <= 1.0e-6 * flux_span
+    )
 
 
 def test_the_public_route_carries_the_rows_into_a_receipt(steered):
@@ -390,7 +531,13 @@ def test_the_public_route_carries_the_rows_into_a_receipt(steered):
 SCORE_REASSOCIATION = 1.0e-6
 #: Kernels a constrained solve drives on this machine.  Each must compile
 #: once across a sequence of moved targets that re-enters one program.
-STEERED_KERNELS = ("initial_gather", "jacobian", "direction", "grade", "boundary")
+STEERED_KERNELS = (
+    "initial_gather",
+    "jacobian",
+    "direction",
+    "step_scores",
+    "boundary",
+)
 
 
 def _cache_sizes(program):
@@ -431,6 +578,7 @@ def test_consecutive_moved_targets_share_one_compiled_program(steered):
             program=program,
             tolerance=SOLVE_TOLERANCE,
             newton_steps=NEWTON_STEPS,
+            constraint_current_step_cap=1.0e6,
         )
         assert result.converged
         reached.append(_centroid(profile, result.state) - commanded)

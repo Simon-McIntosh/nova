@@ -4,6 +4,8 @@ import numpy as np
 
 from nova.biot.greens import greens_bz_br, greens_psi
 from nova.biot.polygonanalytic import (
+    _ARCSINH_DIFFERENCE_SWITCH,
+    _near_collinear_arsinh_difference,
     polygon_analytic_field_moments,
     polygon_analytic_flux,
     polygon_analytic_flux_moments,
@@ -140,6 +142,35 @@ def test_near_collinear_arsinh_difference_exposes_cancellation():
         np.longdouble(along_a) / gap
     )
     assert abs(direct - reference) > 20.0 * abs(stable - reference)
+
+
+def test_near_collinear_arsinh_difference_matches_extended_precision():
+    along_a = np.array([-1.0e5, 1.0, 1.0e5, 1.0e7])
+    edge_length = np.full_like(along_a, 0.2)
+    along_b = along_a + edge_length
+    gap = np.array([1.0e-10, 1.0e-10, 1.0e-10, 1.0e-12])
+    computed = _near_collinear_arsinh_difference(
+        np, along_a, along_b, gap, edge_length, np.ones_like(along_a, dtype=bool)
+    )
+    reference = np.array(
+        [
+            np.arcsinh(np.longdouble(b) / g) - np.arcsinh(np.longdouble(a) / g)
+            for a, b, g in zip(along_a, along_b, gap, strict=True)
+        ],
+        dtype=np.float64,
+    )
+    np.testing.assert_allclose(computed, reference, rtol=5.0e-9, atol=5.0e-17)
+
+
+def test_near_collinear_arsinh_difference_switch_is_continuous():
+    along_a = 1.0
+    edge_length = 0.2
+    along_b = along_a + edge_length
+    gap = _ARCSINH_DIFFERENCE_SWITCH * along_a
+    direct = np.arcsinh(along_b / gap) - np.arcsinh(along_a / gap)
+    denominator = along_b * np.hypot(along_a, gap) + along_a * np.hypot(along_b, gap)
+    stable = np.arcsinh(edge_length * (along_a + along_b) / denominator)
+    np.testing.assert_allclose(stable, direct, rtol=0.0, atol=4.0 * np.finfo(float).eps)
 
 
 def test_flux_moment_blocks_match_midpoint_subdivision_near_and_far():

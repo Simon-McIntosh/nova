@@ -1456,6 +1456,40 @@ def _edge_field(r, z, edge, which, nodes):
     return _edge_terms(r, z, edge, which, nodes)[1:]
 
 
+_ARCSINH_DIFFERENCE_SWITCH = np.sqrt(np.finfo(np.float64).eps)
+
+
+def _near_collinear_arsinh_difference(xp, along_a, along_b, gap, length, active):
+    """Return ``asinh(along_b / gap) - asinh(along_a / gap)`` stably.
+
+    The direct subtraction is well conditioned when the endpoints straddle the
+    perpendicular projection.  On one side of the edge, sufficiently small
+    ``gap`` makes both terms large and nearly equal.  There, rationalising
+    ``sinh(asinh(b / gap) - asinh(a / gap))`` retains the edge length explicitly.
+    The square-root machine-epsilon switch keeps the direct branch away from
+    the cancellation regime while keeping the two forms within round-off at the
+    boundary.
+    """
+    has_logarithm = active & (gap > 0.0)
+    same_side = ((along_a > 0.0) & (along_b > 0.0)) | (
+        (along_a < 0.0) & (along_b < 0.0)
+    )
+    near_collinear = (
+        has_logarithm
+        & same_side
+        & (
+            gap
+            <= _ARCSINH_DIFFERENCE_SWITCH * xp.minimum(xp.abs(along_a), xp.abs(along_b))
+        )
+    )
+    direct_gap = xp.where(near_collinear, 1.0, xp.where(has_logarithm, gap, 1.0))
+    direct = xp.arcsinh(along_b / direct_gap) - xp.arcsinh(along_a / direct_gap)
+    denominator = along_b * xp.hypot(along_a, gap) + along_a * xp.hypot(along_b, gap)
+    held_denominator = xp.where(near_collinear, denominator, 1.0)
+    stable = xp.arcsinh(length * (along_a + along_b) / held_denominator)
+    return xp.where(has_logarithm, xp.where(near_collinear, stable, direct), 0.0)
+
+
 def _axis_vertical_field(
     target_z: np.ndarray, vertices: np.ndarray, norm: float
 ) -> np.ndarray:
@@ -1488,10 +1522,9 @@ def _axis_vertical_field(
         along_b = (rb * dr - ub * dz) / length
         perpendicular = ua + dz * along_a / length
         gap = np.abs(ra * (-dz) - ua * dr) / length
-        has_logarithm = gap > 0.0
-        held_gap = np.where(has_logarithm, gap, 1.0)
-        logarithm = np.arcsinh(along_b / held_gap) - np.arcsinh(along_a / held_gap)
-        logarithm = np.where(has_logarithm, logarithm, 0.0)
+        logarithm = _near_collinear_arsinh_difference(
+            np, along_a, along_b, gap, length, np.ones_like(gap, dtype=bool)
+        )
         contributions.append(
             dr
             * (
@@ -1532,10 +1565,9 @@ def _packed_axis_vertical_field(xp, target_z, edge, present, norm):
         along_b = (rb * dr - ub * dz) / length
         perpendicular = ua + dz * along_a / length
         gap = xp.abs(-ra * dz - ua * dr) / length
-        has_logarithm = active & (gap > 0.0)
-        held_gap = xp.where(has_logarithm, gap, 1.0)
-        logarithm = xp.arcsinh(along_b / held_gap) - xp.arcsinh(along_a / held_gap)
-        logarithm = xp.where(has_logarithm, logarithm, 0.0)
+        logarithm = _near_collinear_arsinh_difference(
+            xp, along_a, along_b, gap, length, active
+        )
         contribution = dr * (
             -dz / length2 * (distance_b - distance_a)
             + perpendicular / length * logarithm

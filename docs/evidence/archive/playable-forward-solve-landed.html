@@ -1483,6 +1483,20 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     <code>~/.config/reckon/crew/reports/nova/playable/reversed-current-guard.md</code>; figures under
     <code>docs/figures/playable-forward-solve/reversed-current-guard/</code>.</p>
   </section>
+  <section id="the-centroid-major-radius-guard-fails-by-design">
+    <h2>The current-centroid major radius is guarded against EFIT with a discretisation floor, and the guard fails by design on seven bank rows (2026-09-08 04:08Z)</h2>
+    <p>Nodes <code>pfs-centroid-radius-validation</code> (local lane; produced the benchmark, the test and the receipt, then died on the lane after
+    twelve hours; rescued as <code>4afca8ef</code>) and <code>pfs-centroid-radius-report</code> (ran the test in the default lane and wrote the
+    report from the receipt). The tolerance is argued from the lattice rather than the observed miss: the solved centroid is a cell-current-weighted
+    mean of cell centres, and representing each cell's current at its centre displaces the moment by at most half a cell, so the floor is half the
+    radial step, 30.3 mm at a 60.6 mm step, a value that predates and is independent of the numbers it now judges. Against EFIT's published
+    current-centroid major radius on the 22086 bank rows, one measured row passes at +1.36 cm and seven fail at 3.6 to 8.6 cm inboard (rows 12, 18,
+    24, 30, 36, 43 and 45), while rows without a converged solve are named rather than hidden. The default-lane run reads one failed, two passed,
+    and that failure is the finding: the guard fires as written and stays visible until the carrier of the inboard systematic is attributed, the
+    same carrier family the axis adjudication and the placement test are converging on, rather than being hidden or its floor set to today's miss.
+    The bank and carrier distributions are recorded in the receipt under <code>docs/figures/playable-forward-solve/centroid-radius/</code>; report at
+    <code>~/.config/reckon/crew/reports/nova/playable/centroid-radius-validation.md</code>.</p>
+  </section>
 </main>
 </body>
 </html>

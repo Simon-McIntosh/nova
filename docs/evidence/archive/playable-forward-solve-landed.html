@@ -1430,6 +1430,16 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     Report at <code>~/.config/reckon/crew/reports/nova/playable/axis-definition.md</code>; receipt under
     <code>docs/figures/playable-forward-solve/axis-definition/</code>.</p>
   </section>
+  <section id="one-psi-unit-under-cocos-17">
+    <h2>The session schema carries one psi unit: total poloidal flux in Wb under COCOS 17 (2026-09-08 00:00Z)</h2>
+    <p>Node <code>pfs-psi-unit-label</code> (local lane, spec exact, same schema member as the wall group; commit <code>2e207735</code>,
+    merged). The module header declared COCOS 17 and Wb while the variable table labelled the raster psi Wb per radian; COCOS 17 carries the
+    total flux (the 2&pi; convention, e<sub>Bp</sub> = 1) and the raster is assembled from the forward operator's total flux. The label is
+    settled from the values: a test asserts the frame's psi at the axis equals the solve's axis flux in Wb on the Solovev fixture, and the
+    variable table, the netCDF attributes and the module header now state one unit, with a <code>flux_unit</code> attribute written so a
+    consumer reads it rather than infers it. Gate: the fast steering-frame lane at 17 passed. Small, and closed with the schema's next touch
+    as the followup asked.</p>
+  </section>
 </main>
 </body>
 </html>

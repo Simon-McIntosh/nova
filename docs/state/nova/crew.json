@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T17:45:23",
+  "updated": "2026-09-08T17:58:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -136580,6 +136580,168 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T154524689857-pfs-reduced-newton-cache-abort",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-reduced-newton-cache-abort",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1168,
+                "cached_input_tokens": 554522,
+                "input_tokens": 555692,
+                "output_tokens": 2384,
+                "reasoning_output_tokens": 633,
+                "total_tokens": 558076,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "This defect taxes every node that touches that file and three briefs today have had to carry a clause telling workers to report it as a known lane fault rather than their own regression, so naming it is worth more than the file it lives in. WHAT IS KNOWN. Three debug-partition runs of tests/test_reduced_newton.py, jobs 1263812, 1263828 and 1263836, at 8 cores and 32G with the CPU platform pinned and the environment interpreter called directly, each passed exactly six tests and then died with SIGABRT, a fatal Python abort at exit 6, after about forty-four minutes, inside the JAX compilation cache read path. It reproduced identically on a shared filesystem cache, a private filesystem cache and an empty node-local cache, so neither cross-host entries nor concurrent writers explain it. The three compiled-route tests of the same file pass in 567 seconds on the same lane. FIRST FIND THE ABORTING TEST, because everything else follows from knowing whether it is the seventh test or the seventh compile. Run the file one test per allocation using a selection expression, or run it with the fault handler enabled and the compilation cache directory unset so the cache read path is bypassed entirely. If it aborts with the cache disabled it is not a cache defect at all and the seventh test is the subject. If it survives with the cache disabled, the cache is implicated and the next question is which of three: an entry size limit, a capacity limit on the node-local temporary filesystem, or a format mismatch between a cache populated on the login node and one read on a debug node. Discriminate them rather than choosing the plausible one. Report the answer with the evidence that distinguishes it from the other two. SCOPE. Do NOT open tests/test_reduced_newton.py or nova/equilibrium/reduced_newton.py: a concurrent node holds both exclusively and is mid-measurement on them. If the repair turns out to belong in either file, say so precisely and stop, and I will sequence it behind that node. What you may write is your report and a note in nova/equilibrium/AGENTS.md recording the lane recipe that works, since that is where a future worker will look. Run on all_debug with --time=00:59:00, JAX_PLATFORMS=cpu, TMPDIR exported as /tmp inside the job and never a path under /run/user. On a compute node call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH, never uv, running any payload from a file rather than inline. Give each job its own log filename carrying its job id. Never submit the same job twice; a different job later in the same turn is fine and there is no per-turn budget. If you park, write status waiting with all five wait fields and wait_started_at unquoted in UTC exactly like 2026-09-08T16:00:00Z.",
+          "estimated_hours": 2.0,
+          "goal": "The named cause of the reduced-Newton test file aborting inside the JAX compilation cache, with a lane recipe that survives it",
+          "id": "pfs-reduced-newton-cache-abort",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/reduced-newton-cache-abort.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/AGENTS.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/reduced-newton-cache-abort"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-cacheabort-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T15:45:36Z",
+        "completed_at": "2026-09-08T15:55:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 607,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 607,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9e38c86282029da442bc6b25f89fb01d40a03865",
+        "commits": [
+          "55b2864c2fba4e8fb9b606fc346ed8f9086c29cc"
+        ],
+        "changed_lines": {
+          "added": 25,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug jobs 1267160 collect, 1267161 seventh test with the compilation cache disabled, 1267162 seventh test on the current default root",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/reduced-newton-cache-default-single-1267162.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/reduced-newton-cache-abort.md",
+        "scope_changed": false,
+        "session_id": "01a081b2-3e75-7b10-83ae-f793bcb124d8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4038400,
+            "cached_input_tokens_cumulative": 4038400,
+            "input_tokens": 4175291,
+            "input_tokens_cumulative": 4175291,
+            "output_tokens": 18188,
+            "output_tokens_cumulative": 18188,
+            "reasoning_output_tokens": 7419,
+            "reasoning_output_tokens_cumulative": 7419
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T15:55:43Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 46.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T15:55:43Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 4038400,
+          "cumulative_input_tokens": 8213691,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 25607
+        },
+        "follow_on_paths": [
+          "tests/test_reduced_newton.py",
+          "nova/equilibrium/reduced_newton.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-reduced-newton-cache-abort",
+          "session_id": "01a081b2-3e75-7b10-83ae-f793bcb124d8",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T15:55:43Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -136892,6 +137054,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2273
+    "_version": 2274
   }
 }

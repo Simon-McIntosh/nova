@@ -1,0 +1,5876 @@
+{
+  "artifact": "reduced-state plain-Newton prototype on the four bank rows",
+  "evidence_inputs": {
+    "persistent_compilation_cache": {
+      "directory": "/work/projects/imas_gpu/sophelio/jax-cache/adaptive-refresh/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 1.0,
+      "root": "/work/projects/imas_gpu/sophelio/jax-cache/adaptive-refresh",
+      "runtime_identity": {
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "NVIDIA H200 NVL",
+            "platform": "gpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
+      },
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-0745ecebea4cb264e054"
+    },
+    "previous_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/msc-adaptive-refresh/docs/figures/millisecond-converged-solve/reduced-newton/four-rows-before.json",
+    "production_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/msc-adaptive-refresh/docs/figures/solver-convergence-regression/settled-mask-stall/fallback-carry/four-rows-after.json",
+    "response_carrier": {
+      "carrier": {
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "frozen_reference_count": 6,
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "size_bytes": 645864,
+        "stored_circuit_count": 101,
+        "warm_load_seconds": 0.006050297990441322
+      },
+      "loaded_from_persisted_carrier": true,
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/msc-adaptive-refresh/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "direct_green_operator_builder_entries": 0,
+        "passes": true,
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.056922 direct_builders=0 verdict=PASS"
+      }
+    }
+  },
+  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/msc-adaptive-refresh/docs/figures/millisecond-converged-solve/adaptive-refresh/four-rows.png",
+  "measurement_contract": {
+    "convergence_tolerance": 1e-08,
+    "newton_steps": 12,
+    "pass_order": "both prototype routes of a row land before the next row, and every production row lands after all of them, so a job that runs out of wall clock still delivers the arms it was dispatched to measure",
+    "production_arm_measured_here": false,
+    "production_route": "ForwardProfile.solve_branch(newton_krylov)",
+    "prototype_route": "reduced_newton.solve_reduced_newton",
+    "prototype_routes": {
+      "adaptive_half_prototype": {
+        "jacobian_refresh_threshold": 0.5,
+        "ladder_scoring": "batched_tail",
+        "trip_boundary": "fused"
+      },
+      "adaptive_prototype": {
+        "jacobian_refresh_threshold": 1.0,
+        "ladder_scoring": "batched_tail",
+        "trip_boundary": "fused"
+      },
+      "eager_prototype": {
+        "jacobian_refresh_threshold": null,
+        "ladder_scoring": "eager",
+        "trip_boundary": "dispatched"
+      },
+      "prototype": {
+        "jacobian_refresh_threshold": null,
+        "ladder_scoring": "batched_tail",
+        "trip_boundary": "fused"
+      },
+      "serial_prototype": {
+        "jacobian_refresh_threshold": null,
+        "ladder_scoring": "first_accept",
+        "trip_boundary": "fused"
+      }
+    },
+    "reference_arm": "the eager ladder behind the dispatched boundary is the route the previous receipt measured, re-derived in this job so the fast route's terminal flux is compared against a terminal flux measured here rather than against a stored scalar; the serial per-grade ladder behind the same fused boundary is the route the batched tail replaces, measured beside it so the refused step's recovered wall and the unmoved decisions are read against a route measured in the same job",
+    "residual_norm_source": "the reduced residual sup norm each step reports is returned by the scoring kernel that already holds the residual, not reduced in a dispatch of its own",
+    "seed": "persisted pure-arm bank seed for each row",
+    "support_policy": "participation",
+    "targets": [
+      [
+        21985,
+        51
+      ],
+      [
+        21986,
+        46
+      ],
+      [
+        21989,
+        55
+      ],
+      [
+        22086,
+        43
+      ]
+    ]
+  },
+  "rows": [
+    {
+      "adaptive": {
+        "threshold_half": {
+          "contraction_refreshes_per_trip": [
+            2,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1
+          ],
+          "identical_trip_census": false,
+          "jacobian_builds_after": 12,
+          "jacobian_builds_before": 8,
+          "jacobian_builds_delta": 4,
+          "newton_steps_after": 5,
+          "newton_steps_before": 5,
+          "newton_steps_delta": 0,
+          "reference_route": "refusal-only chord, fused boundary",
+          "sup_flux_difference_fraction_of_span": 0.004883633558260892,
+          "sup_flux_difference_wb": 0.007239941014380663,
+          "terminal_residual_after": 0.000980434628217084,
+          "terminal_residual_before": 0.0009504270893105743,
+          "warm_jacobian_wall_after_s": 0.0010110740549862385,
+          "warm_jacobian_wall_before_s": 0.0009780656546354294,
+          "warm_step_wall_after_s": 0.006153469905257225,
+          "warm_step_wall_before_s": 0.006845329888164997,
+          "whole_trip_wall_after_s": 4.929150065407157,
+          "whole_trip_wall_before_s": 37.26816022954881
+        },
+        "threshold_one": {
+          "contraction_refreshes_per_trip": [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0
+          ],
+          "identical_trip_census": false,
+          "jacobian_builds_after": 12,
+          "jacobian_builds_before": 8,
+          "jacobian_builds_delta": 4,
+          "newton_steps_after": 5,
+          "newton_steps_before": 5,
+          "newton_steps_delta": 0,
+          "reference_route": "refusal-only chord, fused boundary",
+          "sup_flux_difference_fraction_of_span": 0.004883633558260892,
+          "sup_flux_difference_wb": 0.007239941014380663,
+          "terminal_residual_after": 0.000980434628217084,
+          "terminal_residual_before": 0.0009504270893105743,
+          "warm_jacobian_wall_after_s": 0.0010472247377038002,
+          "warm_jacobian_wall_before_s": 0.0009780656546354294,
+          "warm_step_wall_after_s": 0.0073031652718782425,
+          "warm_step_wall_before_s": 0.006845329888164997,
+          "whole_trip_wall_after_s": 5.6897540576756,
+          "whole_trip_wall_before_s": 37.26816022954881
+        }
+      },
+      "adaptive_half_prototype": {
+        "accepted_step_count": 5,
+        "active_set_iterations": 7,
+        "active_set_mask_differences": [
+          71,
+          65,
+          35,
+          35,
+          35,
+          35,
+          0
+        ],
+        "active_set_residuals": [
+          0.005410645252415013,
+          0.0009790831886079421,
+          0.0009271164623035721,
+          0.0009288076515587742,
+          0.0009594093494095804,
+          0.0009600279367065967,
+          0.000980434628217084
+        ],
+        "boundary_wall_per_trip_s": [
+          2.963790601119399,
+          0.045964556746184826,
+          0.045637655071914196,
+          0.045658997260034084,
+          0.04567181132733822,
+          0.04560381267219782,
+          0.04581216908991337
+        ],
+        "contraction_refreshes_per_trip": [
+          2,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 0.11720144841820002,
+        "first_step_wall_s": 1.1386502236127853,
+        "jacobian_builds_per_trip": [
+          3,
+          1,
+          2,
+          1,
+          2,
+          1,
+          2
+        ],
+        "jacobian_refresh_threshold": 0.5,
+        "jacobian_wall_per_trip_s": [
+          0.11720144841820002,
+          0.0008887341246008873,
+          0.0011576926335692406,
+          0.0006610620766878128,
+          0.0011334139853715897,
+          0.0007481779903173447,
+          0.001359664835035801
+        ],
+        "ladder_scoring": "batched_tail",
+        "map_evaluations_per_trip": [
+          19,
+          7,
+          13,
+          7,
+          13,
+          7,
+          13
+        ],
+        "median_warm_accepting_step_wall_s": 0.007499142549932003,
+        "median_warm_boundary_wall_s": 0.04566540429368615,
+        "median_warm_jacobian_wall_s": 0.0010110740549862385,
+        "median_warm_newton_work_per_trip_s": 0.008558256551623344,
+        "median_warm_refused_step_map_evaluations": 6.5,
+        "median_warm_refused_step_wall_s": 0.00575839402154088,
+        "median_warm_step_map_evaluations": 7.0,
+        "median_warm_step_wall_s": 0.006153469905257225,
+        "median_warm_trip_wall_s": 0.054950340650975704,
+        "newton_steps_per_trip": [
+          2,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.1487536365166306,
+          0.005128059536218643,
+          0.013427194207906723,
+          0.006796751171350479,
+          0.01031976193189621,
+          0.006318447180092335,
+          0.0137632479891181
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 623,
+        "rejected_step_count": 7,
+        "rejected_steps_per_trip": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.0020457380475404586,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0021505464299380736,
+            "reduced_residual": 99.97327744146423,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.1386502236127853
+          },
+          {
+            "accepted_factor": 0.25,
+            "flux_residual": 0.0013918572427976087,
+            "grades_tried": 3,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0013500900213535077,
+            "reduced_residual": 295.65371832439735,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.00596648920327425
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0011939128354537022,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0011979916458252492,
+            "reduced_residual": 221.740288743298,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.00413692370057106
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009790831886079421,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009926881831538613,
+            "reduced_residual": 41.76099656642941,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.005128059536218643
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.000933060375154128,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009843954388131123,
+            "reduced_residual": 34.85469235291566,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.007499142549932003
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009271164623035721,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0009777824312032217,
+            "reduced_residual": 39.49319903632054,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.00592805165797472
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009288076515587742,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009682101440059305,
+            "reduced_residual": 33.03961706491582,
+            "step": 0,
+            "trip": 3,
+            "wall_s": 0.006796751171350479
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0009585796589249435,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009845495769419525,
+            "reduced_residual": 33.033466676685265,
+            "step": 0,
+            "trip": 4,
+            "wall_s": 0.006153469905257225
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009594093494095804,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0009781562607274188,
+            "reduced_residual": 35.33653116432839,
+            "step": 1,
+            "trip": 4,
+            "wall_s": 0.004166292026638985
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009600279367065967,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009775274141943667,
+            "reduced_residual": 34.02405745013253,
+            "step": 0,
+            "trip": 5,
+            "wall_s": 0.006318447180092335
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.000991398946330815,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0010029212310371568,
+            "reduced_residual": 34.06211202378472,
+            "step": 0,
+            "trip": 6,
+            "wall_s": 0.008174511604011059
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.000980434628217084,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0009886214223920665,
+            "reduced_residual": 32.98793986759078,
+            "step": 1,
+            "trip": 6,
+            "wall_s": 0.00558873638510704
+          }
+        ],
+        "support_cells": 623,
+        "support_policy": "participation",
+        "terminal_residual": 0.000980434628217084,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          4.228593800216913,
+          0.05201575066894293,
+          0.05978936888277531,
+          0.053137059323489666,
+          0.05676362197846174,
+          0.05269044078886509,
+          0.06039400398731232
+        ],
+        "wall_per_trip_s": 0.7041642950581652,
+        "wall_s": 4.929150065407157,
+        "warm_accepting_step_count": 3,
+        "warm_refused_step_count": 6
+      },
+      "adaptive_prototype": {
+        "accepted_step_count": 5,
+        "active_set_iterations": 7,
+        "active_set_mask_differences": [
+          71,
+          65,
+          35,
+          35,
+          35,
+          35,
+          0
+        ],
+        "active_set_residuals": [
+          0.005410645252415013,
+          0.0009790831886079421,
+          0.0009271164623035721,
+          0.0009288076515587742,
+          0.0009594093494095804,
+          0.0009600279367065967,
+          0.000980434628217084
+        ],
+        "boundary_wall_per_trip_s": [
+          3.408326963894069,
+          0.04531667660921812,
+          0.04418579861521721,
+          0.045383634977042675,
+          0.045204452238976955,
+          0.04494514316320419,
+          0.045285215601325035
+        ],
+        "contraction_refreshes_per_trip": [
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          0
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 0.5678135193884373,
+        "first_step_wall_s": 0.9932068735361099,
+        "jacobian_builds_per_trip": [
+          3,
+          1,
+          2,
+          1,
+          2,
+          1,
+          2
+        ],
+        "jacobian_refresh_threshold": 1.0,
+        "jacobian_wall_per_trip_s": [
+          0.5678135193884373,
+          0.001028238795697689,
+          0.0012690229341387749,
+          0.0005103545263409615,
+          0.0010662106797099113,
+          0.0007511693984270096,
+          0.0015843547880649567
+        ],
+        "ladder_scoring": "batched_tail",
+        "map_evaluations_per_trip": [
+          25,
+          7,
+          13,
+          7,
+          13,
+          7,
+          19
+        ],
+        "median_warm_accepting_step_wall_s": 0.008808259852230549,
+        "median_warm_boundary_wall_s": 0.045244833920150995,
+        "median_warm_jacobian_wall_s": 0.0010472247377038002,
+        "median_warm_newton_work_per_trip_s": 0.010824616998434067,
+        "median_warm_refused_step_map_evaluations": 7.0,
+        "median_warm_refused_step_wall_s": 0.006397169083356857,
+        "median_warm_step_map_evaluations": 7.0,
+        "median_warm_step_wall_s": 0.0073031652718782425,
+        "median_warm_trip_wall_s": 0.05678164679557085,
+        "newton_steps_per_trip": [
+          2,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.0095915691927075,
+          0.007670367136597633,
+          0.014483114704489708,
+          0.004317588172852993,
+          0.0139788668602705,
+          0.007132484577596188,
+          0.01742540393024683
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 623,
+        "rejected_step_count": 7,
+        "rejected_steps_per_trip": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          2
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.0020457380475404586,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0021505464299380736,
+            "reduced_residual": 99.97327744146423,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 0.9932068735361099
+          },
+          {
+            "accepted_factor": 0.25,
+            "flux_residual": 0.0013918572427976087,
+            "grades_tried": 3,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0013500900213535077,
+            "reduced_residual": 295.65371832439735,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.006760843098163605
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0011939128354537022,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0011979916458252492,
+            "reduced_residual": 221.740288743298,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.00962385255843401
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009790831886079421,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009926881831538613,
+            "reduced_residual": 41.76099656642941,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.007670367136597633
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.000933060375154128,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009843954388131123,
+            "reduced_residual": 34.85469235291566,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.008821261115372181
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009271164623035721,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0009777824312032217,
+            "reduced_residual": 39.49319903632054,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.005661853589117527
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009288076515587742,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009682101440059305,
+            "reduced_residual": 33.03961706491582,
+            "step": 0,
+            "trip": 3,
+            "wall_s": 0.004317588172852993
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0009585796589249435,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009845495769419525,
+            "reduced_residual": 33.033466676685265,
+            "step": 0,
+            "trip": 4,
+            "wall_s": 0.008808259852230549
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009594093494095804,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0009781562607274188,
+            "reduced_residual": 35.33653116432839,
+            "step": 1,
+            "trip": 4,
+            "wall_s": 0.005170607008039951
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009600279367065967,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009775274141943667,
+            "reduced_residual": 34.02405745013253,
+            "step": 0,
+            "trip": 5,
+            "wall_s": 0.007132484577596188
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.000991398946330815,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0010029212310371568,
+            "reduced_residual": 34.06211202378472,
+            "step": 0,
+            "trip": 6,
+            "wall_s": 0.0073031652718782425
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.000980434628217084,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0009886214223920665,
+            "reduced_residual": 32.98793986759078,
+            "step": 1,
+            "trip": 6,
+            "wall_s": 0.010122238658368587
+          }
+        ],
+        "support_cells": 623,
+        "support_policy": "participation",
+        "terminal_residual": 0.000980434628217084,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          4.9841996897011995,
+          0.05403924826532602,
+          0.05952404532581568,
+          0.05023344233632088,
+          0.0597750386223197,
+          0.052854291163384914,
+          0.06342753488570452
+        ],
+        "wall_per_trip_s": 0.8128220082393715,
+        "wall_s": 5.6897540576756,
+        "warm_accepting_step_count": 3,
+        "warm_refused_step_count": 6
+      },
+      "arm": "pure",
+      "banked_production": {
+        "conditioning_trace": {
+          "count": 0,
+          "maximum_projected_condition": 19898.56215577929,
+          "result_scope": "whole active-set solve"
+        },
+        "configuration": {
+          "convergence_tolerance": 1e-08,
+          "gmres_iterations": 30,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "route": "ForwardProfile.solve_branch(newton_krylov)",
+          "step_cap": 10.0,
+          "warmup": 0
+        },
+        "result": {
+          "active_set_iterations": 8,
+          "active_set_mask_differences": [
+            5,
+            32,
+            38,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.00504605510566441,
+            0.0044626828814398984,
+            0.010634581095636867,
+            0.008365159990769023,
+            0.0009677839571982415,
+            0.000732796408473379,
+            0.0006403305065683237,
+            0.0006403305065683237
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 0,
+          "maximum_projected_krylov_condition": 19898.56215577929,
+          "terminal_residual": 0.0006403305065683237,
+          "termination_reason": "active_set_settled"
+        },
+        "terminal_topology": {
+          "achieved_class": "diverted",
+          "admitted_axis_m": [
+            0.8947069344417068,
+            0.06430641409358102
+          ],
+          "admitted_saddle_m": [
+            0.5771729923124537,
+            1.1758531834838333
+          ],
+          "axis_admitted": true,
+          "failure_exception_class": null,
+          "saddle_admitted": true
+        }
+      },
+      "batched_tail": {
+        "accepting_step_wall_over_serial_s": -0.0072313519194722176,
+        "accepting_step_wall_s": 0.006555318832397461,
+        "bitwise_identical_flux": true,
+        "eager_refused_step_wall_s": 0.004911856725811958,
+        "identical_decisions": true,
+        "identical_terminal_residual": true,
+        "reference_route": "serial per-grade ladder behind the fused boundary",
+        "refused_step_wall_over_eager_s": 0.002223484218120575,
+        "refused_step_wall_recovered_from_serial_s": 0.005194574594497681,
+        "refused_step_wall_s": 0.007135340943932533,
+        "serial_accepting_step_wall_s": 0.013786670751869678,
+        "serial_refused_step_wall_s": 0.012329915538430214,
+        "sup_flux_difference_wb": 0.0,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 3
+      },
+      "eager_prototype": {
+        "accepted_step_count": 5,
+        "active_set_iterations": 4,
+        "active_set_mask_differences": [
+          6,
+          5,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.0056038372322887555,
+          0.0047711870239784595,
+          0.0009180353292457384,
+          0.000950427089310425
+        ],
+        "boundary_wall_per_trip_s": [
+          10.09471427090466,
+          0.11336271464824677,
+          0.1097530173137784,
+          0.11480186972767115
+        ],
+        "contraction_refreshes_per_trip": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 0.11281765531748533,
+        "first_step_wall_s": 1.258082683198154,
+        "jacobian_builds_per_trip": [
+          4,
+          1,
+          1,
+          2
+        ],
+        "jacobian_refresh_threshold": null,
+        "jacobian_wall_per_trip_s": [
+          0.11281765531748533,
+          0.0006105592474341393,
+          0.0003190748393535614,
+          0.000986655242741108
+        ],
+        "ladder_scoring": "eager",
+        "map_evaluations_per_trip": [
+          58,
+          8,
+          8,
+          22
+        ],
+        "median_warm_accepting_step_wall_s": 0.005327722057700157,
+        "median_warm_boundary_wall_s": 0.11336271464824677,
+        "median_warm_jacobian_wall_s": 0.0006105592474341393,
+        "median_warm_newton_work_per_trip_s": 0.004911856725811958,
+        "median_warm_refused_step_map_evaluations": 8.0,
+        "median_warm_refused_step_wall_s": 0.004911856725811958,
+        "median_warm_step_map_evaluations": 8.0,
+        "median_warm_step_wall_s": 0.005119789391756058,
+        "median_warm_trip_wall_s": 0.1329369144514203,
+        "newton_steps_per_trip": [
+          4,
+          0,
+          0,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.293261089362204,
+          0.004911856725811958,
+          0.0049099428579211235,
+          0.015862618573009968
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 623,
+        "rejected_step_count": 4,
+        "rejected_steps_per_trip": [
+          4,
+          1,
+          1,
+          2
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.0020457380475404586,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0021505464299380783,
+            "reduced_residual": 99.97327744146878,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.258082683198154
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0013918572427976087,
+            "grades_tried": 4,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0013500900213535272,
+            "reduced_residual": 295.6537183243968,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.007689926773309708
+          },
+          {
+            "accepted_factor": 0.25,
+            "flux_residual": 0.0013570443936450607,
+            "grades_tried": 9,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.0013239026075699838,
+            "reduced_residual": 305.0229366997586,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.00926255900412798
+          },
+          {
+            "accepted_factor": 0.0625,
+            "flux_residual": 0.0012415836044288367,
+            "grades_tried": 11,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.001254335455913011,
+            "reduced_residual": 318.0086330198401,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.008456256240606308
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.00121851218031974,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.0012359460574556717,
+            "reduced_residual": 282.3717793438843,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.009769664146006107
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009573295026464779,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0009903253594462581,
+            "reduced_residual": 43.753804618692264,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.004911856725811958
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009180353292456634,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0009727629525160693,
+            "reduced_residual": 34.11776163754689,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.0049099428579211235
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0009456478030769322,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0009813009279423458,
+            "reduced_residual": 32.90138013562566,
+            "step": 0,
+            "trip": 3,
+            "wall_s": 0.005327722057700157
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.00095042708931035,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.0009767185565270208,
+            "reduced_residual": 37.207946968576444,
+            "step": 1,
+            "trip": 3,
+            "wall_s": 0.01053489651530981
+          }
+        ],
+        "support_cells": 623,
+        "support_policy": "participation",
+        "terminal_residual": 0.000950427089310425,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "dispatched",
+        "trip_wall_per_trip_s": [
+          13.373516408726573,
+          0.1329369144514203,
+          0.12732501979917288,
+          0.14144647866487503
+        ],
+        "wall_per_trip_s": 3.493426288012415,
+        "wall_s": 13.97370515204966,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 3
+      },
+      "identity": "21985/51",
+      "previous_prototype": {
+        "accepted_step_count": 5,
+        "active_set_iterations": 4,
+        "active_set_mask_differences": [
+          6,
+          5,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.005603837232289089,
+          0.004771187023978663,
+          0.0009180353292457379,
+          0.000950427089310424
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 2.3312935354188085,
+        "first_step_wall_s": 1.3820206532254815,
+        "jacobian_builds_per_trip": [
+          4,
+          1,
+          1,
+          2
+        ],
+        "jacobian_wall_per_trip_s": [
+          2.3312935354188085,
+          0.0006033768877387047,
+          0.00030840467661619186,
+          0.000699811615049839
+        ],
+        "median_warm_jacobian_wall_s": 0.0006033768877387047,
+        "median_warm_step_wall_s": 0.00469338009133935,
+        "newton_steps_per_trip": [
+          4,
+          0,
+          0,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.414631430990994,
+          0.0043903132900595665,
+          0.0047415634617209435,
+          0.012113820761442184
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 623,
+        "rejected_step_count": 4,
+        "rejected_steps_per_trip": [
+          4,
+          1,
+          1,
+          2
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.0020457380475404586,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "merit": 0.0021505464299380935,
+            "reduced_residual": 99.97327744146878,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.3820206532254815
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0013918572427976837,
+            "grades_tried": 4,
+            "jacobian_refreshed": false,
+            "merit": 0.0013500900213535003,
+            "reduced_residual": 295.65371832440053,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.007502952590584755
+          },
+          {
+            "accepted_factor": 0.25,
+            "flux_residual": 0.0013570443936452106,
+            "grades_tried": 9,
+            "jacobian_refreshed": true,
+            "merit": 0.0013239026075700779,
+            "reduced_residual": 305.0229366997624,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.00828354712575674
+          },
+          {
+            "accepted_factor": 0.0625,
+            "flux_residual": 0.001241583604428911,
+            "grades_tried": 11,
+            "jacobian_refreshed": true,
+            "merit": 0.001254335455913136,
+            "reduced_residual": 318.0086330198634,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.00785672664642334
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0012185121803198144,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "merit": 0.0012359460574556814,
+            "reduced_residual": 282.3717793439281,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.008967551402747631
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009573295026465523,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "merit": 0.0009903253594462712,
+            "reduced_residual": 43.75380461869385,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.0043903132900595665
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009180353292458128,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "merit": 0.0009727629525160578,
+            "reduced_residual": 34.11776163754598,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.0047415634617209435
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0009456478030769318,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "merit": 0.0009813009279423404,
+            "reduced_residual": 32.90138013562408,
+            "step": 0,
+            "trip": 3,
+            "wall_s": 0.004645196720957756
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.000950427089310424,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "merit": 0.0009767185565270626,
+            "reduced_residual": 37.20794696859924,
+            "step": 1,
+            "trip": 3,
+            "wall_s": 0.007468624040484428
+          }
+        ],
+        "support_cells": 623,
+        "support_policy": "participation",
+        "terminal_residual": 0.000950427089310424,
+        "termination_reason": "active_set_settled",
+        "trip_wall_per_trip_s": [
+          6.383622453548014,
+          0.1266855113208294,
+          0.11753857601433992,
+          0.1239312756806612
+        ],
+        "wall_per_trip_s": 2.8844876401126385,
+        "wall_s": 11.537950560450554
+      },
+      "prototype": {
+        "accepted_step_count": 5,
+        "active_set_iterations": 4,
+        "active_set_mask_differences": [
+          6,
+          5,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.005603837232288867,
+          0.004771187023978552,
+          0.0009180353292457382,
+          0.0009504270893105743
+        ],
+        "boundary_wall_per_trip_s": [
+          13.343974539078772,
+          0.043772571720182896,
+          0.046227541752159595,
+          0.04548740480095148
+        ],
+        "contraction_refreshes_per_trip": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 2.7792642498388886,
+        "first_step_wall_s": 1.6200669277459383,
+        "jacobian_builds_per_trip": [
+          4,
+          1,
+          1,
+          2
+        ],
+        "jacobian_refresh_threshold": null,
+        "jacobian_wall_per_trip_s": [
+          2.7792642498388886,
+          0.0009780656546354294,
+          0.0006034485995769501,
+          0.0013671787455677986
+        ],
+        "ladder_scoring": "batched_tail",
+        "map_evaluations_per_trip": [
+          49,
+          7,
+          7,
+          19
+        ],
+        "median_warm_accepting_step_wall_s": 0.006555318832397461,
+        "median_warm_boundary_wall_s": 0.04548740480095148,
+        "median_warm_jacobian_wall_s": 0.0009780656546354294,
+        "median_warm_newton_work_per_trip_s": 0.007135340943932533,
+        "median_warm_refused_step_map_evaluations": 7.0,
+        "median_warm_refused_step_wall_s": 0.007135340943932533,
+        "median_warm_step_map_evaluations": 7.0,
+        "median_warm_step_wall_s": 0.006845329888164997,
+        "median_warm_trip_wall_s": 0.05192230734974146,
+        "newton_steps_per_trip": [
+          4,
+          0,
+          0,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.659165309742093,
+          0.007135340943932533,
+          0.004493718966841698,
+          0.016703003086149693
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 623,
+        "rejected_step_count": 4,
+        "rejected_steps_per_trip": [
+          4,
+          1,
+          1,
+          2
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.0020457380475404586,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0021505464299380736,
+            "reduced_residual": 99.97327744146423,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.6200669277459383
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0013918572427976087,
+            "grades_tried": 4,
+            "jacobian_refreshed": false,
+            "map_evaluations": 6,
+            "merit": 0.0013500900213535077,
+            "reduced_residual": 295.65371832439735,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.005556762218475342
+          },
+          {
+            "accepted_factor": 0.25,
+            "flux_residual": 0.0013570443936451355,
+            "grades_tried": 9,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0013239026075700785,
+            "reduced_residual": 305.02293669975916,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.011933783069252968
+          },
+          {
+            "accepted_factor": 0.0625,
+            "flux_residual": 0.0012415836044286123,
+            "grades_tried": 11,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.001254335455912943,
+            "reduced_residual": 318.0086330198491,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.011989225633442402
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.001218512180319665,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.001235946057455697,
+            "reduced_residual": 282.37177934389905,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.009618611074984074
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009573295026466275,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009903253594462753,
+            "reduced_residual": 43.75380461869063,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.007135340943932533
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009180353292457382,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009727629525160535,
+            "reduced_residual": 34.117761637551894,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.004493718966841698
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0009456478030769322,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.00098130092794234,
+            "reduced_residual": 32.90138013562412,
+            "step": 0,
+            "trip": 3,
+            "wall_s": 0.006555318832397461
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009504270893105743,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0009767185565270546,
+            "reduced_residual": 37.20794696858477,
+            "step": 1,
+            "trip": 3,
+            "wall_s": 0.010147684253752232
+          }
+        ],
+        "support_cells": 623,
+        "support_policy": "participation",
+        "terminal_residual": 0.0009504270893105743,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          17.780529480427504,
+          0.05192230734974146,
+          0.05135547183454037,
+          0.06289743538945913
+        ],
+        "wall_per_trip_s": 9.317040057387203,
+        "wall_s": 37.26816022954881,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 3
+      },
+      "repair": {
+        "millisecond_target_s": 0.001,
+        "reference_warm_boundary_wall_s": 0.11336271464824677,
+        "reference_warm_newton_work_per_trip_s": 0.004911856725811958,
+        "reference_warm_step_map_evaluations": 8.0,
+        "reference_warm_step_wall_s": 0.005119789391756058,
+        "reference_warm_trip_wall_s": 0.1329369144514203,
+        "warm_boundary_wall_s": 0.04548740480095148,
+        "warm_newton_work_per_trip_s": 0.007135340943932533,
+        "warm_step_map_evaluations": 7.0,
+        "warm_step_speedup": 0.7479244207949343,
+        "warm_step_wall_s": 0.006845329888164997,
+        "warm_step_walls_of_target": 6.845329888164997,
+        "warm_trip_speedup": 2.56030444787393,
+        "warm_trip_wall_s": 0.05192230734974146
+      },
+      "route_agreement": {
+        "bitwise_identical_flux": false,
+        "flux_agrees": true,
+        "identical_trip_census": true,
+        "previous_receipt_reproduced": {
+          "banked_active_set_iterations": 4,
+          "banked_newton_steps_per_trip": [
+            4,
+            0,
+            0,
+            1
+          ],
+          "banked_terminal_residual": 0.000950427089310424,
+          "identical_trip_census": true,
+          "measured_active_set_iterations": 4,
+          "measured_newton_steps_per_trip": [
+            4,
+            0,
+            0,
+            1
+          ],
+          "measured_terminal_residual": 0.000950427089310425,
+          "relative_residual_difference": 1.140752599204785e-15
+        },
+        "reference_route": "eager ladder behind the dispatched boundary",
+        "required_fraction_of_span": 1e-06,
+        "sup_flux_difference_fraction_of_span": 1.1233356202993471e-15,
+        "sup_flux_difference_wb": 1.6653345369377348e-15,
+        "terminal_residual_fast": 0.0009504270893105743,
+        "terminal_residual_reference": 0.000950427089310425
+      },
+      "serial_prototype": {
+        "accepted_step_count": 5,
+        "active_set_iterations": 4,
+        "active_set_mask_differences": [
+          6,
+          5,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.005603837232288867,
+          0.004771187023978552,
+          0.0009180353292457382,
+          0.0009504270893105743
+        ],
+        "boundary_wall_per_trip_s": [
+          3.0426558861508965,
+          0.046569560654461384,
+          0.046823736280202866,
+          0.047241562977433205
+        ],
+        "contraction_refreshes_per_trip": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 0.12047890201210976,
+        "first_step_wall_s": 0.7775816079229116,
+        "jacobian_builds_per_trip": [
+          4,
+          1,
+          1,
+          2
+        ],
+        "jacobian_refresh_threshold": null,
+        "jacobian_wall_per_trip_s": [
+          0.12047890201210976,
+          0.0009808670729398727,
+          0.0005779480561614037,
+          0.0010063974186778069
+        ],
+        "ladder_scoring": "first_accept",
+        "map_evaluations_per_trip": [
+          39,
+          7,
+          7,
+          19
+        ],
+        "median_warm_accepting_step_wall_s": 0.013786670751869678,
+        "median_warm_boundary_wall_s": 0.046823736280202866,
+        "median_warm_jacobian_wall_s": 0.0009808670729398727,
+        "median_warm_newton_work_per_trip_s": 0.012329915538430214,
+        "median_warm_refused_step_map_evaluations": 7.0,
+        "median_warm_refused_step_wall_s": 0.012329915538430214,
+        "median_warm_step_map_evaluations": 7.0,
+        "median_warm_step_wall_s": 0.013058293145149946,
+        "median_warm_trip_wall_s": 0.059749918058514595,
+        "newton_steps_per_trip": [
+          4,
+          0,
+          0,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          0.834842661395669,
+          0.011577297933399677,
+          0.012329915538430214,
+          0.03336045891046524
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 623,
+        "rejected_step_count": 4,
+        "rejected_steps_per_trip": [
+          4,
+          1,
+          1,
+          2
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.0020457380475404586,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 3,
+            "merit": 0.0021505464299380736,
+            "reduced_residual": 99.97327744146423,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 0.7775816079229116
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0013918572427976087,
+            "grades_tried": 4,
+            "jacobian_refreshed": false,
+            "map_evaluations": 4,
+            "merit": 0.0013500900213535077,
+            "reduced_residual": 295.65371832439735,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.007059011608362198
+          },
+          {
+            "accepted_factor": 0.25,
+            "flux_residual": 0.0013570443936451355,
+            "grades_tried": 9,
+            "jacobian_refreshed": true,
+            "map_evaluations": 9,
+            "merit": 0.0013239026075700785,
+            "reduced_residual": 305.02293669975916,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.014389554969966412
+          },
+          {
+            "accepted_factor": 0.0625,
+            "flux_residual": 0.0012415836044286123,
+            "grades_tried": 11,
+            "jacobian_refreshed": true,
+            "map_evaluations": 11,
+            "merit": 0.001254335455912943,
+            "reduced_residual": 318.0086330198491,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.016129931434988976
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.001218512180319665,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.001235946057455697,
+            "reduced_residual": 282.37177934389905,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.019682555459439754
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009573295026466275,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009903253594462753,
+            "reduced_residual": 43.75380461869063,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.011577297933399677
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009180353292457382,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0009727629525160535,
+            "reduced_residual": 34.117761637551894,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.012329915538430214
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0009456478030769322,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.00098130092794234,
+            "reduced_residual": 32.90138013562412,
+            "step": 0,
+            "trip": 3,
+            "wall_s": 0.013786670751869678
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009504270893105743,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0009767185565270546,
+            "reduced_residual": 37.20794696858477,
+            "step": 1,
+            "trip": 3,
+            "wall_s": 0.019573788158595562
+          }
+        ],
+        "support_cells": 623,
+        "support_policy": "participation",
+        "terminal_residual": 0.0009504270893105743,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          3.996593350544572,
+          0.05915323458611965,
+          0.059749918058514595,
+          0.08124323468655348
+        ],
+        "wall_per_trip_s": 1.1732095063198358,
+        "wall_s": 4.692838025279343,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 3
+      }
+    },
+    {
+      "adaptive": {
+        "threshold_half": {
+          "contraction_refreshes_per_trip": [
+            2,
+            0,
+            1
+          ],
+          "identical_trip_census": false,
+          "jacobian_builds_after": 6,
+          "jacobian_builds_before": 6,
+          "jacobian_builds_delta": 0,
+          "newton_steps_after": 3,
+          "newton_steps_before": 4,
+          "newton_steps_delta": -1,
+          "reference_route": "refusal-only chord, fused boundary",
+          "sup_flux_difference_fraction_of_span": 0.001421146245175434,
+          "sup_flux_difference_wb": 0.0018185386272546733,
+          "terminal_residual_after": 0.001956832629359772,
+          "terminal_residual_before": 0.001967697918924222,
+          "warm_jacobian_wall_after_s": 0.0009429040364921093,
+          "warm_jacobian_wall_before_s": 0.0010980390943586826,
+          "warm_step_wall_after_s": 0.0060019176453351974,
+          "warm_step_wall_before_s": 0.0076745618134737015,
+          "whole_trip_wall_after_s": 5.194698319770396,
+          "whole_trip_wall_before_s": 15.991328085772693
+        },
+        "threshold_one": {
+          "contraction_refreshes_per_trip": [
+            1,
+            0,
+            1
+          ],
+          "identical_trip_census": false,
+          "jacobian_builds_after": 6,
+          "jacobian_builds_before": 6,
+          "jacobian_builds_delta": 0,
+          "newton_steps_after": 3,
+          "newton_steps_before": 4,
+          "newton_steps_delta": -1,
+          "reference_route": "refusal-only chord, fused boundary",
+          "sup_flux_difference_fraction_of_span": 0.001421146245175434,
+          "sup_flux_difference_wb": 0.0018185386272546733,
+          "terminal_residual_after": 0.001956832629359772,
+          "terminal_residual_before": 0.001967697918924222,
+          "warm_jacobian_wall_after_s": 0.0011193500831723213,
+          "warm_jacobian_wall_before_s": 0.0010980390943586826,
+          "warm_step_wall_after_s": 0.006371520459651947,
+          "warm_step_wall_before_s": 0.0076745618134737015,
+          "whole_trip_wall_after_s": 4.9466717755422,
+          "whole_trip_wall_before_s": 15.991328085772693
+        }
+      },
+      "adaptive_half_prototype": {
+        "accepted_step_count": 3,
+        "active_set_iterations": 3,
+        "active_set_mask_differences": [
+          7,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.002239412215122115,
+          0.0019672376689254317,
+          0.001956832629359772
+        ],
+        "boundary_wall_per_trip_s": [
+          3.0400036703795195,
+          0.04737183079123497,
+          0.04808500688523054
+        ],
+        "contraction_refreshes_per_trip": [
+          2,
+          0,
+          1
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 0.3629437731578946,
+        "first_step_wall_s": 1.196472205221653,
+        "jacobian_builds_per_trip": [
+          3,
+          1,
+          2
+        ],
+        "jacobian_refresh_threshold": 0.5,
+        "jacobian_wall_per_trip_s": [
+          0.3629437731578946,
+          0.0009904559701681137,
+          0.0008953521028161049
+        ],
+        "ladder_scoring": "batched_tail",
+        "map_evaluations_per_trip": [
+          19,
+          7,
+          13
+        ],
+        "median_warm_accepting_step_wall_s": 0.0060019176453351974,
+        "median_warm_boundary_wall_s": 0.047728418838232756,
+        "median_warm_jacobian_wall_s": 0.0009429040364921093,
+        "median_warm_newton_work_per_trip_s": 0.008451325818896294,
+        "median_warm_refused_step_map_evaluations": 6.5,
+        "median_warm_refused_step_wall_s": 0.005450366996228695,
+        "median_warm_step_map_evaluations": 7.0,
+        "median_warm_step_wall_s": 0.0060019176453351974,
+        "median_warm_trip_wall_s": 0.05699805961921811,
+        "newton_steps_per_trip": [
+          2,
+          0,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.206350008957088,
+          0.006579994224011898,
+          0.01032265741378069
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 637,
+        "rejected_step_count": 3,
+        "rejected_steps_per_trip": [
+          1,
+          1,
+          1
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.003299341234447786,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.003620856862260772,
+            "reduced_residual": 106.16729464791581,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.196472205221653
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0023638497804586954,
+            "grades_tried": 4,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0023924068193504197,
+            "reduced_residual": 252.97627735122012,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.005445724353194237
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.002239412215122115,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0022971132476694947,
+            "reduced_residual": 220.70067584886357,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.004432079382240772
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0019672376689254317,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.002075527007994241,
+            "reduced_residual": 59.81310797703782,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.006579994224011898
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0019564931999887522,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0020772848578910113,
+            "reduced_residual": 54.060619978171644,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.0060019176453351974
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.001956832629359772,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.002074803921531148,
+            "reduced_residual": 81.81321094165682,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.004320739768445492
+          }
+        ],
+        "support_cells": 637,
+        "support_policy": "participation",
+        "terminal_residual": 0.001956832629359772,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          4.608328032307327,
+          0.0549688758328557,
+          0.05902724340558052
+        ],
+        "wall_per_trip_s": 1.731566106590132,
+        "wall_s": 5.194698319770396,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 2
+      },
+      "adaptive_prototype": {
+        "accepted_step_count": 3,
+        "active_set_iterations": 3,
+        "active_set_mask_differences": [
+          7,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.002239412215122115,
+          0.0019672376689254317,
+          0.001956832629359772
+        ],
+        "boundary_wall_per_trip_s": [
+          2.9863294111564755,
+          0.047783615067601204,
+          0.04759329091757536
+        ],
+        "contraction_refreshes_per_trip": [
+          1,
+          0,
+          1
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 0.3482336765155196,
+        "first_step_wall_s": 1.1192020326852798,
+        "jacobian_builds_per_trip": [
+          3,
+          1,
+          2
+        ],
+        "jacobian_refresh_threshold": 1.0,
+        "jacobian_wall_per_trip_s": [
+          0.3482336765155196,
+          0.0008680326864123344,
+          0.0013706674799323082
+        ],
+        "ladder_scoring": "batched_tail",
+        "map_evaluations_per_trip": [
+          25,
+          7,
+          13
+        ],
+        "median_warm_accepting_step_wall_s": 0.007767966017127037,
+        "median_warm_boundary_wall_s": 0.04768845299258828,
+        "median_warm_jacobian_wall_s": 0.0011193500831723213,
+        "median_warm_newton_work_per_trip_s": 0.00978181790560484,
+        "median_warm_refused_step_map_evaluations": 6.5,
+        "median_warm_refused_step_wall_s": 0.005897834897041321,
+        "median_warm_step_map_evaluations": 7.0,
+        "median_warm_step_wall_s": 0.006371520459651947,
+        "median_warm_trip_wall_s": 0.0583529626019299,
+        "newton_steps_per_trip": [
+          2,
+          0,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.1315102307125926,
+          0.006371520459651947,
+          0.013192115351557732
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 637,
+        "rejected_step_count": 3,
+        "rejected_steps_per_trip": [
+          2,
+          1,
+          1
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.003299341234447786,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.003620856862260772,
+            "reduced_residual": 106.16729464791581,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.1192020326852798
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0023638497804586954,
+            "grades_tried": 4,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0023924068193504197,
+            "reduced_residual": 252.97627735122012,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.004704468883574009
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.002239412215122115,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0022971132476694947,
+            "reduced_residual": 220.70067584886357,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.007603729143738747
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0019672376689254317,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.002075527007994241,
+            "reduced_residual": 59.81310797703782,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.006371520459651947
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0019564931999887522,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0020772848578910113,
+            "reduced_residual": 54.060619978171644,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.007767966017127037
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.001956832629359772,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.002074803921531148,
+            "reduced_residual": 81.81321094165682,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.005424149334430695
+          }
+        ],
+        "support_cells": 637,
+        "support_policy": "participation",
+        "terminal_residual": 0.001956832629359772,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          4.465082782320678,
+          0.05504603311419487,
+          0.061659892089664936
+        ],
+        "wall_per_trip_s": 1.6488905918474,
+        "wall_s": 4.9466717755422,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 2
+      },
+      "arm": "pure",
+      "banked_production": {
+        "conditioning_trace": {
+          "count": 0,
+          "maximum_projected_condition": 51700.36006903102,
+          "result_scope": "whole active-set solve"
+        },
+        "configuration": {
+          "convergence_tolerance": 1e-08,
+          "gmres_iterations": 30,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "route": "ForwardProfile.solve_branch(newton_krylov)",
+          "step_cap": 10.0,
+          "warmup": 0
+        },
+        "result": {
+          "active_set_iterations": 4,
+          "active_set_mask_differences": [
+            5,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.0019683642268978644,
+            0.0014262291572355549,
+            0.0013530525770449893,
+            0.0013530525770449893
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 0,
+          "maximum_projected_krylov_condition": 51700.36006903102,
+          "terminal_residual": 0.0013530525770449893,
+          "termination_reason": "active_set_settled"
+        },
+        "terminal_topology": {
+          "achieved_class": "diverted",
+          "admitted_axis_m": [
+            0.9139608490671101,
+            0.0577759135280113
+          ],
+          "admitted_saddle_m": [
+            0.6114415419016359,
+            1.1434156488247078
+          ],
+          "axis_admitted": true,
+          "failure_exception_class": null,
+          "saddle_admitted": true
+        }
+      },
+      "batched_tail": {
+        "accepting_step_wall_over_serial_s": -0.0048779090866446495,
+        "accepting_step_wall_s": 0.0076745618134737015,
+        "bitwise_identical_flux": true,
+        "eager_refused_step_wall_s": 0.0086651467718184,
+        "identical_decisions": true,
+        "identical_terminal_residual": true,
+        "reference_route": "serial per-grade ladder behind the fused boundary",
+        "refused_step_wall_over_eager_s": -0.0004612249322235584,
+        "refused_step_wall_recovered_from_serial_s": 0.006901942193508148,
+        "refused_step_wall_s": 0.008203921839594841,
+        "serial_accepting_step_wall_s": 0.012552470900118351,
+        "serial_refused_step_wall_s": 0.01510586403310299,
+        "sup_flux_difference_wb": 0.0,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 2
+      },
+      "eager_prototype": {
+        "accepted_step_count": 4,
+        "active_set_iterations": 3,
+        "active_set_mask_differences": [
+          7,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.00231306303979512,
+          0.002007597840332662,
+          0.001967697918924222
+        ],
+        "boundary_wall_per_trip_s": [
+          0.6144625060260296,
+          0.11753198131918907,
+          0.11256298515945673
+        ],
+        "contraction_refreshes_per_trip": [
+          0,
+          0,
+          0
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 0.5801928173750639,
+        "first_step_wall_s": 1.0510395541787148,
+        "jacobian_builds_per_trip": [
+          3,
+          1,
+          2
+        ],
+        "jacobian_refresh_threshold": null,
+        "jacobian_wall_per_trip_s": [
+          0.5801928173750639,
+          0.0005941065028309822,
+          0.0010120021179318428
+        ],
+        "ladder_scoring": "eager",
+        "map_evaluations_per_trip": [
+          44,
+          8,
+          22
+        ],
+        "median_warm_accepting_step_wall_s": 0.006183686666190624,
+        "median_warm_boundary_wall_s": 0.1150474832393229,
+        "median_warm_jacobian_wall_s": 0.0008030543103814125,
+        "median_warm_newton_work_per_trip_s": 0.011756990104913712,
+        "median_warm_refused_step_map_evaluations": 11.0,
+        "median_warm_refused_step_wall_s": 0.0086651467718184,
+        "median_warm_step_map_evaluations": 8.0,
+        "median_warm_step_wall_s": 0.006183686666190624,
+        "median_warm_trip_wall_s": 0.14036645879969,
+        "newton_steps_per_trip": [
+          3,
+          0,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.0756569020450115,
+          0.005884518846869469,
+          0.017629461362957954
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 637,
+        "rejected_step_count": 3,
+        "rejected_steps_per_trip": [
+          3,
+          1,
+          2
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.003299341234447786,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0036208568622607693,
+            "reduced_residual": 106.16729464791018,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.0510395541787148
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0023638497804586954,
+            "grades_tried": 4,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0023924068193504084,
+            "reduced_residual": 252.97627735121893,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.00652479100972414
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.00232578053835402,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.0023585988468752188,
+            "reduced_residual": 270.359005846483,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.00844583660364151
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0023130630397948594,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.002350645474429035,
+            "reduced_residual": 261.9102869137804,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.009646720252931118
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0020075978403326614,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.00209805225019946,
+            "reduced_residual": 61.65767186002813,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.005884518846869469
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0019932349710868476,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.002105196858834988,
+            "reduced_residual": 55.23107887811034,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.006183686666190624
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0019676979189242215,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.002080325560726949,
+            "reduced_residual": 68.00531063728141,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.01144577469676733
+          }
+        ],
+        "support_cells": 637,
+        "support_policy": "participation",
+        "terminal_residual": 0.001967697918924222,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "dispatched",
+        "trip_wall_per_trip_s": [
+          2.6007644962519407,
+          0.135417222045362,
+          0.14531569555401802
+        ],
+        "wall_per_trip_s": 1.0266158540422718,
+        "wall_s": 3.0798475621268153,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 2
+      },
+      "identity": "21986/46",
+      "previous_prototype": {
+        "accepted_step_count": 4,
+        "active_set_iterations": 3,
+        "active_set_mask_differences": [
+          7,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.0023130630397949466,
+          0.002007597840332748,
+          0.001967697918924222
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 1.0201263083145022,
+        "first_step_wall_s": 1.3311787359416485,
+        "jacobian_builds_per_trip": [
+          3,
+          1,
+          2
+        ],
+        "jacobian_wall_per_trip_s": [
+          1.0201263083145022,
+          0.0005351416766643524,
+          0.0010540122166275978
+        ],
+        "median_warm_jacobian_wall_s": 0.0007945769466459751,
+        "median_warm_step_wall_s": 0.0045331381261348724,
+        "newton_steps_per_trip": [
+          3,
+          0,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.3597246306017041,
+          0.004089094698429108,
+          0.014396884478628635
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 637,
+        "rejected_step_count": 3,
+        "rejected_steps_per_trip": [
+          3,
+          1,
+          2
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.003299341234447786,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "merit": 0.0036208568622607736,
+            "reduced_residual": 106.16729464791018,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.3311787359416485
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0023638497804586954,
+            "grades_tried": 4,
+            "jacobian_refreshed": false,
+            "merit": 0.002392406819350405,
+            "reduced_residual": 252.97627735121785,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.0067372918128967285
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0023257805383541936,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "merit": 0.0023585988468753484,
+            "reduced_residual": 270.35900584648186,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.011100324802100658
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0023130630397950333,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "merit": 0.002350645474429046,
+            "reduced_residual": 261.9102869137793,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.01070827804505825
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.002007597840332748,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "merit": 0.002098052250199545,
+            "reduced_residual": 61.6576718600287,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.004089094698429108
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.001993234971086761,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "merit": 0.0021051968588349473,
+            "reduced_residual": 55.231078878114886,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.0045331381261348724
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.001967697918924308,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "merit": 0.002080325560726921,
+            "reduced_residual": 68.00531063728153,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.009863746352493763
+          }
+        ],
+        "support_cells": 637,
+        "support_policy": "participation",
+        "terminal_residual": 0.001967697918924222,
+        "termination_reason": "active_set_settled",
+        "trip_wall_per_trip_s": [
+          3.3428023727610707,
+          0.12492186482995749,
+          0.14143389649689198
+        ],
+        "wall_per_trip_s": 1.2748181183512013,
+        "wall_s": 3.8244543550536036
+      },
+      "prototype": {
+        "accepted_step_count": 4,
+        "active_set_iterations": 3,
+        "active_set_mask_differences": [
+          7,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.0023130630397948594,
+          0.002007597840332748,
+          0.001967697918924222
+        ],
+        "boundary_wall_per_trip_s": [
+          13.14987703692168,
+          0.04720468632876873,
+          0.0473273703828454
+        ],
+        "contraction_refreshes_per_trip": [
+          0,
+          0,
+          0
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 1.0167274894192815,
+        "first_step_wall_s": 1.278224490582943,
+        "jacobian_builds_per_trip": [
+          3,
+          1,
+          2
+        ],
+        "jacobian_refresh_threshold": null,
+        "jacobian_wall_per_trip_s": [
+          1.0167274894192815,
+          0.0010953368619084358,
+          0.0011007413268089294
+        ],
+        "ladder_scoring": "batched_tail",
+        "map_evaluations_per_trip": [
+          37,
+          7,
+          19
+        ],
+        "median_warm_accepting_step_wall_s": 0.0076745618134737015,
+        "median_warm_boundary_wall_s": 0.047266028355807066,
+        "median_warm_jacobian_wall_s": 0.0010980390943586826,
+        "median_warm_newton_work_per_trip_s": 0.012041202746331692,
+        "median_warm_refused_step_map_evaluations": 9.5,
+        "median_warm_refused_step_wall_s": 0.008203921839594841,
+        "median_warm_step_map_evaluations": 7.0,
+        "median_warm_step_wall_s": 0.0076745618134737015,
+        "median_warm_trip_wall_s": 0.0601462721824646,
+        "newton_steps_per_trip": [
+          3,
+          0,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.3069515088573098,
+          0.006599871441721916,
+          0.017482534050941467
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 637,
+        "rejected_step_count": 3,
+        "rejected_steps_per_trip": [
+          3,
+          1,
+          2
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.003299341234447786,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.003620856862260772,
+            "reduced_residual": 106.16729464791581,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.278224490582943
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0023638497804586954,
+            "grades_tried": 4,
+            "jacobian_refreshed": false,
+            "map_evaluations": 6,
+            "merit": 0.0023924068193504197,
+            "reduced_residual": 252.97627735122012,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.005634283646941185
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0023257805383541936,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0023585988468752504,
+            "reduced_residual": 270.35900584648414,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.011609681881964207
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0023130630397948594,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0023506454744290487,
+            "reduced_residual": 261.91028691378153,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.011483052745461464
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.002007597840332748,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0020980522501995035,
+            "reduced_residual": 61.657671860028586,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.006599871441721916
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.001993234971086761,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.002105196858834954,
+            "reduced_residual": 55.231078878112385,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.0076745618134737015
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.001967697918924222,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0020803255607269137,
+            "reduced_residual": 68.00531063728228,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.009807972237467766
+          }
+        ],
+        "support_cells": 637,
+        "support_policy": "participation",
+        "terminal_residual": 0.001967697918924222,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          15.47218159493059,
+          0.05494672153145075,
+          0.06534582283347845
+        ],
+        "wall_per_trip_s": 5.330442695257564,
+        "wall_s": 15.991328085772693,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 2
+      },
+      "repair": {
+        "millisecond_target_s": 0.001,
+        "reference_warm_boundary_wall_s": 0.1150474832393229,
+        "reference_warm_newton_work_per_trip_s": 0.011756990104913712,
+        "reference_warm_step_map_evaluations": 8.0,
+        "reference_warm_step_wall_s": 0.006183686666190624,
+        "reference_warm_trip_wall_s": 0.14036645879969,
+        "warm_boundary_wall_s": 0.047266028355807066,
+        "warm_newton_work_per_trip_s": 0.012041202746331692,
+        "warm_step_map_evaluations": 7.0,
+        "warm_step_speedup": 0.8057380755386385,
+        "warm_step_wall_s": 0.0076745618134737015,
+        "warm_step_walls_of_target": 7.6745618134737015,
+        "warm_trip_speedup": 2.3337515976694774,
+        "warm_trip_wall_s": 0.0601462721824646
+      },
+      "route_agreement": {
+        "bitwise_identical_flux": false,
+        "flux_agrees": true,
+        "identical_trip_census": true,
+        "previous_receipt_reproduced": {
+          "banked_active_set_iterations": 3,
+          "banked_newton_steps_per_trip": [
+            3,
+            0,
+            1
+          ],
+          "banked_terminal_residual": 0.001967697918924222,
+          "identical_trip_census": true,
+          "measured_active_set_iterations": 3,
+          "measured_newton_steps_per_trip": [
+            3,
+            0,
+            1
+          ],
+          "measured_terminal_residual": 0.001967697918924222,
+          "relative_residual_difference": 0.0
+        },
+        "reference_route": "eager ladder behind the dispatched boundary",
+        "required_fraction_of_span": 1e-06,
+        "sup_flux_difference_fraction_of_span": 2.6028415219344087e-16,
+        "sup_flux_difference_wb": 3.3306690738754696e-16,
+        "terminal_residual_fast": 0.001967697918924222,
+        "terminal_residual_reference": 0.001967697918924222
+      },
+      "serial_prototype": {
+        "accepted_step_count": 4,
+        "active_set_iterations": 3,
+        "active_set_mask_differences": [
+          7,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.0023130630397948594,
+          0.002007597840332748,
+          0.001967697918924222
+        ],
+        "boundary_wall_per_trip_s": [
+          3.3279114328324795,
+          0.04569560382515192,
+          0.04683719575405121
+        ],
+        "contraction_refreshes_per_trip": [
+          0,
+          0,
+          0
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 0.3554388424381614,
+        "first_step_wall_s": 0.6672474220395088,
+        "jacobian_builds_per_trip": [
+          3,
+          1,
+          2
+        ],
+        "jacobian_refresh_threshold": null,
+        "jacobian_wall_per_trip_s": [
+          0.3554388424381614,
+          0.0010236511006951332,
+          0.0011560609564185143
+        ],
+        "ladder_scoring": "first_accept",
+        "map_evaluations_per_trip": [
+          31,
+          7,
+          19
+        ],
+        "median_warm_accepting_step_wall_s": 0.012552470900118351,
+        "median_warm_boundary_wall_s": 0.046266399789601564,
+        "median_warm_jacobian_wall_s": 0.0010898560285568237,
+        "median_warm_newton_work_per_trip_s": 0.021382099483162165,
+        "median_warm_refused_step_map_evaluations": 9.5,
+        "median_warm_refused_step_wall_s": 0.01510586403310299,
+        "median_warm_step_map_evaluations": 7.0,
+        "median_warm_step_wall_s": 0.012555445544421673,
+        "median_warm_trip_wall_s": 0.06859349505975842,
+        "newton_steps_per_trip": [
+          3,
+          0,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          0.7051029987633228,
+          0.012555445544421673,
+          0.030208753421902657
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 637,
+        "rejected_step_count": 3,
+        "rejected_steps_per_trip": [
+          3,
+          1,
+          2
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.003299341234447786,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 3,
+            "merit": 0.003620856862260772,
+            "reduced_residual": 106.16729464791581,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 0.6672474220395088
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0023638497804586954,
+            "grades_tried": 4,
+            "jacobian_refreshed": false,
+            "map_evaluations": 4,
+            "merit": 0.0023924068193504197,
+            "reduced_residual": 252.97627735122012,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.005960509181022644
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0023257805383541936,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0023585988468752504,
+            "reduced_residual": 270.35900584648414,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.015259499661624432
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0023130630397948594,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0023506454744290487,
+            "reduced_residual": 261.91028691378153,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.016635567881166935
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.002007597840332748,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0020980522501995035,
+            "reduced_residual": 61.657671860028586,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.012555445544421673
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.001993234971086761,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.002105196858834954,
+            "reduced_residual": 55.231078878112385,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.012552470900118351
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.001967697918924222,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0020803255607269137,
+            "reduced_residual": 68.00531063728228,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.017656282521784306
+          }
+        ],
+        "support_cells": 637,
+        "support_policy": "participation",
+        "terminal_residual": 0.001967697918924222,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          4.387563967145979,
+          0.0592993414029479,
+          0.07788764871656895
+        ],
+        "wall_per_trip_s": 1.6773604977255065,
+        "wall_s": 5.03208149317652,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 2
+      }
+    },
+    {
+      "adaptive": {
+        "threshold_half": {
+          "contraction_refreshes_per_trip": [
+            3,
+            1,
+            1,
+            1
+          ],
+          "identical_trip_census": false,
+          "jacobian_builds_after": 10,
+          "jacobian_builds_before": 11,
+          "jacobian_builds_delta": -1,
+          "newton_steps_after": 6,
+          "newton_steps_before": 9,
+          "newton_steps_delta": -3,
+          "reference_route": "refusal-only chord, fused boundary",
+          "sup_flux_difference_fraction_of_span": 0.0001421528286767554,
+          "sup_flux_difference_wb": 0.00020978091332901627,
+          "terminal_residual_after": 0.0009985187409166788,
+          "terminal_residual_before": 0.0009925831100648424,
+          "warm_jacobian_wall_after_s": 0.0013365615159273148,
+          "warm_jacobian_wall_before_s": 0.0013205492869019508,
+          "warm_step_wall_after_s": 0.006239676848053932,
+          "warm_step_wall_before_s": 0.009278171230107546,
+          "whole_trip_wall_after_s": 5.005882211960852,
+          "whole_trip_wall_before_s": 16.54998787213117
+        },
+        "threshold_one": {
+          "contraction_refreshes_per_trip": [
+            1,
+            1,
+            0,
+            1
+          ],
+          "identical_trip_census": false,
+          "jacobian_builds_after": 10,
+          "jacobian_builds_before": 11,
+          "jacobian_builds_delta": -1,
+          "newton_steps_after": 6,
+          "newton_steps_before": 9,
+          "newton_steps_delta": -3,
+          "reference_route": "refusal-only chord, fused boundary",
+          "sup_flux_difference_fraction_of_span": 0.0001421528286767554,
+          "sup_flux_difference_wb": 0.00020978091332901627,
+          "terminal_residual_after": 0.0009985187409166788,
+          "terminal_residual_before": 0.0009925831100648424,
+          "warm_jacobian_wall_after_s": 0.0013479171320796013,
+          "warm_jacobian_wall_before_s": 0.0013205492869019508,
+          "warm_step_wall_after_s": 0.006779614370316267,
+          "warm_step_wall_before_s": 0.009278171230107546,
+          "whole_trip_wall_after_s": 4.803171950392425,
+          "whole_trip_wall_before_s": 16.54998787213117
+        }
+      },
+      "adaptive_half_prototype": {
+        "accepted_step_count": 6,
+        "active_set_iterations": 4,
+        "active_set_mask_differences": [
+          8,
+          6,
+          33,
+          0
+        ],
+        "active_set_residuals": [
+          0.006201199890687749,
+          0.005397700759715324,
+          0.005471151331019996,
+          0.0009985187409166788
+        ],
+        "boundary_wall_per_trip_s": [
+          3.043979682959616,
+          0.04744988586753607,
+          0.04764938913285732,
+          0.047085052356123924
+        ],
+        "contraction_refreshes_per_trip": [
+          3,
+          1,
+          1,
+          1
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 0.12216527480632067,
+        "first_step_wall_s": 1.2531720008701086,
+        "jacobian_builds_per_trip": [
+          4,
+          2,
+          2,
+          2
+        ],
+        "jacobian_refresh_threshold": 0.5,
+        "jacobian_wall_per_trip_s": [
+          0.12216527480632067,
+          0.0013676602393388748,
+          0.0007992982864379883,
+          0.0013365615159273148
+        ],
+        "ladder_scoring": "batched_tail",
+        "map_evaluations_per_trip": [
+          25,
+          13,
+          13,
+          13
+        ],
+        "median_warm_accepting_step_wall_s": 0.007186753675341606,
+        "median_warm_boundary_wall_s": 0.04744988586753607,
+        "median_warm_jacobian_wall_s": 0.0013365615159273148,
+        "median_warm_newton_work_per_trip_s": 0.012892983853816986,
+        "median_warm_refused_step_map_evaluations": 6.0,
+        "median_warm_refused_step_wall_s": 0.005073128268122673,
+        "median_warm_step_map_evaluations": 6.5,
+        "median_warm_step_wall_s": 0.006239676848053932,
+        "median_warm_trip_wall_s": 0.06076022516936064,
+        "newton_steps_per_trip": [
+          3,
+          1,
+          1,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.2723783906549215,
+          0.01340772956609726,
+          0.011032253503799438,
+          0.012892983853816986
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 622,
+        "rejected_step_count": 4,
+        "rejected_steps_per_trip": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.002878319350939736,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0027918414420410637,
+            "reduced_residual": 181.76922076154852,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.2531720008701086
+          },
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.003154236182499725,
+            "grades_tried": 2,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.002485785324391531,
+            "reduced_residual": 694.2836340402563,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.007317901588976383
+          },
+          {
+            "accepted_factor": 0.25,
+            "flux_residual": 0.0022338195122451475,
+            "grades_tried": 3,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0018966945328588135,
+            "reduced_residual": 533.015745180433,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.0064064087346196175
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.001464813012085871,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0013372380698216011,
+            "reduced_residual": 349.6842646380885,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.005482079461216927
+          },
+          {
+            "accepted_factor": 0.0625,
+            "flux_residual": 0.0010687049804388139,
+            "grades_tried": 5,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0011075314988171336,
+            "reduced_residual": 53.5731582371383,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.008334601297974586
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0010690895465361623,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0010750938699953263,
+            "reduced_residual": 72.74947970257293,
+            "step": 1,
+            "trip": 1,
+            "wall_s": 0.005073128268122673
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0010106215390685753,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.001048220691939127,
+            "reduced_residual": 40.676379846934424,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.0067731235176324844
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0010074434671177325,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0010352204785513024,
+            "reduced_residual": 40.66289086875091,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.004259129986166954
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0009955168658343616,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.001033377797406744,
+            "reduced_residual": 38.91159234319662,
+            "step": 0,
+            "trip": 3,
+            "wall_s": 0.007186753675341606
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009985187409166788,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.001026460486177991,
+            "reduced_residual": 41.482619696964555,
+            "step": 1,
+            "trip": 3,
+            "wall_s": 0.00570623017847538
+          }
+        ],
+        "support_cells": 622,
+        "support_policy": "participation",
+        "terminal_residual": 0.0009985187409166788,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          4.436546758748591,
+          0.061799622140824795,
+          0.059163451194763184,
+          0.06076022516936064
+        ],
+        "wall_per_trip_s": 1.251470552990213,
+        "wall_s": 5.005882211960852,
+        "warm_accepting_step_count": 3,
+        "warm_refused_step_count": 3
+      },
+      "adaptive_prototype": {
+        "accepted_step_count": 6,
+        "active_set_iterations": 4,
+        "active_set_mask_differences": [
+          8,
+          6,
+          33,
+          0
+        ],
+        "active_set_residuals": [
+          0.006201199890687749,
+          0.005397700759715324,
+          0.005471151331019996,
+          0.0009985187409166788
+        ],
+        "boundary_wall_per_trip_s": [
+          2.9876482244580984,
+          0.04736800026148558,
+          0.04640784300863743,
+          0.04692577477544546
+        ],
+        "contraction_refreshes_per_trip": [
+          1,
+          1,
+          0,
+          1
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 0.12084083445370197,
+        "first_step_wall_s": 1.0966572230681777,
+        "jacobian_builds_per_trip": [
+          4,
+          2,
+          2,
+          2
+        ],
+        "jacobian_refresh_threshold": 1.0,
+        "jacobian_wall_per_trip_s": [
+          0.12084083445370197,
+          0.0015518907457590103,
+          0.0013479171320796013,
+          0.0008610822260379791
+        ],
+        "ladder_scoring": "batched_tail",
+        "map_evaluations_per_trip": [
+          37,
+          13,
+          19,
+          13
+        ],
+        "median_warm_accepting_step_wall_s": 0.008279307745397091,
+        "median_warm_boundary_wall_s": 0.04692577477544546,
+        "median_warm_jacobian_wall_s": 0.0013479171320796013,
+        "median_warm_newton_work_per_trip_s": 0.013698163442313671,
+        "median_warm_refused_step_map_evaluations": 6.0,
+        "median_warm_refused_step_wall_s": 0.005279920995235443,
+        "median_warm_step_map_evaluations": 7.0,
+        "median_warm_step_wall_s": 0.006779614370316267,
+        "median_warm_trip_wall_s": 0.06220736540853977,
+        "newton_steps_per_trip": [
+          3,
+          1,
+          1,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.1187878046184778,
+          0.013698163442313671,
+          0.020361898466944695,
+          0.008929136209189892
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 622,
+        "rejected_step_count": 4,
+        "rejected_steps_per_trip": [
+          3,
+          1,
+          2,
+          1
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.002878319350939736,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0027918414420410637,
+            "reduced_residual": 181.76922076154852,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.0966572230681777
+          },
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.003154236182499725,
+            "grades_tried": 2,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.002485785324391531,
+            "reduced_residual": 694.2836340402563,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.005429914221167564
+          },
+          {
+            "accepted_factor": 0.25,
+            "flux_residual": 0.0022338195122451475,
+            "grades_tried": 9,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0018966945328588135,
+            "reduced_residual": 533.015745180433,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.009011924266815186
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.001464813012085871,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0013372380698216011,
+            "reduced_residual": 349.6842646380885,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.007688743062317371
+          },
+          {
+            "accepted_factor": 0.0625,
+            "flux_residual": 0.0010687049804388139,
+            "grades_tried": 5,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0011075314988171336,
+            "reduced_residual": 53.5731582371383,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.008418242447078228
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0010690895465361623,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.0010750938699953263,
+            "reduced_residual": 72.74947970257293,
+            "step": 1,
+            "trip": 1,
+            "wall_s": 0.005279920995235443
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0010106215390685753,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.001048220691939127,
+            "reduced_residual": 40.676379846934424,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.008279307745397091
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0010074434671177325,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0010352204785513024,
+            "reduced_residual": 40.66289086875091,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.012082590721547604
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0009955168658343616,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.001033377797406744,
+            "reduced_residual": 38.91159234319662,
+            "step": 0,
+            "trip": 3,
+            "wall_s": 0.005268159322440624
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009985187409166788,
+            "grades_tried": 6,
+            "jacobian_refreshed": true,
+            "map_evaluations": 6,
+            "merit": 0.001026460486177991,
+            "reduced_residual": 41.482619696964555,
+            "step": 1,
+            "trip": 3,
+            "wall_s": 0.0036609768867492676
+          }
+        ],
+        "support_cells": 622,
+        "support_policy": "participation",
+        "terminal_residual": 0.0009985187409166788,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          4.225780111737549,
+          0.06220736540853977,
+          0.06738672032952309,
+          0.056420210748910904
+        ],
+        "wall_per_trip_s": 1.2007929875981063,
+        "wall_s": 4.803171950392425,
+        "warm_accepting_step_count": 3,
+        "warm_refused_step_count": 3
+      },
+      "arm": "pure",
+      "banked_production": {
+        "conditioning_trace": {
+          "count": 0,
+          "maximum_projected_condition": 2403.612651244375,
+          "result_scope": "whole active-set solve"
+        },
+        "configuration": {
+          "convergence_tolerance": 1e-08,
+          "gmres_iterations": 30,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "route": "ForwardProfile.solve_branch(newton_krylov)",
+          "step_cap": 10.0,
+          "warmup": 0
+        },
+        "result": {
+          "active_set_iterations": 6,
+          "active_set_mask_differences": [
+            9,
+            34,
+            0,
+            0,
+            0,
+            0
+          ],
+          "active_set_residuals": [
+            0.006253412702287295,
+            0.00580117971304189,
+            0.0011334720510659448,
+            0.0007952361680160276,
+            0.0007331916379767382,
+            0.0007331916379767382
+          ],
+          "converged": false,
+          "krylov_conditioning_count": 0,
+          "maximum_projected_krylov_condition": 2403.612651244375,
+          "terminal_residual": 0.0007331916379767382,
+          "termination_reason": "active_set_settled"
+        },
+        "terminal_topology": {
+          "achieved_class": "limited",
+          "admitted_axis_m": [
+            0.9122942652453293,
+            0.035712757882398936
+          ],
+          "admitted_saddle_m": [
+            0.5862368224780896,
+            1.1536828744866212
+          ],
+          "axis_admitted": true,
+          "failure_exception_class": null,
+          "saddle_admitted": false
+        }
+      },
+      "batched_tail": {
+        "accepting_step_wall_over_serial_s": -0.0027465857565402985,
+        "accepting_step_wall_s": 0.007583696395158768,
+        "bitwise_identical_flux": true,
+        "eager_refused_step_wall_s": 0.01147422380745411,
+        "identical_decisions": true,
+        "identical_terminal_residual": true,
+        "reference_route": "serial per-grade ladder behind the fused boundary",
+        "refused_step_wall_over_eager_s": -0.0011264169588685036,
+        "refused_step_wall_recovered_from_serial_s": 0.0066949790343642235,
+        "refused_step_wall_s": 0.010347806848585606,
+        "serial_accepting_step_wall_s": 0.010330282151699066,
+        "serial_refused_step_wall_s": 0.01704278588294983,
+        "sup_flux_difference_wb": 0.0,
+        "warm_accepting_step_count": 3,
+        "warm_refused_step_count": 3
+      },
+      "eager_prototype": {
+        "accepted_step_count": 9,
+        "active_set_iterations": 4,
+        "active_set_mask_differences": [
+          8,
+          6,
+          33,
+          0
+        ],
+        "active_set_residuals": [
+          0.006198146764564989,
+          0.0053913321986202994,
+          0.005464272106195359,
+          0.0009925831100649177
+        ],
+        "boundary_wall_per_trip_s": [
+          0.4925588956102729,
+          0.11129994038492441,
+          0.1114325225353241,
+          0.10440810862928629
+        ],
+        "contraction_refreshes_per_trip": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 0.1245884895324707,
+        "first_step_wall_s": 1.2896754778921604,
+        "jacobian_builds_per_trip": [
+          5,
+          2,
+          2,
+          2
+        ],
+        "jacobian_refresh_threshold": null,
+        "jacobian_wall_per_trip_s": [
+          0.1245884895324707,
+          0.0013019675388932228,
+          0.0008909115567803383,
+          0.0009912457317113876
+        ],
+        "ladder_scoring": "eager",
+        "map_evaluations_per_trip": [
+          80,
+          22,
+          22,
+          22
+        ],
+        "median_warm_accepting_step_wall_s": 0.00576846394687891,
+        "median_warm_boundary_wall_s": 0.11129994038492441,
+        "median_warm_jacobian_wall_s": 0.0009912457317113876,
+        "median_warm_newton_work_per_trip_s": 0.017262323759496212,
+        "median_warm_refused_step_map_evaluations": 14.0,
+        "median_warm_refused_step_wall_s": 0.01147422380745411,
+        "median_warm_step_map_evaluations": 11.0,
+        "median_warm_step_wall_s": 0.008305494207888842,
+        "median_warm_trip_wall_s": 0.142857039347291,
+        "newton_steps_per_trip": [
+          6,
+          1,
+          1,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.3521336941048503,
+          0.0184733085334301,
+          0.0165223628282547,
+          0.017262323759496212
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 622,
+        "rejected_step_count": 4,
+        "rejected_steps_per_trip": [
+          5,
+          2,
+          2,
+          2
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.002878319350939736,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.002791841442041112,
+            "reduced_residual": 181.7692207615409,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.2896754778921604
+          },
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.003154236182499498,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0024857853243913457,
+            "reduced_residual": 694.2836340402564,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.009082346223294735
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0025483545825334417,
+            "grades_tried": 4,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0020357500738937065,
+            "reduced_residual": 644.7836324041194,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.005559448152780533
+          },
+          {
+            "accepted_factor": 0.25,
+            "flux_residual": 0.0024955910856749503,
+            "grades_tried": 9,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.002028498187719627,
+            "reduced_residual": 644.1779480315047,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.011282888241112232
+          },
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.0021285328941621482,
+            "grades_tried": 8,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.001986615194592236,
+            "reduced_residual": 548.0300105776494,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.012366579845547676
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0021730020039418146,
+            "grades_tried": 10,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.0018267574187947617,
+            "reduced_residual": 622.9840759657075,
+            "step": 5,
+            "trip": 0,
+            "wall_s": 0.012723037041723728
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0016840996860081957,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.001478792126346446,
+            "reduced_residual": 494.42122902138277,
+            "step": 6,
+            "trip": 0,
+            "wall_s": 0.011443916708230972
+          },
+          {
+            "accepted_factor": 0.0625,
+            "flux_residual": 0.0010790310520186223,
+            "grades_tried": 5,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0011146966664558893,
+            "reduced_residual": 67.33655800026499,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.00576846394687891
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.00107537887225941,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.0010789989247546137,
+            "reduced_residual": 73.78185076752351,
+            "step": 1,
+            "trip": 1,
+            "wall_s": 0.01270484458655119
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0010091746781841972,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0010504144434800953,
+            "reduced_residual": 40.67525197898641,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.005699474364519119
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0010018788587840158,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.0010352330675064039,
+            "reduced_residual": 41.49341993294793,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.01082288846373558
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.000994277911030952,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0010362051354145358,
+            "reduced_residual": 39.17558216071723,
+            "step": 0,
+            "trip": 3,
+            "wall_s": 0.005788099952042103
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.000992583110064767,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 14,
+            "merit": 0.001025166249236856,
+            "reduced_residual": 40.27366179547061,
+            "step": 1,
+            "trip": 3,
+            "wall_s": 0.01147422380745411
+          }
+        ],
+        "support_cells": 622,
+        "support_policy": "participation",
+        "terminal_residual": 0.0009925831100649177,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "dispatched",
+        "trip_wall_per_trip_s": [
+          2.495560957118869,
+          0.1451423792168498,
+          0.142857039347291,
+          0.1346665294840932
+        ],
+        "wall_per_trip_s": 0.7781206057406962,
+        "wall_s": 3.1124824229627848,
+        "warm_accepting_step_count": 3,
+        "warm_refused_step_count": 3
+      },
+      "identity": "21989/55",
+      "previous_prototype": {
+        "accepted_step_count": 9,
+        "active_set_iterations": 4,
+        "active_set_mask_differences": [
+          8,
+          6,
+          33,
+          0
+        ],
+        "active_set_residuals": [
+          0.006198146764565641,
+          0.0053913321986210445,
+          0.0054642721061968335,
+          0.0009925831100648388
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 1.0366570688784122,
+        "first_step_wall_s": 0.9198255762457848,
+        "jacobian_builds_per_trip": [
+          5,
+          2,
+          2,
+          2
+        ],
+        "jacobian_wall_per_trip_s": [
+          1.0366570688784122,
+          0.0008833445608615875,
+          0.0008576968684792519,
+          0.0007462417706847191
+        ],
+        "median_warm_jacobian_wall_s": 0.0008576968684792519,
+        "median_warm_step_wall_s": 0.006133957765996456,
+        "newton_steps_per_trip": [
+          6,
+          1,
+          1,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          0.9632475757971406,
+          0.011705520562827587,
+          0.015298529528081417,
+          0.013022694736719131
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 622,
+        "rejected_step_count": 4,
+        "rejected_steps_per_trip": [
+          5,
+          2,
+          2,
+          2
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.0028783193509398113,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "merit": 0.002791841442041255,
+            "reduced_residual": 181.76922076154102,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 0.9198255762457848
+          },
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.003154236182499649,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "merit": 0.0024857853243914867,
+            "reduced_residual": 694.2836340402755,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.006708584725856781
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0025483545825335913,
+            "grades_tried": 4,
+            "jacobian_refreshed": false,
+            "merit": 0.0020357500738937898,
+            "reduced_residual": 644.7836324041283,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.004049419425427914
+          },
+          {
+            "accepted_factor": 0.25,
+            "flux_residual": 0.0024955910856751,
+            "grades_tried": 9,
+            "jacobian_refreshed": true,
+            "merit": 0.0020284981877197183,
+            "reduced_residual": 644.1779480315472,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.007170123979449272
+          },
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.0021285328941622233,
+            "grades_tried": 8,
+            "jacobian_refreshed": true,
+            "merit": 0.0019866151945922847,
+            "reduced_residual": 548.0300105776373,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.007836663164198399
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0021730020039421125,
+            "grades_tried": 10,
+            "jacobian_refreshed": true,
+            "merit": 0.0018267574187948701,
+            "reduced_residual": 622.9840759658334,
+            "step": 5,
+            "trip": 0,
+            "wall_s": 0.009280908852815628
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0016840996860082685,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "merit": 0.0014787921263464709,
+            "reduced_residual": 494.4212290214877,
+            "step": 6,
+            "trip": 0,
+            "wall_s": 0.008376299403607845
+          },
+          {
+            "accepted_factor": 0.0625,
+            "flux_residual": 0.0010790310520183948,
+            "grades_tried": 5,
+            "jacobian_refreshed": false,
+            "merit": 0.0011146966664557392,
+            "reduced_residual": 67.33655800024931,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.004247404634952545
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0010753788722594085,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "merit": 0.0010789989247545965,
+            "reduced_residual": 73.78185076751485,
+            "step": 1,
+            "trip": 1,
+            "wall_s": 0.007458115927875042
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0010091746781841205,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "merit": 0.0010504144434799652,
+            "reduced_residual": 40.67525197896687,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.00480979960411787
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0010018788587838631,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "merit": 0.0010352330675063742,
+            "reduced_residual": 41.49341993297365,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.010488729923963547
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.000994277911030724,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "merit": 0.0010362051354143372,
+            "reduced_residual": 39.17558216070961,
+            "step": 0,
+            "trip": 3,
+            "wall_s": 0.0045540183782577515
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009925831100648388,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "merit": 0.0010251662492369187,
+            "reduced_residual": 40.273661795545856,
+            "step": 1,
+            "trip": 3,
+            "wall_s": 0.00846867635846138
+          }
+        ],
+        "support_cells": 622,
+        "support_policy": "participation",
+        "terminal_residual": 0.0009925831100648388,
+        "termination_reason": "active_set_settled",
+        "trip_wall_per_trip_s": [
+          2.8914256123825908,
+          0.12507123965770006,
+          0.12904122285544872,
+          0.12639310210943222
+        ],
+        "wall_per_trip_s": 0.8743557408452034,
+        "wall_s": 3.4974229633808136
+      },
+      "prototype": {
+        "accepted_step_count": 9,
+        "active_set_iterations": 4,
+        "active_set_mask_differences": [
+          8,
+          6,
+          33,
+          0
+        ],
+        "active_set_residuals": [
+          0.006198146764564953,
+          0.005391332198620263,
+          0.0054642721061953035,
+          0.0009925831100648424
+        ],
+        "boundary_wall_per_trip_s": [
+          13.24062626529485,
+          0.047398172318935394,
+          0.047131482511758804,
+          0.0474290456622839
+        ],
+        "contraction_refreshes_per_trip": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 1.210961390286684,
+        "first_step_wall_s": 1.3355817012488842,
+        "jacobian_builds_per_trip": [
+          5,
+          2,
+          2,
+          2
+        ],
+        "jacobian_refresh_threshold": null,
+        "jacobian_wall_per_trip_s": [
+          1.210961390286684,
+          0.0018767239525914192,
+          0.0013205492869019508,
+          0.0011051753535866737
+        ],
+        "ladder_scoring": "batched_tail",
+        "map_evaluations_per_trip": [
+          67,
+          19,
+          19,
+          19
+        ],
+        "median_warm_accepting_step_wall_s": 0.007583696395158768,
+        "median_warm_boundary_wall_s": 0.047398172318935394,
+        "median_warm_jacobian_wall_s": 0.0013205492869019508,
+        "median_warm_newton_work_per_trip_s": 0.018805247731506824,
+        "median_warm_refused_step_map_evaluations": 12.0,
+        "median_warm_refused_step_wall_s": 0.010347806848585606,
+        "median_warm_step_map_evaluations": 9.5,
+        "median_warm_step_wall_s": 0.009278171230107546,
+        "median_warm_trip_wall_s": 0.06651184801012278,
+        "newton_steps_per_trip": [
+          6,
+          1,
+          1,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          1.3906694203615189,
+          0.018922246992588043,
+          0.018805247731506824,
+          0.017432100139558315
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 622,
+        "rejected_step_count": 4,
+        "rejected_steps_per_trip": [
+          5,
+          2,
+          2,
+          2
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.002878319350939736,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0027918414420410637,
+            "reduced_residual": 181.76922076154852,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.3355817012488842
+          },
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.003154236182499725,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 6,
+            "merit": 0.002485785324391531,
+            "reduced_residual": 694.2836340402563,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.006690286099910736
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.002548354582533442,
+            "grades_tried": 4,
+            "jacobian_refreshed": false,
+            "map_evaluations": 6,
+            "merit": 0.002035750073893681,
+            "reduced_residual": 644.7836324041134,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.00531410425901413
+          },
+          {
+            "accepted_factor": 0.25,
+            "flux_residual": 0.0024955910856749508,
+            "grades_tried": 9,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0020284981877196624,
+            "reduced_residual": 644.1779480315081,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.010386929847300053
+          },
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.0021285328941622237,
+            "grades_tried": 8,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.001986615194592237,
+            "reduced_residual": 548.0300105776536,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.010958402417600155
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0021730020039418896,
+            "grades_tried": 10,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0018267574187947684,
+            "reduced_residual": 622.984075965695,
+            "step": 5,
+            "trip": 0,
+            "wall_s": 0.011035646311938763
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0016840996860081202,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0014787921263464314,
+            "reduced_residual": 494.42122902137214,
+            "step": 6,
+            "trip": 0,
+            "wall_s": 0.010702350176870823
+          },
+          {
+            "accepted_factor": 0.0625,
+            "flux_residual": 0.001079031052018773,
+            "grades_tried": 5,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0011146966664558962,
+            "reduced_residual": 67.33655800026416,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.008574440144002438
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.00107537887225941,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0010789989247546171,
+            "reduced_residual": 73.78185076752254,
+            "step": 1,
+            "trip": 1,
+            "wall_s": 0.010347806848585606
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0010091746781841972,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0010504144434801107,
+            "reduced_residual": 40.67525197898875,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.007583696395158768
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0010018788587839405,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.00103523306750641,
+            "reduced_residual": 41.49341993295222,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.011221551336348057
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0009942779110310273,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0010362051354145406,
+            "reduced_residual": 39.17558216071677,
+            "step": 0,
+            "trip": 3,
+            "wall_s": 0.007450197823345661
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009925831100648424,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0010251662492368457,
+            "reduced_residual": 40.273661795464264,
+            "step": 1,
+            "trip": 3,
+            "wall_s": 0.009981902316212654
+          }
+        ],
+        "support_cells": 622,
+        "support_policy": "participation",
+        "terminal_residual": 0.0009925831100648424,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          15.839544981718063,
+          0.06735706515610218,
+          0.06651184801012278,
+          0.0655102776363492
+        ],
+        "wall_per_trip_s": 4.137496968032792,
+        "wall_s": 16.54998787213117,
+        "warm_accepting_step_count": 3,
+        "warm_refused_step_count": 3
+      },
+      "repair": {
+        "millisecond_target_s": 0.001,
+        "reference_warm_boundary_wall_s": 0.11129994038492441,
+        "reference_warm_newton_work_per_trip_s": 0.017262323759496212,
+        "reference_warm_step_map_evaluations": 11.0,
+        "reference_warm_step_wall_s": 0.008305494207888842,
+        "reference_warm_trip_wall_s": 0.142857039347291,
+        "warm_boundary_wall_s": 0.047398172318935394,
+        "warm_newton_work_per_trip_s": 0.018805247731506824,
+        "warm_step_map_evaluations": 9.5,
+        "warm_step_speedup": 0.8951650063255591,
+        "warm_step_wall_s": 0.009278171230107546,
+        "warm_step_walls_of_target": 9.278171230107546,
+        "warm_trip_speedup": 2.1478434838489053,
+        "warm_trip_wall_s": 0.06651184801012278
+      },
+      "route_agreement": {
+        "bitwise_identical_flux": false,
+        "flux_agrees": true,
+        "identical_trip_census": true,
+        "previous_receipt_reproduced": {
+          "banked_active_set_iterations": 4,
+          "banked_newton_steps_per_trip": [
+            6,
+            1,
+            1,
+            1
+          ],
+          "banked_terminal_residual": 0.0009925831100648388,
+          "identical_trip_census": true,
+          "measured_active_set_iterations": 4,
+          "measured_newton_steps_per_trip": [
+            6,
+            1,
+            1,
+            1
+          ],
+          "measured_terminal_residual": 0.0009925831100649177,
+          "relative_residual_difference": 7.951970707197382e-14
+        },
+        "reference_route": "eager ladder behind the dispatched boundary",
+        "required_fraction_of_span": 1e-06,
+        "sup_flux_difference_fraction_of_span": 6.018520594960139e-16,
+        "sup_flux_difference_wb": 8.881784197001252e-16,
+        "terminal_residual_fast": 0.0009925831100648424,
+        "terminal_residual_reference": 0.0009925831100649177
+      },
+      "serial_prototype": {
+        "accepted_step_count": 9,
+        "active_set_iterations": 4,
+        "active_set_mask_differences": [
+          8,
+          6,
+          33,
+          0
+        ],
+        "active_set_residuals": [
+          0.006198146764564953,
+          0.005391332198620263,
+          0.0054642721061953035,
+          0.0009925831100648424
+        ],
+        "boundary_wall_per_trip_s": [
+          3.092960118316114,
+          0.04754030238837004,
+          0.047906880266964436,
+          0.04752563126385212
+        ],
+        "contraction_refreshes_per_trip": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "converged": false,
+        "first_jacobian_wall_s": 0.12209886778146029,
+        "first_step_wall_s": 0.8097068322822452,
+        "jacobian_builds_per_trip": [
+          5,
+          2,
+          2,
+          2
+        ],
+        "jacobian_refresh_threshold": null,
+        "jacobian_wall_per_trip_s": [
+          0.12209886778146029,
+          0.0011519594117999077,
+          0.0010528545826673508,
+          0.001234465278685093
+        ],
+        "ladder_scoring": "first_accept",
+        "map_evaluations_per_trip": [
+          48,
+          18,
+          19,
+          19
+        ],
+        "median_warm_accepting_step_wall_s": 0.010330282151699066,
+        "median_warm_boundary_wall_s": 0.04754030238837004,
+        "median_warm_jacobian_wall_s": 0.0011519594117999077,
+        "median_warm_newton_work_per_trip_s": 0.026561930775642395,
+        "median_warm_refused_step_map_evaluations": 12.0,
+        "median_warm_refused_step_wall_s": 0.01704278588294983,
+        "median_warm_step_map_evaluations": 9.5,
+        "median_warm_step_wall_s": 0.014660630840808153,
+        "median_warm_trip_wall_s": 0.07522456254810095,
+        "newton_steps_per_trip": [
+          6,
+          1,
+          1,
+          1
+        ],
+        "newton_wall_per_trip_s": [
+          0.8732416238635778,
+          0.02647660579532385,
+          0.026561930775642395,
+          0.030648243613541126
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 622,
+        "rejected_step_count": 4,
+        "rejected_steps_per_trip": [
+          5,
+          2,
+          2,
+          2
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.002878319350939736,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 3,
+            "merit": 0.0027918414420410637,
+            "reduced_residual": 181.76922076154852,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 0.8097068322822452
+          },
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.003154236182499725,
+            "grades_tried": 2,
+            "jacobian_refreshed": false,
+            "map_evaluations": 2,
+            "merit": 0.002485785324391531,
+            "reduced_residual": 694.2836340402563,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.0033482667058706284
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.002548354582533442,
+            "grades_tried": 4,
+            "jacobian_refreshed": false,
+            "map_evaluations": 4,
+            "merit": 0.002035750073893681,
+            "reduced_residual": 644.7836324041134,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.0048358142375946045
+          },
+          {
+            "accepted_factor": 0.25,
+            "flux_residual": 0.0024955910856749508,
+            "grades_tried": 9,
+            "jacobian_refreshed": true,
+            "map_evaluations": 9,
+            "merit": 0.0020284981877196624,
+            "reduced_residual": 644.1779480315081,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.011386004276573658
+          },
+          {
+            "accepted_factor": 0.5,
+            "flux_residual": 0.0021285328941622237,
+            "grades_tried": 8,
+            "jacobian_refreshed": true,
+            "map_evaluations": 8,
+            "merit": 0.001986615194592237,
+            "reduced_residual": 548.0300105776536,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.011480629444122314
+          },
+          {
+            "accepted_factor": 0.125,
+            "flux_residual": 0.0021730020039418896,
+            "grades_tried": 10,
+            "jacobian_refreshed": true,
+            "map_evaluations": 10,
+            "merit": 0.0018267574187947684,
+            "reduced_residual": 622.984075965695,
+            "step": 5,
+            "trip": 0,
+            "wall_s": 0.013634958304464817
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0016840996860081202,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0014787921263464314,
+            "reduced_residual": 494.42122902137214,
+            "step": 6,
+            "trip": 0,
+            "wall_s": 0.01884911861270666
+          },
+          {
+            "accepted_factor": 0.0625,
+            "flux_residual": 0.001079031052018773,
+            "grades_tried": 5,
+            "jacobian_refreshed": false,
+            "map_evaluations": 6,
+            "merit": 0.0011146966664558962,
+            "reduced_residual": 67.33655800026416,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.010330282151699066
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.00107537887225941,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0010789989247546171,
+            "reduced_residual": 73.78185076752254,
+            "step": 1,
+            "trip": 1,
+            "wall_s": 0.016146323643624783
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0010091746781841972,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0010504144434801107,
+            "reduced_residual": 40.67525197898875,
+            "step": 0,
+            "trip": 2,
+            "wall_s": 0.009519144892692566
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0010018788587839405,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.00103523306750641,
+            "reduced_residual": 41.49341993295222,
+            "step": 1,
+            "trip": 2,
+            "wall_s": 0.01704278588294983
+          },
+          {
+            "accepted_factor": 0.03125,
+            "flux_residual": 0.0009942779110310273,
+            "grades_tried": 6,
+            "jacobian_refreshed": false,
+            "map_evaluations": 7,
+            "merit": 0.0010362051354145406,
+            "reduced_residual": 39.17558216071677,
+            "step": 0,
+            "trip": 3,
+            "wall_s": 0.013174938037991524
+          },
+          {
+            "accepted_factor": null,
+            "flux_residual": 0.0009925831100648424,
+            "grades_tried": 12,
+            "jacobian_refreshed": true,
+            "map_evaluations": 12,
+            "merit": 0.0010251662492368457,
+            "reduced_residual": 40.273661795464264,
+            "step": 1,
+            "trip": 3,
+            "wall_s": 0.017473305575549603
+          }
+        ],
+        "support_cells": 622,
+        "support_policy": "participation",
+        "terminal_residual": 0.0009925831100648424,
+        "termination_reason": "active_set_settled",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          4.086635521613061,
+          0.07485503051429987,
+          0.07522456254810095,
+          0.07904469035565853
+        ],
+        "wall_per_trip_s": 1.200284288264811,
+        "wall_s": 4.801137153059244,
+        "warm_accepting_step_count": 3,
+        "warm_refused_step_count": 3
+      }
+    },
+    {
+      "adaptive": {
+        "threshold_half": {
+          "contraction_refreshes_per_trip": [
+            1,
+            0,
+            0
+          ],
+          "identical_trip_census": false,
+          "jacobian_builds_after": 4,
+          "jacobian_builds_before": 3,
+          "jacobian_builds_delta": 1,
+          "newton_steps_after": 6,
+          "newton_steps_before": 13,
+          "newton_steps_delta": -7,
+          "reference_route": "refusal-only chord, fused boundary",
+          "sup_flux_difference_fraction_of_span": 7.377567742607818e-09,
+          "sup_flux_difference_wb": 9.138951970188991e-09,
+          "terminal_residual_after": 3.38271414736567e-10,
+          "terminal_residual_before": 1.0270974678427239e-13,
+          "warm_jacobian_wall_after_s": 0.0010054176673293114,
+          "warm_jacobian_wall_before_s": 0.0007560206577181816,
+          "warm_step_wall_after_s": null,
+          "warm_step_wall_before_s": 0.005104292184114456,
+          "whole_trip_wall_after_s": 4.527416363358498,
+          "whole_trip_wall_before_s": 15.72016984783113
+        },
+        "threshold_one": {
+          "contraction_refreshes_per_trip": [
+            1,
+            0,
+            0
+          ],
+          "identical_trip_census": false,
+          "jacobian_builds_after": 4,
+          "jacobian_builds_before": 3,
+          "jacobian_builds_delta": 1,
+          "newton_steps_after": 6,
+          "newton_steps_before": 13,
+          "newton_steps_delta": -7,
+          "reference_route": "refusal-only chord, fused boundary",
+          "sup_flux_difference_fraction_of_span": 7.377567742607818e-09,
+          "sup_flux_difference_wb": 9.138951970188991e-09,
+          "terminal_residual_after": 3.38271414736567e-10,
+          "terminal_residual_before": 1.0270974678427239e-13,
+          "warm_jacobian_wall_after_s": 0.0009281877428293228,
+          "warm_jacobian_wall_before_s": 0.0007560206577181816,
+          "warm_step_wall_after_s": null,
+          "warm_step_wall_before_s": 0.005104292184114456,
+          "whole_trip_wall_after_s": 4.517918048426509,
+          "whole_trip_wall_before_s": 15.72016984783113
+        }
+      },
+      "adaptive_half_prototype": {
+        "accepted_step_count": 6,
+        "active_set_iterations": 3,
+        "active_set_mask_differences": [
+          27,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.005257486344138934,
+          3.308225381778823e-10,
+          3.38271414736567e-10
+        ],
+        "boundary_wall_per_trip_s": [
+          2.9924190575256944,
+          0.04704425111413002,
+          0.04682403523474932
+        ],
+        "contraction_refreshes_per_trip": [
+          1,
+          0,
+          0
+        ],
+        "converged": true,
+        "first_jacobian_wall_s": 0.36660716962069273,
+        "first_step_wall_s": 0.6789421821013093,
+        "jacobian_builds_per_trip": [
+          2,
+          1,
+          1
+        ],
+        "jacobian_refresh_threshold": 0.5,
+        "jacobian_wall_per_trip_s": [
+          0.36660716962069273,
+          0.0010456163436174393,
+          0.0009652189910411835
+        ],
+        "ladder_scoring": "batched_tail",
+        "map_evaluations_per_trip": [
+          7,
+          1,
+          1
+        ],
+        "median_warm_accepting_step_wall_s": null,
+        "median_warm_boundary_wall_s": 0.04693414317443967,
+        "median_warm_jacobian_wall_s": 0.0010054176673293114,
+        "median_warm_newton_work_per_trip_s": 0.0,
+        "median_warm_refused_step_map_evaluations": null,
+        "median_warm_refused_step_wall_s": null,
+        "median_warm_step_map_evaluations": null,
+        "median_warm_step_wall_s": null,
+        "median_warm_trip_wall_s": 0.04943938320502639,
+        "newton_steps_per_trip": [
+          6,
+          0,
+          0
+        ],
+        "newton_wall_per_trip_s": [
+          0.6936687668785453,
+          0.0,
+          0.0
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 661,
+        "rejected_step_count": 0,
+        "rejected_steps_per_trip": [
+          0,
+          0,
+          0
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0028264454517472454,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 2,
+            "merit": 0.002917740943289758,
+            "reduced_residual": 137.1621446484893,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 0.6789421821013093
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0014478613406611195,
+            "grades_tried": 1,
+            "jacobian_refreshed": true,
+            "map_evaluations": 1,
+            "merit": 0.0012110696342527182,
+            "reduced_residual": 568.9023244343214,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.0035179918631911278
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.9010205554627474e-05,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 1.5928686389457222e-05,
+            "reduced_residual": 10.47178292584422,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.003000577911734581
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 2.132516978111084e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 1.5957819553438917e-06,
+            "reduced_residual": 0.942469579239777,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.0031474269926548004
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.3314426333786738e-07,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 1.0250425053117352e-07,
+            "reduced_residual": 0.058563874881734534,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.0024196691811084747
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.0856776346438757e-08,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 8.137597569155382e-09,
+            "reduced_residual": 0.00485979317734575,
+            "step": 5,
+            "trip": 0,
+            "wall_s": 0.002640918828547001
+          }
+        ],
+        "support_cells": 661,
+        "support_policy": "participation",
+        "terminal_residual": 3.38271414736567e-10,
+        "termination_reason": "converged",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          4.051797667518258,
+          0.04979886021465063,
+          0.049079906195402145
+        ],
+        "wall_per_trip_s": 1.509138787786166,
+        "wall_s": 4.527416363358498,
+        "warm_accepting_step_count": 0,
+        "warm_refused_step_count": 0
+      },
+      "adaptive_prototype": {
+        "accepted_step_count": 6,
+        "active_set_iterations": 3,
+        "active_set_mask_differences": [
+          27,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.005257486344138934,
+          3.308225381778823e-10,
+          3.38271414736567e-10
+        ],
+        "boundary_wall_per_trip_s": [
+          3.006778683513403,
+          0.048783852718770504,
+          0.04853177722543478
+        ],
+        "contraction_refreshes_per_trip": [
+          1,
+          0,
+          0
+        ],
+        "converged": true,
+        "first_jacobian_wall_s": 0.18231320101767778,
+        "first_step_wall_s": 0.7359558595344424,
+        "jacobian_builds_per_trip": [
+          2,
+          1,
+          1
+        ],
+        "jacobian_refresh_threshold": 1.0,
+        "jacobian_wall_per_trip_s": [
+          0.18231320101767778,
+          0.0010479427874088287,
+          0.0008084326982498169
+        ],
+        "ladder_scoring": "batched_tail",
+        "map_evaluations_per_trip": [
+          7,
+          1,
+          1
+        ],
+        "median_warm_accepting_step_wall_s": null,
+        "median_warm_boundary_wall_s": 0.04865781497210264,
+        "median_warm_jacobian_wall_s": 0.0009281877428293228,
+        "median_warm_newton_work_per_trip_s": 0.0,
+        "median_warm_refused_step_map_evaluations": null,
+        "median_warm_refused_step_wall_s": null,
+        "median_warm_step_map_evaluations": null,
+        "median_warm_step_wall_s": null,
+        "median_warm_trip_wall_s": 0.05115190474316478,
+        "newton_steps_per_trip": [
+          6,
+          0,
+          0
+        ],
+        "newton_wall_per_trip_s": [
+          0.7533943876624107,
+          0.0,
+          0.0
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 661,
+        "rejected_step_count": 0,
+        "rejected_steps_per_trip": [
+          0,
+          0,
+          0
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0028264454517472454,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 2,
+            "merit": 0.002917740943289758,
+            "reduced_residual": 137.1621446484893,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 0.7359558595344424
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0014478613406611195,
+            "grades_tried": 1,
+            "jacobian_refreshed": true,
+            "map_evaluations": 1,
+            "merit": 0.0012110696342527182,
+            "reduced_residual": 568.9023244343214,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.004369724541902542
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.9010205554627474e-05,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 1.5928686389457222e-05,
+            "reduced_residual": 10.47178292584422,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.0032939333468675613
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 2.132516978111084e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 1.5957819553438917e-06,
+            "reduced_residual": 0.942469579239777,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.0033707888796925545
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.3314426333786738e-07,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 1.0250425053117352e-07,
+            "reduced_residual": 0.058563874881734534,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.0033185333013534546
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.0856776346438757e-08,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 8.137597569155382e-09,
+            "reduced_residual": 0.00485979317734575,
+            "step": 5,
+            "trip": 0,
+            "wall_s": 0.003085548058152199
+          }
+        ],
+        "support_cells": 661,
+        "support_policy": "participation",
+        "terminal_residual": 3.38271414736567e-10,
+        "termination_reason": "converged",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          3.941608229652047,
+          0.05161809828132391,
+          0.050685711205005646
+        ],
+        "wall_per_trip_s": 1.5059726828088362,
+        "wall_s": 4.517918048426509,
+        "warm_accepting_step_count": 0,
+        "warm_refused_step_count": 0
+      },
+      "arm": "pure",
+      "banked_production": {
+        "conditioning_trace": {
+          "count": 0,
+          "maximum_projected_condition": 31.964451720464893,
+          "result_scope": "whole active-set solve"
+        },
+        "configuration": {
+          "convergence_tolerance": 1e-08,
+          "gmres_iterations": 30,
+          "newton_steps": 12,
+          "relaxation": 0.5,
+          "route": "ForwardProfile.solve_branch(newton_krylov)",
+          "step_cap": 10.0,
+          "warmup": 0
+        },
+        "result": {
+          "active_set_iterations": 3,
+          "active_set_mask_differences": [
+            27,
+            1,
+            0
+          ],
+          "active_set_residuals": [
+            0.005257486947967733,
+            3.192874981840307e-16,
+            3.192874981840307e-16
+          ],
+          "converged": true,
+          "krylov_conditioning_count": 0,
+          "maximum_projected_krylov_condition": 31.964451720464893,
+          "terminal_residual": 3.192874981840307e-16,
+          "termination_reason": "converged"
+        },
+        "terminal_topology": {
+          "achieved_class": "diverted",
+          "admitted_axis_m": [
+            0.9016135226489935,
+            0.024617984126976886
+          ],
+          "admitted_saddle_m": [
+            0.5648168497490588,
+            1.258022156147815
+          ],
+          "axis_admitted": true,
+          "failure_exception_class": null,
+          "saddle_admitted": true
+        }
+      },
+      "batched_tail": {
+        "accepting_step_wall_over_serial_s": 0.0007280381396412849,
+        "accepting_step_wall_s": 0.005104292184114456,
+        "bitwise_identical_flux": true,
+        "eager_refused_step_wall_s": null,
+        "identical_decisions": true,
+        "identical_terminal_residual": true,
+        "reference_route": "serial per-grade ladder behind the fused boundary",
+        "refused_step_wall_over_eager_s": null,
+        "refused_step_wall_recovered_from_serial_s": null,
+        "refused_step_wall_s": null,
+        "serial_accepting_step_wall_s": 0.004376254044473171,
+        "serial_refused_step_wall_s": null,
+        "sup_flux_difference_wb": 0.0,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 0
+      },
+      "eager_prototype": {
+        "accepted_step_count": 13,
+        "active_set_iterations": 3,
+        "active_set_mask_differences": [
+          27,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.005257493815817281,
+          2.0891485144339355e-13,
+          1.0253049766248483e-13
+        ],
+        "boundary_wall_per_trip_s": [
+          0.49637950398027897,
+          0.10950986947864294,
+          0.10635160375386477
+        ],
+        "contraction_refreshes_per_trip": [
+          0,
+          0,
+          0
+        ],
+        "converged": true,
+        "first_jacobian_wall_s": 0.12381363473832607,
+        "first_step_wall_s": 1.2726314766332507,
+        "jacobian_builds_per_trip": [
+          1,
+          1,
+          1
+        ],
+        "jacobian_refresh_threshold": null,
+        "jacobian_wall_per_trip_s": [
+          0.12381363473832607,
+          0.0005771219730377197,
+          0.000500975176692009
+        ],
+        "ladder_scoring": "eager",
+        "map_evaluations_per_trip": [
+          96,
+          10,
+          2
+        ],
+        "median_warm_accepting_step_wall_s": 0.005099757574498653,
+        "median_warm_boundary_wall_s": 0.10793073661625385,
+        "median_warm_jacobian_wall_s": 0.0005390485748648643,
+        "median_warm_newton_work_per_trip_s": 0.0025498787872493267,
+        "median_warm_refused_step_map_evaluations": null,
+        "median_warm_refused_step_wall_s": null,
+        "median_warm_step_map_evaluations": 8.0,
+        "median_warm_step_wall_s": 0.005099757574498653,
+        "median_warm_trip_wall_s": 0.12244464224204421,
+        "newton_steps_per_trip": [
+          12,
+          1,
+          0
+        ],
+        "newton_wall_per_trip_s": [
+          1.3403221294283867,
+          0.005099757574498653,
+          0.0
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 661,
+        "rejected_step_count": 0,
+        "rejected_steps_per_trip": [
+          0,
+          0,
+          0
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0028264454517471557,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.002917740943289734,
+            "reduced_residual": 137.162144648486,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 1.2726314766332507
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0014478613406611195,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0012110696342527117,
+            "reduced_residual": 568.9023244343296,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.007402685470879078
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0003889128021752448,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.0003324851646402915,
+            "reduced_residual": 63.031067466219326,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.0057669999077916145
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.00017839919960901742,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 0.00015676589842230574,
+            "reduced_residual": 73.66867570165536,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.0055494364351034164
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 5.51842846212244e-05,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 5.2825250292348774e-05,
+            "reduced_residual": 18.081151641528436,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.005408131517469883
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 2.316555898710398e-05,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 2.0123076210148323e-05,
+            "reduced_residual": 5.758385328176065,
+            "step": 5,
+            "trip": 0,
+            "wall_s": 0.00506549421697855
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 8.87959227339326e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 8.783828547240539e-06,
+            "reduced_residual": 2.7704061782441727,
+            "step": 6,
+            "trip": 0,
+            "wall_s": 0.005570198409259319
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 3.0053226212098783e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 2.7147024929557854e-06,
+            "reduced_residual": 0.6604392265496237,
+            "step": 7,
+            "trip": 0,
+            "wall_s": 0.006505646742880344
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.307013356196452e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 1.3013017789611755e-06,
+            "reduced_residual": 0.5029958132818706,
+            "step": 8,
+            "trip": 0,
+            "wall_s": 0.006578494794666767
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 3.157357974177345e-07,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 3.3112877883133477e-07,
+            "reduced_residual": 0.055865088623736625,
+            "step": 9,
+            "trip": 0,
+            "wall_s": 0.006385941058397293
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 2.021205028331545e-07,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 1.8740271630721626e-07,
+            "reduced_residual": 0.07401696042114736,
+            "step": 10,
+            "trip": 0,
+            "wall_s": 0.00649169459939003
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 5.839389364539159e-08,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 5.7150110065181555e-08,
+            "reduced_residual": 0.011038842918367209,
+            "step": 11,
+            "trip": 0,
+            "wall_s": 0.006965929642319679
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.0950792835399959e-08,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 8,
+            "merit": 1.1088042108908656e-08,
+            "reduced_residual": 0.0009628902201939127,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.005099757574498653
+          }
+        ],
+        "support_cells": 661,
+        "support_policy": "participation",
+        "terminal_residual": 1.0253049766248483e-13,
+        "termination_reason": "converged",
+        "trip_boundary": "dispatched",
+        "trip_wall_per_trip_s": [
+          2.4723551208153367,
+          0.12818081118166447,
+          0.11670847330242395
+        ],
+        "wall_per_trip_s": 0.9752710775161783,
+        "wall_s": 2.925813232548535,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 0
+      },
+      "identity": "22086/43",
+      "previous_prototype": {
+        "accepted_step_count": 13,
+        "active_set_iterations": 3,
+        "active_set_mask_differences": [
+          27,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.00525749381581728,
+          2.0882522688249977e-13,
+          1.0279937134516617e-13
+        ],
+        "converged": true,
+        "first_jacobian_wall_s": 1.0360389007255435,
+        "first_step_wall_s": 0.9064501598477364,
+        "jacobian_builds_per_trip": [
+          1,
+          1,
+          1
+        ],
+        "jacobian_wall_per_trip_s": [
+          1.0360389007255435,
+          0.0005378331989049911,
+          0.00032140128314495087
+        ],
+        "median_warm_jacobian_wall_s": 0.000429617241024971,
+        "median_warm_step_wall_s": 0.005321950651705265,
+        "newton_steps_per_trip": [
+          12,
+          1,
+          0
+        ],
+        "newton_wall_per_trip_s": [
+          0.9532634504139423,
+          0.005321950651705265,
+          0.0
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 661,
+        "rejected_step_count": 0,
+        "rejected_steps_per_trip": [
+          0,
+          0,
+          0
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.002826445451747156,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "merit": 0.0029177409432897213,
+            "reduced_residual": 137.162144648486,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 0.9064501598477364
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0014478613406610971,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "merit": 0.0012110696342526911,
+            "reduced_residual": 568.9023244343073,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.006002817302942276
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.00038891280217524484,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "merit": 0.00033248516464022364,
+            "reduced_residual": 63.03106746620523,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.004073532298207283
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.00017839919960897262,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "merit": 0.00015676589842227707,
+            "reduced_residual": 73.66867570164618,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.003989597782492638
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 5.5184284621224415e-05,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "merit": 5.282525029241487e-05,
+            "reduced_residual": 18.08115164151957,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.0036642225459218025
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 2.3165558987059165e-05,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "merit": 2.012307621011303e-05,
+            "reduced_residual": 5.758385328169272,
+            "step": 5,
+            "trip": 0,
+            "wall_s": 0.004277726635336876
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 8.879592273482885e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "merit": 8.783828547305864e-06,
+            "reduced_residual": 2.77040617824764,
+            "step": 6,
+            "trip": 0,
+            "wall_s": 0.0038680965080857277
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 3.005322621187473e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "merit": 2.714702492925422e-06,
+            "reduced_residual": 0.6604392265394594,
+            "step": 7,
+            "trip": 0,
+            "wall_s": 0.004246529191732407
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.3070133560172027e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "merit": 1.301301778821547e-06,
+            "reduced_residual": 0.5029958132866454,
+            "step": 8,
+            "trip": 0,
+            "wall_s": 0.004021643660962582
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 3.1573579744014065e-07,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "merit": 3.3112877880805894e-07,
+            "reduced_residual": 0.05586508862852213,
+            "step": 9,
+            "trip": 0,
+            "wall_s": 0.003941718488931656
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 2.0212050285556064e-07,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "merit": 1.874027162199364e-07,
+            "reduced_residual": 0.07401696041404193,
+            "step": 10,
+            "trip": 0,
+            "wall_s": 0.004409554414451122
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 5.8393893645391595e-08,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "merit": 5.715011014942655e-08,
+            "reduced_residual": 0.011038842924847359,
+            "step": 11,
+            "trip": 0,
+            "wall_s": 0.004317851737141609
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.0950792880212238e-08,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "merit": 1.1088042096760653e-08,
+            "reduced_residual": 0.0009628902183465016,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.005321950651705265
+          }
+        ],
+        "support_cells": 661,
+        "support_policy": "participation",
+        "terminal_residual": 1.0279937134516617e-13,
+        "termination_reason": "converged",
+        "trip_wall_per_trip_s": [
+          2.911331173032522,
+          0.12418871838599443,
+          0.11660725995898247
+        ],
+        "wall_per_trip_s": 1.1243186139812071,
+        "wall_s": 3.3729558419436216
+      },
+      "prototype": {
+        "accepted_step_count": 13,
+        "active_set_iterations": 3,
+        "active_set_mask_differences": [
+          27,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.005257493815817236,
+          2.090044760042873e-13,
+          1.0270974678427239e-13
+        ],
+        "boundary_wall_per_trip_s": [
+          12.827945784665644,
+          0.04750820994377136,
+          0.0480226781219244
+        ],
+        "contraction_refreshes_per_trip": [
+          0,
+          0,
+          0
+        ],
+        "converged": true,
+        "first_jacobian_wall_s": 1.5464954506605864,
+        "first_step_wall_s": 0.7641546372324228,
+        "jacobian_builds_per_trip": [
+          1,
+          1,
+          1
+        ],
+        "jacobian_refresh_threshold": null,
+        "jacobian_wall_per_trip_s": [
+          1.5464954506605864,
+          0.0009705033153295517,
+          0.0005415380001068115
+        ],
+        "ladder_scoring": "batched_tail",
+        "map_evaluations_per_trip": [
+          13,
+          2,
+          1
+        ],
+        "median_warm_accepting_step_wall_s": 0.005104292184114456,
+        "median_warm_boundary_wall_s": 0.04776544403284788,
+        "median_warm_jacobian_wall_s": 0.0007560206577181816,
+        "median_warm_newton_work_per_trip_s": 0.002552146092057228,
+        "median_warm_refused_step_map_evaluations": null,
+        "median_warm_refused_step_wall_s": null,
+        "median_warm_step_map_evaluations": 2.0,
+        "median_warm_step_wall_s": 0.005104292184114456,
+        "median_warm_trip_wall_s": 0.05166902719065547,
+        "newton_steps_per_trip": [
+          12,
+          1,
+          0
+        ],
+        "newton_wall_per_trip_s": [
+          0.798499227501452,
+          0.005104292184114456,
+          0.0
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 661,
+        "rejected_step_count": 0,
+        "rejected_steps_per_trip": [
+          0,
+          0,
+          0
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0028264454517472454,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 2,
+            "merit": 0.002917740943289758,
+            "reduced_residual": 137.1621446484893,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 0.7641546372324228
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0014478613406611195,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 0.0012110696342527182,
+            "reduced_residual": 568.9023244343214,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.003380204550921917
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0003889128021754239,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 0.0003324851646404658,
+            "reduced_residual": 63.03106746621637,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.0028554797172546387
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.00017839919960903987,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 0.000156765898422322,
+            "reduced_residual": 73.66867570165905,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.0031006624922156334
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 5.5184284621224415e-05,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 5.2825250292245415e-05,
+            "reduced_residual": 18.08115164152497,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.0030013788491487503
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 2.3165558987103976e-05,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 2.0123076210140456e-05,
+            "reduced_residual": 5.75838532818133,
+            "step": 5,
+            "trip": 0,
+            "wall_s": 0.0029199207201600075
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 8.879592273482883e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 8.783828547208096e-06,
+            "reduced_residual": 2.7704061782339977,
+            "step": 6,
+            "trip": 0,
+            "wall_s": 0.0027879495173692703
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 3.00532262125469e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 2.7147024929271247e-06,
+            "reduced_residual": 0.6604392265425183,
+            "step": 7,
+            "trip": 0,
+            "wall_s": 0.003112180158495903
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.3070133561964516e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 1.3013017790009573e-06,
+            "reduced_residual": 0.5029958132866454,
+            "step": 8,
+            "trip": 0,
+            "wall_s": 0.0029794862493872643
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 3.1573579744014065e-07,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 3.311287787938261e-07,
+            "reduced_residual": 0.05586508861791373,
+            "step": 9,
+            "trip": 0,
+            "wall_s": 0.003081738017499447
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 2.021205028331545e-07,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 1.8740271630981506e-07,
+            "reduced_residual": 0.07401696042751382,
+            "step": 10,
+            "trip": 0,
+            "wall_s": 0.003298206254839897
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 5.839389373501613e-08,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 5.7150110111344255e-08,
+            "reduced_residual": 0.011038842918310365,
+            "step": 11,
+            "trip": 0,
+            "wall_s": 0.003827383741736412
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.0950792835399959e-08,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 2,
+            "merit": 1.108804211652399e-08,
+            "reduced_residual": 0.000962890216641199,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.005104292184114456
+          }
+        ],
+        "support_cells": 661,
+        "support_policy": "participation",
+        "terminal_residual": 1.0270974678427239e-13,
+        "termination_reason": "converged",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          15.173087906092405,
+          0.05363612063229084,
+          0.0497019337490201
+        ],
+        "wall_per_trip_s": 5.24005661594371,
+        "wall_s": 15.72016984783113,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 0
+      },
+      "repair": {
+        "millisecond_target_s": 0.001,
+        "reference_warm_boundary_wall_s": 0.10793073661625385,
+        "reference_warm_newton_work_per_trip_s": 0.0025498787872493267,
+        "reference_warm_step_map_evaluations": 8.0,
+        "reference_warm_step_wall_s": 0.005099757574498653,
+        "reference_warm_trip_wall_s": 0.12244464224204421,
+        "warm_boundary_wall_s": 0.04776544403284788,
+        "warm_newton_work_per_trip_s": 0.002552146092057228,
+        "warm_step_map_evaluations": 2.0,
+        "warm_step_speedup": 0.9991116085341049,
+        "warm_step_wall_s": 0.005104292184114456,
+        "warm_step_walls_of_target": 5.104292184114456,
+        "warm_trip_speedup": 2.369788031623494,
+        "warm_trip_wall_s": 0.05166902719065547
+      },
+      "route_agreement": {
+        "bitwise_identical_flux": false,
+        "flux_agrees": true,
+        "identical_trip_census": true,
+        "previous_receipt_reproduced": {
+          "banked_active_set_iterations": 3,
+          "banked_newton_steps_per_trip": [
+            12,
+            1,
+            0
+          ],
+          "banked_terminal_residual": 1.0279937134516617e-13,
+          "identical_trip_census": true,
+          "measured_active_set_iterations": 3,
+          "measured_newton_steps_per_trip": [
+            12,
+            1,
+            0
+          ],
+          "measured_terminal_residual": 1.0253049766248483e-13,
+          "relative_residual_difference": 0.002615518744550996
+        },
+        "reference_route": "eager ladder behind the dispatched boundary",
+        "required_fraction_of_span": 1e-09,
+        "sup_flux_difference_fraction_of_span": 5.377473653626604e-16,
+        "sup_flux_difference_wb": 6.661338147750939e-16,
+        "terminal_residual_fast": 1.0270974678427239e-13,
+        "terminal_residual_reference": 1.0253049766248483e-13
+      },
+      "serial_prototype": {
+        "accepted_step_count": 13,
+        "active_set_iterations": 3,
+        "active_set_mask_differences": [
+          27,
+          1,
+          0
+        ],
+        "active_set_residuals": [
+          0.005257493815817236,
+          2.090044760042873e-13,
+          1.0270974678427239e-13
+        ],
+        "boundary_wall_per_trip_s": [
+          3.0338144302368164,
+          0.047688196413218975,
+          0.04694648738950491
+        ],
+        "contraction_refreshes_per_trip": [
+          0,
+          0,
+          0
+        ],
+        "converged": true,
+        "first_jacobian_wall_s": 0.122133057564497,
+        "first_step_wall_s": 0.8043679017573595,
+        "jacobian_builds_per_trip": [
+          1,
+          1,
+          1
+        ],
+        "jacobian_refresh_threshold": null,
+        "jacobian_wall_per_trip_s": [
+          0.122133057564497,
+          0.0007568057626485825,
+          0.000511866994202137
+        ],
+        "ladder_scoring": "first_accept",
+        "map_evaluations_per_trip": [
+          13,
+          2,
+          1
+        ],
+        "median_warm_accepting_step_wall_s": 0.004376254044473171,
+        "median_warm_boundary_wall_s": 0.04731734190136194,
+        "median_warm_jacobian_wall_s": 0.0006343363784253597,
+        "median_warm_newton_work_per_trip_s": 0.0021881270222365856,
+        "median_warm_refused_step_map_evaluations": null,
+        "median_warm_refused_step_wall_s": null,
+        "median_warm_step_map_evaluations": 2.0,
+        "median_warm_step_wall_s": 0.004376254044473171,
+        "median_warm_trip_wall_s": 0.050772870890796185,
+        "newton_steps_per_trip": [
+          12,
+          1,
+          0
+        ],
+        "newton_wall_per_trip_s": [
+          0.8381697703152895,
+          0.004376254044473171,
+          0.0
+        ],
+        "off_support_leakage": 0.0,
+        "reduced_dimension": 661,
+        "rejected_step_count": 0,
+        "rejected_steps_per_trip": [
+          0,
+          0,
+          0
+        ],
+        "route": "reduced_newton.solve_reduced_newton",
+        "steps": [
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0028264454517472454,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 2,
+            "merit": 0.002917740943289758,
+            "reduced_residual": 137.1621446484893,
+            "step": 0,
+            "trip": 0,
+            "wall_s": 0.8043679017573595
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0014478613406611195,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 0.0012110696342527182,
+            "reduced_residual": 568.9023244343214,
+            "step": 1,
+            "trip": 0,
+            "wall_s": 0.0032500475645065308
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.0003889128021754239,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 0.0003324851646404658,
+            "reduced_residual": 63.03106746621637,
+            "step": 2,
+            "trip": 0,
+            "wall_s": 0.0030960962176322937
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 0.00017839919960903987,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 0.000156765898422322,
+            "reduced_residual": 73.66867570165905,
+            "step": 3,
+            "trip": 0,
+            "wall_s": 0.002890479750931263
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 5.5184284621224415e-05,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 5.2825250292245415e-05,
+            "reduced_residual": 18.08115164152497,
+            "step": 4,
+            "trip": 0,
+            "wall_s": 0.0028814543038606644
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 2.3165558987103976e-05,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 2.0123076210140456e-05,
+            "reduced_residual": 5.75838532818133,
+            "step": 5,
+            "trip": 0,
+            "wall_s": 0.0028575491160154343
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 8.879592273482883e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 8.783828547208096e-06,
+            "reduced_residual": 2.7704061782339977,
+            "step": 6,
+            "trip": 0,
+            "wall_s": 0.00277036614716053
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 3.00532262125469e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 2.7147024929271247e-06,
+            "reduced_residual": 0.6604392265425183,
+            "step": 7,
+            "trip": 0,
+            "wall_s": 0.003162452019751072
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.3070133561964516e-06,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 1.3013017790009573e-06,
+            "reduced_residual": 0.5029958132866454,
+            "step": 8,
+            "trip": 0,
+            "wall_s": 0.0029897987842559814
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 3.1573579744014065e-07,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 3.311287787938261e-07,
+            "reduced_residual": 0.05586508861791373,
+            "step": 9,
+            "trip": 0,
+            "wall_s": 0.0033220117911696434
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 2.021205028331545e-07,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 1.8740271630981506e-07,
+            "reduced_residual": 0.07401696042751382,
+            "step": 10,
+            "trip": 0,
+            "wall_s": 0.0032438375055789948
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 5.839389373501613e-08,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 1,
+            "merit": 5.7150110111344255e-08,
+            "reduced_residual": 0.011038842918310365,
+            "step": 11,
+            "trip": 0,
+            "wall_s": 0.003337775357067585
+          },
+          {
+            "accepted_factor": 1.0,
+            "flux_residual": 1.0950792835399959e-08,
+            "grades_tried": 1,
+            "jacobian_refreshed": false,
+            "map_evaluations": 2,
+            "merit": 1.108804211652399e-08,
+            "reduced_residual": 0.000962890216641199,
+            "step": 0,
+            "trip": 1,
+            "wall_s": 0.004376254044473171
+          }
+        ],
+        "support_cells": 661,
+        "support_policy": "participation",
+        "terminal_residual": 1.0270974678427239e-13,
+        "termination_reason": "converged",
+        "trip_boundary": "fused",
+        "trip_wall_per_trip_s": [
+          3.994251945987344,
+          0.05285099055618048,
+          0.04869475122541189
+        ],
+        "wall_per_trip_s": 1.5298156042893727,
+        "wall_s": 4.589446812868118,
+        "warm_accepting_step_count": 1,
+        "warm_refused_step_count": 0
+      }
+    }
+  ],
+  "runtime": {
+    "devices": [
+      "cuda:0"
+    ],
+    "jax": "0.11.0",
+    "python": "3.14.2",
+    "scheduler": {
+      "job_id": "1264707",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA"
+    }
+  },
+  "source_commit": "6487b4874de774da896f1b007a6d9408e7e25c53",
+  "verdict": {
+    "adaptive_rows_with_identical_census": {
+      "threshold_half": 0,
+      "threshold_one": 0
+    },
+    "adaptive_total_jacobian_builds_delta": {
+      "threshold_half": 4,
+      "threshold_one": 4
+    },
+    "adaptive_total_newton_steps_delta": {
+      "threshold_half": -11,
+      "threshold_one": -11
+    },
+    "any_rejected_newton_step": true,
+    "every_row_batched_tail_decisions_identical": true,
+    "every_row_batched_tail_flux_bitwise_identical": true,
+    "every_row_flux_agrees": true,
+    "every_row_trip_census_identical": true,
+    "maximum_accepting_step_wall_s": 0.0076745618134737015,
+    "maximum_off_support_leakage": 0.0,
+    "maximum_refused_step_wall_over_eager_s": 0.002223484218120575,
+    "maximum_warm_step_wall_s": 0.009278171230107546,
+    "minimum_warm_step_wall_s": 0.005104292184114456,
+    "previous_receipt_reproduced": true,
+    "prototype_converged_count": 1,
+    "row_count": 4,
+    "terminal_flux": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/msc-adaptive-refresh/docs/figures/millisecond-converged-solve/adaptive-refresh/four-rows-terminal-flux.npz"
+  }
+}

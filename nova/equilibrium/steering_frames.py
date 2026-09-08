@@ -75,6 +75,8 @@ polygon vertex count, ``nt`` the frame count).  All coordinates are COCOS 17
 | x_point_z                | (2, nt)         | float64 | m (primary first)  |
 | strike_points_r          | (2, nt)         | float64 | m (in/outboard)    |
 | strike_points_z          | (2, nt)         | float64 | m (in/outboard)    |
+| strike_segment           | (2, nt)         | int32   | wall segment index |
+| strike_parameter         | (2, nt)         | float64 | along segment      |
 | lcfs_r                   | (n_b, nt)       | float64 | m (NaN-padded)     |
 | lcfs_z                   | (n_b, nt)       | float64 | m (NaN-padded)     |
 | n_boundary_coords        | (nt,)           | int32   | vertices           |
@@ -117,9 +119,12 @@ The session carries the wall polygon as its own closed group
 (:data:`WALL_GROUP`), written once per session rather than per frame and
 closed by repeating the first vertex.  It is the containment reference for
 the labelled points: the magnetic axis and the X-points are tested against it
-by ray-cast point-in-polygon inclusion, and the strike points by proximity
-within :data:`STRIKE_WALL_TOLERANCE_M` metres (they land on the wall, where
-ray-cast inclusion is ambiguous).
+by ray-cast point-in-polygon inclusion, and each strike point by exact
+membership of its recorded wall segment - the point is rebuilt from the
+segment index and along-segment parameter carried on the labelled flux and
+must equal the recorded coordinates to round-off, because a strike point is
+the exact intersection of the boundary level curve with a wall segment and
+lies on the wall where ray-cast inclusion is ambiguous.
 :func:`count_labelled_outside_wall` returns the labeller receipt's count of
 labelled point slots judged outside it.
 """
@@ -158,12 +163,6 @@ SESSION_GROUP = "steering"
 #: The wall is session-scoped (written once per session, never per frame) and
 #: is the containment reference for the labelled points (see the docstring).
 WALL_GROUP = "wall"
-
-#: Metres of proximity a strike point may sit from the wall polygon and still
-#: count as on the boundary.  Strike points are wall crossings, so the
-#: tolerance absorbs the crossing numerics and only genuinely displaced
-#: strike points are judged outside in the containment receipt.
-STRIKE_WALL_TOLERANCE_M = 0.05
 
 #: Ordered point components ``finite_mask`` labels, one flag per component.
 #: A component is present (finite coordinate values and a True mask flag) or
@@ -259,6 +258,8 @@ _FIELD_TABLE: tuple[tuple[str, tuple[str, ...], str, str], ...] = (
     ("x_point_z", ("2", "nt"), "float64", "m"),
     ("strike_points_r", ("2", "nt"), "float64", "m"),
     ("strike_points_z", ("2", "nt"), "float64", "m"),
+    ("strike_segment", ("2", "nt"), "int32", "wall segment index"),
+    ("strike_parameter", ("2", "nt"), "float64", "along segment"),
     ("lcfs_r", ("n_b", "nt"), "float64", "m"),
     ("lcfs_z", ("n_b", "nt"), "float64", "m"),
     ("n_boundary_coords", ("nt",), "int32", "vertices"),
@@ -392,6 +393,12 @@ class SteeringFrame(NamedTuple):
     divertor_leg_r: object
     divertor_leg_z: object
     divertor_leg_finite: object
+    #: Wall segment index (2,) each strike point lies on, and the
+    #: along-segment parameter (2,) with
+    #: point = wall[segment] * (1 - parameter) + wall[segment + 1] * parameter.
+    #: ``None`` marks a frame authored without the recorded crossing geometry.
+    strike_segment: object = None
+    strike_parameter: object = None
 
 
 def _as_numpy(value) -> np.ndarray:

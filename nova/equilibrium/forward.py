@@ -261,7 +261,14 @@ class ForwardDomainLabel(IntEnum):
 
 
 class ForwardLabelledFlux(NamedTuple):
-    """Fixed-shape labelled flux map read from one terminal solve state."""
+    """Fixed-shape labelled flux map read from one terminal solve state.
+
+    ``strike_points`` carries one exact inboard and one outboard separatrix
+    crossing of the wall, ``strike_segment`` the wall segment index each lies
+    on (the wall node the segment starts at, wrapping to node zero) and
+    ``strike_parameter`` the along-segment parameter in ``(0, 1)`` with
+    point = ``wall[segment] * (1 - parameter) + wall[segment + 1] * parameter``.
+    """
 
     psi: jax.Array
     psi_norm: jax.Array
@@ -271,6 +278,8 @@ class ForwardLabelledFlux(NamedTuple):
     lcfs: jax.Array
     lcfs_vertex_count: jax.Array
     strike_points: jax.Array
+    strike_segment: jax.Array
+    strike_parameter: jax.Array
     domain_label: jax.Array
 
 
@@ -423,6 +432,59 @@ class ForwardPerturbedSeedReceipt(NamedTuple):
     root_relative_error: jax.Array
     passed: jax.Array
     largest_passing_amplitude: jax.Array
+
+
+def _intersect_wall_level_curve(wall, wall_psi_norm, axis, x_point) -> tuple[jax.Array, jax.Array, jax.Array]:
+    """Return exact wall crossings of the boundary level curve.
+
+    For each radial side of the X-point, locate the wall segment whose
+    normalised flux straddles the level one - a sign change of
+    ``wall_psi_norm - 1`` between adjacent wall nodes, the closing
+    last-to-first node included - and solve the crossing exactly by linear
+    interpolation on that segment.  Returns fixed-shape arrays for the two
+    side slots (inboard then outboard): the crossing point, the segment index
+    (the wall node the segment starts at, wrapping to node zero) and the
+    along-segment parameter in ``(0, 1)`` with
+    ``crossing = wall[segment] * (1 - parameter) + wall[segment + 1] * parameter``.
+    A side without a crossing yields NaN coordinates, a zero segment index
+    and a NaN parameter.  The computation is vectorised over the wall so the
+    returned shapes do not depend on which segments cross; a wall segment is
+    qualified only when its wall nodes are finite and lie on the same
+    vertical side of the axis as the X-point, and the crossing nearest the
+    X-point is selected when several segments cross on one side.
+    """
+    level = wall_psi_norm - 1.0
+    following_level = jnp.roll(level, -1)
+    crossing = (level < 0.0) != (following_level < 0.0)
+    finite = jnp.isfinite(wall_psi_norm) & jnp.all(jnp.isfinite(wall), axis=1)
+    denominator = level - following_level
+    fraction = jnp.where(
+        crossing & finite,
+        level / jnp.where(denominator == 0.0, 1.0, denominator),
+        0.0,
+    )
+    following_wall = jnp.roll(wall, -1, axis=0)
+    point = wall + fraction[:, jnp.newaxis] * (following_wall - wall)
+    same_side = (point[:, 1] - axis[1]) * (x_point[1] - axis[1]) >= 0.0
+
+    def select(side_mask):
+        qualified = crossing & finite & same_side & side_mask
+        reach = jnp.linalg.norm(point - x_point, axis=1)
+        index = jnp.argmin(jnp.where(qualified, reach, jnp.inf))
+        present = jnp.any(qualified)
+        return (
+            jnp.where(present, point[index], jnp.nan),
+            jnp.where(present, index, 0).astype(jnp.int32),
+            jnp.where(present, fraction[index], jnp.nan),
+        )
+
+    inboard = select(point[:, 0] < x_point[0])
+    outboard = select(point[:, 0] >= x_point[0])
+    return (
+        jnp.stack((inboard[0], outboard[0])),
+        jnp.stack((inboard[1], outboard[1])),
+        jnp.stack((inboard[2], outboard[2])),
+    )
 
 
 @dataclass
@@ -1248,29 +1310,25 @@ class ForwardProfile:
 
     def _strike_points(
         self, flux: jax.Array, topology: ForwardTopologyState
-    ) -> jax.Array:
-        """Return the inboard and outboard wall intersections of the separatrix."""
+    ) -> tuple[jax.Array, jax.Array, jax.Array]:
+        """Return exact inboard and outboard separatrix wall crossings.
+
+        Each side's strike point is the point where the boundary level curve
+        crosses a wall segment, found from the sign change of ``psi_norm - 1``
+        between adjacent wall nodes and solved exactly on that segment rather
+        than selected as the nearest wall vertex.  Returns ``(points,
+        segment, parameter)`` where ``points`` is the ``(2, 2)`` R-Z crossing
+        pair (inboard then outboard of the X-point), ``segment`` the ``(2,)``
+        int32 wall segment index each lies on and ``parameter`` the ``(2,)``
+        along-segment fraction in ``(0, 1)``.
+        """
 
         physical = jnp.asarray(flux)[: self.operator.physical_node_number]
         _grid_flux, wall_flux = self.operator.topology.split_flux_map(physical)
         wall = jnp.asarray(self.operator.wall.coordinate, dtype=flux.dtype)
         wall_psi_norm = (wall_flux - topology.axis_flux) / topology.flux_span
-        same_side = (wall[:, 1] - topology.axis[1]) * (
-            topology.x_point[1] - topology.axis[1]
-        ) >= 0.0
-        finite = jnp.isfinite(wall_psi_norm) & jnp.all(jnp.isfinite(wall), axis=1)
-        residual = jnp.abs(wall_psi_norm - 1.0)
-
-        def select(radial_mask):
-            qualified = same_side & finite & radial_mask
-            index = jnp.argmin(jnp.where(qualified, residual, jnp.inf))
-            return jnp.where(jnp.any(qualified), wall[index], jnp.nan)
-
-        return jnp.stack(
-            [
-                select(wall[:, 0] < topology.x_point[0]),
-                select(wall[:, 0] >= topology.x_point[0]),
-            ]
+        return _intersect_wall_level_curve(
+            wall, wall_psi_norm, topology.axis, topology.x_point
         )
 
     def _labelled_flux(
@@ -1284,6 +1342,9 @@ class ForwardProfile:
                 "psi, psi_norm and domain labels must span the same mesh cells"
             )
         lcfs, lcfs_vertex_count = self._lcfs_polyline(flux, masks, topology)
+        strike_points, strike_segment, strike_parameter = self._strike_points(
+            flux, topology
+        )
         return ForwardLabelledFlux(
             psi=psi,
             psi_norm=masks.psi_norm,
@@ -1292,7 +1353,9 @@ class ForwardProfile:
             secondary_x_point=self._secondary_x_point(flux, topology),
             lcfs=lcfs,
             lcfs_vertex_count=lcfs_vertex_count,
-            strike_points=self._strike_points(flux, topology),
+            strike_points=strike_points,
+            strike_segment=strike_segment,
+            strike_parameter=strike_parameter,
             domain_label=labels,
         )
 

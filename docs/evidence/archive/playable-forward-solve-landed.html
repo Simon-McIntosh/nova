@@ -1440,6 +1440,24 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
     consumer reads it rather than infers it. Gate: the fast steering-frame lane at 17 passed. Small, and closed with the schema's next touch
     as the followup asked.</p>
   </section>
+  <section id="the-compilation-cache-persists-across-allocations">
+    <h2>The forward compilation cache now persists across allocations, and the premise behind the per-job TMPDIR was measured true (2026-09-08 01:03Z)</h2>
+    <p>Node <code>pfs-compilation-cache-root</code> (local lane, spec guided; commits <code>bb647f02</code> to <code>65b5fe0c</code>, merged).
+    The premise was confirmed rather than assumed: the compute node's /tmp carries a filesystem id distinct from the shared home on the same node,
+    a marker written there in one allocation is invisible to the next, and every SLURM step sets TMPDIR onto it, so the old TMPDIR-derived cache
+    root died with each allocation and no job banked a compile for its successor. The root now lives on the shared GPFS home under
+    <code>~/.cache/nova/forward-compilation-cache/user-&lt;uid&gt;/host-&lt;hostname&gt;</code>, overridable by one environment variable,
+    keyed per user and per host so a build never crosses nodes, with JAX's own runtime hash (jax and jaxlib versions, backend, x64 flag,
+    device topology) keying the architecture below it. One finding on the way: a root under the setgid per-user data tree silently stops
+    persisting, because that tree's group has no name in the cluster's name service and JAX resolves every cached file's group while evicting,
+    aborting the write of every entry after the first; <code>~/.cache</code> is not setgid. Measured on two allocations on one debug node:
+    59.93 s of cold compile (57.34 s solve wall, 0 to 28 entries) became 8.66 s warm on the second allocation with all 28 entries reused and
+    none rewritten. Gate: four tests in the default lane. Not measured, and carried as the open question: two allocations compiling the same
+    program on one node at the same time, the collision the per-job TMPDIR was protecting against; the node asserts JAX's entry lock serialises
+    them and the earlier aborts inside the cache write argue for testing that before every brief drops the per-job TMPDIR. Report at
+    <code>~/.config/reckon/crew/reports/nova/playable/compilation-cache-root.md</code>; receipts and figure under
+    <code>docs/figures/playable-forward-solve/compilation-cache/</code>.</p>
+  </section>
 </main>
 </body>
 </html>

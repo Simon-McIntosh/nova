@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T02:20:25",
+  "updated": "2026-09-08T03:14:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2852,10 +2852,21 @@
         "id": "pfs-cache-c",
         "harness": "clive",
         "role": "implement",
+        "session_id": "c4a5dbce-412d-4b6c-988a-448ad039b217",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "c4a5dbce-412d-4b6c-988a-448ad039b217"
+        },
+        "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-cachelock-c",
+        "harness": "clive",
+        "role": "test",
         "session_id": null,
         "session_model": null,
         "sessions": {},
-        "created": "2026-09-07"
+        "created": "2026-09-08"
       },
       {
         "id": "pfs-census-s",
@@ -3850,6 +3861,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-07"
+      },
+      {
+        "id": "s19-score-c7",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "s19-scout-c",
@@ -124804,6 +124824,162 @@
           "role": "review",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260907T164711933335-pfs-compilation-cache-root",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-compilation-cache-root",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 963,
+                "cached_input_tokens": 372762,
+                "input_tokens": 373757,
+                "output_tokens": 268,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 374025,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The node-local premise of the TMPDIR-derived root is confirmed or refuted by a stated measurement; nova/equilibrium/solve_request.py default_forward_compilation_cache_root implements the chosen root with its isolation and keying argument recorded in its docstring and in nova/equilibrium/AGENTS.md; a before-and-after compile wall for one program on two separate allocations shows reuse occurring rather than being configured; tests/test_forward_compilation_cache_root.py green in the default lane",
+          "estimated_hours": 1.5,
+          "goal": "A forward compilation cache root that persists across SLURM allocations and isolates concurrent writers, chosen on a measured compile-wall comparison",
+          "id": "pfs-compilation-cache-root",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164711933335-pfs-compilation-cache-root/manifest.md",
+          "plan": "playable-forward-solve",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "nova/equilibrium/solve_request.py",
+            "nova/equilibrium/AGENTS.md",
+            "tests/test_forward_compilation_cache_root.py",
+            "docs/figures/playable-forward-solve/compilation-cache/",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/playable/compilation-cache-root.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-cache-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-07T16:47:17Z",
+        "completed_at": "2026-09-08T01:11:23.999Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 30231,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 30246,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "52ca3c4e5aa9453f10415e00b00b4eece980a586",
+        "commits": [
+          "65b5fe0c63cb599fd0fb2a8e40df112f6416a3b5"
+        ],
+        "changed_lines": {
+          "added": 455,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_forward_compilation_cache_root.py (4 passed) plus the two-allocation compile-wall receipt: cold 59.93 s compile, warm 8.66 s with 28 of 28 entries reused on the same node",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164711933335-pfs-compilation-cache-root/test-default-lane.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260907T164711933335-pfs-compilation-cache-root/manifest.md",
+        "scope_changed": false,
+        "session_id": "c4a5dbce-412d-4b6c-988a-448ad039b217",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 22026398,
+            "input_tokens_cumulative": 22026398,
+            "output_tokens": 102053,
+            "output_tokens_cumulative": 102053,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 30244.014,
+          "generated_tokens": 102053,
+          "generation_seconds": 29765.141,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 23.6,
+          "machine_seconds": 478.873,
+          "peak_input_tokens": 239563,
+          "tokens_per_second": 3.43,
+          "wall_tokens_per_second": 3.37
+        },
+        "follow_on_paths": [
+          "tests/test_compilation_cache_location.py",
+          "tests/test_forward_profile_defaults.py::test_a_diagnostic_absolute_source_declares_the_current_pin_opt_out",
+          "nightly/CI"
+        ],
+        "dispute_count": 0,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-compilation-cache-root",
+          "session_id": "c4a5dbce-412d-4b6c-988a-448ad039b217",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T01:11:23.999Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -125116,6 +125292,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2092
+    "_version": 2096
   }
 }

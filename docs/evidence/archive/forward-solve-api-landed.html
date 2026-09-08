@@ -239,6 +239,14 @@
     <code>nova/equilibrium/forward_operator.py</code>, built at <code>nova/equilibrium/forward.py:474</code>), so a request contract binds to the operator build
     and its grid; no new holder is needed.</p>
   </section>
+<section id="an-interactive-coil-edit-recompiles-the-slice"><h2>An interactive coil edit recompiles the slice (2026-09-08 05:35Z)</h2>
+<p>Node <code>fsa-coil-edit-latency</code> (local lane, spec exact; commits <code>e9c37aea</code>, <code>a767da78</code>, <code>878758b0</code>, merged at <code>4134c48c</code>). Negative result against the interactive target, delivered as a complete receipt.</p>
+<p><strong>Measure.</strong> Twenty warm two-percent edits of P4-upper (circuit 8) through the compiled slice route on the H200 (job 1264724, persistent compilation cache on, per-job TMPDIR), seeded from the converged 22086/43 mixed base frame. Median per-edit wall 30119 ms (range 28335 to 44030 ms) against the sub-100 ms target; persistent-cache hits after the first edit 0 of 20; 10 of 20 edits converged, the failing points named with trip counts 1 to 4; the raster separatrix (122 to 130 vertices) rides every edit on the once-built 33 by 33 target.</p>
+<p><strong>Mechanism.</strong> The compiled slice partially applies the conductor external carrying the edited prescribed current onto its kernels, so the StableHLO bakes that current in as a constant: the program digest differs across currents (d7e66d9d at 1.0x, e6ce36d1 at 0.8x, 979c005d at 1.2x) and repeats for a fixed one, so every edit is a compile rather than a call. The traced-current Newton-Krylov route compiled once. The repair, threading the prescribed current as a traced kernel argument, is recorded on millisecond-converged-solve; this driver reruns unchanged afterwards.</p>
+<p><strong>Caveat.</strong> The boundary-displacement column falls back to the raw topology-boundary norm (about 2.5 m) because the reference LCFS read returns no vertices on this path; the receiver-grid separatrix vertex counts are the meaningful boundary read.</p>
+<figure><img src="/nova/figures/forward-solve-api/coil-edit-latency/coil-edit-latency.png" alt="Per-edit wall, trip counts, residual and displacement over twenty P4-upper edits"><figcaption>Per-edit wall, trips, residual and displacement across the twenty edits; every point after the first is a recompile.</figcaption></figure>
+<p>Receipt: <code>docs/figures/forward-solve-api/coil-edit-latency/coil-edit-latency.json</code>. Report: <code>~/.config/reckon/crew/reports/nova/forward-solve-api/coil-edit-latency.md</code>.</p>
+</section>
 </main>
 </body>
 </html>

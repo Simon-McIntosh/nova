@@ -119,3 +119,45 @@ not comparable with any production receipt.
 - Pin `JAX_PLATFORMS=cpu` for every CPU-lane build, solve, test, or benchmark.
   Login and compute hosts may expose CUDA, and an implicit backend change is a
   different numerical measurement.
+
+## Forward compilation cache root
+
+`default_forward_compilation_cache_root` in
+`nova/equilibrium/solve_request.py` selects where forward solves keep
+compiled JAX programs.  Its default is
+`~/.cache/nova/forward-compilation-cache/user-<uid>/host-<hostname>`
+on the shared home filesystem, and a launch that must name its own location
+sets `NOVA_FORWARD_COMPILATION_CACHE_ROOT` to that base directory.  The root
+is deliberately **not** TMPDIR-derived: every SLURM step on this cluster
+lands TMPDIR on the node-local filesystem, so a TMPDIR-derived root dies with
+the allocation and no job banks a compile for its successor.  The base sits
+under `~/.cache`, **not** under `~/.local/share/nova`: the per-user data tree
+inherits a setgid group down the hierarchy whose name the cluster's name
+service cannot resolve, and JAX's cache runtime calls `grp.getgrgid` on every
+cached file while evicting, so a root inside that tree writes at most one
+entry and then aborts every later write.  `~/.cache` is not setgid, so files
+beneath it carry the user's own resolvable group.
+
+Isolation and keying argument, kept here because it governs every consumer:
+
+- **Host key** — `host-<hostname>` keeps each node's build inside its own
+  subtree: a cache written by one node is never read by another, and
+  allocations on different nodes never write the same file.  Reuse is
+  therefore per node, which is how the reserved single-GPU lane pays: it
+  always lands on the same node, so successive jobs hit the prior job's
+  compiles.  A debug node that varies per allocation still cold-compiles,
+  which is expected rather than a defect.
+- **Concurrent writers, same node** — two allocations on one node share one
+  subtree and are serialised by JAX's own cache entry lock (`.lockfile`).
+  JAX writes an entry as a plain open+write under that lock, so neither the
+  layout nor the writer depends on the atomic no-clobber create that GPFS
+  does not provide.
+- **Architecture key** — carried below the host key by the persistent cache
+  configuration, which appends `nova/jax-compilation/runtime-<hash>` where
+  the hash covers the jax/jaxlib versions, backend platform and version, the
+  x64 flag, and the device topology.  A build for one runtime is therefore in
+  a different directory than any other runtime and is never read by it.
+
+Measurements of the root choice (node-local `/tmp` premise, cold-versus-warm
+compile wall across two allocations on the same host) live under
+`docs/figures/playable-forward-solve/compilation-cache/`.

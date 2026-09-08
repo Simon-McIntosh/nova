@@ -1,0 +1,553 @@
+{
+  "receipt": "current-centroid major radius attribution: class, support, weighting",
+  "source": {
+    "revision": "6fce8753af842d6a7eecf635a9b277157a3e9e18",
+    "python": "3.14.2",
+    "operator": "frozen-six carrier on 22086/43 (+ slice-native anchors)",
+    "corpus_root": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29"
+  },
+  "target": {
+    "shot": 22086,
+    "rows": [
+      12,
+      18,
+      24,
+      30,
+      36,
+      43,
+      45
+    ],
+    "native_rows": [
+      12,
+      36,
+      43
+    ],
+    "floor_m": 0.030312500020954758,
+    "radial_step_m": 0.060625000041909516
+  },
+  "rows": [
+    {
+      "row": 12,
+      "time_s": 0.07499999552965164,
+      "operator_anchor": "frozen",
+      "requested_class": 0,
+      "requested_diverted": false,
+      "emergent_diverted": true,
+      "classes_agree": false,
+      "converged": true,
+      "termination": "converged",
+      "trips": 1,
+      "terminal_residual": 8.545060659392995e-09,
+      "solve_wall_s": 10.794162344187498,
+      "efit_centroid_r_m": 0.7301784753799438,
+      "read": {
+        "emergent_r": 0.6941621890625803,
+        "classed_r": 0.6941621890625803,
+        "core_r": 0.6490290565913295,
+        "core_emergent_r": 0.6800230930807503,
+        "uniform_r": 1.0103234642281262,
+        "emergent_z": -0.0026162669590480132,
+        "classed_z": -0.0026162669590480132
+      },
+      "weighting": {
+        "current_r": 0.6941621890625802,
+        "current_z": -0.002616266959048008,
+        "magnitude_r": 0.6941621890625802,
+        "uniform_r": 1.0103234642281262,
+        "core_current_r": 0.6490290565913295,
+        "participation_cells": 684,
+        "core_cells": 209,
+        "negative_current_cells": 0
+      },
+      "offset_cm": {
+        "emergent_cm": -3.6016286317363533,
+        "classed_cm": -3.6016286317363533,
+        "core_cm": -8.114941878861437,
+        "core_emergent_cm": -5.0155382299193585,
+        "uniform_cm": 28.014498884818238
+      },
+      "fraction_accounted": {
+        "class": -0.0,
+        "support": -1.2531312105182828,
+        "support_emergent_base": -0.39257506610318016,
+        "weighting": 8.77828636688519
+      },
+      "persisted_achieved_r": 0.6941621890230208,
+      "persisted_offset_cm": -3.6016286356923
+    },
+    {
+      "row": 18,
+      "time_s": 0.10499999672174454,
+      "operator_anchor": "frozen",
+      "requested_class": 1,
+      "requested_diverted": true,
+      "emergent_diverted": true,
+      "classes_agree": true,
+      "converged": true,
+      "termination": "converged",
+      "trips": 4,
+      "terminal_residual": 3.491731683584276e-12,
+      "solve_wall_s": 5.358736302703619,
+      "efit_centroid_r_m": 0.7815418839454651,
+      "read": {
+        "emergent_r": 0.7044184937942727,
+        "classed_r": 0.7044184937942727,
+        "core_r": 0.6926302519388822,
+        "core_emergent_r": 0.6926302519388822,
+        "uniform_r": 1.0147765872066639,
+        "emergent_z": -0.0020463967935172686,
+        "classed_z": -0.0020463967935172686
+      },
+      "weighting": {
+        "current_r": 0.7044184937942727,
+        "current_z": -0.0020463967935172665,
+        "magnitude_r": 0.7044184937942727,
+        "uniform_r": 1.0147765872066639,
+        "core_current_r": 0.6926302519388821,
+        "participation_cells": 677,
+        "core_cells": 300,
+        "negative_current_cells": 0
+      },
+      "offset_cm": {
+        "emergent_cm": -7.712339015119241,
+        "classed_cm": -7.712339015119241,
+        "core_cm": -8.891163200658292,
+        "core_emergent_cm": -8.891163200658292,
+        "uniform_cm": 23.323470326119878
+      },
+      "fraction_accounted": {
+        "class": -0.0,
+        "support": -0.1528491140272865,
+        "support_emergent_base": -0.1528491140272865,
+        "weighting": 4.024175970531979
+      },
+      "persisted_achieved_r": 0.7044184938122656,
+      "persisted_offset_cm": -7.712339013319946
+    },
+    {
+      "row": 24,
+      "time_s": 0.13499999046325684,
+      "operator_anchor": "frozen",
+      "requested_class": 1,
+      "requested_diverted": true,
+      "emergent_diverted": true,
+      "classes_agree": true,
+      "converged": true,
+      "termination": "converged",
+      "trips": 3,
+      "terminal_residual": 4.1374585858238185e-10,
+      "solve_wall_s": 4.418766213580966,
+      "efit_centroid_r_m": 0.795543372631073,
+      "read": {
+        "emergent_r": 0.7095124568803075,
+        "classed_r": 0.7095124568803075,
+        "core_r": 0.691974776146072,
+        "core_emergent_r": 0.691974776146072,
+        "uniform_r": 1.0163278924950705,
+        "emergent_z": -0.003807336754050549,
+        "classed_z": -0.003807336754050549
+      },
+      "weighting": {
+        "current_r": 0.7095124568803075,
+        "current_z": -0.003807336754050549,
+        "magnitude_r": 0.7095124568803075,
+        "uniform_r": 1.0163278924950705,
+        "core_current_r": 0.6919747761460721,
+        "participation_cells": 674,
+        "core_cells": 266,
+        "negative_current_cells": 0
+      },
+      "offset_cm": {
+        "emergent_cm": -8.603091575076549,
+        "classed_cm": -8.603091575076549,
+        "core_cm": -10.356859648500105,
+        "core_emergent_cm": -10.356859648500105,
+        "uniform_cm": 22.07845198639975
+      },
+      "fraction_accounted": {
+        "class": -0.0,
+        "support": -0.20385323788767776,
+        "support_emergent_base": -0.20385323788767776,
+        "weighting": 3.5663392971849537
+      },
+      "persisted_achieved_r": 0.7095124568273006,
+      "persisted_offset_cm": -8.603091580377242
+    },
+    {
+      "row": 30,
+      "time_s": 0.16499999165534973,
+      "operator_anchor": "frozen",
+      "requested_class": 1,
+      "requested_diverted": true,
+      "emergent_diverted": true,
+      "classes_agree": true,
+      "converged": true,
+      "termination": "converged",
+      "trips": 4,
+      "terminal_residual": 1.8664745468039018e-09,
+      "solve_wall_s": 5.837965399026871,
+      "efit_centroid_r_m": 0.8029686212539673,
+      "read": {
+        "emergent_r": 0.7149096791435348,
+        "classed_r": 0.7149096791435348,
+        "core_r": 0.6997130464167058,
+        "core_emergent_r": 0.6997130464167058,
+        "uniform_r": 1.0180915171783584,
+        "emergent_z": -0.006073632302366556,
+        "classed_z": -0.006073632302366556
+      },
+      "weighting": {
+        "current_r": 0.7149096791435349,
+        "current_z": -0.0060736323023665465,
+        "magnitude_r": 0.7149096791435349,
+        "uniform_r": 1.0180915171783584,
+        "core_current_r": 0.6997130464167058,
+        "participation_cells": 672,
+        "core_cells": 251,
+        "negative_current_cells": 0
+      },
+      "offset_cm": {
+        "emergent_cm": -8.805894211043253,
+        "classed_cm": -8.805894211043253,
+        "core_cm": -10.325557483726143,
+        "core_emergent_cm": -10.325557483726143,
+        "uniform_cm": 21.512289592439117
+      },
+      "fraction_accounted": {
+        "class": -0.0,
+        "support": -0.17257341915113164,
+        "support_emergent_base": -0.17257341915113164,
+        "weighting": 3.44294208820509
+      },
+      "persisted_achieved_r": 0.7149096782051404,
+      "persisted_offset_cm": -8.805894304882688
+    },
+    {
+      "row": 36,
+      "time_s": 0.19499999284744263,
+      "operator_anchor": "frozen",
+      "requested_class": 1,
+      "requested_diverted": true,
+      "emergent_diverted": true,
+      "classes_agree": true,
+      "converged": true,
+      "termination": "converged",
+      "trips": 2,
+      "terminal_residual": 2.8379127910406002e-09,
+      "solve_wall_s": 3.6527194436639547,
+      "efit_centroid_r_m": 0.8136305212974548,
+      "read": {
+        "emergent_r": 0.7160880429124145,
+        "classed_r": 0.7160880429124145,
+        "core_r": 0.7098043886332831,
+        "core_emergent_r": 0.7098043886332831,
+        "uniform_r": 1.032228176972642,
+        "emergent_z": -0.01971145585646159,
+        "classed_z": -0.01971145585646159
+      },
+      "weighting": {
+        "current_r": 0.7160880429124143,
+        "current_z": -0.019711455856461585,
+        "magnitude_r": 0.7160880429124143,
+        "uniform_r": 1.032228176972642,
+        "core_current_r": 0.7098043886332831,
+        "participation_cells": 653,
+        "core_cells": 222,
+        "negative_current_cells": 0
+      },
+      "offset_cm": {
+        "emergent_cm": -9.754247838504037,
+        "classed_cm": -9.754247838504037,
+        "core_cm": -10.382613266417174,
+        "core_emergent_cm": -10.382613266417174,
+        "uniform_cm": 21.859765567518718
+      },
+      "fraction_accounted": {
+        "class": -0.0,
+        "support": -0.06441967010851612,
+        "support_emergent_base": -0.06441967010851612,
+        "weighting": 3.24105086619075
+      },
+      "persisted_achieved_r": 0.716088037690739,
+      "persisted_offset_cm": -9.75424836067158
+    },
+    {
+      "row": 43,
+      "time_s": 0.22999998927116394,
+      "operator_anchor": "frozen",
+      "requested_class": 1,
+      "requested_diverted": true,
+      "emergent_diverted": true,
+      "classes_agree": true,
+      "converged": true,
+      "termination": "converged",
+      "trips": 3,
+      "terminal_residual": 3.3827141473656687e-10,
+      "solve_wall_s": 4.482539089396596,
+      "efit_centroid_r_m": 0.8181217908859253,
+      "read": {
+        "emergent_r": 0.7768314708385712,
+        "classed_r": 0.7768314708385712,
+        "core_r": 0.7767700687857331,
+        "core_emergent_r": 0.7767700687857331,
+        "uniform_r": 1.0385932625752636,
+        "emergent_z": 0.03174846796303002,
+        "classed_z": 0.03174846796303002
+      },
+      "weighting": {
+        "current_r": 0.7768314708385711,
+        "current_z": 0.03174846796303001,
+        "magnitude_r": 0.7767731673479392,
+        "uniform_r": 1.0385932625752636,
+        "core_current_r": 0.7767700687857325,
+        "participation_cells": 642,
+        "core_cells": 234,
+        "negative_current_cells": 6
+      },
+      "offset_cm": {
+        "emergent_cm": -4.129032004735411,
+        "classed_cm": -4.129032004735411,
+        "core_cm": -4.135172210019222,
+        "core_emergent_cm": -4.135172210019222,
+        "uniform_cm": 22.047147168933833
+      },
+      "fraction_accounted": {
+        "class": -0.0,
+        "support": -0.0014870810584102037,
+        "support_emergent_base": -0.0014870810584102037,
+        "weighting": 6.339543782573954
+      },
+      "persisted_achieved_r": 0.7768314697583227,
+      "persisted_offset_cm": -4.129032112760256
+    },
+    {
+      "row": 45,
+      "time_s": 0.23999999463558197,
+      "operator_anchor": "frozen",
+      "requested_class": 1,
+      "requested_diverted": true,
+      "emergent_diverted": true,
+      "classes_agree": true,
+      "converged": true,
+      "termination": "converged",
+      "trips": 2,
+      "terminal_residual": 4.940090608753339e-09,
+      "solve_wall_s": 4.302045378834009,
+      "efit_centroid_r_m": 0.824302613735199,
+      "read": {
+        "emergent_r": 0.7813441518821163,
+        "classed_r": 0.7813441518821163,
+        "core_r": 0.7813441518821163,
+        "core_emergent_r": 0.7813441518821163,
+        "uniform_r": 1.0467440469600704,
+        "emergent_z": 0.030734194779136078,
+        "classed_z": 0.030734194779136078
+      },
+      "weighting": {
+        "current_r": 0.7813441518821161,
+        "current_z": 0.030734194779136078,
+        "magnitude_r": 0.7812229789384362,
+        "uniform_r": 1.0467440469600704,
+        "core_current_r": 0.7813441518821161,
+        "participation_cells": 630,
+        "core_cells": 225,
+        "negative_current_cells": 5
+      },
+      "offset_cm": {
+        "emergent_cm": -4.295846185308272,
+        "classed_cm": -4.295846185308272,
+        "core_cm": -4.295846185308272,
+        "core_emergent_cm": -4.295846185308272,
+        "uniform_cm": 22.24414332248714
+      },
+      "fraction_accounted": {
+        "class": -0.0,
+        "support": -0.0,
+        "support_emergent_base": -0.0,
+        "weighting": 6.178058608932919
+      },
+      "persisted_achieved_r": 0.781344155542059,
+      "persisted_offset_cm": -4.295845819313993
+    },
+    {
+      "row": 12,
+      "time_s": 0.07499999552965164,
+      "operator_anchor": "native",
+      "requested_class": 0,
+      "requested_diverted": false,
+      "emergent_diverted": true,
+      "classes_agree": false,
+      "converged": true,
+      "termination": "converged",
+      "trips": 1,
+      "terminal_residual": 4.679813656402056e-09,
+      "solve_wall_s": 27.08747123926878,
+      "efit_centroid_r_m": 0.7301784753799438,
+      "read": {
+        "emergent_r": 0.6865340402576722,
+        "classed_r": 0.6865340402576722,
+        "core_r": 0.6865340402576722,
+        "core_emergent_r": 0.6865340402576722,
+        "uniform_r": 1.0103234642281262,
+        "emergent_z": 0.03903737695982338,
+        "classed_z": 0.03903737695982338
+      },
+      "weighting": {
+        "current_r": 0.6865340402576724,
+        "current_z": 0.03903737695982339,
+        "magnitude_r": 0.6865221405617293,
+        "uniform_r": 1.0103234642281262,
+        "core_current_r": 0.6865340402576724,
+        "participation_cells": 684,
+        "core_cells": 197,
+        "negative_current_cells": 3
+      },
+      "offset_cm": {
+        "emergent_cm": -4.364443512227167,
+        "classed_cm": -4.364443512227167,
+        "core_cm": -4.364443512227167,
+        "core_emergent_cm": -4.364443512227167,
+        "uniform_cm": 28.014498884818238
+      },
+      "fraction_accounted": {
+        "class": -0.0,
+        "support": -0.0,
+        "support_emergent_base": -0.0,
+        "weighting": 7.418802031996628
+      },
+      "persisted_achieved_r": null,
+      "persisted_offset_cm": null
+    },
+    {
+      "row": 36,
+      "time_s": 0.19499999284744263,
+      "operator_anchor": "native",
+      "requested_class": 1,
+      "requested_diverted": true,
+      "emergent_diverted": true,
+      "classes_agree": true,
+      "converged": true,
+      "termination": "converged",
+      "trips": 3,
+      "terminal_residual": 1.6574908247349282e-09,
+      "solve_wall_s": 29.451356671750546,
+      "efit_centroid_r_m": 0.8136305212974548,
+      "read": {
+        "emergent_r": 0.7716797588712696,
+        "classed_r": 0.7716797588712696,
+        "core_r": 0.7717116641547455,
+        "core_emergent_r": 0.7717116641547455,
+        "uniform_r": 1.0339173070244634,
+        "emergent_z": 0.03786262409165632,
+        "classed_z": 0.03786262409165632
+      },
+      "weighting": {
+        "current_r": 0.7716797588712697,
+        "current_z": 0.03786262409165631,
+        "magnitude_r": 0.7716788413780229,
+        "uniform_r": 1.0339173070244634,
+        "core_current_r": 0.7717116641547453,
+        "participation_cells": 650,
+        "core_cells": 239,
+        "negative_current_cells": 1
+      },
+      "offset_cm": {
+        "emergent_cm": -4.195076242618523,
+        "classed_cm": -4.195076242618523,
+        "core_cm": -4.191885714270938,
+        "core_emergent_cm": -4.191885714270938,
+        "uniform_cm": 22.028678572700855
+      },
+      "fraction_accounted": {
+        "class": -0.0,
+        "support": 0.0007605412066584444,
+        "support_emergent_base": 0.0007605412066584444,
+        "weighting": 6.251079431860524
+      },
+      "persisted_achieved_r": null,
+      "persisted_offset_cm": null
+    },
+    {
+      "row": 43,
+      "time_s": 0.22999998927116394,
+      "operator_anchor": "native",
+      "requested_class": 1,
+      "requested_diverted": true,
+      "emergent_diverted": true,
+      "classes_agree": true,
+      "converged": true,
+      "termination": "converged",
+      "trips": 3,
+      "terminal_residual": 3.382712354874448e-10,
+      "solve_wall_s": 27.232727356255054,
+      "efit_centroid_r_m": 0.8181217908859253,
+      "read": {
+        "emergent_r": 0.776831470838571,
+        "classed_r": 0.776831470838571,
+        "core_r": 0.7767700687857326,
+        "core_emergent_r": 0.7767700687857326,
+        "uniform_r": 1.0385932625752636,
+        "emergent_z": 0.03174846796303009,
+        "classed_z": 0.03174846796303009
+      },
+      "weighting": {
+        "current_r": 0.776831470838571,
+        "current_z": 0.03174846796303008,
+        "magnitude_r": 0.7767731673479394,
+        "uniform_r": 1.0385932625752636,
+        "core_current_r": 0.7767700687857326,
+        "participation_cells": 642,
+        "core_cells": 234,
+        "negative_current_cells": 6
+      },
+      "offset_cm": {
+        "emergent_cm": -4.129032004735434,
+        "classed_cm": -4.129032004735434,
+        "core_cm": -4.135172210019267,
+        "core_emergent_cm": -4.135172210019267,
+        "uniform_cm": 22.047147168933833
+      },
+      "fraction_accounted": {
+        "class": -0.0,
+        "support": -0.0014870810584153577,
+        "support_emergent_base": -0.0014870810584153577,
+        "weighting": 6.339543782573925
+      },
+      "persisted_achieved_r": null,
+      "persisted_offset_cm": null
+    }
+  ],
+  "summary": {
+    "fraction_class_median": 0.0,
+    "fraction_support_median": -0.1528491140272865,
+    "fraction_support_emergent_base_median": -0.1528491140272865,
+    "fraction_weighting_median": 4.024175970531979,
+    "classes": {
+      "differ": [
+        12
+      ],
+      "agree": [
+        18,
+        24,
+        30,
+        36,
+        43,
+        45
+      ],
+      "unresolved": []
+    },
+    "carrier": "none-of-the-three",
+    "native_anchor": {
+      "rows": [
+        12,
+        36,
+        43
+      ],
+      "emergent_offset_from_efit_cm": [
+        -4.364443512227167,
+        -4.195076242618523,
+        -4.129032004735434
+      ]
+    }
+  }
+}

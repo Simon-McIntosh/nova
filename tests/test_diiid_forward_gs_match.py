@@ -383,3 +383,16 @@ def test_frame_solves_release_compilation_state_between_identities(monkeypatch):
             )
         )
     assert events == expected_events
+
+
+def test_single_shot_gate_rejects_a_row_without_the_banked_read_block():
+    rows = [
+        {
+            "frame_identity": {"label": f"synthetic row {index}"},
+            "banked_read": None,
+        }
+        for index in range(gate.SINGLE_SHOT_GATE_FRAME_COUNT)
+    ]
+
+    with pytest.raises(RuntimeError, match="synthetic row"):
+        gate._require_banked_reads(rows)

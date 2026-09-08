@@ -74,11 +74,13 @@ import numpy as np
 
 from nova.equilibrium.constraint import (
     CircuitCurrentUnknown,
+    CompensatorRule,
     ConstraintContext,
     ConstraintPair,
     ConstraintRecord,
     constraint_records,
     constraint_row_slices,
+    select_compensating_directions,
 )
 from nova.equilibrium.forward_operator import CellCurrentMoments
 from nova.equilibrium.fixed_point import (
@@ -99,6 +101,8 @@ __all__ = [
     "ReducedNewtonResult",
     "ReducedScores",
     "ReducedTrip",
+    "derive_reduced_constraint_pairs",
+    "linearized_constraint_response_matrix",
     "reduced_coordinates",
     "solve_constrained_reduced_newton",
     "solve_constrained_reduced_newton_compiled",
@@ -1876,6 +1880,149 @@ def _row_augmentation(
         requested_class=requested_class,
         target_current=target_current,
     )
+
+
+def linearized_constraint_response_matrix(
+    profile,
+    pairs: tuple[ConstraintPair, ...],
+    flux,
+    *,
+    requested_class=None,
+    target_current=None,
+    prescribed_current=None,
+) -> jax.Array:
+    """Return row sensitivities after the reduced fixed point responds.
+
+    A circuit changes the external flux directly, but it also changes the
+    converged plasma amplitudes.  The latter is the vertical response that a
+    centroid constraint must use when selecting and scaling its compensator.
+    The reduced residual already supplies the fixed-point Jacobian, so the
+    implicit derivative is solved as ``du/dI = -F_u^-1 F_I`` with the active
+    shadow held at the converged equilibrium.
+
+    This is intentionally a local linearisation.  A topology transition is a
+    separate equilibrium branch, not a differentiable response of the branch
+    that the constrained Newton step is currently correcting.
+    """
+    pairs = tuple(pairs)
+    if not pairs:
+        raise ValueError("a linearized response needs at least one constraint pair")
+    operator = profile.operator
+    field = operator.prescribed_current_field
+    if field is None:
+        raise ValueError("a linearized response needs a prescribed current field")
+    state = jnp.ravel(jnp.asarray(flux))
+    target_value = None if target_current is None else jnp.asarray(target_current)
+    external = operator.external(None, prescribed_current)
+    shadow = jnp.ravel(
+        jnp.asarray(operator.residual_shadow_mask(state, requested_class), dtype=bool)
+    )
+    coordinates = reduced_coordinates(
+        operator,
+        state,
+        requested_class=requested_class,
+        target_current=target_value,
+    )
+    kernels = _reduced_kernels(
+        operator,
+        coordinates,
+        external,
+        requested_class,
+        target_value,
+    )
+    reduced = kernels["initial_gather"](state)
+    residual = kernels["reduced_residual"]
+    jacobian = kernels["jacobian"](reduced, shadow, state)
+    external_response = jnp.asarray(field.response)
+
+    def residual_from_external(value):
+        return residual(reduced, shadow, state, external_value=value)
+
+    residual_external = jax.jacfwd(residual_from_external)(external)
+    amplitude_response = -jnp.linalg.solve(
+        jacobian, residual_external @ external_response
+    )
+
+    def reconstructed(reduced_value, external_value):
+        return kernels["reconstruct"](
+            reduced_value, shadow, state, external_value=external_value
+        )
+
+    state_from_amplitudes = jax.jacfwd(reconstructed, argnums=0)(reduced, external)
+    state_from_external = jax.jacfwd(reconstructed, argnums=1)(reduced, external)
+    state_response = (
+        state_from_amplitudes @ amplitude_response
+        + state_from_external @ external_response
+    )
+    context = ConstraintContext(state, requested_class, target_value, shadow)
+    blocks = []
+    for pair in pairs:
+
+        def observe(value, pair=pair):
+            return jnp.atleast_1d(
+                pair.functional.observed(
+                    profile, context._replace(flux=value), pair.binding.payload
+                )
+            )
+
+        observation = jax.jacfwd(observe)(state)
+        blocks.append(observation @ state_response)
+    return jnp.concatenate(blocks, axis=0)
+
+
+def derive_reduced_constraint_pairs(
+    profile,
+    pairs: tuple[ConstraintPair, ...],
+    flux,
+    *,
+    requested_class=None,
+    target_current=None,
+    prescribed_current=None,
+    circuits=None,
+) -> tuple[tuple[ConstraintPair, ...], Any]:
+    """Select circuit compensators from the reduced fixed-point response."""
+    pairs = tuple(pairs)
+    response = np.asarray(
+        linearized_constraint_response_matrix(
+            profile,
+            pairs,
+            flux,
+            requested_class=requested_class,
+            target_current=target_current,
+            prescribed_current=prescribed_current,
+        ),
+        dtype=float,
+    )
+    row_slices = constraint_row_slices(pairs)
+    scales = np.concatenate(
+        tuple(np.ravel(np.asarray(pair.binding.scale, dtype=float)) for pair in pairs)
+    )
+    selection = select_compensating_directions(
+        response / scales[:, None], circuits=circuits
+    )._replace(response=response)
+    derived = []
+    for pair, row_slice in zip(pairs, row_slices, strict=True):
+        authority = selection.direction_authority[row_slice]
+        ampere_scale = (
+            jnp.asarray(pair.unknown.ampere_scale)
+            if isinstance(pair.unknown, CircuitCurrentUnknown)
+            and pair.unknown.rule == CompensatorRule.EXPLICIT
+            else jnp.asarray(1.0 / authority)
+        )
+        derived.append(
+            ConstraintPair(
+                functional=pair.functional,
+                unknown=CircuitCurrentUnknown(
+                    direction=jnp.asarray(selection.directions[:, row_slice]),
+                    ampere_scale=ampere_scale,
+                    singular_values=jnp.asarray(selection.singular_values),
+                    authority=jnp.asarray(authority),
+                    rule=selection.rule,
+                ),
+                binding=pair.binding,
+            )
+        )
+    return tuple(derived), selection
 
 
 def solve_constrained_reduced_newton(

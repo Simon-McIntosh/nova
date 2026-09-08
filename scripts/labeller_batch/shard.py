@@ -871,17 +871,31 @@ def label_shot(
                     raise ValueError("non-finite reconstruction flux seed")
                 pair, _selection = _centroid_pair(
                     prepared.profile,
-                    slice_seed,
+                    (
+                        free_result.state
+                        if free_result is not None and free_result.converged
+                        else slice_seed
+                    ),
                     target=inputs["target_centroid_z"],
                     unknown=None,
                     target_current=target_current,
                     requested=requested,
                     names=circuit_names,
                 )
+                if free_result is not None and free_result.converged:
+                    (pair,), _selection = (
+                        reduced_newton.derive_reduced_constraint_pairs(
+                            prepared.profile,
+                            (pair,),
+                            free_result.state,
+                            requested_class=requested,
+                            target_current=target_current,
+                            prescribed_current=current,
+                            circuits=sorted(circuit_names),
+                        )
+                    )
             except Exception as error:
-                # Deriving the centroid constraint from the seed admits the
-                # slice into conditioning.  A failure here (for example
-                # NoQualifiedAxisError) means the constrained solve never
+                # A failed pair derivation means the constrained solve never
                 # began, so the slice is recorded as skipped, not as a
                 # conditioned-solve failure.
                 conditioning_skipped = f"{type(error).__name__}: {error}"

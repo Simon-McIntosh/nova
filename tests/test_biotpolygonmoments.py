@@ -127,6 +127,21 @@ def _field_midpoint_reference(target_r, target_z, vertices, expansion_point, lev
     )
 
 
+def test_near_collinear_arsinh_difference_exposes_cancellation():
+    """Large same-signed arguments lose digits when subtracted directly."""
+    along_a = 1.0e5
+    edge_length = 0.2
+    along_b = along_a + edge_length
+    gap = 1.0e-10
+    direct = np.arcsinh(along_b / gap) - np.arcsinh(along_a / gap)
+    denominator = along_b * np.hypot(along_a, gap) + along_a * np.hypot(along_b, gap)
+    stable = np.arcsinh(edge_length * (along_a + along_b) / denominator)
+    reference = np.arcsinh(np.longdouble(along_b) / gap) - np.arcsinh(
+        np.longdouble(along_a) / gap
+    )
+    assert abs(direct - reference) > 20.0 * abs(stable - reference)
+
+
 def test_flux_moment_blocks_match_midpoint_subdivision_near_and_far():
     vertices = np.array(
         [[2.82, -0.08], [3.10, -0.12], [3.17, 0.06], [2.93, 0.15], [2.78, 0.04]]

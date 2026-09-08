@@ -83,6 +83,7 @@ from nova.equilibrium.solve_request import (
     ExplicitSolveSeed,
     ForwardSolveRequest,
     ResolvedForwardSolveDefaults,
+    SampledFluxFunction,
 )
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
@@ -1261,8 +1262,8 @@ def _build_profile(
     )
     source = ForwardSource(
         core=DomainProfile(
-            p_prime=_profile_function(surfaces, p_prime),
-            ff_prime=_profile_function(surfaces, ff_prime),
+            p_prime=SampledFluxFunction(surfaces, p_prime),
+            ff_prime=SampledFluxFunction(surfaces, ff_prime),
         ),
         boundary_pressure=0.0,
         boundary_field_function=_boundary_field_function(

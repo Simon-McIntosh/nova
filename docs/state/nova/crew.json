@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T10:07:32",
+  "updated": "2026-09-08T10:22:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -134,6 +134,15 @@
         "sessions": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07f50-7bf1-7123-9a35-8783b459b170"
         },
+        "created": "2026-09-08"
+      },
+      {
+        "id": "bob-cache-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-08"
       },
       {
@@ -2417,6 +2426,15 @@
         "created": "2026-09-04"
       },
       {
+        "id": "nia-drift-t",
+        "harness": "codex-terra",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
+      },
+      {
         "id": "nia-dsv4-census-x",
         "harness": "clive",
         "role": "implement",
@@ -3000,6 +3018,17 @@
         "created": "2026-09-08"
       },
       {
+        "id": "pfs-cachetests-l",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": "01a08014-ed1b-7252-9ab1-105d79241b80",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a08014-ed1b-7252-9ab1-105d79241b80"
+        },
+        "created": "2026-09-08"
+      },
+      {
         "id": "pfs-census-s",
         "harness": "codex",
         "role": "implement",
@@ -3332,6 +3361,15 @@
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "6c8afe7a-859a-43d4-8c51-3e5ce289dccd"
         },
         "created": "2026-09-07"
+      },
+      {
+        "id": "pfs-parity-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "pfs-placement-c",
@@ -4156,6 +4194,15 @@
           "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a07fd5-4fb9-7a21-bb0f-c4109d8b6884"
         },
         "created": "2026-09-07"
+      },
+      {
+        "id": "scr-checkpoint-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-08"
       },
       {
         "id": "scr-conditioning-x",
@@ -132192,6 +132239,166 @@
           "reason": "the fourth one-hour allocation timed out on the same monolithic row; continuing this session would submit a fifth of the same shape, and the remedy is a checkpointing change to the driver in a new node"
         },
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T081516745034-pfs-efit-parity-default-route",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-efit-parity-default-route",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5520,
+                "cached_input_tokens": 721614,
+                "input_tokens": 727136,
+                "output_tokens": 3234,
+                "reasoning_output_tokens": 109,
+                "total_tokens": 730370,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/efit-parity-default-route.md names why the two failing tests in tests/test_efit_parity_default_route.py (an eight-element geometric array mismatching at 9.5e-7 relative, ACTUAL 200.000191 against DESIRED 200.0) pass at the parent of 0f4034f9 and fail at head, showing the two paths or two code routes side by side (which receipt or fixture the test reads before and after the binding, its dtype and revision); the cause is repaired at its source, regenerating the bound receipt under x64 on a debug partition or binding the test to its own fixture, never by widening a tolerance; both tests pass in the default lane with the log captured once under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/efit-parity-default-route.log; if the repair needs a path outside tests/test_efit_parity_default_route.py and the receipt directory it reads, stop and report the path rather than editing it; while a SLURM job runs, write the manifest with status waiting and all five wait fields: wait_condition (one line naming the job), wait_probe as a JSON argv array that prints only the state (sacct with the job number and the flags -n -X -o State), wait_terminal as the JSON array of COMPLETED, FAILED, CANCELLED, TIMEOUT, OUT_OF_MEMORY and NODE_FAIL, wait_started_at as an unquoted UTC ISO stamp, and resume_brief, then end your turn; every uv command carries --no-sync and nothing runs uv sync; commit at each deliverable with a conventional subject and body and no attribution trailer",
+          "estimated_hours": 1.0,
+          "goal": "The two efit-parity default-route tests that fail since the measurements were bound to the checkout root pass again, with the cause named",
+          "id": "pfs-efit-parity-default-route",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081516745034-pfs-efit-parity-default-route/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "tests/test_efit_parity_default_route.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/efit-parity-default-route.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/efit-parity-default-route.log"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "pfs-parity-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T08:15:29Z",
+        "completed_at": "2026-09-08T08:20:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 293,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 293,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "4d7139b31399ee09f01cd7771749ce5f9c780558",
+        "commits": [
+          "4d3dd8d9b42aa8b7e775b01fbde67bba1223fb84"
+        ],
+        "changed_lines": {
+          "added": 6,
+          "removed": 4,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT main venv PYTHONPATH worktree uv run --no-sync pytest tests/test_efit_parity_default_route.py -vv (3 passed in 8.24 s)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-labeller/efit-parity-default-route.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260908T081516745034-pfs-efit-parity-default-route/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08016-2666-7e13-8f5a-756c2c78c272",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2163712,
+            "cached_input_tokens_cumulative": 2163712,
+            "input_tokens": 2302426,
+            "input_tokens_cumulative": 2302426,
+            "output_tokens": 10301,
+            "output_tokens_cumulative": 10301,
+            "reasoning_output_tokens": 3120,
+            "reasoning_output_tokens_cumulative": 3120
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T08:20:22Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 21.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T08:20:22Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2163712,
+          "cumulative_input_tokens": 4466138,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 13421
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-efit-parity-default-route",
+          "session_id": "01a08016-2666-7e13-8f5a-756c2c78c272",
+          "session_source": "stream",
+          "retained_at": "2026-09-08T08:20:22Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -132504,6 +132711,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2191
+    "_version": 2198
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T13:06:51",
+  "updated": "2026-09-09T13:22:43",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -144468,6 +144468,185 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T104911734383-mulw-jt60sa-atlas-panel",
+        "plan": "multi-unit-limiter-wall",
+        "section": "\u00a75",
+        "node": "mulw-jt60sa-atlas-panel",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 392,
+                "cached_input_tokens": 663500,
+                "input_tokens": 663896,
+                "output_tokens": 24,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 663920,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "the PNG exists and is force-added, the receipt docs/figures/null-identification-authority/convergence-atlas/jt60sa-wall-units.json records five units with vertex counts 89, 6, 6, 10, 8 and closures True, False, False, False, False drawn as five polylines, and reckon audit-doc docs/evidence/poloidal-convergence-atlas.html reports OK with a project-absolute src for the new figure",
+          "estimated_hours": null,
+          "goal": "Add the JT-60SA panel to the poloidal convergence atlas as the visual proof that a five-unit wall is drawn as five structures, rendering the JT-60SA description's wall units with the landed unit-aware painters on all_debug into docs/figures/null-identification-authority/convergence-atlas/jt60sa-wall-units.png and referencing it from docs/evidence/poloidal-convergence-atlas.html",
+          "id": "mulw-jt60sa-atlas-panel",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T10:49:12Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T104911734383-mulw-jt60sa-atlas-panel/manifest.md",
+          "plan": "multi-unit-limiter-wall",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/figures/null-identification-authority/convergence-atlas/jt60sa-wall-units.png",
+            "docs/figures/null-identification-authority/convergence-atlas/jt60sa-wall-units.json",
+            "docs/figures/null-identification-authority/convergence-atlas/render_jt60sa_wall_units.py",
+            "docs/evidence/poloidal-convergence-atlas.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-mulw-atlas",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-09T10:49:23Z",
+        "completed_at": "2026-09-09T11:19:59.552Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1816,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1836,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9aebfc86894f19c625456a3618d5088e97b9a059",
+        "commits": [
+          "fe6cd0364a1bc08aac803dce0df5df9a9cb40e40"
+        ],
+        "changed_lines": {
+          "added": 167,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug render of the JT-60SA description (five units 89, 6, 6, 10, 8 with closures True, False, False, False, False in jt60sa-wall-units.json); reckon audit-doc docs/evidence/poloidal-convergence-atlas.html (OK)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/null-identification-authority/convergence-atlas/jt60sa-wall-units.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T104911734383-mulw-jt60sa-atlas-panel/manifest.md",
+        "scope_changed": false,
+        "session_id": "fe4d923d-7382-4903-a179-12f50a5a6e84",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3763797,
+            "input_tokens_cumulative": 3763797,
+            "output_tokens": 22798,
+            "output_tokens_cumulative": 22798,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-09T11:19:59.552Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 3763797,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1831.664,
+          "generated_tokens": 22798,
+          "generation_seconds": 1771.686,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 12.0,
+          "machine_seconds": 59.978,
+          "peak_input_tokens": 122224,
+          "tokens_per_second": 12.87,
+          "wall_tokens_per_second": 12.45
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/mulw-jt60sa-atlas-panel",
+          "session_id": "fe4d923d-7382-4903-a179-12f50a5a6e84",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T11:19:59.552Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -144780,6 +144959,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2364
+    "_version": 2365
   }
 }

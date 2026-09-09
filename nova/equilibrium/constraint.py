@@ -28,6 +28,75 @@ Payload = TypeVar("Payload")
 ConstraintPolicy = Literal["imposed", "eliminated"]
 
 
+@dataclass(frozen=True)
+class ConstraintElimination:
+    """Bounded scalar search parameters for one eliminated constraint row.
+
+    The inner augmented solve continues to impose ``ConstraintBinding.target``
+    and solve its compensating unknown freely.  The outer solve varies that
+    target within ``target_bounds`` until the physical compensating value
+    reaches ``prescribed_unknown``.  ``target_step`` supplies the second
+    scalar sample and ``maximum_steps`` bounds the number of inner receipts.
+    """
+
+    target_step: object
+    target_bounds: object
+    unknown_tolerance: object
+    prescribed_unknown: object = 0.0
+    maximum_steps: int = 6
+
+    def __post_init__(self) -> None:
+        """Require finite scalar controls and an ordered target interval."""
+        step = np.asarray(self.target_step)
+        bounds = np.asarray(self.target_bounds)
+        tolerance = np.asarray(self.unknown_tolerance)
+        prescribed = np.asarray(self.prescribed_unknown)
+        if step.size != 1 or not np.all(np.isfinite(step)) or np.all(step == 0.0):
+            raise ValueError("elimination target_step must be finite and nonzero")
+        if bounds.shape != (2,) or not np.all(np.isfinite(bounds)):
+            raise ValueError("elimination target_bounds must be two finite values")
+        if not bounds[0] < bounds[1]:
+            raise ValueError("elimination target_bounds must be strictly ordered")
+        if (
+            tolerance.size != 1
+            or not np.all(np.isfinite(tolerance))
+            or np.any(tolerance <= 0.0)
+        ):
+            raise ValueError(
+                "elimination unknown_tolerance must be positive and finite"
+            )
+        if prescribed.size != 1 or not np.all(np.isfinite(prescribed)):
+            raise ValueError("elimination prescribed_unknown must be finite and scalar")
+        if self.maximum_steps < 2:
+            raise ValueError("elimination maximum_steps must be at least two")
+        object.__setattr__(self, "target_step", jnp.asarray(self.target_step))
+        object.__setattr__(self, "target_bounds", jnp.asarray(self.target_bounds))
+        object.__setattr__(
+            self, "unknown_tolerance", jnp.asarray(self.unknown_tolerance)
+        )
+        object.__setattr__(
+            self, "prescribed_unknown", jnp.asarray(self.prescribed_unknown)
+        )
+
+
+class ConstraintOuterStep(NamedTuple):
+    """One target evaluation and the complete imposed inner receipt."""
+
+    target: jax.Array
+    compensating_value: jax.Array
+    inner_receipt: object
+
+
+class ConstraintOuterTrace(NamedTuple):
+    """Bounded scalar elimination history carried by the terminal state."""
+
+    steps: tuple[ConstraintOuterStep, ...]
+    status: Literal["converged", "no-root", "budget"]
+    target_bounds: jax.Array
+    prescribed_unknown: jax.Array
+    unknown_tolerance: jax.Array
+
+
 class CompensatorRule(IntEnum):
     """How one row's compensating circuit direction was decided.
 
@@ -115,11 +184,20 @@ class ConstraintBinding:
     initial_unknown: object
     payload: object = None
     policy: ConstraintPolicy = "imposed"
+    elimination: ConstraintElimination | None = None
 
     def __post_init__(self) -> None:
         """Require a known solve policy; row-shape validation belongs to the pair."""
         if self.policy not in ("imposed", "eliminated"):
             raise ValueError("constraint policy must be 'imposed' or 'eliminated'")
+        if self.policy == "imposed" and self.elimination is not None:
+            raise ValueError("an imposed constraint cannot carry elimination controls")
+        if self.policy == "eliminated" and not isinstance(
+            self.elimination, ConstraintElimination
+        ):
+            raise ValueError(
+                "an eliminated constraint needs ConstraintElimination controls"
+            )
         for name in ("target", "tolerance", "scale", "initial_unknown"):
             object.__setattr__(self, name, jnp.asarray(getattr(self, name)))
 
@@ -132,6 +210,7 @@ class ConstraintBinding:
                 self.scale,
                 self.initial_unknown,
                 self.payload,
+                self.elimination,
             ),
             (self.policy,),
         )
@@ -140,8 +219,16 @@ class ConstraintBinding:
     def tree_unflatten(cls, aux_data, children):
         """Rebuild a binding from its static policy and traced leaves."""
         (policy,) = aux_data
-        target, tolerance, scale, initial_unknown, payload = children
-        return cls(target, tolerance, scale, initial_unknown, payload, policy)
+        target, tolerance, scale, initial_unknown, payload, elimination = children
+        return cls(
+            target,
+            tolerance,
+            scale,
+            initial_unknown,
+            payload,
+            policy,
+            elimination,
+        )
 
 
 @jax.tree_util.register_pytree_node_class
@@ -1459,8 +1546,11 @@ __all__ = [
     "CompensatorSelection",
     "ConstraintBinding",
     "ConstraintContext",
+    "ConstraintElimination",
     "ConstraintFunctional",
     "ConstraintMultiplier",
+    "ConstraintOuterStep",
+    "ConstraintOuterTrace",
     "ConstraintPair",
     "ConstraintPolicy",
     "ConstraintRecord",

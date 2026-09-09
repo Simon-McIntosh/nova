@@ -1361,6 +1361,7 @@ def _compiled_slice_solver(
     newton_steps: int,
     active_set_steps: int,
     initial_unknown: jax.Array | None = None,
+    refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
 ) -> Callable[..., Any]:
     """Build one fixed-shape program for a complete reduced solve.
 
@@ -1393,22 +1394,83 @@ def _compiled_slice_solver(
         jacobian = kernels["jacobian"](reduced, shadow, base_state)
 
         def step_body(_index, carry):
-            reduced, jacobian, active, step_count, builds, rejected = carry
+            (
+                reduced,
+                jacobian,
+                active,
+                step_count,
+                builds,
+                rejected,
+                accepted_norm,
+                fresh,
+            ) = carry
 
             def run_step(carry):
-                reduced, jacobian, _active, step_count, builds, rejected = carry
+                (
+                    reduced,
+                    jacobian,
+                    _active,
+                    step_count,
+                    builds,
+                    rejected,
+                    accepted_norm,
+                    fresh,
+                ) = carry
                 scores = kernels["step_scores"](reduced, shadow, base_state)
                 finished = jnp.isfinite(scores.flux_residual) & (
                     scores.flux_residual <= tolerance
                 )
 
                 def no_step(_):
-                    return reduced, jacobian, False, step_count, builds, rejected
-
-                def try_step(_):
-                    first = choose(
+                    return (
                         reduced,
                         jacobian,
+                        False,
+                        step_count,
+                        builds,
+                        rejected,
+                        accepted_norm,
+                        fresh,
+                    )
+
+                def try_step(_):
+                    if refresh_threshold is None:
+                        prepared_jacobian = jacobian
+                        prepared_fresh = fresh
+                        contraction_builds = jnp.asarray(0, dtype=jnp.int32)
+                    else:
+                        contraction = scores.residual_norm / jnp.maximum(
+                            accepted_norm, jnp.finfo(scores.residual_norm.dtype).tiny
+                        )
+                        refresh_for_contraction = (
+                            jnp.isfinite(accepted_norm)
+                            & (accepted_norm > 0.0)
+                            & ~fresh
+                            & (contraction > refresh_threshold)
+                        )
+
+                        def rebuild(_):
+                            return (
+                                kernels["jacobian"](reduced, shadow, base_state),
+                                jnp.asarray(True),
+                                jnp.asarray(1, dtype=jnp.int32),
+                            )
+
+                        prepared_jacobian, prepared_fresh, contraction_builds = (
+                            jax.lax.cond(
+                                refresh_for_contraction,
+                                rebuild,
+                                lambda _: (
+                                    jacobian,
+                                    fresh,
+                                    jnp.asarray(0, dtype=jnp.int32),
+                                ),
+                                None,
+                            )
+                        )
+                    first = choose(
+                        reduced,
+                        prepared_jacobian,
                         shadow,
                         base_state,
                         scores.merit,
@@ -1423,10 +1485,30 @@ def _compiled_slice_solver(
                             base_state,
                             scores.merit,
                         )
-                        return selected, refreshed, 1
+                        return (
+                            selected,
+                            refreshed,
+                            True,
+                            1,
+                            1 + (~selected[0]).astype(jnp.int32),
+                        )
 
-                    selected, selected_jacobian, refreshes = jax.lax.cond(
-                        ~first[0], refresh, lambda _: (first, jacobian, 0), None
+                    def keep(_):
+                        return (
+                            first,
+                            prepared_jacobian,
+                            prepared_fresh,
+                            0,
+                            (~first[0]).astype(jnp.int32),
+                        )
+
+                    selected, selected_jacobian, selected_fresh, refreshes, refusals = (
+                        jax.lax.cond(
+                            ~first[0] & ~prepared_fresh,
+                            refresh,
+                            keep,
+                            None,
+                        )
                     )
                     found, accepted, candidate = selected
                     return (
@@ -1434,8 +1516,10 @@ def _compiled_slice_solver(
                         selected_jacobian,
                         found,
                         step_count + found.astype(jnp.int32),
-                        builds + refreshes,
-                        rejected + (~found).astype(jnp.int32),
+                        builds + contraction_builds + refreshes,
+                        rejected + refusals,
+                        jnp.where(found, scores.residual_norm, accepted_norm),
+                        jnp.where(found, False, selected_fresh),
                     )
 
                 return jax.lax.cond(finished, no_step, try_step, None)
@@ -1453,6 +1537,8 @@ def _compiled_slice_solver(
                 jnp.asarray(0, dtype=jnp.int32),
                 jnp.asarray(1, dtype=jnp.int32),
                 jnp.asarray(0, dtype=jnp.int32),
+                jnp.asarray(jnp.nan, dtype=reduced.dtype),
+                jnp.asarray(True),
             ),
         )
 
@@ -1513,8 +1599,10 @@ def _compiled_slice_solver(
                     step_count,
                     builds,
                     rejected,
+                    accepted_norm,
+                    fresh,
                 ) = trip_body(reduced, shadow, state)
-                del jacobian_active, trip_active
+                del jacobian_active, trip_active, accepted_norm, fresh
                 closed = kernels["boundary"](solved_reduced, shadow, state)
                 next_state, promoted, difference, observed, next_reduced, excluded = (
                     closed
@@ -2791,6 +2879,7 @@ def _compiled_result(
     tolerance,
     newton_steps,
     active_set_steps,
+    refresh_threshold,
 ):
     """Run a complete slice and synchronise its fixed-shape receipt once."""
     program, raw_kernels = _compiled_program(
@@ -2820,6 +2909,7 @@ def _compiled_result(
         tolerance,
         newton_steps,
         active_set_steps,
+        refresh_threshold,
         _compiled_argument_key(initial_unknown),
     )
     solvers = {} if program.slice_solvers is None else program.slice_solvers
@@ -2831,6 +2921,7 @@ def _compiled_result(
             newton_steps=newton_steps,
             active_set_steps=active_set_steps,
             initial_unknown=initial_unknown,
+            refresh_threshold=refresh_threshold,
         )
         solvers = dict(solvers)
         solvers[policy_key] = solver
@@ -2858,6 +2949,7 @@ def solve_reduced_newton_compiled(
     tolerance: float = FIXED_POINT_RESIDUAL_TOLERANCE,
     newton_steps: int = NEWTON_STEPS,
     active_set_steps: int = ACTIVE_SET_STEPS,
+    jacobian_refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
     program: "ReducedProgram | None" = None,
     stream: bool = False,
 ) -> ReducedNewtonResult:
@@ -2879,6 +2971,7 @@ def solve_reduced_newton_compiled(
         tolerance=tolerance,
         newton_steps=newton_steps,
         active_set_steps=active_set_steps,
+        refresh_threshold=jacobian_refresh_threshold,
     )
     return ReducedNewtonResult(
         state=fields["state"],
@@ -2911,6 +3004,7 @@ def solve_constrained_reduced_newton_compiled(
     tolerance: float = FIXED_POINT_RESIDUAL_TOLERANCE,
     newton_steps: int = NEWTON_STEPS,
     active_set_steps: int = ACTIVE_SET_STEPS,
+    jacobian_refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
     constraint_current_ceiling: float | np.ndarray | None = (
         DEFAULT_COMPENSATING_CURRENT_CEILING
     ),
@@ -2931,6 +3025,7 @@ def solve_constrained_reduced_newton_compiled(
             tolerance=tolerance,
             newton_steps=newton_steps,
             active_set_steps=active_set_steps,
+            jacobian_refresh_threshold=jacobian_refresh_threshold,
             program=program,
         )
         return ConstrainedReducedNewtonResult(**result.__dict__)
@@ -2966,6 +3061,7 @@ def solve_constrained_reduced_newton_compiled(
         tolerance=tolerance,
         newton_steps=newton_steps,
         active_set_steps=active_set_steps,
+        refresh_threshold=jacobian_refresh_threshold,
     )
     unknowns = fields["reduced"][program.coordinates.size :]
     records = constraint_records(

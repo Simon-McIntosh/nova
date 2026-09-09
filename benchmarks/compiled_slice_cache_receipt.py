@@ -9,6 +9,7 @@ from pathlib import Path
 import time
 from typing import Any
 
+import jax
 import jax.numpy as jnp
 import numpy as np
 
@@ -33,6 +34,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = (
     ROOT / "docs/figures/millisecond-converged-solve/compiled-slice-cache/receipt.json"
 )
+DEFAULT_DIAGNOSTIC = DEFAULT_OUTPUT.with_name("vertical-mode-diagnostic.json")
 DISPATCH_TOLERANCE = 0.10
 
 
@@ -82,7 +84,7 @@ def _solve(member):
     )
 
 
-def _host(member):
+def _host(member, *, refresh_threshold=reduced_newton.JACOBIAN_REFRESH_THRESHOLD):
     """Run the matched host route used for the terminal-flux comparison."""
     return reduced_newton.solve_reduced_newton(
         member.operator,
@@ -93,7 +95,85 @@ def _host(member):
         newton_steps=12,
         active_set_steps=16,
         trip_boundary=reduced_newton.TRIP_BOUNDARY,
+        jacobian_refresh_threshold=refresh_threshold,
     )
+
+
+def _direct_dispatch(result, member):
+    """Dispatch the carried executable directly, bypassing public cache lookup."""
+    state = jnp.asarray(member.state)
+    requested = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    shadow = jnp.ravel(
+        jnp.asarray(member.operator.residual_shadow_mask(state, requested), dtype=bool)
+    )
+    output = result.program.slice_solver(state, shadow)
+    jax.block_until_ready(output)
+    return output
+
+
+def diagnose_vertical_mode(output: Path) -> dict[str, Any]:
+    """Locate the first adaptive-versus-refusal decision on the vertical row."""
+    configure_dtypes()
+    members, inputs = _build_members()
+    member = next(item for item in members if item.identity == "21986/46 mixed")
+    adaptive = _host(member)
+    refusal = _host(member, refresh_threshold=None)
+    reduced_newton._compiled_program_cache.clear()
+    _solve(member)
+    cached = _solve(member)
+    first_step = None
+    for adaptive_step, refusal_step in zip(
+        adaptive.steps, refusal.steps, strict=False
+    ):
+        left = adaptive_step._replace(wall_s=0.0)
+        right = refusal_step._replace(wall_s=0.0)
+        if left != right:
+            moved = [
+                name
+                for name in left._fields
+                if getattr(left, name) != getattr(right, name)
+            ]
+            first_step = {
+                "trip": adaptive_step.trip,
+                "step": adaptive_step.step,
+                "quantities": moved,
+                "adaptive": _strict(left._asdict()),
+                "refusal_only": _strict(right._asdict()),
+            }
+            break
+    trip_rows = []
+    for trip in range(
+        max(adaptive.active_set_iterations, cached.active_set_iterations)
+    ):
+        trip_rows.append(
+            {
+                "trip": trip,
+                "direct_residual": adaptive.active_set_residuals[trip],
+                "cached_residual": cached.active_set_residuals[trip],
+                "direct_steps": adaptive.newton_steps_per_trip[trip],
+                "cached_steps": cached.newton_steps_per_trip[trip],
+                "direct_jacobian_builds": adaptive.jacobian_builds_per_trip[trip],
+                "cached_jacobian_builds": cached.jacobian_builds_per_trip[trip],
+                "direct_mask_difference": adaptive.active_set_mask_differences[trip],
+                "cached_mask_difference": cached.active_set_mask_differences[trip],
+            }
+        )
+    diagnosis = {
+        "member": member.identity,
+        "inputs": inputs,
+        "mechanism": (
+            "the cached executable omitted the adaptive Jacobian-refresh threshold "
+            "and therefore ran the refusal-only chord policy"
+        ),
+        "quantity_moved_first": first_step,
+        "trip_comparison_after_repair": trip_rows,
+        "terminal_flux_ulp_after_repair": _ulp_distance(cached.state, adaptive.state),
+        "refusal_only_terminal_flux_ulp": _ulp_distance(
+            refusal.state, adaptive.state
+        ),
+    }
+    _write_json(output, diagnosis)
+    return diagnosis
 
 
 def run(output: Path, *, cache_root: Path | None = None) -> dict[str, Any]:
@@ -119,9 +199,14 @@ def run(output: Path, *, cache_root: Path | None = None) -> dict[str, Any]:
         },
         "policy": {"newton_steps": 12, "active_set_steps": 16},
         "acceptance": {
-            "dispatch_wall_relative_tolerance": DISPATCH_TOLERANCE,
+            "same_job_direct_wall_relative_tolerance": DISPATCH_TOLERANCE,
             "terminal_flux_max_ulp": 4,
         },
+        "correctness_diagnostic": (
+            json.loads(DEFAULT_DIAGNOSTIC.read_text(encoding="utf-8"))
+            if DEFAULT_DIAGNOSTIC.exists()
+            else None
+        ),
         "members": [],
         "verdict": None,
     }
@@ -138,24 +223,40 @@ def run(output: Path, *, cache_root: Path | None = None) -> dict[str, Any]:
         cold_started = time.perf_counter()
         first = _solve(member)
         cold_wall = time.perf_counter() - cold_started
-        warm_started = time.perf_counter()
-        second = _solve(member)
-        warm_wall = time.perf_counter() - warm_started
+        _direct_dispatch(first, member)
+        _solve(member)
+        if number % 2:
+            direct_started = time.perf_counter()
+            direct = _direct_dispatch(first, member)
+            direct_wall = time.perf_counter() - direct_started
+            warm_started = time.perf_counter()
+            second = _solve(member)
+            warm_wall = time.perf_counter() - warm_started
+        else:
+            warm_started = time.perf_counter()
+            second = _solve(member)
+            warm_wall = time.perf_counter() - warm_started
+            direct_started = time.perf_counter()
+            direct = _direct_dispatch(first, member)
+            direct_wall = time.perf_counter() - direct_started
         host = _host(member)
         reference_wall = dispatch_reference[member.identity]
-        relative_dispatch_error = abs(warm_wall - reference_wall) / reference_wall
+        relative_dispatch_error = abs(warm_wall - direct_wall) / direct_wall
         flux_ulp = _ulp_distance(second.state, host.state)
+        direct_flux_ulp = _ulp_distance(second.state, direct[0])
         row = {
             "identity": member.identity,
             "cold_public_wall_s": cold_wall,
             "warm_public_wall_s": warm_wall,
             "dispatch_reference_wall_s": reference_wall,
+            "same_job_direct_wall_s": direct_wall,
             "dispatch_relative_error": relative_dispatch_error,
             "same_cached_program": second.program is first.program,
             "slice_solver_count": len(second.program.slice_solvers or {}),
             "compiled_host_terminal_flux_ulp": flux_ulp,
+            "cached_direct_terminal_flux_ulp": direct_flux_ulp,
             "dispatch_within_tolerance": relative_dispatch_error <= DISPATCH_TOLERANCE,
-            "terminal_flux_within_tolerance": flux_ulp <= 4,
+            "terminal_flux_within_tolerance": flux_ulp <= 4 and direct_flux_ulp <= 4,
         }
         receipt["members"].append(row)
         _write_json(output, receipt)
@@ -183,7 +284,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--cache-root", type=Path, default=None)
+    parser.add_argument("--diagnose-vertical-mode", action="store_true")
+    parser.add_argument("--diagnostic-output", type=Path, default=DEFAULT_DIAGNOSTIC)
     arguments = parser.parse_args()
+    if arguments.diagnose_vertical_mode:
+        result = diagnose_vertical_mode(arguments.diagnostic_output.resolve())
+        print(json.dumps(_strict(result), sort_keys=True), flush=True)
+        return
     result = run(
         arguments.output.resolve(),
         cache_root=arguments.cache_root.resolve() if arguments.cache_root else None,

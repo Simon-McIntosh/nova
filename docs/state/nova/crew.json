@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T10:19:10",
+  "updated": "2026-09-09T10:31:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -142987,6 +142987,175 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T075653849634-cank-compensator-bound",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a74",
+        "node": "cank-compensator-bound",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 430,
+                "cached_input_tokens": 561114,
+                "input_tokens": 561548,
+                "output_tokens": 12,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 561560,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "tests/test_reduced_newton_constraint_bounds.py is green on all_debug CPU x64 asserting that an over-ceiling Solovev row is refused before a qualified result and that the in-bound centroid row's receipt is bit-identical to the unbounded route, with docs/figures/constraint-augmented-newton-krylov/compensator-bound/receipt.json recording both cases",
+          "estimated_hours": null,
+          "goal": "Bound the compensating unknown on the constrained reduced route (followup f-cank-010) so a receipt whose per-circuit compensating current exceeds a physical or caller-supplied ceiling, or whose topology has no qualified axis, is returned unqualified with a refusal reason instead of converged",
+          "id": "cank-compensator-bound",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T07:56:54Z",
+            "read_at": "2026-09-09T07:56:55Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 60.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T075653849634-cank-compensator-bound/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "tests/test_reduced_newton_constraint_bounds.py",
+            "docs/figures/constraint-augmented-newton-krylov/compensator-bound"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cank-bound",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T07:57:11Z",
+        "completed_at": "2026-09-09T08:28:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1866,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1866,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9ff98552afd6ebd6eb95e02f05e5e988c9b07f9f",
+        "commits": [
+          "d884fe5942147fdcf6eee3ba64913853964d9ab7"
+        ],
+        "changed_lines": {
+          "added": 358,
+          "removed": 5,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug CPU x64: python -m pytest -p no:cacheprovider tests/test_reduced_newton_constraint_bounds.py -vv (2 passed in 722 s)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T075653849634-cank-compensator-bound/reduced-newton-constraint-bounds-rerun.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T075653849634-cank-compensator-bound/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0852b-c02a-7e90-9cac-3f64c1d2729d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12695040,
+            "cached_input_tokens_cumulative": 12695040,
+            "input_tokens": 12927603,
+            "input_tokens_cumulative": 12927603,
+            "output_tokens": 28166,
+            "output_tokens_cumulative": 28166,
+            "reasoning_output_tokens": 9209,
+            "reasoning_output_tokens_cumulative": 9209
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T08:28:17Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 64.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T08:28:17Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 12695040,
+          "cumulative_input_tokens": 25622643,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 37375
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cank-compensator-bound",
+          "session_id": "01a0852b-c02a-7e90-9cac-3f64c1d2729d",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T08:28:17Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -143299,6 +143468,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2348
+    "_version": 2349
   }
 }

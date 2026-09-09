@@ -88,7 +88,18 @@ from nova.jax.config import Precision, resolve_precision
 from nova.linalg.tensor_spline import TensorBSpline, fit_tensor_spline
 
 
-def _boundary_defaults(psi2d, rg, zg, angles, wall_r, wall_z, wall_psi):
+def _boundary_defaults(
+    psi2d,
+    rg,
+    zg,
+    angles,
+    wall_r,
+    wall_z,
+    wall_psi,
+    wall_unit_offsets=None,
+    wall_unit_closed=None,
+    wall_unit_vessel=None,
+):
     """Materialise optional values in geometry or solved-field dtype."""
     if angles is None:
         angles = jnp.asarray(LCFS_ANGLES, dtype=rg.dtype)
@@ -98,7 +109,28 @@ def _boundary_defaults(psi2d, rg, zg, angles, wall_r, wall_z, wall_psi):
         wall_z = jnp.asarray([1.0e30], dtype=zg.dtype)
     if wall_psi is None:
         wall_psi = jnp.asarray([jnp.nan], dtype=psi2d.dtype)
-    return angles, wall_r, wall_z, wall_psi
+    if wall_unit_offsets is None:
+        wall_unit_offsets = jnp.asarray([0, wall_r.size], dtype=jnp.int32)
+    else:
+        wall_unit_offsets = jnp.asarray(wall_unit_offsets, dtype=jnp.int32)
+    unit_count = wall_unit_offsets.size - 1
+    if wall_unit_closed is None:
+        wall_unit_closed = jnp.ones((unit_count,), dtype=bool)
+    else:
+        wall_unit_closed = jnp.asarray(wall_unit_closed, dtype=bool)
+    if wall_unit_vessel is None:
+        wall_unit_vessel = jnp.ones((unit_count,), dtype=bool)
+    else:
+        wall_unit_vessel = jnp.asarray(wall_unit_vessel, dtype=bool)
+    return (
+        angles,
+        wall_r,
+        wall_z,
+        wall_psi,
+        wall_unit_offsets,
+        wall_unit_closed,
+        wall_unit_vessel,
+    )
 
 
 def _arg_extreme(values, *, maximize):
@@ -178,6 +210,96 @@ def _points_inside_polygon(point_r, point_z, polygon_r, polygon_z):
         axis=-1,
     )
     return inside | on_boundary
+
+
+def _wall_segment_geometry(wall_r, wall_z, wall_unit_offsets, wall_unit_closed):
+    """Return per-node segment ends without joining distinct wall units."""
+    wall_r = jnp.asarray(wall_r)
+    wall_z = jnp.asarray(wall_z)
+    offsets = jnp.asarray(wall_unit_offsets, dtype=jnp.int32)
+    closed = jnp.asarray(wall_unit_closed, dtype=bool)
+    node = jnp.arange(wall_r.size, dtype=jnp.int32)
+    unit = jnp.searchsorted(offsets[1:], node, side="right")
+    unit_start = offsets[unit]
+    unit_end = offsets[unit + 1]
+    last = node == unit_end - 1
+    following = jnp.where(last, unit_start, node + 1)
+    valid = (~last) | closed[unit]
+    start = jnp.stack((wall_r, wall_z), axis=-1)
+    end = jnp.stack((wall_r[following], wall_z[following]), axis=-1)
+    return start, end, valid, unit, following
+
+
+def _points_inside_wall_units(
+    point_r,
+    point_z,
+    wall_r,
+    wall_z,
+    wall_unit_offsets,
+    wall_unit_closed,
+    wall_unit_vessel,
+):
+    """Test points against vessel interiors minus material units."""
+    point_r = jnp.asarray(point_r)
+    point_z = jnp.asarray(point_z)
+    start, end, valid, segment_unit, _following = _wall_segment_geometry(
+        wall_r, wall_z, wall_unit_offsets, wall_unit_closed
+    )
+    vessel = jnp.asarray(wall_unit_vessel, dtype=bool)
+    closed = jnp.asarray(wall_unit_closed, dtype=bool)
+    unit_count = vessel.size
+    query_r = point_r[..., None]
+    query_z = point_z[..., None]
+    start_r = start[:, 0]
+    start_z = start[:, 1]
+    end_r = end[:, 0]
+    end_z = end[:, 1]
+    straddles = (start_z > query_z) != (end_z > query_z)
+    height = end_z - start_z
+    safe_height = jnp.where(height == 0.0, 1.0, height)
+    crossing_r = start_r + (query_z - start_z) * (end_r - start_r) / safe_height
+    crossings = straddles & (query_r < crossing_r) & valid
+
+    unit_axis = jnp.arange(unit_count, dtype=jnp.int32)
+    per_unit_inside = (
+        jnp.sum(
+            crossings[..., None, :] & (segment_unit[None, :] == unit_axis[:, None]),
+            axis=-1,
+        )
+        % 2
+        == 1
+    )
+
+    edge = end - start
+    edge_length2 = jnp.sum(edge**2, axis=-1)
+    safe_length2 = jnp.where(edge_length2 == 0.0, 1.0, edge_length2)
+    projection = jnp.clip(
+        ((query_r - start_r) * edge[:, 0] + (query_z - start_z) * edge[:, 1])
+        / safe_length2,
+        0.0,
+        1.0,
+    )
+    nearest_r = start_r + projection * edge[:, 0]
+    nearest_z = start_z + projection * edge[:, 1]
+    coordinate_scale = jnp.maximum(
+        1.0,
+        jnp.maximum(jnp.max(jnp.abs(wall_r)), jnp.max(jnp.abs(wall_z))),
+    )
+    tolerance = jnp.maximum(
+        jnp.asarray(1.0e-12, dtype=point_r.dtype),
+        16.0 * jnp.finfo(point_r.dtype).eps * coordinate_scale,
+    )
+    on_edge = (
+        ((query_r - nearest_r) ** 2 + (query_z - nearest_z) ** 2) <= tolerance**2
+    ) & valid
+    per_unit_edge = jnp.any(
+        on_edge[..., None, :] & (segment_unit[None, :] == unit_axis[:, None]),
+        axis=-1,
+    )
+    contained = per_unit_inside | per_unit_edge
+    vessel_inside = jnp.any(contained & vessel & closed, axis=-1)
+    material_inside = jnp.any(contained & ~vessel, axis=-1)
+    return vessel_inside & ~material_inside
 
 
 #: static count of X-point candidate slots the stencil classifier fills (a
@@ -651,7 +773,14 @@ def _signed_area2(origin_r, origin_z, a_r, a_z, b_r, b_z):
 
 
 def _wall_nodes_in_line_of_sight(
-    source_r, source_z, target_r, target_z, wall_r, wall_z
+    source_r,
+    source_z,
+    target_r,
+    target_z,
+    wall_r,
+    wall_z,
+    wall_unit_offsets=None,
+    wall_unit_closed=None,
 ):
     """Mark targets with an unobstructed sightline from ``source`` to the wall.
 
@@ -673,10 +802,17 @@ def _wall_nodes_in_line_of_sight(
         jnp.asarray(source_z, dtype=target_z.dtype), target_z.shape
     )
 
-    edge_start_r = wall_r[None, :]
-    edge_start_z = wall_z[None, :]
-    edge_end_r = jnp.roll(wall_r, -1)[None, :]
-    edge_end_z = jnp.roll(wall_z, -1)[None, :]
+    if wall_unit_offsets is None:
+        wall_unit_offsets = jnp.asarray([0, wall_r.size], dtype=jnp.int32)
+    if wall_unit_closed is None:
+        wall_unit_closed = jnp.ones((wall_unit_offsets.size - 1,), dtype=bool)
+    edge_start, edge_end, edge_valid, _unit, _following = _wall_segment_geometry(
+        wall_r, wall_z, wall_unit_offsets, wall_unit_closed
+    )
+    edge_start_r = edge_start[None, :, 0]
+    edge_start_z = edge_start[None, :, 1]
+    edge_end_r = edge_end[None, :, 0]
+    edge_end_z = edge_end[None, :, 1]
 
     src_r, src_z = source_r[:, None], source_z[:, None]
     tgt_r, tgt_z = target_r[:, None], target_z[:, None]
@@ -688,7 +824,10 @@ def _wall_nodes_in_line_of_sight(
         src_r, src_z, tgt_r, tgt_z, edge_start_r, edge_start_z
     ) * _signed_area2(src_r, src_z, tgt_r, tgt_z, edge_end_r, edge_end_z)
 
-    crossed = jnp.any((across_edge < 0.0) & (across_query < 0.0), axis=-1)
+    crossed = jnp.any(
+        (across_edge < 0.0) & (across_query < 0.0) & edge_valid[None, :],
+        axis=-1,
+    )
     return ~crossed
 
 
@@ -705,6 +844,8 @@ def _masked_wall_reachability(
     wall_r,
     wall_z,
     compact_capacity,
+    wall_unit_offsets=None,
+    wall_unit_closed=None,
 ):
     """Evaluate exact reachability without visiting inactive padded candidates."""
     candidate_mask = candidate_mask.reshape(-1)
@@ -731,6 +872,8 @@ def _masked_wall_reachability(
                 selected_z,
                 wall_r,
                 wall_z,
+                wall_unit_offsets,
+                wall_unit_closed,
             )
             & active_slots
         )
@@ -759,6 +902,8 @@ def _masked_wall_reachability(
                 candidate_z,
                 wall_r,
                 wall_z,
+                wall_unit_offsets,
+                wall_unit_closed,
             )
         )
 
@@ -827,12 +972,18 @@ def _masked_surface_derivatives(
     )
 
 
-def _sample_wall_polyline(wall_r, wall_z, sample_count):
-    """Return fixed-count, equal-arc samples around a closed wall polyline."""
-    segment_length = jnp.hypot(
-        jnp.roll(wall_r, -1) - wall_r,
-        jnp.roll(wall_z, -1) - wall_z,
+def _sample_wall_polyline(
+    wall_r, wall_z, sample_count, wall_unit_offsets=None, wall_unit_closed=None
+):
+    """Return equal-arc samples without introducing inter-unit segments."""
+    if wall_unit_offsets is None:
+        wall_unit_offsets = jnp.asarray([0, wall_r.size], dtype=jnp.int32)
+    if wall_unit_closed is None:
+        wall_unit_closed = jnp.ones((wall_unit_offsets.size - 1,), dtype=bool)
+    start, end, valid, unit, following = _wall_segment_geometry(
+        wall_r, wall_z, wall_unit_offsets, wall_unit_closed
     )
+    segment_length = jnp.where(valid, jnp.linalg.norm(end - start, axis=-1), 0.0)
     segment_end = jnp.cumsum(segment_length)
     segment_start = segment_end - segment_length
     perimeter = segment_end[-1]
@@ -842,10 +993,16 @@ def _sample_wall_polyline(wall_r, wall_z, sample_count):
     )
     safe_length = jnp.where(segment_length[segment] > 0.0, segment_length[segment], 1.0)
     fraction = (arc - segment_start[segment]) / safe_length
-    following = jnp.mod(segment + 1, wall_r.size)
     sample_r = wall_r[segment] + fraction * (wall_r[following] - wall_r[segment])
     sample_z = wall_z[segment] + fraction * (wall_z[following] - wall_z[segment])
-    return arc, sample_r, sample_z
+    prior = jnp.arange(wall_r.size)[None, :] < jnp.arange(wall_r.size)[:, None]
+    same_unit = unit[None, :] == unit[:, None]
+    local_start = jnp.sum(
+        jnp.where(prior & same_unit & valid[None, :], segment_length[None, :], 0.0),
+        axis=1,
+    )
+    local_arc = local_start[segment] + fraction * segment_length[segment]
+    return local_arc, sample_r, sample_z, segment
 
 
 def _select_reachable_wall_limiter(
@@ -862,6 +1019,8 @@ def _select_reachable_wall_limiter(
     axis_r,
     axis_z,
     selected_wall=None,
+    wall_unit_offsets=None,
+    wall_unit_closed=None,
 ):
     """Polish a wall candidate on the tensor spline over reachable wall pieces.
 
@@ -886,26 +1045,51 @@ def _select_reachable_wall_limiter(
     masked argmin.  The selected-wall path checks only its selected point,
     nearest support node, segment samples, and refined roots.
     """
-    all_start = jnp.stack((wall_r, wall_z), axis=-1)
-    all_end = jnp.roll(all_start, -1, axis=0)
+    if wall_unit_offsets is None:
+        wall_unit_offsets = jnp.asarray([0, wall_r.size], dtype=jnp.int32)
+    if wall_unit_closed is None:
+        wall_unit_closed = jnp.ones((wall_unit_offsets.size - 1,), dtype=bool)
+    all_start, all_end, segment_valid, segment_unit, _following = (
+        _wall_segment_geometry(wall_r, wall_z, wall_unit_offsets, wall_unit_closed)
+    )
     all_tangent = all_end - all_start
     all_length_squared = jnp.sum(all_tangent**2, axis=-1)
-    sample_arc, sample_r, sample_z = _sample_wall_polyline(
-        wall_r, wall_z, _WALL_REACHABILITY_SAMPLES
+    sample_arc, sample_r, sample_z, sample_segment = _sample_wall_polyline(
+        wall_r,
+        wall_z,
+        _WALL_REACHABILITY_SAMPLES,
+        wall_unit_offsets,
+        wall_unit_closed,
     )
     if selected_wall is None:
         node_reachable = _wall_nodes_touching_region(
             pre_saddle_region, inside_limiter, rg, zg, wall_r, wall_z
-        ) & _wall_nodes_in_line_of_sight(axis_r, axis_z, wall_r, wall_z, wall_r, wall_z)
+        ) & _wall_nodes_in_line_of_sight(
+            axis_r,
+            axis_z,
+            wall_r,
+            wall_z,
+            wall_r,
+            wall_z,
+            wall_unit_offsets,
+            wall_unit_closed,
+        )
         node_reachable &= wall_r.shape[0] > 1
         sample_reachable = _wall_nodes_touching_region(
             pre_saddle_region, inside_limiter, rg, zg, sample_r, sample_z
         ) & _wall_nodes_in_line_of_sight(
-            axis_r, axis_z, sample_r, sample_z, wall_r, wall_z
+            axis_r,
+            axis_z,
+            sample_r,
+            sample_z,
+            wall_r,
+            wall_z,
+            wall_unit_offsets,
+            wall_unit_closed,
         )
         sample_reachable &= wall_r.shape[0] > 1
         segment_index = jnp.arange(wall_r.size, dtype=jnp.int32)
-        support_valid = jnp.asarray(True)
+        support_valid = segment_valid
     else:
         selected_wall = jnp.asarray(selected_wall, dtype=wall_r.dtype)
         support_valid = jnp.all(jnp.isfinite(selected_wall[:3]))
@@ -917,7 +1101,11 @@ def _select_reachable_wall_limiter(
         closest = all_start + projection[:, None] * all_tangent
         distance_squared = jnp.sum((closest - safe_selected[None, :]) ** 2, axis=-1)
         selected_segment = _argmin_exact(
-            jnp.where(all_length_squared > 0.0, distance_squared, jnp.inf)
+            jnp.where(
+                segment_valid & (all_length_squared > 0.0),
+                distance_squared,
+                jnp.inf,
+            )
         )
         selected_node = _argmin_exact(
             (wall_r - safe_selected[0]) ** 2 + (wall_z - safe_selected[1]) ** 2
@@ -958,7 +1146,7 @@ def _select_reachable_wall_limiter(
         jnp.isfinite(upper)
         & (upper > lower)
         & (segment_length[:, None] > 0)
-        & support_valid
+        & (support_valid if selected_wall is not None else support_valid[:, None])
     )
     fraction = jnp.linspace(0.0, 1.0, _WALL_DERIVATIVE_BINS + 1, dtype=wall_r.dtype)
     parameter = lower[..., None] + (upper - lower)[..., None] * fraction
@@ -984,6 +1172,8 @@ def _select_reachable_wall_limiter(
             flat_points[:, 1],
             wall_r,
             wall_z,
+            wall_unit_offsets,
+            wall_unit_closed,
         )
         endpoint_reachable = endpoint_reachable.reshape(parameter.shape) & endpoint_mask
     if selected_wall is None:
@@ -1097,6 +1287,8 @@ def _select_reachable_wall_limiter(
             wall_r,
             wall_z,
             _SELECTED_WALL_REACHABILITY_CAPACITY,
+            wall_unit_offsets,
+            wall_unit_closed,
         )
         support_reachable = support_valid & jnp.all(combined_reachable[:2])
         selected_node_reachable = combined_reachable[1] & support_reachable
@@ -1131,18 +1323,26 @@ def _select_reachable_wall_limiter(
     root_score = jnp.where(
         root_reachable, (root_value - psi_axis) / span_safe, jnp.inf
     ).reshape(-1)
-    all_segment_length = jnp.linalg.norm(all_tangent, axis=-1)
-    all_segment_end = jnp.cumsum(all_segment_length)
+    all_segment_length = jnp.where(
+        segment_valid, jnp.linalg.norm(all_tangent, axis=-1), 0.0
+    )
+    prior = jnp.arange(wall_r.size)[None, :] < jnp.arange(wall_r.size)[:, None]
+    same_unit = segment_unit[None, :] == segment_unit[:, None]
+    all_segment_start = jnp.sum(
+        jnp.where(
+            prior & same_unit & segment_valid[None, :],
+            all_segment_length[None, :],
+            0.0,
+        ),
+        axis=1,
+    )
     if selected_wall is None:
-        sample_segment = jnp.clip(
-            jnp.searchsorted(all_segment_end, sample_arc, side="right"),
-            0,
-            wall_r.size - 1,
-        )
         sample_supported = jnp.any(
             sample_segment[:, None] == segment_index[None, :], axis=-1
         )
-        sample_eligible = sample_reachable & sample_supported & support_valid
+        sample_eligible = (
+            sample_reachable & sample_supported & segment_valid[sample_segment]
+        )
         sample_evaluation_r = jnp.where(sample_eligible, sample_r, axis_r)
         sample_evaluation_z = jnp.where(sample_eligible, sample_z, axis_z)
         sample_value = global_surface(sample_evaluation_r, sample_evaluation_z)
@@ -1162,11 +1362,19 @@ def _select_reachable_wall_limiter(
     )
     candidate_arcs = jnp.concatenate(
         (
-            (all_segment_end - all_segment_length)[segment_index, None, None]
+            all_segment_start[segment_index, None, None]
             + parameter * segment_length[:, None, None],
-            (all_segment_end - all_segment_length)[segment_index, None, None]
+            all_segment_start[segment_index, None, None]
             + root_parameter * segment_length[:, None, None],
             sample_arc[None, :],
+        ),
+        axis=None,
+    )
+    candidate_segments = jnp.concatenate(
+        (
+            jnp.broadcast_to(segment_index[:, None, None], parameter.shape),
+            jnp.broadcast_to(segment_index[:, None, None], root_parameter.shape),
+            sample_segment[None, :],
         ),
         axis=None,
     )
@@ -1176,7 +1384,8 @@ def _select_reachable_wall_limiter(
     point_evaluation = jnp.where(valid, point, safe_point)
     point_flux = global_surface(point_evaluation[0], point_evaluation[1])
     nearest_node = _argmin_exact((wall_r - point[0]) ** 2 + (wall_z - point[1]) ** 2)
-    node_arc = all_segment_end - all_segment_length
+    node_arc = all_segment_start
+    selected_segment = candidate_segments[selected]
     nan = jnp.asarray(jnp.nan, dtype=wall_r.dtype)
     exact_evaluation_r = jnp.where(wall_r.shape[0] > 1, wall_r, axis_r)
     exact_evaluation_z = jnp.where(wall_r.shape[0] > 1, wall_z, axis_z)
@@ -1195,6 +1404,7 @@ def _select_reachable_wall_limiter(
         "reachable_samples": sample_reachable,
         "sample_arc": sample_arc,
         "node_index": nearest_node,
+        "unit_index": segment_unit[selected_segment],
         "node_arc": jnp.where(valid, node_arc[nearest_node], nan),
         "node_r": jnp.where(valid, wall_r[nearest_node], nan),
         "node_z": jnp.where(valid, wall_z[nearest_node], nan),
@@ -1238,6 +1448,9 @@ def _read_ingredients(
     classification_x=None,
     classification_wall=None,
     surface: TensorBSpline | None = None,
+    wall_unit_offsets=None,
+    wall_unit_closed=None,
+    wall_unit_vessel=None,
 ) -> dict:
     """Everything the binding needs, up to (but not including) the min/softmin.
 
@@ -1506,8 +1719,14 @@ def _read_ingredients(
         supplied_x = jnp.asarray(classification_x, dtype=psi2d.dtype)
         supplied_wall = jnp.asarray(classification_wall, dtype=psi2d.dtype)
         supplied_x_present = jnp.all(jnp.isfinite(supplied_x[:, :3]), axis=1)
-        supplied_x_inside_wall = _points_inside_polygon(
-            supplied_x[:, 0], supplied_x[:, 1], wall_r, wall_z
+        supplied_x_inside_wall = _points_inside_wall_units(
+            supplied_x[:, 0],
+            supplied_x[:, 1],
+            wall_r,
+            wall_z,
+            wall_unit_offsets,
+            wall_unit_closed,
+            wall_unit_vessel,
         )
         supplied_x_valid = supplied_x_present & supplied_x_inside_wall
         supplied_x_r = jnp.where(supplied_x_valid, supplied_x[:, 0], axis_r)
@@ -1549,7 +1768,11 @@ def _read_ingredients(
             axis_z,
         )
         if classification_wall is None:
-            class_wall = _select_reachable_wall_limiter(*wall_arguments)
+            class_wall = _select_reachable_wall_limiter(
+                *wall_arguments,
+                wall_unit_offsets=wall_unit_offsets,
+                wall_unit_closed=wall_unit_closed,
+            )
         else:
             supplied_wall_surface_flux = global_surface(
                 supplied_wall[0], supplied_wall[1]
@@ -1564,9 +1787,16 @@ def _read_ingredients(
             class_wall = jax.lax.cond(
                 supplied_wall_matches_surface,
                 lambda: _select_reachable_wall_limiter(
-                    *wall_arguments, selected_wall=supplied_wall
+                    *wall_arguments,
+                    selected_wall=supplied_wall,
+                    wall_unit_offsets=wall_unit_offsets,
+                    wall_unit_closed=wall_unit_closed,
                 ),
-                lambda: _select_reachable_wall_limiter(*wall_arguments),
+                lambda: _select_reachable_wall_limiter(
+                    *wall_arguments,
+                    wall_unit_offsets=wall_unit_offsets,
+                    wall_unit_closed=wall_unit_closed,
+                ),
             )
         wall_level = (class_wall["psi"] - psi_axis) / span_safe
         u_wall_c = jnp.where(class_wall["valid"], wall_level, jnp.inf)
@@ -1580,6 +1810,7 @@ def _read_ingredients(
                 (_WALL_REACHABILITY_SAMPLES,), jnp.nan, dtype=rg.dtype
             ),
             "node_index": jnp.asarray(0, dtype=jnp.int32),
+            "unit_index": jnp.asarray(-1, dtype=jnp.int32),
             "node_arc": coordinate_nan,
             "node_r": coordinate_nan,
             "node_z": coordinate_nan,
@@ -1669,6 +1900,9 @@ def traced_boundary_read(
     classification_x: jnp.ndarray | None = None,
     classification_wall: jnp.ndarray | None = None,
     surface: TensorBSpline | None = None,
+    wall_unit_offsets: jnp.ndarray | None = None,
+    wall_unit_closed: jnp.ndarray | None = None,
+    wall_unit_vessel: jnp.ndarray | None = None,
 ) -> dict:
     """Connectivity LCFS read from ψ — the device-native ``lcfs_contour``.
 
@@ -1694,8 +1928,25 @@ def traced_boundary_read(
     ``s_star`` (the binding level in [0, 1]), ``radii`` ``(len(angles),)`` LCFS
     radii about the axis [m], and ``n_core_cells``.  ``jit``/``vmap``/``grad``-safe.
     """
-    angles, wall_r, wall_z, wall_psi = _boundary_defaults(
-        psi2d, rg, zg, angles, wall_r, wall_z, wall_psi
+    (
+        angles,
+        wall_r,
+        wall_z,
+        wall_psi,
+        wall_unit_offsets,
+        wall_unit_closed,
+        wall_unit_vessel,
+    ) = _boundary_defaults(
+        psi2d,
+        rg,
+        zg,
+        angles,
+        wall_r,
+        wall_z,
+        wall_psi,
+        wall_unit_offsets,
+        wall_unit_closed,
+        wall_unit_vessel,
     )
     ing = _read_ingredients(
         psi2d,
@@ -1714,6 +1965,9 @@ def traced_boundary_read(
         classification_x,
         classification_wall,
         surface,
+        wall_unit_offsets,
+        wall_unit_closed,
+        wall_unit_vessel,
     )
     n_iter = ing["n_iter"]
     seed = ing["seed"]
@@ -1842,6 +2096,7 @@ def traced_boundary_read(
         "private_wall_node_mask": private_wall_node_mask,
         "reachable_wall_sample_mask": ing["class_wall"]["reachable_samples"],
         "limiter_wall_node_index": ing["class_wall"]["node_index"],
+        "limiter_wall_unit_index": ing["class_wall"]["unit_index"],
         "limiter_wall_node_arc": ing["class_wall"]["node_arc"],
         "limiter_wall_node_r": ing["class_wall"]["node_r"],
         "limiter_wall_node_z": ing["class_wall"]["node_z"],
@@ -2040,6 +2295,9 @@ def traced_smooth_boundary_read(
     classification_x: jnp.ndarray | None = None,
     classification_wall: jnp.ndarray | None = None,
     surface: TensorBSpline | None = None,
+    wall_unit_offsets: jnp.ndarray | None = None,
+    wall_unit_closed: jnp.ndarray | None = None,
+    wall_unit_vessel: jnp.ndarray | None = None,
 ) -> dict:
     """The SMOOTH connectivity boundary read — the end-to-end differentiable path.
 
@@ -2074,8 +2332,25 @@ def traced_smooth_boundary_read(
     ``core_weight`` ``(nz, nr)``, ``n_core_soft``, ``p_diverted``, ``u_wall``,
     ``u_xpoint``.  ``jit``/``vmap``/``grad``-safe.
     """
-    angles, wall_r, wall_z, wall_psi = _boundary_defaults(
-        psi2d, rg, zg, angles, wall_r, wall_z, wall_psi
+    (
+        angles,
+        wall_r,
+        wall_z,
+        wall_psi,
+        wall_unit_offsets,
+        wall_unit_closed,
+        wall_unit_vessel,
+    ) = _boundary_defaults(
+        psi2d,
+        rg,
+        zg,
+        angles,
+        wall_r,
+        wall_z,
+        wall_psi,
+        wall_unit_offsets,
+        wall_unit_closed,
+        wall_unit_vessel,
     )
     ing = _read_ingredients(
         psi2d,
@@ -2094,6 +2369,9 @@ def traced_smooth_boundary_read(
         classification_x,
         classification_wall,
         surface,
+        wall_unit_offsets,
+        wall_unit_closed,
+        wall_unit_vessel,
     )
     tau = temperature
     psi_axis = ing["psi_axis"]
@@ -2218,6 +2496,9 @@ def traced_iteration_boundary_read(
     previous_flood_level=jnp.nan,
     resolution_stride: int = 2,
     use_doubling: bool = True,
+    wall_unit_offsets: jnp.ndarray | None = None,
+    wall_unit_closed: jnp.ndarray | None = None,
+    wall_unit_vessel: jnp.ndarray | None = None,
 ) -> dict:
     """Smooth topology approximation for nonlinear map evaluations.
 
@@ -2251,6 +2532,9 @@ def traced_iteration_boundary_read(
         temperature,
         previous_flood_level,
         use_doubling,
+        wall_unit_offsets=wall_unit_offsets,
+        wall_unit_closed=wall_unit_closed,
+        wall_unit_vessel=wall_unit_vessel,
     )
     core_weight = _interpolate_grid(result["core_weight"], coarse_r, coarse_z, rg, zg)
     return {
@@ -2278,6 +2562,9 @@ def _smooth_read_at_stencil_axis(
     wall_z,
     wall_psi,
     temperature,
+    wall_unit_offsets,
+    wall_unit_closed,
+    wall_unit_vessel,
 ):
     """Census the O-point, globally polish it, then seed the smooth read.
 
@@ -2318,6 +2605,9 @@ def _smooth_read_at_stencil_axis(
         wall_psi,
         temperature,
         surface=spline,
+        wall_unit_offsets=wall_unit_offsets,
+        wall_unit_closed=wall_unit_closed,
+        wall_unit_vessel=wall_unit_vessel,
     )
     out = dict(out)
     out["axis_r"] = jnp.where(axis_polished, ax_r, jnp.nan)
@@ -2364,6 +2654,35 @@ def _densify_wall(grid, m: int = 720):
         return np.array([1.0e30]), np.array([1.0e30])
     q = np.linspace(0.0, total, m, endpoint=False)
     return np.interp(q, s, rr), np.interp(q, s, zz)
+
+
+def _wall_unit_metadata(grid, wall_node_count):
+    """Return packed-unit metadata, defaulting a legacy wall to one vessel."""
+    import numpy as np  # noqa: PLC0415
+
+    offsets = np.asarray(
+        getattr(grid, "wall_unit_offsets", [0, wall_node_count]), dtype=np.int32
+    )
+    unit_count = offsets.size - 1
+    units = tuple(getattr(grid, "wall_units", ()))
+    closed = np.asarray(
+        getattr(
+            grid,
+            "wall_unit_closed",
+            [unit.closed for unit in units]
+            if units
+            else np.ones(unit_count, dtype=bool),
+        ),
+        dtype=bool,
+    )
+    kinds = tuple(
+        getattr(
+            grid,
+            "wall_unit_kinds",
+            tuple(unit.kind for unit in units) if units else ("vessel",) * unit_count,
+        )
+    )
+    return offsets, closed, np.asarray([kind == "vessel" for kind in kinds])
 
 
 @dataclass
@@ -2425,6 +2744,7 @@ def host_boundary_read(
     dtype = jnp.float32 if resolved is Precision.SINGLE else jnp.float64
     geometry_dtype = jnp.float64
     wall_r, wall_z = _densify_wall(grid)
+    wall_offsets, wall_closed, wall_vessel = _wall_unit_metadata(grid, wall_r.size)
     # ONE hard error per solve: the flood seed (the axis cell) must be occupiable
     # — if it lands in wall material (or outside the vessel) the connectivity read
     # has no plasma to grow.  (The read itself is fully differentiable; this is a
@@ -2459,6 +2779,9 @@ def host_boundary_read(
         jnp.asarray(wall_r, dtype=geometry_dtype),
         jnp.asarray(wall_z, dtype=geometry_dtype),
         wpsi,
+        wall_unit_offsets=jnp.asarray(wall_offsets),
+        wall_unit_closed=jnp.asarray(wall_closed),
+        wall_unit_vessel=jnp.asarray(wall_vessel),
     )
     return ConnectivityBoundary(
         found=bool(out["found"]),
@@ -2519,6 +2842,7 @@ def host_boundary_read_smooth(
     dtype = jnp.float32 if resolved is Precision.SINGLE else jnp.float64
     geometry_dtype = jnp.float64
     wall_r, wall_z = _densify_wall(grid)
+    wall_offsets, wall_closed, wall_vessel = _wall_unit_metadata(grid, wall_r.size)
     if wall_psi is None:
         wpsi = jnp.asarray([jnp.nan], dtype=dtype)
     else:
@@ -2539,6 +2863,9 @@ def host_boundary_read_smooth(
         jnp.asarray(wall_z, dtype=geometry_dtype),
         wpsi,
         jnp.asarray(temperature, dtype=dtype),
+        jnp.asarray(wall_offsets),
+        jnp.asarray(wall_closed),
+        jnp.asarray(wall_vessel),
     )
     return {k: np.asarray(v) for k, v in out.items()}
 
@@ -2576,6 +2903,7 @@ def host_boundary_read_batch(
     ps = jnp.asarray(psi_stack, dtype=dtype)
     ax = jnp.asarray(axes, dtype=dtype)
     wall_r, wall_z = _densify_wall(grid)
+    wall_offsets, wall_closed, wall_vessel = _wall_unit_metadata(grid, wall_r.size)
     wr = jnp.asarray(wall_r, dtype=geometry_dtype)
     wz = jnp.asarray(wall_z, dtype=geometry_dtype)
     if wall_psi is None:
@@ -2599,6 +2927,9 @@ def host_boundary_read_batch(
             wr,
             wz,
             wp,
+            wall_unit_offsets=jnp.asarray(wall_offsets),
+            wall_unit_closed=jnp.asarray(wall_closed),
+            wall_unit_vessel=jnp.asarray(wall_vessel),
         )
 
     return jax.vmap(one)(ps, ax, wpsi)

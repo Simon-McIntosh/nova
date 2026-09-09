@@ -15,9 +15,10 @@ from nova.biot.null import Null1D, Null2D
 from nova.equilibrium.connectivity_boundary import (
     _PRE_SADDLE_OFFSET_FRACTION,
     _canonicalize_reciprocal_hex_edges,
-    _points_inside_polygon,
+    _points_inside_wall_units,
     _raster_hex_partition_geometry,
 )
+from nova.geometry import select
 from nova.equilibrium.domain import (
     DomainMasks,
     axis_connected_component,
@@ -65,6 +66,7 @@ class TopologyState(NamedTuple):
     wall_point: jax.Array
     wall_point_flux: jax.Array
     diverted: jax.Array
+    wall_unit_index: jax.Array = jnp.asarray(-1, dtype=jnp.int32)
 
     @property
     def boundary_is_xpoint(self) -> jax.Array:
@@ -203,6 +205,7 @@ class TopologySolveReceipt:
     transition_count: int
     transitions_without_solver_failure: int
     solver_succeeded: bool
+    limiting_unit_index: int | None
 
     def as_dict(self) -> dict[str, object]:
         """Return the strict-JSON representation of this receipt."""
@@ -221,6 +224,7 @@ class TopologySolveReceipt:
                 self.transitions_without_solver_failure
             ),
             "solver_succeeded": self.solver_succeeded,
+            "limiting_unit_index": self.limiting_unit_index,
         }
 
 
@@ -273,6 +277,11 @@ def topology_solve_receipt(
         transition_count=transitions,
         transitions_without_solver_failure=transitions if solver_succeeded else 0,
         solver_succeeded=solver_succeeded,
+        limiting_unit_index=(
+            int(jax.device_get(final_state.wall_unit_index))
+            if final_mode is BoundaryMode.LIMITED
+            else None
+        ),
     )
 
 
@@ -294,9 +303,29 @@ class Topology(Pytree):
     polish_vertical: jax.Array | None = field(default=None, repr=False)
     polish_gather: jax.Array | None = field(default=None, repr=False)
     polish_valid: jax.Array | None = field(default=None, repr=False)
+    wall_unit_offsets: jax.Array | None = field(default=None, repr=False)
+    wall_unit_closed: jax.Array | None = field(default=None, repr=False)
+    wall_unit_vessel: jax.Array | None = field(default=None, repr=False)
 
     def __post_init__(self):
         """Cache the tensor axes required by the saddle-aware component read."""
+        if self.wall_unit_offsets is None:
+            self.wall_unit_offsets = jnp.asarray(
+                [0, self.wall.coordinate.shape[0]], dtype=jnp.int32
+            )
+        else:
+            self.wall_unit_offsets = jnp.asarray(
+                self.wall_unit_offsets, dtype=jnp.int32
+            )
+        unit_count = self.wall_unit_offsets.shape[0] - 1
+        if self.wall_unit_closed is None:
+            self.wall_unit_closed = jnp.ones((unit_count,), dtype=bool)
+        else:
+            self.wall_unit_closed = jnp.asarray(self.wall_unit_closed, dtype=bool)
+        if self.wall_unit_vessel is None:
+            self.wall_unit_vessel = jnp.ones((unit_count,), dtype=bool)
+        else:
+            self.wall_unit_vessel = jnp.asarray(self.wall_unit_vessel, dtype=bool)
         if all(
             value is not None
             for value in (
@@ -353,11 +382,14 @@ class Topology(Pytree):
     def contained_x_candidates(self, vmap_x):
         """Return finite saddle candidates within the first-wall polygon."""
         finite = jnp.all(jnp.isfinite(vmap_x[:, :3]), axis=1)
-        return finite & _points_inside_polygon(
+        return finite & _points_inside_wall_units(
             vmap_x[:, 0],
             vmap_x[:, 1],
             self.wall.coordinate[:, 0],
             self.wall.coordinate[:, 1],
+            self.wall_unit_offsets,
+            self.wall_unit_closed,
+            self.wall_unit_vessel,
         )
 
     @jax.jit
@@ -449,6 +481,70 @@ class Topology(Pytree):
         """Return wall-point flux."""
         return self.wall(psi_wall, polarity)[2]
 
+    def _wall_anchor_selection(self, wall_flux, polarity):
+        """Return a unit-confined wall extremum, its unit and bracket nodes."""
+        signed = jnp.asarray(polarity, dtype=wall_flux.dtype) * wall_flux
+        node = jnp.argmax(signed)
+        offsets = self.wall_unit_offsets
+        unit = jnp.searchsorted(offsets[1:], node, side="right")
+        start = offsets[unit]
+        end = offsets[unit + 1]
+        closed = self.wall_unit_closed[unit]
+        previous = jnp.where(node > start, node - 1, jnp.where(closed, end - 1, start))
+        following = jnp.where(
+            node < end - 1, node + 1, jnp.where(closed, start, end - 1)
+        )
+        open_start = jnp.clip(node - 1, start, jnp.maximum(start, end - 3))
+        open_bracket = jnp.minimum(open_start + jnp.arange(3), end - 1)
+        closed_bracket = jnp.stack((previous, node, following))
+        bracket = jnp.where(closed, closed_bracket, open_bracket)
+        coordinate = self.wall.coordinate[bracket]
+        values = wall_flux[bracket]
+        length = select.length_2d(
+            coordinate[:, 0], coordinate[:, 1], array_namespace=jnp
+        )
+        coefficients = select.traced_quadratic_wall(length, values)
+        position = select.wall_length(coefficients, array_namespace=jnp)
+        interpolated_flux = (
+            coefficients[0] * position**2 + coefficients[1] * position + coefficients[2]
+        )
+        radius, height = select.wall_coordinate(
+            position,
+            coordinate[:, 0],
+            coordinate[:, 1],
+            length,
+            array_namespace=jnp,
+        )
+        kind = jnp.where(
+            coefficients[0] > 0,
+            -1.0,
+            jnp.where(coefficients[0] < 0, 1.0, jnp.nan),
+        )
+        fitted = jnp.stack((radius, height, interpolated_flux, kind))
+        sampled = jnp.concatenate(
+            (
+                self.wall.coordinate[node],
+                wall_flux[node][None],
+                jnp.asarray([jnp.nan]),
+            )
+        )
+        data = jnp.where((end - start) >= 3, fitted, sampled)
+        legacy = self.wall(wall_flux, polarity)
+        single_closed_vessel = (
+            (self.wall_unit_offsets.shape[0] == 2)
+            & self.wall_unit_closed[0]
+            & self.wall_unit_vessel[0]
+        )
+        return (
+            jnp.where(single_closed_vessel, legacy, data),
+            unit,
+            bracket,
+        )
+
+    def wall_anchor_bracket(self, psi_wall, polarity):
+        """Return the three flat node indices supporting the selected unit."""
+        return self._wall_anchor_selection(jnp.asarray(psi_wall), polarity)[2]
+
     def wall_anchor_data(
         self,
         psi_wall,
@@ -470,7 +566,7 @@ class Topology(Pytree):
         """
         wall_flux = jnp.asarray(psi_wall)
         if private_wall_node_mask is None or requested_class is None:
-            return self.wall(wall_flux, polarity)
+            return self._wall_anchor_selection(wall_flux, polarity)[0]
         private_wall = jnp.asarray(private_wall_node_mask, dtype=bool)
         if private_wall.shape != wall_flux.shape:
             raise ValueError("private wall mask must carry one flag per wall node")
@@ -489,7 +585,7 @@ class Topology(Pytree):
             jnp.asarray(polarity, dtype=wall_flux.dtype) * losing_score,
             wall_flux,
         )
-        selected = self.wall(masked_flux, polarity)
+        selected = self._wall_anchor_selection(masked_flux, polarity)[0]
         selected_score = jnp.asarray(polarity, dtype=wall_flux.dtype) * selected[2]
         bounded_flux = jnp.asarray(polarity, dtype=wall_flux.dtype) * jnp.minimum(
             selected_score, highest
@@ -890,6 +986,12 @@ class Topology(Pytree):
             requested_class,
             private_wall_node_mask,
         )
+        wall_node = jnp.argmin(
+            jnp.sum((self.wall.coordinate - data_w[:2]) ** 2, axis=1)
+        )
+        wall_unit_index = jnp.searchsorted(
+            self.wall_unit_offsets[1:], wall_node, side="right"
+        )
         qualified_o = self.qualified_o_candidates(
             vmap_o,
             vmap_x,
@@ -1016,6 +1118,7 @@ class Topology(Pytree):
             wall_point=data_w[:2],
             wall_point_flux=data_w[2],
             diverted=boundary_is_xpoint,
+            wall_unit_index=wall_unit_index,
         )
         return TopologyQualification(
             masks,
@@ -1112,6 +1215,9 @@ class Topology(Pytree):
             self.polish_vertical,
             self.polish_gather,
             self.polish_valid,
+            self.wall_unit_offsets,
+            self.wall_unit_closed,
+            self.wall_unit_vessel,
         )
         aux_data = {}
         return (children, aux_data)

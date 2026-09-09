@@ -77,6 +77,8 @@ count).  All coordinates are COCOS 17
 | strike_points_z          | (2, nt)         | float64 | m (in/outboard)    |
 | strike_segment           | (2, nt)         | int32   | wall segment index |
 | strike_parameter         | (2, nt)         | float64 | along segment      |
+| strike_unit              | (2, nt)         | int32   | wall unit index    |
+| limiting_unit_index      | (nt,)           | int32   | wall unit index    |
 | lcfs_r                   | (n_b, nt)       | float64 | m (NaN-padded)     |
 | lcfs_z                   | (n_b, nt)       | float64 | m (NaN-padded)     |
 | n_boundary_coords        | (nt,)           | int32   | vertices           |
@@ -263,6 +265,8 @@ _FIELD_TABLE: tuple[tuple[str, tuple[str, ...], str, str], ...] = (
     ("strike_points_z", ("2", "nt"), "float64", "m"),
     ("strike_segment", ("2", "nt"), "int32", "wall segment index"),
     ("strike_parameter", ("2", "nt"), "float64", "along segment"),
+    ("strike_unit", ("2", "nt"), "int32", "wall unit index"),
+    ("limiting_unit_index", ("nt",), "int32", "wall unit index"),
     ("lcfs_r", ("n_b", "nt"), "float64", "m"),
     ("lcfs_z", ("n_b", "nt"), "float64", "m"),
     ("n_boundary_coords", ("nt",), "int32", "vertices"),
@@ -402,6 +406,8 @@ class SteeringFrame(NamedTuple):
     #: ``None`` marks a frame authored without the recorded crossing geometry.
     strike_segment: object = None
     strike_parameter: object = None
+    strike_unit: object = None
+    limiting_unit_index: object = None
 
 
 def _as_numpy(value) -> np.ndarray:
@@ -517,6 +523,18 @@ def _wall_segments(units: Sequence[WallUnit]) -> tuple[np.ndarray, ...]:
             vertices = np.vstack((vertices, vertices[:1]))
         segments.extend(np.stack((vertices[:-1], vertices[1:]), axis=1))
     return tuple(segments)
+
+
+def _wall_segment_units(units: Sequence[WallUnit]) -> np.ndarray:
+    """Return the owning unit index for every entry in the segment table."""
+    owners = []
+    for unit_index, unit in enumerate(units):
+        vertices = unit.vertices
+        segment_count = vertices.shape[0] - 1
+        if unit.closed and not np.array_equal(vertices[0], vertices[-1]):
+            segment_count += 1
+        owners.extend([unit_index] * segment_count)
+    return np.asarray(owners, dtype=np.int32)
 
 
 def _inside_occupiable_region(point: np.ndarray, units: Sequence[WallUnit]) -> bool:
@@ -949,10 +967,14 @@ def assemble_frame(
     strike = _as_numpy(labelled.strike_points)
     strike_segment = getattr(labelled, "strike_segment", None)
     strike_parameter = getattr(labelled, "strike_parameter", None)
+    strike_unit = getattr(labelled, "strike_unit", None)
     if strike_segment is None:
         strike_segment = np.full(N_STRIKE_POINTS, -1, dtype=np.int32)
     if strike_parameter is None:
         strike_parameter = np.full(N_STRIKE_POINTS, np.nan, dtype=np.float64)
+    if strike_unit is None:
+        strike_unit = np.full(N_STRIKE_POINTS, -1, dtype=np.int32)
+    limiting_unit_index = getattr(equilibrium.topology, "wall_unit_index", -1)
     lcfs = _as_numpy(labelled.lcfs)
     if lcfs.ndim != 2 or lcfs.shape[1] != 2:
         raise ValueError("the LCFS polyline must be packed as (vertex, R-Z)")
@@ -1032,6 +1054,8 @@ def assemble_frame(
         strike_points_z=strike[:, 1],
         strike_segment=np.asarray(strike_segment, dtype=np.int32),
         strike_parameter=np.asarray(strike_parameter, dtype=np.float64),
+        strike_unit=np.asarray(strike_unit, dtype=np.int32),
+        limiting_unit_index=np.int32(limiting_unit_index),
         lcfs_r=lcfs_r,
         lcfs_z=lcfs_z,
         n_boundary_coords=np.int32(boundary_count),
@@ -1206,6 +1230,22 @@ def session_dataset(
             ("strike_slot", "time"),
             _strike_geometry_stack(frames, "strike_parameter", np.nan),
         ),
+        "strike_unit": (
+            ("strike_slot", "time"),
+            _strike_geometry_stack(frames, "strike_unit", -1).astype(np.int32),
+        ),
+        "limiting_unit_index": (
+            "time",
+            np.asarray(
+                [
+                    -1
+                    if frame.limiting_unit_index is None
+                    else frame.limiting_unit_index
+                    for frame in frames
+                ],
+                dtype=np.int32,
+            ),
+        ),
         "lcfs_r": (
             ("boundary_vertex", "time"),
             _frame_stack(frames, "lcfs_r"),
@@ -1374,6 +1414,8 @@ def session_dataset(
             "strike_points_z",
             "strike_segment",
             "strike_parameter",
+            "strike_unit",
+            "limiting_unit_index",
             "lcfs_r",
             "lcfs_z",
             "coil_current",
@@ -1404,6 +1446,18 @@ def session_dataset(
         "p_prime_source": p_prime_source,
     }
     if wall_reference is not None:
+        if wall_reference.units:
+            segment_units = _wall_segment_units(wall_reference.units)
+            segment = np.asarray(variables["strike_segment"][1], dtype=np.int32)
+            recorded_unit = np.asarray(variables["strike_unit"][1], dtype=np.int32)
+            valid_segment = (segment >= 0) & (segment < segment_units.size)
+            derived_unit = segment_units[np.clip(segment, 0, segment_units.size - 1)]
+            variables["strike_unit"] = (
+                ("strike_slot", "time"),
+                np.where(
+                    (recorded_unit < 0) & valid_segment, derived_unit, recorded_unit
+                ),
+            )
         attrs["containment_reference"] = WALL_GROUP
         attrs["wall_reference_digest"] = wall_reference.content_digest
         attrs["wall_reference_legacy"] = str(wall_reference.legacy_copied_wall).lower()
@@ -1684,6 +1738,16 @@ def frames_from_session(dataset: xr.Dataset) -> list[SteeringFrame]:
                     if "strike_parameter" in dataset.variables
                     else None
                 ),
+                strike_unit=(
+                    np.asarray(frame["strike_unit"].values)
+                    if "strike_unit" in dataset.variables
+                    else None
+                ),
+                limiting_unit_index=(
+                    np.int32(frame["limiting_unit_index"].values)
+                    if "limiting_unit_index" in dataset.variables
+                    else None
+                ),
                 lcfs_r=np.asarray(frame["lcfs_r"].values),
                 lcfs_z=np.asarray(frame["lcfs_z"].values),
                 n_boundary_coords=int(np.asarray(frame["n_boundary_coords"].values)),
@@ -1811,6 +1875,7 @@ def count_labelled_outside_wall(
     ):
         raise ValueError("the session carries no recorded strike crossing geometry")
     segment_table = _wall_segments(reference.units)
+    segment_units = _wall_segment_units(reference.units)
     outside = 0
     for index in range(int(dataset.sizes["time"])):
         frame = dataset.isel(time=index)
@@ -1834,6 +1899,11 @@ def count_labelled_outside_wall(
         )
         segment_indices = np.asarray(frame["strike_segment"].values, dtype=np.int32)
         parameters = np.asarray(frame["strike_parameter"].values, dtype=np.float64)
+        strike_units = (
+            np.asarray(frame["strike_unit"].values, dtype=np.int32)
+            if "strike_unit" in dataset.variables
+            else np.full(N_STRIKE_POINTS, -1, dtype=np.int32)
+        )
         if not _point_absent(axis) and not _inside_occupiable_region(
             axis, reference.units
         ):
@@ -1843,8 +1913,8 @@ def count_labelled_outside_wall(
                 x_point, reference.units
             ):
                 outside += 1
-        for strike, segment, parameter in zip(
-            strikes, segment_indices, parameters, strict=True
+        for strike, segment, parameter, unit_index in zip(
+            strikes, segment_indices, parameters, strike_units, strict=True
         ):
             if _point_absent(strike):
                 continue
@@ -1852,6 +1922,9 @@ def count_labelled_outside_wall(
                 outside += 1
                 continue
             start, end = segment_table[segment]
+            if unit_index >= 0 and unit_index != segment_units[segment]:
+                outside += 1
+                continue
             reconstructed = start + parameter * (end - start)
             if not np.allclose(strike, reconstructed, rtol=0.0, atol=1.0e-12):
                 outside += 1

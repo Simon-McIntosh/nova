@@ -1234,6 +1234,9 @@ class ForwardFluxOperator:
     moment_geometry: MomentGeometry | None = field(repr=False, default=None)
     sample: FluxTarget | None = field(repr=False, default=None)
     use_linear_moments: bool = field(repr=False, default=True)
+    wall_unit_offsets: object = field(repr=False, default=None)
+    wall_unit_closed: object = field(repr=False, default=None)
+    wall_unit_kinds: tuple[str, ...] | None = field(repr=False, default=None)
     prescribed_current_field: InitVar[PrescribedCurrentField | None] = None
     prescribed_field: PrescribedCurrentField | None = field(
         init=False, repr=False, default=None
@@ -1262,6 +1265,44 @@ class ForwardFluxOperator:
         self.area = _host_array(self.area, dtype=np.float64)
         self.grid.null = _host_tree(self.grid.null)
         self.wall.null = _host_tree(self.wall.null)
+        wall_node_count = self.wall.node_number
+        offsets = (
+            np.asarray([0, wall_node_count], dtype=np.int32)
+            if self.wall_unit_offsets is None
+            else np.asarray(self.wall_unit_offsets, dtype=np.int32)
+        )
+        if (
+            offsets.ndim != 1
+            or offsets.size < 2
+            or offsets[0] != 0
+            or offsets[-1] != wall_node_count
+            or np.any(np.diff(offsets) < 2)
+        ):
+            raise ValueError(
+                "wall unit offsets must start at zero, end at the node count, "
+                "and delimit units with at least two nodes"
+            )
+        unit_count = offsets.size - 1
+        closed = (
+            np.ones(unit_count, dtype=bool)
+            if self.wall_unit_closed is None
+            else np.asarray(self.wall_unit_closed, dtype=bool)
+        )
+        kinds = (
+            ("vessel",) * unit_count
+            if self.wall_unit_kinds is None
+            else tuple(self.wall_unit_kinds)
+        )
+        if closed.shape != (unit_count,):
+            raise ValueError("wall closure flags must carry one value per unit")
+        if len(kinds) != unit_count or not set(kinds) <= {"vessel", "material"}:
+            raise ValueError("wall kinds must name vessel or material once per unit")
+        self.wall_unit_offsets = _host_array(offsets, dtype=np.int32)
+        self.wall_unit_closed = _host_array(closed, dtype=bool)
+        self.wall_unit_kinds = kinds
+        self._wall_unit_vessel = _host_array(
+            np.asarray([kind == "vessel" for kind in kinds]), dtype=bool
+        )
         if self.sample is not None:
             self.sample.null = _host_tree(self.sample.null)
         if self.cell_average_stencil is not None:
@@ -1334,6 +1375,9 @@ class ForwardFluxOperator:
             "connectivity_coordinate": _host_array(self.grid.coordinate),
             "connectivity_edge_gather": _host_array(edge_gather, dtype=np.int32),
             "connectivity_edge_weight": _host_array(edge_weight),
+            "wall_unit_offsets": self.wall_unit_offsets,
+            "wall_unit_closed": self.wall_unit_closed,
+            "wall_unit_vessel": self._wall_unit_vessel,
         }
         self.topology = _host_tree(
             Topology(self.grid.null, self.wall.null, **topology_geometry)
@@ -1434,6 +1478,9 @@ class ForwardFluxOperator:
             "moment_geometry": self.moment_geometry,
             "polarity": self.polarity,
             "use_linear_moments": self.use_linear_moments,
+            "wall_unit_offsets": self.wall_unit_offsets,
+            "wall_unit_closed": self.wall_unit_closed,
+            "wall_unit_kinds": self.wall_unit_kinds,
         }
         dynamic_extras = set(self._dynamic_extra_names())
         base_fields = {
@@ -1450,6 +1497,9 @@ class ForwardFluxOperator:
             "sample",
             "use_linear_moments",
             "prescribed_field",
+            "wall_unit_offsets",
+            "wall_unit_closed",
+            "wall_unit_kinds",
         }
         geometry["specialisation"] = {
             name: value
@@ -1807,6 +1857,9 @@ class ForwardFluxOperator:
             self.wall.coordinate[:, 1],
             wall_flux,
             **options,
+            wall_unit_offsets=self.wall_unit_offsets,
+            wall_unit_closed=self.wall_unit_closed,
+            wall_unit_vessel=self._wall_unit_vessel,
         )
 
     def _carrier_shadow_read(self, physical, masks: DomainMasks):

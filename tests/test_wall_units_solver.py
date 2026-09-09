@@ -8,6 +8,7 @@ import numpy as np
 
 from nova.biot.null import Null1D, Null2D
 from nova.biot.target import FluxTarget
+from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.connectivity_boundary import (
     _points_inside_wall_units,
     _wall_segment_geometry,
@@ -19,7 +20,6 @@ from nova.equilibrium.steering_frames import _wall_segment_units
 from nova.equilibrium.topology import TopologyState, topology_solve_receipt
 from nova.geometry.hexstencil import hex_stencil
 from nova.jax.config import configure_dtypes
-from nova.linalg.stencil import FluxLattice
 
 
 configure_dtypes()
@@ -31,14 +31,19 @@ VESSEL = np.asarray(
     dtype=np.float64,
 )
 BLADE = np.asarray([[1.35, -0.65], [1.15, 0.0], [1.35, 0.65]], dtype=np.float64)
+BLADE_REGION = np.asarray(
+    [[1.1, -0.3], [1.4, -0.3], [1.4, 0.3], [1.1, 0.3]], dtype=np.float64
+)
 WALL = np.concatenate((VESSEL, BLADE))
 OFFSETS = np.asarray([0, len(VESSEL), len(WALL)], dtype=np.int32)
 CLOSED = np.asarray([True, False])
 VESSEL_KIND = np.asarray([True, False])
 
 
-def _operator() -> ForwardFluxOperator:
+def _operator(*, closed_blade: bool = False) -> ForwardFluxOperator:
     """Return a matrix-free carrier retaining the synthetic packed wall."""
+    wall = np.concatenate((VESSEL, BLADE_REGION)) if closed_blade else WALL
+    offsets = np.asarray([0, len(VESSEL), len(wall)], dtype=np.int32)
     lattice = FluxLattice(np.linspace(0.1, 1.9, 7), np.linspace(-0.9, 0.9, 7))
     node_count = lattice.node_count
 
@@ -54,17 +59,17 @@ def _operator() -> ForwardFluxOperator:
             ),
         ),
         wall=FluxTarget(
-            source_target=jnp.zeros((len(WALL), 1)),
-            plasma_target=jnp.zeros((len(WALL), 1)),
-            null=Null1D(jnp.asarray(WALL)),
+            source_target=jnp.zeros((len(wall), 1)),
+            plasma_target=jnp.zeros((len(wall), 1)),
+            null=Null1D(jnp.asarray(wall)),
         ),
         source=ForwardSource(core=DomainProfile(p_prime=zero, ff_prime=zero)),
         external_current=jnp.zeros(1),
         area=jnp.asarray(lattice.cell_area),
         inside_material=jnp.ones(node_count, dtype=bool),
         use_linear_moments=False,
-        wall_unit_offsets=OFFSETS,
-        wall_unit_closed=CLOSED,
+        wall_unit_offsets=offsets,
+        wall_unit_closed=np.asarray([True, closed_blade]),
         wall_unit_kinds=("vessel", "material"),
     )
 
@@ -72,13 +77,15 @@ def _operator() -> ForwardFluxOperator:
 def test_occupiable_containment_subtracts_the_blade() -> None:
     """Material inside the vessel is excluded without excluding its neighbour."""
     points = np.asarray([[1.25, 0.0], [0.8, 0.0]])
+    wall = np.concatenate((VESSEL, BLADE_REGION))
+    offsets = np.asarray([0, len(VESSEL), len(wall)], dtype=np.int32)
     contained = _points_inside_wall_units(
         points[:, 0],
         points[:, 1],
-        WALL[:, 0],
-        WALL[:, 1],
-        OFFSETS,
-        CLOSED,
+        wall[:, 0],
+        wall[:, 1],
+        offsets,
+        np.asarray([True, True]),
         VESSEL_KIND,
     )
     np.testing.assert_array_equal(contained, [False, True])
@@ -86,7 +93,7 @@ def test_occupiable_containment_subtracts_the_blade() -> None:
 
 def test_x_candidate_inside_the_blade_is_screened() -> None:
     """The topology candidate screen uses the occupiable region."""
-    topology = _operator().topology
+    topology = _operator(closed_blade=True).topology
     candidates = jnp.asarray([[1.25, 0.0, 2.0], [0.8, 0.0, 1.0]])
     np.testing.assert_array_equal(topology.contained_x_candidates(candidates), [0, 1])
 
@@ -120,7 +127,7 @@ def test_wall_height_shadow_retains_unit_ownership() -> None:
         0.0,
         qualified[0],
         qualified,
-        jnp.zeros(len(WALL), dtype=bool),
+        jnp.ones(len(WALL), dtype=bool),
         jnp.zeros(len(WALL), dtype=bool),
         0.01,
         0.1,

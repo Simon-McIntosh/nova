@@ -223,7 +223,7 @@ def _wall_segment_geometry(wall_r, wall_z, wall_unit_offsets, wall_unit_closed):
     unit_start = offsets[unit]
     unit_end = offsets[unit + 1]
     last = node == unit_end - 1
-    following = jnp.where(last, unit_start, node + 1)
+    following = jnp.where(last, jnp.where(closed[unit], unit_start, node), node + 1)
     valid = (~last) | closed[unit]
     start = jnp.stack((wall_r, wall_z), axis=-1)
     end = jnp.stack((wall_r[following], wall_z[following]), axis=-1)
@@ -261,10 +261,12 @@ def _points_inside_wall_units(
     crossings = straddles & (query_r < crossing_r) & valid
 
     unit_axis = jnp.arange(unit_count, dtype=jnp.int32)
+    unit_segment = segment_unit[None, :] == unit_axis[:, None]
     per_unit_inside = (
-        jnp.sum(
-            crossings[..., None, :] & (segment_unit[None, :] == unit_axis[:, None]),
-            axis=-1,
+        jnp.einsum(
+            "...n,un->...u",
+            crossings.astype(jnp.int32),
+            unit_segment.astype(jnp.int32),
         )
         % 2
         == 1
@@ -292,9 +294,13 @@ def _points_inside_wall_units(
     on_edge = (
         ((query_r - nearest_r) ** 2 + (query_z - nearest_z) ** 2) <= tolerance**2
     ) & valid
-    per_unit_edge = jnp.any(
-        on_edge[..., None, :] & (segment_unit[None, :] == unit_axis[:, None]),
-        axis=-1,
+    per_unit_edge = (
+        jnp.einsum(
+            "...n,un->...u",
+            on_edge.astype(jnp.int32),
+            unit_segment.astype(jnp.int32),
+        )
+        > 0
     )
     contained = per_unit_inside | per_unit_edge
     vessel_inside = jnp.any(contained & vessel & closed, axis=-1)

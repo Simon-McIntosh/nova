@@ -1955,28 +1955,10 @@ def _compiled_argument_key(value: Any) -> tuple[tuple[int, ...], str, str] | Non
     )
 
 
-def _compiled_argument_shape(value: Any) -> tuple[tuple[int, ...], str] | None:
-    """Return the static array signature used to select a slice program."""
-    if value is None:
-        return None
-    dtype = getattr(value, "dtype", None)
-    if dtype is None:
-        dtype = np.asarray(value).dtype
-    return tuple(np.shape(value)), np.dtype(dtype).str
-
-
-def _compiled_external_key(current: Any, prescribed_current: Any) -> tuple[Any, ...]:
-    """Key conductor inputs without synchronising the derived external field."""
-    return (
-        _compiled_argument_key(current),
-        _compiled_argument_key(prescribed_current),
-    )
-
-
 def _compiled_program_key(
     operator: Any,
-    state: jax.Array,
-    external_key: tuple[Any, ...],
+    coordinates: ReducedCoordinates,
+    external: jax.Array,
     target_current: Any,
     requested_class: Any,
     row_count: int,
@@ -1985,8 +1967,8 @@ def _compiled_program_key(
     """Return the static layout and captured-data identity of one program."""
     return (
         id(operator),
-        _compiled_argument_shape(state),
-        external_key,
+        tuple(np.asarray(coordinates.cells, dtype=np.intp)),
+        _compiled_argument_key(external),
         _compiled_argument_key(target_current),
         _compiled_argument_key(requested_class),
         row_count,
@@ -2826,7 +2808,6 @@ def _compiled_program(
     requested_class,
     target_current,
     external,
-    external_key,
     program,
     augmentation=None,
 ):
@@ -2848,10 +2829,18 @@ def _compiled_program(
         None if requested_class is None else tuple(np.shape(requested_class))
     )
     if program is None:
-        cache_key = _compiled_program_key(
+        coordinates = reduced_coordinates(
             operator,
             state,
-            external_key,
+            requested_class=requested_class,
+            target_current=target_current,
+            policy=SUPPORT_POLICY,
+            floor=_ACTIVE_SUPPORT_FLOOR,
+        )
+        cache_key = _compiled_program_key(
+            operator,
+            coordinates,
+            external,
             target_current,
             requested_class,
             row_count,
@@ -2859,14 +2848,6 @@ def _compiled_program(
         )
         program = _compiled_program_cache.get(cache_key)
         if program is None:
-            coordinates = reduced_coordinates(
-                operator,
-                state,
-                requested_class=requested_class,
-                target_current=target_current,
-                policy=SUPPORT_POLICY,
-                floor=_ACTIVE_SUPPORT_FLOOR,
-            )
             program = _remember_compiled_program(
                 ReducedProgram(
                     coordinates=coordinates,
@@ -2912,7 +2893,6 @@ def _compiled_result(
     requested_class,
     target_current,
     external,
-    external_key,
     program,
     augmentation,
     row_arguments,
@@ -2929,7 +2909,6 @@ def _compiled_result(
         requested_class=requested_class,
         target_current=target_current,
         external=external,
-        external_key=external_key,
         program=program,
         augmentation=augmentation,
     )
@@ -3008,7 +2987,6 @@ def solve_reduced_newton_compiled(
         requested_class=requested_class,
         target_current=target_value,
         external=external,
-        external_key=_compiled_external_key(current, prescribed_current),
         program=program,
         augmentation=None,
         row_arguments=TRACED_ROWS,
@@ -3102,7 +3080,6 @@ def solve_constrained_reduced_newton_compiled(
         requested_class=requested_class,
         target_current=target_value,
         external=external,
-        external_key=_compiled_external_key(current, prescribed_current),
         program=program,
         augmentation=augmentation,
         row_arguments=row_arguments,

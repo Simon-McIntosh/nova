@@ -839,22 +839,14 @@ def test_compiled_slice_caches_one_executable_per_static_policy(machine, monkeyp
     """Equal calls reuse one executable while a fixed output shape rebuilds it."""
     profile, seed = machine
     builds = 0
-    coordinate_builds = 0
-    original_builder = reduced_newton._compiled_slice_solver
-    original_coordinates = reduced_newton.reduced_coordinates
+    original = reduced_newton._compiled_slice_solver
 
     def counted_builder(*args, **kwargs):
         nonlocal builds
         builds += 1
-        return original_builder(*args, **kwargs)
-
-    def counted_coordinates(*args, **kwargs):
-        nonlocal coordinate_builds
-        coordinate_builds += 1
-        return original_coordinates(*args, **kwargs)
+        return original(*args, **kwargs)
 
     monkeypatch.setattr(reduced_newton, "_compiled_slice_solver", counted_builder)
-    monkeypatch.setattr(reduced_newton, "reduced_coordinates", counted_coordinates)
     reduced_newton._compiled_program_cache.clear()
     common = dict(tolerance=SOLVE_TOLERANCE, newton_steps=1, active_set_steps=1)
     first = reduced_newton.solve_reduced_newton_compiled(
@@ -875,6 +867,9 @@ def test_compiled_slice_caches_one_executable_per_static_policy(machine, monkeyp
         **common,
     )
 
+    assert builds == 1
+    assert second.program is first.program
+    assert second.program.slice_solver is first.program.slice_solver
     assert np.array_equal(np.asarray(second.state), np.asarray(host.state))
     assert second.terminal_residual == host.terminal_residual
 
@@ -882,7 +877,6 @@ def test_compiled_slice_caches_one_executable_per_static_policy(machine, monkeyp
         profile.operator, seed, **(common | {"active_set_steps": 2})
     )
     assert builds == 2
-    assert coordinate_builds == 2
 
 
 def test_compiled_slice_replays_the_host_step_and_trip_counters(machine):

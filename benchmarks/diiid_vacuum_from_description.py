@@ -46,6 +46,9 @@ from nova.jax.config import configure_dtypes
 DEFAULT_OUTPUT = Path("docs/figures/diiid-vertical-force-balance")
 RECEIPT_NAME = "vacuum-field-reproduction.json"
 FIGURE_NAME = "vacuum-field-reproduction.png"
+MACHINE_ARTIFACT_CACHE = Path(
+    "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache"
+)
 PERSISTED_ENTRY = Path(
     "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc"
 )
@@ -248,7 +251,10 @@ def score_frame(data: Path, shot: str, frame: int) -> dict[str, Any]:
     row["_source_path"] = str(source)
 
     profile, _seed, _label, _wall, _reliable, _statement = build_profile(
-        row, frame, PSEUDO_WALL_EXPANSION
+        row,
+        frame,
+        PSEUDO_WALL_EXPANSION,
+        machine_artifact_cache=MACHINE_ARTIFACT_CACHE,
     )
     shipped = np.asarray(profile.operator.external_current, dtype=float)
     if shipped.size != len(POLOIDAL_CONDUCTORS):

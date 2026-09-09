@@ -1,0 +1,26 @@
+{
+  "in_bound_identity": {
+    "bounded_converged": true,
+    "ceiling_a": 1000000.0,
+    "compensating_current_bit_identical": true,
+    "records_bit_identical": true,
+    "state_bit_identical": true,
+    "unbounded_converged": true
+  },
+  "over_ceiling": {
+    "ceiling_a": 0.001,
+    "converged": false,
+    "maximum_compensating_current_a": 40.85566932623417,
+    "qualified": false,
+    "refusal_reason": "compensating-current-ceiling-exceeded",
+    "row_qualified": [
+      false
+    ]
+  },
+  "receipt": "constrained reduced-route compensator admission",
+  "source": {
+    "backend": "cpu",
+    "fixture": "bootstrapped Solovev free-boundary equilibrium",
+    "x64": true
+  }
+}

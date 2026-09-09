@@ -12722,11 +12722,23 @@
     "theoretical_discrete_operator_order": 2.0
   },
   "production_run": {
-    "array_concurrency": 3,
     "jax_default_backend": "gpu",
     "jax_platforms": "cuda",
+    "launcher_scheduler_contract": {
+      "aggregation": "same_job_after_all_row_workers_succeed",
+      "default_gpu_count": 1,
+      "multi_gpu_worker_policy": "one_worker_process_per_allocated_gpu",
+      "row_assignment": "round_robin_over_case_table",
+      "shape": "single_slurm_job"
+    },
+    "measurement_scheduler": {
+      "gpu_count_per_task": 1,
+      "job_id": "1267913",
+      "maximum_concurrent_tasks": 3,
+      "shape": "slurm_job_array",
+      "task_count": 16
+    },
     "precision": "float64",
-    "row_scheduler_job_id": "1267913",
     "source_revision": "45a3c7f47465e49ca2c68ee4fe941e6c199fce9b",
     "thread_counts": {
       "mkl_num_threads": "4",

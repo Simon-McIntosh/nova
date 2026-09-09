@@ -8,6 +8,11 @@ import numpy as np
 import pytest
 
 from benchmarks import efit_forward_parity_slice as parity
+from nova.equilibrium.solve_request import (
+    ForwardSolveReceipt,
+    ForwardSolveRequest,
+    ResolvedForwardSolveDefaults,
+)
 
 
 def _banked_row(shot: int) -> dict:
@@ -36,7 +41,11 @@ def test_banked_comparator_requires_zero_converged_plasma_roots() -> None:
 def test_public_branch_solve_receives_the_declared_current() -> None:
     captured = {}
     equilibrium = SimpleNamespace(
-        fixed_point=SimpleNamespace(trace=np.asarray([1.0])),
+        fixed_point=SimpleNamespace(
+            trace=np.asarray([1.0]),
+            residual=np.asarray(1.0e-3),
+            active_set_iterations=np.asarray(12),
+        ),
         cell_current=np.asarray([801_493.25]),
         finite=SimpleNamespace(passed=True),
         normalisation=SimpleNamespace(
@@ -51,29 +60,50 @@ def test_public_branch_solve_receives_the_declared_current() -> None:
         ),
     )
 
-    def solve_branch(state, requested_class, **options):
-        captured.update(options)
-        return SimpleNamespace(
-            equilibrium=equilibrium,
-            requested_class=requested_class,
-            achieved_class=requested_class,
-            topology_consistent=True,
-            converged=False,
-            residual=1.0e-3,
-            iterations=12,
+    def solve(request):
+        captured["request"] = request
+        captured["target_current"] = request.target_current
+        captured["tolerance"] = request.policy.qualification_tolerance
+        return ForwardSolveReceipt(
+            terminal_state=equilibrium,
+            qualified=False,
+            termination_reason=0,
+            residual_history=np.asarray([1.0e-3]),
+            mask_history=np.asarray([0]),
+            globalisation_decisions=(np.asarray([]), np.asarray([])),
+            amplitude_history=np.asarray([1.125]),
+            topology_read=equilibrium.topology,
+            polish_receipt=None,
+            compilation_cache_hit=False,
+            wall_seconds=0.01,
+            resolved_defaults=ResolvedForwardSolveDefaults.from_policy(request.policy),
         )
 
-    profile = SimpleNamespace(solve_branch=solve_branch)
+    profile = SimpleNamespace(
+        source=object(),
+        operator=SimpleNamespace(
+            flux_map_with_shadow=None,
+            _fixed_design_read=None,
+        ),
+        solve=solve,
+    )
     case = {"state": np.zeros(4)}
-    context = {"group": {"plasma_current_c": np.asarray([801_493.25])}, "row": 0}
+    context = {
+        "group": {"plasma_current_c": np.asarray([801_493.25])},
+        "row": 0,
+        "reference": {"shot": 21978, "slice_index": 35},
+    }
 
-    record, _trace, _branch = parity._passive_inclusive_solve(
+    record, _trace, receipt = parity._passive_inclusive_solve(
         case,
         context,
         profile,
         target_current=801_493.25,
     )
 
+    assert isinstance(captured["request"], ForwardSolveRequest)
+    assert isinstance(receipt, ForwardSolveReceipt)
+    assert float(np.sum(receipt.equilibrium.cell_current)) == 801_493.25
     assert captured["target_current"] == 801_493.25
     assert captured["tolerance"] == parity.FIXED_POINT_CRITERION
     assert record["target_current_a"] == 801_493.25

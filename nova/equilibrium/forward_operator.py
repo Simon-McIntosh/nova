@@ -1993,6 +1993,19 @@ class ForwardFluxOperator:
         )
         return DomainMasks(label=promoted_label, psi_norm=masks.psi_norm)
 
+    @staticmethod
+    def _vertex_level_participation(cell_vertex_count, vertex_level):
+        """Select cells whose spline-authority vertices straddle its level."""
+        level = jnp.asarray(vertex_level)
+        slot = jnp.arange(level.shape[1])
+        valid = slot[None, :] < jnp.asarray(cell_vertex_count)[:, None]
+        magnitude = jnp.max(jnp.where(valid, jnp.abs(level), 0.0), axis=1)
+        roundoff = 256.0 * jnp.finfo(level.dtype).eps * jnp.maximum(magnitude, 1.0)
+        positive = jnp.any(valid & (level > roundoff[:, None]), axis=1)
+        negative = jnp.any(valid & (level < -roundoff[:, None]), axis=1)
+        near_level = jnp.any(valid & (jnp.abs(level) <= roundoff[:, None]), axis=1)
+        return (positive & negative) | near_level
+
     def _profile_support(self, masks, topology, physical, sample_psi_norm):
         """Return the curved plasma-side support with geometry as traced data."""
         if self.moment_geometry is None:
@@ -2035,11 +2048,19 @@ class ForwardFluxOperator:
             )
             return jnp.where(surface.fit_executed, spline_level, local_level)
 
-        traced_support = self.moment_geometry.atomic_mesh.traced_clip(
+        atomic_mesh = self.moment_geometry.atomic_mesh
+        traced_support = atomic_mesh.traced_clip(
             inside_boundary,
             curve_evaluator=curved_level,
         )
-        participation = masks.profile_participation | traced_support.boundary
+        cell_vertices = jnp.asarray(atomic_mesh.node_coordinates)[
+            jnp.asarray(atomic_mesh.cell_nodes)
+        ]
+        vertex_participation = self._vertex_level_participation(
+            atomic_mesh.cell_vertex_count,
+            curved_level(cell_vertices),
+        )
+        participation = masks.profile_participation | vertex_participation
         return traced_support.qualify(participation)
 
     def _partition_for_state(self, psi, frozen):

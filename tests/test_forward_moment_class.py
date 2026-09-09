@@ -229,3 +229,22 @@ def test_curved_boundary_support_promotes_every_cut_cell_before_moment_selection
     assert float(support.area[0]) > 0.0
     promoted = ForwardFluxOperator._moment_support_masks(masks, support)
     assert bool(promoted.profile_participation[0])
+
+
+def test_spline_vertex_participation_includes_straddles_and_roundoff_levels():
+    """Spline vertex signs decide cut-cell participation without edge topology."""
+    configure_dtypes()
+    epsilon = np.finfo(np.float64).eps
+    level = jnp.asarray(
+        [
+            [1.0, -0.25, 0.5, 0.75],
+            [1.0, 0.25, 0.5, 0.75],
+            [1.0, 0.25, 128.0 * epsilon, 0.75],
+        ]
+    )
+
+    participation = ForwardFluxOperator._vertex_level_participation(
+        jnp.asarray([4, 4, 4]), level
+    )
+
+    np.testing.assert_array_equal(participation, [True, False, True])

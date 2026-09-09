@@ -1387,27 +1387,23 @@ def solve_pinned_arm(
     row: int,
     current_field: str,
 ) -> dict[str, Any]:
-    """Solve the two-class portfolio and serialize its diverted branch."""
+    """Solve the reference-seeded arm through the request-receipt seam."""
     profile, seed, reference, provenance = build_profile(
         group, shot, row, current_field
     )
-    seeds = jnp.stack((jnp.asarray(seed), jnp.asarray(seed)))
-    portfolio = profile.solve_portfolio(
-        seeds,
-        route="newton_krylov",
-        tolerance=FIXED_POINT_CRITERION,
-        gmres_iterations=GMRES_ITERATIONS,
-        warmup=WARMUP_SWEEPS,
-        relaxation=RELAXATION,
-        step_cap=STEP_CAP,
+    request = _parity_solve_request(
+        profile,
+        seed,
+        shot=shot,
+        row=row,
+        current_field=current_field,
     )
-    index = int(TopologyClass.DIVERTED)
-    branch = jax.tree.map(lambda value: value[index], portfolio.branches)
-    equilibrium = branch.equilibrium
+    receipt = profile.solve(request)
+    equilibrium = receipt.equilibrium
     trace = np.asarray(equilibrium.fixed_point.trace, dtype=np.float64)
-    requested = int(branch.requested_class)
-    achieved = int(branch.achieved_class)
-    converged = bool(branch.converged)
+    requested = int(TopologyClass.DIVERTED)
+    achieved = int(bool(equilibrium.topology.diverted))
+    converged = bool(receipt.qualified)
     terminal = {
         "fixed_point_residual": float(equilibrium.fixed_point.residual),
         "finite_receipt": bool(equilibrium.finite.passed),
@@ -1419,11 +1415,9 @@ def solve_pinned_arm(
     record = {
         "current_arm": provenance,
         "solver": {
-            "entry_point": "ForwardProfile.solve_portfolio",
+            "entry_point": "ForwardProfile.solve",
             "route": "newton_krylov",
             "reference_seeded": True,
-            "portfolio_branch_order": ["limited", "diverted"],
-            "selected_branch_index": index,
             "registered_criterion": FIXED_POINT_CRITERION,
             "residual_trajectory": [
                 float(value) if np.isfinite(value) else None for value in trace
@@ -1436,10 +1430,13 @@ def solve_pinned_arm(
             "achieved_class": "diverted" if achieved else "limited",
             "achieved_class_code": achieved,
             "converged": converged,
-            "residual": float(branch.residual),
-            "iterations": int(branch.iterations),
-            "topology_consistent": bool(branch.topology_consistent),
+            "residual": float(equilibrium.fixed_point.residual),
+            "iterations": int(
+                getattr(equilibrium.fixed_point, "active_set_iterations", 0)
+            ),
+            "topology_consistent": bool(achieved == requested),
         },
+        "resolved_defaults": receipt.resolved_defaults.to_dict(),
     }
     if converged:
         record["metrics"] = _pinned_metrics(group, row, profile, reference, equilibrium)
@@ -3510,32 +3507,38 @@ def _passive_inclusive_solve(
         operator.flux_map_with_shadow = instrumented_factory
         fixed_point._print_active_set_trip = record_trip
     try:
-        branch = profile.solve_branch(
-            jnp.asarray(case["state"]),
-            TopologyClass.DIVERTED,
-            route="newton_krylov",
+        request = ForwardSolveRequest.from_defaults(
+            carrier_identity=(
+                f"mast-passive:{context['reference']['shot']}:"
+                f"{context['reference']['slice_index']}"
+            ),
+            source_profile=profile.source,
+            seed_policy=ExplicitSolveSeed(jnp.asarray(case["state"])),
+            policy_overrides={
+                "newton_steps": newton_budget,
+                "gmres_iterations": GMRES_ITERATIONS,
+                "warmup": WARMUP_SWEEPS,
+                "relaxation": RELAXATION,
+                "step_cap": STEP_CAP,
+                "kernel_tolerance": FIXED_POINT_CRITERION,
+                "qualification_tolerance": FIXED_POINT_CRITERION,
+            },
             target_current=target_current,
-            tolerance=FIXED_POINT_CRITERION,
-            newton_steps=newton_budget,
-            gmres_iterations=GMRES_ITERATIONS,
-            warmup=WARMUP_SWEEPS,
-            relaxation=RELAXATION,
-            step_cap=STEP_CAP,
-            stream_active_set=freeze_partition is not None,
         )
+        receipt = profile.solve(request)
     finally:
         operator.flux_map_with_shadow = original_factory
         operator._fixed_design_read = original_read
         fixed_point._print_active_set_trip = original_trip_reporter
     solve_wall = time.perf_counter() - started
-    equilibrium = branch.equilibrium
+    equilibrium = receipt.equilibrium
     trace = np.asarray(equilibrium.fixed_point.trace, dtype=np.float64)
-    requested = int(branch.requested_class)
-    achieved = int(branch.achieved_class)
+    requested = int(TopologyClass.DIVERTED)
+    achieved = int(bool(equilibrium.topology.diverted))
     current = float(np.sum(np.asarray(equilibrium.cell_current)))
     reference_current = float(context["group"]["plasma_current_c"][context["row"]])
     nonzero_current = bool(abs(current) >= 0.01 * abs(reference_current))
-    converged = bool(branch.converged)
+    converged = bool(receipt.qualified)
     metrics = None
     if converged:
         metrics = _pinned_metrics(
@@ -3553,7 +3556,7 @@ def _passive_inclusive_solve(
         )
     )
     record = {
-        "entry_point": "ForwardProfile.solve_branch",
+        "entry_point": "ForwardProfile.solve",
         "route": "newton_krylov",
         "reference_seeded": True,
         "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
@@ -3565,11 +3568,14 @@ def _passive_inclusive_solve(
             "requested_class_code": requested,
             "achieved_class": "diverted" if achieved else "limited",
             "achieved_class_code": achieved,
-            "topology_consistent": bool(branch.topology_consistent),
+            "topology_consistent": bool(achieved == requested),
             "converged": converged,
-            "residual": _strict_scalar(branch.residual),
-            "iterations": int(branch.iterations),
+            "residual": _strict_scalar(equilibrium.fixed_point.residual),
+            "iterations": int(
+                getattr(equilibrium.fixed_point, "active_set_iterations", 0)
+            ),
         },
+        "resolved_defaults": receipt.resolved_defaults.to_dict(),
         "terminal_state": {
             "plasma_current_a": current,
             "reference_plasma_current_a": reference_current,
@@ -3625,13 +3631,11 @@ def _passive_inclusive_solve(
                 float(np.mean(trip_walls)) if trip_walls else None
             ),
             "whole_solve_wall_seconds": solve_wall,
-            "terminal_residual": float(branch.residual),
-            "termination_reason": int(
-                branch.equilibrium.fixed_point.termination_reason
-            ),
+            "terminal_residual": float(equilibrium.fixed_point.residual),
+            "termination_reason": int(receipt.termination_reason),
             "converged": converged,
         }
-    return record, trace, branch
+    return record, trace, receipt
 
 
 def _passive_inclusive_figure(
@@ -4292,7 +4296,7 @@ def run_current_constrained(
             "invocation_route": "current_constrained_default",
             "selection": "identical frozen-six rows selected by the banked scorecard",
             "target_current": "abs(efm/plasma_current_c) on each selected row",
-            "public_entry_point": "ForwardProfile.solve_branch(target_current=...)",
+            "public_entry_point": "ForwardProfile.solve(request)",
             "route": "newton_krylov",
             "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
             "newton_promotions": NEWTON_STEPS,

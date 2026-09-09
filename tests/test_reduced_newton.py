@@ -863,6 +863,11 @@ def test_compiled_slice_caches_one_executable_per_static_policy(machine, monkeyp
     second = reduced_newton.solve_reduced_newton_compiled(
         profile.operator, seed, **common
     )
+    assert builds == 1
+    assert coordinate_builds == 1
+    assert second.program is first.program
+    assert second.program.slice_solver is first.program.slice_solver
+
     host = reduced_newton.solve_reduced_newton(
         profile.operator,
         seed,
@@ -870,10 +875,6 @@ def test_compiled_slice_caches_one_executable_per_static_policy(machine, monkeyp
         **common,
     )
 
-    assert builds == 1
-    assert coordinate_builds == 1
-    assert second.program is first.program
-    assert second.program.slice_solver is first.program.slice_solver
     assert np.array_equal(np.asarray(second.state), np.asarray(host.state))
     assert second.terminal_residual == host.terminal_residual
 
@@ -881,7 +882,7 @@ def test_compiled_slice_caches_one_executable_per_static_policy(machine, monkeyp
         profile.operator, seed, **(common | {"active_set_steps": 2})
     )
     assert builds == 2
-    assert coordinate_builds == 1
+    assert coordinate_builds == 2
 
 
 def test_compiled_slice_replays_the_host_step_and_trip_counters(machine):

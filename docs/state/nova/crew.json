@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T10:31:08",
+  "updated": "2026-09-09T10:34:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -143156,6 +143156,182 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T074732159945-ucc-off-axis-error-path",
+        "plan": "uniform-cell-clip-and-coupling",
+        "section": "",
+        "node": "ucc-off-axis-error-path",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 228,
+                "cached_input_tokens": 556835,
+                "input_tokens": 557095,
+                "output_tokens": 65,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 557160,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "docs/figures/uniform-cell-clip-and-coupling/off-axis-error/census.json records for the weak-rotation-reactor-static case at 110 and 300 cells the per-edge off-axis kernel contribution error against the closed-form field, the error-map correlation with cut cells and with distance to the normalisation anchor, and the matched-resolution rectangular-grid error map with its patch enrichment, and if a repair lands the axis error at 110, 300, 500 cells no longer grows monotonically with tests/test_biotpolygonmoments.py green on all_debug CPU x64",
+          "estimated_hours": null,
+          "goal": "Find the off-axis coupling-path error behind the growing Solovev axis error exactly as followup f-20260909T0940-outboard-error-off-axis-path specifies, writing the census receipt and any kernel repair",
+          "id": "ucc-off-axis-error-path",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T07:47:32Z",
+            "read_at": "2026-09-09T07:47:33Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 59.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T074732159945-ucc-off-axis-error-path/manifest.md",
+          "plan": "uniform-cell-clip-and-coupling",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/biot/polygonanalytic.py",
+            "nova/biot/line.py",
+            "tests/test_biotpolygonmoments.py",
+            "benchmarks/solovev_off_axis_census.py",
+            "docs/figures/uniform-cell-clip-and-coupling/off-axis-error"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-ucc-offaxis",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T07:47:43Z",
+        "completed_at": "2026-09-09T08:31:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2647,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2647,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9ff98552afd6ebd6eb95e02f05e5e988c9b07f9f",
+        "commits": [
+          "3264d1aa52d9f2efb8092741632ffbfc907a5148",
+          "4a9358d14e7f4515d6db8b0b093b8d0682352d79",
+          "da67ae21c4e1e57e5cb2fe25f4cade798ea09b18",
+          "098ae42fed7f521e289453aea681ffae2c7b8fd0"
+        ],
+        "changed_lines": {
+          "added": 4800,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug CPU x64: python -m pytest -p no:cacheprovider tests/test_biotpolygonmoments.py -q (baseline 11 passed, after 12 passed); python benchmarks/solovev_off_axis_census.py (exit 0, four rows)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T074732159945-ucc-off-axis-error-path/off-axis-census-sampled.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T074732159945-ucc-off-axis-error-path/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08523-1456-7b20-abda-ee45c02ca55e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 21540480,
+            "cached_input_tokens_cumulative": 21540480,
+            "input_tokens": 21809245,
+            "input_tokens_cumulative": 21809245,
+            "output_tokens": 44712,
+            "output_tokens_cumulative": 44712,
+            "reasoning_output_tokens": 14622,
+            "reasoning_output_tokens_cumulative": 14622
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T08:31:50Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 64.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T08:31:50Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 21540480,
+          "cumulative_input_tokens": 43349725,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 59334
+        },
+        "follow_on_paths": [
+          "/"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/ucc-off-axis-error-path",
+          "session_id": "01a08523-1456-7b20-abda-ee45c02ca55e",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T08:31:50Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -143468,6 +143644,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2349
+    "_version": 2350
   }
 }

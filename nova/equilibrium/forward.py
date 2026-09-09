@@ -69,11 +69,11 @@ none.
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import IntEnum
 from pathlib import Path
 import time
-from typing import NamedTuple
+from typing import Literal, NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -81,6 +81,7 @@ import numpy as np
 import scipy.optimize
 
 from nova.equilibrium.solve_request import (
+    ExplicitSolveSeed,
     ForwardSolvePolicy,
     ForwardSolveReceipt,
     ForwardSolveRequest,
@@ -108,6 +109,8 @@ from nova.equilibrium.constraint import (
     CompensatorSelection,
     ConstraintPair,
     ConstraintRecord,
+    ConstraintOuterStep,
+    ConstraintOuterTrace,
     constraint_response_matrix,
     derive_circuit_compensators,
     assemble_augmented_system,
@@ -323,6 +326,7 @@ class ForwardEquilibrium(NamedTuple):
     raster_flux_status: jax.Array | None = None
     labelled_flux: ForwardLabelledFlux | None = None
     constraints: tuple[ConstraintRecord, ...] = ()
+    constraint_outer: ConstraintOuterTrace | None = None
 
 
 class ForwardBranchReceipt(NamedTuple):
@@ -1506,6 +1510,7 @@ class ForwardProfile:
         current=None,
         prescribed_current=None,
         constraints: tuple[ConstraintRecord, ...] = (),
+        constraint_outer: ConstraintOuterTrace | None = None,
     ) -> ForwardEquilibrium:
         """Return the typed result of one converged or supplied flux map."""
         current_moments, support_integrals, masks, topology, amplitude = (
@@ -1553,6 +1558,7 @@ class ForwardProfile:
             raster_flux_status=raster_flux_status,
             labelled_flux=self._labelled_flux(flux, masks, topology),
             constraints=constraints,
+            constraint_outer=constraint_outer,
         )
 
     def _host_history(
@@ -1859,6 +1865,11 @@ class ForwardProfile:
         pairs = tuple(constraint_pairs)
         if not all(isinstance(pair, ConstraintPair) for pair in pairs):
             raise TypeError("constraint_pairs must contain ConstraintPair values")
+        if any(pair.binding.policy != "imposed" for pair in pairs):
+            raise ValueError(
+                "eliminated constraints require a typed ForwardSolveRequest so "
+                "the bounded outer trace can be retained"
+            )
         if (
             pairs
             and prescribed_current is None
@@ -2066,7 +2077,190 @@ class ForwardProfile:
         return policy, resolved
 
     def _solve_request(self, request: ForwardSolveRequest) -> ForwardSolveReceipt:
-        """Resolve one typed request through the public keyword solve path."""
+        """Resolve imposed rows directly and eliminated rows through an outer solve."""
+        eliminated = tuple(
+            index
+            for index, pair in enumerate(request.constraint_pairs)
+            if pair.binding.policy == "eliminated"
+        )
+        if not eliminated:
+            return self._solve_imposed_request(request)
+        if len(eliminated) != 1:
+            raise ValueError(
+                "the bounded outer mode accepts exactly one eliminated constraint"
+            )
+        index = eliminated[0]
+        if request.constraint_pairs[index].row_count != 1:
+            raise ValueError("the bounded outer mode accepts one scalar row")
+        return self._solve_eliminated_request(request, index)
+
+    def _solve_eliminated_request(
+        self,
+        request: ForwardSolveRequest,
+        eliminated_index: int,
+    ) -> ForwardSolveReceipt:
+        """Drive one compensating value to its target with bounded warm starts."""
+        outer_pair = request.constraint_pairs[eliminated_index]
+        controls = outer_pair.binding.elimination
+        if controls is None:
+            raise ValueError("an eliminated constraint needs outer controls")
+
+        bounds = np.asarray(controls.target_bounds, dtype=np.float64)
+        target = float(np.asarray(outer_pair.binding.target).reshape(-1)[0])
+        step = float(np.asarray(controls.target_step).reshape(-1)[0])
+        prescribed = float(np.asarray(controls.prescribed_unknown).reshape(-1)[0])
+        tolerance = float(np.asarray(controls.unknown_tolerance).reshape(-1)[0])
+        if not bounds[0] <= target <= bounds[1]:
+            raise ValueError("the eliminated constraint target lies outside its bounds")
+
+        seed = request.seed_policy.resolve(self, current=request.current)
+        initial_unknown = np.asarray(
+            outer_pair.binding.initial_unknown, dtype=np.float64
+        ).reshape(-1)
+        steps: list[ConstraintOuterStep] = []
+        targets: list[float] = []
+        errors: list[float] = []
+
+        def solve_target(value: float) -> tuple[ForwardSolveReceipt, float]:
+            nonlocal seed, initial_unknown
+            pairs = []
+            for pair_index, pair in enumerate(request.constraint_pairs):
+                if pair_index == eliminated_index:
+                    binding = replace(
+                        pair.binding,
+                        target=jnp.asarray([value]),
+                        initial_unknown=jnp.asarray(initial_unknown),
+                        policy="imposed",
+                        elimination=None,
+                    )
+                    pair = replace(pair, binding=binding)
+                pairs.append(pair)
+            inner_request = replace(
+                request,
+                seed_policy=ExplicitSolveSeed(jnp.asarray(seed)),
+                constraint_pairs=tuple(pairs),
+            )
+            receipt = self._solve_imposed_request(inner_request)
+            record = receipt.constraints[eliminated_index]
+            compensating = float(np.asarray(record.physical_unknown).reshape(-1)[0])
+            seed = receipt.equilibrium.flux
+            initial_unknown = np.asarray(record.normalized_unknown).reshape(-1)
+            targets.append(value)
+            errors.append(compensating - prescribed)
+            steps.append(
+                ConstraintOuterStep(
+                    target=jnp.asarray(value),
+                    compensating_value=jnp.asarray(compensating),
+                    inner_receipt=receipt,
+                )
+            )
+            return receipt, compensating
+
+        final_receipt, compensating = solve_target(target)
+        status: Literal["converged", "no-root", "budget"] = "budget"
+        if abs(compensating - prescribed) <= tolerance:
+            status = "converged"
+
+        def bracket() -> tuple[tuple[float, float], tuple[float, float]] | None:
+            ordered = sorted(zip(targets, errors, strict=True))
+            for left, right in zip(ordered[:-1], ordered[1:], strict=True):
+                if np.signbit(left[1]) != np.signbit(right[1]):
+                    return left, right
+            return None
+
+        def sampled(value: float) -> bool:
+            scale = max(abs(bounds[0]), abs(bounds[1]), 1.0)
+            return any(
+                abs(value - previous) <= 16.0 * np.finfo(np.float64).eps * scale
+                for previous in targets
+            )
+
+        while (
+            status == "budget"
+            and len(steps) < controls.maximum_steps
+            and all(np.isfinite(error) for error in errors)
+        ):
+            active_bracket = bracket()
+            candidate = np.nan
+            if len(steps) == 1:
+                candidate = target + step
+                if not bounds[0] <= candidate <= bounds[1]:
+                    candidate = target - step
+            elif active_bracket is not None:
+                left, right = active_bracket
+                denominator = right[1] - left[1]
+                if np.isfinite(denominator) and denominator != 0.0:
+                    candidate = right[0] - right[1] * (right[0] - left[0]) / denominator
+                if (
+                    not np.isfinite(candidate)
+                    or not left[0] < candidate < right[0]
+                    or sampled(candidate)
+                ):
+                    candidate = 0.5 * (left[0] + right[0])
+            else:
+                previous_target, previous_error = targets[-2], errors[-2]
+                current_target, current_error = targets[-1], errors[-1]
+                denominator = current_error - previous_error
+                if np.isfinite(denominator) and denominator != 0.0:
+                    candidate = (
+                        current_target
+                        - current_error
+                        * (current_target - previous_target)
+                        / denominator
+                    )
+
+            if (
+                not np.isfinite(candidate)
+                or not bounds[0] <= candidate <= bounds[1]
+                or sampled(candidate)
+            ):
+                missing_bounds = [value for value in bounds if not sampled(value)]
+                if not missing_bounds:
+                    status = "no-root" if bracket() is None else "budget"
+                    break
+                if np.isfinite(candidate):
+                    candidate = min(
+                        missing_bounds, key=lambda value: abs(value - candidate)
+                    )
+                else:
+                    candidate = max(
+                        missing_bounds,
+                        key=lambda value: min(abs(value - seen) for seen in targets),
+                    )
+
+            final_receipt, compensating = solve_target(float(candidate))
+            if abs(compensating - prescribed) <= tolerance:
+                status = "converged"
+
+        if (
+            status == "budget"
+            and all(np.isfinite(error) for error in errors)
+            and bracket() is None
+            and all(sampled(value) for value in bounds)
+        ):
+            status = "no-root"
+
+        trace = ConstraintOuterTrace(
+            steps=tuple(steps),
+            status=status,
+            target_bounds=jnp.asarray(bounds),
+            prescribed_unknown=jnp.asarray(prescribed),
+            unknown_tolerance=jnp.asarray(tolerance),
+        )
+        terminal_state = final_receipt.terminal_state._replace(constraint_outer=trace)
+        return replace(
+            final_receipt,
+            terminal_state=terminal_state,
+            qualified=jnp.asarray(final_receipt.qualified) & (status == "converged"),
+            compilation_cache_hit=steps[0].inner_receipt.compilation_cache_hit,
+            wall_seconds=sum(item.inner_receipt.wall_seconds for item in steps),
+            seed_provenance=request.seed_policy.provenance(),
+        )
+
+    def _solve_imposed_request(
+        self, request: ForwardSolveRequest
+    ) -> ForwardSolveReceipt:
+        """Resolve one typed request whose constraint targets remain fixed."""
 
         if request.source_profile is not self.source:
             raise ValueError("request source_profile must be this profile's source")
@@ -2187,7 +2381,16 @@ class ForwardProfile:
             return tuple(array.shape), str(array.dtype)
 
         constraint_signature = tuple(
-            (type(pair.functional).__qualname__, type(pair.unknown).__qualname__)
+            (
+                type(pair.functional).__qualname__,
+                type(pair.unknown).__qualname__,
+                pair.binding.policy,
+                (
+                    None
+                    if pair.binding.elimination is None
+                    else pair.binding.elimination.maximum_steps
+                ),
+            )
             for pair in request.constraint_pairs
         )
         return (

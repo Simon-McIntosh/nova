@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from types import SimpleNamespace
+from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -14,6 +15,7 @@ from nova.equilibrium.constraint import (
     CircuitCurrentUnknown,
     ConstraintBinding,
     ConstraintContext,
+    ConstraintElimination,
     ConstraintMultiplier,
     ConstraintPair,
     ConstraintRecord,
@@ -75,23 +77,43 @@ class _LinearOperator:
         return jnp.zeros_like(flux, dtype=bool)
 
 
+class _FixtureEquilibrium(NamedTuple):
+    flux: jax.Array
+    fixed_point: fixed_point.FixedPointResult
+    constraints: tuple[ConstraintRecord, ...]
+    finite: object
+    topology: object = None
+    normalisation: object = None
+    constraint_outer: object = None
+
+
 def _profile(*, changing_mask: bool = False) -> ForwardProfile:
     profile = object.__new__(ForwardProfile)
     profile.operator = _LinearOperator(changing_mask=changing_mask)
     profile.newton_steps = 6
+    profile._request_compilation_cache = set()
 
     def receipt(flux, history, *_args, constraints=(), **_kwargs):
-        return SimpleNamespace(
+        return _FixtureEquilibrium(
             flux=flux,
             fixed_point=history,
             constraints=constraints,
+            finite=SimpleNamespace(passed=jnp.asarray(True)),
         )
 
     profile._receipt = receipt
     return profile
 
 
-def _pair(functional, unknown, *, target, payload=None):
+def _pair(
+    functional,
+    unknown,
+    *,
+    target,
+    payload=None,
+    policy="imposed",
+    elimination=None,
+):
     return ConstraintPair(
         functional=functional,
         unknown=unknown,
@@ -101,6 +123,8 @@ def _pair(functional, unknown, *, target, payload=None):
             scale=jnp.asarray([1.0]),
             initial_unknown=jnp.asarray([0.0]),
             payload=payload,
+            policy=policy,
+            elimination=elimination,
         ),
     )
 
@@ -282,3 +306,139 @@ def test_typed_request_and_receipt_carry_constraint_rows() -> None:
 
     assert request.constraint_pairs == (pair,)
     assert receipt.constraints == (record,)
+
+
+def test_eliminated_constraint_runs_through_typed_solve_with_outer_trace() -> None:
+    configure_dtypes()
+    profile = _profile()
+    policy = replace(declared_forward_solve_policy(), compilation_cache=False)
+    controls = ConstraintElimination(
+        target_step=0.5,
+        target_bounds=jnp.asarray([-2.0, 2.0]),
+        unknown_tolerance=1.0e-10,
+        maximum_steps=5,
+    )
+    eliminated = _pair(
+        _CoordinateFunctional(0),
+        CircuitCurrentUnknown(jnp.asarray([1.0]), jnp.asarray([1.0])),
+        target=1.0,
+        policy="eliminated",
+        elimination=controls,
+    )
+    request = ForwardSolveRequest(
+        carrier_identity="constraint-fixture",
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(jnp.asarray([0.5, 0.0])),
+        policy=policy,
+        route=policy.route,
+        constraint_pairs=(eliminated,),
+    )
+
+    receipt = profile.solve(request)
+    trace = receipt.equilibrium.constraint_outer
+
+    assert trace is not None
+    assert trace.status in {"converged", "no-root", "budget"}
+    assert trace.status == "converged"
+    assert 2 <= len(trace.steps) <= controls.maximum_steps
+    np.testing.assert_allclose(
+        [step.target for step in trace.steps], [1.0, 1.5, 0.0], atol=1.0e-12
+    )
+    np.testing.assert_allclose(
+        [step.compensating_value for step in trace.steps],
+        [1.0, 1.5, 0.0],
+        atol=1.0e-10,
+    )
+    assert all(
+        isinstance(step.inner_receipt, ForwardSolveReceipt) for step in trace.steps
+    )
+    assert all(len(step.inner_receipt.constraints) == 1 for step in trace.steps)
+    assert bool(np.asarray(receipt.qualified))
+
+    imposed = replace(
+        eliminated,
+        binding=replace(
+            eliminated.binding,
+            target=jnp.atleast_1d(trace.steps[-1].target),
+            initial_unknown=trace.steps[-2]
+            .inner_receipt.constraints[0]
+            .normalized_unknown,
+            policy="imposed",
+            elimination=None,
+        ),
+    )
+    imposed_receipt = profile.solve(
+        replace(
+            request,
+            seed_policy=ExplicitSolveSeed(
+                trace.steps[-2].inner_receipt.equilibrium.flux
+            ),
+            constraint_pairs=(imposed,),
+        )
+    )
+    np.testing.assert_array_max_ulp(
+        np.asarray(receipt.equilibrium.flux),
+        np.asarray(imposed_receipt.equilibrium.flux),
+        maxulp=4,
+    )
+
+
+def test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows() -> None:
+    configure_dtypes()
+    profile = _profile()
+    policy = replace(declared_forward_solve_policy(), compilation_cache=False)
+    controls = ConstraintElimination(
+        target_step=0.25,
+        target_bounds=jnp.asarray([1.0, 2.0]),
+        unknown_tolerance=1.0e-10,
+        maximum_steps=5,
+    )
+    eliminated = _pair(
+        _CoordinateFunctional(0),
+        CircuitCurrentUnknown(jnp.asarray([1.0]), jnp.asarray([1.0])),
+        target=1.5,
+        policy="eliminated",
+        elimination=controls,
+    )
+    request = ForwardSolveRequest(
+        carrier_identity="constraint-fixture",
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(jnp.asarray([0.5, 0.0])),
+        policy=policy,
+        route=policy.route,
+        constraint_pairs=(eliminated,),
+    )
+
+    receipt = profile.solve(request)
+    trace = receipt.equilibrium.constraint_outer
+
+    assert trace is not None
+    assert trace.status == "no-root"
+    assert not bool(np.asarray(receipt.qualified))
+    np.testing.assert_allclose(
+        sorted(float(step.target) for step in trace.steps)[:: len(trace.steps) - 1],
+        [1.0, 2.0],
+    )
+
+    budget_controls = replace(
+        controls,
+        target_bounds=jnp.asarray([-2.0, 2.0]),
+        maximum_steps=2,
+    )
+    budget_pair = replace(
+        eliminated,
+        binding=replace(
+            eliminated.binding,
+            target=jnp.asarray([1.0]),
+            elimination=budget_controls,
+        ),
+    )
+    budget_receipt = profile.solve(replace(request, constraint_pairs=(budget_pair,)))
+    assert budget_receipt.equilibrium.constraint_outer.status == "budget"
+    assert len(budget_receipt.equilibrium.constraint_outer.steps) == 2
+    assert not bool(np.asarray(budget_receipt.qualified))
+
+    with np.testing.assert_raises_regex(
+        ValueError, "exactly one eliminated constraint"
+    ):
+        profile.solve(replace(request, constraint_pairs=(eliminated, eliminated)))

@@ -1,0 +1,49 @@
+{
+  "schema": "nova.constraint-elimination-receipt/1",
+  "synthetic_vertical_position": {
+    "policy": "eliminated",
+    "status": "converged",
+    "target_bounds": [
+      -2.0,
+      2.0
+    ],
+    "prescribed_compensating_current_a": 0.0,
+    "compensating_current_tolerance_a": 1e-10,
+    "outer_step_count": 3,
+    "outer_trace": [
+      {
+        "target_m": 1.0,
+        "compensating_current_a": 1.0,
+        "inner_receipt": {
+          "qualified": true,
+          "constraint_count": 1
+        }
+      },
+      {
+        "target_m": 1.5,
+        "compensating_current_a": 1.5,
+        "inner_receipt": {
+          "qualified": true,
+          "constraint_count": 1
+        }
+      },
+      {
+        "target_m": 0.0,
+        "compensating_current_a": 0.0,
+        "inner_receipt": {
+          "qualified": true,
+          "constraint_count": 1
+        }
+      }
+    ],
+    "imposed_terminal_state_max_ulp_bound": 4
+  },
+  "mast_21986_46": {
+    "policy": "eliminated",
+    "status": "no-root",
+    "target_scan_width_m": 0.1,
+    "minimum_absolute_compensating_current_a": 2600.0,
+    "interpretation": "The bounded target scan has no zero-current sign change. The minimum is retained as a physical negative result, not relabelled as convergence.",
+    "evidence_source": "solver-convergence-regression vertical-elimination receipt"
+  }
+}

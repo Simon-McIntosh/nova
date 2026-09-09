@@ -19,6 +19,10 @@ from typing import Any, Mapping
 import numpy as np
 
 from nova.biot.greens import MU0
+from nova.equilibrium.solve_request import (
+    ForwardSolveRequest,
+    ResolvedForwardSolveDefaults,
+)
 from nova.transport.current_diffusion import (
     EtaProfile,
     FluxSurfaceGeometry,
@@ -201,6 +205,13 @@ class ForwardTransportInput:
     initial_state: TransportState
     waveforms: TransportWaveforms
     model: TransportModel
+    equilibrium_request: ForwardSolveRequest | None = None
+
+    def __post_init__(self) -> None:
+        if self.equilibrium_request is not None and not isinstance(
+            self.equilibrium_request, ForwardSolveRequest
+        ):
+            raise TypeError("equilibrium_request must be a ForwardSolveRequest")
 
 
 @dataclass(frozen=True)
@@ -256,7 +267,7 @@ class TransportProvenance:
 
 @dataclass(frozen=True)
 class ForwardTransportReceipt:
-    """Evolved state plus conservation, boundary and numerical receipts."""
+    """Evolved state, route provenance, and coupled equilibrium defaults."""
 
     state: TransportState
     flux_consumption: FluxConsumptionLedger
@@ -264,6 +275,79 @@ class ForwardTransportReceipt:
     boundary: AchievedBoundaryValues
     diagnostics: SolverDiagnostics
     provenance: TransportProvenance
+    equilibrium_resolved_defaults: ResolvedForwardSolveDefaults | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a lossless JSON-compatible transport receipt."""
+
+        return {
+            "state": {
+                name: np.asarray(getattr(self.state, name)).tolist()
+                for name in (
+                    "rho",
+                    "psi",
+                    "ion_temperature",
+                    "electron_temperature",
+                    "electron_density",
+                )
+            },
+            "flux_consumption": dataclasses.asdict(self.flux_consumption),
+            "plasma_current": dataclasses.asdict(self.plasma_current),
+            "boundary": dataclasses.asdict(self.boundary),
+            "diagnostics": dataclasses.asdict(self.diagnostics),
+            "provenance": {
+                **dataclasses.asdict(self.provenance),
+                "rung": self.provenance.rung.value,
+            },
+            "equilibrium_resolved_defaults": (
+                None
+                if self.equilibrium_resolved_defaults is None
+                else self.equilibrium_resolved_defaults.to_dict()
+            ),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> ForwardTransportReceipt:
+        """Restore and validate a JSON transport receipt."""
+
+        expected = {
+            "state",
+            "flux_consumption",
+            "plasma_current",
+            "boundary",
+            "diagnostics",
+            "provenance",
+            "equilibrium_resolved_defaults",
+        }
+        if set(payload) != expected:
+            raise ValueError("transport receipt payload keys differ from the schema")
+        provenance = dict(payload["provenance"])
+        provenance["rung"] = TransportRung(provenance["rung"])
+        resolved_payload = payload["equilibrium_resolved_defaults"]
+        return cls(
+            state=TransportState(**payload["state"]),
+            flux_consumption=FluxConsumptionLedger(**payload["flux_consumption"]),
+            plasma_current=PlasmaCurrentLedger(**payload["plasma_current"]),
+            boundary=AchievedBoundaryValues(**payload["boundary"]),
+            diagnostics=SolverDiagnostics(**payload["diagnostics"]),
+            provenance=TransportProvenance(**provenance),
+            equilibrium_resolved_defaults=(
+                None
+                if resolved_payload is None
+                else ResolvedForwardSolveDefaults.from_dict(resolved_payload)
+            ),
+        )
+
+
+def _equilibrium_resolved_defaults(
+    inputs: ForwardTransportInput,
+) -> ResolvedForwardSolveDefaults | None:
+    """Resolve the policy embedded by a coupled transport caller."""
+
+    request = inputs.equilibrium_request
+    if request is None:
+        return None
+    return ResolvedForwardSolveDefaults.from_policy(request.policy)
 
 
 class TransportEngineError(RuntimeError):
@@ -507,6 +591,7 @@ def _solve_native(inputs: ForwardTransportInput) -> ForwardTransportReceipt:
             engine="nova.current_diffusion",
             engine_version="1",
         ),
+        equilibrium_resolved_defaults=_equilibrium_resolved_defaults(inputs),
     )
 
 
@@ -911,6 +996,7 @@ def _solve_torax(inputs: ForwardTransportInput) -> ForwardTransportReceipt:
             engine="torax",
             engine_version=version("torax"),
         ),
+        equilibrium_resolved_defaults=_equilibrium_resolved_defaults(inputs),
     )
 
 

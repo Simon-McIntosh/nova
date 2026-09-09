@@ -23,7 +23,7 @@ from __future__ import annotations
 import dataclasses
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from types import MappingProxyType
+from types import MappingProxyType, SimpleNamespace
 from typing import Any
 
 import jax
@@ -32,12 +32,19 @@ import numpy as np
 
 from nova.equilibrium import (
     BranchAdmissibility,
+    ExplicitSolveSeed,
+    ForwardSolveReceipt,
+    ForwardSolveRequest,
     SelectionHistory,
     SelectionPolicy,
     SelectionReceipt,
     select_forward_branch,
 )
-from nova.equilibrium.forward import ForwardEquilibrium, ForwardProfile, SolveRoute
+from nova.equilibrium.forward import (
+    ForwardEquilibrium,
+    ForwardProfile,
+    ForwardPortfolio,
+)
 from nova.equilibrium.source import ForwardSource
 from nova.equilibrium.topology import TopologyClass
 from nova.transport.forward import (
@@ -866,6 +873,30 @@ class TransportSweepReceipt:
         """Return the state at the end of the sweep."""
         return self.receipts[-1].state
 
+    def to_dict(self) -> dict[str, Any]:
+        """Return a lossless JSON-compatible sweep receipt."""
+
+        return {
+            "time": self.time.tolist(),
+            "geometry_time": self.geometry_time.tolist(),
+            "receipts": [receipt.to_dict() for receipt in self.receipts],
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> TransportSweepReceipt:
+        """Restore and validate a JSON sweep receipt."""
+
+        if set(payload) != {"time", "geometry_time", "receipts"}:
+            raise ValueError("transport sweep payload keys differ from the schema")
+        return cls(
+            time=np.asarray(payload["time"], dtype=np.float64),
+            geometry_time=np.asarray(payload["geometry_time"], dtype=np.float64),
+            receipts=tuple(
+                ForwardTransportReceipt.from_dict(receipt)
+                for receipt in payload["receipts"]
+            ),
+        )
+
 
 @dataclass(frozen=True)
 class EquilibriumSweepReceipt:
@@ -874,6 +905,7 @@ class EquilibriumSweepReceipt:
     time: np.ndarray
     source_samples: tuple[WaveformSample, ...]
     equilibria: tuple[ForwardEquilibrium, ...]
+    solve_receipts: tuple[ForwardSolveReceipt, ...]
     branch_receipts: tuple[EquilibriumBranchReceipt, ...]
 
     def __post_init__(self) -> None:
@@ -1493,6 +1525,7 @@ def transport_sweep(
     plasma_current: Sequence[float],
     model: TransportModel,
     *,
+    equilibrium_request: ForwardSolveRequest | None = None,
     solve: Callable[[ForwardTransportInput], ForwardTransportReceipt] | None = None,
 ) -> TransportSweepReceipt:
     """Advance transport once against midpoint-interpolated window geometry.
@@ -1531,6 +1564,7 @@ def transport_sweep(
                     plasma_current=current_array[index : index + 2],
                 ),
                 model=model,
+                equilibrium_request=equilibrium_request,
             )
         )
         receipts.append(receipt)
@@ -1544,14 +1578,11 @@ def transport_sweep(
 
 def equilibrium_sweep(
     profile: ForwardProfile,
-    initial_flux,
+    equilibrium_request: ForwardSolveRequest,
     source_waveform: Waveform,
     time: Sequence[float],
     source_from_sample: Callable[[WaveformSample], ForwardSource],
     *,
-    route: SolveRoute = "newton_krylov",
-    current=None,
-    solve_options: Mapping[str, Any] | None = None,
     selection_history: SelectionHistory | None = None,
     selection_policy: SelectionPolicy | None = None,
 ) -> EquilibriumSweepReceipt:
@@ -1573,12 +1604,18 @@ def equilibrium_sweep(
         raise ValueError("an equilibrium sweep needs at least one sample time")
     if not np.all(np.diff(time_array) > 0.0):
         raise ValueError("equilibrium sweep time must be strictly increasing")
-    options = dict(solve_options or {})
-    seed = jnp.asarray(initial_flux)
+    if not isinstance(equilibrium_request, ForwardSolveRequest):
+        raise TypeError("an equilibrium sweep requires a ForwardSolveRequest")
+    if equilibrium_request.source_profile is not profile.source:
+        raise ValueError(
+            "equilibrium request source_profile must be the profile source"
+        )
+    seed_policy = equilibrium_request.seed_policy
     history = SelectionHistory() if selection_history is None else selection_history
     policy = selection_policy
     samples: list[WaveformSample] = []
     equilibria: list[ForwardEquilibrium] = []
+    solve_receipts: list[ForwardSolveReceipt] = []
     branch_receipts: list[EquilibriumBranchReceipt] = []
     for sample_index, sample_time in enumerate(time_array):
         sample = source_waveform.sample(float(sample_time))
@@ -1586,68 +1623,44 @@ def equilibrium_sweep(
         operator = dataclasses.replace(profile.operator, source=source)
         sampled_profile = dataclasses.replace(profile, operator=operator)
 
-        if history.selected_class is None:
-            observed = sampled_profile.observe(seed)
-            cell_current = np.asarray(observed.cell_current, dtype=np.float64)
-            coordinates = np.asarray(
-                sampled_profile.lattice.coordinate, dtype=np.float64
-            )
-            if cell_current.ndim != 1 or coordinates.shape != (
-                cell_current.size,
-                2,
-            ):
-                raise ValueError(
-                    "equilibrium cell current and lattice coordinates must align"
-                )
-            total_current = float(np.sum(cell_current))
-            current_scale = float(np.sum(np.abs(cell_current)))
-            if abs(total_current) <= np.finfo(np.float64).eps * max(current_scale, 1.0):
-                raise ValueError(
-                    "a cold equilibrium portfolio needs a non-zero confined current"
-                )
-            centroid = (
-                np.sum(coordinates * cell_current[:, np.newaxis], axis=0)
-                / total_current
-            )
-            cold = sampled_profile.cold_seed_portfolio(
-                float(observed.moments.plasma_current),
-                centroid,
-                current=current,
-            )
-            portfolio_seed = cold.branches.flux
-            if policy is None:
-                cold_class = (
-                    TopologyClass.DIVERTED
-                    if bool(observed.topology.diverted)
-                    else TopologyClass.LIMITED
-                )
-                policy = SelectionPolicy(
-                    cold_start_class=cold_class,
-                    persistence_threshold=1,
-                )
-        else:
-            portfolio_seed = jnp.stack((seed, seed))
-            if policy is None:
-                policy = SelectionPolicy(
-                    cold_start_class=history.selected_class,
-                    persistence_threshold=1,
-                )
-
-        portfolio = sampled_profile.solve_portfolio(
-            portfolio_seed,
-            route=route,
-            current=current,
-            **options,
+        request = dataclasses.replace(
+            equilibrium_request,
+            source_profile=source,
+            seed_policy=seed_policy,
         )
-        core = np.asarray(portfolio.branches.equilibrium.domains.core)
-        if core.ndim < 2 or core.shape[0] != 2:
-            raise ValueError(
-                "equilibrium portfolio core masks must carry limited/diverted axes"
+        solve_receipt = sampled_profile.solve(request)
+        if not isinstance(solve_receipt, ForwardSolveReceipt):
+            raise TypeError(
+                "the typed equilibrium solve must return ForwardSolveReceipt"
             )
+        equilibrium = solve_receipt.equilibrium
+        _masks, achieved_read = sampled_profile.operator.read(equilibrium.flux)
+        achieved_class = (
+            TopologyClass.DIVERTED
+            if bool(achieved_read.diverted)
+            else TopologyClass.LIMITED
+        )
+        core_count = int(np.count_nonzero(np.asarray(equilibrium.domains.core)))
         core_counts = tuple(
-            int(np.count_nonzero(core[index]))
-            for index in (int(TopologyClass.LIMITED), int(TopologyClass.DIVERTED))
+            core_count if index == int(achieved_class) else 0 for index in (0, 1)
         )
+        qualified = bool(solve_receipt.qualified)
+        residual = float(np.asarray(equilibrium.fixed_point.residual))
+        availability = tuple(
+            qualified if index == int(achieved_class) else False for index in (0, 1)
+        )
+        portfolio = ForwardPortfolio(
+            branches=SimpleNamespace(
+                converged=availability,
+                topology_consistent=(True, True),
+                residual=(residual, residual),
+            )
+        )
+        if policy is None:
+            policy = SelectionPolicy(
+                cold_start_class=achieved_class,
+                persistence_threshold=1,
+            )
         admissibility = BranchAdmissibility(
             limited=core_counts[int(TopologyClass.LIMITED)] > 0,
             diverted=core_counts[int(TopologyClass.DIVERTED)] > 0,
@@ -1683,20 +1696,17 @@ def equilibrium_sweep(
                 f"at sample {sample_index}"
             )
 
-        selected_index = int(selection.selected_class)
-        if core_counts[selected_index] == 0:
+        if core_counts[int(selection.selected_class)] == 0:
             raise ConvergedNonConfinedError(branch_receipt)
-        equilibrium = jax.tree.map(
-            lambda value: value[selected_index],
-            portfolio.branches.equilibrium,
-        )
         samples.append(sample)
         equilibria.append(equilibrium)
-        seed = equilibrium.flux
+        solve_receipts.append(solve_receipt)
+        seed_policy = ExplicitSolveSeed(equilibrium.flux)
         history = selection.next_history
     return EquilibriumSweepReceipt(
         time=time_array,
         source_samples=tuple(samples),
         equilibria=tuple(equilibria),
+        solve_receipts=tuple(solve_receipts),
         branch_receipts=tuple(branch_receipts),
     )

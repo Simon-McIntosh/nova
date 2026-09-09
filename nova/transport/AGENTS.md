@@ -25,9 +25,10 @@ manufactures a replacement state. The batched member form is
   (`nova/transport/torax_geometry.py`), and
   `forward_source_from_receipt` (`nova/transport/evolved_state.py`) maps the
   evolved receipt back into an equilibrium `ForwardSource`. The equilibrium
-  side of a coupled solve goes through the equilibrium request seam —
-  `ForwardSolveRequest` / `ForwardProfile.solve` — never through a private
-  fixed-point kernel.
+  side of a coupled solve goes through the `ForwardSolveRequest` embedded on
+  `ForwardTransportInput`; `equilibrium_sweep` hands that request to
+  `ForwardProfile.solve`. It never passes a raw option mapping to a portfolio
+  or private fixed-point kernel.
 - The declared equilibrium defaults table lives once at
   `nova/equilibrium/solve_request.py` (`FORWARD_SOLVE_DEFAULTS`), keyed by the
   installed Nova package version. A coupled driver does not hand-configure an
@@ -36,10 +37,14 @@ manufactures a replacement state. The batched member form is
   any deliberate deviation on the receipt's `resolved_defaults.deviations`.
 - Every coupled forward records which equilibrium defaults and which transport
   route ran: the equilibrium resolved-defaults block rides the equilibrium
-  solve, and the transport rung and engine ride the `TransportProvenance` on
-  the transport receipt. TORAX is the optional `transport` extra
+  solve and is copied to `ForwardTransportReceipt.equilibrium_resolved_defaults`,
+  while the transport rung and engine ride the `TransportProvenance`. Both the
+  scalar and interval-sweep receipts have lossless JSON mappings. TORAX is the
+  optional `transport` extra
   (`pyproject.toml` declares `transport = ["torax>=1.4.3"]`), so the native
   rung is the only one that must always work.
 - After touching a coupled route or its equilibrium coupling, run the
   default-wiring tests named in `nova/equilibrium/AGENTS.md`:
   `tests/test_route_default_wiring.py` and `tests/test_default_wiring.py`.
+  The transport-specific request, receipt, and JSON contract is covered by
+  `tests/test_transport_forward_seam.py`.

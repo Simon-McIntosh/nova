@@ -11,8 +11,15 @@ import jax
 import numpy as np
 import pytest
 
-from nova.equilibrium import SelectionHistory, SelectionPolicy, SelectionReason
-from nova.equilibrium.forward import ForwardPortfolio
+from nova.equilibrium import (
+    ExplicitSolveSeed,
+    ForwardSolveReceipt,
+    ForwardSolveRequest,
+    ResolvedForwardSolveDefaults,
+    SelectionHistory,
+    SelectionPolicy,
+    SelectionReason,
+)
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.topology import TopologyClass
 from nova.transport.coupled_window import (
@@ -273,17 +280,26 @@ def test_equilibrium_sweep_consumes_interpolated_sources_and_returns_receipts(
         )
 
     coarse_time = np.array([0.25, 0.75])
+    equilibrium_request = ForwardSolveRequest.from_defaults(
+        carrier_identity="coupled-window-fixture",
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(converged.flux),
+        policy_overrides={
+            "route": "anderson",
+            "newton_steps": EVALUATIONS,
+        },
+    )
     sweep = equilibrium_sweep(
         profile,
-        converged.flux,
+        equilibrium_request,
         source_waveform,
         coarse_time,
         source_from_sample,
-        route="anderson",
-        solve_options={"evaluations": EVALUATIONS},
     )
 
     assert len(sweep.equilibria) == coarse_time.size
+    assert len(sweep.solve_receipts) == coarse_time.size
+    assert all(receipt.resolved_defaults.to_dict() for receipt in sweep.solve_receipts)
     assert sweep.conservation == tuple(
         equilibrium.conservation for equilibrium in sweep.equilibria
     )
@@ -786,27 +802,42 @@ def test_coreless_branch_outcome_names_its_sample_and_window_exchange(
     """A converged vacuum portfolio cannot cross the equilibrium boundary."""
     profile, _seed, _vacuum = machine
 
-    def coreless_portfolio(_profile, _initial_flux, **_options):
-        branches = SimpleNamespace(
-            equilibrium=SimpleNamespace(
-                domains=SimpleNamespace(core=np.zeros((2, 5), dtype=bool))
-            ),
-            converged=np.ones(2, dtype=bool),
-            topology_consistent=np.ones(2, dtype=bool),
-            residual=np.asarray((2.0e-16, 3.0e-16)),
+    def coreless_solve(_profile, request):
+        terminal = SimpleNamespace(
+            domains=SimpleNamespace(core=np.zeros(5, dtype=bool)),
+            flux=converged.flux,
+            fixed_point=SimpleNamespace(residual=np.asarray(2.0e-16)),
         )
-        return ForwardPortfolio(branches=branches)
+        return ForwardSolveReceipt(
+            terminal_state=terminal,
+            qualified=True,
+            termination_reason=0,
+            residual_history=np.asarray((2.0e-16,)),
+            mask_history=np.asarray((0,)),
+            globalisation_decisions=(np.asarray((0,)), np.asarray((1.0,))),
+            amplitude_history=np.asarray((1.0,)),
+            topology_read=None,
+            polish_receipt=None,
+            compilation_cache_hit=False,
+            wall_seconds=0.0,
+            resolved_defaults=ResolvedForwardSolveDefaults.from_policy(request.policy),
+        )
 
-    monkeypatch.setattr(type(profile), "solve_portfolio", coreless_portfolio)
+    monkeypatch.setattr(type(profile), "solve", coreless_solve)
     source_waveform = _exchange_waveform((0.0, 1.0), 5, "source", 1.0)
+    equilibrium_request = ForwardSolveRequest.from_defaults(
+        carrier_identity="coreless-window-fixture",
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(converged.flux),
+        policy_overrides={"route": "anderson"},
+    )
     with pytest.raises(ConvergedNonConfinedError) as unqualified:
         equilibrium_sweep(
             profile,
-            converged.flux,
+            equilibrium_request,
             source_waveform,
             (0.5,),
             lambda _sample: profile.source,
-            route="anderson",
             selection_history=SelectionHistory(selected_class=TopologyClass.LIMITED),
             selection_policy=SelectionPolicy(
                 cold_start_class=TopologyClass.LIMITED,

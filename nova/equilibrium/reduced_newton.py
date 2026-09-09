@@ -1394,7 +1394,9 @@ def _compiled_slice_solver(
                 reduced, direction, shadow, base_state
             )
             valid = jnp.isfinite(scored.merit) & (scored.merit < merit)
-            accepted = jnp.argmax(valid.astype(jnp.int32))
+            accepted = jnp.asarray(
+                jnp.argmax(valid.astype(jnp.int32)), dtype=jnp.int32
+            )
             return jnp.any(valid), accepted + 1, candidates[accepted]
 
         return jax.lax.cond(first_valid, accept_first, score_tail, None)

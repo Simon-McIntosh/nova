@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T18:02:32",
+  "updated": "2026-09-09T18:44:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4630,6 +4630,15 @@
       },
       {
         "id": "s19i-fsa-routes",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-gaa-artifact",
         "harness": "codex-terra",
         "role": "implement",
         "session_id": null,
@@ -146597,6 +146606,191 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T155701193869-ucc-cut-cell-second-moments",
+        "plan": "uniform-cell-clip-and-coupling",
+        "section": "",
+        "node": "ucc-cut-cell-second-moments",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1854,
+                "cached_input_tokens": 859708,
+                "input_tokens": 861594,
+                "output_tokens": 1373,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 862967,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "docs/figures/uniform-cell-clip-and-coupling/cut-cell-moments/receipt.json records for each of the three rungs every boundary-cut cell's zeroth, first and second moment relative error against the exact Solovev density with its outboard-window membership, the cut-cell and interior-cell curvature errors, and for the four imaging variants (production, exact cut-cell moments, second order zeroed everywhere, second order zeroed in cut cells) the outboard-window squared-error fraction and the imaged-field axis error, with line-contour error maps on shared levels as SVG beside it; produced on all_debug CPU x64 one rung per fresh process with no solver source change",
+          "estimated_hours": null,
+          "goal": "Test the lead's curvature-term hypothesis exactly as followup f-20260909T1750-cut-cell-second-moment-discriminator specifies: exact Solovev cut-cell current moments against the production ring-quadratic Duffy moments, the production curvature against the exact flux Hessian, and the operator flux image of the exact state with cut-cell moments substituted and with second-order terms zeroed, on weak and moderate -110 and weak -300",
+          "id": "ucc-cut-cell-second-moments",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T15:57:02Z",
+            "read_at": "2026-09-09T15:57:03Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 89.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T155701193869-ucc-cut-cell-second-moments/manifest.md",
+          "plan": "uniform-cell-clip-and-coupling",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/solovev_cut_cell_moments.py",
+            "docs/figures/uniform-cell-clip-and-coupling/cut-cell-moments"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-ucc-offaxis",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T15:57:21Z",
+        "completed_at": "2026-09-09T16:41:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2622,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2622,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "d99c2c831b54e9a4c3d11e1745421b6836ab3939",
+        "commits": [
+          "e623367e588b2bd84b8ff68ac05a05007ad37c81",
+          "3b34690a2aa498fba1da3f36eee95b7c3465bf7b",
+          "cd3fac734413f76e9f99ef03144fce885cb798e6",
+          "0a5e792455ec7ef8b4215744c8e491a0fae14c2d"
+        ],
+        "changed_lines": {
+          "added": 48337,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug CPU x64 job 1268059: three fresh rung processes plus aggregate, exit 0; strict jq receipt checks passed; oracle repeat disagreement 4.2e-12, 9.3e-13, 1.7e-12 within the 1e-9 bound",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/uniform-cell-clip-and-coupling/cut-cell-moments/receipt.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T155701193869-ucc-cut-cell-second-moments/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a086e3-5b60-7e21-aac7-69a059627384",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8832128,
+            "cached_input_tokens_cumulative": 8832128,
+            "input_tokens": 8894956,
+            "input_tokens_cumulative": 8894956,
+            "output_tokens": 20587,
+            "output_tokens_cumulative": 20587,
+            "reasoning_output_tokens": 5631,
+            "reasoning_output_tokens_cumulative": 5631
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T16:41:03Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 91.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T16:41:03Z"
+            }
+          ],
+          "notional_cost_usd": 74.5504,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 8832128,
+          "cumulative_input_tokens": 17727084,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 26218
+        },
+        "follow_on_paths": [
+          "support/current",
+          "weak/moderate"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/ucc-cut-cell-second-moments",
+          "session_id": "01a086e3-5b60-7e21-aac7-69a059627384",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T16:41:03Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -146909,6 +147103,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2379
+    "_version": 2381
   }
 }

@@ -1,0 +1,1420 @@
+{
+  "artifact": "one untuned MAST Thomson chord predicted from a forward equilibrium",
+  "source_revision": "db6465e51d0d00caf9fb76a870cc76332c337f92",
+  "verdict": "MEASURED_DISAGREEMENT_REPORTED_WITHOUT_TUNING",
+  "prediction_policy": "The target pulse is held out until after prediction. The immediately preceding measured electron profile is mapped through the current independently solved Grad--Shafranov equilibrium. No parameter is fit to the target trace, and no edge or crossing is extracted.",
+  "forward_equilibrium": {
+    "identity": "MAST 22086/43 banked converged reduced_newton.solve_reduced_newton",
+    "route": "reduced_newton.solve_reduced_newton",
+    "converged": true,
+    "termination_reason": "converged",
+    "terminal_residual": 1.0270974678427239e-13,
+    "accepted_step_count": 13,
+    "active_set_iterations": 3,
+    "axis_m": [
+      0.9033613058058605,
+      0.022469963648661998
+    ],
+    "axis_flux_wb": 0.34157609764772245,
+    "boundary_flux_wb": -0.12236763818437127,
+    "cocos": 17,
+    "target_current_a": 933034.875,
+    "state_provenance": {
+      "terminal_state_artifact": "docs/figures/millisecond-converged-solve/reduced-newton/four-rows-terminal-flux.npz",
+      "terminal_state_key": "22086/43 fast",
+      "convergence_receipt": "docs/figures/millisecond-converged-solve/reduced-newton/four-rows.json",
+      "receipt_artifact": "reduced-state plain-Newton prototype on the four bank rows",
+      "runtime": {
+        "devices": [
+          "cuda:0"
+        ],
+        "jax": "0.11.0",
+        "python": "3.14.2",
+        "scheduler": {
+          "job_id": "1262998",
+          "node": "98dci4-gpu-0003",
+          "partition": "betelgeuse",
+          "reservation": "gpu_0003_grpA"
+        }
+      },
+      "row_identity": "22086/43",
+      "arm": "pure"
+    },
+    "response_carrier": {
+      "loaded_from_persisted_carrier": true,
+      "carrier": {
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "stored_circuit_count": 101,
+        "frozen_reference_count": 6,
+        "warm_load_seconds": 0.008255230262875557,
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "size_bytes": 645864
+      },
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cank-thomson-forward-model/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.017181 direct_builders=0 verdict=PASS",
+        "direct_green_operator_builder_entries": 0,
+        "passes": true
+      }
+    },
+    "prescribed_field_policy": {
+      "policy": "explicit prescribed-current response matrix",
+      "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+      "stored_circuit_count": 101,
+      "active_circuit_count": 13,
+      "passive_or_vessel_circuit_count": 88,
+      "section_kernel_evaluations": 938,
+      "section_kernel_evaluations_this_shot": 0,
+      "passive_registry_minimum_overlap_fraction": 0.26603493820443475,
+      "passive_registry_maximum_separation_m": 0.0,
+      "response_shape": [
+        1126,
+        101
+      ],
+      "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+      "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+      "stored_field_closure_sup_wb": 6.661338147750939e-16,
+      "stored_field_closure_rms_wb": 1.9851452319074747e-17,
+      "all_currents_prescribed": true,
+      "response_matrix_reused": true,
+      "response_input_digests": {
+        "algorithm": "sha256",
+        "combined_sha256": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "inputs": {
+          "gridr": {
+            "sha256": "ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b",
+            "dtype": "<f4",
+            "shape": [
+              65
+            ]
+          },
+          "gridz": {
+            "sha256": "649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70",
+            "dtype": "<f4",
+            "shape": [
+              65
+            ]
+          },
+          "limiterr": {
+            "sha256": "0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db",
+            "dtype": "<f4",
+            "shape": [
+              37
+            ]
+          },
+          "limiterz": {
+            "sha256": "85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d",
+            "dtype": "<f4",
+            "shape": [
+              37
+            ]
+          },
+          "fcoil_n": {
+            "sha256": "defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab",
+            "dtype": "<f4",
+            "shape": [
+              101
+            ]
+          },
+          "fcoil_circ": {
+            "sha256": "99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12",
+            "dtype": "<f8",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_r": {
+            "sha256": "9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_z": {
+            "sha256": "0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_width": {
+            "sha256": "030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_height": {
+            "sha256": "b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_ang1": {
+            "sha256": "3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_ang2": {
+            "sha256": "18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_turns": {
+            "sha256": "e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_xmult": {
+            "sha256": "7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "resolved_response_targets": {
+            "sha256": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+            "dtype": "<f8",
+            "shape": [
+              1126,
+              2
+            ]
+          }
+        }
+      },
+      "active_mapping_recomputed_for_shot": true,
+      "active_mapping": [
+        {
+          "family": "p2_inner_lower",
+          "stored_circuit": 4,
+          "centroid_separation_m": 3.020663818271642e-08,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 50319.8671875,
+          "filament_turn_multiplier_sum": 0.9999960064888,
+          "effective_drive_a_turn": 50319.66623454681
+        },
+        {
+          "family": "p2_inner_upper",
+          "stored_circuit": 2,
+          "centroid_separation_m": 4.610138552976278e-08,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 50267.71875,
+          "filament_turn_multiplier_sum": 0.9999960064888,
+          "effective_drive_a_turn": 50267.518005302176
+        },
+        {
+          "family": "p2_outer_lower",
+          "stored_circuit": 5,
+          "centroid_separation_m": 3.794706373301994e-08,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 33416.35546875,
+          "filament_turn_multiplier_sum": 1.0,
+          "effective_drive_a_turn": 33416.35546875
+        },
+        {
+          "family": "p2_outer_upper",
+          "stored_circuit": 3,
+          "centroid_separation_m": 3.882122250270243e-08,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 33341.1796875,
+          "filament_turn_multiplier_sum": 1.0,
+          "effective_drive_a_turn": 33341.1796875
+        },
+        {
+          "family": "p3_lower",
+          "stored_circuit": 7,
+          "centroid_separation_m": 1.2310483904636694e-07,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 46.641414642333984,
+          "filament_turn_multiplier_sum": 1.0,
+          "effective_drive_a_turn": 46.641414642333984
+        },
+        {
+          "family": "p3_upper",
+          "stored_circuit": 6,
+          "centroid_separation_m": 1.1378064254653142e-07,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 29.57099151611328,
+          "filament_turn_multiplier_sum": 1.0,
+          "effective_drive_a_turn": 29.57099151611328
+        },
+        {
+          "family": "p4_lower",
+          "stored_circuit": 9,
+          "centroid_separation_m": 0.002284428762164253,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": -185195.171875,
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "effective_drive_a_turn": -185195.33400285762
+        },
+        {
+          "family": "p4_upper",
+          "stored_circuit": 8,
+          "centroid_separation_m": 0.003039636783399228,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": -185433.671875,
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "effective_drive_a_turn": -185433.83421165083
+        },
+        {
+          "family": "p5_lower",
+          "stored_circuit": 11,
+          "centroid_separation_m": 0.0022829440191137885,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": -138175.46875,
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "effective_drive_a_turn": -138175.5897147773
+        },
+        {
+          "family": "p5_upper",
+          "stored_circuit": 10,
+          "centroid_separation_m": 0.0022872695201792835,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": -138156.90625,
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "effective_drive_a_turn": -138157.0271985269
+        },
+        {
+          "family": "p6_lower",
+          "stored_circuit": 13,
+          "centroid_separation_m": 5.527338696549878e-08,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 926.8552856445312,
+          "filament_turn_multiplier_sum": 1.0,
+          "effective_drive_a_turn": 926.8552856445312
+        },
+        {
+          "family": "p6_upper",
+          "stored_circuit": 12,
+          "centroid_separation_m": 1.4493967305635352e-08,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": -554.8970947265625,
+          "filament_turn_multiplier_sum": 1.0,
+          "effective_drive_a_turn": -554.8970947265625
+        },
+        {
+          "family": "sol",
+          "stored_circuit": 1,
+          "centroid_separation_m": 2.5307005105576235e-06,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": -25381.810546875,
+          "filament_turn_multiplier_sum": 328.0,
+          "effective_drive_a_turn": -8325233.859375
+        }
+      ]
+    }
+  },
+  "negative_control": {
+    "role": "fresh newton_krylov terminal candidate retained as negative control; never used as the prediction equilibrium",
+    "identity": "MAST 22086/43 passive-inclusive ForwardProfile.solve_branch",
+    "entry_point": "ForwardProfile.solve_branch",
+    "route": "newton_krylov",
+    "converged": false,
+    "topology_consistent": true,
+    "terminal_residual": 0.00047749374833596324,
+    "residual_evaluations": 168,
+    "axis_m": [
+      0.9037436254143673,
+      0.01792332792014415
+    ],
+    "axis_flux_wb": 0.3414412366373421,
+    "boundary_flux_wb": -0.12440216027127886,
+    "cocos": 17,
+    "target_current_a": 933034.875,
+    "response_carrier": {
+      "loaded_from_persisted_carrier": true,
+      "carrier": {
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "stored_circuit_count": 101,
+        "frozen_reference_count": 6,
+        "warm_load_seconds": 0.008455444127321243,
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "size_bytes": 645864
+      },
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cank-thomson-forward-model/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.018412 direct_builders=0 verdict=PASS",
+        "direct_green_operator_builder_entries": 0,
+        "passes": true
+      }
+    },
+    "prescribed_field_policy": {
+      "policy": "explicit prescribed-current response matrix",
+      "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+      "stored_circuit_count": 101,
+      "active_circuit_count": 13,
+      "passive_or_vessel_circuit_count": 88,
+      "section_kernel_evaluations": 938,
+      "section_kernel_evaluations_this_shot": 0,
+      "passive_registry_minimum_overlap_fraction": 0.26603493820443475,
+      "passive_registry_maximum_separation_m": 0.0,
+      "response_shape": [
+        1126,
+        101
+      ],
+      "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+      "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+      "stored_field_closure_sup_wb": 6.661338147750939e-16,
+      "stored_field_closure_rms_wb": 1.9851452319074747e-17,
+      "all_currents_prescribed": true,
+      "response_matrix_reused": true,
+      "response_input_digests": {
+        "algorithm": "sha256",
+        "combined_sha256": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "inputs": {
+          "gridr": {
+            "sha256": "ec61e2a07b264000dab0fc09bee8c3bee2d9cc5bd122e9c1ab02ff69305fbc4b",
+            "dtype": "<f4",
+            "shape": [
+              65
+            ]
+          },
+          "gridz": {
+            "sha256": "649ed439f3c44e6ec10083caf8d274e7e9a9bc90f8910d596d8db049dfdbbc70",
+            "dtype": "<f4",
+            "shape": [
+              65
+            ]
+          },
+          "limiterr": {
+            "sha256": "0d2de31863de50d107078ca2804b9aa715019df548df03eb272e4b2458ebc5db",
+            "dtype": "<f4",
+            "shape": [
+              37
+            ]
+          },
+          "limiterz": {
+            "sha256": "85b1840ed10a8015a6cd3ba52022b66461e3e6b6d37630b162aacc0bb37b7d3d",
+            "dtype": "<f4",
+            "shape": [
+              37
+            ]
+          },
+          "fcoil_n": {
+            "sha256": "defc5bbea7a8214d855707286bac46c6c0d5f81b6a892950eb5779aa1131d0ab",
+            "dtype": "<f4",
+            "shape": [
+              101
+            ]
+          },
+          "fcoil_circ": {
+            "sha256": "99bafa9503a94afbc0c98c159dbc12a2132a98d8bf1e8d71955ea62e726ced12",
+            "dtype": "<f8",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_r": {
+            "sha256": "9fa3f75cf258f8f4cbe1126a4916a3a7f47feeff880ed2c407cf5b8884b9f0a3",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_z": {
+            "sha256": "0177e9c817a7a764d06200052510c393f89c090e6b0b6e29dafd4f427a18a024",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_width": {
+            "sha256": "030a746f1ca64b2c598457d524cd78d84424bed33adc88b170b6d492ad3fa0b9",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_height": {
+            "sha256": "b537670538b27513fd6308c91cbf3c7055522932f7b3fe6822186200ee46c5bb",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_ang1": {
+            "sha256": "3da46144e21d5c57e9d0564c5732f11c55b7feaeee7a240b898ff3f706e5afb4",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_ang2": {
+            "sha256": "18a85c290495e4aaf56aab08b95c7504b1aeb0f8aa26e0e490b6db45baa94962",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_turns": {
+            "sha256": "e4155e976b21c21444f833bf4b9f21576ccce474ec950e3bf6876d2a8ec2d7d8",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "fcoil_xmult": {
+            "sha256": "7f2118f4c1a66954d57978574082c9bdfffba524c50f1a15879668eb9817ee9f",
+            "dtype": "<f4",
+            "shape": [
+              938
+            ]
+          },
+          "resolved_response_targets": {
+            "sha256": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+            "dtype": "<f8",
+            "shape": [
+              1126,
+              2
+            ]
+          }
+        }
+      },
+      "active_mapping_recomputed_for_shot": true,
+      "active_mapping": [
+        {
+          "family": "p2_inner_lower",
+          "stored_circuit": 4,
+          "centroid_separation_m": 3.020663818271642e-08,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 50319.8671875,
+          "filament_turn_multiplier_sum": 0.9999960064888,
+          "effective_drive_a_turn": 50319.66623454681
+        },
+        {
+          "family": "p2_inner_upper",
+          "stored_circuit": 2,
+          "centroid_separation_m": 4.610138552976278e-08,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 50267.71875,
+          "filament_turn_multiplier_sum": 0.9999960064888,
+          "effective_drive_a_turn": 50267.518005302176
+        },
+        {
+          "family": "p2_outer_lower",
+          "stored_circuit": 5,
+          "centroid_separation_m": 3.794706373301994e-08,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 33416.35546875,
+          "filament_turn_multiplier_sum": 1.0,
+          "effective_drive_a_turn": 33416.35546875
+        },
+        {
+          "family": "p2_outer_upper",
+          "stored_circuit": 3,
+          "centroid_separation_m": 3.882122250270243e-08,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 33341.1796875,
+          "filament_turn_multiplier_sum": 1.0,
+          "effective_drive_a_turn": 33341.1796875
+        },
+        {
+          "family": "p3_lower",
+          "stored_circuit": 7,
+          "centroid_separation_m": 1.2310483904636694e-07,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 46.641414642333984,
+          "filament_turn_multiplier_sum": 1.0,
+          "effective_drive_a_turn": 46.641414642333984
+        },
+        {
+          "family": "p3_upper",
+          "stored_circuit": 6,
+          "centroid_separation_m": 1.1378064254653142e-07,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 29.57099151611328,
+          "filament_turn_multiplier_sum": 1.0,
+          "effective_drive_a_turn": 29.57099151611328
+        },
+        {
+          "family": "p4_lower",
+          "stored_circuit": 9,
+          "centroid_separation_m": 0.002284428762164253,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": -185195.171875,
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "effective_drive_a_turn": -185195.33400285762
+        },
+        {
+          "family": "p4_upper",
+          "stored_circuit": 8,
+          "centroid_separation_m": 0.003039636783399228,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": -185433.671875,
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "effective_drive_a_turn": -185433.83421165083
+        },
+        {
+          "family": "p5_lower",
+          "stored_circuit": 11,
+          "centroid_separation_m": 0.0022829440191137885,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": -138175.46875,
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "effective_drive_a_turn": -138175.5897147773
+        },
+        {
+          "family": "p5_upper",
+          "stored_circuit": 10,
+          "centroid_separation_m": 0.0022872695201792835,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": -138156.90625,
+          "filament_turn_multiplier_sum": 1.0000008754432201,
+          "effective_drive_a_turn": -138157.0271985269
+        },
+        {
+          "family": "p6_lower",
+          "stored_circuit": 13,
+          "centroid_separation_m": 5.527338696549878e-08,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": 926.8552856445312,
+          "filament_turn_multiplier_sum": 1.0,
+          "effective_drive_a_turn": 926.8552856445312
+        },
+        {
+          "family": "p6_upper",
+          "stored_circuit": 12,
+          "centroid_separation_m": 1.4493967305635352e-08,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": -554.8970947265625,
+          "filament_turn_multiplier_sum": 1.0,
+          "effective_drive_a_turn": -554.8970947265625
+        },
+        {
+          "family": "sol",
+          "stored_circuit": 1,
+          "centroid_separation_m": 2.5307005105576235e-06,
+          "current_field": "efm/fcoil_c",
+          "raw_current_a": -25381.810546875,
+          "filament_turn_multiplier_sum": 328.0,
+          "effective_drive_a_turn": -8325233.859375
+        }
+      ]
+    }
+  },
+  "measurement": {
+    "shot": 22086,
+    "equilibrium_slice": 43,
+    "equilibrium_time_s": 0.22999998927116394,
+    "target_laser_index": 54,
+    "target_laser_time_s": 0.22799421846866608,
+    "profile_laser_index": 53,
+    "profile_laser_time_s": 0.2239943891763687,
+    "profile_to_target_time_s": 0.003999829292297363,
+    "source": {
+      "stored_row_count": 74,
+      "admitted_row_count": 74,
+      "admission": "time inside the core system's shot window",
+      "usable_sample_fraction": 0.8843843843843844,
+      "height_m": 0.0,
+      "height_source": "both systems view the midplane; no stored Z leaf",
+      "group": "atm",
+      "era": "atm",
+      "source": "/work/projects/imas_gpu/mast/level1/shots/22086.zarr",
+      "shot_window_s": [
+        0.003998453263193369,
+        0.3079928159713745
+      ]
+    }
+  },
+  "inputs_absent_from_gs_forward": [
+    {
+      "name": "scattering_positions_m",
+      "category": "chord geometry",
+      "absent_from_gs_forward": "the equilibrium has no diagnostic location or channel identity"
+    },
+    {
+      "name": "scattering_volume_sigma_m",
+      "category": "instrument geometry",
+      "absent_from_gs_forward": "the equilibrium has no laser or collection-volume extent"
+    },
+    {
+      "name": "laser_wavelength_m, laser_energy_j, scattering_angle_rad",
+      "category": "scattering physics",
+      "absent_from_gs_forward": "the equilibrium carries fields and force balance, not a laser"
+    },
+    {
+      "name": "spectral_band_edges_m, throughput, solid_angle_sr, scattering_length_m",
+      "category": "instrument response",
+      "absent_from_gs_forward": "the equilibrium has no polychromator, collection optics, or calibration"
+    },
+    {
+      "name": "electron_temperature_ev, electron_density_m3",
+      "category": "independent electron profiles",
+      "absent_from_gs_forward": "Grad--Shafranov pressure and current profiles do not determine electron temperature and density separately"
+    }
+  ],
+  "concrete_inputs": {
+    "chord_geometry": {
+      "channel_names": [
+        "atm-11",
+        "atm-12",
+        "atm-13",
+        "atm-14",
+        "atm-15",
+        "atm-16",
+        "atm-17",
+        "atm-18",
+        "atm-19",
+        "atm-20",
+        "atm-21",
+        "atm-22",
+        "atm-23",
+        "atm-24",
+        "atm-25",
+        "atm-26",
+        "atm-27",
+        "atm-28",
+        "atm-29",
+        "atm-30",
+        "atm-31",
+        "atm-32",
+        "atm-33"
+      ],
+      "scattering_positions_m": [
+        [
+          0.9810000061988831,
+          0.0
+        ],
+        [
+          1.031999945640564,
+          0.0
+        ],
+        [
+          1.0924999713897705,
+          0.0
+        ],
+        [
+          1.152500033378601,
+          0.0
+        ],
+        [
+          1.2055000066757202,
+          0.0
+        ],
+        [
+          1.2545000314712524,
+          0.0
+        ],
+        [
+          1.2879999876022339,
+          0.0
+        ],
+        [
+          1.2999999523162842,
+          0.0
+        ],
+        [
+          1.312000036239624,
+          0.0
+        ],
+        [
+          1.3240000009536743,
+          0.0
+        ],
+        [
+          1.3359999656677246,
+          0.0
+        ],
+        [
+          1.347000002861023,
+          0.0
+        ],
+        [
+          1.3580000400543213,
+          0.0
+        ],
+        [
+          1.3619999885559082,
+          0.0
+        ],
+        [
+          1.36899995803833,
+          0.0
+        ],
+        [
+          1.3799999952316284,
+          0.0
+        ],
+        [
+          1.3899999856948853,
+          0.0
+        ],
+        [
+          1.3910000324249268,
+          0.0
+        ],
+        [
+          1.4019999504089355,
+          0.0
+        ],
+        [
+          1.4119999408721924,
+          0.0
+        ],
+        [
+          1.4220000505447388,
+          0.0
+        ],
+        [
+          1.4320000410079956,
+          0.0
+        ],
+        [
+          1.4420000314712524,
+          0.0
+        ]
+      ],
+      "chord_direction_rz": [
+        1.0,
+        0.0
+      ],
+      "source": "/work/projects/imas_gpu/mast/level1/shots/22086.zarr",
+      "why_absent": "the equilibrium has no diagnostic location or channel identity"
+    },
+    "instrument_geometry": {
+      "scattering_volume_sigma_m": 0.001,
+      "source": "declared untuned ideal spatial response",
+      "why_absent": "the equilibrium has no laser or collection-volume extent"
+    },
+    "scattering_physics": {
+      "laser_wavelength_m": 1.064e-06,
+      "laser_energy_j": 1.0,
+      "scattering_angle_rad": 1.5707963267948966,
+      "differential_cross_section_m2_sr": 3.970393841012081e-30,
+      "source": "declared non-relativistic illustrative response; not calibrated to target",
+      "why_absent": "the equilibrium carries fields and force balance, not a laser"
+    },
+    "instrument_response": {
+      "spectral_band_edges_m": [
+        [
+          7e-07,
+          9e-07
+        ],
+        [
+          9e-07,
+          1.04e-06
+        ],
+        [
+          1.04e-06,
+          1.088e-06
+        ],
+        [
+          1.088e-06,
+          1.3e-06
+        ]
+      ],
+      "throughput": [
+        0.18,
+        0.22,
+        0.25,
+        0.17
+      ],
+      "solid_angle_sr": 0.0001,
+      "scattering_length_m": 0.005,
+      "quantum_efficiency": 0.7,
+      "background_photoelectrons": [
+        2.0,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "source": "declared untuned ideal polychromator response; used for raw counts, not target selection",
+      "why_absent": "the equilibrium has no polychromator, collection optics, or calibration"
+    },
+    "independent_electron_profiles": {
+      "psi_norm": [
+        0.005742667762635327,
+        0.02469646976238209,
+        0.06196618015882187,
+        0.1354795203414971,
+        0.24017640181070318,
+        0.3627980294732891,
+        0.5014234755744937,
+        0.6066545415865728,
+        0.6476246665140785,
+        0.6885951984444049,
+        0.7295653233719107,
+        0.7712422881744864,
+        0.8115029452758372,
+        0.851763602377188,
+        0.8664036033349635,
+        0.8920238231668932,
+        0.9322844802682441,
+        0.9688849189743282,
+        0.9725451373695948,
+        1.0113070431178233,
+        1.0460913332870199,
+        1.0808760381176639,
+        1.1156603282868607,
+        1.1504446184560573,
+        1.1817503137437553
+      ],
+      "electron_temperature_ev": [
+        1025.9320068359375,
+        1015.1288452148438,
+        1025.01318359375,
+        842.6708984375,
+        768.0486450195312,
+        670.5679321289062,
+        611.2702026367188,
+        402.5919494628906,
+        333.98309326171875,
+        295.6958923339844,
+        241.67416381835938,
+        232.961669921875,
+        149.9439697265625,
+        154.25697326660156,
+        136.99343872070312,
+        96.85834503173828,
+        86.78727722167969,
+        80.99606323242188,
+        25.993791580200195,
+        42.250694274902344,
+        12.8450345993042,
+        14.50993824005127,
+        8.410762786865234,
+        8.243698120117188,
+        8.795291900634766
+      ],
+      "electron_density_m3": [
+        4.273926161881576e+19,
+        5.036001629334982e+19,
+        4.9370878040816484e+19,
+        5.001030562501938e+19,
+        4.824211060764862e+19,
+        4.1650278914387345e+19,
+        4.366537586484498e+19,
+        4.047337926020196e+19,
+        3.284208026915753e+19,
+        3.5894660998421807e+19,
+        3.347618841610525e+19,
+        3.1748055204404134e+19,
+        2.7319455464187494e+19,
+        2.8886110000186917e+19,
+        2.4621335293485646e+19,
+        2.7492001823934382e+19,
+        2.236833261407961e+19,
+        2.130651884197354e+19,
+        1.8244366863989473e+19,
+        1.6332074250728899e+19,
+        1.3383710731103371e+19,
+        1.263802084563406e+19,
+        1.0980054067971097e+19,
+        6.080359774740808e+18,
+        6.270352635241431e+18
+      ],
+      "source": "MAST level-1 core Thomson pulse at 0.223994389 s, one laser pulse before the held-out measured target; values were not fit to the target",
+      "why_absent": "Grad--Shafranov pressure and current profiles do not determine electron temperature and density separately"
+    }
+  },
+  "disagreement": {
+    "compared_channels": 23,
+    "temperature_rmse_ev": 33.5965833574119,
+    "temperature_median_absolute_error_ev": 15.414897795150168,
+    "temperature_normalised_rmse": 0.07226481803377609,
+    "density_rmse_m3": 2.4092668881284045e+18,
+    "density_median_absolute_error_m3": 1.79116257279599e+18,
+    "density_normalised_rmse": 0.07584120756184365
+  },
+  "trace": [
+    {
+      "channel": "atm-11",
+      "position_m": [
+        0.9810000061988831,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.024696469762382114,
+      "predicted_temperature_ev": 1015.326904488434,
+      "measured_temperature_ev": 962.88427734375,
+      "temperature_error_ev": 52.442627144684025,
+      "predicted_density_m3": 5.025837384800979e+19,
+      "measured_density_m3": 4.992430622354126e+19,
+      "density_error_m3": 3.3406762446853734e+17,
+      "predicted_photoelectrons_by_band": [
+        2.4875690881623536,
+        31.05167531913089,
+        28.141356176658174,
+        24.895707685613612
+      ]
+    },
+    {
+      "channel": "atm-12",
+      "position_m": [
+        1.031999945640564,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.061970877216055716,
+      "predicted_temperature_ev": 1023.9179174829628,
+      "measured_temperature_ev": 1044.3548583984375,
+      "temperature_error_ev": -20.43694091547468,
+      "predicted_density_m3": 4.938482640645968e+19,
+      "measured_density_m3": 5.12004082148311e+19,
+      "density_error_m3": -1.8155818083714253e+18,
+      "predicted_photoelectrons_by_band": [
+        2.49292227071835,
+        30.575357109676073,
+        27.583504307258195,
+        24.532163596640185
+      ]
+    },
+    {
+      "channel": "atm-13",
+      "position_m": [
+        1.0924999713897705,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.13548542700156163,
+      "predicted_temperature_ev": 843.6769050386556,
+      "measured_temperature_ev": 941.8796997070312,
+      "temperature_error_ev": -98.20279466837565,
+      "predicted_density_m3": 4.999558294563129e+19,
+      "measured_density_m3": 4.780745167095621e+19,
+      "density_error_m3": 2.188131274675077e+18,
+      "predicted_photoelectrons_by_band": [
+        2.244877888818508,
+        30.136525000339525,
+        30.406381591079626,
+        23.969545987581512
+      ]
+    },
+    {
+      "channel": "atm-14",
+      "position_m": [
+        1.152500033378601,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.24020052667526198,
+      "predicted_temperature_ev": 767.9680597511054,
+      "measured_temperature_ev": 783.3781127929688,
+      "temperature_error_ev": -15.410053041863307,
+      "predicted_density_m3": 4.821327993120893e+19,
+      "measured_density_m3": 4.90569146945283e+19,
+      "density_error_m3": -8.436347633193697e+17,
+      "predicted_photoelectrons_by_band": [
+        2.1593048535906654,
+        28.678498979798846,
+        30.64121849137324,
+        22.76406707717117
+      ]
+    },
+    {
+      "channel": "atm-15",
+      "position_m": [
+        1.2055000066757202,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.3627980294732891,
+      "predicted_temperature_ev": 670.8510302554728,
+      "measured_temperature_ev": 760.1812133789062,
+      "temperature_error_ev": -89.33018312343347,
+      "predicted_density_m3": 4.170292859707418e+19,
+      "measured_density_m3": 3.827287826102223e+19,
+      "density_error_m3": 3.4300503360519537e+18,
+      "predicted_photoelectrons_by_band": [
+        2.0734554692490015,
+        24.4387193246693,
+        28.400899337736494,
+        19.407989155978555
+      ]
+    },
+    {
+      "channel": "atm-16",
+      "position_m": [
+        1.2545000314712524,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.5014234755744936,
+      "predicted_temperature_ev": 609.7640864467039,
+      "measured_temperature_ev": 608.95263671875,
+      "temperature_error_ev": 0.8114497279539137,
+      "predicted_density_m3": 4.362192510650272e+19,
+      "measured_density_m3": 4.40056967038742e+19,
+      "density_error_m3": -3.837715973714821e+17,
+      "predicted_photoelectrons_by_band": [
+        2.0468813991696755,
+        24.953809479208324,
+        30.874981701696868,
+        19.78115643974598
+      ]
+    },
+    {
+      "channel": "atm-17",
+      "position_m": [
+        1.2879999876022339,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.6066545415865727,
+      "predicted_temperature_ev": 402.9428489436808,
+      "measured_temperature_ev": 389.7378845214844,
+      "temperature_error_ev": 13.20496442219644,
+      "predicted_density_m3": 4.0295982720389825e+19,
+      "measured_density_m3": 3.887943484560114e+19,
+      "density_error_m3": 1.416547874788688e+18,
+      "predicted_photoelectrons_by_band": [
+        2.0028048646397947,
+        20.803858532857795,
+        34.24011215378003,
+        16.532902764765396
+      ]
+    },
+    {
+      "channel": "atm-18",
+      "position_m": [
+        1.2999999523162842,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.6476246665140785,
+      "predicted_temperature_ev": 334.8250730205511,
+      "measured_temperature_ev": 307.1719665527344,
+      "temperature_error_ev": 27.653106467816713,
+      "predicted_density_m3": 3.313874850906313e+19,
+      "measured_density_m3": 3.2282351884805603e+19,
+      "density_error_m3": 8.563966242575278e+17,
+      "predicted_photoelectrons_by_band": [
+        2.00045824751547,
+        16.467236833784995,
+        30.784197770539407,
+        13.179661233029012
+      ]
+    },
+    {
+      "channel": "atm-19",
+      "position_m": [
+        1.312000036239624,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.6885951984444049,
+      "predicted_temperature_ev": 295.2589667214064,
+      "measured_temperature_ev": 273.7729187011719,
+      "temperature_error_ev": 21.486048020234534,
+      "predicted_density_m3": 3.574274208793024e+19,
+      "measured_density_m3": 3.4663346513777787e+19,
+      "density_error_m3": 1.0793955741524541e+18,
+      "predicted_photoelectrons_by_band": [
+        2.000138483791569,
+        16.836806135980517,
+        34.79074333531974,
+        13.464935530146821
+      ]
+    },
+    {
+      "channel": "atm-20",
+      "position_m": [
+        1.3240000009536743,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.7295653233719106,
+      "predicted_temperature_ev": 242.93640995751332,
+      "measured_temperature_ev": 219.95692443847656,
+      "temperature_error_ev": 22.979485519036757,
+      "predicted_density_m3": 3.349617155430348e+19,
+      "measured_density_m3": 3.09579461486843e+19,
+      "density_error_m3": 2.5382254056191795e+18,
+      "predicted_photoelectrons_by_band": [
+        2.000012956146023,
+        14.73829316666166,
+        35.37995539355247,
+        11.843238774221719
+      ]
+    },
+    {
+      "channel": "atm-21",
+      "position_m": [
+        1.3359999656677246,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.7712422881744863,
+      "predicted_temperature_ev": 230.7018418003002,
+      "measured_temperature_ev": 217.38153076171875,
+      "temperature_error_ev": 13.320311038581451,
+      "predicted_density_m3": 3.16644734860281e+19,
+      "measured_density_m3": 2.987331091323211e+19,
+      "density_error_m3": 1.79116257279599e+18,
+      "predicted_photoelectrons_by_band": [
+        2.0000061636435134,
+        13.740774775214199,
+        34.238584069513976,
+        11.072422692972243
+      ]
+    },
+    {
+      "channel": "atm-22",
+      "position_m": [
+        1.347000002861023,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.8115029452758371,
+      "predicted_temperature_ev": 152.5893984997133,
+      "measured_temperature_ev": 170.16773986816406,
+      "temperature_error_ev": -17.578341368450765,
+      "predicted_density_m3": 2.7501064193835655e+19,
+      "measured_density_m3": 2.894097123236643e+19,
+      "density_error_m3": -1.439907038530773e+18,
+      "predicted_photoelectrons_by_band": [
+        2.0000000052352447,
+        10.01616233292881,
+        34.95623542988524,
+        8.194307262207642
+      ]
+    },
+    {
+      "channel": "atm-23",
+      "position_m": [
+        1.3580000400543213,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.851763602377188,
+      "predicted_temperature_ev": 152.6881919594334,
+      "measured_temperature_ev": 135.67901611328125,
+      "temperature_error_ev": 17.009175846152147,
+      "predicted_density_m3": 2.8483377518123577e+19,
+      "measured_density_m3": 2.4717269882032357e+19,
+      "density_error_m3": 3.76610763609122e+18,
+      "predicted_photoelectrons_by_band": [
+        2.0000000054941713,
+        10.306122578517936,
+        36.125152292625565,
+        8.418367452225603
+      ]
+    },
+    {
+      "channel": "atm-24",
+      "position_m": [
+        1.3619999885559082,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.8664036033349634,
+      "predicted_temperature_ev": 136.52105099819954,
+      "measured_temperature_ev": 98.39238739013672,
+      "temperature_error_ev": 38.12866360806282,
+      "predicted_density_m3": 2.5113260621353628e+19,
+      "measured_density_m3": 2.2416759504213377e+19,
+      "density_error_m3": 2.6965011171402506e+18,
+      "predicted_photoelectrons_by_band": [
+        2.000000000436168,
+        8.768122821772971,
+        33.34939401275394,
+        7.229913089963846
+      ]
+    },
+    {
+      "channel": "atm-25",
+      "position_m": [
+        1.36899995803833,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.8920238231668931,
+      "predicted_temperature_ev": 98.46379060337054,
+      "measured_temperature_ev": 109.0727310180664,
+      "temperature_error_ev": -10.608940414695866,
+      "predicted_density_m3": 2.720014514763308e+19,
+      "measured_density_m3": 2.253425331675752e+19,
+      "density_error_m3": 4.665891830875558e+18,
+      "predicted_photoelectrons_by_band": [
+        2.000000000000075,
+        7.579859533449508,
+        39.93332828148557,
+        6.311709639483854
+      ]
+    },
+    {
+      "channel": "atm-26",
+      "position_m": [
+        1.3799999952316284,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.932284480268244,
+      "predicted_temperature_ev": 86.89937927238046,
+      "measured_temperature_ev": 81.80415344238281,
+      "temperature_error_ev": 5.095225829997645,
+      "predicted_density_m3": 2.2488158060746367e+19,
+      "measured_density_m3": 1.952842382190628e+19,
+      "density_error_m3": 2.9597342388400865e+18,
+      "predicted_photoelectrons_by_band": [
+        2.0000000000000018,
+        6.074652117006252,
+        34.58605056666008,
+        5.148594817686709
+      ]
+    },
+    {
+      "channel": "atm-27",
+      "position_m": [
+        1.3899999856948853,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.968884918974328,
+      "predicted_temperature_ev": 68.50847540469462,
+      "measured_temperature_ev": 65.11997985839844,
+      "temperature_error_ev": 3.388495546296184,
+      "predicted_density_m3": 2.060936478571086e+19,
+      "measured_density_m3": 1.9751448760484364e+19,
+      "density_error_m3": 8.57916025226494e+17,
+      "predicted_photoelectrons_by_band": [
+        2.0,
+        4.840891621396484,
+        33.89393810673869,
+        4.195234434715515
+      ]
+    },
+    {
+      "channel": "atm-28",
+      "position_m": [
+        1.3910000324249268,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 0.9725449186006402,
+      "predicted_temperature_ev": 39.39689648585569,
+      "measured_temperature_ev": 54.81179428100586,
+      "temperature_error_ev": -15.414897795150168,
+      "predicted_density_m3": 1.8909316989818036e+19,
+      "measured_density_m3": 2.308735604404047e+19,
+      "density_error_m3": -4.1780390542224343e+18,
+      "predicted_photoelectrons_by_band": [
+        2.0,
+        3.0728426764944126,
+        34.74873240295035,
+        2.8290147954729843
+      ]
+    },
+    {
+      "channel": "atm-29",
+      "position_m": [
+        1.4019999504089355,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 1.0113070431178233,
+      "predicted_temperature_ev": 40.78473998488988,
+      "measured_temperature_ev": 56.95532989501953,
+      "temperature_error_ev": -16.17058991012965,
+      "predicted_density_m3": 1.6291012117806316e+19,
+      "measured_density_m3": 1.6729596082681545e+19,
+      "density_error_m3": -4.385839648752292e+17,
+      "predicted_photoelectrons_by_band": [
+        2.0,
+        2.989845752076005,
+        30.065143338460228,
+        2.7648808084223937
+      ]
+    },
+    {
+      "channel": "atm-30",
+      "position_m": [
+        1.4119999408721924,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 1.0460913332870199,
+      "predicted_temperature_ev": 13.880349657232236,
+      "measured_temperature_ev": 23.967988967895508,
+      "temperature_error_ev": -10.087639310663272,
+      "predicted_density_m3": 1.345710727102979e+19,
+      "measured_density_m3": 1.3592208922055279e+19,
+      "density_error_m3": -1.3510165102548787e+17,
+      "predicted_photoelectrons_by_band": [
+        2.0,
+        2.024362713406606,
+        26.986009782192713,
+        2.0188257330869237
+      ]
+    },
+    {
+      "channel": "atm-31",
+      "position_m": [
+        1.4220000505447388,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 1.080876038117664,
+      "predicted_temperature_ev": 14.251228653688822,
+      "measured_temperature_ev": 16.589502334594727,
+      "temperature_error_ev": -2.338273680905905,
+      "predicted_density_m3": 1.260762217534491e+19,
+      "measured_density_m3": 8.26505969231777e+18,
+      "density_error_m3": 4.3425624830271406e+18,
+      "predicted_photoelectrons_by_band": [
+        2.0,
+        2.0260742388613484,
+        25.401373190460216,
+        2.020148275483771
+      ]
+    },
+    {
+      "channel": "atm-32",
+      "position_m": [
+        1.4320000410079956,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 1.1156603282868605,
+      "predicted_temperature_ev": 8.608429223841219,
+      "measured_temperature_ev": 7.981945991516113,
+      "temperature_error_ev": 0.6264832323251053,
+      "predicted_density_m3": 1.0872035059102597e+19,
+      "measured_density_m3": 8.093853087489327e+18,
+      "density_error_m3": 2.77818197161327e+18,
+      "predicted_photoelectrons_by_band": [
+        2.0,
+        2.000907166246891,
+        22.22893971355628,
+        2.0007009920998704
+      ]
+    },
+    {
+      "channel": "atm-33",
+      "position_m": [
+        1.4420000314712524,
+        0.0
+      ],
+      "psi_norm_from_forward_equilibrium": 1.150444618456057,
+      "predicted_temperature_ev": 8.269687168834986,
+      "measured_temperature_ev": 4.260380744934082,
+      "temperature_error_ev": 4.009306423900904,
+      "predicted_density_m3": 6.250658911719831e+18,
+      "measured_density_m3": 5.948013209372852e+18,
+      "density_error_m3": 3.026457023469783e+17,
+      "predicted_photoelectrons_by_band": [
+        2.0,
+        2.0003759596656354,
+        13.630554831636347,
+        2.000290514287082
+      ]
+    }
+  ],
+  "figure": "docs/figures/constraint-augmented-newton-krylov/thomson-forward/chord-comparison.png"
+}

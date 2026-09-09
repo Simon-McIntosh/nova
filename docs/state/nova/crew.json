@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T18:44:16",
+  "updated": "2026-09-09T19:04:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -146791,6 +146791,192 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T160346985581-gaa-certificate-artifact",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a73",
+        "node": "gaa-certificate-artifact",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2431,
+                "cached_input_tokens": 866693,
+                "input_tokens": 869156,
+                "output_tokens": 1232,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 870388,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "reckon audit-doc docs/evidence/gs-absolute-accuracy-certificate.html reports OK with plan-evidence-for gs-absolute-accuracy-gates, 16 panel figures cited with project-absolute src each drawn by the nova.media painters with contours only (grep -c contourf over the renderer prints 0 and grep -c 'scatter(' over the certificate figure code paths prints 0), and tests/test_certificate_pin.py is green in the default CPU lane asserting qualified_rows 3, unqualified_rows 13, the per-row converged flags and the declared platform and thread configuration read from the receipt",
+          "estimated_hours": null,
+          "goal": "Author the certificate artifact of followup f-20260909T1640-certificate-artifact-with-contour-panels: docs/evidence/gs-absolute-accuracy-certificate.html with one line-contour poloidal panel per rung of the regenerated production-route receipt (solved beside analytic on shared levels, both null sets, wall, residual and errors in the caption), the certificate error-field figures converted from scatter to line contours, the NaN-era receipt relabelled, and tests/test_certificate_pin.py pinning the 16-row census",
+          "id": "gaa-certificate-artifact",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T16:03:47Z",
+            "read_at": "2026-09-09T16:03:48Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 89.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T160346985581-gaa-certificate-artifact/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "docs/evidence/gs-absolute-accuracy-certificate.html",
+            "docs/figures/gs-absolute-accuracy",
+            "benchmarks/solovev_certificate.py",
+            "tests/test_certificate_pin.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-gaa-artifact",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T16:04:01Z",
+        "completed_at": "2026-09-09T17:00:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3398,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3398,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "21faeb58da5b0622cc8c9cca931509f4c4a04f13",
+        "commits": [
+          "5fdfcc71715fa22e91db4f31f93824bea27a05d5",
+          "7889083d38a2b6fdef81e4d59fcca424dd14c698",
+          "d8aa5df75f545c4bcb716178c46409ff84439625",
+          "a8d7c0bdaede3c98eb3415d74821a82f648278ad",
+          "43d036c71dc068b81faf03a286b16a3ea21a8740",
+          "ee81907552b21859048a35b0dffbf4050ed7e01f"
+        ],
+        "changed_lines": {
+          "added": 867596,
+          "removed": 11537,
+          "files": 34
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1268058 (one allocation, gpu:2, two worker processes, cache warm, 23 min 30 s, 16 of 16 rows reproduced exactly); reckon audit-doc docs/evidence/gs-absolute-accuracy-certificate.html (OK); default CPU lane tests/test_certificate_pin.py (2 passed); grep contourf and scatter over the renderer (0, 0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T160346985581-gaa-certificate-artifact/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a086e9-7671-72b2-92e0-683991b32598",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 26401280,
+            "cached_input_tokens_cumulative": 26401280,
+            "input_tokens": 26714033,
+            "input_tokens_cumulative": 26714033,
+            "output_tokens": 40618,
+            "output_tokens_cumulative": 40618,
+            "reasoning_output_tokens": 10798,
+            "reasoning_output_tokens_cumulative": 10798
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T17:00:39Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 56.0,
+              "resets_at": 1789302634,
+              "observed_at": "2026-09-09T17:00:39Z"
+            }
+          ],
+          "notional_cost_usd": 74.0871,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 26401280,
+          "cumulative_input_tokens": 53115313,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 51416
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/gaa-certificate-artifact",
+          "session_id": "01a086e9-7671-72b2-92e0-683991b32598",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T17:00:39Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -147103,6 +147289,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2381
+    "_version": 2382
   }
 }

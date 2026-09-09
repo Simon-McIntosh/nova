@@ -1,0 +1,136 @@
+{
+  "schema": "nova.strict-exit-incidence/2",
+  "measurement_state": "blocked_before_batch_compile",
+  "recorded_at": "2026-09-09T11:08:36Z",
+  "source": {
+    "revision": "2071f8c02f7e2d7a13b6cc8748eb8fafa842a7da",
+    "driver": "benchmarks/strict_exit_incidence.py",
+    "operand_cache": "logs/exact-operand-cache.npz",
+    "operand_cache_sha256": "2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904"
+  },
+  "execution": {
+    "job_id": 1267675,
+    "scheduler_state": "CANCELLED by owner after the required stacked branch was declined",
+    "elapsed": "00:02:24",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "cpu_count": 1,
+    "gpu_count": 1,
+    "device": "NVIDIA H200",
+    "requested_memory": "128G",
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "tmpdir": "/tmp",
+    "shared_venv_python": "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+    "persistent_compilation_cache": true,
+    "stage_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/batched-exit-incidence-h200.log",
+    "stage_log_sha256": "6a85a3f8cbd6af658f178570cc5ba47497438e6d479d79400c5d0f8efd8a195f",
+    "scheduler_step_max_rss_kib": 7190972,
+    "scheduler_step_max_rss_mib": 7022.43359375,
+    "driver_process_peak_rss_mib_before_compile": 5017.0625,
+    "host_memory_under_16_gib_before_compile": true
+  },
+  "configuration": {
+    "requested_program_widths": {
+      "MAST": 12,
+      "DIII-D": 5
+    },
+    "same_arguments_for_exit_passes": true,
+    "exit_passes_requested": [
+      "without_exit",
+      "with_exit"
+    ]
+  },
+  "machines": {
+    "MAST": {
+      "requested_width": 12,
+      "built_member_count": 12,
+      "compile_once": false,
+      "compile_seconds": null,
+      "passes_completed": [],
+      "batched_ms_per_member": {
+        "without_exit": null,
+        "with_exit": null
+      },
+      "per_member_firing_trips": null,
+      "execution_route_selected": "sequential_jitted_geometry_fallback",
+      "operator_identity_group_count": 6,
+      "operator_identity_groups": [
+        [0, 1],
+        [2, 3],
+        [4, 5],
+        [6, 7],
+        [8, 9],
+        [10, 11]
+      ],
+      "member_identities": [
+        "21978/35 pure",
+        "21978/35 mixed",
+        "21983/35 pure",
+        "21983/35 mixed",
+        "21985/51 pure",
+        "21985/51 mixed",
+        "21986/46 pure",
+        "21986/46 mixed",
+        "21989/55 pure",
+        "21989/55 mixed",
+        "22086/43 pure",
+        "22086/43 mixed"
+      ],
+      "geometry_identity_digests": [
+        "368cccf7d7e6f24dee19abe8f6ff54b8ec5d8fefbdced751dba55ee4b1a17399",
+        "368cccf7d7e6f24dee19abe8f6ff54b8ec5d8fefbdced751dba55ee4b1a17399",
+        "dc5f405f8fd96c11ef8612ea5f9270d80be34b291429749c6b64bf0a7cc862c2",
+        "dc5f405f8fd96c11ef8612ea5f9270d80be34b291429749c6b64bf0a7cc862c2",
+        "8cc621daa704a78fca5fce6a8034e9b98f247341b382bbdfd220f4e9a271ce8d",
+        "8cc621daa704a78fca5fce6a8034e9b98f247341b382bbdfd220f4e9a271ce8d",
+        "5442c7438f5690421745640f37c1ffad094b9c82fecad2b1a655bceb22390d57",
+        "5442c7438f5690421745640f37c1ffad094b9c82fecad2b1a655bceb22390d57",
+        "3539ada01babf4295141ad5d5559bde23016bada1241758be50a966748784e93",
+        "3539ada01babf4295141ad5d5559bde23016bada1241758be50a966748784e93",
+        "3f807381009d9cd018c2fa759ccd6bcd5b2e399cd735954165e1b8a624d8d2f3",
+        "3f807381009d9cd018c2fa759ccd6bcd5b2e399cd735954165e1b8a624d8d2f3"
+      ],
+      "group_diagnostic_job_id": 1267678,
+      "group_diagnostic_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/mast-geometry-groups.log",
+      "group_diagnostic_log_sha256": "60f7763fe040704c13a8839536226678b6a84a143a5017829102112b7e2d09f6"
+    },
+    "DIII-D": {
+      "requested_width": 5,
+      "built_member_count": 0,
+      "compile_once": null,
+      "compile_seconds": null,
+      "passes_completed": [],
+      "batched_ms_per_member": {
+        "without_exit": null,
+        "with_exit": null
+      },
+      "per_member_firing_trips": null,
+      "not_run_reason": "the required MAST width-12 program was already impossible at the current operator boundary"
+    }
+  },
+  "sequential_width_one_comparison": {
+    "receipt_path": "docs/figures/millisecond-converged-solve/strict-exit-incidence.json",
+    "receipt_sha256": "7eb2bb066dfc8f0f7fda66f4ebb144aae68ea171172380c8c645e3adb730a3d0",
+    "measurement_state": "partial_scheduler_timeout",
+    "MAST": {
+      "paired_timing_member_count": 12,
+      "without_exit_mean_ms": 64354.927120500004,
+      "with_exit_mean_ms": 60188.503989
+    },
+    "DIII-D": {
+      "paired_timing_member_count": 2,
+      "without_exit_mean_ms": 205113.028233,
+      "with_exit_mean_ms": 196694.746691
+    }
+  },
+  "blocker": {
+    "condition": "the twelve real MAST members do not share one stackable operator identity",
+    "observable_result": "ForwardOperatorBatch partitions the twelve members into six two-arm groups and selects its sequential compiled fallback before the driver can lower one width-12 program",
+    "required_decision": "decide whether the real bank may be rebuilt on one canonical host geometry or whether the operator boundary must support batched differing host geometry",
+    "scope": "the first option changes the benchmark's evidence semantics; the second requires nova/equilibrium changes outside this node's write fence"
+  }
+}

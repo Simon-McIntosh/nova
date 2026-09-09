@@ -5820,6 +5820,7 @@
     }
   },
   "preregistration": {
+    "historical_status": "superseded_nan_era_receipt",
     "boundary_band": "Euclidean distance at most two characteristic pitches",
     "cases": [
       "weak-rotation-reactor-static",
@@ -5851,6 +5852,7 @@
     "reuse_map": "docs/research/forward-accuracy-reuse-map.html#absolute-reference",
     "solver_source_modified": false,
     "source_revision": "a3ae6bd4e9e8744308069450c3b8ad9c4a199357",
+    "superseded_by": "docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json",
     "terminal_residual_bound": 1e-12,
     "theoretical_discrete_operator_order": 2.0
   },
@@ -6081,6 +6083,7 @@
     "qualified_rows": 0,
     "resolution_rows": 16,
     "schema_valid": true,
+    "status": "historical_nan_era_not_current_certificate",
     "unqualified_rows": 16
   }
 }

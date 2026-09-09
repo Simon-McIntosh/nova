@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="gs-absolute-accuracy-certificate">
+  <meta name="plan-title" content="GS absolute-accuracy certificate">
+  <meta name="plan-summary" content="Sixteen retained production-route Solovev terminal rows: three residual-qualified Cerfon-Freidberg single-null rows and thirteen unqualified rows, with shared-level poloidal flux and line-contour error panels.">
+  <meta name="plan-evidence-for" content="gs-absolute-accuracy-gates">
+  <meta name="plan-verifies" content="gs-absolute-accuracy-gates#s3">
+  <meta name="plan-recorded-at" content="2026-09-09">
+  <meta name="plan-verdict" content="partial-qualification">
+  <meta name="plan-tags" content="equilibrium,solovev,grad-shafranov,accuracy,certificate">
+  <title>GS absolute-accuracy certificate | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <p class="eyebrow">Evidence · production Grad-Shafranov solve against closed-form Solovev fields</p>
+    <h1>GS absolute-accuracy certificate</h1>
+    <p class="lead">This certificate retains every terminal production-route solve. Three Cerfon-Freidberg single-null rungs satisfy the 1e-12 fixed-point-residual qualification; thirteen rows do not. A finite error or a visually plausible terminal map is never promoted as convergence. Every panel overlays analytic blue and solved ochre poloidal-flux contours at one physical level array, marks the two topology reads, draws the wall, and keeps the absolute error fields as unfilled line contours.</p>
+  </header>
+
+  <section id="receipt">
+    <h2>Receipt, qualification, and rendering contract</h2>
+    <p>The machine-readable source is <code>docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json</code>, produced by <code>benchmarks/solovev_certificate.py</code> at source revision <code>8ae3a7d7</code>. It records a one-allocation H200 production run on <code>98dci4-gpu-0003</code>: CUDA float64, four CPU threads per row (<code>OMP_NUM_THREADS</code>, <code>OPENBLAS_NUM_THREADS</code>, <code>MKL_NUM_THREADS</code>, and <code>NUMEXPR_NUM_THREADS</code> all 4). The census is 16 retained rows: 3 qualified and 13 unqualified.</p>
+    <p>The blue markers are the analytic stationary-point read and the ochre markers are the solved terminal read; a missing cross is recorded as missing, not inferred from the analytic field. The solid triangle denotes an axis and the cross a saddle. The residual flag remains the current qualification rule; the pending joint residual-and-identification rule may reduce, but cannot inflate, the certified set.</p>
+  </section>
+
+  <section id="census">
+    <h2>Complete terminal census</h2>
+    <table>
+      <caption>Every production-route rung. Axis and X-point errors are distances from the closed-form reference; “unavailable” means no admitted terminal X-point, not zero error.</caption>
+      <thead><tr><th>Case</th><th>Requested cells</th><th>Residual</th><th>Converged</th><th>Axis error [mm]</th><th>X-point error [mm]</th></tr></thead>
+      <tbody>
+        <tr><td>diverted single-null</td><td>110</td><td>5.291e-15</td><td>yes</td><td>5.097</td><td>unavailable</td></tr>
+        <tr><td>diverted single-null</td><td>300</td><td>5.627e-15</td><td>yes</td><td>2.597</td><td>unavailable</td></tr>
+        <tr><td>diverted single-null</td><td>500</td><td>2.423e-17</td><td>yes</td><td>1.433</td><td>1.199</td></tr>
+        <tr><td>diverted single-null</td><td>1000</td><td>3.951e-2</td><td>no</td><td>9.504</td><td>26.480</td></tr>
+        <tr><td>moderate rotation conventional static</td><td>110 / 300 / 500 / 1000</td><td>1.246e-2 / 8.456e-3 / 7.016e-3 / 5.744e-3</td><td>no / no / no / no</td><td>2.704 / 11.292 / 14.622 / 18.302</td><td>unavailable</td></tr>
+        <tr><td>strong rotation compact static</td><td>110 / 300 / 500 / 1000</td><td>1.355e-2 / 1.739e-2 / 5.934e-3 / 4.243e-3</td><td>no / no / no / no</td><td>2.563 / 4.055 / 5.953 / 7.114</td><td>unavailable</td></tr>
+        <tr><td>weak rotation reactor static</td><td>110 / 300 / 500 / 1000</td><td>7.448e-3 / 5.559e-3 / 1.246e-3 / 5.401e-3</td><td>no / no / no / no</td><td>1.846 / 33.461 / 55.654 / 64.316</td><td>unavailable</td></tr>
+      </tbody>
+    </table>
+    <p>The three qualified rungs support a separated qualification cohort and its convergence-order fit; the 1000-cell single-null rung and every static rung are held outside that cohort. The rising weak-rotation axis error despite a lower intermediate residual is the reason the per-rung panels and flags travel with the scalar table.</p>
+  </section>
+
+  <section id="figures">
+    <h2>Sixteen retained contour panels</h2>
+    <p>Each figure contains the shared-level solved-versus-analytic flux panel, the wall, analytic and terminal null markers, and three absolute error fields (<code>psi</code>, gradient, Hessian) drawn as line contours. The caption states the terminal residual and errors, so an unqualified picture cannot be read as a certificate pass.</p>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-reduced.png" alt="Shared-level solved and analytic flux and line-contour error fields for the 110-cell diverted single-null rung."><figcaption><strong>Diverted single-null, 110 requested cells — qualified.</strong> Residual 5.291e-15; axis error 5.097 mm; no admitted terminal X-point. Blue analytic and ochre solved contours share levels.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png" alt="Shared-level solved and analytic flux and line-contour error fields for the 300-cell diverted single-null rung."><figcaption><strong>Diverted single-null, 300 requested cells — qualified.</strong> Residual 5.627e-15; axis error 2.597 mm; no admitted terminal X-point.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-500.png" alt="Shared-level solved and analytic flux and line-contour error fields for the 500-cell diverted single-null rung."><figcaption><strong>Diverted single-null, 500 requested cells — qualified.</strong> Residual 2.423e-17; axis error 1.433 mm; X-point error 1.199 mm.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-1000.png" alt="Shared-level solved and analytic flux and line-contour error fields for the 1000-cell diverted single-null rung."><figcaption><strong>Diverted single-null, 1000 requested cells — unqualified.</strong> Residual 3.951e-2; axis error 9.504 mm; X-point error 26.480 mm.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-reduced.png" alt="Shared-level solved and analytic flux and line-contour error fields for moderate rotation at 110 cells."><figcaption><strong>Moderate rotation conventional static, 110 requested cells — unqualified.</strong> Residual 1.246e-2; axis error 2.704 mm; no admitted terminal X-point.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.png" alt="Shared-level solved and analytic flux and line-contour error fields for moderate rotation at 300 cells."><figcaption><strong>Moderate rotation conventional static, 300 requested cells — unqualified.</strong> Residual 8.456e-3; axis error 11.292 mm; no admitted terminal X-point.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-500.png" alt="Shared-level solved and analytic flux and line-contour error fields for moderate rotation at 500 cells."><figcaption><strong>Moderate rotation conventional static, 500 requested cells — unqualified.</strong> Residual 7.016e-3; axis error 14.622 mm; no admitted terminal X-point.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-1000.png" alt="Shared-level solved and analytic flux and line-contour error fields for moderate rotation at 1000 cells."><figcaption><strong>Moderate rotation conventional static, 1000 requested cells — unqualified.</strong> Residual 5.744e-3; axis error 18.302 mm; no admitted terminal X-point.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-reduced.png" alt="Shared-level solved and analytic flux and line-contour error fields for strong rotation at 110 cells."><figcaption><strong>Strong rotation compact static, 110 requested cells — unqualified.</strong> Residual 1.355e-2; axis error 2.563 mm; no admitted terminal X-point.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.png" alt="Shared-level solved and analytic flux and line-contour error fields for strong rotation at 300 cells."><figcaption><strong>Strong rotation compact static, 300 requested cells — unqualified.</strong> Residual 1.739e-2; axis error 4.055 mm; no admitted terminal X-point.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-500.png" alt="Shared-level solved and analytic flux and line-contour error fields for strong rotation at 500 cells."><figcaption><strong>Strong rotation compact static, 500 requested cells — unqualified.</strong> Residual 5.934e-3; axis error 5.953 mm; no admitted terminal X-point.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-1000.png" alt="Shared-level solved and analytic flux and line-contour error fields for strong rotation at 1000 cells."><figcaption><strong>Strong rotation compact static, 1000 requested cells — unqualified.</strong> Residual 4.243e-3; axis error 7.114 mm; no admitted terminal X-point.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-reduced.png" alt="Shared-level solved and analytic flux and line-contour error fields for weak rotation at 110 cells."><figcaption><strong>Weak rotation reactor static, 110 requested cells — unqualified.</strong> Residual 7.448e-3; axis error 1.846 mm; no admitted terminal X-point.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-300.png" alt="Shared-level solved and analytic flux and line-contour error fields for weak rotation at 300 cells."><figcaption><strong>Weak rotation reactor static, 300 requested cells — unqualified.</strong> Residual 5.559e-3; axis error 33.461 mm; no admitted terminal X-point.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-500.png" alt="Shared-level solved and analytic flux and line-contour error fields for weak rotation at 500 cells."><figcaption><strong>Weak rotation reactor static, 500 requested cells — unqualified.</strong> Residual 1.246e-3; axis error 55.654 mm; no admitted terminal X-point.</figcaption></figure>
+    <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-1000.png" alt="Shared-level solved and analytic flux and line-contour error fields for weak rotation at 1000 cells."><figcaption><strong>Weak rotation reactor static, 1000 requested cells — unqualified.</strong> Residual 5.401e-3; axis error 64.316 mm; no admitted terminal X-point.</figcaption></figure>
+  </section>
+
+  <section id="verdict">
+    <h2>Verdict and re-certification cost</h2>
+    <p><strong>Partial qualification: 3 of 16 rows.</strong> The three residual-qualified single-null rows reproduce the closed-form field at the stated terminal bound. The thirteen remaining rows are evidence of a production termination, not evidence of absolute accuracy. Regenerating all sixteen rows is a GPU measurement: the source receipt records H200 row walls alongside each row and must be run in one allocation with persisted per-row receipts; the default CPU test below only protects the published census from silent drift.</p>
+    <p>The prior NaN-era <code>docs/figures/gs-absolute-accuracy/solovev-certificate.json</code> is superseded by the named production-route receipt. It is retained only as historical non-finite diagnostic evidence and is not a certificate source.</p>
+  </section>
+
+  <section id="pin">
+    <h2>Default-lane pin</h2>
+    <p><code>tests/test_certificate_pin.py</code> reads the production-route receipt without replaying its GPU solve. It pins the 16-row census, all per-row convergence flags, CUDA float64 platform declaration, four CPUs per row, and every declared four-thread environment variable.</p>
+  </section>
+</main>
+</body>
+</html>

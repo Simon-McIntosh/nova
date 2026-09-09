@@ -26,10 +26,10 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm, Normalize
 from matplotlib.path import Path as PolygonPath
 import numpy as np
 from scipy import stats
+from scipy.interpolate import LinearNDInterpolator
 
 from benchmarks.analytic_operator_ladder import _fit_order, _region_masks
 from benchmarks.diiid_forward_gs_match import (
@@ -59,6 +59,8 @@ from nova.jax.config import (
     configure_persistent_compilation_cache,
     default_persistent_compilation_cache_root,
 )
+from nova.media import poloidal
+from nova.media.ink import DEFAULT_INK, poloidal_axes
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.analytic_oracle_fixtures.reduced_oracle import measure_reduced_oracle
 from scripts.oracle_rebaseline import measure as recovery
@@ -1733,80 +1735,147 @@ def _analytic_diverted_topology(exact: CerfonFreidbergSingleNull) -> dict[str, A
     }
 
 
+def _error_magnitude(values: np.ndarray) -> np.ndarray:
+    """Collapse vector and matrix errors into one absolute field."""
+
+    magnitude = np.asarray(values, dtype=np.float64)
+    if magnitude.ndim == 1:
+        return np.abs(magnitude)
+    components = magnitude.reshape(len(magnitude), -1)
+    scale = np.max(np.abs(components), axis=1)
+    normalized = np.divide(
+        components,
+        scale[:, None],
+        out=np.zeros_like(components),
+        where=np.isfinite(scale[:, None]) & (scale[:, None] > 0.0),
+    )
+    return scale * np.sqrt(np.mean(normalized**2, axis=1))
+
+
+def _raster_field(
+    coordinates: np.ndarray,
+    values: np.ndarray,
+    wall: np.ndarray,
+    *,
+    samples: int = 181,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Interpolate one stored field onto a display raster for line contours."""
+
+    points = np.asarray(coordinates, dtype=np.float64)
+    field = np.asarray(values, dtype=np.float64).reshape(-1)
+    finite = np.all(np.isfinite(points), axis=1) & np.isfinite(field)
+    points, field = points[finite], field[finite]
+    if len(points) < 3:
+        raise ValueError("field has too few finite samples for contour rendering")
+    limits = np.vstack((points, np.asarray(wall, dtype=np.float64)))
+    radial = np.linspace(
+        float(np.min(limits[:, 0])), float(np.max(limits[:, 0])), samples
+    )
+    height = np.linspace(
+        float(np.min(limits[:, 1])), float(np.max(limits[:, 1])), samples
+    )
+    radius_grid, height_grid = np.meshgrid(radial, height)
+    raster = LinearNDInterpolator(points, field, fill_value=np.nan)(
+        radius_grid, height_grid
+    )
+    if not np.any(np.isfinite(raster)):
+        raise ValueError("field interpolation produced no finite contour raster")
+    return radial, height, np.asarray(raster, dtype=np.float64)
+
+
+def _draw_error_contours(
+    axis,
+    coordinates: np.ndarray,
+    values: np.ndarray,
+    wall: np.ndarray,
+    boundary: np.ndarray,
+    name: str,
+) -> None:
+    """Draw an absolute error field as unfilled line contours only."""
+
+    radial, height, field = _raster_field(coordinates, _error_magnitude(values), wall)
+    levels = poloidal.contour_levels(field, count=8)
+    poloidal.draw_flux_contours(
+        axis,
+        radial,
+        height,
+        field,
+        levels,
+        color="#7a3e9d",
+        linewidth=0.65,
+    )
+    poloidal.draw_boundary(axis, boundary[:, 0], boundary[:, 1], color="#35b9c8")
+    poloidal.draw_wall(axis, wall[:, 0], wall[:, 1])
+    poloidal_axes(axis)
+    axis.set_title(f"absolute {name} error", fontsize=9)
+    axis.text(
+        0.02,
+        0.02,
+        "levels: " + ", ".join(f"{level:.2e}" for level in levels),
+        transform=axis.transAxes,
+        fontsize=6,
+        va="bottom",
+        bbox=DEFAULT_INK.label_bbox,
+    )
+
+
 def _plot(
     coordinates: np.ndarray,
+    terminal_state: np.ndarray,
+    analytic_state: np.ndarray,
     derivative_coordinates: np.ndarray,
     errors: dict[str, np.ndarray],
     boundary: np.ndarray,
+    wall: np.ndarray,
+    terminal_topology: dict[str, Any],
+    analytic_topology: dict[str, Any],
     path: Path,
     title: str,
 ) -> None:
-    figure, axes = plt.subplots(1, 3, figsize=(13.2, 4.2), constrained_layout=True)
+    """Render shared-level flux and error contours for one terminal rung."""
+
+    figure, axes = plt.subplots(2, 2, figsize=(10.5, 9.0), constrained_layout=True)
+    flux_axis = axes[0, 0]
+    radial, height, solved = _raster_field(coordinates, terminal_state, wall)
+    _, _, analytic = _raster_field(coordinates, analytic_state, wall)
+    levels = poloidal.contour_levels(
+        np.concatenate((solved.ravel(), analytic.ravel())), count=12
+    )
+    poloidal.draw_flux_contours(
+        flux_axis, radial, height, analytic, levels, color="#3366cc"
+    )
+    poloidal.draw_flux_contours(
+        flux_axis, radial, height, solved, levels, color="#cc7722"
+    )
+    poloidal.draw_boundary(flux_axis, boundary[:, 0], boundary[:, 1], color="#3366cc")
+    poloidal.draw_wall(flux_axis, wall[:, 0], wall[:, 1])
+    poloidal.draw_nulls(
+        flux_axis,
+        magnetic_axis=analytic_topology["axis_rz_m"],
+        x_points=analytic_topology["x_point_rz_m"],
+        style=DEFAULT_INK.variant(
+            axis_marker="^", axis_color="#3366cc", xpoint_color="#3366cc"
+        ),
+        contain=wall,
+    )
+    poloidal.draw_nulls(
+        flux_axis,
+        magnetic_axis=terminal_topology["axis_rz_m"],
+        x_points=terminal_topology["x_point_rz_m"],
+        style=DEFAULT_INK.variant(
+            axis_marker="^", axis_color="#cc7722", xpoint_color="#cc7722"
+        ),
+        contain=wall,
+    )
+    poloidal_axes(flux_axis)
+    flux_axis.set_title("analytic blue / solved ochre; shared Wb levels", fontsize=9)
     for axis, name, points in zip(
-        axes,
+        (axes[0, 1], axes[1, 0], axes[1, 1]),
         NORM_FIELDS,
         (coordinates, derivative_coordinates, derivative_coordinates),
         strict=True,
     ):
-        magnitude = np.asarray(errors[name], dtype=np.float64)
-        if magnitude.ndim > 1:
-            components = magnitude.reshape(len(magnitude), -1)
-            scale = np.max(np.abs(components), axis=1)
-            normalized = np.divide(
-                components,
-                scale[:, None],
-                out=np.zeros_like(components),
-                where=np.isfinite(scale[:, None]) & (scale[:, None] > 0.0),
-            )
-            magnitude = scale * np.sqrt(np.mean(normalized**2, axis=1))
-        finite = np.isfinite(magnitude)
-        finite_values = magnitude[finite]
-        if finite_values.size == 0:
-            axis.scatter(points[:, 0], points[:, 1], s=10, c="0.72", linewidths=0.0)
-            axis.text(
-                0.5,
-                0.5,
-                "no finite field, unqualified",
-                ha="center",
-                va="center",
-                transform=axis.transAxes,
-                bbox={"facecolor": "white", "alpha": 0.9, "edgecolor": "0.4"},
-            )
-        else:
-            minimum = float(np.nanmin(finite_values))
-            maximum = float(np.nanmax(finite_values))
-            positive = finite_values[finite_values > 0.0]
-            if positive.size and float(np.min(positive)) < maximum:
-                norm = LogNorm(vmin=float(np.min(positive)), vmax=maximum)
-            else:
-                width = max(abs(minimum), 1.0) * np.finfo(float).eps
-                norm = Normalize(vmin=minimum - width, vmax=maximum + width)
-            artist = axis.scatter(
-                points[finite, 0],
-                points[finite, 1],
-                c=finite_values,
-                s=10,
-                cmap="magma",
-                norm=norm,
-                linewidths=0.0,
-            )
-            figure.colorbar(artist, ax=axis, label=f"absolute {name} error")
-        if not np.all(finite):
-            axis.scatter(
-                points[~finite, 0],
-                points[~finite, 1],
-                marker="x",
-                s=16,
-                c="#35b9c8",
-                linewidths=0.7,
-                label=f"non-finite: {np.count_nonzero(~finite)}",
-            )
-            axis.legend(loc="best", fontsize="x-small")
-        axis.plot(boundary[:, 0], boundary[:, 1], color="#35b9c8", lw=0.9)
-        axis.set_title(name)
-        axis.set_xlabel("R [m]")
-        axis.set_ylabel("Z [m]")
-        axis.set_aspect("equal")
+        _draw_error_contours(axis, points, errors[name], wall, boundary, name)
     figure.suptitle(title)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
@@ -2031,7 +2100,9 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         requested_cells=requested_cells,
     ):
         _plot(
-            machine.node,
+            coordinates,
+            terminal_state,
+            oracle_state,
             derivative_coordinates,
             {
                 "psi": psi_error,
@@ -2039,6 +2110,9 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
                 "hessian": hessian_error,
             },
             boundary,
+            machine.wall_node,
+            root_topology,
+            exact_topology,
             figure,
             f"{case_name} · {_slug(requested_cells)} · {qualification}",
         )

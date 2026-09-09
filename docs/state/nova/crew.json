@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T20:31:00",
+  "updated": "2026-09-09T21:23:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4638,6 +4638,15 @@
         "created": "2026-09-09"
       },
       {
+        "id": "s19i-fsa-transport",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
         "id": "s19i-gaa-artifact",
         "harness": "codex-terra",
         "role": "implement",
@@ -4704,9 +4713,11 @@
         "id": "s19i-mulw-verify",
         "harness": "codex-luna",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a08732-7198-7cb1-ba9c-08e1b4007828",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a08732-7198-7cb1-ba9c-08e1b4007828"
+        },
         "created": "2026-09-09"
       },
       {
@@ -4716,6 +4727,17 @@
         "session_id": null,
         "session_model": null,
         "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-nia-joint",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": "01a08782-0d0f-7211-8923-dc6852a68381",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a08782-0d0f-7211-8923-dc6852a68381"
+        },
         "created": "2026-09-09"
       },
       {
@@ -147344,6 +147366,196 @@
         "watch_override": null,
         "tool_steps": 77.0,
         "orientation_input_tokens": null
+      },
+      {
+        "run_id": "r-20260909T185031896287-nia-joint-qualification-rule",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-joint-qualification-rule",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2984,
+                "cached_input_tokens": 954407,
+                "input_tokens": 957393,
+                "output_tokens": 741,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 958134,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json re-aggregated on all_debug CPU x64 without any solve carries per row the three qualification components and the joint verdict, the census reports the joint qualified count (expected to demote the two single-null rows whose read has no admitted X-point) beside the residual-only count, tests/test_certificate_pin.py is updated to the joint census and green in the default CPU lane, and tests/test_solovev_recovery_gates.py stays green",
+          "estimated_hours": null,
+          "goal": "Implement the section 4 joint qualification rule in benchmarks/solovev_certificate.py so a certificate row qualifies only when its terminal residual is within bound, its topology read admits the axis (with the X-point on a diverted case), and its axis and X-point errors are within a resolution-scaled bound, with the existing production-route part receipts re-aggregated under the new predicate without re-solving",
+          "id": "nia-joint-qualification-rule",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T18:50:32Z",
+            "read_at": "2026-09-09T18:50:33Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 94.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T185031896287-nia-joint-qualification-rule/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/solovev_certificate.py",
+            "docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json",
+            "tests/test_certificate_pin.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-nia-joint",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T18:50:41Z",
+        "completed_at": "2026-09-09T19:15:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1496,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1496,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "bf6cddb069c609c4f87845d5a8ef18e7ce987395",
+        "commits": [
+          "b40c5b6cff336127a70ee93d43c4b6212754361e",
+          "0e7d41f9dd25c6e0a9f24a29f991f8c541f041a0",
+          "e9e7cae57b5a58212286c3288ea80dcb8e03cd20",
+          "d2a1382b0609ee2f77c6dea20899f2504335a747",
+          "98f4269fd61c5c4047ace1c6562744ff99120edb"
+        ],
+        "changed_lines": {
+          "added": 780,
+          "removed": 226,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug: /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_solovev_recovery_gates.py tests/test_certificate_pin.py (8 passed, 2 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T185031896287-nia-joint-qualification-rule/recovery-gates-final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T185031896287-nia-joint-qualification-rule/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08782-0d0f-7211-8923-dc6852a68381",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14649088,
+            "cached_input_tokens_cumulative": 14649088,
+            "input_tokens": 15046611,
+            "input_tokens_cumulative": 15046611,
+            "output_tokens": 30830,
+            "output_tokens_cumulative": 30830,
+            "reasoning_output_tokens": 10128,
+            "reasoning_output_tokens_cumulative": 10128
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T19:15:37Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 95.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T19:15:37Z"
+            }
+          ],
+          "notional_cost_usd": 3.0463,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 14649088,
+          "cumulative_input_tokens": 15046611,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 40958,
+          "generation_seconds": 798.692,
+          "machine_seconds": 695.496,
+          "tokens_per_second": 51.28
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/nia-joint-qualification-rule",
+          "session_id": "01a08782-0d0f-7211-8923-dc6852a68381",
+          "session_source": "pointer",
+          "retained_at": "2026-09-09T19:15:37Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 77.0,
+        "orientation_input_tokens": null
       }
     ],
     "holds": [
@@ -147656,6 +147868,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2386
+    "_version": 2391
   }
 }

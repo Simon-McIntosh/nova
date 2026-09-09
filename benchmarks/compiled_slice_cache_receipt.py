@@ -36,6 +36,18 @@ DEFAULT_OUTPUT = (
 )
 DEFAULT_DIAGNOSTIC = DEFAULT_OUTPUT.with_name("vertical-mode-diagnostic.json")
 DISPATCH_TOLERANCE = 0.10
+WITHDRAWN_KEYED_LOOKUP = {
+    "approach": "pre-coordinate lookup keyed by conductor inputs",
+    "cross_job_dispatch_comparator": {"passes": 3, "member_count": 12},
+    "terminal_flux_identity": {
+        "member": "21986/46 mixed",
+        "max_ulp": 512,
+        "limit_ulp": 4,
+    },
+    "disposition": (
+        "withdrawn in favour of the reduced-coordinate and derived-external key"
+    ),
+}
 
 
 def _dispatch_reference() -> dict[str, float]:
@@ -198,20 +210,28 @@ def diagnose_vertical_mode(output: Path) -> dict[str, Any]:
         target_current=jnp.asarray(member.target_current),
         policy=reduced_newton.SUPPORT_POLICY,
     )
+    terminal_ulp = _ulp_distance(cached.state, adaptive.state)
     diagnosis = {
         "member": member.identity,
         "inputs": inputs,
         "mechanism": (
-            "the first state difference is produced by trip-boundary reconstruction; "
-            "cached external and coordinate inputs equal their recomputed values, so "
-            "the remaining difference is the boundary image reduction inlined in the "
-            "compiled loop versus separately dispatched by the host"
+            "the reduced-coordinate and derived-external cache key retains the "
+            "host-route terminal-flux identity"
+            if terminal_ulp <= 4
+            else (
+                "the first state difference is produced by trip-boundary "
+                "reconstruction; cached external and coordinate inputs equal their "
+                "recomputed values, so the remaining difference is the boundary "
+                "image reduction inlined in the compiled loop versus separately "
+                "dispatched by the host"
+            )
         ),
         "roundoff_operation": (
             "trip boundary external plus current-moment image, inlined in the compiled "
             "fori_loop versus a separately dispatched host boundary"
         ),
         "capture_omission_found": False,
+        "withdrawn_keyed_lookup": WITHDRAWN_KEYED_LOOKUP,
         "rejected_hypotheses": [
             "adaptive Jacobian refresh policy",
             "eager six-grade lax.map versus grade-one then conditional tail ordering",
@@ -232,7 +252,7 @@ def diagnose_vertical_mode(output: Path) -> dict[str, Any]:
             ),
             "target_current": member.target_current,
         },
-        "terminal_flux_ulp_after_repair": _ulp_distance(cached.state, adaptive.state),
+        "terminal_flux_ulp_after_repair": terminal_ulp,
         "refusal_only_terminal_flux_ulp": _ulp_distance(
             refusal.state, adaptive.state
         ),
@@ -272,6 +292,7 @@ def run(output: Path, *, cache_root: Path | None = None) -> dict[str, Any]:
             if DEFAULT_DIAGNOSTIC.exists()
             else None
         ),
+        "withdrawn_keyed_lookup": WITHDRAWN_KEYED_LOOKUP,
         "members": [],
         "verdict": None,
     }

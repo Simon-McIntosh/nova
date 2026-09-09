@@ -48,6 +48,15 @@ WITHDRAWN_KEYED_LOOKUP = {
         "withdrawn in favour of the reduced-coordinate and derived-external key"
     ),
 }
+DEVICE_QUALIFIED_EVIDENCE = {
+    "all_debug_cpu_x64": {
+        "job_id": 1267817,
+        "member": "21986/46 mixed",
+        "terminal_flux_ulp": 512,
+        "acceptance_scope": False,
+    },
+    "acceptance_device": "NVIDIA H200 NVL",
+}
 
 
 def _dispatch_reference() -> dict[str, float]:
@@ -261,6 +270,7 @@ def run(output: Path, *, cache_root: Path | None = None) -> dict[str, Any]:
             "same_job_direct_wall_relative_tolerance": DISPATCH_TOLERANCE,
             "terminal_flux_max_ulp": 4,
         },
+        "device_qualified_evidence": DEVICE_QUALIFIED_EVIDENCE,
         "correctness_diagnostic": (
             json.loads(DEFAULT_DIAGNOSTIC.read_text(encoding="utf-8"))
             if DEFAULT_DIAGNOSTIC.exists()

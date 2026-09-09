@@ -905,8 +905,8 @@ class EquilibriumSweepReceipt:
     time: np.ndarray
     source_samples: tuple[WaveformSample, ...]
     equilibria: tuple[ForwardEquilibrium, ...]
-    solve_receipts: tuple[ForwardSolveReceipt, ...]
     branch_receipts: tuple[EquilibriumBranchReceipt, ...]
+    solve_receipts: tuple[ForwardSolveReceipt, ...] = ()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "time", _readonly(self.time, dtype=np.float64))

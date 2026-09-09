@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T13:00:03",
+  "updated": "2026-09-09T13:06:51",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -144286,6 +144286,188 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T104302325448-fsa-route-bodies-on-seam",
+        "plan": "forward-solve-api",
+        "section": "\u00a72",
+        "node": "fsa-route-bodies-on-seam",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4476,
+                "cached_input_tokens": 657845,
+                "input_tokens": 662353,
+                "output_tokens": 396,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 662749,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "tests/test_route_seam_execution.py is green on all_debug CPU x64 asserting for each of the four routes that the invoked solve receives a ForwardSolveRequest and returns a ForwardSolveReceipt whose resolved_defaults block is non-empty and whose nova_version matches the package, grep -c 'solve_portfolio(' over the four route files prints 0 outside the seam helper, and tests/test_default_wiring.py stays green with 63 of 63 production cells DEFAULT-ON",
+          "estimated_hours": null,
+          "goal": "Make the four production route bodies named in the 2026-09-09 review comment on section 2 (bank_revision_reproduction.py, real_equilibria_reachability.py, diiid_forward_gs_match.py, efit_forward_parity_slice.py) hand their typed ForwardSolveRequest to the invoked solve and consume its ForwardSolveReceipt, with a route-level harness that proves the receipt's resolved_defaults come from the solve that ran rather than from a recording helper",
+          "id": "fsa-route-bodies-on-seam",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T10:43:02Z",
+            "read_at": "2026-09-09T10:43:03Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 73.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T104302325448-fsa-route-bodies-on-seam/manifest.md",
+          "plan": "forward-solve-api",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/bank_revision_reproduction.py",
+            "docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py",
+            "benchmarks/diiid_forward_gs_match.py",
+            "benchmarks/efit_forward_parity_slice.py",
+            "tests/test_route_seam_execution.py",
+            "tests/test_default_wiring.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-fsa-routes",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T10:43:15Z",
+        "completed_at": "2026-09-09T11:04:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1262,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1262,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9aebfc86894f19c625456a3618d5088e97b9a059",
+        "commits": [
+          "4871a26ecd094da3a15573f49256d9fe9cb9c1c7",
+          "e4e685f46f38c8fcfaeee1b5bbfbaba9c810ee43"
+        ],
+        "changed_lines": {
+          "added": 388,
+          "removed": 173,
+          "files": 6
+        },
+        "tests_added": 9,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug CPU x64 jobs 1267668 and 1267677: pytest tests/test_route_seam_execution.py tests/test_default_wiring.py (78 passed, 63 production cells DEFAULT-ON); tests/test_forward_parity_constrained_arm.py (4 passed, 1 pre-existing failure at the base)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T104302325448-fsa-route-bodies-on-seam/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T104302325448-fsa-route-bodies-on-seam/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a085c3-c78d-7390-bc5d-0c448e3ce2e2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2696704,
+            "cached_input_tokens_cumulative": 2696704,
+            "input_tokens": 2886870,
+            "input_tokens_cumulative": 2886870,
+            "output_tokens": 9731,
+            "output_tokens_cumulative": 9731,
+            "reasoning_output_tokens": 2714,
+            "reasoning_output_tokens_cumulative": 2714
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T11:04:17Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 75.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T11:04:17Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2696704,
+          "cumulative_input_tokens": 5583574,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 12445
+        },
+        "follow_on_paths": [
+          "tests/test_forward_parity_constrained_arm.py::test_reference_native_grid_interpolates_the_stored_map",
+          "tests/test_forward_parity_constrained_arm.py",
+          "benchmarks/efit_forward_parity_slice.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": [
+          {
+            "path": "tests/test_forward_parity_constrained_arm.py",
+            "reason": "the seam migration broke this test's fake profile, which only provided solve_branch; the fix belongs with the migration"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/fsa-route-bodies-on-seam",
+          "session_id": "01a085c3-c78d-7390-bc5d-0c448e3ce2e2",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T11:04:17Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -144598,6 +144780,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2363
+    "_version": 2364
   }
 }

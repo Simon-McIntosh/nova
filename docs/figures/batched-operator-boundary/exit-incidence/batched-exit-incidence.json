@@ -1,17 +1,18 @@
 {
   "schema": "nova.strict-exit-incidence/2",
-  "measurement_state": "blocked_before_batch_compile",
-  "recorded_at": "2026-09-09T11:08:36Z",
+  "measurement_state": "partial_scheduler_timeout_after_mast_passes",
+  "recorded_at": "2026-09-09T16:01:48Z",
   "source": {
-    "revision": "2071f8c02f7e2d7a13b6cc8748eb8fafa842a7da",
+    "revision": "2f6ed1d14f89815f20c7f435938f9cddaacefdfa",
     "driver": "benchmarks/strict_exit_incidence.py",
+    "driver_sha256": "6be56ea78232b1fdf31a39454b8d5b7e935273ea0ed48b3808443602eaac8b72",
     "operand_cache": "logs/exact-operand-cache.npz",
     "operand_cache_sha256": "2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904"
   },
   "execution": {
-    "job_id": 1267675,
-    "scheduler_state": "CANCELLED by owner after the required stacked branch was declined",
-    "elapsed": "00:02:24",
+    "job_id": 1267937,
+    "scheduler_state": "TIMEOUT",
+    "elapsed": "00:40:26",
     "node": "98dci4-gpu-0003",
     "partition": "betelgeuse",
     "reservation": "gpu_0003_grpA",
@@ -26,12 +27,17 @@
     "tmpdir": "/tmp",
     "shared_venv_python": "/home/ITER/mcintos/Code/nova/.venv/bin/python",
     "persistent_compilation_cache": true,
-    "stage_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/batched-exit-incidence-h200.log",
-    "stage_log_sha256": "6a85a3f8cbd6af658f178570cc5ba47497438e6d479d79400c5d0f8efd8a195f",
-    "scheduler_step_max_rss_kib": 7190972,
-    "scheduler_step_max_rss_mib": 7022.43359375,
-    "driver_process_peak_rss_mib_before_compile": 5017.0625,
-    "host_memory_under_16_gib_before_compile": true
+    "stage_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/batched-exit-incidence-h200-rerun.log",
+    "stage_log_sha256": "81e82153b9a2924792c733b50e9463431959cb77ed88c369aae63a1f8a9a210f",
+    "scheduler_step_max_rss_kib": 42617388,
+    "scheduler_step_max_rss_mib": 41618.54296875,
+    "driver_process_peak_rss_mib": 41861.965,
+    "host_memory_under_16_gib": false,
+    "time_limit_extension_attempt": {
+      "requested_time_limit": "00:55:00",
+      "accepted": false,
+      "scheduler_error": "Access/permission denied for job 1267937"
+    }
   },
   "configuration": {
     "requested_program_widths": {
@@ -48,23 +54,24 @@
     "MAST": {
       "requested_width": 12,
       "built_member_count": 12,
-      "compile_once": false,
+      "compile_once": true,
       "compile_seconds": null,
-      "passes_completed": [],
+      "compile_seconds_unavailable_reason": "the driver retained compile duration in memory and the scheduler terminated the process before the first machine checkpoint",
+      "passes_completed": [
+        "without_exit",
+        "with_exit"
+      ],
+      "passes_completed_evidence": "both synchronized DONE stage markers were flushed before scheduler termination",
       "batched_ms_per_member": {
         "without_exit": null,
         "with_exit": null
       },
       "per_member_firing_trips": null,
-      "execution_route_selected": "sequential_jitted_geometry_fallback",
-      "operator_identity_group_count": 6,
+      "result_unavailable_reason": "the scheduler terminated after both synchronized passes but before host result extraction and the atomic MAST checkpoint",
+      "execution_route_selected": "one_stacked_vmap_program",
+      "operator_identity_group_count": 1,
       "operator_identity_groups": [
-        [0, 1],
-        [2, 3],
-        [4, 5],
-        [6, 7],
-        [8, 9],
-        [10, 11]
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
       ],
       "member_identities": [
         "21978/35 pure",
@@ -80,23 +87,13 @@
         "22086/43 pure",
         "22086/43 mixed"
       ],
-      "geometry_identity_digests": [
-        "368cccf7d7e6f24dee19abe8f6ff54b8ec5d8fefbdced751dba55ee4b1a17399",
-        "368cccf7d7e6f24dee19abe8f6ff54b8ec5d8fefbdced751dba55ee4b1a17399",
-        "dc5f405f8fd96c11ef8612ea5f9270d80be34b291429749c6b64bf0a7cc862c2",
-        "dc5f405f8fd96c11ef8612ea5f9270d80be34b291429749c6b64bf0a7cc862c2",
-        "8cc621daa704a78fca5fce6a8034e9b98f247341b382bbdfd220f4e9a271ce8d",
-        "8cc621daa704a78fca5fce6a8034e9b98f247341b382bbdfd220f4e9a271ce8d",
-        "5442c7438f5690421745640f37c1ffad094b9c82fecad2b1a655bceb22390d57",
-        "5442c7438f5690421745640f37c1ffad094b9c82fecad2b1a655bceb22390d57",
-        "3539ada01babf4295141ad5d5559bde23016bada1241758be50a966748784e93",
-        "3539ada01babf4295141ad5d5559bde23016bada1241758be50a966748784e93",
-        "3f807381009d9cd018c2fa759ccd6bcd5b2e399cd735954165e1b8a624d8d2f3",
-        "3f807381009d9cd018c2fa759ccd6bcd5b2e399cd735954165e1b8a624d8d2f3"
-      ],
-      "group_diagnostic_job_id": 1267678,
-      "group_diagnostic_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/mast-geometry-groups.log",
-      "group_diagnostic_log_sha256": "60f7763fe040704c13a8839536226678b6a84a143a5017829102112b7e2d09f6"
+      "batch_admission_preflight": {
+        "geometry_identical": true,
+        "stacked": true,
+        "batch_identity_count": 1,
+        "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/batch-admission-preflight.log",
+        "log_sha256": "540361177497a745674964cced2424eac4fd135eac8ae384413704b24c035a56"
+      }
     },
     "DIII-D": {
       "requested_width": 5,
@@ -109,7 +106,7 @@
         "with_exit": null
       },
       "per_member_firing_trips": null,
-      "not_run_reason": "the required MAST width-12 program was already impossible at the current operator boundary"
+      "not_run_reason": "the scheduler time limit fired after both MAST passes and before the MAST checkpoint or DIII-D input construction"
     }
   },
   "sequential_width_one_comparison": {
@@ -128,8 +125,13 @@
     }
   },
   "host_geometry_discriminator": {
-    "status": "classification_defect_found",
+    "status": "resolved_by_declared_support_member_leaf",
     "recorded_at": "2026-09-09T11:25:50Z",
+    "resolution": {
+      "repair_revision": "e1540b6b",
+      "merged_main_revision": "bddebd03",
+      "batch_admission_result": "twelve MAST members form one geometry group and one stackable identity"
+    },
     "diagnostic_execution": {
       "job_id": 1267690,
       "partition": "all_debug",
@@ -320,13 +322,13 @@
       "equilibrium_dependence": "the benchmark constructs declared_support from inside_polygon(lattice coordinates, stored LCFS coordinates) intersected with the common machine material mask; the stored LCFS is an equilibrium result for the selected shot and time slice",
       "source_binding": "benchmarks/efit_forward_parity_slice.py computes declared_support from _stored_lcfs in _passive_inclusive_case and passes it to DeclaredAnchorOperator",
       "required_repair": "move declared_support from operator static_state to traced member children alongside the two declared flux anchors",
-      "repair_owner": "nova/equilibrium/forward_operator.py is held by another worktree, so this node stops without editing it"
+      "repair_outcome": "declared_support now rides as a dynamic member leaf; the historical discriminator is retained to explain the prior six-group refusal"
     }
   },
   "blocker": {
-    "condition": "DeclaredAnchorOperator.declared_support is equilibrium-dependent member data but remains in the pytree auxiliary static_state",
-    "observable_result": "the six stored-LCFS support masks create six host geometry digests, partitioning the twelve MAST members into six pure/mixed pairs and selecting the sequential fallback",
-    "required_change": "classify declared_support as a dynamic operator leaf alongside declared_axis_flux and declared_boundary_flux",
-    "scope": "the repair belongs in nova/equilibrium/forward_operator.py, which is outside this node's write fence and held by another worktree"
+    "condition": "the 40-minute scheduler limit terminated the process after both MAST passes but before host result extraction and the first machine checkpoint",
+    "observable_result": "the width-12 program compiled once and both synchronized passes emitted DONE markers, but compile seconds, per-member trip results and batched milliseconds remained only in process memory; DIII-D was not reached",
+    "independent_failed_gate": "width-12 compile host RSS peaked at 41861.965 MiB, above the 16384 MiB limit",
+    "next_action": "rerun from the persistent GPU compilation cache with enough foreground time for result extraction and the DIII-D width-5 program; the current node time fence is spent"
   }
 }

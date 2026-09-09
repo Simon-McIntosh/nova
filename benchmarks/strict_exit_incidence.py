@@ -87,7 +87,7 @@ DEFAULT_JSON = (
 DEFAULT_PNG = DEFAULT_JSON.with_suffix(".png")
 DEFAULT_BATCHED_JSON = (
     ROOT / "docs/figures/batched-operator-boundary/exit-incidence/"
-    "strict-exit-incidence.json"
+    "batched-exit-incidence.json"
 )
 MAST_BANK = (
     ROOT / "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json"
@@ -1418,7 +1418,7 @@ def _measure_batched_machine(
                 else "sequential_jitted_geometry_fallback"
             ),
             "compile_count_per_pass": compile_count,
-            "compiled_once": compile_count == 1,
+            "compile_once": compile_count == 1,
         },
         "compile_seconds": compile_seconds,
         "stage_host_memory": stages,
@@ -1798,7 +1798,7 @@ def run_batched(
     allocation = (
         _require_cpu_self_check()
         if self_check
-        else _require_gpu_allocation(expected_cpu_count=8)
+        else _require_gpu_allocation(expected_cpu_count=1)
     )
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
@@ -1884,9 +1884,7 @@ def run_batched(
         "machines": machines,
         "sequential_width_one_comparison": _banked_sequential_comparison(),
         "observations": {
-            "mast_compiled_once": machines["MAST"]["execution_contract"][
-                "compiled_once"
-            ],
+            "mast_compile_once": machines["MAST"]["execution_contract"]["compile_once"],
             "batch_compile_count_per_pass": {
                 name: machine["execution_contract"]["compile_count_per_pass"]
                 for name, machine in machines.items()

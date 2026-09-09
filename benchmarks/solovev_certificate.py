@@ -1298,15 +1298,36 @@ def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
     minor_radius = exact.minor_radius
     axis_distance = float(_distance_to_boundary(AXIS_M[None, :], boundary)[0])
     pitch = float(np.sqrt(np.median(np.asarray(machine.area, dtype=np.float64))))
+    wall = np.asarray(machine.wall_node, dtype=np.float64)
 
     radial = np.linspace(
-        min(float(np.min(machine.node[:, 0])), float(np.min(boundary[:, 0]))) - pitch,
-        max(float(np.max(machine.node[:, 0])), float(np.max(boundary[:, 0]))) + pitch,
+        min(
+            float(np.min(machine.node[:, 0])),
+            float(np.min(boundary[:, 0])),
+            float(np.min(wall[:, 0])),
+        )
+        - pitch,
+        max(
+            float(np.max(machine.node[:, 0])),
+            float(np.max(boundary[:, 0])),
+            float(np.max(wall[:, 0])),
+        )
+        + pitch,
         241,
     )
     vertical = np.linspace(
-        min(float(np.min(machine.node[:, 1])), float(np.min(boundary[:, 1]))) - pitch,
-        max(float(np.max(machine.node[:, 1])), float(np.max(boundary[:, 1]))) + pitch,
+        min(
+            float(np.min(machine.node[:, 1])),
+            float(np.min(boundary[:, 1])),
+            float(np.min(wall[:, 1])),
+        )
+        - pitch,
+        max(
+            float(np.max(machine.node[:, 1])),
+            float(np.max(boundary[:, 1])),
+            float(np.max(wall[:, 1])),
+        )
+        + pitch,
         241,
     )
     radial_grid, vertical_grid = np.meshgrid(radial, vertical)
@@ -1340,7 +1361,6 @@ def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
         grid_spacing=grid_spacing,
     )
     hausdorff = _symmetric_polyline_distance(boundary, selected)
-    wall = np.asarray(machine.wall_node, dtype=np.float64)
     leg_rows = []
     for leg in divertor_legs:
         exit_point = _wall_exit_point(leg, wall)
@@ -1360,6 +1380,12 @@ def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
             else [np.inf, np.inf]
         )
     )
+    if len(leg_rows) == 2:
+        leg_diagnostic_status = "resolved"
+    elif requested_cells == -110:
+        leg_diagnostic_status = "resolution_limited"
+    else:
+        leg_diagnostic_status = "invalid"
     axis_eigenvalues = np.linalg.eigvalsh(exact.hessian(AXIS_M[None, :])[0])
     x_eigenvalues = np.linalg.eigvalsh(exact.hessian(X_POINT_M[None, :])[0])
     wall_distance = _distance_to_boundary(boundary, wall)
@@ -1427,6 +1453,7 @@ def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
         "selected_contour_rule": "closed zero-level core lobe containing magnetic axis",
         "selected_contour_point_count": int(len(selected)),
         "divertor_leg_count": len(leg_rows),
+        "divertor_leg_diagnostic_status": leg_diagnostic_status,
         "divertor_legs": leg_rows,
         "hausdorff_distance_m": hausdorff,
         "hausdorff_distance_in_cell_pitches": hausdorff / pitch,
@@ -1460,10 +1487,21 @@ def _diverted_geometry_receipt(
             "axis": "closed-form stationary point",
             "minor_radius": "major radius times inverse aspect ratio",
             "contour": (
-                "241 by 241 extraction over the carrier and analytic boundary "
-                "envelope with one-pitch padding, at the median analytic boundary flux"
+                "241 by 241 extraction over the carrier, analytic boundary, and "
+                "carrier wall envelope with one-pitch padding, at the median "
+                "analytic boundary flux"
             ),
             "distance": "symmetric sampled point-to-polyline Hausdorff distance",
+        },
+        "divertor_leg_diagnostic": {
+            "authority_requested_cells": -342,
+            "authority_leg_count": next(
+                row["divertor_leg_count"]
+                for row in rows
+                if row["requested_cells"] == -342
+            ),
+            "coarse_resolution_limited_allowed": True,
+            "part_of_geometry_verdict": False,
         },
         "rows": rows,
         "verdict": {

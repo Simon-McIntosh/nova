@@ -492,7 +492,7 @@ def _comparison() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "axis_flux_per_radian_wb": axis_flux,
             "reuse_anchors": [
                 "scripts.analytic_oracle_fixtures exact-recovery carrier",
-                "scripts.dual_basin_fixtures diverted Solovev coefficients",
+                "scripts.dual_basin_fixtures diverted Solovev stationary points",
                 "tests.rotating_equilibrium_references Grad-Shafranov convention",
             ],
             "rotating_reference_static_limit": {

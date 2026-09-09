@@ -241,18 +241,32 @@ def test_mapped_source_converges_with_force_and_current_receipts(mapped_case):
     receipt, _source, profile, seed, *_rest = mapped_case
     equilibrium = profile.solve(seed, route="anderson", evaluations=EVALUATIONS)
     conservation = equilibrium.conservation
-    current_scale = max(abs(float(equilibrium.moments.plasma_current)), 1.0)
-    current_residual = (
-        abs(float(equilibrium.ledger.total - equilibrium.moments.plasma_current))
-        / current_scale
-    )
-    return_current_residual = (
+    ledger = equilibrium.ledger
+    plasma_current = float(equilibrium.moments.plasma_current)
+    current_scale = max(abs(plasma_current), 1.0)
+    # The current ledger conserves on its domain parts: the four selections
+    # tile the solve domain, so the total equals their sum to a fp64
+    # reduction.  The achieved plasma current is the core share of that
+    # ledger; the common-SOL cells carry their own smaller reconstruction
+    # current across the separatrix, so comparing the total-domain figure
+    # against the core-only moment would read that share as a loss.
+    ledger_closure_residual = (
         abs(
             float(
-                equilibrium.moments.plasma_current
-                - receipt.plasma_current.achieved_final
+                ledger.total
+                - (
+                    ledger.core
+                    + ledger.common_sol
+                    + ledger.private_flux
+                    + ledger.excluded_material
+                )
             )
         )
+        / current_scale
+    )
+    core_recovery_residual = abs(float(ledger.core) - plasma_current) / current_scale
+    return_current_residual = (
+        abs(plasma_current - float(receipt.plasma_current.achieved_final))
         / current_scale
     )
 
@@ -262,5 +276,6 @@ def test_mapped_source_converges_with_force_and_current_receipts(mapped_case):
     assert float(conservation.relative_divergence_j) < DIVERGENCE_TOLERANCE
     assert float(conservation.relative_grad_shafranov) < FORCE_BALANCE_TOLERANCE
     assert float(conservation.relative_force) < FORCE_BALANCE_TOLERANCE
-    assert current_residual < CURRENT_LEDGER_TOLERANCE
+    assert ledger_closure_residual < CURRENT_LEDGER_TOLERANCE
+    assert core_recovery_residual < CURRENT_LEDGER_TOLERANCE
     assert return_current_residual < RETURN_CURRENT_TOLERANCE

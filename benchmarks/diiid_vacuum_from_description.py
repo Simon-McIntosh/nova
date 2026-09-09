@@ -32,7 +32,6 @@ from benchmarks.diiid_forward_gs_match import (
     _GEOMETRY_COLUMNS,
     _LABEL_COLUMNS,
     _read,
-    build_profile,
 )
 from nova.biot.polygon import polygon_greens
 from nova.imas.diiid_description import (
@@ -46,15 +45,11 @@ from nova.jax.config import configure_dtypes
 DEFAULT_OUTPUT = Path("docs/figures/diiid-vertical-force-balance")
 RECEIPT_NAME = "vacuum-field-reproduction.json"
 FIGURE_NAME = "vacuum-field-reproduction.png"
-MACHINE_ARTIFACT_CACHE = Path(
-    "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache"
-)
 PERSISTED_ENTRY = Path(
     "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc"
 )
 PERSISTED_DD_VERSION = "4.1.1"
 ROUNDOFF_RELATIVE_BOUND = 1e-12
-PSEUDO_WALL_EXPANSION = None
 
 # Reproduced from benchmarks.diiid_solenoid_inclusion_ladder rather than
 # imported: that module's own import chain currently raises ImportError
@@ -229,6 +224,23 @@ def _max_abs_relative(persisted: np.ndarray, ladder: np.ndarray) -> dict[str, fl
     }
 
 
+def _recorded_shipped_currents(row: dict[str, Any], frame: int) -> np.ndarray:
+    """Interpolate the nineteen recorded poloidal channels at one frame time."""
+
+    target_time = float(np.asarray(row["efit_times"], dtype=float)[frame])
+    source_time = np.asarray(row["magnetics_time"], dtype=float)
+    currents = []
+    for name in POLOIDAL_CONDUCTORS:
+        values = np.asarray(row[f"magnetics_{name}"], dtype=float)
+        valid = np.isfinite(source_time + values)
+        if np.count_nonzero(valid) < 2:
+            raise RuntimeError(f"magnetics_{name} has fewer than two samples")
+        currents.append(
+            1000.0 * np.interp(target_time, source_time[valid], values[valid])
+        )
+    return np.asarray(currents, dtype=float)
+
+
 def _per_coil_contribution(
     name: str,
     current: float,
@@ -250,13 +262,7 @@ def score_frame(data: Path, shot: str, frame: int) -> dict[str, Any]:
     row = _read(source, columns)
     row["_source_path"] = str(source)
 
-    profile, _seed, _label, _wall, _reliable, _statement = build_profile(
-        row,
-        frame,
-        PSEUDO_WALL_EXPANSION,
-        machine_artifact_cache=MACHINE_ARTIFACT_CACHE,
-    )
-    shipped = np.asarray(profile.operator.external_current, dtype=float)
+    shipped = _recorded_shipped_currents(row, frame)
     if shipped.size != len(POLOIDAL_CONDUCTORS):
         raise RuntimeError("forward profile does not carry the shipped 19 conductors")
     ecoila = float(shipped[ECOILA_INDEX])

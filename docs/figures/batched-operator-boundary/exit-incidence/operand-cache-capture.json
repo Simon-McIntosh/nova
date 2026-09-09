@@ -1,0 +1,44 @@
+{
+  "schema": "nova.operand-cache-capture/1",
+  "status": "captured",
+  "capture": {
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/bob-operand-cache-capture",
+    "base_sha": "9ff98552afd6ebd6eb95e02f05e5e988c9b07f9f",
+    "captured_at": "2026-09-09T00:00:00+00:00"
+  },
+  "cache": {
+    "path": "logs/exact-operand-cache.npz",
+    "sha256": "2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904",
+    "size_bytes": 180876,
+    "arm_count": 12,
+    "schema_revision": 8
+  },
+  "source": {
+    "commit": "5c3fdb5bd469cc5c4093c438ae602c89f297627d",
+    "commit_subject": "chore(benchmark): bank exact operand cache",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-operand-cache-regeneration",
+    "capture_method": "git show 5c3fdb5b:logs/exact-operand-cache.npz",
+    "regeneration_receipt": "docs/figures/batched-operator-boundary/exit-incidence/operand-cache-regeneration.json"
+  },
+  "bank": {
+    "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+    "sha256": "58a5d895fe7aed0df31bb62083832b9efdfdf945fe4567e552b611cbec356a10",
+    "declared_exact_cache_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-banked-reads/docs/figures/primary-xpoint-evidence/.efit-topology-corroboration-cache.npz",
+    "producer_revision": "fae50f159699a0a36aa460e4cf22f39b74fd1b2a",
+    "matches_current_bank": true
+  },
+  "bank_rows_covered": [
+    {"identity": "21978/35", "arm": "pure"},
+    {"identity": "21978/35", "arm": "mixed"},
+    {"identity": "21983/35", "arm": "pure"},
+    {"identity": "21983/35", "arm": "mixed"},
+    {"identity": "21985/51", "arm": "pure"},
+    {"identity": "21985/51", "arm": "mixed"},
+    {"identity": "21986/46", "arm": "pure"},
+    {"identity": "21986/46", "arm": "mixed"},
+    {"identity": "21989/55", "arm": "pure"},
+    {"identity": "21989/55", "arm": "mixed"},
+    {"identity": "22086/43", "arm": "pure"},
+    {"identity": "22086/43", "arm": "mixed"}
+  ]
+}

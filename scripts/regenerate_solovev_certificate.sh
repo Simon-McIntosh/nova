@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SCRIPT_PATH="$(realpath "${BASH_SOURCE[0]}")"
-REPO_ROOT="$(git -C "$(dirname "$SCRIPT_PATH")/.." rev-parse --show-toplevel)"
+REPO_ROOT="${CERTIFICATE_REPO_ROOT:-$(git -C "$(dirname "$SCRIPT_PATH")/.." rev-parse --show-toplevel)}"
 PYTHON="$REPO_ROOT/.venv/bin/python"
 DRIVER="$REPO_ROOT/benchmarks/solovev_certificate.py"
 OUTPUT="$REPO_ROOT/docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json"
@@ -33,7 +33,7 @@ case "${1:-submit}" in
                 --mem="$ROW_MEMORY" \
                 --time="$ROW_TIME" \
                 --output="$LOG_ROOT/row-%A_%a.log" \
-                --export="ALL,CERTIFICATE_THREAD_COUNT=$THREAD_COUNT" \
+                --export="ALL,CERTIFICATE_REPO_ROOT=$REPO_ROOT,CERTIFICATE_THREAD_COUNT=$THREAD_COUNT" \
                 "$SCRIPT_PATH" run-row
         })"
         row_job="${row_job%%;*}"
@@ -46,7 +46,7 @@ case "${1:-submit}" in
                 --mem=16G \
                 --time=00:30:00 \
                 --output="$LOG_ROOT/aggregate-%j.log" \
-                --export="ALL,CERTIFICATE_ROW_JOB_ID=$row_job,CERTIFICATE_ARRAY_CONCURRENCY=$ARRAY_CONCURRENCY,CERTIFICATE_THREAD_COUNT=$THREAD_COUNT" \
+                --export="ALL,CERTIFICATE_REPO_ROOT=$REPO_ROOT,CERTIFICATE_ROW_JOB_ID=$row_job,CERTIFICATE_ARRAY_CONCURRENCY=$ARRAY_CONCURRENCY,CERTIFICATE_THREAD_COUNT=$THREAD_COUNT" \
                 "$SCRIPT_PATH" aggregate
         })"
         aggregate_job="${aggregate_job%%;*}"

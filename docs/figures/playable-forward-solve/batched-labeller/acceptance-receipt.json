@@ -8,6 +8,7 @@
     "selected_batch_per_device": 256,
     "scope": "batched engine",
     "status": "passed",
+    "throughput_complete": true,
     "type_error_count": 0
   },
   "throughput_acceptance": {
@@ -45,15 +46,33 @@
         "slices_per_second": 6.2986348735662405,
         "total_batch_per_step": 512,
         "type_error_count": 0
+      },
+      {
+        "batch_per_device": 256,
+        "card_count": 3,
+        "concretization_error_count": 0,
+        "converged_count": 608,
+        "converged_fraction": 0.7916666666666666,
+        "fraction_parity": true,
+        "guard_count": 112,
+        "guard_fraction": 0.14583333333333334,
+        "job_id": "1267802",
+        "measured_slices_per_repeat": 768,
+        "per_card_slices_per_second": 3.1685084191679693,
+        "runtime_error_count": 0,
+        "slices_per_second": 9.505525257503908,
+        "total_batch_per_step": 768,
+        "type_error_count": 0
       }
     ],
     "completed_card_counts": [
       1,
-      2
+      2,
+      3
     ],
     "selected_batch_per_device": 256,
     "selection_basis": "highest one-card warmed throughput among batches 16, 64 and 256",
-    "status": "partial"
+    "status": "complete"
   },
   "batch": {
     "active_slice_count": 48,

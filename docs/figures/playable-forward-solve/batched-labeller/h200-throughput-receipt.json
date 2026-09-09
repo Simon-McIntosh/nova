@@ -2451,14 +2451,48 @@
       }
     ]
   },
+  "selected_card_measurements": [
+    {
+      "batch_per_device": 256,
+      "card_count": 1,
+      "converged_count": 608,
+      "fraction_parity": true,
+      "job_id": "1267748",
+      "per_card_slices_per_second": 3.184991059700392,
+      "runtime_error_count": 0,
+      "slices_per_second": 3.184991059700392
+    },
+    {
+      "batch_per_device": 256,
+      "card_count": 2,
+      "converged_count": 1216,
+      "fraction_parity": true,
+      "job_id": "1267778",
+      "per_card_slices_per_second": 3.1493174367831203,
+      "runtime_error_count": 0,
+      "slices_per_second": 6.2986348735662405
+    },
+    {
+      "batch_per_device": 256,
+      "card_count": 3,
+      "converged_count": 608,
+      "fraction_parity": true,
+      "job_id": "1267802",
+      "per_card_slices_per_second": 3.1685084191679693,
+      "runtime_error_count": 0,
+      "slices_per_second": 9.505525257503908
+    }
+  ],
   "selection": {
     "completed_device_counts": [
-      1
+      1,
+      2,
+      3
     ],
     "selected_batch_per_device": 256,
     "selection_basis": "highest one-card warmed throughput among completed candidates"
   },
   "slurm_job_id": "1267748",
   "source_revision": "cb8818e9ad5fbdff7827450889a8ffed371b42de",
-  "status": "partial-selected"
+  "status": "complete-selected"
 }

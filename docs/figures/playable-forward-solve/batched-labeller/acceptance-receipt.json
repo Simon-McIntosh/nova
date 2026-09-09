@@ -1,0 +1,1262 @@
+{
+  "batch": {
+    "active_slice_count": 48,
+    "device_count": 1,
+    "elements_per_device": 16,
+    "padded_slice_count": 0,
+    "step_count": 3,
+    "total_elements_per_step": 16
+  },
+  "batched_wall_seconds": 193.83194570988417,
+  "cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+  "conditioning": {
+    "batched_conditioned_count": 39,
+    "conditioned_centroid_error_m": [
+      2.1480413524288533e-09,
+      0.006192654447371599,
+      1.8587450025323027e-09,
+      null,
+      5.90554834201118e-10,
+      3.465515697326227e-09,
+      5.647793422172698e-10,
+      2.1140675966757616e-08,
+      4.735719871806765e-10,
+      4.520490815441286e-10,
+      5.213019408506492e-10,
+      null,
+      0.005825950158375679,
+      4.730631372740213e-10,
+      2.1343850480429194e-09,
+      1.5263708335461201e-09,
+      0.017726561583634823,
+      8.115881729685304e-10,
+      4.3192264868874286e-11,
+      9.444772533506729e-10,
+      2.4884897766551395e-09,
+      1.2384121506059387e-12,
+      8.185415069708601e-09,
+      2.463735618296603e-09,
+      2.222985101552055e-09,
+      7.36138070628594e-09,
+      1.6907278355127175e-09,
+      0.25531136309228447,
+      0.02297005672373939,
+      7.471154476329511e-10,
+      3.4869971623704976e-09,
+      2.429900725076095e-11,
+      2.362796685737023e-09,
+      4.811491560209602e-09,
+      1.6926541418493812e-09,
+      0.09536043258611551,
+      7.329537150824184e-11,
+      2.5326962749261384e-14,
+      0.01703480214171809,
+      4.4686823685857746e-13,
+      4.129141473185882e-12,
+      1.971415253265718e-09
+    ],
+    "free_centroid_error_m": [
+      0.00010971992504135242,
+      0.006192654447371599,
+      0.011300583659254997,
+      null,
+      0.02615823877955483,
+      0.0205758141944843,
+      0.013168519205220656,
+      0.06763714496632403,
+      0.013771247048428012,
+      0.0017189125270490814,
+      0.12581192150330195,
+      0.07590562656817229,
+      0.005825950158375679,
+      0.003037162163063137,
+      0.013391168291614953,
+      0.018606043604629165,
+      0.021054351657634827,
+      0.007112368645411827,
+      0.018420802231807736,
+      0.02000153862347725,
+      0.0033656456125102235,
+      0.1222766651622384,
+      0.01706813932658493,
+      0.07038342396126437,
+      0.0073521704959851,
+      0.041431034564619294,
+      0.16963415000172785,
+      0.25531136309228447,
+      0.16603072404173938,
+      0.022936215856884552,
+      0.03961069079799716,
+      0.202980098404701,
+      0.010432904206203315,
+      0.00592083925150844,
+      0.07749431128534585,
+      0.09266316946411551,
+      0.13632142344470463,
+      0.14767180573802532,
+      0.01703480214171809,
+      0.05811458887455313,
+      0.04290179754587087,
+      0.09877250695458473
+    ],
+    "materially_improved": false,
+    "maximum_conditioned_centroid_error_m": null,
+    "median_conditioned_centroid_error_m": null,
+    "median_free_centroid_error_m": null,
+    "no_coincident_rows": false,
+    "no_worse_rows": false,
+    "sequential_conditioned_count": 42,
+    "sequential_conditioned_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      9,
+      10,
+      11,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      41,
+      42,
+      43,
+      45,
+      46,
+      47
+    ],
+    "sequential_conditioned_rows_executed": false,
+    "under_half_centimetre": false
+  },
+  "failed_checks": [
+    "converged fraction parity",
+    "guard fraction parity",
+    "sequential conditioned rows executed",
+    "finite centroid errors",
+    "material conditioning improvement",
+    "conditioned error limit",
+    "no coincident free and conditioned rows",
+    "no conditioned row worse than free"
+  ],
+  "fraction_parity": {
+    "batched": {
+      "conditioned_count": 39,
+      "conditioned_fraction": 0.8125,
+      "converged_count": 42,
+      "converged_fraction": 0.875,
+      "guard_count": 10,
+      "guard_fraction": 0.20833333333333334
+    },
+    "converged_fraction_matches": false,
+    "denominator": 48,
+    "guard_fraction_matches": false,
+    "sequential": {
+      "conditioned_count": 42,
+      "conditioned_fraction": 0.875,
+      "converged_count": 38,
+      "converged_fraction": 0.7916666666666666,
+      "guard_count": 7,
+      "guard_fraction": 0.14583333333333334
+    }
+  },
+  "reference_wall_seconds": 1882.5661631496623,
+  "runtime": {
+    "devices": [
+      "cuda:0"
+    ],
+    "jax": "0.11.0",
+    "python": "3.14.2"
+  },
+  "selection": [
+    {
+      "admitted_row_count": 82,
+      "quartile": 1,
+      "row": 21,
+      "shot": 24751,
+      "source_converged_slice_count": 68,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24751.manifest.json"
+    },
+    {
+      "admitted_row_count": 89,
+      "quartile": 2,
+      "row": 45,
+      "shot": 24774,
+      "source_converged_slice_count": 52,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24774.manifest.json"
+    },
+    {
+      "admitted_row_count": 88,
+      "quartile": 3,
+      "row": 66,
+      "shot": 24766,
+      "source_converged_slice_count": 59,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24766.manifest.json"
+    },
+    {
+      "admitted_row_count": 87,
+      "quartile": 4,
+      "row": 87,
+      "shot": 24765,
+      "source_converged_slice_count": 40,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24765.manifest.json"
+    },
+    {
+      "admitted_row_count": 87,
+      "quartile": 1,
+      "row": 23,
+      "shot": 24761,
+      "source_converged_slice_count": 62,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24761.manifest.json"
+    },
+    {
+      "admitted_row_count": 88,
+      "quartile": 2,
+      "row": 45,
+      "shot": 24753,
+      "source_converged_slice_count": 61,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24753.manifest.json"
+    },
+    {
+      "admitted_row_count": 86,
+      "quartile": 3,
+      "row": 65,
+      "shot": 24760,
+      "source_converged_slice_count": 67,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24760.manifest.json"
+    },
+    {
+      "admitted_row_count": 82,
+      "quartile": 4,
+      "row": 82,
+      "shot": 24752,
+      "source_converged_slice_count": 56,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24752.manifest.json"
+    },
+    {
+      "admitted_row_count": 81,
+      "quartile": 1,
+      "row": 21,
+      "shot": 24756,
+      "source_converged_slice_count": 67,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24756.manifest.json"
+    },
+    {
+      "admitted_row_count": 97,
+      "quartile": 2,
+      "row": 49,
+      "shot": 18475,
+      "source_converged_slice_count": 73,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18475.manifest.json"
+    },
+    {
+      "admitted_row_count": 78,
+      "quartile": 3,
+      "row": 59,
+      "shot": 24754,
+      "source_converged_slice_count": 66,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24754.manifest.json"
+    },
+    {
+      "admitted_row_count": 76,
+      "quartile": 4,
+      "row": 76,
+      "shot": 24772,
+      "source_converged_slice_count": 37,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24772.manifest.json"
+    },
+    {
+      "admitted_row_count": 72,
+      "quartile": 1,
+      "row": 19,
+      "shot": 24769,
+      "source_converged_slice_count": 36,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24769.manifest.json"
+    },
+    {
+      "admitted_row_count": 72,
+      "quartile": 2,
+      "row": 37,
+      "shot": 24755,
+      "source_converged_slice_count": 56,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24755.manifest.json"
+    },
+    {
+      "admitted_row_count": 71,
+      "quartile": 3,
+      "row": 53,
+      "shot": 24771,
+      "source_converged_slice_count": 30,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24771.manifest.json"
+    },
+    {
+      "admitted_row_count": 65,
+      "quartile": 4,
+      "row": 65,
+      "shot": 24763,
+      "source_converged_slice_count": 30,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24763.manifest.json"
+    },
+    {
+      "admitted_row_count": 95,
+      "quartile": 1,
+      "row": 25,
+      "shot": 18076,
+      "source_converged_slice_count": 76,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18076.manifest.json"
+    },
+    {
+      "admitted_row_count": 118,
+      "quartile": 2,
+      "row": 59,
+      "shot": 21858,
+      "source_converged_slice_count": 101,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21858.manifest.json"
+    },
+    {
+      "admitted_row_count": 115,
+      "quartile": 3,
+      "row": 87,
+      "shot": 21860,
+      "source_converged_slice_count": 102,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21860.manifest.json"
+    },
+    {
+      "admitted_row_count": 112,
+      "quartile": 4,
+      "row": 112,
+      "shot": 21861,
+      "source_converged_slice_count": 101,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21861.manifest.json"
+    },
+    {
+      "admitted_row_count": 111,
+      "quartile": 1,
+      "row": 29,
+      "shot": 21862,
+      "source_converged_slice_count": 101,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21862.manifest.json"
+    },
+    {
+      "admitted_row_count": 113,
+      "quartile": 2,
+      "row": 57,
+      "shot": 21859,
+      "source_converged_slice_count": 100,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21859.manifest.json"
+    },
+    {
+      "admitted_row_count": 106,
+      "quartile": 3,
+      "row": 80,
+      "shot": 21856,
+      "source_converged_slice_count": 99,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21856.manifest.json"
+    },
+    {
+      "admitted_row_count": 94,
+      "quartile": 4,
+      "row": 94,
+      "shot": 21857,
+      "source_converged_slice_count": 85,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21857.manifest.json"
+    },
+    {
+      "admitted_row_count": 63,
+      "quartile": 1,
+      "row": 17,
+      "shot": 24768,
+      "source_converged_slice_count": 31,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24768.manifest.json"
+    },
+    {
+      "admitted_row_count": 60,
+      "quartile": 2,
+      "row": 31,
+      "shot": 24757,
+      "source_converged_slice_count": 27,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24757.manifest.json"
+    },
+    {
+      "admitted_row_count": 92,
+      "quartile": 3,
+      "row": 69,
+      "shot": 21845,
+      "source_converged_slice_count": 75,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21845.manifest.json"
+    },
+    {
+      "admitted_row_count": 90,
+      "quartile": 4,
+      "row": 90,
+      "shot": 21848,
+      "source_converged_slice_count": 70,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21848.manifest.json"
+    },
+    {
+      "admitted_row_count": 74,
+      "quartile": 1,
+      "row": 19,
+      "shot": 21855,
+      "source_converged_slice_count": 56,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21855.manifest.json"
+    },
+    {
+      "admitted_row_count": 64,
+      "quartile": 2,
+      "row": 33,
+      "shot": 24775,
+      "source_converged_slice_count": 32,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24775.manifest.json"
+    },
+    {
+      "admitted_row_count": 88,
+      "quartile": 3,
+      "row": 66,
+      "shot": 21849,
+      "source_converged_slice_count": 60,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21849.manifest.json"
+    },
+    {
+      "admitted_row_count": 64,
+      "quartile": 4,
+      "row": 64,
+      "shot": 24764,
+      "source_converged_slice_count": 30,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24764.manifest.json"
+    },
+    {
+      "admitted_row_count": 67,
+      "quartile": 1,
+      "row": 17,
+      "shot": 21854,
+      "source_converged_slice_count": 47,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21854.manifest.json"
+    },
+    {
+      "admitted_row_count": 62,
+      "quartile": 2,
+      "row": 31,
+      "shot": 24777,
+      "source_converged_slice_count": 31,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24777.manifest.json"
+    },
+    {
+      "admitted_row_count": 71,
+      "quartile": 3,
+      "row": 53,
+      "shot": 21844,
+      "source_converged_slice_count": 57,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21844.manifest.json"
+    },
+    {
+      "admitted_row_count": 70,
+      "quartile": 4,
+      "row": 70,
+      "shot": 21853,
+      "source_converged_slice_count": 44,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21853.manifest.json"
+    },
+    {
+      "admitted_row_count": 106,
+      "quartile": 1,
+      "row": 27,
+      "shot": 18596,
+      "source_converged_slice_count": 89,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18596.manifest.json"
+    },
+    {
+      "admitted_row_count": 61,
+      "quartile": 2,
+      "row": 31,
+      "shot": 24778,
+      "source_converged_slice_count": 29,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24778.manifest.json"
+    },
+    {
+      "admitted_row_count": 56,
+      "quartile": 3,
+      "row": 42,
+      "shot": 21850,
+      "source_converged_slice_count": 51,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21850.manifest.json"
+    },
+    {
+      "admitted_row_count": 79,
+      "quartile": 4,
+      "row": 79,
+      "shot": 23862,
+      "source_converged_slice_count": 47,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23862.manifest.json"
+    },
+    {
+      "admitted_row_count": 55,
+      "quartile": 1,
+      "row": 15,
+      "shot": 21847,
+      "source_converged_slice_count": 45,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21847.manifest.json"
+    },
+    {
+      "admitted_row_count": 78,
+      "quartile": 2,
+      "row": 39,
+      "shot": 23865,
+      "source_converged_slice_count": 33,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23865.manifest.json"
+    },
+    {
+      "admitted_row_count": 53,
+      "quartile": 3,
+      "row": 40,
+      "shot": 21851,
+      "source_converged_slice_count": 41,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21851.manifest.json"
+    },
+    {
+      "admitted_row_count": 59,
+      "quartile": 4,
+      "row": 59,
+      "shot": 24776,
+      "source_converged_slice_count": 31,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24776.manifest.json"
+    },
+    {
+      "admitted_row_count": 53,
+      "quartile": 1,
+      "row": 16,
+      "shot": 21846,
+      "source_converged_slice_count": 35,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21846.manifest.json"
+    },
+    {
+      "admitted_row_count": 96,
+      "quartile": 2,
+      "row": 59,
+      "shot": 29547,
+      "source_converged_slice_count": 82,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29547.manifest.json"
+    },
+    {
+      "admitted_row_count": 118,
+      "quartile": 3,
+      "row": 99,
+      "shot": 29371,
+      "source_converged_slice_count": 91,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29371.manifest.json"
+    },
+    {
+      "admitted_row_count": 116,
+      "quartile": 4,
+      "row": 126,
+      "shot": 29364,
+      "source_converged_slice_count": 86,
+      "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29364.manifest.json"
+    }
+  ],
+  "sequential": {
+    "conditioned_count": 42,
+    "conditioned_fraction": 0.875,
+    "converged_count": 38,
+    "converged_fraction": 0.7916666666666666,
+    "exception_slice_count": 8,
+    "first_exception_traceback": "Traceback (most recent call last):\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/pfs-batched-engine-acceptance/benchmarks/batched_labeller_receipt.py\", line 340, in _sequential_reference\n    centroid = profile.current_moment_observation(\n               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        free.state,\n        ^^^^^^^^^^^\n    ...<2 lines>...\n        requested_class=requested,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ).stack()[1:]\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/pfs-batched-engine-acceptance/nova/equilibrium/forward.py\", line 1037, in current_moment_observation\n    current, _integrals, masks, _topology, _amplitude = self._integral_state(\n                                                        ~~~~~~~~~~~~~~~~~~~~^\n        flux, requested_class=requested_class, target_current=target_current\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/pfs-batched-engine-acceptance/nova/equilibrium/forward.py\", line 1198, in _integral_state\n    masks, topology = self.operator.read(flux, requested_class)\n                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/pfs-batched-engine-acceptance/nova/equilibrium/forward_operator.py\", line 1841, in read\n    require_qualified_axis(admitted)\n    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/pfs-batched-engine-acceptance/nova/equilibrium/topology.py\", line 181, in require_qualified_axis\n    raise NoQualifiedAxisError(\n        \"no qualified magnetic-axis candidate has a resolved component\"\n    )\nnova.equilibrium.topology.NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component\n",
+    "guard_count": 7,
+    "guard_fraction": 0.14583333333333334,
+    "slice_count": 48,
+    "slice_results": [
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.6988984823618526,
+          -0.0028776364611559275
+        ],
+        "guard": false,
+        "index": 0
+      },
+      {
+        "conditioned": true,
+        "converged": false,
+        "exception_classes": [
+          "NoQualifiedAxisError",
+          "NoQualifiedAxisError"
+        ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
+        "guard": false,
+        "index": 1
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.0339062335904134,
+          -0.005086980117602613
+        ],
+        "guard": false,
+        "index": 2
+      },
+      {
+        "conditioned": true,
+        "converged": false,
+        "exception_classes": [
+          "NoQualifiedAxisError",
+          "ConcretizationTypeError"
+        ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "ConcretizationTypeError",
+            "exception_message": "Abstract tracer value encountered where concrete value is expected: traced array with shape float64[]\nThe problem arose with the `float` function. If trying to convert the data type of a value, try using `x.astype(float)` or `jnp.array(x, float)` instead.\n\nSee https://docs.jax.dev/en/latest/errors.html#jax.errors.ConcretizationTypeError",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
+        "guard": false,
+        "index": 3
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.6801421479962487,
+          -0.008456547763011002
+        ],
+        "guard": false,
+        "index": 4
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.582789530118108,
+          0.028004731296914182
+        ],
+        "guard": false,
+        "index": 5
+      },
+      {
+        "conditioned": false,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.8241443306938431,
+          0.025440155463402715
+        ],
+        "guard": true,
+        "index": 6
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9596658343572365,
+          -0.006007926380698604
+        ],
+        "guard": false,
+        "index": 7
+      },
+      {
+        "conditioned": false,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7124636684486297,
+          -0.002780495227470871
+        ],
+        "guard": true,
+        "index": 8
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.8722704911080437,
+          0.07217365044100044
+        ],
+        "guard": false,
+        "index": 9
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7521563834323233,
+          0.017878132802292716
+        ],
+        "guard": false,
+        "index": 10
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9892187317589723,
+          0.002339024873622004
+        ],
+        "guard": false,
+        "index": 11
+      },
+      {
+        "conditioned": false,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.6912104187691954,
+          -0.0025500191561377266
+        ],
+        "guard": true,
+        "index": 12
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.5975928058293832,
+          -0.11632710888554096
+        ],
+        "guard": false,
+        "index": 13
+      },
+      {
+        "conditioned": true,
+        "converged": false,
+        "exception_classes": [
+          "NoQualifiedAxisError",
+          "NoQualifiedAxisError"
+        ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
+        "guard": false,
+        "index": 14
+      },
+      {
+        "conditioned": true,
+        "converged": false,
+        "exception_classes": [
+          "NoQualifiedAxisError",
+          "NoQualifiedAxisError"
+        ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
+        "guard": false,
+        "index": 15
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7112660993394494,
+          -0.0026480396828205376
+        ],
+        "guard": false,
+        "index": 16
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.799347025925693,
+          0.01867289418998756
+        ],
+        "guard": false,
+        "index": 17
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.0203449715096495,
+          -0.01579969278312484
+        ],
+        "guard": false,
+        "index": 18
+      },
+      {
+        "conditioned": true,
+        "converged": false,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9354968439630544,
+          -0.05100233289599291
+        ],
+        "guard": false,
+        "index": 19
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7205240299452953,
+          -0.0035935879524435737
+        ],
+        "guard": false,
+        "index": 20
+      },
+      {
+        "conditioned": true,
+        "converged": false,
+        "exception_classes": [
+          "NoQualifiedAxisError",
+          "NoQualifiedAxisError"
+        ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
+        "guard": false,
+        "index": 21
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.0262274073969297,
+          -0.015989634733654882
+        ],
+        "guard": false,
+        "index": 22
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.067653397537929,
+          -0.0012720995200543265
+        ],
+        "guard": false,
+        "index": 23
+      },
+      {
+        "conditioned": false,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.6906083358402538,
+          -0.0027999293350779476
+        ],
+        "guard": true,
+        "index": 24
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.695914493219109,
+          0.012868733597348716
+        ],
+        "guard": false,
+        "index": 25
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.0001945581826155,
+          -0.008877634119572281
+        ],
+        "guard": false,
+        "index": 26
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.0857093118314618,
+          -0.034336982273324386
+        ],
+        "guard": false,
+        "index": 27
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7916828644061017,
+          -0.014587909953221937
+        ],
+        "guard": true,
+        "index": 28
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7038070819375073,
+          -0.040565696077620686
+        ],
+        "guard": false,
+        "index": 29
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9855023925643218,
+          0.010900707575676708
+        ],
+        "guard": false,
+        "index": 30
+      },
+      {
+        "conditioned": true,
+        "converged": false,
+        "exception_classes": [
+          "NoQualifiedAxisError",
+          "NoQualifiedAxisError"
+        ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
+        "guard": false,
+        "index": 31
+      },
+      {
+        "conditioned": true,
+        "converged": false,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.732133141574653,
+          0.0003041732379847003
+        ],
+        "guard": false,
+        "index": 32
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7264208645060559,
+          -0.015569253126091979
+        ],
+        "guard": false,
+        "index": 33
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9335371203905514,
+          -0.03315298202216298
+        ],
+        "guard": false,
+        "index": 34
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.0075384268429215,
+          -0.028866631069012823
+        ],
+        "guard": false,
+        "index": 35
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7122272946088084,
+          -0.0031126850206022122
+        ],
+        "guard": false,
+        "index": 36
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7245661339390985,
+          -0.008617654663962401
+        ],
+        "guard": false,
+        "index": 37
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9368822700451719,
+          -0.017279873741118255
+        ],
+        "guard": false,
+        "index": 38
+      },
+      {
+        "conditioned": true,
+        "converged": false,
+        "exception_classes": [
+          "NoQualifiedAxisError",
+          "NoQualifiedAxisError"
+        ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
+        "guard": false,
+        "index": 39
+      },
+      {
+        "conditioned": false,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.709935358790536,
+          -0.019137763812893196
+        ],
+        "guard": true,
+        "index": 40
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7028078177072314,
+          -0.14545847835016873
+        ],
+        "guard": false,
+        "index": 41
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9212253229992249,
+          -0.03402078342339249
+        ],
+        "guard": false,
+        "index": 42
+      },
+      {
+        "conditioned": true,
+        "converged": false,
+        "exception_classes": [
+          "NoQualifiedAxisError",
+          "NoQualifiedAxisError"
+        ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
+        "guard": false,
+        "index": 43
+      },
+      {
+        "conditioned": false,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.718717092932007,
+          -0.010880955578759547
+        ],
+        "guard": true,
+        "index": 44
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.5985281726911346,
+          -0.0402432313736235
+        ],
+        "guard": false,
+        "index": 45
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9017306567051607,
+          -0.23499502395288935
+        ],
+        "guard": false,
+        "index": 46
+      },
+      {
+        "conditioned": true,
+        "converged": true,
+        "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9845784606417545,
+          -0.15687199330102167
+        ],
+        "guard": false,
+        "index": 47
+      }
+    ]
+  },
+  "slice_count": 48,
+  "slurm_job_id": "1267654",
+  "source_revision": "752e247286ac1145f536b0b44839237c5362b265",
+  "status": "failed"
+}

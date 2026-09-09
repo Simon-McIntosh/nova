@@ -302,6 +302,7 @@ class ReducedNewtonResult:
     support_cells: int = 0
     off_support_leakage: float = 0.0
     steps: list[ReducedNewtonStep] = field(default_factory=list)
+    state_per_trip: list[jax.Array] = field(default_factory=list, compare=False)
     program: "ReducedProgram | None" = field(default=None, compare=False)
 
     @property
@@ -1233,6 +1234,7 @@ def _drive_trips(
     regather: Callable[[jax.Array], jax.Array],
     dispatched_boundary: Callable[..., Any],
     stream: bool,
+    capture_trip_states: bool = False,
 ) -> dict[str, Any]:
     """Run the active-set trips of one reduced solve and report every census.
 
@@ -1257,6 +1259,7 @@ def _drive_trips(
     per_trip_wall: list[float] = []
     per_trip_maps: list[int] = []
     steps: list[ReducedNewtonStep] = []
+    states: list[jax.Array] = []
     reason = FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED
     converged = False
     terminal_residual = float("inf")
@@ -1310,6 +1313,8 @@ def _drive_trips(
         per_trip_wall.append(time.perf_counter() - trip_started)
         residuals.append(observed)
         differences.append(difference)
+        if capture_trip_states:
+            states.append(jnp.asarray(state))
         terminal_residual = observed
         if stream:
             print(
@@ -1351,6 +1356,7 @@ def _drive_trips(
         "map_evaluations_per_trip": per_trip_maps,
         "off_support_leakage": leakage,
         "steps": steps,
+        "state_per_trip": states,
     }
 
 
@@ -1362,6 +1368,7 @@ def _compiled_slice_solver(
     active_set_steps: int,
     initial_unknown: jax.Array | None = None,
     refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
+    capture_trip_states: bool = False,
 ) -> Callable[..., Any]:
     """Build one fixed-shape program for a complete reduced solve.
 
@@ -1583,6 +1590,9 @@ def _compiled_slice_solver(
         trip_builds = jnp.zeros((active_set_steps,), dtype=jnp.int32)
         trip_rejected = jnp.zeros((active_set_steps,), dtype=jnp.int32)
         trip_maps = jnp.zeros((active_set_steps,), dtype=jnp.int32)
+        trip_states = jnp.full(
+            (active_set_steps, *initial.shape), jnp.nan, dtype=initial.dtype
+        )
 
         def outer_body(index, carry):
             (
@@ -1602,6 +1612,7 @@ def _compiled_slice_solver(
                 trip_builds,
                 trip_rejected,
                 trip_maps,
+                trip_states,
             ) = carry
 
             def run_trip(_):
@@ -1651,11 +1662,12 @@ def _compiled_slice_solver(
                     trip_builds.at[index].set(builds),
                     trip_rejected.at[index].set(rejected),
                     trip_maps.at[index].set(step_count),
+                    trip_states.at[index].set(next_state),
                 )
 
             return jax.lax.cond(active, run_trip, lambda value: value, carry)
 
-        return jax.lax.fori_loop(
+        solved = jax.lax.fori_loop(
             0,
             active_set_steps,
             outer_body,
@@ -1676,8 +1688,10 @@ def _compiled_slice_solver(
                 trip_builds,
                 trip_rejected,
                 trip_maps,
+                trip_states,
             ),
         )
+        return solved if capture_trip_states else solved[:-1]
 
     return jax.jit(solve)
 
@@ -1707,6 +1721,7 @@ def solve_reduced_newton(
     ladder_scoring: str = LADDER_SCORING,
     trip_boundary: str = TRIP_BOUNDARY,
     jacobian_refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
+    capture_trip_states: bool = False,
     program: "ReducedProgram | None" = None,
     stream: bool = False,
 ) -> ReducedNewtonResult:
@@ -1849,6 +1864,7 @@ def solve_reduced_newton(
         regather=regather,
         dispatched_boundary=dispatched_boundary,
         stream=stream,
+        capture_trip_states=capture_trip_states,
     )
     return ReducedNewtonResult(
         state=driven["state"],
@@ -1871,6 +1887,7 @@ def solve_reduced_newton(
         support_cells=int(coordinates.cells.size),
         off_support_leakage=driven["off_support_leakage"],
         steps=driven["steps"],
+        state_per_trip=driven["state_per_trip"],
         program=program,
     )
 
@@ -2774,7 +2791,7 @@ def _compiled_output_fields(output):
     """Convert one compiled call's fixed-shape receipt arrays to host fields."""
     host = jax.device_get(output)
     iterations = int(host[7])
-    return {
+    fields = {
         "state": jnp.asarray(host[0]),
         "reduced": jnp.asarray(host[1]),
         "terminal_residual": float(host[6]),
@@ -2790,6 +2807,12 @@ def _compiled_output_fields(output):
         "off_support_leakage": float(host[9]),
         "converged_trip": int(host[8]),
     }
+    fields["state_per_trip"] = (
+        [jnp.asarray(value) for value in host[16][:iterations]]
+        if len(host) > 16
+        else []
+    )
+    return fields
 
 
 def _compiled_program(
@@ -2893,6 +2916,7 @@ def _compiled_result(
     newton_steps,
     active_set_steps,
     refresh_threshold,
+    capture_trip_states,
 ):
     """Run a complete slice and synchronise its fixed-shape receipt once."""
     program, raw_kernels = _compiled_program(
@@ -2923,6 +2947,7 @@ def _compiled_result(
         newton_steps,
         active_set_steps,
         refresh_threshold,
+        capture_trip_states,
         _compiled_argument_key(initial_unknown),
     )
     solvers = {} if program.slice_solvers is None else program.slice_solvers
@@ -2935,6 +2960,7 @@ def _compiled_result(
             active_set_steps=active_set_steps,
             initial_unknown=initial_unknown,
             refresh_threshold=refresh_threshold,
+            capture_trip_states=capture_trip_states,
         )
         solvers = dict(solvers)
         solvers[policy_key] = solver
@@ -2963,6 +2989,7 @@ def solve_reduced_newton_compiled(
     newton_steps: int = NEWTON_STEPS,
     active_set_steps: int = ACTIVE_SET_STEPS,
     jacobian_refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
+    capture_trip_states: bool = False,
     program: "ReducedProgram | None" = None,
     stream: bool = False,
 ) -> ReducedNewtonResult:
@@ -2985,6 +3012,7 @@ def solve_reduced_newton_compiled(
         newton_steps=newton_steps,
         active_set_steps=active_set_steps,
         refresh_threshold=jacobian_refresh_threshold,
+        capture_trip_states=capture_trip_states,
     )
     return ReducedNewtonResult(
         state=fields["state"],
@@ -3001,6 +3029,7 @@ def solve_reduced_newton_compiled(
         reduced_dimension=program.coordinates.size,
         support_cells=int(program.coordinates.cells.size),
         off_support_leakage=fields["off_support_leakage"],
+        state_per_trip=fields["state_per_trip"],
         program=program,
     )
 
@@ -3018,6 +3047,7 @@ def solve_constrained_reduced_newton_compiled(
     newton_steps: int = NEWTON_STEPS,
     active_set_steps: int = ACTIVE_SET_STEPS,
     jacobian_refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
+    capture_trip_states: bool = False,
     constraint_current_ceiling: float | np.ndarray | None = (
         DEFAULT_COMPENSATING_CURRENT_CEILING
     ),
@@ -3039,6 +3069,7 @@ def solve_constrained_reduced_newton_compiled(
             newton_steps=newton_steps,
             active_set_steps=active_set_steps,
             jacobian_refresh_threshold=jacobian_refresh_threshold,
+            capture_trip_states=capture_trip_states,
             program=program,
         )
         return ConstrainedReducedNewtonResult(**result.__dict__)
@@ -3075,6 +3106,7 @@ def solve_constrained_reduced_newton_compiled(
         newton_steps=newton_steps,
         active_set_steps=active_set_steps,
         refresh_threshold=jacobian_refresh_threshold,
+        capture_trip_states=capture_trip_states,
     )
     unknowns = fields["reduced"][program.coordinates.size :]
     records = constraint_records(

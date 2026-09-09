@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T15:40:22",
+  "updated": "2026-09-09T16:07:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4546,6 +4546,15 @@
         "created": "2026-09-09"
       },
       {
+        "id": "s19i-bob-declared",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
         "id": "s19i-bob-hash",
         "harness": "codex-luna",
         "role": "implement",
@@ -4566,6 +4575,15 @@
       {
         "id": "s19i-cank-bound",
         "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-cank-elim",
+        "harness": "codex",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -4602,6 +4620,15 @@
         "created": "2026-09-09"
       },
       {
+        "id": "s19i-fsa-contract",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
         "id": "s19i-fsa-routes",
         "harness": "codex-terra",
         "role": "implement",
@@ -4622,6 +4649,15 @@
       {
         "id": "s19i-gaa-pin",
         "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-gaa-regen",
+        "harness": "codex",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -145011,6 +145047,363 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T104503283227-mcs-compiled-slice-cache",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "mcs-compiled-slice-cache",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 774,
+                "cached_input_tokens": 662321,
+                "input_tokens": 663099,
+                "output_tokens": 26,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 663125,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "tests/test_reduced_newton.py gains a test green on all_debug CPU x64 asserting that two successive calls with equal static shape and policy reuse one cached executable (trace count 1) and that a changed static shape traces once more, and docs/figures/millisecond-converged-solve/compiled-slice-cache/receipt.json on the H200 records for the twelve bank members that the per-call wall after the first call is within 10 percent of the dispatch wall the trip-quantum receipt measured, with compiled and host terminal flux identical within 4 ulp",
+          "estimated_hours": null,
+          "goal": "Make the compiled slice program a cached executable keyed by static shape and policy so repeated calls of solve_reduced_newton_compiled dispatch without re-tracing (followup f-20260908T035500-compiled-entry-retraces), keeping the compiled and host routes bit-identical",
+          "id": "mcs-compiled-slice-cache",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T10:45:04Z",
+            "read_at": "2026-09-09T10:45:05Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 73.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T104503283227-mcs-compiled-slice-cache/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "tests/test_reduced_newton.py",
+            "benchmarks/compiled_slice_cache_receipt.py",
+            "docs/figures/millisecond-converged-solve/compiled-slice-cache"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-mcs-cache",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T10:45:16Z",
+        "completed_at": "2026-09-09T14:01:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 11749,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "9aebfc86894f19c625456a3618d5088e97b9a059",
+        "commits": [
+          "e04983134337ed1c41ae0bc28827a119cac8f180",
+          "36a1ede51f240eb9d55a5e094ba9f3e954350c32"
+        ],
+        "changed_lines": {
+          "added": 1193,
+          "removed": 26,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T104503283227-mcs-compiled-slice-cache/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a085c5-a3b9-77d2-838e-9ab844fc790c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2494336,
+            "cached_input_tokens_cumulative": 2494336,
+            "input_tokens": 2516345,
+            "input_tokens_cumulative": 2516345,
+            "output_tokens": 7513,
+            "output_tokens_cumulative": 7513,
+            "reasoning_output_tokens": 743,
+            "reasoning_output_tokens_cumulative": 743
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T14:01:05Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 83.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T14:01:05Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2494336,
+          "cumulative_input_tokens": 5010681,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 8256
+        },
+        "follow_on_paths": [
+          "12/12"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 22,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/mcs-compiled-slice-cache",
+          "session_id": "01a085c5-a3b9-77d2-838e-9ab844fc790c",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T14:01:05Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "01a085c5-a3b9-77d2-838e-9ab844fc790c",
+          "source": "stream",
+          "reason": "the node's remaining question (removing the cache-entry overhead without reviving keyed identity loss) is new design work owned by a fresh node, not a continuation of this measurement session; the identity and reuse results are landed and merged"
+        },
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T135335431893-nia-clipped-moment-repair",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-clipped-moment-repair",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1193,
+                "cached_input_tokens": 265880,
+                "input_tokens": 267075,
+                "output_tokens": 1585,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 268660,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The exposure measurement, banked at ~/.config/reckon/crew/reports/nova/null-identification/separatrix-clip/, proves the surrogate does not work. On the diverted -110 and -342 Solovev rungs, 18 and 48 cells are cut by the plasma boundary and not one of the 65 finite comparisons agrees within a tenth of a cell diagonal. The median separation between the centroid the first moments imply and the centroid of the part of the cell actually inside is 1.07 and 1.34 cell diagonals, the worst is 3.25 and 8.09 diagonals, or 0.53 m and 0.56 m, and one implied centroid lands at R equal 0.4835 m for a cell centred at R equal 1.0373 m, which is far outside the cell. The zeroth moment is wrong too: direct clipped quadrature retains a median of only 37.5 and 38.5 percent of the current the production path assigns a cut cell, with a minimum near zero. The net plasma current stays pinned by the lambda factor at 1.44e-16 relative error, which is exactly what hides this, because the total is right while the distribution is not. Make the moments entering coupling_current_moments equal the traced inside-support zeroth and first moments, so a cut cell carries the current genuinely inside the boundary and places it at the centroid of the inside part. State in the report, as an assumption a reader can challenge, that a cut cell is expected to carry the CLIPPED current rather than its unclipped whole, because plasma current outside the plasma has no meaning, while the SUM over cells remains pinned by lambda. Diagnose before repairing, because an implied centroid landing half a metre from its own cell smells like a wrong origin or a wrong normalisation in the conversion rather than a wrong quadrature: coupling_current_moments converts physical first moments through moment_geometry.second_moment, so check first whether those moments are taken about the cell centre or about the machine axis, and report what you find either way. Then gate it. On both rungs every boundary-cut cell must agree with direct clipped quadrature to within a tenth of a cell diagonal on the centroid and within a stated relative tolerance on the current, the net current must stay pinned at the same 1e-16 order, and the exact-oracle residuals on the unqualified certificate rungs must not degrade. Do not set any tolerance from a value you observed: name each one in advance with its justification. Run every gate on all_debug with --time=00:59:00 and JAX_PLATFORMS=cpu. On a compute node do not invoke uv at all, because its wrapper injects --no-sync and a second one kills the job before Python starts: call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH. Call sbatch or srun exactly once in a turn.",
+          "estimated_hours": 3.0,
+          "goal": "Cell current moments that reproduce the current and the centroid of the part of each boundary-cut cell that actually lies inside the plasma",
+          "id": "nia-clipped-moment-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-moment-repair.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/source.py",
+            "tests/test_forward_moment_class.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "nia-clipmoment-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T13:53:46Z",
+        "completed_at": "2026-09-09T13:58:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 86676,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "2e7c4af26f2dd1608cdd7037bd7682e2a864f1ce",
+        "commits": [
+          "f7850a3c0bd0d61884de7675aac7ebe285f83c75",
+          "b23764dc5f41b060e746f3f7cde536599931ec01",
+          "810d026adbad398d1b6926cac6ad9011ff47a6f4",
+          "ee34e0c9f6b631a87d3ccee129091707b4d1f7ef",
+          "a4b9c0dca4b3dc9ca9592ac0ffdf7d7ddbabf58a",
+          "1cfa045622bc7f2a7ba221f19f0a93ac3fdd4d4b",
+          "7cc2e06f518bdd0a7b8806983470f972659df4ec",
+          "839bb7590055e787d57103cba2ec8ecc30982e73",
+          "10517ff6bdef05f4a53ed27fc43d7547531c4854",
+          "ee0ff57bf86a35762a3daae7934663975bdc78c5",
+          "fefe2df489a9449543c3c06fabb34fcb040cbcb7",
+          "1c4daf51eea9dc34d887d1d64e3316102dc47d30"
+        ],
+        "changed_lines": {
+          "added": 858,
+          "removed": 109,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-moment-repair.md",
+        "scope_changed": false,
+        "session_id": "01a0814b-d9d7-75c0-bc41-2a26538e188c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 22981888,
+            "cached_input_tokens_cumulative": 22981888,
+            "input_tokens": 23124440,
+            "input_tokens_cumulative": 23124440,
+            "output_tokens": 36040,
+            "output_tokens_cumulative": 36040,
+            "reasoning_output_tokens": 12731,
+            "reasoning_output_tokens_cumulative": 12731
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T13:58:22Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 83.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T13:58:22Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 284128384,
+          "cumulative_input_tokens": 286936578,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 48771,
+          "generation_seconds": 74235.798,
+          "machine_seconds": 12438.076,
+          "tokens_per_second": 0.66
+        },
+        "follow_on_paths": [
+          "target/reference;",
+          "measure.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 14,
+        "scope_acceptances": [
+          {
+            "path": "nova/equilibrium/fixed_point.py",
+            "reason": "the axisless conditioning and unqualified-trial handling of the locked decision live in the fixed-point iteration; these were the declared write paths of the original dispatch as recorded in the manifest orientation"
+          },
+          {
+            "path": "nova/equilibrium/forward.py",
+            "reason": "the direct typed request receipt for unqualified cold starts (7cc2e06f) is built in forward.py; declared in the manifest orientation write paths"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-clipped-moment-repair",
+          "session_id": "01a0814b-d9d7-75c0-bc41-2a26538e188c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-09T13:58:22Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "01a0814b-d9d7-75c0-bc41-2a26538e188c",
+          "source": "pointer",
+          "reason": "the node ends on a lead decision (q-nia-boundary-trace-moderate-regression) rather than on work the session can continue: the per-trip diagnostic it was resumed for exhausts 128 GiB of LLVM compile memory on the traced variant twice, and the twelve commits are safe on the retained worktree tip 1c4daf51 for the node the lead's answer creates"
+        },
+        "watch_override": null
       }
     ],
     "holds": [
@@ -145323,6 +145716,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2367
+    "_version": 2373
   }
 }

@@ -1742,6 +1742,7 @@ def _apply_joint_qualification(row: dict[str, Any]) -> dict[str, Any]:
     solver = row["solver"]
     geometry = row["geometry"]
     root_topology = geometry["root_topology"]
+    solver["converged"] = bool(solver["production_telemetry"]["converged"])
     terminal_residual = solver["terminal_fixed_point_residual"]
     residual_qualified = bool(
         terminal_residual is not None

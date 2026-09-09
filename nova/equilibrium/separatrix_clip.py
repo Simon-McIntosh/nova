@@ -486,11 +486,10 @@ def _pack_traced_vertices(vertices, valid, capacity):
     import jax.numpy as jnp
 
     rank = jnp.cumsum(valid, axis=1) - 1
-    destination = jnp.arange(capacity)
-    selector = valid[:, :, jnp.newaxis] & (
-        rank[:, :, jnp.newaxis] == destination[jnp.newaxis, jnp.newaxis, :]
-    )
-    packed = jnp.einsum("cvs,cvd->csd", selector, vertices)
+    safe_rank = jnp.where(valid, rank, 0)
+    cell = jnp.broadcast_to(jnp.arange(vertices.shape[0])[:, None], safe_rank.shape)
+    packed = jnp.zeros((vertices.shape[0], capacity, vertices.shape[2]), vertices.dtype)
+    packed = packed.at[cell, safe_rank].add(jnp.where(valid[..., None], vertices, 0.0))
     return packed, jnp.sum(valid, axis=1)
 
 
@@ -499,9 +498,11 @@ def _pack_traced_values(values, valid, capacity):
     import jax.numpy as jnp
 
     rank = jnp.cumsum(valid, axis=1) - 1
-    destination = jnp.arange(capacity)
-    selector = valid[:, :, None] & (rank[:, :, None] == destination[None, None, :])
-    return jnp.any(selector & values[:, :, None], axis=1)
+    safe_rank = jnp.where(valid, rank, 0)
+    cell = jnp.broadcast_to(jnp.arange(values.shape[0])[:, None], safe_rank.shape)
+    packed = jnp.zeros((values.shape[0], capacity), dtype=jnp.int32)
+    packed = packed.at[cell, safe_rank].add((valid & values).astype(jnp.int32))
+    return packed > 0
 
 
 def _cross_2d(first, second):

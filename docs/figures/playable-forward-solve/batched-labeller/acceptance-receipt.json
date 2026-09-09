@@ -28,10 +28,28 @@
         "slices_per_second": 3.184991059700392,
         "total_batch_per_step": 256,
         "type_error_count": 0
+      },
+      {
+        "batch_per_device": 256,
+        "card_count": 2,
+        "concretization_error_count": 0,
+        "converged_count": 1216,
+        "converged_fraction": 0.7916666666666666,
+        "fraction_parity": true,
+        "guard_count": 224,
+        "guard_fraction": 0.14583333333333334,
+        "job_id": "1267778",
+        "measured_slices_per_repeat": 1536,
+        "per_card_slices_per_second": 3.1493174367831203,
+        "runtime_error_count": 0,
+        "slices_per_second": 6.2986348735662405,
+        "total_batch_per_step": 512,
+        "type_error_count": 0
       }
     ],
     "completed_card_counts": [
-      1
+      1,
+      2
     ],
     "selected_batch_per_device": 256,
     "selection_basis": "highest one-card warmed throughput among batches 16, 64 and 256",

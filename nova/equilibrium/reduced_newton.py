@@ -529,10 +529,6 @@ def _reduced_kernels(
         )
         return jnp.where(shadow, base_state, image)
 
-    # Preserve the same compiled reconstruction boundary whether trips are
-    # driven by Python or enclosed by the fixed-shape loop.
-    boundary_reconstruct = jax.jit(reconstruct, inline=False)
-
     def reduced_map(
         reduced,
         shadow,
@@ -821,7 +817,7 @@ def _reduced_kernels(
         del amplitudes
         bound = _bound(rows)
         external_value = external if external_value is None else external_value
-        state = boundary_reconstruct(
+        state = reconstruct(
             reduced,
             shadow,
             base_state,
@@ -880,7 +876,7 @@ def _reduced_kernels(
         return -jnp.linalg.solve(jacobian, residual)
 
     return {
-        "reconstruct": boundary_reconstruct,
+        "reconstruct": jax.jit(reconstruct),
         "reduced_map": jax.jit(reduced_map),
         "reduced_residual": jax.jit(reduced_residual),
         "jacobian": jax.jit(jax.jacfwd(reduced_residual, argnums=0)),

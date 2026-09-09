@@ -1805,7 +1805,7 @@ def _draw_error_contours(
         linewidth=0.65,
     )
     poloidal.draw_boundary(axis, boundary[:, 0], boundary[:, 1], color="#35b9c8")
-    poloidal.draw_wall(axis, wall[:, 0], wall[:, 1])
+    poloidal.draw_wall(axis, units=(wall,))
     poloidal_axes(axis)
     axis.set_title(f"absolute {name} error", fontsize=9)
     axis.text(
@@ -1848,7 +1848,8 @@ def _plot(
         flux_axis, radial, height, solved, levels, color="#cc7722"
     )
     poloidal.draw_boundary(flux_axis, boundary[:, 0], boundary[:, 1], color="#3366cc")
-    poloidal.draw_wall(flux_axis, wall[:, 0], wall[:, 1])
+    wall_units = (wall,)
+    poloidal.draw_wall(flux_axis, units=wall_units)
     poloidal.draw_nulls(
         flux_axis,
         magnetic_axis=analytic_topology["axis_rz_m"],
@@ -1856,7 +1857,7 @@ def _plot(
         style=DEFAULT_INK.variant(
             axis_marker="^", axis_color="#3366cc", xpoint_color="#3366cc"
         ),
-        contain=wall,
+        contain=wall_units,
     )
     poloidal.draw_nulls(
         flux_axis,
@@ -1865,14 +1866,18 @@ def _plot(
         style=DEFAULT_INK.variant(
             axis_marker="^", axis_color="#cc7722", xpoint_color="#cc7722"
         ),
-        contain=wall,
+        contain=wall_units,
     )
     poloidal_axes(flux_axis)
     flux_axis.set_title("analytic blue / solved ochre; shared Wb levels", fontsize=9)
     for axis, name, points in zip(
         (axes[0, 1], axes[1, 0], axes[1, 1]),
         NORM_FIELDS,
-        (coordinates, derivative_coordinates, derivative_coordinates),
+        (
+            coordinates[: len(errors["psi"])],
+            derivative_coordinates,
+            derivative_coordinates,
+        ),
         strict=True,
     ):
         _draw_error_contours(axis, points, errors[name], wall, boundary, name)
@@ -1880,6 +1885,90 @@ def _plot(
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
     plt.close(figure)
+
+
+def _render_data(
+    coordinates: np.ndarray,
+    terminal_state: np.ndarray,
+    analytic_state: np.ndarray,
+    derivative_coordinates: np.ndarray,
+    errors: dict[str, np.ndarray],
+    boundary: np.ndarray,
+    wall: np.ndarray,
+    terminal_topology: dict[str, Any],
+    analytic_topology: dict[str, Any],
+) -> dict[str, Any]:
+    """Return the complete, solve-independent input for one row figure."""
+
+    return {
+        "schema": "nova.solovev-certificate-render-data",
+        "version": 1,
+        "coordinates_rz_m": coordinates,
+        "terminal_flux_wb": terminal_state,
+        "analytic_flux_wb": analytic_state,
+        "derivative_coordinates_rz_m": derivative_coordinates,
+        "error_fields": errors,
+        "boundary_rz_m": boundary,
+        "wall_units_rz_m": [wall],
+        "terminal_topology": terminal_topology,
+        "analytic_topology": analytic_topology,
+    }
+
+
+def _validate_render_data(data: dict[str, Any]) -> None:
+    """Reject a persisted figure input that cannot reproduce its own panel."""
+
+    if data.get("schema") != "nova.solovev-certificate-render-data":
+        raise RuntimeError("certificate render data has the wrong schema")
+    coordinates = np.asarray(data["coordinates_rz_m"], dtype=np.float64)
+    if coordinates.ndim != 2 or coordinates.shape[1] != 2:
+        raise RuntimeError("certificate render coordinates are not R-Z pairs")
+    for name in ("terminal_flux_wb", "analytic_flux_wb"):
+        values = np.asarray(data[name], dtype=np.float64)
+        if values.shape != (len(coordinates),):
+            raise RuntimeError(f"{name} does not share the persisted coordinates")
+    derivatives = np.asarray(data["derivative_coordinates_rz_m"], dtype=np.float64)
+    if derivatives.ndim != 2 or derivatives.shape[1] != 2:
+        raise RuntimeError("derivative render coordinates are not R-Z pairs")
+    errors = data["error_fields"]
+    if np.asarray(errors["psi"]).shape[0] > len(coordinates):
+        raise RuntimeError("psi error field exceeds the common coordinate array")
+    for name in ("gradient", "hessian"):
+        if np.asarray(errors[name]).shape[0] != len(derivatives):
+            raise RuntimeError(f"{name} error field does not match its coordinates")
+    wall_units = data["wall_units_rz_m"]
+    if len(wall_units) != 1 or np.asarray(wall_units[0]).shape[1] != 2:
+        raise RuntimeError("certificate row must persist its one wall unit")
+
+
+def _render_persisted_row(row: dict[str, Any]) -> dict[str, Any]:
+    """Rebuild one panel from its part receipt without entering the solver."""
+
+    data = row["render_data"]
+    _validate_render_data(data)
+    figure = ROOT / row["figure"]["filesystem_path"]
+    errors = {name: np.asarray(data["error_fields"][name]) for name in NORM_FIELDS}
+    started = perf_counter()
+    _plot(
+        np.asarray(data["coordinates_rz_m"]),
+        np.asarray(data["terminal_flux_wb"]),
+        np.asarray(data["analytic_flux_wb"]),
+        np.asarray(data["derivative_coordinates_rz_m"]),
+        errors,
+        np.asarray(data["boundary_rz_m"]),
+        np.asarray(data["wall_units_rz_m"][0]),
+        data["terminal_topology"],
+        data["analytic_topology"],
+        figure,
+        (
+            f"{row['case']} · {_slug(row['requested_cells'])} · "
+            f"{row['solver']['qualification']}"
+        ),
+    )
+    row["stage_wall_seconds"]["figure_render"] = perf_counter() - started
+    row["figure"]["sha256"] = hashlib.sha256(figure.read_bytes()).hexdigest()
+    row["figure"]["render_source"] = "persisted_part_receipt"
+    return row
 
 
 def _certificate_solve_request(
@@ -1907,6 +1996,20 @@ def _certificate_solve_request(
 
 
 def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
+    part = _part_path(case_name, requested_cells)
+    if part.exists():
+        persisted = json.loads(part.read_text(encoding="utf-8"))
+        if "render_data" in persisted:
+            print(
+                f"SOLOVEV_RENDER_PERSISTED case={case_name} "
+                f"requested_cells={requested_cells}",
+                flush=True,
+            )
+            row = _render_persisted_row(persisted)
+            _validate_row(row)
+            _write_json(part, row)
+            return row
+
     row_started = perf_counter()
     configure_dtypes()
     compilation_cache = configure_persistent_compilation_cache(
@@ -2092,6 +2195,21 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             and reference_topology_fallback
             else None
         )
+    render_data = _render_data(
+        coordinates,
+        terminal_state,
+        oracle_state,
+        derivative_coordinates,
+        {
+            "psi": psi_error,
+            "gradient": gradient_error,
+            "hessian": hessian_error,
+        },
+        boundary,
+        machine.wall_node,
+        root_topology,
+        exact_topology,
+    )
     figure = _figure_path(case_name, requested_cells)
     with _timed_stage(
         "figure_render",
@@ -2218,12 +2336,14 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             "exact_topology": exact_topology,
         },
         "banked_read": banked_read,
+        "render_data": render_data,
         "figure": {
             "filesystem_path": str(figure.relative_to(ROOT)),
             "project_absolute_src": (
                 f"/nova/figures/gs-absolute-accuracy/solovev/{figure.name}"
             ),
             "sha256": hashlib.sha256(figure.read_bytes()).hexdigest(),
+            "render_source": "fresh_production_solve",
         },
     }
     _validate_row(row)
@@ -2270,6 +2390,8 @@ def _validate_row(row: dict[str, Any]) -> None:
     src = row["figure"]["project_absolute_src"]
     if not src.startswith("/nova/figures/gs-absolute-accuracy/solovev/"):
         raise RuntimeError("figure src is not project absolute")
+    if "render_data" in row:
+        _validate_render_data(row["render_data"])
 
 
 def _fit_quantity(
@@ -2418,6 +2540,7 @@ def _schema() -> dict[str, Any]:
             "stage_wall_seconds",
             "lane",
             "figure",
+            "render_data",
         ],
         "norm_fields": list(NORM_FIELDS),
         "norm_regions": list(NORM_REGIONS),

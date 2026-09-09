@@ -37,6 +37,7 @@ from benchmarks.diiid_forward_gs_match import (
 from nova.biot.polygon import polygon_greens
 from nova.imas.diiid_description import (
     POLOIDAL_CONDUCTORS,
+    _imas_element_vertices,
     dataset_machine_description,
 )
 from nova.jax.config import configure_dtypes
@@ -113,17 +114,7 @@ def _persisted_response(
             turn_sum = 0.0
             for element in coil.element:
                 geometry = element.geometry
-                geometry_type = int(geometry.geometry_type)
-                if geometry_type != 1:
-                    raise RuntimeError(
-                        f"unsupported geometry type {geometry_type} for {name}"
-                    )
-                vertices = np.column_stack(
-                    (
-                        np.asarray(geometry.outline.r, dtype=float),
-                        np.asarray(geometry.outline.z, dtype=float),
-                    )
-                )
+                vertices = _imas_element_vertices(geometry, name)
                 turns = float(element.turns_with_sign)
                 turn_sum += turns
                 point_psi, point_br, point_bz = polygon_greens(
@@ -149,14 +140,21 @@ def _persisted_response(
 
 
 def _ladder_shipped_response(
-    row: dict[str, Any], target_r: np.ndarray, target_z: np.ndarray
+    row: dict[str, Any],
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    *,
+    persisted_ecoila: tuple[np.ndarray, np.ndarray, np.ndarray],
 ) -> tuple[tuple[str, ...], np.ndarray, np.ndarray, np.ndarray]:
-    """Return (psi, Br, Bz) per shipped conductor from the row-derived description.
+    """Return (psi, Br, Bz) per shipped conductor on one representation contract.
 
-    Reproduces the geometry read the ladder uses for its eighteen F-coils and
-    ECOILA (``dataset_machine_description(row).physical``), the same source
-    ``nova.imas.diiid_description.vacuum_response`` draws its flux-only
-    response from.
+    The eighteen F-coils retain the independent row-derived challenge geometry.
+    ECOILA is the one representation exception: the persisted description
+    carries 48 one-turn source elements while the challenge row carries one
+    bulk rectangle.  The persisted element tessellation is authoritative for
+    this comparison so the reference field and the persisted vacuum response
+    measure the same physical representation rather than a discretisation
+    difference.
     """
 
     description = dataset_machine_description(
@@ -167,19 +165,25 @@ def _ladder_shipped_response(
     psi = []
     br = []
     bz = []
+    persisted_psi, persisted_br, persisted_bz = persisted_ecoila
     for conductor in description.conductors:
         if (
             conductor.vertices is None
             or not conductor.turns.affects_axisymmetric_poloidal_flux
         ):
             continue
-        point_psi, point_br, point_bz = polygon_greens(
-            target_r.ravel(), target_z.ravel(), conductor.vertices
-        )
+        if conductor.name == "ECOILA":
+            point_psi = persisted_psi
+            point_br = persisted_br
+            point_bz = persisted_bz
+        else:
+            point_psi, point_br, point_bz = polygon_greens(
+                target_r.ravel(), target_z.ravel(), conductor.vertices
+            )
         names.append(conductor.name)
-        psi.append(point_psi.reshape(shape))
-        br.append(point_br.reshape(shape))
-        bz.append(point_bz.reshape(shape))
+        psi.append(np.asarray(point_psi).reshape(shape))
+        br.append(np.asarray(point_br).reshape(shape))
+        bz.append(np.asarray(point_bz).reshape(shape))
     return tuple(names), np.stack(psi), np.stack(br), np.stack(bz)
 
 
@@ -262,8 +266,25 @@ def score_frame(data: Path, shot: str, frame: int) -> dict[str, Any]:
     height = np.asarray(row["efit_grid_Z"], dtype=float)
     target_r, target_z = np.meshgrid(radius, height)
 
+    persisted_psi_all, persisted_br_all, persisted_bz_all, persisted_meta = (
+        _persisted_response(
+            PERSISTED_ENTRY,
+            PERSISTED_DD_VERSION,
+            ALL_CONDUCTOR_NAMES,
+            target_r,
+            target_z,
+        )
+    )
+    persisted_ecoila = (
+        persisted_psi_all[ECOILA_INDEX],
+        persisted_br_all[ECOILA_INDEX],
+        persisted_bz_all[ECOILA_INDEX],
+    )
     shipped_names, shipped_psi, shipped_br, shipped_bz = _ladder_shipped_response(
-        row, target_r, target_z
+        row,
+        target_r,
+        target_z,
+        persisted_ecoila=persisted_ecoila,
     )
     if tuple(shipped_names) != POLOIDAL_CONDUCTORS:
         raise RuntimeError("shipped conductor order differs from POLOIDAL_CONDUCTORS")
@@ -286,16 +307,6 @@ def score_frame(data: Path, shot: str, frame: int) -> dict[str, Any]:
         "c,czr->zr",
         np.asarray([omitted_currents[name] for name in MISSING_CONDUCTOR_ORDER]),
         omitted_bz,
-    )
-
-    persisted_psi_all, persisted_br_all, persisted_bz_all, persisted_meta = (
-        _persisted_response(
-            PERSISTED_ENTRY,
-            PERSISTED_DD_VERSION,
-            ALL_CONDUCTOR_NAMES,
-            target_r,
-            target_z,
-        )
     )
     persisted_psi = np.einsum("c,czr->zr", all_conductors_currents, persisted_psi_all)
     persisted_br = np.einsum("c,czr->zr", all_conductors_currents, persisted_br_all)
@@ -352,6 +363,23 @@ def score_frame(data: Path, shot: str, frame: int) -> dict[str, Any]:
                 "eighteen F-coils and ECOILA itself carry their own shipped "
                 "channel currents unchanged"
             ),
+        },
+        "representation": {
+            "f_coils": "independent challenge-row bulk polygons",
+            "ecoila": {
+                "reference": "persisted pf_active element tessellation",
+                "elements": persisted_meta["coils"][ECOILA_INDEX]["elements"],
+                "signed_turn_sum": persisted_meta["coils"][ECOILA_INDEX][
+                    "signed_turn_sum"
+                ],
+                "reason": (
+                    "the challenge row stores one bulk ECOILA rectangle while "
+                    "the persisted description stores 48 one-turn source rings; "
+                    "the persisted tessellation is used on both sides of this "
+                    "comparison"
+                ),
+            },
+            "omitted_ohmic_channels": "raw-source netCDF element polygons",
         },
         "flux_wb": psi_metrics,
         "radial_field_t": br_metrics,

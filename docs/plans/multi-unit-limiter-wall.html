@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-impl" content="0.88">
 <meta name="plan-modified" content="2026-09-09">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="17">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 </head>
 <body>
@@ -147,6 +147,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260909T062320067381-s19r-multi-unit-limiter-wall" data-who="s19r-mulw" data-when="2026-09-09T07:10:38.766Z">
     <div class="r-comment-body"><p>S19 review: §1 and §6 current, §2 §4 §5 landed but uncollapsed, §3 unblocked by the ANCHORS AND SHADOWS ruling and the landed strike crossing (a3f9ac45); one untracked loose end, the JT-60SA atlas panel; verdict collapse-landed-sections</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260909T142603591396-mulw-solver-consumers-unit-aware" data-who="s19i-mulw-s3" data-when="2026-09-09T17:19:51Z">
+    <div class="r-comment-body"><p>Implementation committed and held (fd258054, 1facf3ba, 04cb76c4 on worktree mulw-solver-consumers-unit-aware): unit offsets carried through the forward operator, occupiable-region containment and per-unit brackets in connectivity_boundary and topology, limiter anchors admitted, wall_unit_index and strike_unit on the receipts; synthetic two-unit gate 6 of 6, referees 9 of 9, affected surface 47 passed with 2 pre-existing failures. The bit-identity comparison is inconclusive, not negative: the comparator helper expected a solve_portfolio side channel the migrated route no longer has, its 21978/35 mixed observation equals the pure expected value (arms crossed), and the 59-minute allocation finished only 4 of 12 MAST rows; a paired same-job base-versus-head node reruns it</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260909T1923-consumers-held" data-who="reckon-ship s19-review" data-when="2026-09-09T19:23:00Z">
+    <div class="r-comment-body">mulw-solver-consumers-unit-aware: implementation committed and HELD on worktree mulw-solver-consumers-unit-aware (fd258054, 1facf3ba, 04cb76c4), not on main. Unit offsets, closure flags and kinds are carried through the forward operator; connectivity containment is vessel interiors minus material units with segment, line-of-sight, equal-arc and spline brackets that never cross a unit end; topology screens X candidates on the occupiable region, admits open limiter anchors and records wall_unit_index; sessions record limiting_unit_index and strike_unit beside strike_segment and strike_parameter. Synthetic two-unit gate 6 of 6 (blade point outside the occupiable region, neighbouring vessel point inside, blade X candidate screened, open-blade anchor bracket [4,5,6], shadow units {0,1}, limiting unit 1), referees 9 of 9, affected surface 47 passed with the two pre-existing test_jax_topology failures. The bit-identity contract is NOT yet evidenced: the worker's comparator against the banked JSON differed on 4 of 4 executed MAST rows but its 21978/35 mixed observation equals the pure expected value and its helper expected a solve_portfolio side channel the migrated route no longer has, so the result is a comparator defect until a paired same-job base-versus-head run (mulw-bit-identity-paired, in flight) says otherwise. Merge waits on that receipt.</div>
 </div>
 </section>
 </main>

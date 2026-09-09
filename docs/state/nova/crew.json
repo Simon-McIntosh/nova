@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T19:04:23",
+  "updated": "2026-09-09T19:23:27",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4701,6 +4701,15 @@
         "created": "2026-09-09"
       },
       {
+        "id": "s19i-mulw-verify",
+        "harness": "codex-luna",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
         "id": "s19i-nia-diverted",
         "harness": "codex",
         "role": "implement",
@@ -4731,6 +4740,15 @@
       },
       {
         "id": "s19i-ucc-offaxis",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-ucc-participation",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -146977,6 +146995,181 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T142603591396-mulw-solver-consumers-unit-aware",
+        "plan": "multi-unit-limiter-wall",
+        "section": "\u00a73",
+        "node": "mulw-solver-consumers-unit-aware",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1383,
+                "cached_input_tokens": 794592,
+                "input_tokens": 796007,
+                "output_tokens": 2024,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 798031,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "tests/test_wall_units_solver.py is green on all_debug CPU x64 asserting on the synthetic two-unit fixture that a point inside the blade is outside the occupiable region while a point inside the vessel beside it is inside, that the blade X candidate is screened, that the first-contact anchor selects the blade node with a bracket within the blade, that the shadow mask marks nodes by unit and that the receipt names the limiting unit index; and the twelve MAST bank rows, the Solovev certificate rungs and the DIII-D gate frames stay bit-identical against main with the seven referee tests green",
+          "estimated_hours": null,
+          "goal": "Make the solver's wall consumers unit-aware under the ANCHORS AND SHADOWS ruling: carry unit offsets through the flat wall node arrays in the forward operator, evaluate containment on the occupiable region and per-unit arcs and shadows in connectivity_boundary and topology, admit limiter nodes as first-contact anchors with a bracket that does not cross a unit end, and record the limiting and strike unit index on the receipt beside strike_segment and strike_parameter",
+          "id": "mulw-solver-consumers-unit-aware",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T14:26:04Z",
+            "read_at": "2026-09-09T14:26:05Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 84.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T142603591396-mulw-solver-consumers-unit-aware/manifest.md",
+          "plan": "multi-unit-limiter-wall",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/connectivity_boundary.py",
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/steering_frames.py",
+            "tests/test_wall_units_solver.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-mulw-s3",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T14:26:18Z",
+        "completed_at": "2026-09-09T17:19:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 10413,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "bddebd03ec8dafb5d97bf99546bcdf551c98fb0e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T142603591396-mulw-solver-consumers-unit-aware/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08690-001b-7563-9468-84231b73e7c5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 26406016,
+            "cached_input_tokens_cumulative": 26406016,
+            "input_tokens": 26688214,
+            "input_tokens_cumulative": 26688214,
+            "output_tokens": 71122,
+            "output_tokens_cumulative": 71122,
+            "reasoning_output_tokens": 11465,
+            "reasoning_output_tokens_cumulative": 11465
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T17:19:51Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 56.0,
+              "resets_at": 1789302633,
+              "observed_at": "2026-09-09T17:19:51Z"
+            }
+          ],
+          "notional_cost_usd": 336.1645,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 26406016,
+          "cumulative_input_tokens": 53094230,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 82587
+        },
+        "follow_on_paths": [
+          "tests/test_session_wall_reference.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/mulw-solver-consumers-unit-aware",
+          "session_id": "01a08690-001b-7563-9468-84231b73e7c5",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T17:19:51Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 103.0,
+        "orientation_input_tokens": null
       }
     ],
     "holds": [
@@ -147289,6 +147482,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2382
+    "_version": 2385
   }
 }

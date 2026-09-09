@@ -1789,6 +1789,33 @@ def _banked_sequential_comparison() -> dict[str, Any]:
     return comparison
 
 
+def _mast_per_member_wall_finding(
+    machine: dict[str, Any], baseline: dict[str, Any]
+) -> dict[str, Any]:
+    """Record the measured batch wall against the banked width-one latency."""
+    batched = machine["summary"]["batched_ms_per_member"]
+    sequential = {
+        "without_exit": baseline["without_exit_mean_ms"],
+        "with_exit": baseline["with_exit_mean_ms"],
+    }
+    return {
+        "classification": "plan_level_finding",
+        "verdict": "batched_per_member_wall_not_below_sequential_width_one",
+        "batched_ms_per_member": batched,
+        "sequential_width_one_ms_per_member": sequential,
+        "batched_minus_sequential_ms_per_member": {
+            arm: batched[arm] - sequential[arm] for arm in batched
+        },
+        "batched_over_sequential": {
+            arm: batched[arm] / sequential[arm] for arm in batched
+        },
+        "qualification": (
+            "the measured MAST batch wall is retained as a throughput finding; "
+            "it is not adjusted or explained away"
+        ),
+    }
+
+
 def _write_batched_report(
     report_path: Path,
     payload: dict[str, Any],
@@ -1862,6 +1889,9 @@ def _retained_compile_memory_evidence(output_json: Path) -> dict[str, Any] | Non
     if not output_json.is_file():
         return None
     previous = _read_json(output_json)
+    retained = previous.get("evidence_inputs", {}).get("retained_compile_memory")
+    if retained is not None:
+        return retained
     execution = previous.get("execution", {})
     peak = execution.get("driver_process_peak_rss_mib")
     if peak is None:
@@ -1877,6 +1907,165 @@ def _retained_compile_memory_evidence(output_json: Path) -> dict[str, Any] | Non
             "cold width-12 compile evidence retained across the cache-enabled rerun"
         ),
     }
+
+
+def _validated_mast_checkpoint(output_json: Path) -> dict[str, Any]:
+    """Read the complete MAST checkpoint required to resume with DIII-D."""
+    checkpoint = _read_json(output_json)
+    completed = checkpoint.get("checkpoint", {}).get("completed_machines")
+    pending = checkpoint.get("checkpoint", {}).get("pending_machines")
+    mast = checkpoint.get("machines", {}).get("MAST")
+    if (
+        checkpoint.get("schema") != "nova.strict-exit-incidence/2"
+        or checkpoint.get("measurement_state") != "mast_complete_diiid_pending"
+        or completed != ["MAST"]
+        or pending != ["DIII-D"]
+        or mast is None
+        or len(mast.get("members", ())) != 12
+        or not mast.get("execution_contract", {}).get("compile_once", False)
+        or mast.get("execution_contract", {}).get("width") != 12
+    ):
+        raise RuntimeError(
+            "DIII-D resume requires one validated width-12 MAST checkpoint"
+        )
+    return checkpoint
+
+
+def resume_batched_diiid(
+    output_json: Path,
+    diiid_machine_cache: Path,
+    report_path: Path | None,
+) -> dict[str, Any]:
+    """Complete a validated MAST checkpoint with only the DIII-D program."""
+    total_started = time.perf_counter()
+    revision = _require_revision()
+    checkpoint_sha256 = _sha256(output_json)
+    checkpoint = _validated_mast_checkpoint(output_json)
+    configure_dtypes()
+    allocation = _require_gpu_allocation(expected_cpu_count=1)
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    input_stages = list(checkpoint["configuration"]["host_memory_stages"])
+    _batch_stage_count(input_stages, "DIIID_INPUT_BUILD_START")
+    diiid_started = time.perf_counter()
+    diiid_members, diiid_inputs = _build_diiid_members(
+        diiid_machine_cache, member_count=5
+    )
+    diiid_build_seconds = time.perf_counter() - diiid_started
+    _batch_stage_count(input_stages, "DIIID_INPUT_BUILD_DONE")
+    diiid_result = _measure_batched_machine(diiid_members, name="DIIID")
+    del diiid_members
+    gc.collect()
+    _batch_stage_count(input_stages, "DIIID_INPUT_RELEASED")
+
+    machines = {"MAST": checkpoint["machines"]["MAST"], "DIII-D": diiid_result}
+    retained_compile_memory = checkpoint["evidence_inputs"].get(
+        "retained_compile_memory"
+    )
+    peak_candidates = [
+        *[stage["resource_peak_rss_mib"] for stage in input_stages],
+        *[machine["summary"]["peak_host_rss_mib"] for machine in machines.values()],
+    ]
+    if retained_compile_memory is not None:
+        peak_candidates.append(retained_compile_memory["process_peak_host_rss_mib"])
+    peak_rss_mib = max(peak_candidates)
+    sequential_comparison = checkpoint["sequential_width_one_comparison"]
+    mast_execution = checkpoint["execution"]
+    diiid_execution = {
+        **allocation,
+        "elapsed_seconds": time.perf_counter() - total_started,
+        "exit_marker": 0,
+        "persistent_compilation_cache": cache.receipt(),
+        "input_build_seconds": {"DIII-D": diiid_build_seconds},
+    }
+    evidence_inputs = dict(checkpoint["evidence_inputs"])
+    evidence_inputs["DIII-D"] = diiid_inputs
+    findings = dict(checkpoint.get("findings", {}))
+    findings["mast_per_member_wall"] = _mast_per_member_wall_finding(
+        machines["MAST"], sequential_comparison["MAST"]
+    )
+    payload = dict(checkpoint)
+    payload.pop("blocker", None)
+    payload.update(
+        {
+            "measurement_state": "complete",
+            "recorded_at": datetime.now(UTC).isoformat(),
+            "source": {
+                "revision": revision,
+                "required_ancestor": REQUIRED_ANCESTOR,
+                "driver": str(Path(__file__).relative_to(ROOT)),
+                "driver_sha256": _sha256(Path(__file__)),
+                "solver_source_modified": False,
+                "machine_revisions": {
+                    "MAST": checkpoint["source"]["revision"],
+                    "DIII-D": revision,
+                },
+                "machine_driver_sha256": {
+                    "MAST": checkpoint["source"]["driver_sha256"],
+                    "DIII-D": _sha256(Path(__file__)),
+                },
+            },
+            "execution": {
+                **diiid_execution,
+                "machine_runs": {
+                    "MAST": mast_execution,
+                    "DIII-D": diiid_execution,
+                },
+                "resumed_from": {
+                    "receipt_sha256": checkpoint_sha256,
+                    "measurement_state": checkpoint["measurement_state"],
+                    "recorded_at": checkpoint["recorded_at"],
+                },
+            },
+            "configuration": {
+                **checkpoint["configuration"],
+                "program_widths": {"MAST": 12, "DIII-D": 5},
+                "host_memory_peak_mib": peak_rss_mib,
+                "host_memory_under_limit": peak_rss_mib < 16 * 1024,
+                "host_memory_stages": input_stages,
+            },
+            "evidence_inputs": evidence_inputs,
+            "machines": machines,
+            "checkpoint": {
+                "completed_machines": ["MAST", "DIII-D"],
+                "pending_machines": [],
+                "persistence": "atomically replaced after each completed machine",
+            },
+            "observations": {
+                "mast_compile_once": machines["MAST"]["execution_contract"][
+                    "compile_once"
+                ],
+                "batch_compile_count_per_pass": {
+                    name: machine["execution_contract"]["compile_count_per_pass"]
+                    for name, machine in machines.items()
+                },
+                "geometry_fallbacks": {
+                    name: {
+                        "fallback": not machine["execution_contract"][
+                            "geometry_identical"
+                        ],
+                        "geometry_digests": machine["execution_contract"][
+                            "geometry_digests"
+                        ],
+                    }
+                    for name, machine in machines.items()
+                },
+            },
+            "findings": findings,
+        }
+    )
+    payload["execution"]["elapsed_seconds"] = time.perf_counter() - total_started
+    payload["execution"]["machine_runs"]["DIII-D"]["elapsed_seconds"] = payload[
+        "execution"
+    ]["elapsed_seconds"]
+    _persist_batched_receipt(output_json, payload)
+    print(f"BATCHED_MACHINE_RECEIPT_WRITTEN=DIII-D:{output_json}", flush=True)
+    if report_path is not None:
+        _write_batched_report(report_path, payload)
+    print(f"BATCHED_RECEIPT_WRITTEN={output_json}", flush=True)
+    print("EXIT_MARKER=0", flush=True)
+    return payload
 
 
 def run_batched(
@@ -1973,6 +2162,11 @@ def run_batched(
         },
         "machines": {"MAST": mast_result},
         "sequential_width_one_comparison": sequential_comparison,
+        "findings": {
+            "mast_per_member_wall": _mast_per_member_wall_finding(
+                mast_result, sequential_comparison["MAST"]
+            )
+        },
         "observations": {
             "mast_compile_once": mast_result["execution_contract"]["compile_once"],
             "batch_compile_count_per_pass": {
@@ -2066,6 +2260,11 @@ def run_batched(
         },
         "machines": machines,
         "sequential_width_one_comparison": sequential_comparison,
+        "findings": {
+            "mast_per_member_wall": _mast_per_member_wall_finding(
+                machines["MAST"], sequential_comparison["MAST"]
+            )
+        },
         "checkpoint": {
             "completed_machines": ["MAST", "DIII-D"],
             "pending_machines": [],
@@ -2263,9 +2462,15 @@ def run(
     return payload
 
 
-def _validate_arguments(*, batched: bool, self_check: bool) -> None:
+def _validate_arguments(
+    *, batched: bool, self_check: bool, resume_diiid: bool = False
+) -> None:
     if self_check and not batched:
         raise ValueError("--self-check requires --batched")
+    if resume_diiid and not batched:
+        raise ValueError("--resume-diiid requires --batched")
+    if resume_diiid and self_check:
+        raise ValueError("--resume-diiid cannot be combined with --self-check")
 
 
 def main() -> None:
@@ -2283,12 +2488,17 @@ def main() -> None:
     parser.add_argument("--regenerate-mast-state-cache", action="store_true")
     parser.add_argument("--harvest-log", type=Path)
     parser.add_argument("--batched", action="store_true")
+    parser.add_argument("--resume-diiid", action="store_true")
     parser.add_argument("--self-check", action="store_true")
     parser.add_argument("--report", type=Path)
     arguments = parser.parse_args()
     if arguments.repeats < 0:
         raise ValueError("additional timing repetitions cannot be negative")
-    _validate_arguments(batched=arguments.batched, self_check=arguments.self_check)
+    _validate_arguments(
+        batched=arguments.batched,
+        self_check=arguments.self_check,
+        resume_diiid=arguments.resume_diiid,
+    )
     if arguments.regenerate_mast_state_cache:
         regenerate_mast_state_cache(arguments.mast_state_cache.resolve())
         return
@@ -2309,13 +2519,21 @@ def main() -> None:
         output_json = (
             DEFAULT_BATCHED_JSON if arguments.json == DEFAULT_JSON else arguments.json
         )
-        run_batched(
-            output_json.resolve(),
-            arguments.mast_state_cache.resolve(),
-            arguments.diiid_machine_cache.resolve(),
-            None if arguments.report is None else arguments.report.resolve(),
-            self_check=arguments.self_check,
-        )
+        report_path = None if arguments.report is None else arguments.report.resolve()
+        if arguments.resume_diiid:
+            resume_batched_diiid(
+                output_json.resolve(),
+                arguments.diiid_machine_cache.resolve(),
+                report_path,
+            )
+        else:
+            run_batched(
+                output_json.resolve(),
+                arguments.mast_state_cache.resolve(),
+                arguments.diiid_machine_cache.resolve(),
+                report_path,
+                self_check=arguments.self_check,
+            )
         return
     run(
         arguments.json.resolve(),

@@ -13,7 +13,6 @@ from pathlib import Path
 import socket
 import subprocess
 import sys
-import time
 from typing import Any
 
 import numpy as np
@@ -288,51 +287,32 @@ def _solve_pure_arm(
     *,
     carrier_identity: str,
 ) -> dict[str, Any]:
-    import jax
-    import jax.numpy as jnp
 
     from nova.equilibrium.fixed_point import FixedPointTerminationReason
-    from nova.equilibrium.topology import TopologyClass
 
-    initial = jnp.stack((seed, seed))
     request = _bank_solve_request(
         profile,
-        initial,
+        seed,
         target_current,
         carrier_identity=carrier_identity,
     )
     policy = request.policy
-    started = time.perf_counter()
-    portfolio = profile.solve_portfolio(
-        request.seed_policy.resolve(profile),
-        route=request.route,
-        target_current=request.target_current,
-        tolerance=policy.qualification_tolerance,
-        newton_steps=policy.newton_steps,
-        gmres_iterations=policy.gmres_iterations,
-        warmup=policy.warmup,
-        relaxation=policy.relaxation,
-        step_cap=policy.step_cap,
-    )
-    portfolio.branches.equilibrium.flux.block_until_ready()
-    elapsed = time.perf_counter() - started
-    branch = jax.tree.map(
-        lambda value: value[int(TopologyClass.DIVERTED)], portfolio.branches
-    )
-    fixed = branch.equilibrium.fixed_point
-    reason_value = int(np.asarray(fixed.termination_reason))
+    receipt = profile.solve(request)
+    receipt.equilibrium.flux.block_until_ready()
+    fixed = receipt.equilibrium.fixed_point
+    reason_value = int(np.asarray(receipt.termination_reason))
     try:
         reason = FixedPointTerminationReason(reason_value).name.lower()
     except ValueError:
         reason = f"unknown_{reason_value}"
-    state = branch.equilibrium.flux
+    state = receipt.equilibrium.flux
     _masks, topology = profile.operator.read(state)
     geometry = corroboration._post_cutover_geometry(profile, state, topology)
     polish_receipt = _stationary_point_polish_receipt(profile.operator, state)
     trip_count = int(np.asarray(getattr(fixed, "active_set_iterations", 0)))
     return {
-        "converged": bool(np.asarray(branch.converged)),
-        "terminal_residual": float(np.asarray(branch.residual)),
+        "converged": bool(np.asarray(receipt.qualified)),
+        "terminal_residual": float(np.asarray(fixed.residual)),
         "termination_reason": reason,
         "trip_count": trip_count,
         "active_set_residuals": _strict_floats(
@@ -351,7 +331,7 @@ def _solve_pure_arm(
             :2
         ].tolist(),
         "topology_qualification_polish_receipt": polish_receipt,
-        "solve_wall_seconds_including_compilation": elapsed,
+        "solve_wall_seconds_including_compilation": receipt.wall_seconds,
         "solver": {
             "fixed_point_tolerance": policy.kernel_tolerance,
             "newton_steps": policy.newton_steps,
@@ -359,9 +339,7 @@ def _solve_pure_arm(
             "warmup_sweeps": policy.warmup,
             "relaxation": policy.relaxation,
             "step_cap": policy.step_cap,
-            "resolved_defaults": _solve_contract_module()
-            .ResolvedForwardSolveDefaults.from_policy(policy)
-            .to_dict(),
+            "resolved_defaults": receipt.resolved_defaults.to_dict(),
         },
     }
 

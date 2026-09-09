@@ -56,12 +56,6 @@ from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.connectivity_boundary import (
     traced_margin_candidate_diagnostics,
 )
-from nova.equilibrium.branch_selection import (
-    BranchAdmissibility,
-    SelectionHistory,
-    SelectionPolicy,
-    select_forward_branch,
-)
 from nova.equilibrium.boundary_comparison import (
     BoundaryMode,
     compare_closed_boundaries,
@@ -729,7 +723,7 @@ def banked_read_summary(
     def point(value: Any) -> list[float] | None:
         try:
             result = np.asarray(value, dtype=float)
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return None
         return (
             result.tolist()
@@ -739,7 +733,7 @@ def banked_read_summary(
 
     try:
         reference_points = np.asarray(reference_x_points_rz_m, dtype=float)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         reference_points = np.empty((0, 2), dtype=float)
     if reference_points.ndim != 2 or reference_points.shape[1] != 2:
         reference_points = np.empty((0, 2), dtype=float)
@@ -777,7 +771,7 @@ def banked_failed_read_summary(
     def point(value: Any) -> list[float] | None:
         try:
             result = np.asarray(value, dtype=float)
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return None
         return (
             result.tolist()
@@ -787,7 +781,7 @@ def banked_failed_read_summary(
 
     try:
         reference_points = np.asarray(reference_x_points_rz_m, dtype=float)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         reference_points = np.empty((0, 2), dtype=float)
     if reference_points.ndim != 2 or reference_points.shape[1] != 2:
         reference_points = np.empty((0, 2), dtype=float)
@@ -1579,58 +1573,66 @@ def _solve_registered(
         cold.branches.flux[int(TopologyClass.DIVERTED)], dtype=float
     )
     seed_identity = bool(np.array_equal(diverted_seed, label_seed))
-    request = _registered_solve_request(
-        profile,
-        cold.branches.flux,
-        jnp.asarray(current),
-        target_current_a,
-        carrier_identity=f"diiid:{row.get('_source_path', 'corpus')}:{frame}",
-    )
-    policy = request.policy
-    portfolio = profile.solve_portfolio(
-        request.seed_policy.resolve(profile),
-        route=request.route,
-        current=request.current,
-        target_current=request.target_current,
-        tolerance=policy.qualification_tolerance,
-        newton_steps=policy.newton_steps,
-        gmres_iterations=policy.gmres_iterations,
-        warmup=policy.warmup,
-        relaxation=policy.relaxation,
-        step_cap=policy.step_cap,
-        stream_active_set=True,
-    )
-    selection = select_forward_branch(
-        portfolio,
-        SelectionHistory(),
-        SelectionPolicy(
-            cold_start_class=TopologyClass.DIVERTED,
-            persistence_threshold=3,
-        ),
-        BranchAdmissibility(limited=False, diverted=True),
-    )
-    diverted = jax.tree.map(
-        lambda value: value[int(TopologyClass.DIVERTED)], portfolio.branches
-    )
+    carrier_identity = f"diiid:{row.get('_source_path', 'corpus')}:{frame}"
+    requests = {
+        topology_class: _registered_solve_request(
+            profile,
+            cold.branches.flux[int(topology_class)],
+            jnp.asarray(current),
+            target_current_a,
+            carrier_identity=f"{carrier_identity}:{topology_class.name.lower()}",
+        )
+        for topology_class in (TopologyClass.LIMITED, TopologyClass.DIVERTED)
+    }
+    receipts = {
+        topology_class: profile.solve(request)
+        for topology_class, request in requests.items()
+    }
+    for receipt in receipts.values():
+        receipt.equilibrium.flux.block_until_ready()
+    diverted = receipts[TopologyClass.DIVERTED]
     branches = {}
     for topology_class in (TopologyClass.LIMITED, TopologyClass.DIVERTED):
-        branch = jax.tree.map(
-            lambda value: value[int(topology_class)], portfolio.branches
+        receipt = receipts[topology_class]
+        equilibrium = receipt.equilibrium
+        achieved_class = (
+            TopologyClass.DIVERTED
+            if bool(equilibrium.topology.diverted)
+            else TopologyClass.LIMITED
         )
         branches[topology_class.name.lower()] = {
             "requested_class": topology_class.name.lower(),
-            "achieved_class": ("diverted" if int(branch.achieved_class) else "limited"),
-            "residual": float(branch.residual),
-            "iterations": int(branch.iterations),
-            "converged": bool(branch.converged),
-            "topology_consistent": bool(branch.topology_consistent),
-            "finite": bool(branch.equilibrium.finite.passed),
+            "achieved_class": achieved_class.name.lower(),
+            "residual": float(equilibrium.fixed_point.residual),
+            "iterations": int(
+                getattr(
+                    equilibrium.fixed_point,
+                    "active_set_iterations",
+                    requests[topology_class].policy.newton_steps,
+                )
+            ),
+            "converged": bool(receipt.qualified),
+            "topology_consistent": achieved_class is topology_class,
+            "finite": bool(equilibrium.finite.passed),
         }
-    selection_receipt = selection.as_dict()
-    selection_receipt["residuals"] = {
-        name: float(value) for name, value in selection_receipt["residuals"].items()
+    selected_diverted = bool(
+        branches["diverted"]["converged"]
+        and branches["diverted"]["topology_consistent"]
+    )
+    selection_receipt = {
+        "policy": {
+            "cold_start_class": "diverted",
+            "persistence_threshold": 3,
+        },
+        "reason": (
+            "direct diverted receipt is qualification-valid"
+            if selected_diverted
+            else "direct diverted receipt is not qualification-valid"
+        ),
+        "selected_class": "diverted" if selected_diverted else None,
+        "residuals": {name: branch["residual"] for name, branch in branches.items()},
+        "branches": branches,
     }
-    selection_receipt["branches"] = branches
     selection_receipt["cold_seed"] = {
         "entry_point": "ForwardProfile.cold_seed_portfolio",
         "centroid_rz_m": axis.tolist(),
@@ -1638,7 +1640,6 @@ def _solve_registered(
         "stored_flux_samples_used": False,
         "label_seed_identity": seed_identity,
     }
-    selected_diverted = selection.selected_class is TopologyClass.DIVERTED
     termination = (
         "public branch selector accepted the converged diverted root"
         if selected_diverted
@@ -1648,10 +1649,16 @@ def _solve_registered(
         diverted.equilibrium,
         termination,
         selection_receipt,
-        int(diverted.iterations),
+        int(
+            getattr(
+                diverted.equilibrium.fixed_point,
+                "active_set_iterations",
+                requests[TopologyClass.DIVERTED].policy.newton_steps,
+            )
+        ),
         seed_identity,
-        bool(diverted.converged and selected_diverted),
-        ResolvedForwardSolveDefaults.from_policy(policy).to_dict(),
+        bool(diverted.qualified and selected_diverted),
+        diverted.resolved_defaults.to_dict(),
     )
 
 

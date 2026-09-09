@@ -130,6 +130,7 @@ def _solve_with_defaults(
     carrier_identity: str,
     target_current: float,
     current=None,
+    policy_overrides: dict[str, object] | None = None,
 ) -> ForwardSolveReceipt:
     request = ForwardSolveRequest.from_defaults(
         carrier_identity=carrier_identity,
@@ -137,6 +138,7 @@ def _solve_with_defaults(
         seed_policy=ExplicitSolveSeed(jnp.asarray(seed)),
         target_current=target_current,
         current=current,
+        policy_overrides=policy_overrides,
     )
     receipt = profile.solve(request)
     receipt.equilibrium.flux.block_until_ready()
@@ -150,25 +152,24 @@ def _mast_states(
     *,
     carrier_identity: str,
 ) -> dict[str, MastArmResult]:
-    initial = jnp.stack((seed, seed))
-    portfolio = profile.solve_portfolio(
-        initial,
-        route="newton_krylov",
+    pure_receipt = _solve_with_defaults(
+        profile,
+        seed,
+        carrier_identity=carrier_identity,
         target_current=target_current,
-        tolerance=FIXED_POINT_CRITERION,
-        newton_steps=NEWTON_STEPS,
-        gmres_iterations=GMRES_ITERATIONS,
-        warmup=WARMUP_SWEEPS,
-        relaxation=RELAXATION,
-        step_cap=STEP_CAP,
+        policy_overrides={
+            "newton_steps": NEWTON_STEPS,
+            "gmres_iterations": GMRES_ITERATIONS,
+            "warmup": WARMUP_SWEEPS,
+            "relaxation": RELAXATION,
+            "step_cap": STEP_CAP,
+            "kernel_tolerance": FIXED_POINT_CRITERION,
+            "qualification_tolerance": FIXED_POINT_CRITERION,
+        },
     )
-    portfolio.branches.equilibrium.flux.block_until_ready()
-    pure_branch = jax.tree.map(
-        lambda value: value[int(TopologyClass.DIVERTED)], portfolio.branches
-    )
-    pure_reason_value = int(
-        np.asarray(pure_branch.equilibrium.fixed_point.termination_reason)
-    )
+    pure_receipt.equilibrium.flux.block_until_ready()
+    pure_equilibrium = pure_receipt.equilibrium
+    pure_reason_value = int(np.asarray(pure_receipt.termination_reason))
     try:
         pure_reason = FixedPointTerminationReason(pure_reason_value).name.lower()
     except ValueError:
@@ -189,12 +190,12 @@ def _mast_states(
         mixed_reason = f"unknown_{mixed_reason_value}"
     return {
         "pure": MastArmResult(
-            state=pure_branch.equilibrium.flux,
-            converged=bool(np.asarray(pure_branch.converged)),
-            terminal_residual=float(np.asarray(pure_branch.residual)),
+            state=pure_equilibrium.flux,
+            converged=bool(np.asarray(pure_receipt.qualified)),
+            terminal_residual=float(np.asarray(pure_equilibrium.fixed_point.residual)),
             tolerance=FIXED_POINT_CRITERION,
             termination_reason=pure_reason,
-            resolved_defaults=None,
+            resolved_defaults=pure_receipt.resolved_defaults.to_dict(),
         ),
         "mixed": MastArmResult(
             state=mixed_receipt.equilibrium.flux,

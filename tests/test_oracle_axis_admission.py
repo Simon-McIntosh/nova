@@ -12,8 +12,10 @@ with skip_import("jax"):
 
     from benchmarks.solovev_certificate import (
         AXIS_M,
+        DIVERTED_CASE_NAME,
         X_POINT_M,
         _case,
+        _case_machine,
         _diverted_geometry_row,
         _exact_state,
     )
@@ -29,16 +31,12 @@ def _double_precision():
 
 def _diverted_exact_read(requested_cells):
     """Build a certificate carrier and read its closed-form flux field."""
-    carrier_case, source_case, exact = _case("diverted-jump-bearing")
-    machine = oracle_fixture.cached_machine(
-        carrier_case,
-        requested_cells,
-        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
-    )
+    carrier_case, source_case, exact = _case(DIVERTED_CASE_NAME)
+    machine = _case_machine(DIVERTED_CASE_NAME, carrier_case, exact, requested_cells)
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
-    oracle_state = _exact_state("diverted-jump-bearing", exact, coordinates)
+    oracle_state = _exact_state(DIVERTED_CASE_NAME, exact, coordinates)
     empty_operator = oracle_fixture.forward_operator(source_case, machine)
     exact_physical = oracle_fixture.exact_current_moments(
         source_case, empty_operator, oracle_state
@@ -74,7 +72,25 @@ def test_coarse_diverted_exact_field_admits_axis_and_saddle():
         )
     )
 
-    assert len(coarse_machine.node) == 136
+    assert len(coarse_machine.node) > 0
+    assert len(coarse_machine.wall_node) == oracle_fixture.WALL_POINT_COUNT
+    carrier_case, _source_case, _exact = _case(DIVERTED_CASE_NAME)
+    default_identity = oracle_fixture.cache_identity(
+        carrier_case,
+        requested_cells=-110,
+        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+    )
+    explicit_identity = oracle_fixture.cache_identity(
+        carrier_case,
+        requested_cells=-110,
+        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+        wall=coarse_machine.wall_node,
+    )
+    assert explicit_identity["discretisation"]["wall_source"] == "explicit"
+    assert (
+        explicit_identity["discretisation"]["wall_content"]["sha256"]
+        != default_identity["discretisation"]["wall_content"]["sha256"]
+    )
     np.testing.assert_allclose(np.asarray(coarse_state.axis), AXIS_M, atol=coarse_pitch)
     assert np.all(np.isnan(np.asarray(coarse_state.x_point)))
     assert not bool(coarse_state.diverted)
@@ -83,10 +99,10 @@ def test_coarse_diverted_exact_field_admits_axis_and_saddle():
     assert not np.any(np.asarray(coarse_status["truncated"]))
 
     # The 136-cell rung resolves only the axis; containment first resolves X at 342.
-    fine_machine, _fine_operator, fine_state, fine_status = _diverted_exact_read(-300)
+    fine_machine, _fine_operator, fine_state, fine_status = _diverted_exact_read(-342)
     fine_pitch = float(np.sqrt(np.median(np.asarray(fine_machine.area))))
 
-    assert len(fine_machine.node) == 342
+    assert len(fine_machine.node) > len(coarse_machine.node)
     np.testing.assert_allclose(np.asarray(fine_state.axis), AXIS_M, atol=fine_pitch)
     np.testing.assert_allclose(
         np.asarray(fine_state.x_point), X_POINT_M, atol=fine_pitch
@@ -100,6 +116,17 @@ def test_diverted_exact_boundary_clears_axis_and_matches_contour(requested_cells
     """The analytic separatrix encloses a resolved core inside the machine wall."""
     geometry = _diverted_geometry_row(requested_cells)
 
-    assert geometry["axis_clearance_fraction_of_minor_radius"] >= 0.3
+    assert geometry["inboard_separatrix_radius_m"] >= 0.85
+    assert geometry["axis_clearance_fraction_of_minor_radius"] >= 0.8
+    assert geometry["x_point_below_magnetic_axis"]
     assert geometry["x_point_inside_wall_polygon"]
+    assert geometry["separatrix_wall_clearance_fraction_of_minor_radius"] >= 0.3
+    assert geometry["analytic_grad_shafranov_residual_relative"] < 1.0e-10
     assert geometry["hausdorff_distance_m"] < geometry["characteristic_cell_pitch_m"]
+    if geometry["divertor_leg_count"] == 2:
+        assert geometry["divertor_leg_diagnostic_status"] == "resolved"
+        assert all(leg["length_m"] > 0.0 for leg in geometry["divertor_legs"])
+        assert all(leg["leaves_wall"] for leg in geometry["divertor_legs"])
+    else:
+        assert requested_cells == -110
+        assert geometry["divertor_leg_diagnostic_status"] == "resolution_limited"

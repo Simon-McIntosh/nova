@@ -38,15 +38,8 @@ from benchmarks.diiid_forward_gs_match import (
     candidate_flux_margins,
 )
 from benchmarks.split_fit_jump_field import (
-    AXIS_M,
     BOUNDARY_BAND_PITCHES,
-    X_POINT_M,
     _distance_to_boundary,
-    _lcfs,
-    _polynomial_flux,
-    _polynomial_gradient,
-    _polynomial_hessian,
-    _solve_coefficients,
 )
 from nova.equilibrium import (
     ColdSeedConstruction,
@@ -54,6 +47,10 @@ from nova.equilibrium import (
     SaddleSeedGeometry,
 )
 from nova.equilibrium.forward import RasterFluxReceiptStatus
+from nova.equilibrium.analytic_single_null import (
+    CerfonFreidbergSingleNull,
+    cerfon_freidberg_single_null,
+)
 from nova.equilibrium.solve_request import ExplicitSolveSeed, ForwardSolveRequest
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
@@ -88,8 +85,14 @@ CASE_NAMES = (
     "weak-rotation-reactor-static",
     "moderate-rotation-conventional-static",
     "strong-rotation-compact-static",
-    "diverted-jump-bearing",
+    "diverted-single-null",
 )
+DIVERTED_CASE_NAME = "diverted-single-null"
+DIVERTED_CASE_ALIASES = frozenset((DIVERTED_CASE_NAME, "diverted-jump-bearing"))
+DIVERTED_REFERENCE = cerfon_freidberg_single_null()
+DIVERTED_WALL_CLEARANCE_FRACTION = 0.35
+AXIS_M = DIVERTED_REFERENCE.magnetic_axis
+X_POINT_M = DIVERTED_REFERENCE.x_point
 TERMINAL_RESIDUAL_BOUND = float(LOCKED_RECOVERY_BOUNDS["fixed_point_residual"])
 THEORETICAL_ORDER = 2.0
 NORM_FIELDS = ("psi", "gradient", "hessian")
@@ -98,7 +101,7 @@ NORM_STATISTICS = ("sup", "rms")
 HEARTBEAT_SECONDS = 30.0
 REUSE_MAP_ROWS = (
     "tests/rotating_equilibrium_references.py::reference_cases",
-    "benchmarks/split_fit_jump_field.py::_polynomial_gradient,_polynomial_hessian,_lcfs",
+    "nova/equilibrium/analytic_single_null.py::CerfonFreidbergSingleNull",
     "benchmarks/analytic_operator_ladder.py::_regional_norms,_fit_order",
     "scripts/analytic_oracle_fixtures/measure.py::cached_machine,forward_operator,exact_current_moments",
     "scripts/analytic_oracle_fixtures/reduced_oracle.py::measure_reduced_oracle",
@@ -503,15 +506,18 @@ def _validate_seed_control(receipt: dict[str, Any]) -> None:
         raise RuntimeError("seed control must be measured under SLURM")
 
 
-def _diverted_source(coefficients: np.ndarray) -> RotatingEquilibrium:
-    axis_flux = float(_polynomial_flux(AXIS_M[None, :], coefficients)[0])
+def _is_diverted_case(case_name: str) -> bool:
+    return case_name in DIVERTED_CASE_ALIASES
+
+
+def _diverted_source(exact: CerfonFreidbergSingleNull) -> RotatingEquilibrium:
     carrier = oracle_fixture.analytic_case()
     return RotatingEquilibrium(
-        name="diverted-jump-bearing-source",
-        major_radius=float(AXIS_M[0]),
-        axis_flux=axis_flux,
-        pressure_coefficient=float(-coefficients[0] / np.pi),
-        field_coefficient=float(-coefficients[1] / (2.0 * np.pi)),
+        name="diverted-single-null-source",
+        major_radius=exact.major_radius,
+        axis_flux=exact.axis_flux,
+        pressure_coefficient=exact.pressure_coefficient,
+        field_coefficient=exact.field_coefficient,
         rotation_parameter=0.0,
         boundary_f=carrier.boundary_f,
         axis_temperature=carrier.axis_temperature,
@@ -576,7 +582,7 @@ def _closed_form_current_target(
 ) -> tuple[float, np.ndarray, dict[str, Any]]:
     """Return the declared current and centroid used by the production seed."""
 
-    if case_name != "diverted-jump-bearing":
+    if not _is_diverted_case(case_name):
         current, centroid, receipt = recovery._aggregate_current_moment(source_case)
         return float(current), np.asarray(centroid, dtype=np.float64), receipt
 
@@ -620,7 +626,7 @@ def _production_seed(
 
     requested_class = (
         TopologyClass.DIVERTED
-        if case_name == "diverted-jump-bearing"
+        if _is_diverted_case(case_name)
         else TopologyClass.LIMITED
     )
     geometry = (
@@ -1013,11 +1019,7 @@ def _nan_census(case_name: str) -> dict[str, Any]:
         requested_cells=requested_cells,
     ):
         carrier_case, source_case, exact = _case(case_name)
-        machine = oracle_fixture.cached_machine(
-            carrier_case,
-            requested_cells,
-            wall_nodes=oracle_fixture.WALL_POINT_COUNT,
-        )
+        machine = _case_machine(case_name, carrier_case, exact, requested_cells)
         coordinates = np.vstack(
             (machine.node, machine.wall_node, machine.sample_coordinates)
         )
@@ -1126,31 +1128,56 @@ def _nan_census(case_name: str) -> dict[str, Any]:
 
 
 def _case(case_name: str) -> tuple[RotatingEquilibrium, RotatingEquilibrium, Any]:
-    if case_name == "diverted-jump-bearing":
-        coefficients = _solve_coefficients()
+    if _is_diverted_case(case_name):
+        exact = DIVERTED_REFERENCE
         return (
             oracle_fixture.analytic_case(),
-            _diverted_source(coefficients),
-            coefficients,
+            _diverted_source(exact),
+            exact,
         )
     base_name = case_name.removesuffix("-static")
     static = reference_cases()[base_name].static_limit()
     return static, static, static
 
 
+def _diverted_wall(exact: CerfonFreidbergSingleNull) -> np.ndarray:
+    """Return the standard-node wall outside the exact single-null separatrix."""
+    return oracle_fixture.offset_wall(
+        exact.separatrix(1441),
+        clearance=DIVERTED_WALL_CLEARANCE_FRACTION * exact.minor_radius,
+        points=oracle_fixture.WALL_POINT_COUNT,
+    )
+
+
+def _case_machine(
+    case_name: str,
+    carrier_case: RotatingEquilibrium,
+    exact: Any,
+    requested_cells: int,
+) -> Any:
+    """Load the case carrier with its declared wall identity."""
+    wall = _diverted_wall(exact) if _is_diverted_case(case_name) else None
+    return oracle_fixture.cached_machine(
+        carrier_case,
+        requested_cells,
+        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+        wall=wall,
+    )
+
+
 def _exact_state(case_name: str, exact: Any, coordinates: np.ndarray) -> np.ndarray:
-    if case_name == "diverted-jump-bearing":
-        return np.asarray(_polynomial_flux(coordinates, exact), dtype=np.float64)
+    if _is_diverted_case(case_name):
+        return np.asarray(exact.flux(coordinates), dtype=np.float64)
     return oracle_fixture.exact_state(exact, coordinates)
 
 
 def _exact_derivatives(
     case_name: str, exact: Any, coordinates: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray]:
-    if case_name == "diverted-jump-bearing":
+    if _is_diverted_case(case_name):
         return (
-            np.asarray(_polynomial_gradient(coordinates, exact), dtype=np.float64),
-            np.asarray(_polynomial_hessian(coordinates, exact), dtype=np.float64),
+            np.asarray(exact.gradient(coordinates), dtype=np.float64),
+            np.asarray(exact.hessian(coordinates), dtype=np.float64),
         )
     radial, vertical = exact.flux_gradient(coordinates[:, 0], coordinates[:, 1])
     label = coordinates[:, 0] ** 2 - exact.major_radius**2
@@ -1170,8 +1197,8 @@ def _exact_derivatives(
 
 
 def _boundary(case_name: str, exact: Any) -> np.ndarray:
-    if case_name == "diverted-jump-bearing":
-        return _lcfs(exact)
+    if _is_diverted_case(case_name):
+        return exact.separatrix()
     radius, half_height, _weight, _offset = exact._surface_nodes(0.0, 721)
     return np.vstack(
         (
@@ -1198,35 +1225,117 @@ def _symmetric_polyline_distance(first: np.ndarray, second: np.ndarray) -> float
     )
 
 
+def _single_null_core_lobe(
+    components: list[np.ndarray],
+    *,
+    magnetic_axis: np.ndarray,
+    x_point: np.ndarray,
+    grid_spacing: float,
+) -> tuple[np.ndarray, list[np.ndarray], int]:
+    """Select the axis-containing core arc and separate its divertor legs."""
+    candidates: list[tuple[np.ndarray, list[np.ndarray], int]] = []
+    saddle_radius = 2.5 * grid_spacing
+    for component_index, component in enumerate(components):
+        component = np.asarray(component, dtype=np.float64)
+        closure_scale = max(float(np.max(np.abs(component))), 1.0)
+        closure_tolerance = 128.0 * np.finfo(np.float64).eps * closure_scale
+        if np.linalg.norm(
+            component[0] - component[-1]
+        ) <= closure_tolerance and PolygonPath(component).contains_point(magnetic_axis):
+            candidates.append((component, [], component_index))
+            continue
+
+        distance = np.linalg.norm(component - x_point, axis=1)
+        near = np.flatnonzero(distance <= saddle_radius)
+        if len(near) == 0:
+            continue
+        groups = np.split(near, np.flatnonzero(np.diff(near) > 1) + 1)
+        visits = [int(group[np.argmin(distance[group])]) for group in groups]
+        for first, second in zip(visits[:-1], visits[1:]):
+            candidate = np.vstack((x_point, component[first : second + 1], x_point))
+            if not PolygonPath(candidate).contains_point(magnetic_axis):
+                continue
+            legs = []
+            if first > 0:
+                legs.append(np.vstack((x_point, component[first::-1])))
+            if second < len(component) - 1:
+                legs.append(np.vstack((x_point, component[second:])))
+            candidates.append((candidate, legs, component_index))
+
+    if len(candidates) != 1:
+        raise RuntimeError(
+            "zero-level contour must yield exactly one axis-containing core lobe, "
+            f"found {len(candidates)}"
+        )
+    return candidates[0]
+
+
+def _wall_exit_point(leg: np.ndarray, wall: np.ndarray) -> np.ndarray | None:
+    """Return where an inside-out divertor leg first crosses the wall polygon."""
+    wall_path = PolygonPath(wall)
+    inside = wall_path.contains_points(leg, radius=1.0e-12)
+    crossings = np.flatnonzero(inside[:-1] & ~inside[1:])
+    if len(crossings) == 0:
+        return None
+    lower = np.asarray(leg[crossings[0]], dtype=np.float64)
+    upper = np.asarray(leg[crossings[0] + 1], dtype=np.float64)
+    for _ in range(50):
+        middle = 0.5 * (lower + upper)
+        if wall_path.contains_point(middle, radius=1.0e-12):
+            lower = middle
+        else:
+            upper = middle
+    return 0.5 * (lower + upper)
+
+
 def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
     """Measure the closed-form diverted lobe against one certificate carrier."""
     if requested_cells not in {-110, -342}:
         raise ValueError("diverted geometry is measured at -110 and -342 cells")
-    carrier_case, _source_case, coefficients = _case("diverted-jump-bearing")
-    machine = oracle_fixture.cached_machine(
-        carrier_case,
-        requested_cells,
-        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
-    )
-    boundary = _boundary("diverted-jump-bearing", coefficients)
-    minor_radius = 0.5 * float(np.ptp(boundary[:, 0]))
+    carrier_case, _source_case, exact = _case(DIVERTED_CASE_NAME)
+    machine = _case_machine(DIVERTED_CASE_NAME, carrier_case, exact, requested_cells)
+    boundary = _boundary(DIVERTED_CASE_NAME, exact)
+    minor_radius = exact.minor_radius
     axis_distance = float(_distance_to_boundary(AXIS_M[None, :], boundary)[0])
     pitch = float(np.sqrt(np.median(np.asarray(machine.area, dtype=np.float64))))
+    wall = np.asarray(machine.wall_node, dtype=np.float64)
 
     radial = np.linspace(
-        float(np.min(machine.node[:, 0])), float(np.max(machine.node[:, 0])), 241
+        min(
+            float(np.min(machine.node[:, 0])),
+            float(np.min(boundary[:, 0])),
+            float(np.min(wall[:, 0])),
+        )
+        - pitch,
+        max(
+            float(np.max(machine.node[:, 0])),
+            float(np.max(boundary[:, 0])),
+            float(np.max(wall[:, 0])),
+        )
+        + pitch,
+        241,
     )
     vertical = np.linspace(
-        float(np.min(machine.node[:, 1])), float(np.max(machine.node[:, 1])), 241
+        min(
+            float(np.min(machine.node[:, 1])),
+            float(np.min(boundary[:, 1])),
+            float(np.min(wall[:, 1])),
+        )
+        - pitch,
+        max(
+            float(np.max(machine.node[:, 1])),
+            float(np.max(boundary[:, 1])),
+            float(np.max(wall[:, 1])),
+        )
+        + pitch,
+        241,
     )
     radial_grid, vertical_grid = np.meshgrid(radial, vertical)
     coordinates = np.column_stack((radial_grid.ravel(), vertical_grid.ravel()))
-    field = _exact_state("diverted-jump-bearing", coefficients, coordinates).reshape(
+    field = _exact_state(DIVERTED_CASE_NAME, exact, coordinates).reshape(
         vertical_grid.shape
     )
-    boundary_level = float(
-        np.median(_exact_state("diverted-jump-bearing", coefficients, boundary))
-    )
+    boundary_level = float(np.median(_exact_state(DIVERTED_CASE_NAME, exact, boundary)))
     figure, axis = plt.subplots()
     contour_set = axis.contour(
         radial,
@@ -1244,19 +1353,51 @@ def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
         raise RuntimeError(
             "analytic zero-flux contour extraction returned no component"
         )
-    distances = [
-        _symmetric_polyline_distance(boundary, component) for component in components
-    ]
-    selected_index = int(np.argmin(distances))
-    selected = components[selected_index]
-    hausdorff = distances[selected_index]
-    wall = np.asarray(machine.wall_node, dtype=np.float64)
-    axis_eigenvalues = np.linalg.eigvalsh(
-        _polynomial_hessian(AXIS_M[None, :], coefficients)[0]
+    grid_spacing = float(np.hypot(radial[1] - radial[0], vertical[1] - vertical[0]))
+    selected, divertor_legs, selected_index = _single_null_core_lobe(
+        components,
+        magnetic_axis=AXIS_M,
+        x_point=X_POINT_M,
+        grid_spacing=grid_spacing,
     )
-    x_eigenvalues = np.linalg.eigvalsh(
-        _polynomial_hessian(X_POINT_M[None, :], coefficients)[0]
+    hausdorff = _symmetric_polyline_distance(boundary, selected)
+    leg_rows = []
+    for leg in divertor_legs:
+        exit_point = _wall_exit_point(leg, wall)
+        leg_rows.append(
+            {
+                "length_m": float(np.sum(np.linalg.norm(np.diff(leg, axis=0), axis=1))),
+                "wall_exit_rz_m": (
+                    exit_point.tolist() if exit_point is not None else None
+                ),
+                "leaves_wall": exit_point is not None,
+            }
+        )
+    leg_rows.sort(
+        key=lambda row: (
+            row["wall_exit_rz_m"]
+            if row["wall_exit_rz_m"] is not None
+            else [np.inf, np.inf]
+        )
     )
+    if len(leg_rows) == 2:
+        leg_diagnostic_status = "resolved"
+    elif requested_cells == -110:
+        leg_diagnostic_status = "resolution_limited"
+    else:
+        leg_diagnostic_status = "invalid"
+    axis_eigenvalues = np.linalg.eigvalsh(exact.hessian(AXIS_M[None, :])[0])
+    x_eigenvalues = np.linalg.eigvalsh(exact.hessian(X_POINT_M[None, :])[0])
+    wall_distance = _distance_to_boundary(boundary, wall)
+    boundary_inside_wall = PolygonPath(wall).contains_points(boundary, radius=1.0e-12)
+    carrier_residual = exact.grad_shafranov_residual(machine.node)
+    carrier_source = exact.grad_shafranov_source(machine.node)
+    relative_residual = float(
+        np.max(np.abs(carrier_residual))
+        / max(np.max(np.abs(carrier_source)), np.finfo(np.float64).tiny)
+    )
+    inboard_radius = float(np.min(boundary[:, 0]))
+    wall_clearance = float(np.min(wall_distance))
     return {
         "requested_cells": requested_cells,
         "realised_cells": int(len(machine.node)),
@@ -1264,13 +1405,38 @@ def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
         "closed_form_axis_rz_m": AXIS_M.tolist(),
         "closed_form_x_point_rz_m": X_POINT_M.tolist(),
         "minor_radius_m": minor_radius,
+        "requested_major_radius_m": exact.major_radius,
+        "requested_inverse_aspect_ratio": exact.inverse_aspect_ratio,
+        "requested_elongation": exact.elongation,
+        "requested_triangularity": exact.triangularity,
+        "inboard_separatrix_radius_m": inboard_radius,
+        "inboard_separatrix_radius_threshold_m": 0.85,
+        "inboard_separatrix_radius_passed": inboard_radius >= 0.85,
         "axis_to_boundary_min_distance_m": axis_distance,
         "axis_clearance_fraction_of_minor_radius": axis_distance / minor_radius,
-        "axis_clearance_threshold_fraction": 0.3,
-        "axis_clearance_passed": axis_distance >= 0.3 * minor_radius,
+        "axis_clearance_threshold_fraction": 0.8,
+        "axis_clearance_passed": axis_distance >= 0.8 * minor_radius,
+        "x_point_below_magnetic_axis": bool(X_POINT_M[1] < AXIS_M[1]),
         "x_point_inside_wall_polygon": bool(
             PolygonPath(wall).contains_point(X_POINT_M)
         ),
+        "separatrix_inside_wall_polygon": bool(np.all(boundary_inside_wall)),
+        "wall_node_count": int(len(wall)),
+        "wall_source": "explicit_separatrix_offset",
+        "wall_requested_offset_m": DIVERTED_WALL_CLEARANCE_FRACTION * minor_radius,
+        "wall_sha256_binary64": hashlib.sha256(
+            np.ascontiguousarray(wall, dtype="<f8").tobytes()
+        ).hexdigest(),
+        "separatrix_minimum_wall_clearance_m": wall_clearance,
+        "separatrix_wall_clearance_fraction_of_minor_radius": wall_clearance
+        / minor_radius,
+        "separatrix_wall_clearance_threshold_fraction": 0.3,
+        "separatrix_wall_clearance_passed": bool(
+            np.all(boundary_inside_wall) and wall_clearance >= 0.3 * minor_radius
+        ),
+        "analytic_grad_shafranov_residual_relative": relative_residual,
+        "analytic_grad_shafranov_residual_relative_threshold": 1.0e-10,
+        "analytic_grad_shafranov_residual_passed": relative_residual < 1.0e-10,
         "axis_hessian_eigenvalues": axis_eigenvalues.tolist(),
         "x_point_hessian_eigenvalues": x_eigenvalues.tolist(),
         "boundary_r_span_m": [
@@ -1284,7 +1450,11 @@ def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
         "analytic_boundary_flux_wb": boundary_level,
         "analytic_contour_component_count": len(components),
         "selected_contour_component_index": selected_index,
+        "selected_contour_rule": "closed zero-level core lobe containing magnetic axis",
         "selected_contour_point_count": int(len(selected)),
+        "divertor_leg_count": len(leg_rows),
+        "divertor_leg_diagnostic_status": leg_diagnostic_status,
+        "divertor_legs": leg_rows,
         "hausdorff_distance_m": hausdorff,
         "hausdorff_distance_in_cell_pitches": hausdorff / pitch,
         "hausdorff_under_one_cell_pitch": hausdorff < pitch,
@@ -1306,7 +1476,7 @@ def _diverted_geometry_receipt(
     receipt = {
         "schema": {
             "$id": "nova.solovev-diverted-case-geometry",
-            "version": 1,
+            "version": 2,
             "required_requested_cells": [-110, -342],
         },
         "source_revision": _source_revision(),
@@ -1315,18 +1485,41 @@ def _diverted_geometry_receipt(
             "boundary": "benchmarks.solovev_certificate._boundary",
             "field": "benchmarks.solovev_certificate._exact_state",
             "axis": "closed-form stationary point",
-            "minor_radius": "half the analytic boundary radial span",
+            "minor_radius": "major radius times inverse aspect ratio",
             "contour": (
-                "241 by 241 carrier-grid extraction at the median analytic "
-                "boundary flux"
+                "241 by 241 extraction over the carrier, analytic boundary, and "
+                "carrier wall envelope with one-pitch padding, at the median "
+                "analytic boundary flux"
             ),
             "distance": "symmetric sampled point-to-polyline Hausdorff distance",
         },
+        "divertor_leg_diagnostic": {
+            "authority_requested_cells": -342,
+            "authority_leg_count": next(
+                row["divertor_leg_count"]
+                for row in rows
+                if row["requested_cells"] == -342
+            ),
+            "coarse_resolution_limited_allowed": True,
+            "part_of_geometry_verdict": False,
+        },
         "rows": rows,
         "verdict": {
+            "inboard_separatrix_radius_passed": all(
+                row["inboard_separatrix_radius_passed"] for row in rows
+            ),
             "axis_clearance_passed": all(row["axis_clearance_passed"] for row in rows),
+            "x_point_below_magnetic_axis": all(
+                row["x_point_below_magnetic_axis"] for row in rows
+            ),
             "x_point_inside_wall_polygon": all(
                 row["x_point_inside_wall_polygon"] for row in rows
+            ),
+            "separatrix_wall_clearance_passed": all(
+                row["separatrix_wall_clearance_passed"] for row in rows
+            ),
+            "analytic_grad_shafranov_residual_passed": all(
+                row["analytic_grad_shafranov_residual_passed"] for row in rows
             ),
             "hausdorff_under_one_cell_pitch": all(
                 row["hausdorff_under_one_cell_pitch"] for row in rows
@@ -1521,9 +1714,9 @@ def _topology(operator, state: np.ndarray) -> dict[str, Any]:
     }
 
 
-def _analytic_diverted_topology(coefficients: np.ndarray) -> dict[str, Any]:
-    axis_flux = float(_polynomial_flux(AXIS_M[None, :], coefficients)[0])
-    boundary_flux = float(_polynomial_flux(X_POINT_M[None, :], coefficients)[0])
+def _analytic_diverted_topology(exact: CerfonFreidbergSingleNull) -> dict[str, Any]:
+    axis_flux = exact.axis_flux
+    boundary_flux = float(exact.flux(X_POINT_M[None, :])[0])
     return {
         "read_status": "analytic_stationary_point_fallback",
         "class": "diverted",
@@ -1663,11 +1856,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         requested_cells=requested_cells,
     ):
         carrier_case, source_case, exact = _case(case_name)
-        machine = oracle_fixture.cached_machine(
-            carrier_case,
-            requested_cells,
-            wall_nodes=oracle_fixture.WALL_POINT_COUNT,
-        )
+        machine = _case_machine(case_name, carrier_case, exact, requested_cells)
 
     with _timed_stage(
         "operator_and_seed",
@@ -1779,18 +1968,16 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         exact_topology = _topology(operator, oracle_state)
         reference_topology_fallback = False
         if (
-            case_name == "diverted-jump-bearing"
+            _is_diverted_case(case_name)
             and exact_topology["read_status"] == "no_qualified_axis"
         ):
             exact_topology = _analytic_diverted_topology(exact)
             reference_topology_fallback = True
         root_topology = _topology(operator, terminal_state)
         axis_reference = (
-            AXIS_M
-            if case_name == "diverted-jump-bearing"
-            else np.asarray(exact.magnetic_axis)
+            AXIS_M if _is_diverted_case(case_name) else np.asarray(exact.magnetic_axis)
         )
-        x_reference = X_POINT_M if case_name == "diverted-jump-bearing" else None
+        x_reference = X_POINT_M if _is_diverted_case(case_name) else None
         reference_x_points = (
             np.asarray(x_reference, dtype=np.float64)[None, :]
             if x_reference is not None
@@ -1831,7 +2018,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         analytic_regions = _analytic_region_norms(psi_error, exact_psi_norm, span)
         band_unavailable_reason = (
             "no separatrix band at this resolution"
-            if case_name == "diverted-jump-bearing"
+            if _is_diverted_case(case_name)
             and requested_cells == -110
             and reference_topology_fallback
             else None

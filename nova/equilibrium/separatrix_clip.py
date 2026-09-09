@@ -19,6 +19,7 @@ from dataclasses import dataclass
 import math
 from typing import Callable, Iterable, NamedTuple
 
+import jax
 import jax.numpy as jnp
 import numpy as np
 
@@ -558,6 +559,28 @@ def _traced_quadratic_segment_root(
     return jnp.where(jnp.abs(quadratic) > floor, quadratic_root, linear_fraction)
 
 
+def _traced_level_segment_root(start, end, start_value, end_value, evaluator):
+    """Bisect one shared level-set crossing on every cell edge."""
+    lower = jnp.zeros_like(start_value)
+    upper = jnp.ones_like(start_value)
+    lower_value = start_value
+
+    def bisect(_iteration, state):
+        low, high, low_value = state
+        midpoint = 0.5 * (low + high)
+        point = start + midpoint[..., None] * (end - start)
+        value = evaluator(point)
+        same_side = (value > 0.0) == (low_value > 0.0)
+        return (
+            jnp.where(same_side, midpoint, low),
+            jnp.where(same_side, high, midpoint),
+            jnp.where(same_side, value, low_value),
+        )
+
+    lower, upper, _value = jax.lax.fori_loop(0, 48, bisect, (lower, upper, lower_value))
+    return 0.5 * (lower + upper)
+
+
 def _traced_quadratic_arc(start, end, coefficient, centre, scale):
     """Sample the connected quadratic level-set arc between two crossings."""
     parameter = jnp.linspace(
@@ -594,6 +617,43 @@ def _traced_quadratic_arc(start, end, coefficient, centre, scale):
         curved_root,
         -zero_value / safe_linear,
     )
+    root = root.at[:, 0].set(0.0)
+    root = root.at[:, -1].set(0.0)
+    return chord + root[..., None] * normal[:, None, :]
+
+
+def _traced_level_arc(start, end, evaluator):
+    """Trace a smooth level-set arc from its two polished edge crossings."""
+    parameter = jnp.linspace(
+        0.0,
+        1.0,
+        _CURVED_BOUNDARY_SEGMENTS + 1,
+        dtype=start.dtype,
+    )
+    chord = start[:, None, :] + parameter[None, :, None] * (end - start)[:, None, :]
+    delta = end - start
+    normal = jnp.stack((-delta[:, 1], delta[:, 0]), axis=1)
+    root = jnp.zeros(chord.shape[:-1], dtype=start.dtype)
+    difference_step = jnp.asarray(1.0e-5, dtype=start.dtype)
+
+    def polish(_iteration, current):
+        point = chord + current[..., None] * normal[:, None, :]
+        offset = difference_step * normal[:, None, :]
+        value = evaluator(point)
+        derivative = (evaluator(point + offset) - evaluator(point - offset)) / (
+            2.0 * difference_step
+        )
+        safe_derivative = jnp.where(
+            jnp.abs(derivative) > jnp.finfo(start.dtype).tiny, derivative, 1.0
+        )
+        candidate = jnp.clip(current - value / safe_derivative, -2.0, 2.0)
+        return jnp.where(
+            jnp.abs(derivative) > jnp.finfo(start.dtype).tiny,
+            candidate,
+            current,
+        )
+
+    root = jax.lax.fori_loop(0, 12, polish, root)
     root = root.at[:, 0].set(0.0)
     root = root.at[:, -1].set(0.0)
     return chord + root[..., None] * normal[:, None, :]
@@ -686,6 +746,7 @@ def _traced_clip(
     curve_coefficient=None,
     curve_centre=None,
     curve_scale=None,
+    curve_evaluator=None,
 ):
     """Clip fixed atomic cells using only traced fixed-shape operations."""
     from nova.jax.config import configure_dtypes
@@ -709,8 +770,14 @@ def _traced_clip(
     following_nodes = jnp.take_along_axis(nodes, following_slot, axis=1)
     start_point = coordinates[nodes]
     end_point = coordinates[following_nodes]
-    curved = curve_coefficient is not None
-    if curved:
+    curved = curve_coefficient is not None or curve_evaluator is not None
+    if curve_evaluator is not None:
+        coefficient = jnp.zeros((cell_count, 6), dtype=coordinates.dtype)
+        curve_origin = centre
+        curve_extent = jnp.ones_like(centre)
+        start_flux = curve_evaluator(start_point)
+        end_flux = curve_evaluator(end_point)
+    elif curved:
         if curve_centre is None or curve_scale is None:
             raise ValueError(
                 "curve coefficients require cell centres and coordinate scales"
@@ -745,14 +812,24 @@ def _traced_clip(
     crossing_edge = valid_edge & (start_inside != end_inside)
     denominator = start_flux - end_flux
     linear_fraction = start_flux / denominator
-    curved_fraction = _traced_quadratic_segment_root(
-        start_point,
-        end_point,
-        start_flux,
-        end_flux,
-        coefficient,
-        curve_origin,
-        curve_extent,
+    curved_fraction = (
+        _traced_level_segment_root(
+            start_point,
+            end_point,
+            start_flux,
+            end_flux,
+            curve_evaluator,
+        )
+        if curve_evaluator is not None
+        else _traced_quadratic_segment_root(
+            start_point,
+            end_point,
+            start_flux,
+            end_flux,
+            coefficient,
+            curve_origin,
+            curve_extent,
+        )
     )
     fraction = jnp.where(
         crossing_edge, jnp.where(curved, curved_fraction, linear_fraction), 0.0
@@ -861,12 +938,16 @@ def _traced_clip(
     support_saddle = support_saddle & (compact_slot[None, :] < vertex_count[:, None])
 
     if curved:
-        arc = _traced_quadratic_arc(
-            support[:, 0],
-            support[:, 1],
-            coefficient,
-            curve_origin,
-            curve_extent,
+        arc = (
+            _traced_level_arc(support[:, 0], support[:, 1], curve_evaluator)
+            if curve_evaluator is not None
+            else _traced_quadratic_arc(
+                support[:, 0],
+                support[:, 1],
+                coefficient,
+                curve_origin,
+                curve_extent,
+            )
         )
         chord_capacity = 2 * width
         expanded = jnp.concatenate(
@@ -1125,6 +1206,7 @@ class AtomicCellMesh:
         curve_coefficient=None,
         curve_centre=None,
         curve_scale=None,
+        curve_evaluator=None,
     ) -> TracedClippedSupports:
         """Clip this fixed topology inside a JAX transformation."""
         return _traced_clip(
@@ -1138,6 +1220,7 @@ class AtomicCellMesh:
             curve_coefficient,
             curve_centre,
             curve_scale,
+            curve_evaluator,
         )
 
     def clip(self, signed_flux: np.ndarray) -> ClippedSupports:

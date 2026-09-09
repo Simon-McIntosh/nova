@@ -71,6 +71,7 @@ from nova.equilibrium.topology import (
     TopologyState,
     require_qualified_axis,
 )
+from nova.linalg.split_spline import fit_split_spline
 
 __all__ = [
     "axis_cell_seed",
@@ -1979,7 +1980,18 @@ class ForwardFluxOperator:
         profile_support = self._profile_support(
             masks, topology, physical, sample_psi_norm
         )
+        masks = self._moment_support_masks(masks, profile_support)
         return masks, topology, sample_psi_norm, profile_support
+
+    @staticmethod
+    def _moment_support_masks(masks, profile_support):
+        """Promote every curved cut support into the profile-owned partition."""
+        promoted_label = jnp.where(
+            profile_support.included,
+            jnp.asarray(int(PlasmaDomain.CORE), dtype=masks.label.dtype),
+            masks.label,
+        )
+        return DomainMasks(label=promoted_label, psi_norm=masks.psi_norm)
 
     def _profile_support(self, masks, topology, physical, sample_psi_norm):
         """Return the curved plasma-side support with geometry as traced data."""
@@ -1992,12 +2004,32 @@ class ForwardFluxOperator:
         )
         inside_coefficient = -flux_coefficient
         inside_coefficient = inside_coefficient.at[:, 0].add(1.0)
-        traced_support = self.moment_geometry.atomic_mesh.traced_clip(
-            inside_boundary,
-            curve_coefficient=inside_coefficient,
-            curve_centre=self._support_curve_centre,
-            curve_scale=self._support_curve_scale,
+        topology_reader = getattr(self, "_fixed_design_topology", None)
+        global_surface_available = topology_reader is not None and bool(
+            np.count_nonzero(np.asarray(topology_reader.polish_valid)) >= 50
         )
+        if global_surface_available:
+            surface_value = masks.psi_norm[topology_reader.polish_gather]
+            surface = fit_split_spline(
+                topology_reader.polish_radial,
+                topology_reader.polish_vertical,
+                surface_value,
+                surface_value - 1.0,
+                valid=topology_reader.polish_valid,
+            )
+            traced_support = self.moment_geometry.atomic_mesh.traced_clip(
+                inside_boundary,
+                curve_evaluator=lambda points: (
+                    1.0 - surface(points[..., 0], points[..., 1])
+                ),
+            )
+        else:
+            traced_support = self.moment_geometry.atomic_mesh.traced_clip(
+                inside_boundary,
+                curve_coefficient=inside_coefficient,
+                curve_centre=self._support_curve_centre,
+                curve_scale=self._support_curve_scale,
+            )
         participation = masks.profile_participation | traced_support.boundary
         return traced_support.qualify(participation)
 
@@ -2036,12 +2068,7 @@ class ForwardFluxOperator:
         masks, _topology, sample_psi_norm, profile_support = partition
         if not self.use_linear_moments:
             return self._point_current_moments(masks)
-        promoted_label = jnp.where(
-            profile_support.included,
-            jnp.asarray(int(PlasmaDomain.CORE), dtype=masks.label.dtype),
-            masks.label,
-        )
-        moment_masks = DomainMasks(label=promoted_label, psi_norm=masks.psi_norm)
+        moment_masks = self._moment_support_masks(masks, profile_support)
         moments = self.source.current_moments(
             moment_masks,
             self.support_current_moments,
@@ -2318,6 +2345,8 @@ class ForwardFluxOperator:
             if self.use_linear_moments
             else None
         )
+        if self.use_linear_moments:
+            masks = self._moment_support_masks(masks, profile_support)
         return _FrozenTopologyPartition(
             label=masks.label,
             topology=topology,

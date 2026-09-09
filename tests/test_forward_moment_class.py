@@ -226,3 +226,5 @@ def test_curved_boundary_support_promotes_every_cut_cell_before_moment_selection
     assert bool(support.boundary[0])
     assert bool(support.included[0])
     assert float(support.area[0]) > 0.0
+    promoted = ForwardFluxOperator._moment_support_masks(masks, support)
+    assert bool(promoted.profile_participation[0])

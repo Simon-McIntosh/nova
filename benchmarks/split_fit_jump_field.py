@@ -22,7 +22,6 @@ from nova.jax.config import configure_dtypes
 from scripts.dual_basin_fixtures.build_diverted_fixture import (
     AXIS_M,
     X_POINT_M,
-    _solve_coefficients,
 )
 from tests.rotating_equilibrium_references import MU_0, reference_cases
 
@@ -36,6 +35,67 @@ DEGREES_OF_FREEDOM = 16
 BOUNDARY_BAND_PITCHES = 2.0
 RADIAL_BOUNDS = (1.02, 2.14)
 VERTICAL_BOUNDS = (-0.62, 0.34)
+R_QUARTIC = -0.1
+Z_QUADRATIC = -0.1
+
+
+def _solve_coefficients() -> np.ndarray:
+    """Solve a well-separated diverted field from its two stationary points."""
+    axis_r, axis_z = AXIS_M
+    x_r, x_z = X_POINT_M
+    system = np.array(
+        [
+            [
+                2.0 * axis_r,
+                0.0,
+                2.0 * axis_r * axis_z,
+                4.0 * axis_r**3 - 8.0 * axis_r * axis_z**2,
+            ],
+            [0.0, 1.0, axis_r**2, -8.0 * axis_r**2 * axis_z],
+            [
+                2.0 * x_r,
+                0.0,
+                2.0 * x_r * x_z,
+                4.0 * x_r**3 - 8.0 * x_r * x_z**2,
+            ],
+            [0.0, 1.0, x_r**2, -8.0 * x_r**2 * x_z],
+        ],
+        dtype=np.float64,
+    )
+    forcing = -np.array(
+        [
+            4.0 * R_QUARTIC * axis_r**3,
+            2.0 * Z_QUADRATIC * axis_z,
+            4.0 * R_QUARTIC * x_r**3,
+            2.0 * Z_QUADRATIC * x_z,
+        ],
+        dtype=np.float64,
+    )
+    r_squared, z_linear, r_squared_z, homogeneous_quartic = np.linalg.solve(
+        system, forcing
+    )
+    x_r2 = x_r**2
+    x_z2 = x_z**2
+    gauge = -(
+        R_QUARTIC * x_r2**2
+        + Z_QUADRATIC * x_z2
+        + r_squared * x_r2
+        + z_linear * x_z
+        + r_squared_z * x_r2 * x_z
+        + homogeneous_quartic * (x_r2**2 - 4.0 * x_r2 * x_z2)
+    )
+    return np.array(
+        [
+            R_QUARTIC,
+            Z_QUADRATIC,
+            gauge,
+            r_squared,
+            z_linear,
+            r_squared_z,
+            homogeneous_quartic,
+        ],
+        dtype="<f8",
+    )
 
 
 def _polynomial_flux(points: np.ndarray, coefficients: np.ndarray) -> np.ndarray:
@@ -432,7 +492,7 @@ def _comparison() -> tuple[dict[str, Any], dict[str, np.ndarray]]:
             "axis_flux_per_radian_wb": axis_flux,
             "reuse_anchors": [
                 "scripts.analytic_oracle_fixtures exact-recovery carrier",
-                "scripts.dual_basin_fixtures diverted Solovev coefficients",
+                "scripts.dual_basin_fixtures diverted Solovev stationary points",
                 "tests.rotating_equilibrium_references Grad-Shafranov convention",
             ],
             "rotating_reference_static_limit": {

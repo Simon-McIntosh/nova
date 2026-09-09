@@ -1,0 +1,163 @@
+{
+  "lane": {
+    "execution": "slurm",
+    "hostname": "98dci4-clu-3143.iter.org",
+    "jax_default_backend": "cpu",
+    "jax_platforms": "cpu",
+    "node": "98dci4-clu-3143",
+    "partition": "all_debug",
+    "precision": "float64",
+    "reservation": null,
+    "slurm_job_id": "1267425"
+  },
+  "method": {
+    "axis": "closed-form stationary point",
+    "boundary": "benchmarks.solovev_certificate._boundary",
+    "contour": "241 by 241 carrier-grid extraction at the median analytic boundary flux",
+    "distance": "symmetric sampled point-to-polyline Hausdorff distance",
+    "field": "benchmarks.solovev_certificate._exact_state",
+    "minor_radius": "half the analytic boundary radial span"
+  },
+  "rows": [
+    {
+      "analytic_boundary_flux_wb": 0.0,
+      "analytic_contour_component_count": 2,
+      "axis_clearance_fraction_of_minor_radius": 0.3763454899302632,
+      "axis_clearance_passed": true,
+      "axis_clearance_threshold_fraction": 0.3,
+      "axis_hessian_eigenvalues": [
+        -0.3569667444549043,
+        -0.07257819668907911
+      ],
+      "axis_to_boundary_min_distance_m": 0.16172780505101308,
+      "boundary_r_span_m": [
+        1.198405322435904,
+        2.0578698802866238
+      ],
+      "boundary_z_span_m": [
+        -0.43408752240161563,
+        0.14688673831349358
+      ],
+      "cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.1283110696822405,
+        "lock_wait_seconds": 1.5461817383766174e-05,
+        "semantic_key": "01e615e165167491",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_110.zarr",
+        "store_seconds": 0.0
+      },
+      "characteristic_cell_pitch_m": 0.13167536867429747,
+      "closed_form_axis_rz_m": [
+        1.7673817014758004,
+        -0.05866047600021829
+      ],
+      "closed_form_x_point_rz_m": [
+        1.198405322435904,
+        -0.43408752240161563
+      ],
+      "contour_grid_r_span_m": [
+        0.9981689531219328,
+        2.1304040045776516
+      ],
+      "contour_grid_shape": [
+        241,
+        241
+      ],
+      "contour_grid_z_span_m": [
+        -1.0330846706836807,
+        1.037844961113175
+      ],
+      "hausdorff_distance_in_cell_pitches": 0.04366735163704515,
+      "hausdorff_distance_m": 0.005749914625838107,
+      "hausdorff_under_one_cell_pitch": true,
+      "minor_radius_m": 0.4297322789253599,
+      "realised_cells": 136,
+      "requested_cells": -110,
+      "selected_contour_component_index": 1,
+      "selected_contour_point_count": 497,
+      "x_point_hessian_eigenvalues": [
+        -0.2693627216401173,
+        0.05467221236407016
+      ],
+      "x_point_inside_wall_polygon": true
+    },
+    {
+      "analytic_boundary_flux_wb": 0.0,
+      "analytic_contour_component_count": 2,
+      "axis_clearance_fraction_of_minor_radius": 0.3763454899302632,
+      "axis_clearance_passed": true,
+      "axis_clearance_threshold_fraction": 0.3,
+      "axis_hessian_eigenvalues": [
+        -0.3569667444549043,
+        -0.07257819668907911
+      ],
+      "axis_to_boundary_min_distance_m": 0.16172780505101308,
+      "boundary_r_span_m": [
+        1.198405322435904,
+        2.0578698802866238
+      ],
+      "boundary_z_span_m": [
+        -0.43408752240161563,
+        0.14688673831349358
+      ],
+      "cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.07821334898471832,
+        "lock_wait_seconds": 7.873401045799255e-06,
+        "semantic_key": "6b2730b3c6705e68",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_342.zarr",
+        "store_seconds": 0.0
+      },
+      "characteristic_cell_pitch_m": 0.07467716676457038,
+      "closed_form_axis_rz_m": [
+        1.7673817014758004,
+        -0.05866047600021829
+      ],
+      "closed_form_x_point_rz_m": [
+        1.198405322435904,
+        -0.43408752240161563
+      ],
+      "contour_grid_r_span_m": [
+        0.9805849350381828,
+        2.147723064188694
+      ],
+      "contour_grid_shape": [
+        241,
+        241
+      ],
+      "contour_grid_z_span_m": [
+        -1.0461470855854396,
+        1.0461470855854396
+      ],
+      "hausdorff_distance_in_cell_pitches": 0.09431856964160634,
+      "hausdorff_distance_m": 0.007043443554121982,
+      "hausdorff_under_one_cell_pitch": true,
+      "minor_radius_m": 0.4297322789253599,
+      "realised_cells": 384,
+      "requested_cells": -342,
+      "selected_contour_component_index": 1,
+      "selected_contour_point_count": 485,
+      "x_point_hessian_eigenvalues": [
+        -0.2693627216401173,
+        0.05467221236407016
+      ],
+      "x_point_inside_wall_polygon": true
+    }
+  ],
+  "schema": {
+    "$id": "nova.solovev-diverted-case-geometry",
+    "required_requested_cells": [
+      -110,
+      -342
+    ],
+    "version": 1
+  },
+  "source_revision": "a940523e0383fa762d538865ec409b3c0fa2a0b0",
+  "verdict": {
+    "axis_clearance_passed": true,
+    "hausdorff_under_one_cell_pitch": true,
+    "x_point_inside_wall_polygon": true
+  }
+}

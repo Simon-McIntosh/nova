@@ -14,6 +14,7 @@ with skip_import("jax"):
         AXIS_M,
         X_POINT_M,
         _case,
+        _diverted_geometry_row,
         _exact_state,
     )
     from nova.jax.config import configure_dtypes
@@ -92,3 +93,13 @@ def test_coarse_diverted_exact_field_admits_axis_and_saddle():
     )
     assert bool(fine_state.diverted)
     assert not np.any(np.asarray(fine_status["truncated"]))
+
+
+@pytest.mark.parametrize("requested_cells", (-110, -342))
+def test_diverted_exact_boundary_clears_axis_and_matches_contour(requested_cells):
+    """The analytic separatrix encloses a resolved core inside the machine wall."""
+    geometry = _diverted_geometry_row(requested_cells)
+
+    assert geometry["axis_clearance_fraction_of_minor_radius"] >= 0.3
+    assert geometry["x_point_inside_wall_polygon"]
+    assert geometry["hausdorff_distance_m"] < geometry["characteristic_cell_pitch_m"]

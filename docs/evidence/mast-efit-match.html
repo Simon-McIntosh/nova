@@ -60,15 +60,15 @@
         <tr><th>Frame</th><th>t [s]</th><th>Solve vs label</th><th>Label GS floor</th><th>Converged</th><th>Fixed-point residual</th><th>Passes</th></tr>
       </thead>
       <tbody>
-        <tr><td>21978/35 pure</td><td>0.19</td><td>0.003413</td><td>0.011615</td><td>no</td><td>2.45065e-3</td><td>no</td></tr>
-        <tr><td>21983/35 pure</td><td>0.19</td><td>0.012388</td><td>0.011615</td><td>no</td><td>5.72108e-3</td><td>no</td></tr>
-        <tr><td>21985/51 pure</td><td>0.275</td><td>0.005797</td><td>0.011615</td><td>no</td><td>3.02823e-3</td><td>no</td></tr>
-        <tr><td>21986/46 pure</td><td>0.25</td><td>0.005901</td><td>0.011615</td><td>no</td><td>5.88986e-3</td><td>no</td></tr>
-        <tr><td>21989/55 pure</td><td>0.295</td><td>0.007151</td><td>0.011615</td><td>no</td><td>3.64673e-3</td><td>no</td></tr>
-        <tr><td>22086/43 pure</td><td>0.23</td><td>0.005381</td><td>0.011615</td><td>yes</td><td>6.02990e-12</td><td>yes</td></tr>
+        <tr><td>21978/35 pure</td><td>0.19</td><td>0.00341270</td><td>0.0116147</td><td>no</td><td>2.45065e-3</td><td>no</td></tr>
+        <tr><td>21983/35 pure</td><td>0.19</td><td>0.0123883</td><td>0.0116147</td><td>no</td><td>5.72108e-3</td><td>no</td></tr>
+        <tr><td>21985/51 pure</td><td>0.275</td><td>0.00579666</td><td>0.0116147</td><td>no</td><td>3.02823e-3</td><td>no</td></tr>
+        <tr><td>21986/46 pure</td><td>0.25</td><td>0.00590078</td><td>0.0116147</td><td>no</td><td>5.88986e-3</td><td>no</td></tr>
+        <tr><td>21989/55 pure</td><td>0.295</td><td>0.00715140</td><td>0.0116147</td><td>no</td><td>3.64673e-3</td><td>no</td></tr>
+        <tr><td>22086/43 pure</td><td>0.23</td><td>0.00538073</td><td>0.0116147</td><td>yes</td><td>6.02990e-12</td><td>yes</td></tr>
       </tbody>
     </table>
-    <p>Six of six solve-label RMS fractions are below the 0.011615 floor, but the gate requires convergence on top of accuracy: five frames terminate with fixed-point residuals in the 3.0e-3 to 5.9e-3 range against the 1e-8 tolerance and are not converged. Only 22086/43 both converges (residual 6.03e-12) and sits below the floor, so it is the single passing frame of the eleven-frame bank.</p>
+    <p>Six of six solve-label RMS fractions are below the 0.0116147 floor, but the gate requires convergence on top of accuracy: five frames terminate with fixed-point residuals in the 3.0e-3 to 5.9e-3 range against the 1e-8 tolerance and are not converged. Only 22086/43 both converges (residual 6.03e-12) and sits below the floor, so it is the single passing frame of the eleven-frame bank.</p>
   </section>
 
   <section id="figures">
@@ -76,32 +76,32 @@
 
     <figure>
       <img src="/nova/figures/gs-absolute-accuracy/efit/mast-21978-row-35.png" alt="Nova production forward solve terminal flux contours versus EFIT label on MAST shot 21978 slice 35 (pure arm), with the registered grid and labelled interior band." style="max-width:100%">
-      <figcaption><strong>21978/35 pure, t = 0.19 s.</strong> Solve-label RMS fraction of span 0.003413 (gauge <code>-1.980e-4</code> Wb) below the 0.011615 floor, but not converged (fixed-point residual 2.45065e-3) so the frame fails. Solver-basin marginal: 22086/43 is the paired arm; the CPU/GPU trajectories agree inside the declared float64 reduction-order floor, so backend averaging is forbidden.</figcaption>
+      <figcaption><strong>21978/35 pure, t = 0.19 s.</strong> Solve-label RMS fraction of span 0.003413 (gauge <code>-1.980e-4</code> Wb) below the 0.0116147 floor, but not converged (fixed-point residual 2.45065e-3) so the frame fails. Solver-basin marginal: 22086/43 is the paired arm; the CPU/GPU trajectories agree inside the declared float64 reduction-order floor, so backend averaging is forbidden.</figcaption>
     </figure>
 
     <figure>
       <img src="/nova/figures/gs-absolute-accuracy/efit/mast-21983-row-35.png" alt="Nova production forward solve terminal flux contours versus EFIT label on MAST shot 21983 slice 35 (pure arm), with the registered grid and labelled interior band." style="max-width:100%">
-      <figcaption><strong>21983/35 pure, t = 0.19 s.</strong> Solve-label RMS fraction of span 0.012388 (gauge <code>-1.925e-4</code> Wb) sits <em>above</em> the 0.011615 floor — the one MAST frame whose solve-label fraction exceeds the label's own inconsistency — and it is also not converged (residual 5.72108e-3). Fails on both arms.</figcaption>
+      <figcaption><strong>21983/35 pure, t = 0.19 s.</strong> Solve-label RMS fraction of span 0.012388 (gauge <code>-1.925e-4</code> Wb) sits <em>above</em> the 0.0116147 floor — the one MAST frame whose solve-label fraction exceeds the label's own inconsistency — and it is also not converged (residual 5.72108e-3). Fails on both arms.</figcaption>
     </figure>
 
     <figure>
       <img src="/nova/figures/gs-absolute-accuracy/efit/mast-21985-row-51.png" alt="Nova production forward solve terminal flux contours versus EFIT label on MAST shot 21985 slice 51 (pure arm), with the registered grid and labelled interior band." style="max-width:100%">
-      <figcaption><strong>21985/51 pure, t = 0.275 s.</strong> Solve-label RMS fraction of span 0.005797 (gauge <code>+5.527e-4</code> Wb) below the 0.011615 floor but not converged (residual 3.02823e-3). Fails on convergence.</figcaption>
+      <figcaption><strong>21985/51 pure, t = 0.275 s.</strong> Solve-label RMS fraction of span 0.005797 (gauge <code>+5.527e-4</code> Wb) below the 0.0116147 floor but not converged (residual 3.02823e-3). Fails on convergence.</figcaption>
     </figure>
 
     <figure>
       <img src="/nova/figures/gs-absolute-accuracy/efit/mast-21986-row-46.png" alt="Nova production forward solve terminal flux contours versus EFIT label on MAST shot 21986 slice 46 (pure arm), with the registered grid and labelled interior band." style="max-width:100%">
-      <figcaption><strong>21986/46 pure, t = 0.25 s.</strong> Solve-label RMS fraction of span 0.005901 (gauge <code>-1.160e-3</code> Wb) below the 0.011615 floor but not converged (residual 5.88986e-3, the largest on the MAST set). Fails on convergence.</figcaption>
+      <figcaption><strong>21986/46 pure, t = 0.25 s.</strong> Solve-label RMS fraction of span 0.005901 (gauge <code>-1.160e-3</code> Wb) below the 0.0116147 floor but not converged (residual 5.88986e-3, the largest on the MAST set). Fails on convergence.</figcaption>
     </figure>
 
     <figure>
       <img src="/nova/figures/gs-absolute-accuracy/efit/mast-21989-row-55.png" alt="Nova production forward solve terminal flux contours versus EFIT label on MAST shot 21989 slice 55 (pure arm), with the registered grid and labelled interior band." style="max-width:100%">
-      <figcaption><strong>21989/55 pure, t = 0.295 s.</strong> Solve-label RMS fraction of span 0.007151 (gauge <code>+1.642e-4</code> Wb) below the 0.011615 floor but not converged (residual 3.64673e-3). Fails on convergence.</figcaption>
+      <figcaption><strong>21989/55 pure, t = 0.295 s.</strong> Solve-label RMS fraction of span 0.007151 (gauge <code>+1.642e-4</code> Wb) below the 0.0116147 floor but not converged (residual 3.64673e-3). Fails on convergence.</figcaption>
     </figure>
 
     <figure>
       <img src="/nova/figures/gs-absolute-accuracy/efit/mast-22086-row-43.png" alt="Nova production forward solve terminal flux contours versus EFIT label on MAST shot 22086 slice 43 (pure arm), with the registered grid and labelled interior band." style="max-width:100%">
-      <figcaption><strong>22086/43 pure, t = 0.23 s.</strong> Solve-label RMS fraction of span 0.005381 (gauge <code>+1.478e-3</code> Wb) below the 0.011615 floor <em>and</em> converged (residual 6.02990e-12). The only passing frame on the six MAST rows and in the whole eleven-frame bank. Solver-basin marginal: 21978/35 is the paired arm; the CPU/GPU trajectories agree inside the declared float64 reduction-order floor.</figcaption>
+      <figcaption><strong>22086/43 pure, t = 0.23 s.</strong> Solve-label RMS fraction of span 0.005381 (gauge <code>+1.478e-3</code> Wb) below the 0.0116147 floor <em>and</em> converged (residual 6.02990e-12). The only passing frame on the six MAST rows and in the whole eleven-frame bank. Solver-basin marginal: 21978/35 is the paired arm; the CPU/GPU trajectories agree inside the declared float64 reduction-order floor.</figcaption>
     </figure>
   </section>
 

@@ -59,11 +59,11 @@
         <tr><th>Frame</th><th>t [ms]</th><th>Solve vs label</th><th>Label GS floor</th><th>Converged</th><th>Finite</th><th>Fixed-point residual</th><th>Passes</th></tr>
       </thead>
       <tbody>
-        <tr><td>d3d_shot_00000c4a7b:179</td><td>3740</td><td>1.883636</td><td>0.083237</td><td>no</td><td>yes</td><td>1.483859e-1</td><td>no</td></tr>
-        <tr><td>d3d_shot_0003ff34e7:44</td><td>1080</td><td>1.590604</td><td>0.083237</td><td>no</td><td>no</td><td>unavailable</td><td>no</td></tr>
-        <tr><td>d3d_shot_001554e054:144</td><td>3240</td><td>0.395973</td><td>0.083237</td><td>no</td><td>yes</td><td>1.820850e-2</td><td>no</td></tr>
-        <tr><td>d3d_shot_002495e835:146</td><td>3180</td><td>0.957306</td><td>0.083237</td><td>no</td><td>yes</td><td>4.696368e-2</td><td>no</td></tr>
-        <tr><td>d3d_shot_0040ca9bdc:137</td><td>3000</td><td>1.173896</td><td>0.083237</td><td>no</td><td>yes</td><td>7.253986e-2</td><td>no</td></tr>
+        <tr><td>d3d_shot_00000c4a7b:179</td><td>3740</td><td>1.88364</td><td>0.0832366</td><td>no</td><td>yes</td><td>1.48386e-1</td><td>no</td></tr>
+        <tr><td>d3d_shot_0003ff34e7:44</td><td>1080</td><td>1.59060</td><td>0.0832366</td><td>no</td><td>no</td><td>unavailable</td><td>no</td></tr>
+        <tr><td>d3d_shot_001554e054:144</td><td>3240</td><td>0.395973</td><td>0.0832366</td><td>no</td><td>yes</td><td>1.82085e-2</td><td>no</td></tr>
+        <tr><td>d3d_shot_002495e835:146</td><td>3180</td><td>0.957306</td><td>0.0832366</td><td>no</td><td>yes</td><td>4.69637e-2</td><td>no</td></tr>
+        <tr><td>d3d_shot_0040ca9bdc:137</td><td>3000</td><td>1.17390</td><td>0.0832366</td><td>no</td><td>yes</td><td>7.25399e-2</td><td>no</td></tr>
       </tbody>
     </table>
     <p>Zero of five DIII-D frames converge; four of the five sit well above the 0.083 floor and the remaining frame (144) still fails because it is not converged. Frame 44 additionally terminates non-finite with no recorded residual. DIII-D non-convergence is pre-existing: the banked forward-GS receipt <code>docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json</code> already records 0 of 5 converged with a 0.0449 residual plateau, so these rows are not a new regression.</p>
@@ -74,27 +74,27 @@
 
     <figure>
       <img src="/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_00000c4a7b-frame-179.png" alt="Nova production forward solve terminal flux contours versus EFIT label on DIII-D parquet shot 00000c4a7b frame 179, with the labelled LCFS interior band and the registered stride-two solve grid." style="max-width:100%">
-      <figcaption><strong>d3d_shot_00000c4a7b.parquet:179, t = 3740 ms.</strong> Solve-label RMS fraction of centred label RMS 1.883636 (gauge <code>+1.919</code> Wb) against the 0.083237 floor; not converged (residual 1.484e-1), terminated by the public branch selector. The figure shows a whole-plasma vertical displacement at about 0.3 of span; the reported RMS exceeds the figure's plotted range, which is the normalisation item open for reconciliation.</figcaption>
+      <figcaption><strong>d3d_shot_00000c4a7b.parquet:179, t = 3740 ms.</strong> Solve-label RMS fraction of centred label RMS 1.883636 (gauge <code>+1.919</code> Wb) against the 0.0832366 floor; not converged (residual 1.484e-1), terminated by the public branch selector. The figure shows a whole-plasma vertical displacement at about 0.3 of span; the reported RMS exceeds the figure's plotted range, which is the normalisation item open for reconciliation.</figcaption>
     </figure>
 
     <figure>
       <img src="/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_0003ff34e7-frame-44.png" alt="Nova production forward solve terminal flux contours versus EFIT label on DIII-D parquet shot 0003ff34e7 frame 44, with the labelled LCFS interior band and the registered stride-two solve grid." style="max-width:100%">
-      <figcaption><strong>d3d_shot_0003ff34e7.parquet:44, t = 1080 ms.</strong> Solve-label RMS fraction 1.590604 (gauge <code>+1.740</code> Wb) against the 0.083237 floor. The solver terminated <em>non-finite</em> with no recorded fixed-point residual, so this row carries no convergence statement at all; the branch selector reported no convergence-qualified diverted root.</figcaption>
+      <figcaption><strong>d3d_shot_0003ff34e7.parquet:44, t = 1080 ms.</strong> Solve-label RMS fraction 1.590604 (gauge <code>+1.740</code> Wb) against the 0.0832366 floor. The solver terminated <em>non-finite</em> with no recorded fixed-point residual, so this row carries no convergence statement at all; the branch selector reported no convergence-qualified diverted root.</figcaption>
     </figure>
 
     <figure>
       <img src="/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_001554e054-frame-144.png" alt="Nova production forward solve terminal flux contours versus EFIT label on DIII-D parquet shot 001554e054 frame 144, with the labelled LCFS interior band and the registered stride-two solve grid." style="max-width:100%">
-      <figcaption><strong>d3d_shot_001554e054.parquet:144, t = 3240 ms.</strong> Solve-label RMS fraction 0.395973 (gauge <code>+0.123</code> Wb) — the closest DIII-D row — but still above the 0.083237 floor and not converged (residual 1.821e-2). The banked post-solve axis sits at (1.705 m, 0.093 m) against a label axis near (1.759 m, 0.013 m).</figcaption>
+      <figcaption><strong>d3d_shot_001554e054.parquet:144, t = 3240 ms.</strong> Solve-label RMS fraction 0.395973 (gauge <code>+0.123</code> Wb) — the closest DIII-D row — but still above the 0.0832366 floor and not converged (residual 1.821e-2). The banked post-solve axis sits at (1.705 m, 0.093 m) against a label axis near (1.759 m, 0.013 m).</figcaption>
     </figure>
 
     <figure>
       <img src="/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_002495e835-frame-146.png" alt="Nova production forward solve terminal flux contours versus EFIT label on DIII-D parquet shot 002495e835 frame 146, with the labelled LCFS interior band and the registered stride-two solve grid." style="max-width:100%">
-      <figcaption><strong>d3d_shot_002495e835.parquet:146, t = 3180 ms.</strong> Solve-label RMS fraction 0.957306 (gauge <code>+0.051</code> Wb) against the 0.083237 floor; not converged (residual 4.696e-2). The banked Nova axis sits at (1.692 m, -0.229 m) against a label axis near (1.718 m, -0.001 m), a large vertical separation.</figcaption>
+      <figcaption><strong>d3d_shot_002495e835.parquet:146, t = 3180 ms.</strong> Solve-label RMS fraction 0.957306 (gauge <code>+0.051</code> Wb) against the 0.0832366 floor; not converged (residual 4.696e-2). The banked Nova axis sits at (1.692 m, -0.229 m) against a label axis near (1.718 m, -0.001 m), a large vertical separation.</figcaption>
     </figure>
 
     <figure>
       <img src="/nova/figures/gs-absolute-accuracy/efit/diiid-d3d_shot_0040ca9bdc-frame-137.png" alt="Nova production forward solve terminal flux contours versus EFIT label on DIII-D parquet shot 0040ca9bdc frame 137, with the labelled LCFS interior band and the registered stride-two solve grid." style="max-width:100%">
-      <figcaption><strong>d3d_shot_0040ca9bdc.parquet:137, t = 3000 ms.</strong> Solve-label RMS fraction 1.173896 (gauge <code>+0.100</code> Wb) against the 0.083237 floor; not converged (residual 7.254e-2). The banked Nova axis sits at (1.693 m, -0.274 m) against a label axis near (1.723 m, +0.002 m).</figcaption>
+      <figcaption><strong>d3d_shot_0040ca9bdc.parquet:137, t = 3000 ms.</strong> Solve-label RMS fraction 1.173896 (gauge <code>+0.100</code> Wb) against the 0.0832366 floor; not converged (residual 7.254e-2). The banked Nova axis sits at (1.693 m, -0.274 m) against a label axis near (1.723 m, +0.002 m).</figcaption>
     </figure>
   </section>
 

@@ -15,6 +15,7 @@ from nova.biot.null import Null1D, Null2D
 from nova.equilibrium.connectivity_boundary import (
     _PRE_SADDLE_OFFSET_FRACTION,
     _canonicalize_reciprocal_hex_edges,
+    _points_inside_polygon,
     _points_inside_wall_units,
     _raster_hex_partition_geometry,
 )
@@ -382,6 +383,13 @@ class Topology(Pytree):
     def contained_x_candidates(self, vmap_x):
         """Return finite saddle candidates within the first-wall polygon."""
         finite = jnp.all(jnp.isfinite(vmap_x[:, :3]), axis=1)
+        if self.wall_unit_offsets is None or self.wall_unit_offsets.shape[0] == 2:
+            return finite & _points_inside_polygon(
+                vmap_x[:, 0],
+                vmap_x[:, 1],
+                self.wall.coordinate[:, 0],
+                self.wall.coordinate[:, 1],
+            )
         return finite & _points_inside_wall_units(
             vmap_x[:, 0],
             vmap_x[:, 1],
@@ -483,6 +491,11 @@ class Topology(Pytree):
 
     def _wall_anchor_selection(self, wall_flux, polarity):
         """Return a unit-confined wall extremum, its unit and bracket nodes."""
+        if self.wall_unit_offsets is None or self.wall_unit_offsets.shape[0] == 2:
+            data = self.wall(wall_flux, polarity)
+            node = jnp.argmax(jnp.asarray(polarity, dtype=wall_flux.dtype) * wall_flux)
+            bracket = jnp.mod(node + jnp.asarray([-1, 0, 1]), wall_flux.size)
+            return data, jnp.asarray(0, dtype=jnp.int32), bracket
         signed = jnp.asarray(polarity, dtype=wall_flux.dtype) * wall_flux
         node = jnp.argmax(signed)
         offsets = self.wall_unit_offsets
@@ -529,17 +542,7 @@ class Topology(Pytree):
             )
         )
         data = jnp.where((end - start) >= 3, fitted, sampled)
-        legacy = self.wall(wall_flux, polarity)
-        single_closed_vessel = (
-            (self.wall_unit_offsets.shape[0] == 2)
-            & self.wall_unit_closed[0]
-            & self.wall_unit_vessel[0]
-        )
-        return (
-            jnp.where(single_closed_vessel, legacy, data),
-            unit,
-            bracket,
-        )
+        return data, unit, bracket
 
     def wall_anchor_bracket(self, psi_wall, polarity):
         """Return the three flat node indices supporting the selected unit."""

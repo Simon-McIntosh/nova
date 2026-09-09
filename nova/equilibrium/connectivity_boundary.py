@@ -999,8 +999,12 @@ def _sample_wall_polyline(
     )
     safe_length = jnp.where(segment_length[segment] > 0.0, segment_length[segment], 1.0)
     fraction = (arc - segment_start[segment]) / safe_length
-    sample_r = wall_r[segment] + fraction * (wall_r[following] - wall_r[segment])
-    sample_z = wall_z[segment] + fraction * (wall_z[following] - wall_z[segment])
+    sample_r = wall_r[segment] + fraction * (
+        wall_r[following[segment]] - wall_r[segment]
+    )
+    sample_z = wall_z[segment] + fraction * (
+        wall_z[following[segment]] - wall_z[segment]
+    )
     prior = jnp.arange(wall_r.size)[None, :] < jnp.arange(wall_r.size)[:, None]
     same_unit = unit[None, :] == unit[:, None]
     local_start = jnp.sum(
@@ -1477,6 +1481,12 @@ def _read_ingredients(
     """
     if (classification_x is None) != (classification_wall is None):
         raise ValueError("classification candidates and wall must be supplied together")
+    if wall_unit_offsets is None:
+        wall_unit_offsets = jnp.asarray([0, wall_r.size], dtype=jnp.int32)
+    if wall_unit_closed is None:
+        wall_unit_closed = jnp.ones((wall_unit_offsets.size - 1,), dtype=bool)
+    if wall_unit_vessel is None:
+        wall_unit_vessel = jnp.ones((wall_unit_offsets.size - 1,), dtype=bool)
 
     nz = zg.shape[0]
     nr = rg.shape[0]

@@ -974,7 +974,8 @@ def assemble_frame(
         strike_parameter = np.full(N_STRIKE_POINTS, np.nan, dtype=np.float64)
     if strike_unit is None:
         strike_unit = np.full(N_STRIKE_POINTS, -1, dtype=np.int32)
-    limiting_unit_index = getattr(equilibrium.topology, "wall_unit_index", -1)
+    topology = getattr(equilibrium, "topology", None)
+    limiting_unit_index = getattr(topology, "wall_unit_index", -1)
     lcfs = _as_numpy(labelled.lcfs)
     if lcfs.ndim != 2 or lcfs.shape[1] != 2:
         raise ValueError("the LCFS polyline must be packed as (vertex, R-Z)")
@@ -1739,12 +1740,18 @@ def frames_from_session(dataset: xr.Dataset) -> list[SteeringFrame]:
                     else None
                 ),
                 strike_unit=(
-                    np.asarray(frame["strike_unit"].values)
+                    (lambda value: None if np.all(value < 0) else value)(
+                        np.asarray(frame["strike_unit"].values, dtype=np.int32)
+                    )
                     if "strike_unit" in dataset.variables
                     else None
                 ),
                 limiting_unit_index=(
-                    np.int32(frame["limiting_unit_index"].values)
+                    (
+                        None
+                        if int(frame["limiting_unit_index"].values) < 0
+                        else np.int32(frame["limiting_unit_index"].values)
+                    )
                     if "limiting_unit_index" in dataset.variables
                     else None
                 ),

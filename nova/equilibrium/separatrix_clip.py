@@ -50,6 +50,9 @@ POLYNOMIAL_POWERS = complete_polynomial_powers(3)
 _CURVED_BOUNDARY_SEGMENTS = 512
 """Fixed chord count used to carry a traced quadratic level-set arc."""
 
+_CURVED_EDGE_SEGMENTS = 128
+"""Fixed edge partition exposing paired crossings on one cell edge."""
+
 
 def _signed_area(vertices: np.ndarray) -> float:
     if len(vertices) < 3:
@@ -760,24 +763,54 @@ def _traced_clip(
     count = jnp.asarray(cell_vertex_count)
     centre = jnp.asarray(centroids)
     flux = jnp.asarray(signed_flux)
-    cell_count, width = nodes.shape
+    cell_count, cell_width = nodes.shape
     if flux.shape != (coordinates.shape[0],):
         raise ValueError("signed_flux must carry one value per atomic node")
 
-    slot = jnp.arange(width)
+    slot = jnp.arange(cell_width)
     valid_edge = slot[None, :] < count[:, None]
     following_slot = jnp.where(slot[None, :] + 1 < count[:, None], slot[None, :] + 1, 0)
     following_nodes = jnp.take_along_axis(nodes, following_slot, axis=1)
-    start_point = coordinates[nodes]
-    end_point = coordinates[following_nodes]
+    cell_start_point = coordinates[nodes]
+    cell_end_point = coordinates[following_nodes]
     curved = curve_coefficient is not None or curve_evaluator is not None
     if curve_evaluator is not None:
         coefficient = jnp.zeros((cell_count, 6), dtype=coordinates.dtype)
         curve_origin = centre
         curve_extent = jnp.ones_like(centre)
+        edge_parameter = jnp.linspace(
+            0.0,
+            1.0,
+            _CURVED_EDGE_SEGMENTS + 1,
+            dtype=coordinates.dtype,
+        )
+        edge_point = (
+            cell_start_point[:, :, None, :]
+            + edge_parameter[None, None, :, None]
+            * (cell_end_point - cell_start_point)[:, :, None, :]
+        )
+        start_point = edge_point[:, :, :-1, :].reshape(
+            cell_count, cell_width * _CURVED_EDGE_SEGMENTS, 2
+        )
+        end_point = edge_point[:, :, 1:, :].reshape(
+            cell_count, cell_width * _CURVED_EDGE_SEGMENTS, 2
+        )
+        original_vertex = jnp.broadcast_to(
+            jnp.arange(_CURVED_EDGE_SEGMENTS)[None, None, :] == 0,
+            (cell_count, cell_width, _CURVED_EDGE_SEGMENTS),
+        ).reshape(cell_count, cell_width * _CURVED_EDGE_SEGMENTS)
+        valid_edge = jnp.broadcast_to(
+            valid_edge[:, :, None],
+            (cell_count, cell_width, _CURVED_EDGE_SEGMENTS),
+        ).reshape(cell_count, cell_width * _CURVED_EDGE_SEGMENTS)
+        width = cell_width * _CURVED_EDGE_SEGMENTS
         start_flux = curve_evaluator(start_point)
         end_flux = curve_evaluator(end_point)
     elif curved:
+        start_point = cell_start_point
+        end_point = cell_end_point
+        original_vertex = valid_edge
+        width = cell_width
         if curve_centre is None or curve_scale is None:
             raise ValueError(
                 "curve coefficients require cell centres and coordinate scales"
@@ -799,14 +832,17 @@ def _traced_clip(
             end_point, coefficient, curve_origin, curve_extent
         )
     else:
+        start_point = cell_start_point
+        end_point = cell_end_point
+        original_vertex = valid_edge
+        width = cell_width
         coefficient = jnp.zeros((cell_count, 6), dtype=coordinates.dtype)
         curve_origin = centre
         curve_extent = jnp.ones_like(centre)
         start_flux = flux[nodes]
         end_flux = flux[following_nodes]
-    support_capacity = support_capacity + (
-        _CURVED_BOUNDARY_SEGMENTS - 1 if curved else 0
-    )
+    chord_capacity = 2 * width if curve_evaluator is not None else support_capacity
+    support_capacity = chord_capacity + (_CURVED_BOUNDARY_SEGMENTS - 1 if curved else 0)
     start_inside = start_flux > 0.0
     end_inside = end_flux > 0.0
     crossing_edge = valid_edge & (start_inside != end_inside)
@@ -836,15 +872,19 @@ def _traced_clip(
     )
     crossing_point = start_point + fraction[..., None] * (end_point - start_point)
 
-    edge_number = jnp.arange(width)
-    same_crossing = jnp.all(
-        crossing_point[:, :, None, :] == crossing_point[:, None, :, :], axis=3
+    previous_crossing = jnp.roll(crossing_point, 1, axis=1)
+    previous_crossing_edge = jnp.roll(crossing_edge, 1, axis=1)
+    duplicate = (
+        crossing_edge
+        & previous_crossing_edge
+        & jnp.all(crossing_point == previous_crossing, axis=2)
     )
-    earlier = edge_number[None, None, :] < edge_number[None, :, None]
-    duplicate = jnp.any(same_crossing & crossing_edge[:, None, :] & earlier, axis=2)
     unique_crossing = crossing_edge & ~duplicate
     crossing, crossing_count = _pack_traced_vertices(
         crossing_point, unique_crossing, width
+    )
+    packed_leaving = _pack_traced_values(
+        crossing_edge & start_inside, unique_crossing, width
     )
     saddle = crossing_count == 4
     first_line = crossing[:, 2] - crossing[:, 0]
@@ -875,7 +915,7 @@ def _traced_clip(
     ).reshape(cell_count, 3 * width, 2)
     candidate_valid = jnp.stack(
         [
-            valid_edge & start_inside,
+            valid_edge & original_vertex & start_inside,
             crossing_edge,
             saddle[:, None] & crossing_edge & start_inside,
         ],
@@ -889,11 +929,22 @@ def _traced_clip(
         ],
         axis=2,
     ).reshape(cell_count, 3 * width)
+    candidate_leaving = jnp.stack(
+        [
+            jnp.zeros_like(valid_edge),
+            crossing_edge & start_inside,
+            jnp.zeros_like(valid_edge),
+        ],
+        axis=2,
+    ).reshape(cell_count, 3 * width)
     compact, compact_count = _pack_traced_vertices(
         candidates, candidate_valid, support_capacity
     )
     compact_saddle = _pack_traced_values(
         candidate_saddle, candidate_valid, support_capacity
+    )
+    compact_leaving = _pack_traced_values(
+        candidate_leaving, candidate_valid, support_capacity
     )
     compact_slot = jnp.arange(support_capacity)
     compact_valid = compact_slot[None, :] < compact_count[:, None]
@@ -902,6 +953,7 @@ def _traced_clip(
     keep = compact_valid & ((compact_slot[None, :] == 0) | distinct)
     support, vertex_count = _pack_traced_vertices(compact, keep, support_capacity)
     support_saddle = _pack_traced_values(compact_saddle, keep, support_capacity)
+    support_leaving = _pack_traced_values(compact_leaving, keep, support_capacity)
     last_slot = jnp.maximum(vertex_count - 1, 0)
     last = jnp.take_along_axis(support, last_slot[:, None, None], axis=1)[:, 0]
     repeated_closure = (vertex_count > 1) & jnp.all(last == support[:, 0], axis=1)
@@ -910,16 +962,6 @@ def _traced_clip(
         compact_slot[None, :, None] < vertex_count[:, None, None], support, 0.0
     )
 
-    packed_leaving = jnp.any(
-        jnp.all(crossing[:, :, None, :] == crossing_point[:, None, :, :], axis=3)
-        & (crossing_edge & start_inside)[:, None, :],
-        axis=2,
-    )
-    support_leaving = jnp.any(
-        jnp.all(support[:, :, None, :] == crossing[:, None, :, :], axis=3)
-        & packed_leaving[:, None, :],
-        axis=2,
-    )
     first_saddle = jnp.argmax(support_saddle, axis=1)
     first_leaving = jnp.argmax(support_leaving, axis=1)
     simple_boundary = crossing_count == 2
@@ -932,6 +974,7 @@ def _traced_clip(
     rotated_slot = (compact_slot[None, :] + rotation[:, None]) % live_count[:, None]
     support = jnp.take_along_axis(support, rotated_slot[..., None], axis=1)
     support_saddle = jnp.take_along_axis(support_saddle, rotated_slot, axis=1)
+    support_leaving = jnp.take_along_axis(support_leaving, rotated_slot, axis=1)
     support = jnp.where(
         compact_slot[None, :, None] < vertex_count[:, None, None], support, 0.0
     )
@@ -949,7 +992,6 @@ def _traced_clip(
                 curve_extent,
             )
         )
-        chord_capacity = 2 * width
         expanded = jnp.concatenate(
             (
                 support[:, :1],
@@ -980,7 +1022,7 @@ def _traced_clip(
     branch_vertex_count = jnp.stack(branch_counts, axis=1)
 
     full_area, _full_first, _full_second = _traced_polygon_moments(
-        start_point, count, centre
+        cell_start_point, count, centre
     )
     flat_branch_support = branch_support.reshape(2 * cell_count, support_capacity, 2)
     flat_branch_count = branch_vertex_count.reshape(2 * cell_count)

@@ -207,6 +207,7 @@ def test_curved_boundary_support_promotes_every_cut_cell_before_moment_selection
     atomic_mesh = AtomicCellMesh.from_cells(cells, centroids=centres)
     operator = object.__new__(ForwardFluxOperator)
     operator.polarity = 1
+    operator.grid = SimpleNamespace(coordinate=centres)
     operator.moment_geometry = SimpleNamespace(atomic_mesh=atomic_mesh)
     operator._support_curve_centre = centres
     operator._support_curve_scale = np.ones((2, 2))

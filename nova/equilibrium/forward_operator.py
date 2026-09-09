@@ -2004,32 +2004,41 @@ class ForwardFluxOperator:
         )
         inside_coefficient = -flux_coefficient
         inside_coefficient = inside_coefficient.at[:, 0].add(1.0)
-        topology_reader = getattr(self, "_fixed_design_topology", None)
-        global_surface_available = topology_reader is not None and bool(
-            np.count_nonzero(np.asarray(topology_reader.polish_valid)) >= 50
+        coordinate = jnp.asarray(self.grid.coordinate, dtype=masks.psi_norm.dtype)
+        surface_value = masks.psi_norm[None, :]
+        surface = fit_split_spline(
+            coordinate[None, :, 0],
+            coordinate[None, :, 1],
+            surface_value,
+            surface_value - 1.0,
+            order=6,
+            regularization=1.0e-14,
         )
-        if global_surface_available:
-            surface_value = masks.psi_norm[topology_reader.polish_gather]
-            surface = fit_split_spline(
-                topology_reader.polish_radial,
-                topology_reader.polish_vertical,
-                surface_value,
-                surface_value - 1.0,
-                valid=topology_reader.polish_valid,
+
+        def curved_level(points):
+            spline_level = -surface._patch_evaluation(
+                surface.level_set_coefficients,
+                points[..., 0],
+                points[..., 1],
+            ).value
+            local = (points - self._support_curve_centre[:, None, :]) / (
+                self._support_curve_scale[:, None, :]
             )
-            traced_support = self.moment_geometry.atomic_mesh.traced_clip(
-                inside_boundary,
-                curve_evaluator=lambda points: (
-                    1.0 - surface(points[..., 0], points[..., 1])
-                ),
+            radial, vertical = local[..., 0], local[..., 1]
+            local_level = (
+                inside_coefficient[:, None, 0]
+                + inside_coefficient[:, None, 1] * radial
+                + inside_coefficient[:, None, 2] * vertical
+                + inside_coefficient[:, None, 3] * radial**2
+                + inside_coefficient[:, None, 4] * radial * vertical
+                + inside_coefficient[:, None, 5] * vertical**2
             )
-        else:
-            traced_support = self.moment_geometry.atomic_mesh.traced_clip(
-                inside_boundary,
-                curve_coefficient=inside_coefficient,
-                curve_centre=self._support_curve_centre,
-                curve_scale=self._support_curve_scale,
-            )
+            return jnp.where(surface.fit_executed, spline_level, local_level)
+
+        traced_support = self.moment_geometry.atomic_mesh.traced_clip(
+            inside_boundary,
+            curve_evaluator=curved_level,
+        )
         participation = masks.profile_participation | traced_support.boundary
         return traced_support.qualify(participation)
 

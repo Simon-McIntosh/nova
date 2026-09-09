@@ -1225,6 +1225,67 @@ def _symmetric_polyline_distance(first: np.ndarray, second: np.ndarray) -> float
     )
 
 
+def _single_null_core_lobe(
+    components: list[np.ndarray],
+    *,
+    magnetic_axis: np.ndarray,
+    x_point: np.ndarray,
+    grid_spacing: float,
+) -> tuple[np.ndarray, list[np.ndarray], int]:
+    """Select the axis-containing core arc and separate its divertor legs."""
+    candidates: list[tuple[np.ndarray, list[np.ndarray], int]] = []
+    saddle_radius = 2.5 * grid_spacing
+    for component_index, component in enumerate(components):
+        component = np.asarray(component, dtype=np.float64)
+        if np.linalg.norm(component[0] - component[-1]) <= grid_spacing and PolygonPath(
+            component
+        ).contains_point(magnetic_axis):
+            candidates.append((component, [], component_index))
+            continue
+
+        distance = np.linalg.norm(component - x_point, axis=1)
+        near = np.flatnonzero(distance <= saddle_radius)
+        if len(near) == 0:
+            continue
+        groups = np.split(near, np.flatnonzero(np.diff(near) > 1) + 1)
+        visits = [int(group[np.argmin(distance[group])]) for group in groups]
+        for first, second in zip(visits[:-1], visits[1:]):
+            candidate = np.vstack((x_point, component[first : second + 1], x_point))
+            if not PolygonPath(candidate).contains_point(magnetic_axis):
+                continue
+            legs = []
+            if first > 0:
+                legs.append(np.vstack((x_point, component[first::-1])))
+            if second < len(component) - 1:
+                legs.append(np.vstack((x_point, component[second:])))
+            candidates.append((candidate, legs, component_index))
+
+    if len(candidates) != 1:
+        raise RuntimeError(
+            "zero-level contour must yield exactly one axis-containing core lobe, "
+            f"found {len(candidates)}"
+        )
+    return candidates[0]
+
+
+def _wall_exit_point(leg: np.ndarray, wall: np.ndarray) -> np.ndarray | None:
+    """Return where an inside-out divertor leg first crosses the wall polygon."""
+    wall_path = PolygonPath(wall)
+    inside = wall_path.contains_points(leg, radius=1.0e-12)
+    crossings = np.flatnonzero(inside[:-1] & ~inside[1:])
+    if len(crossings) == 0:
+        return None
+    lower = np.asarray(leg[crossings[0]], dtype=np.float64)
+    upper = np.asarray(leg[crossings[0] + 1], dtype=np.float64)
+    for _ in range(50):
+        middle = 0.5 * (lower + upper)
+        if wall_path.contains_point(middle, radius=1.0e-12):
+            lower = middle
+        else:
+            upper = middle
+    return 0.5 * (lower + upper)
+
+
 def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
     """Measure the closed-form diverted lobe against one certificate carrier."""
     if requested_cells not in {-110, -342}:
@@ -1269,13 +1330,34 @@ def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
         raise RuntimeError(
             "analytic zero-flux contour extraction returned no component"
         )
-    distances = [
-        _symmetric_polyline_distance(boundary, component) for component in components
-    ]
-    selected_index = int(np.argmin(distances))
-    selected = components[selected_index]
-    hausdorff = distances[selected_index]
+    grid_spacing = float(np.hypot(radial[1] - radial[0], vertical[1] - vertical[0]))
+    selected, divertor_legs, selected_index = _single_null_core_lobe(
+        components,
+        magnetic_axis=AXIS_M,
+        x_point=X_POINT_M,
+        grid_spacing=grid_spacing,
+    )
+    hausdorff = _symmetric_polyline_distance(boundary, selected)
     wall = np.asarray(machine.wall_node, dtype=np.float64)
+    leg_rows = []
+    for leg in divertor_legs:
+        exit_point = _wall_exit_point(leg, wall)
+        leg_rows.append(
+            {
+                "length_m": float(np.sum(np.linalg.norm(np.diff(leg, axis=0), axis=1))),
+                "wall_exit_rz_m": (
+                    exit_point.tolist() if exit_point is not None else None
+                ),
+                "leaves_wall": exit_point is not None,
+            }
+        )
+    leg_rows.sort(
+        key=lambda row: (
+            row["wall_exit_rz_m"]
+            if row["wall_exit_rz_m"] is not None
+            else [np.inf, np.inf]
+        )
+    )
     axis_eigenvalues = np.linalg.eigvalsh(exact.hessian(AXIS_M[None, :])[0])
     x_eigenvalues = np.linalg.eigvalsh(exact.hessian(X_POINT_M[None, :])[0])
     wall_distance = _distance_to_boundary(boundary, wall)
@@ -1340,7 +1422,10 @@ def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
         "analytic_boundary_flux_wb": boundary_level,
         "analytic_contour_component_count": len(components),
         "selected_contour_component_index": selected_index,
+        "selected_contour_rule": "closed zero-level core lobe containing magnetic axis",
         "selected_contour_point_count": int(len(selected)),
+        "divertor_leg_count": len(leg_rows),
+        "divertor_legs": leg_rows,
         "hausdorff_distance_m": hausdorff,
         "hausdorff_distance_in_cell_pitches": hausdorff / pitch,
         "hausdorff_under_one_cell_pitch": hausdorff < pitch,

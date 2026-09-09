@@ -123,3 +123,6 @@ def test_diverted_exact_boundary_clears_axis_and_matches_contour(requested_cells
     assert geometry["separatrix_wall_clearance_fraction_of_minor_radius"] >= 0.3
     assert geometry["analytic_grad_shafranov_residual_relative"] < 1.0e-10
     assert geometry["hausdorff_distance_m"] < geometry["characteristic_cell_pitch_m"]
+    assert geometry["divertor_leg_count"] == 2
+    assert all(leg["length_m"] > 0.0 for leg in geometry["divertor_legs"])
+    assert all(leg["leaves_wall"] for leg in geometry["divertor_legs"])

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T10:50:17",
+  "updated": "2026-09-09T11:07:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -143507,6 +143507,176 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T075856637780-cank-thomson-forward-model",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a73",
+        "node": "cank-thomson-forward-model",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 496,
+                "cached_input_tokens": 561931,
+                "input_tokens": 562459,
+                "output_tokens": 664,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 563123,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "tests/test_thomson_forward_model.py is green on all_debug CPU and docs/figures/constraint-augmented-newton-krylov/thomson-forward/receipt.json records one un-tuned predicted chord beside one measured trace with every input enumerated and justified as absent from the GS forward and the disagreement stated numerically",
+          "estimated_hours": null,
+          "goal": "Build the Thomson forward model of followup f-20260909T053315369887 as a new package nova/diagnostics taking as input only what the GS forward does not carry (chord and instrument geometry, scattering physics, independent profile inputs), predicting one measured MAST chord from a forward equilibrium without inversion or edge extraction",
+          "id": "cank-thomson-forward-model",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T07:58:57Z",
+            "read_at": "2026-09-09T07:58:58Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 60.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T075856637780-cank-thomson-forward-model/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "open",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/diagnostics",
+            "tests/test_thomson_forward_model.py",
+            "docs/figures/constraint-augmented-newton-krylov/thomson-forward"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "s19i-cank-thomson",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T07:59:17Z",
+        "completed_at": "2026-09-09T09:05:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3945,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3945,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9ff98552afd6ebd6eb95e02f05e5e988c9b07f9f",
+        "commits": [
+          "db6465e51d0d00caf9fb76a870cc76332c337f92",
+          "c4a7b38c94a65199a23c3cc89a74a00217a88f1a"
+        ],
+        "changed_lines": {
+          "added": 2087,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug CPU: python -m pytest -p no:cacheprovider tests/test_thomson_forward_model.py -vv (5 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T075856637780-cank-thomson-forward-model/test-thomson-forward-model.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T075856637780-cank-thomson-forward-model/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0852d-addc-7313-ae06-87167f7f463b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4105088,
+            "cached_input_tokens_cumulative": 4105088,
+            "input_tokens": 4134480,
+            "input_tokens_cumulative": 4134480,
+            "output_tokens": 9038,
+            "output_tokens_cumulative": 9038,
+            "reasoning_output_tokens": 1835,
+            "reasoning_output_tokens_cumulative": 1835
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T09:05:02Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 67.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T09:05:02Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 4105088,
+          "cumulative_input_tokens": 8239568,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 10873
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cank-thomson-forward-model",
+          "session_id": "01a0852d-addc-7313-ae06-87167f7f463b",
+          "session_source": "pointer",
+          "retained_at": "2026-09-09T09:05:02Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -143819,6 +143989,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2351
+    "_version": 2352
   }
 }

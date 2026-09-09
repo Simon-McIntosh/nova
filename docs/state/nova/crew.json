@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T19:23:27",
+  "updated": "2026-09-09T20:31:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -147170,6 +147170,180 @@
         "watch_override": null,
         "tool_steps": 103.0,
         "orientation_input_tokens": null
+      },
+      {
+        "run_id": "r-20260909T105115820348-bob-batched-exit-incidence",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a72",
+        "node": "bob-batched-exit-incidence",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 407,
+                "cached_input_tokens": 663892,
+                "input_tokens": 664303,
+                "output_tokens": 25,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 664328,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "docs/figures/batched-operator-boundary/exit-incidence/batched-exit-incidence.json records both machines with batch width 12 and 5, compile_once true, peak host RSS below 16 GiB, per-member firing trips and batched ms per member for both passes beside the width-1 figure from docs/figures/millisecond-converged-solve/strict-exit-incidence.json, run on the H200 with the persistent compilation cache on and the shared venv python called directly",
+          "estimated_hours": null,
+          "goal": "Run the batched strict-exit incidence measurement of section 2 on the H200 with the landed operand cache logs/exact-operand-cache.npz: width-12 MAST and width-5 DIII-D programs, the strict exit enabled and disabled as two passes over the same arguments, writing the receipt with compile seconds, peak host RSS, per-member trips and batched milliseconds per member beside the sequential width-1 figure",
+          "id": "bob-batched-exit-incidence",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T10:51:16Z",
+            "read_at": "2026-09-09T10:51:17Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 74.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/strict_exit_incidence.py",
+            "docs/figures/batched-operator-boundary/exit-incidence"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-bob-measure",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T10:51:33Z",
+        "completed_at": "2026-09-09T18:27:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 27381,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "9aebfc86894f19c625456a3618d5088e97b9a059",
+        "commits": [
+          "efce0b047b8a6129ea4d260c06ca80bef9d7f93c"
+        ],
+        "changed_lines": {
+          "added": 55,
+          "removed": 9,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a085cb-6355-7a22-8b6f-f865ccb63c6d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14599296,
+            "cached_input_tokens_cumulative": 14599296,
+            "input_tokens": 14692014,
+            "input_tokens_cumulative": 14692014,
+            "output_tokens": 34773,
+            "output_tokens_cumulative": 34773,
+            "reasoning_output_tokens": 10400,
+            "reasoning_output_tokens_cumulative": 10400
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T18:27:54Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 93.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T18:27:54Z"
+            }
+          ],
+          "notional_cost_usd": 401.0678,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 14599296,
+          "cumulative_input_tokens": 29291310,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 45173
+        },
+        "follow_on_paths": [
+          "d3d_shot_00000c4a7b.parquet"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 6,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/bob-batched-exit-incidence",
+          "session_id": "01a085cb-6355-7a22-8b6f-f865ccb63c6d",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T18:27:54Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 77.0,
+        "orientation_input_tokens": null
       }
     ],
     "holds": [
@@ -147482,6 +147656,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2385
+    "_version": 2386
   }
 }

@@ -195,10 +195,23 @@ preference to be argued per figure:
   unit collection, never one invented ring); coil outlines (`draw_coils`) are
   optional and welcome where they orient the reader.
 
+- **Every GS forward-solve evidence record carries its poloidal flux contour
+  panels.** Whenever a node produces a terminal forward state (a certificate
+  rung, a bank row, a gate frame, a labeller slice, a discriminator arm), its
+  evidence document shows that state as a line-contour poloidal panel obeying
+  the rules above: solved contours beside the reference contours on shared
+  levels where a reference exists, both null sets, the wall, and the terminal
+  residual and converged flag in the caption. These panels are the debugging
+  and communication instrument for the forward solve (lead 2026-09-09); a
+  residual table without them is under-communicated. Render them with the
+  committed `nova.media` painters on a `*_debug` partition and cite them from
+  the record with project-absolute `src`.
+
 A figure that breaks one of these is regenerated, not captioned around. The
 representation-selection rule of `reckon-create` (figures only where a spatial
 or plotted relationship is clearer visually, minimal ink, never an image of
-what is naturally a table) still governs whether a figure exists at all.
+what is naturally a table) still governs whether a figure exists at all; flux
+contour panels of a forward state always pass it.
 
 ### Publishing a figure so the reckon server lists it
 

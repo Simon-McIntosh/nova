@@ -22,8 +22,8 @@
   <title>Constraint-augmented Newton–Krylov | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-08">
-<meta name="plan-version" content="42">
+<meta name="plan-modified" content="2026-09-09">
+<meta name="plan-version" content="43">
 <meta name="plan-impl" content="0.42">
 <meta name="plan-commits" content="00ef0610,506c9fa9,eb77480b,e7d90cc8,84b23ee6,0081c3e9,4264668e,595cdd0f,6b9c4f25,989d561c,a283f243,5dd6b790,04ea37b0">
 <meta name="plan-artifacts" content="docs/evidence/archive/constraint-augmented-newton-krylov-landed.html,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.png,nova/equilibrium/constraint.py,benchmarks/constraint_centroid_receipt.py,tests/test_wall_null_flux_tangent.py,nova/geometry/select.py,tests/test_wall_polish_continuity.py,benchmarks/constraint_shape_receipt.py,tests/test_shape_constraints.py,docs/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png,docs/figures/constraint-augmented-newton-krylov/shape-control/two-arms.json,docs/figures/constraint-augmented-newton-krylov/shape-control/vertical-shift.json,docs/figures/constraint-augmented-newton-krylov/shape-control/elongation-raise.json,docs/figures/constraint-augmented-newton-krylov/shape-control/converged.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png">
@@ -127,18 +127,18 @@ evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylo
 
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="compensating-unknown-class" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="compensating-unknown-class" data-choice="physical circuit current, so the output is the current the machine would have driven" data-by="lead" data-when="2026-09-09T05:23:05+00:00">
     <p class="r-dec-q">For a position constraint, is the compensating unknown a physical circuit current (the radial-field or vertical-field combination), a multiplier on the constraint&#x27;s flux image, or either per constraint?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="circuit-current">physical circuit current, so the output is the current the machine would have driven</button>
       <button class="r-opt" data-value="multiplier">a multiplier, so no actuator is assumed</button>
       <button class="r-opt" data-value="per-constraint">registered per constraint, both forms supported by the interface</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-09-08. The compensating unknown for a position constraint is a physical circuit current, the radial-field or vertical-field combination, so a converged receipt reports the current the machine would actually have driven rather than an abstract multiplier. This is consistent with the shape-control decision already locked on playable-forward-solve, which takes coil currents by regularised least squares against bounding-box targets and then forward solves on the prescribed currents; a multiplier on the constraint&#x27;s flux image would not compose with that formulation because it names no actuator. The alternative of supporting both forms per constraint was rejected as surface without a demand: no caller today needs a multiplier, and a dual-form interface would have to stay traced and batchable for both.</p>
     </div>
-<div class="r-dec" data-key="thomson-crossing-source" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="thomson-crossing-source" data-choice="superseded: build a Thomson forward model rather than choose an edge definition to invert against" data-by="lead" data-when="2026-09-09T05:23:05+00:00">
     <p class="r-dec-q">Which edge definition supplies the Thomson crossing used as the constraint target: the channel where density falls to a stated fraction of its core value, the steepest gradient, or the reconstruction&#x27;s own separatrix marker on the chord?</p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-09-08, and it rejects the question rather than answering it. The decision asked which edge definition supplies a Thomson crossing to use as a constraint target, offering a density fraction of the core value, the steepest gradient, or the reconstruction&#x27;s own separatrix marker. The lead&#x27;s direction is that NOVA DOES NOT INVERT, so choosing an edge definition to fit against is the wrong shape of work. Instead build a THOMSON FORWARD MODEL in nova, whose inputs are the information the Grad-Shafranov forward does not already carry rather than quantities it produces. Separately, and as its own task, DEMONSTRATE THAT EDGE CONSTRAINTS WORK. The two are related but distinct: the forward model is a diagnostic prediction, the edge-constraint demonstration is a solver capability, and conflating them is what produced a decision about inversion conventions in the first place. Both are recorded as new work in this sprint.</p>
     </div>
 <div class="r-dec" data-key="thomson-target-dataset" data-choice="diiid-competition-primary-mast-calibration" data-by="Simon McIntosh" data-when="2026-09-04T13:53:01+00:00">
     <p class="r-dec-q">thomson-target-dataset</p>

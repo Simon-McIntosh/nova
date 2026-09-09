@@ -22,8 +22,8 @@
 <title>Null identification authority | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-08">
-<meta name="plan-version" content="146">
+<meta name="plan-modified" content="2026-09-09">
+<meta name="plan-version" content="147">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html,docs/figures/null-identification-authority/bank-integrated/bank-integrated.json,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json,docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087,7b0311d2,e76bc389">
 <meta name="plan-impl" content="0.97">
@@ -614,6 +614,10 @@ for the lead before merge.</p>
 <div class="r-dec" data-key="unresolved-null-reported-not-fitted" data-choice="report-unresolved-with-ring-count" data-by="Simon McIntosh" data-when="2026-09-04T11:25:59+00:00">
     <p class="r-dec-q">unresolved-null-reported-not-fitted</p>
     <p class="r-dec-rat">Lead 2026-09-04 13:20 confirmed the coordinator&#x27;s decision: a null the ring census cannot resolve at the mesh&#x27;s resolution is published as unresolved with the nearest ring count, never admitted through a local fit; the exact-oracle pin of axis plus saddle sits at the first rung that resolves it (342 cells for the diverted Solovev case).</p>
+    </div>
+<div class="r-dec" data-key="axisless-trial-conditioning" data-choice="axis-free only when plasma current is negligible against a coil-current matrix norm; otherwise condition with a plasma current patch at R0 or the vessel centroid and construct a GS solution" data-by="lead" data-when="2026-09-09T05:23:25+00:00">
+    <p class="r-dec-q">axisless-trial-conditioning</p>
+    <p class="r-dec-rat">Lead decision 2026-09-08, and it is a conditioning rule rather than the control-flow choice that was offered. TWO REGIMES, discriminated by magnitude. When there is NO plasma current, or very little compared with a matrix norm of the coil currents, the axis-free path is correct: there is genuinely no axis to find, the computation must proceed without one, and IT MUST RETURN FINITE VALUES RATHER THAN NaN. When there IS plasma current, and supporting measurements, an unqualified axis read does not mean the iteration should proceed without an axis. It means the solution needs CONDITIONING: place a plasma current patch at the machine&#x27;s R0, or close to the vessel centroid, and construct a Grad-Shafranov solution from there. WHAT THIS REJECTS. Consuming the unqualified axis for normalisation, which is the NaN this work began with. Carrying the previous qualified axis, which is the same shape as the frozen-partition carry that silently corrupted three certificate rungs. And strict refusal alone, which is what is implemented today and which degrades the exact-oracle residual on both required rungs, 0.021636666445981268 on the reduced diverted rung after 256 REFUSALS and 0.08946861339242938 on -342 after one. That refusal count is now explained: the iteration was meeting trials with real plasma current and no qualified axis, and the correct response there is to condition the trial, not to reject it. TWO CONSEQUENCES RECORDED ELSEWHERE. The all-NaN axisless vacuum flux map on solver-convergence-regression is the same mechanism and is settled by the same rule: at negligible plasma current the map must compute finite values without an axis. And the lead&#x27;s related observation that a reactor-scale Solovev trial SHOULD NEVER TOUCH THE MACHINE AXIS, being unphysical, means any evaluation reaching the r equals zero branch on those cases is itself a defect to be found rather than a case to be handled.</p>
     </div>
 </section>
 </main>

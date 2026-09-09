@@ -24,8 +24,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-impl" content="0.85">
-<meta name="plan-modified" content="2026-09-08">
-<meta name="plan-version" content="7">
+<meta name="plan-modified" content="2026-09-09">
+<meta name="plan-version" content="8">
 </head>
 <body>
 <main class="plan-doc">
@@ -110,8 +110,9 @@
 
 <section data-reckon="questions" id="questions" class="r-questions">
 <h2><span class="sec">§</span> Open questions</h2>
-<div class="r-q" data-id="q-mulw-blade-anchors" data-section="s3" data-status="open" data-opened-by="reckon-ship" data-opened-at="2026-09-08" data-resolved-at="" data-resolved-by="">
+<div class="r-q" data-id="q-mulw-blade-anchors" data-section="s3" data-status="resolved" data-opened-by="reckon-ship" data-opened-at="2026-09-08" data-resolved-at="2026-09-09T05:24:00+00:00" data-resolved-by="lead">
     <p class="r-q-body">Are open limiter structures admissible first-contact anchors for the limited boundary and do they cast wall-height shadows like the vessel, or is only the closed vessel ring the anchor set? Coordinator's reading: a limiter is where the plasma is limited, so its nodes are admissible anchors and its segments shadow like any other wall, with the unit index recorded so a receipt says which structure limited the plasma; the lead decides before §3 merges.</p>
+    <p class="r-q-resolution">ANCHORS AND SHADOWS. Lead decision 2026-09-08: open limiter structures ARE admissible first-contact anchors for the limited boundary, and their segments do cast the wall-height shadow, with the unit index recorded so a receipt states which structure limited the plasma. The lead asked what shadowing meant before deciding, and answered on confirmation that it is the topology and connectivity private-region exclusion. It is: the wall-height shadow mask in nova/equilibrium/connectivity_boundary.py is the hysteretic private-wall exclusion derived from qualified saddles, where the primary saddle and at most one additional qualified saddle on the opposite side of the axis set the two height limits, so it excludes the wall region beyond the X-point heights that cannot bind the plasma. That is the private-flux region behind a limiter or divertor, computed from the same connectivity read that resolves the last closed surface as the outermost closed axis-enclosing contour inside the wall. So the two behaviours travel together for a physical reason rather than by convention, and the split option was correctly not taken. Section 3 is therefore unblocked and builds the larger of the two shapes: the solver's consumers become unit-aware, limiter nodes enter the anchor set, limiter segments contribute to the shadow, and the receipt carries the limiting unit index. Every single-closed-ring machine stays bit-identical, and the JT-60SA five-unit and ITER two-unit descriptions plus the synthetic two-unit fixture remain the positive controls.</p>
     </div>
 </section>
 

@@ -538,6 +538,11 @@ class ForwardProfile:
     newton_steps: int = field(
         default_factory=lambda: declared_forward_solve_policy().newton_steps
     )
+    _request_compilation_cache: set[tuple[object, ...]] = field(
+        default_factory=set,
+        init=False,
+        repr=False,
+    )
 
     def __post_init__(self):
         """Validate that the lattice indexes the operator's plasma grid."""
@@ -2081,12 +2086,17 @@ class ForwardProfile:
                 "typed host_krylov requests need an explicitly declared host policy"
             )
 
+        initial_flux = request.seed_policy.resolve(self, current=request.current)
+        cache_key = self._request_compilation_cache_key(request, initial_flux)
+        compilation_cache_hit = (
+            policy.compilation_cache and cache_key in self._request_compilation_cache
+        )
         cache_directory = self._configure_solve_compilation_cache(
             policy.compilation_cache
         )
         started = time.perf_counter()
         equilibrium = self.solve(
-            request.seed_policy.resolve(self),
+            initial_flux,
             route=request.route,
             current=request.current,
             target_current=request.target_current,
@@ -2101,6 +2111,8 @@ class ForwardProfile:
             **policy.kernel_options(),
         )
         wall_seconds = time.perf_counter() - started
+        if policy.compilation_cache:
+            self._request_compilation_cache.add(cache_key)
         history = equilibrium.fixed_point
         residual = jnp.asarray(history.residual)
         qualified = (
@@ -2152,12 +2164,42 @@ class ForwardProfile:
             amplitude_history=amplitude_history,
             topology_read=topology,
             polish_receipt=polish_receipt,
-            compilation_cache_hit=request.compilation_cache_hit,
+            compilation_cache_hit=compilation_cache_hit,
             wall_seconds=wall_seconds,
             resolved_defaults=ResolvedForwardSolveDefaults.from_policy(
                 policy,
                 compilation_cache_directory=cache_directory,
             ),
+            seed_provenance=request.seed_policy.provenance(),
+        )
+
+    def _request_compilation_cache_key(
+        self,
+        request: ForwardSolveRequest,
+        initial_flux,
+    ) -> tuple[object, ...]:
+        """Describe the static compiled-program inputs observed by this profile."""
+
+        def array_signature(value) -> tuple[tuple[int, ...], str] | None:
+            if value is None:
+                return None
+            array = np.asarray(value)
+            return tuple(array.shape), str(array.dtype)
+
+        constraint_signature = tuple(
+            (type(pair.functional).__qualname__, type(pair.unknown).__qualname__)
+            for pair in request.constraint_pairs
+        )
+        return (
+            id(self.operator),
+            request.route,
+            request.policy,
+            array_signature(initial_flux),
+            array_signature(request.current),
+            array_signature(request.target_current),
+            array_signature(request.prescribed_current),
+            constraint_signature,
+            request.enforce,
         )
 
     def _terminal_polish_receipt(self, equilibrium) -> object | None:

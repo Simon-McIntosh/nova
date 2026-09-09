@@ -386,10 +386,84 @@ class ExplicitSolveSeed:
 
     state: object
 
-    def resolve(self, _profile: object) -> object:
+    def resolve(self, _profile: object, *, current: object | None = None) -> object:
         """Return the state unchanged so its dtype and bytes remain authoritative."""
 
+        del current
         return self.state
+
+    def provenance(self) -> SolveSeedProvenance:
+        """Describe the caller-owned state that supplied this seed."""
+
+        return SolveSeedProvenance(kind="explicit")
+
+
+@dataclass(frozen=True, slots=True)
+class SolveSeedProvenance:
+    """Stable receipt description of how a public solve obtained its seed."""
+
+    kind: Literal["explicit", "cold_seed_portfolio"]
+    requested_class: Literal["limited", "diverted"] | None = None
+    plasma_current: float | None = None
+    centroid: tuple[float, float] | None = None
+
+    def to_dict(self) -> dict[str, JsonScalar | tuple[float, float] | None]:
+        """Return the JSON-native description carried by a solve receipt."""
+
+        return {
+            "kind": self.kind,
+            "requested_class": self.requested_class,
+            "plasma_current": self.plasma_current,
+            "centroid": self.centroid,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class ColdSeedPortfolio:
+    """Construct one selected cold branch through ``profile.cold_seed_portfolio``."""
+
+    plasma_current: float
+    centroid: tuple[float, float]
+    requested_class: Literal["limited", "diverted"] = "limited"
+    radius_fraction: float | None = None
+    diverted_geometry: object | None = None
+
+    def __post_init__(self) -> None:
+        """Freeze the physical inputs that identify a cold-seed construction."""
+
+        centroid = tuple(float(value) for value in self.centroid)
+        if len(centroid) != 2:
+            raise ValueError("cold-seed centroid must be a radius, height pair")
+        if not np.all(np.isfinite(centroid)):
+            raise ValueError("cold-seed centroid must be finite")
+        if not np.isfinite(self.plasma_current):
+            raise ValueError("cold-seed plasma current must be finite")
+        if self.requested_class not in {"limited", "diverted"}:
+            raise ValueError("cold-seed class must be limited or diverted")
+        object.__setattr__(self, "centroid", centroid)
+
+    def resolve(self, profile: object, *, current: object | None = None) -> object:
+        """Return the selected branch from the profile's cold portfolio."""
+
+        portfolio = profile.cold_seed_portfolio(
+            self.plasma_current,
+            self.centroid,
+            current=current,
+            radius_fraction=self.radius_fraction,
+            diverted_geometry=self.diverted_geometry,
+        )
+        index = 0 if self.requested_class == "limited" else 1
+        return portfolio.branches.flux[index]
+
+    def provenance(self) -> SolveSeedProvenance:
+        """Record the selected portfolio branch and physical construction inputs."""
+
+        return SolveSeedProvenance(
+            kind="cold_seed_portfolio",
+            requested_class=self.requested_class,
+            plasma_current=float(self.plasma_current),
+            centroid=self.centroid,
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -403,7 +477,7 @@ class ForwardSolveRequest:
 
     carrier_identity: str
     source_profile: ForwardSource
-    seed_policy: ExplicitSolveSeed
+    seed_policy: ExplicitSolveSeed | ColdSeedPortfolio
     policy: ForwardSolvePolicy
     route: SolveRoute
     target_current: object | None = None
@@ -430,7 +504,7 @@ class ForwardSolveRequest:
         *,
         carrier_identity: str,
         source_profile: object,
-        seed_policy: ExplicitSolveSeed,
+        seed_policy: ExplicitSolveSeed | ColdSeedPortfolio,
         nova_version: str = NOVA_VERSION,
         policy_overrides: Mapping[str, JsonScalar] | None = None,
         **inputs: object,
@@ -545,6 +619,7 @@ class ForwardSolveReceipt:
     compilation_cache_hit: bool
     wall_seconds: float
     resolved_defaults: ResolvedForwardSolveDefaults
+    seed_provenance: SolveSeedProvenance | None = None
 
     @property
     def equilibrium(self) -> ForwardEquilibrium:
@@ -560,6 +635,7 @@ class ForwardSolveReceipt:
 
 
 __all__ = [
+    "ColdSeedPortfolio",
     "ExplicitSolveSeed",
     "FORWARD_SOLVE_DEFAULTS",
     "ForwardSolveMemberData",
@@ -568,6 +644,7 @@ __all__ = [
     "ForwardSolveRequest",
     "ResolvedForwardSolveDefaults",
     "SampledFluxFunction",
+    "SolveSeedProvenance",
     "SolveRoute",
     "declared_forward_solve_policy",
     "default_forward_compilation_cache_root",

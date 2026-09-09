@@ -413,6 +413,26 @@ def test_curved_clip_follows_the_quadratic_level_set_in_a_rectangular_cell():
     )
 
 
+def test_spline_clip_brackets_both_edges_adjacent_to_an_outside_corner():
+    """A participating corner sliver contributes two vertex-bracketed roots."""
+    configure_dtypes()
+    cell = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+    mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.5, 0.5]]))
+
+    def level(points):
+        return 1.5 - points[..., 0] ** 2 - points[..., 1] ** 2
+
+    support = mesh.traced_clip(
+        level(jnp.asarray(mesh.node_coordinates)),
+        curve_evaluator=level,
+        participating_cell=jnp.asarray([True]),
+    )
+
+    assert bool(support.boundary[0])
+    assert 0.0 < float(support.area[0]) < 1.0
+    assert int(support.vertex_count[0]) > len(cell)
+
+
 def test_traced_clip_matches_exact_zero_corner_and_tangential_cells():
     cells = [
         np.asarray([[r, z], [r + 1, z], [r + 1, z + 1], [r, z + 1]], dtype=float)

@@ -2049,10 +2049,6 @@ class ForwardFluxOperator:
             return jnp.where(surface.fit_executed, spline_level, local_level)
 
         atomic_mesh = self.moment_geometry.atomic_mesh
-        traced_support = atomic_mesh.traced_clip(
-            inside_boundary,
-            curve_evaluator=curved_level,
-        )
         cell_vertices = jnp.asarray(atomic_mesh.node_coordinates)[
             jnp.asarray(atomic_mesh.cell_nodes)
         ]
@@ -2061,6 +2057,11 @@ class ForwardFluxOperator:
             curved_level(cell_vertices),
         )
         participation = masks.profile_participation | vertex_participation
+        traced_support = atomic_mesh.traced_clip(
+            inside_boundary,
+            curve_evaluator=curved_level,
+            participating_cell=participation,
+        )
         return traced_support.qualify(participation)
 
     def _partition_for_state(self, psi, frozen):

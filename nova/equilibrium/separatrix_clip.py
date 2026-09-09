@@ -50,9 +50,6 @@ POLYNOMIAL_POWERS = complete_polynomial_powers(3)
 _CURVED_BOUNDARY_SEGMENTS = 512
 """Fixed chord count used to carry a traced quadratic level-set arc."""
 
-_CURVED_EDGE_SEGMENTS = 128
-"""Fixed edge partition exposing paired crossings on one cell edge."""
-
 
 def _signed_area(vertices: np.ndarray) -> float:
     if len(vertices) < 3:
@@ -750,6 +747,7 @@ def _traced_clip(
     curve_centre=None,
     curve_scale=None,
     curve_evaluator=None,
+    participating_cell=None,
 ):
     """Clip fixed atomic cells using only traced fixed-shape operations."""
     from nova.jax.config import configure_dtypes
@@ -763,54 +761,27 @@ def _traced_clip(
     count = jnp.asarray(cell_vertex_count)
     centre = jnp.asarray(centroids)
     flux = jnp.asarray(signed_flux)
-    cell_count, cell_width = nodes.shape
+    cell_count, width = nodes.shape
     if flux.shape != (coordinates.shape[0],):
         raise ValueError("signed_flux must carry one value per atomic node")
 
-    slot = jnp.arange(cell_width)
+    slot = jnp.arange(width)
     valid_edge = slot[None, :] < count[:, None]
     following_slot = jnp.where(slot[None, :] + 1 < count[:, None], slot[None, :] + 1, 0)
     following_nodes = jnp.take_along_axis(nodes, following_slot, axis=1)
     cell_start_point = coordinates[nodes]
     cell_end_point = coordinates[following_nodes]
+    start_point = cell_start_point
+    end_point = cell_end_point
+    original_vertex = valid_edge
     curved = curve_coefficient is not None or curve_evaluator is not None
     if curve_evaluator is not None:
         coefficient = jnp.zeros((cell_count, 6), dtype=coordinates.dtype)
         curve_origin = centre
         curve_extent = jnp.ones_like(centre)
-        edge_parameter = jnp.linspace(
-            0.0,
-            1.0,
-            _CURVED_EDGE_SEGMENTS + 1,
-            dtype=coordinates.dtype,
-        )
-        edge_point = (
-            cell_start_point[:, :, None, :]
-            + edge_parameter[None, None, :, None]
-            * (cell_end_point - cell_start_point)[:, :, None, :]
-        )
-        start_point = edge_point[:, :, :-1, :].reshape(
-            cell_count, cell_width * _CURVED_EDGE_SEGMENTS, 2
-        )
-        end_point = edge_point[:, :, 1:, :].reshape(
-            cell_count, cell_width * _CURVED_EDGE_SEGMENTS, 2
-        )
-        original_vertex = jnp.broadcast_to(
-            jnp.arange(_CURVED_EDGE_SEGMENTS)[None, None, :] == 0,
-            (cell_count, cell_width, _CURVED_EDGE_SEGMENTS),
-        ).reshape(cell_count, cell_width * _CURVED_EDGE_SEGMENTS)
-        valid_edge = jnp.broadcast_to(
-            valid_edge[:, :, None],
-            (cell_count, cell_width, _CURVED_EDGE_SEGMENTS),
-        ).reshape(cell_count, cell_width * _CURVED_EDGE_SEGMENTS)
-        width = cell_width * _CURVED_EDGE_SEGMENTS
         start_flux = curve_evaluator(start_point)
         end_flux = curve_evaluator(end_point)
     elif curved:
-        start_point = cell_start_point
-        end_point = cell_end_point
-        original_vertex = valid_edge
-        width = cell_width
         if curve_centre is None or curve_scale is None:
             raise ValueError(
                 "curve coefficients require cell centres and coordinate scales"
@@ -832,20 +803,22 @@ def _traced_clip(
             end_point, coefficient, curve_origin, curve_extent
         )
     else:
-        start_point = cell_start_point
-        end_point = cell_end_point
-        original_vertex = valid_edge
-        width = cell_width
         coefficient = jnp.zeros((cell_count, 6), dtype=coordinates.dtype)
         curve_origin = centre
         curve_extent = jnp.ones_like(centre)
         start_flux = flux[nodes]
         end_flux = flux[following_nodes]
-    chord_capacity = 2 * width if curve_evaluator is not None else support_capacity
+    if participating_cell is None:
+        participating = jnp.ones(cell_count, dtype=bool)
+    else:
+        participating = jnp.asarray(participating_cell, dtype=bool)
+        if participating.shape != (cell_count,):
+            raise ValueError("participating_cell must carry one flag per cell")
+    chord_capacity = support_capacity
     support_capacity = chord_capacity + (_CURVED_BOUNDARY_SEGMENTS - 1 if curved else 0)
     start_inside = start_flux > 0.0
     end_inside = end_flux > 0.0
-    crossing_edge = valid_edge & (start_inside != end_inside)
+    crossing_edge = valid_edge & participating[:, None] & (start_inside != end_inside)
     denominator = start_flux - end_flux
     linear_fraction = start_flux / denominator
     curved_fraction = (
@@ -1249,6 +1222,7 @@ class AtomicCellMesh:
         curve_centre=None,
         curve_scale=None,
         curve_evaluator=None,
+        participating_cell=None,
     ) -> TracedClippedSupports:
         """Clip this fixed topology inside a JAX transformation."""
         return _traced_clip(
@@ -1263,6 +1237,7 @@ class AtomicCellMesh:
             curve_centre,
             curve_scale,
             curve_evaluator,
+            participating_cell,
         )
 
     def clip(self, signed_flux: np.ndarray) -> ClippedSupports:

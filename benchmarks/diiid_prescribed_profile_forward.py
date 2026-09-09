@@ -9,10 +9,12 @@ the forward solve together with the recorded circuit-driven conductor currents.
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import os
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 from typing import Any
 
@@ -166,8 +168,61 @@ def _atomic_write(path: Path, value: dict[str, Any]) -> None:
     os.replace(temporary, path)
 
 
-def run(data: Path = DEFAULT_DATA, output: Path = DEFAULT_OUTPUT) -> dict[str, Any]:
-    """Solve the five declared frames and write one receipt with every input."""
+def _receipt_shell() -> dict[str, Any]:
+    return {
+        "measurement": "DIII-D prescribed-profile forward solves",
+        "convention": {
+            "target": "Nova COCOS 17 total flux",
+            "source_cocos": (
+                "factor-equivalence class; no single source COCOS index is claimed"
+            ),
+            "map_factor_to_nova_total_flux": PSI_TO_NOVA,
+            "current_factor_to_nova": 1.0,
+            "profile_derivative_source": "affine extraction after map conversion",
+        },
+        "execution": {
+            "jax_x64_enabled": bool(jax.config.x64_enabled),
+            "gate_frame_count": GATE_FRAME_COUNT,
+            "completed_frame_count": 0,
+            "complete": False,
+            "residual_tolerance": GATE_RESIDUAL_TOLERANCE,
+            "git_head": subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                check=True,
+                text=True,
+                capture_output=True,
+            ).stdout.strip(),
+        },
+        "frames": [],
+    }
+
+
+def _persist_frame(path: Path, frame_row: dict[str, Any]) -> dict[str, Any]:
+    """Atomically merge one frame so concurrent slices cannot lose evidence."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.with_suffix(".lock").open("a", encoding="utf-8") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        receipt = json.loads(path.read_text()) if path.exists() else _receipt_shell()
+        frames = {int(existing["ordinal"]): existing for existing in receipt["frames"]}
+        frames[int(frame_row["ordinal"])] = _finite(frame_row)
+        receipt["frames"] = [frames[key] for key in sorted(frames)]
+        completed = len(receipt["frames"])
+        receipt["execution"]["completed_frame_count"] = completed
+        receipt["execution"]["complete"] = completed == GATE_FRAME_COUNT
+        _atomic_write(path, receipt)
+        fcntl.flock(lock, fcntl.LOCK_UN)
+    return receipt
+
+
+def run(
+    data: Path = DEFAULT_DATA,
+    output: Path = DEFAULT_OUTPUT,
+    *,
+    start: int = 0,
+    stop: int = GATE_FRAME_COUNT,
+) -> dict[str, Any]:
+    """Solve a declared frame slice and durably merge each result."""
 
     configure_dtypes()
     if not bool(jax.config.x64_enabled):
@@ -176,8 +231,11 @@ def run(data: Path = DEFAULT_DATA, output: Path = DEFAULT_OUTPUT) -> dict[str, A
     selected = select_frames(
         sorted(data.glob("*.parquet")), GATE_FRAME_COUNT, polarity_population()
     )
-    rows: list[dict[str, Any]] = []
-    for ordinal, selected_frame in enumerate(selected, start=1):
+    if not 0 <= start < stop <= GATE_FRAME_COUNT:
+        raise ValueError("the requested frame range must lie within the five rows")
+    receipt = _receipt_shell()
+    for ordinal, selected_frame in enumerate(selected[start:stop], start=start + 1):
+        started = time.perf_counter()
         row = _read(
             selected_frame.path,
             _LABEL_COLUMNS
@@ -193,69 +251,44 @@ def run(data: Path = DEFAULT_DATA, output: Path = DEFAULT_OUTPUT) -> dict[str, A
             selected_frame.frame,
             REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION,
         )
-        rows.append(
-            {
-                "ordinal": ordinal,
-                "shot": selected_frame.path.name,
-                "frame": selected_frame.frame,
-                "time_ms": selected_frame.time_ms,
-                "source_sign_tuple": sign_tuple,
-                "translation": {
-                    "map_factor_to_nova_total_flux": PSI_TO_NOVA,
-                    "current_factor_to_nova": 1.0,
-                    "map_applied_once_before_affine_extraction": True,
-                    "current_prescription": (
-                        "recorded corpus currents with fixed circuit wiring"
-                    ),
-                },
-                "prescribed_profiles": {
-                    "source": "affine extraction from converted source map",
-                    "psi_norm": psi_norm,
-                    "p_prime": p_prime,
-                    "ff_prime": ff_prime,
-                    "reliable_surface_count": int(len(psi_norm)),
-                },
-                "forward_result": _forward_result(result),
-                "profile_comparison": _stored_profile_comparison(row),
-            }
-        )
+        frame_row = {
+            "ordinal": ordinal,
+            "shot": selected_frame.path.name,
+            "frame": selected_frame.frame,
+            "time_ms": selected_frame.time_ms,
+            "source_sign_tuple": sign_tuple,
+            "translation": {
+                "map_factor_to_nova_total_flux": PSI_TO_NOVA,
+                "current_factor_to_nova": 1.0,
+                "map_applied_once_before_affine_extraction": True,
+                "current_prescription": (
+                    "recorded corpus currents with fixed circuit wiring"
+                ),
+            },
+            "prescribed_profiles": {
+                "source": "affine extraction from converted source map",
+                "psi_norm": psi_norm,
+                "p_prime": p_prime,
+                "ff_prime": ff_prime,
+                "reliable_surface_count": int(len(psi_norm)),
+            },
+            "forward_result": {
+                **_forward_result(result),
+                "wall_seconds": time.perf_counter() - started,
+                "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+            },
+            "profile_comparison": _stored_profile_comparison(row),
+        }
+        receipt = _persist_frame(output / RECEIPT_NAME, frame_row)
         print(
             "SOLVED "
             f"{ordinal}/{GATE_FRAME_COUNT} {selected_frame.path.name}:"
             f"{selected_frame.frame} "
             f"residual={result.fixed_point_relative_residual:.6e} "
-            f"converged={result.converged}",
+            f"converged={result.converged} "
+            f"wall_seconds={frame_row['forward_result']['wall_seconds']:.3f}",
             flush=True,
         )
-    if len(rows) != GATE_FRAME_COUNT:
-        raise RuntimeError("the receipt must contain exactly five gate-frame rows")
-    receipt = _finite(
-        {
-            "measurement": "DIII-D prescribed-profile forward solves",
-            "convention": {
-                "target": "Nova COCOS 17 total flux",
-                "source_cocos": (
-                    "factor-equivalence class; no single source COCOS index is claimed"
-                ),
-                "map_factor_to_nova_total_flux": PSI_TO_NOVA,
-                "current_factor_to_nova": 1.0,
-                "profile_derivative_source": "affine extraction after map conversion",
-            },
-            "execution": {
-                "jax_x64_enabled": bool(jax.config.x64_enabled),
-                "gate_frame_count": GATE_FRAME_COUNT,
-                "residual_tolerance": GATE_RESIDUAL_TOLERANCE,
-                "git_head": subprocess.run(
-                    ["git", "rev-parse", "HEAD"],
-                    check=True,
-                    text=True,
-                    capture_output=True,
-                ).stdout.strip(),
-            },
-            "frames": rows,
-        }
-    )
-    _atomic_write(output / RECEIPT_NAME, receipt)
     return receipt
 
 
@@ -263,8 +296,15 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--start", type=int, default=0)
+    parser.add_argument("--stop", type=int, default=GATE_FRAME_COUNT)
     arguments = parser.parse_args()
-    receipt = run(arguments.data, arguments.output)
+    receipt = run(
+        arguments.data,
+        arguments.output,
+        start=arguments.start,
+        stop=arguments.stop,
+    )
     print(json.dumps(receipt["execution"], sort_keys=True))
 
 

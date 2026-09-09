@@ -166,6 +166,40 @@ Nova caches expensive calculations as netCDF files. Key classes:
 - `nova.database.netcdf.netCDF`: xarray dataset storage with groups
 - `nova.database.filepath.FilePath`: Cross-platform path management with fsspec/appdirs
 
+### Plotting rules (binding, lead 2026-09-09)
+
+Every figure follows the imas-ink style through `nova.media` (`ink.py`,
+`layout.py`, the painters in `poloidal.py`). Four rules, and none of them is a
+preference to be argued per figure:
+
+- **No axes, no gridlines on 2D plots.** A poloidal panel is drawn with the axis
+  off (`nova.media.ink` calls `set_axis_off()`); spines, ticks, tick labels and
+  grids are furniture that adds no information. Scale comes from the machine
+  geometry drawn in the panel, never from an axis.
+- **Scalar maps are line contours.** A poloidal flux map, a residual map, an
+  error map or any other scalar field is displayed as unfilled line contours on
+  stated levels, never as a filled contour, a colour map, or painted scatter. Two
+  fields compared on one panel (solved against analytic, before against after)
+  share one physical level array so a mismatch cannot hide behind independent
+  colour scales.
+- **A flux map always marks its stationary points.** Every panel that draws
+  poloidal flux draws the magnetic axis and every admitted X-point with the
+  `draw_nulls` vocabulary (solid triangle for the axis, filled cross for the
+  admitted saddle, hollow markers for other qualified nulls), and when a panel
+  shows a solved field beside an analytic or reference one it draws BOTH sets of
+  nulls in their own styles and says in the caption which is which. A solved
+  null drawn alone on a non-converged state reads as the answer; that is how
+  the 2026-09-09 clip figures misled their reader.
+- **A flux map always shows the vessel or limiter.** The first-wall units are
+  drawn on every poloidal panel with unit-faithful closure (`draw_wall` over the
+  unit collection, never one invented ring); coil outlines (`draw_coils`) are
+  optional and welcome where they orient the reader.
+
+A figure that breaks one of these is regenerated, not captioned around. The
+representation-selection rule of `reckon-create` (figures only where a spatial
+or plotted relationship is clearer visually, minimal ink, never an image of
+what is naturally a table) still governs whether a figure exists at all.
+
 ### Publishing a figure so the reckon server lists it
 
 The reckon mount for nova is `~/Code/nova/docs`, so a file at

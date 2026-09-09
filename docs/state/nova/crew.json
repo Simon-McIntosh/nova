@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T21:23:20",
+  "updated": "2026-09-09T22:11:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -147556,6 +147556,184 @@
         "watch_override": null,
         "tool_steps": 77.0,
         "orientation_input_tokens": null
+      },
+      {
+        "run_id": "r-20260909T172331856886-mulw-bit-identity-paired",
+        "plan": "multi-unit-limiter-wall",
+        "section": "\u00a73",
+        "node": "mulw-bit-identity-paired",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1937,
+                "cached_input_tokens": 912598,
+                "input_tokens": 914567,
+                "output_tokens": 4485,
+                "reasoning_output_tokens": 2362,
+                "total_tokens": 919052,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/mulw-bit-identity/receipt.json lists the twelve MAST rows with base and head terminal residual, axis, X-point and boundary flux and an equal or first-differing-field verdict per row, produced by one betelgeuse job (gpu:1, 8 cores, 128G, 59 minutes, JAX_PLATFORMS=cuda,cpu in submit and payload, persistent cache on, direct interpreter) with each row persisted as it lands and the two arms alternating per row so an expiry leaves matched pairs",
+          "estimated_hours": null,
+          "goal": "Measure bit identity of the multi-unit solver consumers against main with a paired same-job arm: in one H200 allocation run the bank reproduction driver benchmarks/bank_revision_reproduction.py for the twelve MAST bank rows twice, once with PYTHONPATH at /home/ITER/mcintos/Code/nova (main, the base arm) and once with PYTHONPATH at this worktree (head, carrying fd258054 to 04cb76c4), and compare per row",
+          "id": "mulw-bit-identity-paired",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T17:23:32Z",
+            "read_at": "2026-09-09T17:23:33Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 56.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T172331856886-mulw-bit-identity-paired/manifest.md",
+          "plan": "multi-unit-limiter-wall",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/mulw-bit-identity"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "s19i-mulw-verify",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T17:23:44Z",
+        "completed_at": "2026-09-09T20:07:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 9843,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "04cb76c48b76a34335f7ac1c10f6958e15e7cccc",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1268114 measure_mast_batch.py width-12 exit-off at 04cb76c4 (12/12 residuals bit-identical to the batched main artifact); all_debug job 1268129 measure_solovev_case.py four fresh CPU x64 processes at -110 (4/4 within the 3.9e-8 cross-device drift)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/mulw-bit-identity/logs/mast-batched-h200.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T172331856886-mulw-bit-identity-paired/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08732-7198-7cb1-ba9c-08e1b4007828",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 44561536,
+            "cached_input_tokens_cumulative": 44561536,
+            "input_tokens": 44750056,
+            "input_tokens_cumulative": 44750056,
+            "output_tokens": 46918,
+            "output_tokens_cumulative": 46918,
+            "reasoning_output_tokens": 9939,
+            "reasoning_output_tokens_cumulative": 9939
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T20:07:47Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 97.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T20:07:47Z"
+            }
+          ],
+          "notional_cost_usd": 25.0949,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 80348416,
+          "cumulative_input_tokens": 80996694,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 56857,
+          "generation_seconds": 4224.335,
+          "machine_seconds": 5617.736,
+          "tokens_per_second": 13.46
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "scope_acceptances": null,
+        "no_commit": "report-only measurement node; no repository source changed, receipt and per-row artifacts live under the reports directory",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/mulw-bit-identity-paired",
+          "session_id": "01a08732-7198-7cb1-ba9c-08e1b4007828",
+          "session_source": "pointer",
+          "retained_at": "2026-09-09T20:07:47Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 66.0,
+        "orientation_input_tokens": null
       }
     ],
     "holds": [
@@ -147868,6 +148046,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2391
+    "_version": 2392
   }
 }

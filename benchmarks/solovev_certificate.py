@@ -2850,6 +2850,11 @@ def _validate_partial(receipt: dict[str, Any]) -> None:
 
 
 def _aggregate(output: Path = OUTPUT) -> dict[str, Any]:
+    existing_production_run = None
+    if output.exists():
+        existing_production_run = json.loads(output.read_text(encoding="utf-8")).get(
+            "production_run"
+        )
     case_payload = {}
     for case_name in CASE_NAMES:
         rows = [
@@ -2943,6 +2948,8 @@ def _aggregate(output: Path = OUTPUT) -> dict[str, Any]:
         "cases": case_payload,
         "verdict": {},
     }
+    if existing_production_run is not None:
+        receipt["production_run"] = existing_production_run
     qualifications = [
         row["solver"]["qualification"]
         for case in case_payload.values()

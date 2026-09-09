@@ -2,14 +2,14 @@
   "aggregation_lane": {
     "execution": "slurm",
     "exit_marker": "SOLOVEV_AGGREGATE_EXIT=0",
-    "hostname": "98dci4-clu-3142.iter.org",
+    "hostname": "98dci4-clu-3141.iter.org",
     "jax_default_backend": "cpu",
     "jax_platforms": "cpu",
-    "node": "98dci4-clu-3142",
+    "node": "98dci4-clu-3141",
     "partition": "all_debug",
     "precision": "float64",
     "reservation": null,
-    "slurm_job_id": "1268124"
+    "slurm_job_id": "1268256"
   },
   "cases": {
     "diverted-single-null": {
@@ -114766,8 +114766,8 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "f5d694c7fb93368eea0644446954e6cc4e00826bc2032eac0508ac854b21243d"
+            "render_source": "persisted_part_receipt",
+            "sha256": "aee39e616e0b65c9687422ea2b5474813825056b4045d6991f480a54e0d0356c"
           },
           "geometry": {
             "boundary_flux_error_wb": 0.21957371415736196,
@@ -136035,7 +136035,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.7917921040207148,
             "case_and_machine": 0.19006321672350168,
-            "figure_render": 0.3164465734735131,
+            "figure_render": 0.46788148768246174,
             "operator_and_seed": 22.09374748170376,
             "production_solve": 116.92100436706096
           }
@@ -227983,8 +227983,8 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "daefed2452035cc455ce15ad58b538112de58684a8aaa8762652001ee4a534b4"
+            "render_source": "persisted_part_receipt",
+            "sha256": "e0c30d970be5a09aa72f8a81b9a59df98d62e83485bc860a644acda828f63b6f"
           },
           "geometry": {
             "boundary_flux_error_wb": 0.022291083444660645,
@@ -249186,7 +249186,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.7303165048360825,
             "case_and_machine": 0.17999512422829866,
-            "figure_render": 0.3165068691596389,
+            "figure_render": 0.4706684239208698,
             "operator_and_seed": 21.75265246629715,
             "production_solve": 121.72067821305245
           }
@@ -341214,8 +341214,8 @@
           "figure": {
             "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-300.png",
             "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-300.png",
-            "render_source": "fresh_production_solve",
-            "sha256": "1eb41e1c28a10b97c295b3debb82476757c3dee0f78d54dbe49336f1e5ed011b"
+            "render_source": "persisted_part_receipt",
+            "sha256": "89fc10af919811f0ec06aedad069c31beff5399d465cca73e64c5f04f771ee5f"
           },
           "geometry": {
             "boundary_flux_error_wb": 7.5705133066844486,
@@ -362454,7 +362454,7 @@
           "stage_wall_seconds": {
             "accuracy_scoring": 0.7689140569418669,
             "case_and_machine": 0.18413529638200998,
-            "figure_render": 0.3873791918158531,
+            "figure_render": 0.6648602411150932,
             "operator_and_seed": 21.845613386482,
             "production_solve": 114.32706860173494
           }
@@ -440957,7 +440957,7 @@
     "seed_factory": "profile.cold_seed_portfolio",
     "solver_route": "profile.solve(seed, route='newton_krylov', target_current=Ip_closed_form)",
     "solver_source_modified": false,
-    "source_revision": "e9e7cae57b5a58212286c3288ea80dcb8e03cd20",
+    "source_revision": "b4cb7f8889ff3a4636f91b73496c32a6b2b5d76e",
     "terminal_residual_bound": 1e-12,
     "theoretical_discrete_operator_order": 2.0
   },
@@ -441162,7 +441162,7 @@
     "realised_cells": 136,
     "registry_entry_count": 14,
     "requested_cells": -110,
-    "wall_seconds": 40.24964792467654
+    "wall_seconds": 46.652572598308325
   },
   "schema": {
     "$id": "nova.solovev-production-route-absolute-accuracy-certificate",

@@ -71,8 +71,8 @@
   "figure": {
     "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.png",
     "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.png",
-    "render_source": "fresh_production_solve",
-    "sha256": "daefed2452035cc455ce15ad58b538112de58684a8aaa8762652001ee4a534b4"
+    "render_source": "persisted_part_receipt",
+    "sha256": "e0c30d970be5a09aa72f8a81b9a59df98d62e83485bc860a644acda828f63b6f"
   },
   "geometry": {
     "boundary_flux_error_wb": 0.022291083444660645,
@@ -20767,6 +20767,7 @@
   "solver": {
     "call": "profile.solve(ForwardSolveRequest)",
     "carrier_identity": "solovev:strong-rotation-compact-static:-300",
+    "converged": false,
     "gmres_iterations": 30,
     "lambda_amplitude_history": {
       "samples": [
@@ -21164,12 +21165,37 @@
     },
     "qualification": "unqualified",
     "qualification_bound": 1e-12,
-    "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+    "qualification_components": {
+      "joint": "unqualified",
+      "position_error": {
+        "axis_error_m": 0.004054620568397191,
+        "axis_within_bound": true,
+        "bound_m": 0.03186842212527238,
+        "bound_pitch_multiple": 1.0,
+        "qualified": true,
+        "x_point_error_m": null,
+        "x_point_within_bound": true
+      },
+      "terminal_residual": {
+        "bound": 1e-12,
+        "qualified": false,
+        "value": 0.01738831511268224
+      },
+      "topology_read": {
+        "axis_admitted": true,
+        "qualified": true,
+        "read_status": "qualified_axis",
+        "x_point_admitted": true,
+        "x_point_required": false
+      }
+    },
+    "qualification_reason": "fixed_point_residual_outside_qualification_bound",
     "raster_flux_receipt": {
       "available": false,
       "status": "unavailable_non_tensor_product_grid"
     },
     "requested_seed_class": "limited",
+    "residual_only_qualification": "unqualified",
     "resolved_defaults": {
       "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
       "deviations": {
@@ -21248,7 +21274,7 @@
   "stage_wall_seconds": {
     "accuracy_scoring": 0.7303165048360825,
     "case_and_machine": 0.17999512422829866,
-    "figure_render": 0.3165068691596389,
+    "figure_render": 0.4706684239208698,
     "operator_and_seed": 21.75265246629715,
     "production_solve": 121.72067821305245
   }

@@ -75,9 +75,11 @@ smaller constraint residual and is required never to cost more steps or trips.
 
 from __future__ import annotations
 
+from collections import OrderedDict
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from functools import partial
+import hashlib
 import os as _os
 import time
 from typing import Any, NamedTuple
@@ -212,6 +214,10 @@ TRACED_ROWS = "traced"
 #: built.  Same numbers, one program per commanded target; it stays reachable
 #: because the semantics the traced route must agree with is what it computes.
 CAPTURED_ROWS = "captured"
+
+
+_COMPILED_PROGRAM_CACHE_LIMIT = 32
+_compiled_program_cache: OrderedDict[tuple[Any, ...], "ReducedProgram"] = OrderedDict()
 
 
 class ReducedCoordinates(NamedTuple):
@@ -1811,6 +1817,52 @@ class ReducedProgram(NamedTuple):
     #: solve exact.  A program built under explicit currents always recomputes.
     default_external: bool = True
     slice_solver: Callable[..., Any] | None = None
+    slice_solvers: dict[tuple[Any, ...], Callable[..., Any]] | None = None
+    cache_key: tuple[Any, ...] | None = None
+
+
+def _compiled_argument_key(value: Any) -> tuple[tuple[int, ...], str, str] | None:
+    """Return the identity for an array a compiled program captures."""
+    if value is None:
+        return None
+    array = np.asarray(value)
+    return (
+        tuple(array.shape),
+        array.dtype.str,
+        hashlib.sha256(array.tobytes()).hexdigest(),
+    )
+
+
+def _compiled_program_key(
+    operator: Any,
+    coordinates: ReducedCoordinates,
+    external: jax.Array,
+    target_current: Any,
+    requested_class: Any,
+    row_count: int,
+    row_signature: tuple[tuple[str, str], ...],
+) -> tuple[Any, ...]:
+    """Return the static layout and captured-data identity of one program."""
+    return (
+        id(operator),
+        tuple(np.asarray(coordinates.cells, dtype=np.intp)),
+        _compiled_argument_key(external),
+        _compiled_argument_key(target_current),
+        _compiled_argument_key(requested_class),
+        row_count,
+        row_signature,
+    )
+
+
+def _remember_compiled_program(program: ReducedProgram) -> ReducedProgram:
+    """Store a complete slice program in the bounded reusable-program cache."""
+    if program.cache_key is None:
+        return program
+    _compiled_program_cache[program.cache_key] = program
+    _compiled_program_cache.move_to_end(program.cache_key)
+    while len(_compiled_program_cache) > _COMPILED_PROGRAM_CACHE_LIMIT:
+        _compiled_program_cache.popitem(last=False)
+    return program
 
 
 def _bind_rows(
@@ -2657,25 +2709,41 @@ def _compiled_program(
             policy=SUPPORT_POLICY,
             floor=_ACTIVE_SUPPORT_FLOOR,
         )
-        program = ReducedProgram(
-            coordinates=coordinates,
-            external=external,
-            kernels=_reduced_kernels(
-                operator,
-                coordinates,
-                external,
-                requested_class,
-                target_current,
-                augmentation=augmentation,
-            ),
-            row_count=row_count,
-            operator_identity=id(operator),
-            external_shape=tuple(external.shape),
-            target_current_shape=target_shape,
-            requested_class_shape=requested_shape,
-            row_signature=row_signature,
-            default_external=False,
+        cache_key = _compiled_program_key(
+            operator,
+            coordinates,
+            external,
+            target_current,
+            requested_class,
+            row_count,
+            row_signature,
         )
+        program = _compiled_program_cache.get(cache_key)
+        if program is None:
+            program = _remember_compiled_program(
+                ReducedProgram(
+                    coordinates=coordinates,
+                    external=external,
+                    kernels=_reduced_kernels(
+                        operator,
+                        coordinates,
+                        external,
+                        requested_class,
+                        target_current,
+                        augmentation=augmentation,
+                    ),
+                    row_count=row_count,
+                    operator_identity=id(operator),
+                    external_shape=tuple(external.shape),
+                    target_current_shape=target_shape,
+                    requested_class_shape=requested_shape,
+                    row_signature=row_signature,
+                    default_external=False,
+                    cache_key=cache_key,
+                )
+            )
+        else:
+            _compiled_program_cache.move_to_end(cache_key)
     elif (
         program.operator_identity != id(operator)
         or program.external_shape != tuple(external.shape)
@@ -2727,19 +2795,35 @@ def _compiled_result(
                 for pair in augmentation.pairs
             )
         )
-    solver = _compiled_slice_solver(
-        kernels,
-        tolerance=tolerance,
-        newton_steps=newton_steps,
-        active_set_steps=active_set_steps,
-        initial_unknown=initial_unknown,
+    policy_key = (
+        tolerance,
+        newton_steps,
+        active_set_steps,
+        _compiled_argument_key(initial_unknown),
     )
+    solvers = {} if program.slice_solvers is None else program.slice_solvers
+    solver = solvers.get(policy_key)
+    if solver is None:
+        solver = _compiled_slice_solver(
+            kernels,
+            tolerance=tolerance,
+            newton_steps=newton_steps,
+            active_set_steps=active_set_steps,
+            initial_unknown=initial_unknown,
+        )
+        solvers = dict(solvers)
+        solvers[policy_key] = solver
+        program = _remember_compiled_program(
+            program._replace(slice_solver=solver, slice_solvers=solvers)
+        )
+    elif program.slice_solver is not solver:
+        program = _remember_compiled_program(program._replace(slice_solver=solver))
     shadow = jnp.ravel(
         jnp.asarray(operator.residual_shadow_mask(initial, requested_class), dtype=bool)
     )
     output = solver(initial, shadow)
     fields = _compiled_output_fields(output)
-    return fields, program._replace(slice_solver=solver)
+    return fields, program
 
 
 def solve_reduced_newton_compiled(

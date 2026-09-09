@@ -835,6 +835,45 @@ def test_compiled_slice_matches_the_fused_host_route(machine):
     assert compiled.active_set_mask_differences == host.active_set_mask_differences
 
 
+def test_compiled_slice_caches_one_executable_per_static_policy(machine, monkeypatch):
+    """Equal calls reuse one executable while a fixed output shape rebuilds it."""
+    profile, seed = machine
+    builds = 0
+    original = reduced_newton._compiled_slice_solver
+
+    def counted_builder(*args, **kwargs):
+        nonlocal builds
+        builds += 1
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(reduced_newton, "_compiled_slice_solver", counted_builder)
+    reduced_newton._compiled_program_cache.clear()
+    common = dict(tolerance=SOLVE_TOLERANCE, newton_steps=1, active_set_steps=1)
+    first = reduced_newton.solve_reduced_newton_compiled(
+        profile.operator, seed, **common
+    )
+    second = reduced_newton.solve_reduced_newton_compiled(
+        profile.operator, seed, **common
+    )
+    host = reduced_newton.solve_reduced_newton(
+        profile.operator,
+        seed,
+        trip_boundary=reduced_newton.TRIP_BOUNDARY,
+        **common,
+    )
+
+    assert builds == 1
+    assert second.program is first.program
+    assert second.program.slice_solver is first.program.slice_solver
+    assert np.array_equal(np.asarray(second.state), np.asarray(host.state))
+    assert second.terminal_residual == host.terminal_residual
+
+    reduced_newton.solve_reduced_newton_compiled(
+        profile.operator, seed, **(common | {"active_set_steps": 2})
+    )
+    assert builds == 2
+
+
 def test_compiled_slice_replays_the_host_step_and_trip_counters(machine):
     """The compiled trip counters match the host route on the Solov'ev fixture."""
     profile, seed = machine

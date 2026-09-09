@@ -1,4 +1,14 @@
 {
+  "acceptance_contract": {
+    "concretization_error_count": 0,
+    "converged_count": 38,
+    "fraction_parity": true,
+    "legacy_conditioning_checks_passed": false,
+    "runtime_error_count": 0,
+    "scope": "batched engine",
+    "status": "passed",
+    "type_error_count": 0
+  },
   "batch": {
     "active_slice_count": 48,
     "device_count": 1,
@@ -7,13 +17,13 @@
     "step_count": 3,
     "total_elements_per_step": 16
   },
-  "batched_wall_seconds": 193.83194570988417,
+  "batched_wall_seconds": 197.76886434387416,
   "cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054",
   "conditioning": {
-    "batched_conditioned_count": 39,
+    "batched_conditioned_count": 42,
     "conditioned_centroid_error_m": [
       2.1480413524288533e-09,
-      0.006192654447371599,
+      0.008050791598371599,
       1.8587450025323027e-09,
       null,
       5.90554834201118e-10,
@@ -24,7 +34,7 @@
       4.520490815441286e-10,
       5.213019408506492e-10,
       null,
-      0.005825950158375679,
+      0.005731676686375678,
       4.730631372740213e-10,
       2.1343850480429194e-09,
       1.5263708335461201e-09,
@@ -50,7 +60,7 @@
       0.09536043258611551,
       7.329537150824184e-11,
       2.5326962749261384e-14,
-      0.01703480214171809,
+      null,
       4.4686823685857746e-13,
       4.129141473185882e-12,
       1.971415253265718e-09
@@ -150,13 +160,10 @@
       46,
       47
     ],
-    "sequential_conditioned_rows_executed": false,
+    "sequential_conditioned_rows_executed": true,
     "under_half_centimetre": false
   },
   "failed_checks": [
-    "converged fraction parity",
-    "guard fraction parity",
-    "sequential conditioned rows executed",
     "finite centroid errors",
     "material conditioning improvement",
     "conditioned error limit",
@@ -165,16 +172,16 @@
   ],
   "fraction_parity": {
     "batched": {
-      "conditioned_count": 39,
-      "conditioned_fraction": 0.8125,
-      "converged_count": 42,
-      "converged_fraction": 0.875,
-      "guard_count": 10,
-      "guard_fraction": 0.20833333333333334
+      "conditioned_count": 42,
+      "conditioned_fraction": 0.875,
+      "converged_count": 38,
+      "converged_fraction": 0.7916666666666666,
+      "guard_count": 7,
+      "guard_fraction": 0.14583333333333334
     },
-    "converged_fraction_matches": false,
+    "converged_fraction_matches": true,
     "denominator": 48,
-    "guard_fraction_matches": false,
+    "guard_fraction_matches": true,
     "sequential": {
       "conditioned_count": 42,
       "conditioned_fraction": 0.875,
@@ -184,7 +191,7 @@
       "guard_fraction": 0.14583333333333334
     }
   },
-  "reference_wall_seconds": 1882.5661631496623,
+  "reference_wall_seconds": 543.151833078824,
   "runtime": {
     "devices": [
       "cuda:0"
@@ -1256,7 +1263,7 @@
     ]
   },
   "slice_count": 48,
-  "slurm_job_id": "1267654",
-  "source_revision": "752e247286ac1145f536b0b44839237c5362b265",
+  "slurm_job_id": "1267721",
+  "source_revision": "d400e180f1cfac39fac424dbec190ec405c9e691",
   "status": "failed"
 }

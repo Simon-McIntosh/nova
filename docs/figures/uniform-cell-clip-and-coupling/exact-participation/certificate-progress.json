@@ -1,0 +1,26 @@
+{
+  "rows": [
+    {
+      "baseline_residual": 0.007447526861632619,
+      "case": "weak-rotation-reactor-static",
+      "completed_at_unix_seconds": 1788992341.5110962,
+      "exit_status": 0,
+      "qualification": "unqualified",
+      "receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/ucc-exact-cut-cell-participation/docs/figures/uniform-cell-clip-and-coupling/exact-participation/certificate-parts/weak-rotation-reactor-static-production-route-reduced.json",
+      "requested_cells": -110,
+      "residual_ratio_to_baseline": 63.22209762238517,
+      "terminal_residual": 0.4708482702914733
+    },
+    {
+      "baseline_residual": 0.012457640060526081,
+      "case": "moderate-rotation-conventional-static",
+      "completed_at_unix_seconds": 1788994124.8748589,
+      "exit_status": 0,
+      "qualification": "unqualified",
+      "receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/ucc-exact-cut-cell-participation/docs/figures/uniform-cell-clip-and-coupling/exact-participation/certificate-parts/moderate-rotation-conventional-static-production-route-reduced.json",
+      "requested_cells": -110,
+      "residual_ratio_to_baseline": 10.69773913769825,
+      "terminal_residual": 0.13326858363884744
+    }
+  ]
+}

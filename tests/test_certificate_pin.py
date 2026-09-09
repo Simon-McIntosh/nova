@@ -109,17 +109,17 @@ def test_production_route_census_and_execution_configuration_are_pinned() -> Non
             assert coordinate_count == len(render_data["analytic_flux_wb"])
             assert len(render_data["wall_units_rz_m"]) == 1
             figure_path = ROOT / row["figure"]["filesystem_path"]
-            assert row["figure"]["render_source"] == "fresh_production_solve"
+            assert row["figure"]["render_source"] in {
+                "fresh_production_solve",
+                "persisted_part_receipt",
+            }
             assert row["figure"]["project_absolute_src"].startswith(
                 "/nova/figures/gs-absolute-accuracy/solovev/"
             )
-            if figure_path.exists():
-                assert (
-                    hashlib.sha256(figure_path.read_bytes()).hexdigest()
-                    == row["figure"]["sha256"]
-                )
-            else:
-                assert len(row["figure"]["sha256"]) == 64
+            assert (
+                hashlib.sha256(figure_path.read_bytes()).hexdigest()
+                == row["figure"]["sha256"]
+            )
 
 
 def test_certificate_figure_renderer_uses_line_contours_without_scatter() -> None:

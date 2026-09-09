@@ -24,10 +24,10 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-09">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="38">
 <meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html,benchmarks/solovev_certificate.py,docs/figures/gs-absolute-accuracy/solovev-certificate.json,docs/figures/gs-absolute-accuracy/solovev/,benchmarks/efit_reproduction_gate.py,docs/figures/gs-absolute-accuracy/efit-reproduction.json,docs/figures/gs-absolute-accuracy/efit/,docs/figures/gs-absolute-accuracy/oracle-fixture-assembly.json,tests/test_polygon_analytic_batched_moments.py">
 <meta name="plan-commits" content="3dc4bb57,bf6dcdf9,9b0be0c8,6480a228,69a96bdf,873cfba6,6cecf64e,1f6f3e2c,ebb56768,ae9c0ed6,eca38a8e,5bb6850f,a3ae6bd4,f76e9142,adfff6dc,466b9d02,faec6877,d0a01760,7573d3e7,77a2cd32,6d03967f,dcc671db,b93f9b10,f7d9557b">
-<meta name="plan-impl" content="0.8">
+<meta name="plan-impl" content="0.87">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="solver-convergence-regression,diiid-vertical-force-balance,uniform-cell-clip-and-coupling">
 </head>
@@ -154,6 +154,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260909T062639785903-s19r-gs-absolute-accuracy-gates" data-who="s19r-gaa" data-when="2026-09-09T07:15:29.314Z">
     <div class="r-comment-body"><p>S19 review: §1 and §2 landed with machinery at HEAD, §1 text stale at 0-of-16 against the 2-of-16 production-route receipt; depends_on missing null-identification-authority and diiid-vertical-force-balance; §3 artifact, pinning test and two per-machine EFIT-match docs are dispatchable now; verdict collapse-landed-sections</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260909T104707262069-gaa-efit-match-docs" data-who="s19i-gaa-docs" data-when="2026-09-09T11:46:20.858Z">
+    <div class="r-comment-body"><p>Two per-machine EFIT-match evidence documents landed (docs/evidence/mast-efit-match.html, diiid-efit-match.html) carrying plan-evidence-for gs-absolute-accuracy-gates and plan-informs forward-solve-api, every frame of its machine cited from the eleven-frame receipt with the two error sources in separate columns and the converged flag, all figure srcs project-absolute; caveats recorded for the resolved-defaults provenance (pre-seam receipts) and the DIII-D magnitude normalisation</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260909T1349-efit-match-docs-landed" data-who="reckon-ship s19-review" data-when="2026-09-09T13:49:00Z">
+    <div class="r-comment-body">gaa-efit-match-docs landed: commits 30d723f2, 8f2f0d8d, 5037ea81 merged. docs/evidence/mast-efit-match.html (6 of 6 frames) and docs/evidence/diiid-efit-match.html (5 of 5 frames) cite the eleven-frame two-source receipt with the solve-versus-label and label-GS-floor columns separate beside the converged flag, audit-doc OK, all eleven figure srcs project-absolute, zero numeric mismatches at six significant figures; both carry plan-evidence-for gs-absolute-accuracy-gates and plan-informs forward-solve-api. Caveats recorded in the documents: the receipts predate the typed-request seam so the resolved-defaults provenance is stated rather than recorded, and the DIII-D solve-versus-label magnitude normalisation is still the open reconciliation. COMPARATOR FINDING FOR THE CERTIFICATE (from the clipped-moment attribution on null-identification-authority): the weak-rotation -110 base residual at the dispatched base 2e7c4af2 measures 0.0074475269 in both the 4-core unthreaded and the banked 16-core threaded configuration, against the banked 0.0074474878, a 3.9e-8 difference outside the fixed tolerance baseline*(1+5e-12)+5e-14; so the banked static rows are not reproducible at their own base and the section 3 regeneration re-baselines them at a declared configuration recorded in the receipt. Section 3 remaining: the certificate artifact and pinning test, after the single-null diverted rows and the clipped-moment outcome settle what the census is. impl 0.8 to 0.87.</div>
 </div>
 </section>
 </main>

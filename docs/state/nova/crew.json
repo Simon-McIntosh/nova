@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T13:22:43",
+  "updated": "2026-09-09T13:49:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -144647,6 +144647,188 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T104707262069-gaa-efit-match-docs",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a73",
+        "node": "gaa-efit-match-docs",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 405,
+                "cached_input_tokens": 663095,
+                "input_tokens": 663504,
+                "output_tokens": 11,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 663515,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "reckon audit-doc reports OK for both documents, each document cites every frame of its machine from efit-reproduction.json (six MAST, five DIII-D) in an HTML table with the two error sources in separate columns and the converged flag, and every figure src is project-absolute under /nova/figures/gs-absolute-accuracy/efit/",
+          "estimated_hours": null,
+          "goal": "Author the two per-machine EFIT-match evidence documents docs/evidence/mast-efit-match.html and docs/evidence/diiid-efit-match.html from the eleven-frame two-source receipt docs/figures/gs-absolute-accuracy/efit-reproduction.json, each carrying reckon-type evidence, plan-evidence-for gs-absolute-accuracy-gates and plan-informs forward-solve-api, citing its machine's rows with the solve-versus-label and label-inconsistency error split kept independent and the resolved-defaults provenance of the receipt",
+          "id": "gaa-efit-match-docs",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T10:47:07Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T104707262069-gaa-efit-match-docs/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/mast-efit-match.html",
+            "docs/evidence/diiid-efit-match.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "exact",
+        "member": "s19i-gaa-docs",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-09T10:47:19Z",
+        "completed_at": "2026-09-09T11:46:20.858Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3510,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3541,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9aebfc86894f19c625456a3618d5088e97b9a059",
+        "commits": [
+          "30d723f2ef90d4d05a49b5ce2c6289bd60891478",
+          "8f2f0d8d9e8f39be62fe187a6b0cbbf22da201ad",
+          "5037ea8126ba16dc9bd0f6b2a3d36c3f689c09be"
+        ],
+        "changed_lines": {
+          "added": 231,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reckon audit-doc docs/evidence/mast-efit-match.html docs/evidence/diiid-efit-match.html (OK, OK); frame coverage 6 of 6 MAST and 5 of 5 DIII-D; 11 project-absolute figure srcs; 0 numeric mismatches against efit-reproduction.json at six significant figures",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T104707262069-gaa-efit-match-docs/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T104707262069-gaa-efit-match-docs/manifest.md",
+        "scope_changed": false,
+        "session_id": "a92dc4ac-4eb4-47af-b6e8-1bfa923bcb7f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 7093235,
+            "input_tokens_cumulative": 7093235,
+            "output_tokens": 47268,
+            "output_tokens_cumulative": 47268,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-09T11:46:20.858Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 7093235,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 3537.906,
+          "generated_tokens": 47268,
+          "generation_seconds": 3526.537,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 17.4,
+          "machine_seconds": 11.369,
+          "peak_input_tokens": 176942,
+          "tokens_per_second": 13.4,
+          "wall_tokens_per_second": 13.36
+        },
+        "follow_on_paths": [
+          "gate-rule/normalisation",
+          "/"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/gaa-efit-match-docs",
+          "session_id": "a92dc4ac-4eb4-47af-b6e8-1bfa923bcb7f",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T11:46:20.858Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -144959,6 +145141,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2365
+    "_version": 2366
   }
 }

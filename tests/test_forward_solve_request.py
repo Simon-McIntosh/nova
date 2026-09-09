@@ -12,6 +12,7 @@ from benchmarks.efit_forward_parity_slice import _parity_solve_request
 from nova import __version__
 from nova.equilibrium.forward import PerturbedSeedPolicy
 from nova.equilibrium.solve_request import (
+    ColdSeedPortfolio,
     ExplicitSolveSeed,
     FORWARD_SOLVE_DEFAULTS,
     ForwardSolvePolicy,
@@ -55,6 +56,7 @@ RECEIPT_FIELDS = (
     "compilation_cache_hit",
     "wall_seconds",
     "resolved_defaults",
+    "seed_provenance",
 )
 
 
@@ -108,6 +110,84 @@ def test_request_path_is_bit_identical_and_defaults_round_trip_through_json():
     restored = ResolvedForwardSolveDefaults.from_dict(payload)
     assert restored == request_receipt.resolved_defaults
     assert restored.nova_version == __version__
+
+
+def test_cold_portfolio_seed_policy_solves_and_records_its_selected_branch(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    profile, _ordinary_response, _prescribed_response = _profile()
+    portfolio_calls: list[tuple[object, ...]] = []
+
+    def cold_seed_portfolio(*args, **kwargs):
+        portfolio_calls.append((args, kwargs))
+        return type(
+            "Portfolio",
+            (),
+            {
+                "branches": type(
+                    "Branches",
+                    (),
+                    {"flux": np.asarray(((0.0, 0.0, 0.0, 0.0), (1.0, 1.0, 1.0, 1.0)))},
+                )()
+            },
+        )()
+
+    monkeypatch.setattr(profile, "cold_seed_portfolio", cold_seed_portfolio)
+    request = ForwardSolveRequest.from_defaults(
+        carrier_identity="cpu-cold-seed-carrier",
+        source_profile=profile.source,
+        seed_policy=ColdSeedPortfolio(
+            plasma_current=12_000.0,
+            centroid=(1.0, 0.0),
+            requested_class="diverted",
+        ),
+        policy_overrides={
+            "route": "picard",
+            "newton_steps": 1,
+            "relaxation": 1.0,
+        },
+    )
+
+    receipt = profile.solve(request)
+
+    assert len(portfolio_calls) == 1
+    assert receipt.seed_provenance is not None
+    assert receipt.seed_provenance.to_dict() == {
+        "kind": "cold_seed_portfolio",
+        "requested_class": "diverted",
+        "plasma_current": 12_000.0,
+        "centroid": (1.0, 0.0),
+    }
+
+
+def test_compilation_cache_receipt_observes_reuse_not_the_request_field(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    profile, _ordinary_response, _prescribed_response = _profile()
+    monkeypatch.setattr(
+        profile,
+        "_configure_solve_compilation_cache",
+        staticmethod(lambda enabled: "/test-cache" if enabled else None),
+    )
+    request = ForwardSolveRequest.from_defaults(
+        carrier_identity="cpu-cache-carrier",
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(np.zeros(4)),
+        compilation_cache_hit=True,
+        policy_overrides={
+            "route": "picard",
+            "newton_steps": 1,
+            "relaxation": 1.0,
+        },
+    )
+
+    first = profile.solve(request)
+    second = profile.solve(request)
+
+    assert first.compilation_cache_hit is False
+    assert second.compilation_cache_hit is True
+    payload = json.loads(json.dumps(second.resolved_defaults.to_dict()))
+    assert ResolvedForwardSolveDefaults.from_dict(payload) == second.resolved_defaults
 
 
 def test_parity_request_records_the_gmres_budget_as_a_declared_deviation():

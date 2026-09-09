@@ -723,7 +723,7 @@ class _PersistentCacheProbe(logging.Handler):
     """Capture JAX's authoritative persistent-cache lookup for one compile."""
 
     def __init__(self) -> None:
-        super().__init__(level=logging.WARNING)
+        super().__init__(level=logging.DEBUG)
         self.events: list[dict[str, str]] = []
 
     def emit(self, record: logging.LogRecord) -> None:
@@ -1355,10 +1355,10 @@ def _measure_batched_machine(
             return jax.vmap(solver)(operator, data, settlement)
 
         _batch_stage_count(stages, f"{name}_BATCH_COMPILE_START")
-        jax.config.update("jax_log_compiles", True)
-        jax.config.update("jax_explain_cache_misses", True)
         cache_probe = _PersistentCacheProbe()
         compiler_logger = logging.getLogger("jax._src.compiler")
+        previous_log_level = compiler_logger.level
+        compiler_logger.setLevel(logging.DEBUG)
         compiler_logger.addHandler(cache_probe)
         started = time.perf_counter()
         try:
@@ -1369,6 +1369,7 @@ def _measure_batched_machine(
             )
         finally:
             compiler_logger.removeHandler(cache_probe)
+            compiler_logger.setLevel(previous_log_level)
         compile_seconds = time.perf_counter() - started
         compile_cache = cache_probe.result("jit_batched_solve")
         compile_count = 1

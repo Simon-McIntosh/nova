@@ -14,6 +14,7 @@ import jax.numpy as jnp
 import matplotlib
 
 matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import numpy as np
 from shapely import LineString, Point, Polygon
 from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
@@ -137,6 +138,86 @@ def _analytic_grid(
     )
 
 
+def _boundary_flux_level(
+    case_name: str, exact: Any, boundary: np.ndarray
+) -> float:
+    """Flux of the analytic field on the closed-form analytic boundary."""
+    values = np.asarray(
+        certificate._exact_state(
+            case_name, exact, np.asarray(boundary, dtype=float)
+        ),
+        dtype=float,
+    )
+    finite = values[np.isfinite(values)]
+    if finite.size == 0:
+        raise ValueError("no finite analytic flux on the closed-form boundary")
+    return float(np.mean(finite))
+
+
+def _analytic_grid_extent(
+    case_name: str,
+    exact: Any,
+    boundary: np.ndarray,
+    wall: np.ndarray,
+    count: int = 241,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Analytic field on a grid wide enough for its boundary contour to close.
+
+    The plasma-node extent truncates every static LCFS: measured endpoint gaps
+    on that grid are 0.53 to 1.94 m, so the drawn zero-flux contour stops at
+    the grid edge instead of closing.  Spanning the closed-form boundary and
+    the wall keeps the entire LCFS inside the grid, so the boundary-flux
+    contour closes within it and every drawn loop is a true closed curve.
+    """
+    rmin, rmax, zmin, zmax = _extent(boundary, wall, padding=0.08)
+    radius = np.linspace(rmin, rmax, count)
+    height = np.linspace(zmin, zmax, count)
+    return radius, height, _analytic_grid(case_name, exact, radius, height)
+
+
+def _boundary_contour_endpoint_gap(
+    radius: np.ndarray,
+    height: np.ndarray,
+    flux: np.ndarray,
+    level: float,
+    boundary: np.ndarray,
+) -> dict[str, float | bool | None]:
+    """Endpoint gap of the analytic boundary-flux contour on its own grid.
+
+    The contour is extracted through the same matplotlib code path that draws
+    it, so the measured closure is exactly the drawn closure.  When several
+    segments share the level, the one whose centroid sits nearest the
+    closed-form boundary is the separatrix.
+    """
+    figure = plt.figure(figsize=(1, 1), dpi=30)
+    try:
+        axes = figure.add_subplot(111)
+        cs = axes.contour(
+            np.asarray(radius, dtype=float),
+            np.asarray(height, dtype=float),
+            np.asarray(flux, dtype=float),
+            levels=[float(level)],
+        )
+        segments = [
+            np.asarray(segment, dtype=float)
+            for segment in cs.allsegs[0]
+            if len(segment) >= 2
+        ]
+        target = np.mean(np.asarray(boundary, dtype=float), axis=0)
+        if segments:
+            segments.sort(
+                key=lambda segment: float(
+                    np.linalg.norm(np.mean(segment, axis=0) - target)
+                )
+            )
+            best = segments[0]
+            gap = float(np.linalg.norm(best[0] - best[-1]))
+            return {"closed": gap <= 1.0e-9, "endpoint_gap_m": gap}
+        return {"closed": False, "endpoint_gap_m": None}
+    finally:
+        plt.close(figure)
+
+
 def _shared_levels(
     solved: np.ndarray,
     analytic: np.ndarray,
@@ -209,9 +290,17 @@ def _build_certificate_case(case_name: str, requested_cells: int) -> dict[str, A
     elapsed = perf_counter() - started
     radius, height, solved_grid = _structured_flux(operator, state)
     analytic_grid = _analytic_grid(case_name, exact, radius, height)
+    boundary = certificate._boundary(case_name, exact)
+    wall = np.asarray(machine.wall_node, dtype=np.float64)
+    analytic_radius, analytic_height, analytic_grid_full = _analytic_grid_extent(
+        case_name, exact, boundary, wall
+    )
+    boundary_flux_level = _boundary_flux_level(case_name, exact, boundary)
+    contour = _boundary_contour_endpoint_gap(
+        analytic_radius, analytic_height, analytic_grid_full, boundary_flux_level, boundary
+    )
     topology = certificate._topology(operator, state)
     analytic_topology = certificate._topology(operator, analytic_state)
-    boundary = certificate._boundary(case_name, exact)
     return {
         "case": case_name,
         "requested_cells": requested_cells,
@@ -224,13 +313,18 @@ def _build_certificate_case(case_name: str, requested_cells: int) -> dict[str, A
         "height": height,
         "solved_grid": solved_grid,
         "analytic_grid": analytic_grid,
+        "analytic_radius": analytic_radius,
+        "analytic_height": analytic_height,
+        "analytic_grid_full": analytic_grid_full,
+        "boundary_flux_level_wb": boundary_flux_level,
+        "analytic_boundary_contour": contour,
         "topology": topology,
         "analytic_topology": analytic_topology,
         "boundary": boundary,
         "terminal_residual": float(solve_receipt.equilibrium.fixed_point.residual),
         "converged": bool(solve_receipt.equilibrium.fixed_point.converged),
         "solve_seconds": elapsed,
-        "wall": np.asarray(machine.wall_node, dtype=np.float64),
+        "wall": wall,
     }
 
 
@@ -247,6 +341,9 @@ def _draw_certificate(record: dict[str, Any]) -> dict[str, Any]:
     height = record["height"]
     solved = record["solved_grid"]
     analytic = record["analytic_grid"]
+    analytic_radius = record["analytic_radius"]
+    analytic_height = record["analytic_height"]
+    analytic_full = record["analytic_grid_full"]
     topology = record["topology"]
     analytic_topology = record["analytic_topology"]
     boundary = record["boundary"]
@@ -254,12 +351,15 @@ def _draw_certificate(record: dict[str, Any]) -> dict[str, Any]:
     levels = _shared_levels(
         solved,
         analytic,
+        record.get("boundary_flux_level_wb"),
         topology.get("boundary_flux_wb"),
         analytic_topology.get("boundary_flux_wb"),
     )
     view = poloidal_view(_extent(wall, boundary), height=5.8)
     axes = view.poloidal
-    draw_flux_contours(axes, radius, height, analytic, levels, color="#3366cc")
+    draw_flux_contours(
+        axes, analytic_radius, analytic_height, analytic_full, levels, color="#3366cc"
+    )
     draw_flux_contours(axes, radius, height, solved, levels, color="#cc7722")
     root_boundary = topology.get("boundary_flux_wb")
     if root_boundary is not None and np.isfinite(root_boundary):
@@ -317,6 +417,13 @@ def _draw_certificate(record: dict[str, Any]) -> dict[str, Any]:
         "solve_seconds": record["solve_seconds"],
         "root_boundary_flux_wb": topology.get("boundary_flux_wb"),
         "analytic_boundary_flux_wb": analytic_topology.get("boundary_flux_wb"),
+        "boundary_flux_level_wb": record["boundary_flux_level_wb"],
+        "analytic_boundary_contour_endpoint_gap_m": record[
+            "analytic_boundary_contour"
+        ]["endpoint_gap_m"],
+        "analytic_boundary_contour_closed": record["analytic_boundary_contour"][
+            "closed"
+        ],
     }
 
 
@@ -611,6 +718,15 @@ def _draw_clipped_cells(requested_cells: int) -> dict[str, Any]:
             axis_marker="^", axis_color="#cc7722", xpoint_marker="X"
         ),
         contain=record["wall"],
+    )
+    axes.plot(
+        [],
+        [],
+        color="#cc7722",
+        marker="^",
+        markersize=6,
+        linestyle="none",
+        label="solved terminal axis",
     )
     axes.plot(
         physical_centroid[:, 0],

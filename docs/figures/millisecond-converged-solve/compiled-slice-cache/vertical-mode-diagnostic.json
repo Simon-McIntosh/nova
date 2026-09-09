@@ -5,15 +5,6 @@
     "external_ulp_against_recomputed": 0,
     "target_current": 874260.4375
   },
-  "first_state_difference": {
-    "cached_flux": -0.008173067784577059,
-    "direct_flux": -0.00817306778457706,
-    "element_ulp": 1,
-    "flat_index": 132,
-    "producer": "trip boundary reconstructs external plus current-moment image",
-    "trip": 0,
-    "trip_max_ulp": 16
-  },
   "inputs": {
     "bank_route": {
       "current_pin": "absolute bank reference plasma current as target",
@@ -35,7 +26,7 @@
         "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
         "size_bytes": 645864,
         "stored_circuit_count": 101,
-        "warm_load_seconds": 0.007635992020368576
+        "warm_load_seconds": 0.007782530039548874
       },
       "loaded_from_persisted_carrier": true,
       "named_cache_only_check": {
@@ -50,7 +41,7 @@
         ],
         "direct_green_operator_builder_entries": 0,
         "passes": true,
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.022944 direct_builders=0 verdict=PASS"
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.024503 direct_builders=0 verdict=PASS"
       }
     },
     "state_cache": {
@@ -65,28 +56,17 @@
   },
   "mechanism": "the first state difference is produced by trip-boundary reconstruction; cached external and coordinate inputs equal their recomputed values, so the remaining difference is the boundary image reduction inlined in the compiled loop versus separately dispatched by the host",
   "member": "21986/46 mixed",
-  "repair_attempts": [
-    {
-      "repair": "optimization barrier around the compiled trip-boundary result",
-      "terminal_flux_ulp": 16,
-      "trip_state_max_ulp": [
-        2,
-        0,
-        16
-      ],
-      "within_tolerance": false
+  "backend_qualification": {
+    "all_debug_cpu_x64": {
+      "passes": false,
+      "terminal_flux_ulp": 512
     },
-    {
-      "repair": "shared non-inline jitted trip-boundary reconstruction",
-      "terminal_flux_ulp": 512,
-      "trip_state_max_ulp": [
-        16,
-        8,
-        512
-      ],
-      "within_tolerance": false
+    "original_h200_receipt": {
+      "cache_reuse_passes": 12,
+      "member_count": 12,
+      "terminal_flux_max_ulp": 0
     }
-  ],
+  },
   "quantity_moved_first": {
     "adaptive": {
       "accepted_factor": null,
@@ -137,12 +117,10 @@
       "direct_mask_difference": 1,
       "direct_residual": 0.001743384698567222,
       "direct_steps": 1,
-      "first_differing_flat_index": 132,
-      "state_max_ulp": 16,
       "trip": 0
     },
     {
-      "cached_jacobian_builds": 1,
+      "cached_jacobian_builds": 2,
       "cached_mask_difference": 1,
       "cached_residual": 0.0018105679314074094,
       "cached_steps": 0,
@@ -150,8 +128,6 @@
       "direct_mask_difference": 1,
       "direct_residual": 0.0018105679314074957,
       "direct_steps": 0,
-      "first_differing_flat_index": 101,
-      "state_max_ulp": 8,
       "trip": 1
     },
     {
@@ -163,14 +139,29 @@
       "direct_mask_difference": 0,
       "direct_residual": 0.0018836772967004715,
       "direct_steps": 1,
-      "first_differing_flat_index": 0,
-      "state_max_ulp": 512,
       "trip": 2
     }
   ],
+  "withdrawn_keyed_lookup": {
+    "approach": "pre-coordinate lookup keyed by conductor inputs",
+    "cross_job_dispatch_comparator": {
+      "member_count": 12,
+      "passes": 3
+    },
+    "disposition": "withdrawn in favour of the reduced-coordinate and derived-external key",
+    "terminal_flux_identity": {
+      "limit_ulp": 4,
+      "max_ulp": 512,
+      "member": "21986/46 mixed"
+    }
+  },
+  "withdrawn_trip_state_capture": {
+    "reason": "loop-carried snapshot output changed the compiled program and was removed from the acceptance implementation",
+    "terminal_flux_ulp": 512
+  },
   "verdict": {
     "passes": false,
-    "reason": "both authorized trip-boundary repairs exceed the terminal-flux contract",
+    "reason": "the exact identity-proven source exceeds the CPU x64 terminal-flux contract",
     "terminal_flux_max_ulp": 4
   }
 }

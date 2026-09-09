@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-08T22:17:49",
+  "updated": "2026-09-09T08:21:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -118,9 +118,11 @@
         "id": "biot-singularity-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a082a7-e955-73f3-b4da-a2835b6f3106",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a082a7-e955-73f3-b4da-a2835b6f3106"
+        },
         "created": "2026-09-08"
       },
       {
@@ -2613,9 +2615,11 @@
         "id": "nia-clipcost-t",
         "harness": "codex-terra",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0826e-0bc6-7c33-934a-7292ccd76426",
+        "session_model": "gpt-5.6-terra",
+        "sessions": {
+          "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a0826e-0bc6-7c33-934a-7292ccd76426"
+        },
         "created": "2026-09-08"
       },
       {
@@ -4531,6 +4535,114 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-07"
+      },
+      {
+        "id": "s19r-bob",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19r-cank",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19r-dvf",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19r-fsa",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19r-gaa",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19r-gsce",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19r-mcs",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19r-mulw",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19r-nia",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19r-pfs",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19r-scr",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19r-ucc",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
       },
       {
         "id": "saddle-partition",
@@ -138877,6 +138989,935 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T201310555164-gaa-polygon-kernel-singularity",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a73",
+        "node": "gaa-polygon-kernel-singularity",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1625,
+                "cached_input_tokens": 866466,
+                "input_tokens": 868093,
+                "output_tokens": 2808,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 870901,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The lead has diagnosed the outboard error as a numerical singularity in the coupling operator, not a resolution shortfall, and wants it traced to its arithmetic and fixed at the core. Additional resolution will never fix it; do not propose that.\n\nTHE EVIDENCE THAT PROMPTS THIS. On the exact-oracle Solovev cases the flux error is not distributed. The top five percent of error nodes form ONE COMPACT PATCH on the outboard half around the midplane while the inboard side and both vertical extremes stay clean, drawn in docs/figures/null-identification-authority/mechanism-evidence/weak-rotation-500-error-locality.png. The magnetic axis error on the same cases is 13.352807 mm at 110 cells and 30.247708 mm at 300 cells, GROWING with resolution rather than falling, which is the signature of a pointwise defect being sampled more often rather than a discretisation converging.\n\nTHE SPECIFIC SUSPECT, which the lead named and which the source supports. nova/biot/polygonanalytic.py carries the Urankar closed form for a polygon-section ring. In its edge contribution it computes gap, the perpendicular distance from the field point to the line containing the edge, as the absolute value of a cross product over the edge length, and then guards the logarithm with has_logarithm = gap > 0.0, holding gap at one and zeroing the logarithm when that test fails. There are two such sites, near lines 1491 and 1535. That guard catches only EXACT zero. It does nothing for the neighbourhood where the arithmetic is worst: as gap becomes small but nonzero the arguments along_a / gap and along_b / gap become large, and the contribution is the DIFFERENCE of two arcsinh values of large arguments multiplied by a perpendicular term that is itself going to zero. That is a cancellation of two nearly equal large numbers scaled by a vanishing factor, and it degrades continuously as the geometry approaches the degenerate case while the guard reports nothing wrong.\n\nWHERE THAT BITES GEOMETRICALLY, and this is the hypothesis to test rather than assume. gap vanishes when the field point lies on the line containing a source edge. For a horizontal edge that means a field point at the same height as the edge. Both the hexagonal tiling and a rectangular grid contain horizontal edges, and the midplane is where field points and horizontal edges coincide most often. That would put the worst arithmetic exactly where the observed error patch sits.\n\nFIRST, THE DISCRIMINATOR THE LEAD ASKED FOR. Solve the same Solovev problem on a RECTANGULAR grid as well as the hexagonal one, at matched resolution, and compare the error maps. If the same outboard patch appears on both, the defect is in the kernel and independent of tiling, which is the strong result. If it appears only on hex, the tiling interacts with it and the geometry of the hex edge set is implicated too. Report both maps and say which. Draw them as LINE CONTOURS, never painted scatter, using nova/media/poloidal.py draw_flux_contours with one shared level array.\n\nSECOND, TRACE THE NUMERICS. Evaluate gap over the whole field-point set for a representative case and map its distribution. Report the minimum gap, the count below a sequence of thresholds relative to the local edge length, and where those small-gap evaluations sit in the poloidal plane. Then correlate directly: do the top five percent error nodes coincide with the smallest gap values? Give the correlation and a scatter of error against gap. That single comparison confirms or kills the hypothesis, and if it kills it, say so and report what the error DOES correlate with, because a refuted hypothesis with a measured alternative is the more useful outcome.\n\nInstrument the contribution itself at the worst points: report gap, along_a, along_b, the two arcsinh values, their difference, the perpendicular factor and the final contribution, so the cancellation is visible term by term rather than inferred.\n\nTHIRD, FIX IT AT THE CORE. The repair is a proper near-field treatment rather than a wider exact-zero guard. Where the difference of arcsinh values suffers cancellation, use an algebraically equivalent form that does not: the difference of two arcsinh terms has a closed form that keeps the small quantity explicit, and a series expansion in the small parameter is valid below a stated threshold. Choose the form, state the threshold with the reason it was chosen, and prove the two branches agree to round-off where they meet, which is the test that a branch boundary is not itself a new discontinuity. Do not widen the guard, do not clamp gap to an epsilon, and do not add resolution.\n\nPROVE THE FIX ON THE EVIDENCE THAT MOTIVATED IT. The outboard error patch must reduce or disappear, the axis error must stop growing with resolution, and the six certificate rungs should be re-measured with their residuals reported before and after. Also confirm no regression on the existing biot tests covering this kernel, judged by delta against a stated base rather than absolute green.\n\nWrite the repair as its own commit, separate from the instrumentation, so the fix is reviewable without the diagnostic scaffolding. Change nova/biot/polygonanalytic.py and its tests only; if the repair needs a caller changed, name the file and stop rather than reaching for it.\n\nMECHANICS. all_debug at --time=00:59:00 with JAX_PLATFORMS=cpu, TMPDIR exported as /tmp both before submitting and inside the payload, never a path under /run/user. Call configure_dtypes before building any array and assert the extended-precision flag: this measurement is about cancellation, and arrays built before that call are captured in single precision while the solver returns double states derived from them, which would manufacture exactly the artefact you are hunting. On a compute node call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH, never uv, running payloads from a file. Give each job its own log filename carrying its job id and persist each measurement as it lands. Never read an image back. Never submit the same job twice; a different job later in the same turn is fine and there is no per-turn budget. If you park, write status waiting with all five wait fields and wait_started_at unquoted in UTC exactly like 2026-09-08T21:00:00Z, naming the current job.",
+          "estimated_hours": 4.0,
+          "goal": "The arithmetic origin of the outboard error spike in the polygon coupling kernel, and its core fix",
+          "id": "gaa-polygon-kernel-singularity",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "unknown",
+            "metered": true,
+            "observed_at": "2026-09-08T17:24:11Z",
+            "read_at": "2026-09-08T20:13:31Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/polygon-kernel-singularity.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/biot/polygonanalytic.py",
+            "tests/test_biotpolygonmoments.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/polygon-kernel-singularity"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "biot-singularity-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T20:13:57Z",
+        "completed_at": "2026-09-08T20:21:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 439,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 439,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "3687dc3551fb0d949b4b5c4c88bc173036b34f79",
+        "commits": [
+          "da7f56dec8c3b25078438c1071e94dc0a86cc484",
+          "da9e4a2e4ba2bfd32f70c7faca493040137f66e2"
+        ],
+        "changed_lines": {
+          "added": 86,
+          "removed": 8,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_biotpolygonmoments.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/polygon-kernel-singularity/after-polygonmoments-1267288.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/polygon-kernel-singularity.md",
+        "scope_changed": false,
+        "session_id": "01a082a7-e955-73f3-b4da-a2835b6f3106",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2796544,
+            "cached_input_tokens_cumulative": 2796544,
+            "input_tokens": 2917033,
+            "input_tokens_cumulative": 2917033,
+            "output_tokens": 19003,
+            "output_tokens_cumulative": 19003,
+            "reasoning_output_tokens": 7860,
+            "reasoning_output_tokens_cumulative": 7860
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T20:21:16Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 54.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T20:21:16Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 101,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The clipped physical moments meet every current; centroid and net-current comparison; and the first-iterate regression is repaired; but the exact-oracle residual gate degrades on both required rungs under strict trial rejection. Resolving how iteration continues without consuming an unqualified axis is a lead-level design choice; carrying the prior qualified axis/support is explicitly unsafe and was not reintroduced.",
+              "elapsed_seconds": 3401,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 9740,
+              "log_fresh": false,
+              "manifest_commits": [
+                "f7850a3c0bd0d61884de7675aac7ebe285f83c75",
+                "b23764dc5f41b060e746f3f7cde536599931ec01",
+                "810d026adbad398d1b6926cac6ad9011ff47a6f4",
+                "ee34e0c9f6b631a87d3ccee129091707b4d1f7ef",
+                "a4b9c0dca4b3dc9ca9592ac0ffdf7d7ddbabf58a",
+                "1cfa045622bc7f2a7ba221f19f0a93ac3fdd4d4b",
+                "7cc2e06f518bdd0a7b8806983470f972659df4ec]; changed_paths: [nova/equilibrium/forward_operator.py",
+                "nova/equilibrium/source.py",
+                "nova/equilibrium/fixed_point.py",
+                "nova/equilibrium/forward.py",
+                "tests/test_forward_moment_class.py"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "fa8690b01a0e4dda781a4ac2eeb2e036993602481c3269f279aed2c87094039b",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-moment-repair.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-moment-repair.md; resolve the blocker before resuming the run",
+              "node": "nia-clipped-moment-repair",
+              "phase": "working",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "run_id": "r-20260908T135335431893-nia-clipped-moment-repair",
+              "session": "s19-labeller",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260908T135335431893-nia-clipped-moment-repair",
+                "session_id": "01a0814b-d9d7-75c0-bc41-2a26538e188c",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 9900,
+              "terminal_at": "2026-09-08T17:28:33Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-clipped-moment-repair"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 710,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 3715,
+              "log_fresh": false,
+              "manifest_commits": [
+                "]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip.md",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_floor.py",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_floor.sh",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/analytic-floor-1267249.json",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/floor-1267249.log",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_affine_reference.py",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_affine_reference.sh",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-analytic-recovery-1267258.json",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-1267258.log",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-analytic-recovery-1267259.json",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-1267259.log"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "9f0dc4939759bc6a58ad1d72d7978b13db1b2731fee07acbf3b28b11a4948b76",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260908T185201202084-gaa-affine-flux-function-roundtrip --gate <verdict> --commit ]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip.md --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_floor.py --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_floor.sh --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/analytic-floor-1267249.json --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/floor-1267249.log --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_affine_reference.py --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_affine_reference.sh --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-analytic-recovery-1267258.json --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-1267258.log --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-analytic-recovery-1267259.json --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-1267259.log",
+              "node": "gaa-affine-flux-function-roundtrip",
+              "phase": "working",
+              "plan": "gs-absolute-accuracy-gates",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "promote",
+              "recovery_classification": "completed_unpromoted",
+              "resets_at": null,
+              "run_id": "r-20260908T185201202084-gaa-affine-flux-function-roundtrip",
+              "session": "s19-labeller",
+              "terminal_age_seconds": 3736,
+              "terminal_at": "2026-09-08T19:11:17Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/gaa-affine-flux-function-roundtrip"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the requested same-cell chord-versus-curved measure cannot be called on either certificate rung because production cells are atomic polygons and the shipped curved routine accepts only rectangular tensor cells.",
+              "elapsed_seconds": 333,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 3437,
+              "log_fresh": false,
+              "manifest_commits": [
+                "]; changed_paths: ["
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "bd583a1d6119d45aea7bab81590c6137d817dff1793fbb72ab23b433315d4926",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clip-route-cost-and-accuracy.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "?",
+              "needs_help_complete": true,
+              "next_action": "reckon crew resume --run r-20260908T191036299030-nia-clip-route-cost-and-accuracy --advice <answer>",
+              "node": "nia-clip-route-cost-and-accuracy",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "answer",
+              "recovery_classification": "needs-help",
+              "resets_at": null,
+              "run_id": "r-20260908T191036299030-nia-clip-route-cost-and-accuracy",
+              "session": "s19-labeller",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260908T191036299030-nia-clip-route-cost-and-accuracy",
+                "session_id": "01a0826e-0bc6-7c33-934a-7292ccd76426",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 3456,
+              "terminal_at": "2026-09-08T19:15:57Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-clip-route-cost-and-accuracy"
+            }
+          ]
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 2796544,
+          "cumulative_input_tokens": 5713577,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 26863
+        },
+        "follow_on_paths": [
+          "before/after",
+          "solver/evidence"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/gaa-polygon-kernel-singularity",
+          "session_id": "01a082a7-e955-73f3-b4da-a2835b6f3106",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T20:21:16Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T193316961328-nia-forward-gs-contour-evidence",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-forward-gs-contour-evidence",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3692,
+                "cached_input_tokens": 837754,
+                "input_tokens": 841448,
+                "output_tokens": 615,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 842063,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "Produce docs/evidence/forward-gs-contour-evidence.html, carrying reckon-type evidence and plan-evidence-for null-identification-authority, with its figures under docs/figures/null-identification-authority/gs-contour-evidence/. A previous attempt at this document is being superseded; its worktree at .reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-poloidal-mechanism-evidence holds a committed renderer at docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py and four rendered figures, and you may read and reuse any of it. Its most recent rendering job, 1267260, FAILED after 25 minutes, so do not assume its outputs are complete; check before reusing.\n\nCOMMIT AS YOU GO, STARTING WITH YOUR FIRST FIGURE. The previous attempt rendered for over half an hour and left the document untracked, so the lead could not see any of it. Commit the HTML the moment it has one real figure in it, then commit again after each figure. PNG is gitignored here so figures need git add -f. A partial document a reviewer can open beats a complete one they cannot.\n\nRENDER AS CONTOURS, NOT PAINT. This is the lead's explicit instruction and it governs every panel. A field is drawn as LINE CONTOURS. Never a filled map, never a heatmap, never a colour-mapped scatter of cell centroids. The existing per-rung certificate figures under triage/rebank-certificate-and-bank/artifacts/job-1267132/figures are exactly what is not wanted: they paint absolute error onto scattered points, and no boundary, critical point or shape can be read from them. Use nova/media/poloidal.py draw_flux_contours, which draws unfilled contours and REQUIRES the level array rather than defaulting it, on the stated ground that two maps compared at independently chosen levels can be made to look like anything. Hand the same physical level array to both members of every compared pair. Where an error field must be shown, contour it too; where a quantity is only meaningful per cell, put it in a small table beside the figure rather than colouring cells with it.\n\nDRAW THE PLASMA HEX CELLS WITH THEIR CLIPS, USING THE EXISTING TOOLS. The chain exists: nova/media/sources/plasma_mesh.py hex_mesh returns wall-clipped hexagonal cell outlines with provenance, clip_to_boundary returns the parts inside a solved boundary each already cut, and nova/media/poloidal.py draw_plasma_cells draws the polygons it is handed. Read that painter's docstring: a cell cut by the wall or the separatrix must ARRIVE already clipped, because drawing the unclipped hexagon would overstate the plasma domain at exactly the boundary the figure is about, and it never reconstructs a cut. Whole hexagons straddling the separatrix is the specific error to avoid.\n\nDRAW THE FORWARD GS MAPS THEMSELVES, not only error. The lead wants our solved poloidal flux as line contours in its own right, because a map that looks wrong is diagnosed faster than a residual that is merely large. For each case draw the solved flux with the boundary, the critical points and the wall on it, and where an analytic or reference map exists put it beside on the shared level array. A reader should answer three questions without arithmetic: is the boundary where it should be, are the critical points where they should be, does the field look like a plasma equilibrium at all. Each caption says what a wrong answer to each would look like.\n\nMARK CRITICAL POINTS WITH CONTAINMENT. Use draw_nulls and pass the wall polygon as its contain argument; its docstring explains why finiteness alone is not enough, since a null outside the vessel is finite and otherwise paints a plausible cross against the wall. Draw the limiter and first wall with draw_wall, and note that the wall is now a collection of typed units rather than one ring, so respect unit boundaries rather than concatenating them.\n\nTHE CASES, in priority order, and say plainly which you could not render and why.\n1. The six Solovev certificate rungs from the retained H200 receipt at triage/rebank-certificate-and-bank/artifacts/job-1267132: weak-rotation-reactor-static at 110, 300, 500 and 1000 cells and moderate-rotation-conventional-static at 110 and 300. Terminal residuals 7.448e-3, 5.559e-3, 1.246e-3, 5.401e-3, 1.246e-2 and 8.456e-3, every one converged false. Solved flux beside analytic flux on shared levels.\n2. The boundary-cut cells on the diverted 110 and 342 rungs, eight and twenty of them, where the clipped moments were proven to reproduce the inside current and centroid, 8 of 8 and 20 of 20 with net-current relative error exactly zero. Draw the clipped supports with the separatrix through them and mark both centroids per cut cell.\n3. The cold-start first iterate on 110 that has no qualified axis and produced 256 refusals under strict rejection, with every stationary-point candidate marked and wall containment shown. The superseded attempt already rendered this and it is worth seeing: the first-iterate field is dense small-scale noise across the whole domain with broad structure buried underneath, not a plasma field. Reproduce it, and say in the caption whether that noise is expected of a cold seed or is itself the defect.\n\nDRAW THE TRUE SEPARATRIX BESIDE THE POLYGONAL CLIP. The lead asked whether cut cells use a curved support so that plotting does not render lower order than the calculation. They do not. nova/equilibrium/separatrix_clip.py builds conservative POLYGONAL supports: the crossing on each atomic edge is a LINEAR interpolation of flux along that edge at about line 621, the support is the polygon through those crossings, and its area and moments are then computed analytically for that polygon, exact for a cellwise-linear current density. observation.clipped_support_quadrature then fans each clipped cell into triangles under DEGREE-FIFTEEN Duffy quadrature. So we integrate to degree fifteen over a first-order boundary. Render the clip straight, because that is what is computed, and draw the traced separatrix through the same cells beside it so the gap is visible. Report the area difference per cut cell, absolute and as a fraction of the cell, and set it beside the rung residuals above and the measured operator composition floor of 1.1765249977300346e-3 of span at 67 by 103. Flag it prominently if comparable; do not fix anything.\n\nWHERE THE ERROR LIVES. In the existing error figures the psi, gradient and hessian errors are not uniform: they concentrate at the OUTBOARD MIDPLANE, around R 7.5 and Z between zero and plus one half on the weak-rotation case, while the interior stays dark, and on the 500-cell rung the psi panel appears to carry almost nothing else. Establish where the error actually lives, quantify it as a fraction of the domain, and say whether it coincides with the boundary contact, a limiter touch, the flux normalisation anchor or none of these. A structural error at one place is a different and far more tractable problem than distributed noise.\n\nTHE AFFINE ROUND TRIP HAS LANDED; fold in its result rather than stubbing it. Run r-20260908T185201202084, receipt under gs-accuracy/affine-flux-function-roundtrip. Its verdict: the affine route recovers the analytic constant p-prime at binary64 noise and ff-prime within the measured operator-composition floor, but NOT exactly, with ff-prime carrying a uniform second-order radial-stencil bias while bin-to-bin scatter stays at roundoff; worst finest relative sup 8.851872538089174e-5 over two cases, three lattices and 24 bins with zero exclusions. It also found a structural gap worth stating: the extraction requires a rectangular flux lattice while our forward Solovev receipts are unstructured hex maps flagged unavailable-non-tensor-product, so the route we apply to source EFIT data cannot currently be applied to our own solutions at all.\n\nCAPTIONS SAY WHAT WOULD BE WRONG, not what is drawn. A caption describing only the axes is not evidence. Include one legend panel defining every marker once and follow the vocabulary docs/evidence/poloidal-convergence-atlas.html already uses so the two read together: solid triangle for the magnetic axis, filled cross for the admitted saddle, hollow circles for other qualified X-points inside the wall, hollow squares for those outside. Link to that atlas rather than redrawing the twelve-row MAST bank it owns. Any section you have not reached must say in its own text that it is a placeholder, because a reader landing on a heading assumes the paragraph under it is the finding.\n\nMECHANICS. Figures referenced with project-absolute src beginning /nova/figures/, since a relative src returns not-found in the server. Never read a PNG or any image back. Rendering is heavy: all_debug at --time=00:59:00 with JAX_PLATFORMS=cpu, never the login node, never an output path under /run/user which is node-local to the login node. Export TMPDIR=/tmp both before submitting and inside the payload. Call configure_dtypes before building any array and assert the extended-precision flag, because arrays built before that call are captured in single precision while the solver returns double states derived from them. On a compute node call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH, never uv, running the renderer from a file. Give each job its own log filename carrying its job id. Never submit the same job twice; check squeue before relaunching one that appears to have failed; a different job later in the same turn is fine and there is no per-turn budget. If you park, write status waiting with all five wait fields and wait_started_at unquoted in UTC exactly like 2026-09-08T20:00:00Z, naming the current job.\n\nIf time is short, do the certificate rungs and the boundary-cut cells completely rather than all three groups thinly, and stub the rest with the question each would answer.",
+          "estimated_hours": 3.0,
+          "goal": "An evidence document of forward GS poloidal line-contour maps with critical points, boundaries, wall geometry and clipped hex cells",
+          "id": "nia-forward-gs-contour-evidence",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/forward-gs-contour-evidence.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "docs/evidence/forward-gs-contour-evidence.html",
+            "docs/figures/null-identification-authority/gs-contour-evidence"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "nia-gs-contour-doc-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T19:33:26Z",
+        "completed_at": "2026-09-08T20:22:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2927,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2927,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "40c2d4749469db4fa5fa45a85ffeb77c291aa975",
+        "commits": [
+          "f2cf8411a9dffba9917bbc2ae9c4a977f1856c80",
+          "da8a62fc432f1ebe79bc18999d1bb22217c32c1a",
+          "015b1683b6dab2da80524bb11a495e7ca36fc7c1",
+          "ab310773023c1d6be779a49c9d6193a2410d6f88",
+          "2e9c53184c5944889d6ec02491119bf46b3a90c7",
+          "c4af92fdab9c5e3fc609c2ef4683380fea3d38fe",
+          "210716c2fd9f0d1708ed0035c84e80451b19642d",
+          "8c57659c44ed33a7c3e79a65b31fb96475ad5ffa",
+          "61c625690b4e2c04290e5d8b0081e42967652582",
+          "8b1dc0057e527582d5cc93136fc9e2f8cfcc3a21",
+          "dbad6d111673d52a71e7ad36f6e9c4c31c98720e",
+          "97700025a00abed174585797c4637d4f8bc933ae"
+        ],
+        "changed_lines": {
+          "added": 1102,
+          "removed": 0,
+          "files": 22
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug certificate rendering job 1267270 and the panel jobs through 1267286",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-forward-gs-contour-evidence/docs/figures/null-identification-authority/gs-contour-evidence/certificate-1267270.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/forward-gs-contour-evidence.md",
+        "scope_changed": false,
+        "session_id": "01a08282-d2e8-7460-8c4e-cb249c935d17",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12712960,
+            "cached_input_tokens_cumulative": 12712960,
+            "input_tokens": 12937135,
+            "input_tokens_cumulative": 12937135,
+            "output_tokens": 42493,
+            "output_tokens_cumulative": 42493,
+            "reasoning_output_tokens": 14046,
+            "reasoning_output_tokens_cumulative": 14046
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T20:22:13Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 54.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T20:22:13Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 101,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The clipped physical moments meet every current; centroid and net-current comparison; and the first-iterate regression is repaired; but the exact-oracle residual gate degrades on both required rungs under strict trial rejection. Resolving how iteration continues without consuming an unqualified axis is a lead-level design choice; carrying the prior qualified axis/support is explicitly unsafe and was not reintroduced.",
+              "elapsed_seconds": 3401,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 7327,
+              "log_fresh": false,
+              "manifest_commits": [
+                "f7850a3c0bd0d61884de7675aac7ebe285f83c75",
+                "b23764dc5f41b060e746f3f7cde536599931ec01",
+                "810d026adbad398d1b6926cac6ad9011ff47a6f4",
+                "ee34e0c9f6b631a87d3ccee129091707b4d1f7ef",
+                "a4b9c0dca4b3dc9ca9592ac0ffdf7d7ddbabf58a",
+                "1cfa045622bc7f2a7ba221f19f0a93ac3fdd4d4b",
+                "7cc2e06f518bdd0a7b8806983470f972659df4ec]; changed_paths: [nova/equilibrium/forward_operator.py",
+                "nova/equilibrium/source.py",
+                "nova/equilibrium/fixed_point.py",
+                "nova/equilibrium/forward.py",
+                "tests/test_forward_moment_class.py"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "fa8690b01a0e4dda781a4ac2eeb2e036993602481c3269f279aed2c87094039b",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-moment-repair.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-moment-repair.md; resolve the blocker before resuming the run",
+              "node": "nia-clipped-moment-repair",
+              "phase": "working",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "run_id": "r-20260908T135335431893-nia-clipped-moment-repair",
+              "session": "s19-labeller",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260908T135335431893-nia-clipped-moment-repair",
+                "session_id": "01a0814b-d9d7-75c0-bc41-2a26538e188c",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 7487,
+              "terminal_at": "2026-09-08T17:28:33Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-clipped-moment-repair"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 710,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1302,
+              "log_fresh": false,
+              "manifest_commits": [
+                "]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip.md",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_floor.py",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_floor.sh",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/analytic-floor-1267249.json",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/floor-1267249.log",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_affine_reference.py",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_affine_reference.sh",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-analytic-recovery-1267258.json",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-1267258.log",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-analytic-recovery-1267259.json",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-1267259.log"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "9f0dc4939759bc6a58ad1d72d7978b13db1b2731fee07acbf3b28b11a4948b76",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260908T185201202084-gaa-affine-flux-function-roundtrip --gate <verdict> --commit ]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip.md --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_floor.py --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_floor.sh --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/analytic-floor-1267249.json --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/floor-1267249.log --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_affine_reference.py --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/run_affine_reference.sh --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-analytic-recovery-1267258.json --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-1267258.log --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-analytic-recovery-1267259.json --commit /home/ITER/mcintos/.config/reckon/crew/reports/nova/gs-accuracy/affine-flux-function-roundtrip/affine-1267259.log",
+              "node": "gaa-affine-flux-function-roundtrip",
+              "phase": "working",
+              "plan": "gs-absolute-accuracy-gates",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "promote",
+              "recovery_classification": "completed_unpromoted",
+              "resets_at": null,
+              "run_id": "r-20260908T185201202084-gaa-affine-flux-function-roundtrip",
+              "session": "s19-labeller",
+              "terminal_age_seconds": 1322,
+              "terminal_at": "2026-09-08T19:11:17Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/gaa-affine-flux-function-roundtrip"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: the requested same-cell chord-versus-curved measure cannot be called on either certificate rung because production cells are atomic polygons and the shipped curved routine accepts only rectangular tensor cells.",
+              "elapsed_seconds": 333,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1023,
+              "log_fresh": false,
+              "manifest_commits": [
+                "]; changed_paths: ["
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "bd583a1d6119d45aea7bab81590c6137d817dff1793fbb72ab23b433315d4926",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clip-route-cost-and-accuracy.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "?",
+              "needs_help_complete": true,
+              "next_action": "reckon crew resume --run r-20260908T191036299030-nia-clip-route-cost-and-accuracy --advice <answer>",
+              "node": "nia-clip-route-cost-and-accuracy",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "answer",
+              "recovery_classification": "needs-help",
+              "resets_at": null,
+              "run_id": "r-20260908T191036299030-nia-clip-route-cost-and-accuracy",
+              "session": "s19-labeller",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260908T191036299030-nia-clip-route-cost-and-accuracy",
+                "session_id": "01a0826e-0bc6-7c33-934a-7292ccd76426",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 1043,
+              "terminal_at": "2026-09-08T19:15:57Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-clip-route-cost-and-accuracy"
+            }
+          ]
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 12712960,
+          "cumulative_input_tokens": 25650095,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 56539
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-forward-gs-contour-evidence",
+          "session_id": "01a08282-d2e8-7460-8c4e-cb249c935d17",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T20:22:13Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260908T191036299030-nia-clip-route-cost-and-accuracy",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-clip-route-cost-and-accuracy",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1815,
+                "cached_input_tokens": 814115,
+                "input_tokens": 815932,
+                "output_tokens": 2895,
+                "reasoning_output_tokens": 511,
+                "total_tokens": 818827,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "d365fb28-34a5-424a-87b4-3b91e3c34e25",
+            "session_id": "s19-labeller"
+          },
+          "done_when": "The lead has established that a curvature correction was built and shipped and suspects it never reached the hot path, and wants both routes profiled so the trade is known rather than assumed. THE TWO ROUTES, both already in the tree. The MOMENT path is polygonal: forward_operator._profile_support calls moment_geometry.atomic_mesh.traced_clip, which is _traced_clip in nova/equilibrium/separatrix_clip.py, where the boundary crossing on each atomic edge is a LINEAR interpolation of flux along that edge at about line 621, the clipped support is the polygon through those crossings, and observation.clipped_support_quadrature then fans each convex clipped cell into triangles and applies DEGREE-FIFTEEN Duffy quadrature. The CURVED path shipped with the curved-clip-global-surface plan at S15: a C1 bicubic route with oriented Green-theorem corrections for area and the first and mixed moments, a twelve-node Gauss-Legendre arc rule bound in nova/equilibrium/flux_surface_extraction.py as _BICUBIC_ARC_POINT and _BICUBIC_ARC_WEIGHT from nova.biot.arcbandedcoupling._arc_rule, with bisection for edge roots and constrained Newton for extrema. Read that plan and its landed evidence before measuring; both are in docs. FIRST ESTABLISH THE ROUTING FACT rather than asserting it. Confirm by call trace, not by reading imports, whether the current-moment path can reach the arc rule at all on a production forward solve, and whether the curved route is used only for flux-surface geometry. State it as a fact with the call path written out. That plan already caught one instance of this exact class, a green gate pinning a route production did not use, and its own evidence says a passing test that pins an unused route is worse than no test because it reads as coverage. So establish which route each consumer actually takes today. SECOND MEASURE ACCURACY ON THE SAME CELLS. On the diverted -110 and -342 rungs take the boundary-cut cells, eight and twenty of them, and compute for each the area and the first moments BOTH ways: the chord polygon as production computes them, and the curved support through the same cell using the shipped arc machinery. Report per cell the absolute and relative difference in area and in each first moment, and the aggregate sup and root-mean-square. Give the implied centroid shift per cell in metres and as a fraction of the cell diagonal, because a centroid move is what the coupling actually feels. THIRD PROFILE BOTH ROUTES, which is the lead direct request. Time each route on the same cells and the same machine, warm and separately cold, reporting per-cell and total wall, and say how each scales with the number of cut cells and with resolution across at least three cell counts. Report compile or trace cost separately from execution cost where the route is traced, since a one-off trace and a per-solve execution have very different consequences for the millisecond target. Give the ratio between the routes as the headline number. FOURTH STATE THE TRADE IN ONE PARAGRAPH a reader can act on: what accuracy the curved route buys, at what cost multiple, on how many cells, and whether that changes with resolution. Note the plan own prior analysis as context to test rather than repeat: it found that clipping against the arc moves the EXTREMUM to second order while improving AREA only from second to third, so if current moments care about area the gain may be modest and your measurement should say so plainly either way. ONE COMPARISON THE LEAD WILL WANT. Set the chord-versus-curve area error beside the terminal residuals of the six certificate rungs, which run 0.0012 to 0.0125 and all report converged false, and beside the operator composition floor of 1.1765249977300346e-3 of span measured today at 67 by 103. If the chord error is comparable to either, a first-order boundary geometry under a degree-fifteen quadrature is a structural error at exactly the place the sprint error concentrates. Present the numbers side by side and say what would distinguish the explanations rather than asserting one. Change no solver source: this is measurement and the report plus a strict JSON receipt are the deliverable. Run on all_debug at --time=00:59:00 with JAX_PLATFORMS=cpu, exporting TMPDIR=/tmp both before submitting and inside the payload. Call configure_dtypes before building any array and assert the extended-precision flag, because arrays built before that call are captured in single precision while the solver returns double states derived from them, and this measurement is about geometric exactness. On a compute node call /home/ITER/mcintos/Code/nova/.venv/bin/python directly with the worktree on PYTHONPATH, never uv, running the payload from a file. Give each job its own log filename carrying its job id and persist each case as it lands. Never read an image back. Never submit the same job twice; a different job later in the same turn is fine and there is no per-turn budget. If you park, write status waiting with all five wait fields and wait_started_at unquoted in UTC exactly like 2026-09-08T19:30:00Z.",
+          "estimated_hours": 3.0,
+          "goal": "The cost and the accuracy of the polygonal chord clip against the curved arc clip on the same cut cells",
+          "id": "nia-clip-route-cost-and-accuracy",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clip-route-cost-and-accuracy.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clip-route-cost-and-accuracy"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "nia-clipcost-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-08T19:10:44Z",
+        "completed_at": "2026-09-08T19:16:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 333,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 333,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "40c2d4749469db4fa5fa45a85ffeb77c291aa975",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clip-route-cost-and-accuracy.md",
+        "scope_changed": false,
+        "session_id": "01a0826e-0bc6-7c33-934a-7292ccd76426",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3399936,
+            "cached_input_tokens_cumulative": 3399936,
+            "input_tokens": 3584256,
+            "input_tokens_cumulative": 3584256,
+            "output_tokens": 13312,
+            "output_tokens_cumulative": 13312,
+            "reasoning_output_tokens": 3209,
+            "reasoning_output_tokens_cumulative": 3209
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-08T19:16:17Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 50.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-08T19:16:17Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 101,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The clipped physical moments meet every current; centroid and net-current comparison; and the first-iterate regression is repaired; but the exact-oracle residual gate degrades on both required rungs under strict trial rejection. Resolving how iteration continues without consuming an unqualified axis is a lead-level design choice; carrying the prior qualified axis/support is explicitly unsafe and was not reintroduced.",
+              "elapsed_seconds": 3401,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 5965,
+              "log_fresh": false,
+              "manifest_commits": [
+                "f7850a3c0bd0d61884de7675aac7ebe285f83c75",
+                "b23764dc5f41b060e746f3f7cde536599931ec01",
+                "810d026adbad398d1b6926cac6ad9011ff47a6f4",
+                "ee34e0c9f6b631a87d3ccee129091707b4d1f7ef",
+                "a4b9c0dca4b3dc9ca9592ac0ffdf7d7ddbabf58a",
+                "1cfa045622bc7f2a7ba221f19f0a93ac3fdd4d4b",
+                "7cc2e06f518bdd0a7b8806983470f972659df4ec]; changed_paths: [nova/equilibrium/forward_operator.py",
+                "nova/equilibrium/source.py",
+                "nova/equilibrium/fixed_point.py",
+                "nova/equilibrium/forward.py",
+                "tests/test_forward_moment_class.py"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "fa8690b01a0e4dda781a4ac2eeb2e036993602481c3269f279aed2c87094039b",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-moment-repair.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/clipped-moment-repair.md; resolve the blocker before resuming the run",
+              "node": "nia-clipped-moment-repair",
+              "phase": "working",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "run_id": "r-20260908T135335431893-nia-clipped-moment-repair",
+              "session": "s19-labeller",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260908T135335431893-nia-clipped-moment-repair",
+                "session_id": "01a0814b-d9d7-75c0-bc41-2a26538e188c",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 6125,
+              "terminal_at": "2026-09-08T17:28:33Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-clipped-moment-repair"
+            }
+          ]
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 3399936,
+          "cumulative_input_tokens": 6984192,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 16521
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "measurement-only node; the same-cell chord-versus-curved measure is unbuildable at the base revision because production cells are atomic polygons and the curved routine accepts only rectangular tensor cells",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/nia-clip-route-cost-and-accuracy",
+          "session_id": "01a0826e-0bc6-7c33-934a-7292ccd76426",
+          "session_source": "pointer",
+          "retained_at": "2026-09-08T19:16:17Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "01a0826e-0bc6-7c33-934a-7292ccd76426",
+          "source": "pointer",
+          "reason": "the NEEDS-HELP question was answered by the lead on 2026-09-08 by authoring plan uniform-cell-clip-and-coupling, which owns the adapter work; nothing remains for this session to continue"
+        },
+        "watch_override": null
       }
     ],
     "holds": [
@@ -139189,6 +140230,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2300
+    "_version": 2317
   }
 }

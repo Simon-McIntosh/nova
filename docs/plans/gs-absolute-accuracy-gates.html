@@ -23,8 +23,8 @@
 <title>GS absolute accuracy gates | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-08">
-<meta name="plan-version" content="32">
+<meta name="plan-modified" content="2026-09-09">
+<meta name="plan-version" content="33">
 <meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html,benchmarks/solovev_certificate.py,docs/figures/gs-absolute-accuracy/solovev-certificate.json,docs/figures/gs-absolute-accuracy/solovev/,benchmarks/efit_reproduction_gate.py,docs/figures/gs-absolute-accuracy/efit-reproduction.json,docs/figures/gs-absolute-accuracy/efit/,docs/figures/gs-absolute-accuracy/oracle-fixture-assembly.json,tests/test_polygon_analytic_batched_moments.py">
 <meta name="plan-commits" content="3dc4bb57,bf6dcdf9,9b0be0c8,6480a228,69a96bdf,873cfba6,6cecf64e,1f6f3e2c,ebb56768,ae9c0ed6,eca38a8e,5bb6850f,a3ae6bd4,f76e9142,adfff6dc,466b9d02,faec6877,d0a01760,7573d3e7,77a2cd32,6d03967f,dcc671db,b93f9b10,f7d9557b">
 <meta name="plan-impl" content="0.8">
@@ -146,6 +146,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260908T185201202084-gaa-affine-flux-function-roundtrip" data-who="gaa-affine-roundtrip-t" data-when="2026-09-08T19:11:38Z">
     <div class="r-comment-body"><p>The affine route recovers our flux functions ALMOST exactly, and the almost is a named bias rather than noise. Sampling the closed-form analytic flux directly onto rectangular lattices at 33x49, 49x73 and 67x103 for the weak-rotation and moderate-rotation cases, with no solver, no stored map and no interpolation in the path, the route returns the prescribed constant p prime at binary64 noise and ff prime within the measured operator-composition floor, but NOT exactly: ff prime carries a UNIFORM SECOND-ORDER RADIAL-STENCIL BIAS while bin-to-bin scatter stays at roundoff. Worst finest relative deviation 8.851872538089174e-5 across two cases, three lattices and 24 bins with zero exclusions, classified as within the measured composition floor of 1.1765249977300346e-3 of span. The offset-versus-scatter split is what makes this actionable: a uniform offset is a bias with a mechanism, and the mechanism is named as the radial stencil rather than left as an error bar. A STRUCTURAL GAP FOUND ON THE WAY, and it is the more important half. The extraction requires a rectangular flux lattice while our forward Solovev receipts are unstructured hex maps carrying an explicit unavailable-non-tensor-product status, so the route we apply to source EFIT data CANNOT currently be applied to our own forward solutions at all. That means every profile extracted from EFIT by this route has never been validated against a case whose answer we know, which is why the analytic-lattice test above was the only exact check available. The node declined to author a tensor carrier or interpolate hex onto a raster, correctly, since either would inject the error the measurement exists to bound and the carrier choice is a design decision rather than a step to unblock oneself. It also measured the composition floor itself: the operator pair is still CONVERGENT rather than at an arithmetic floor, and the finite-section Green composition runs 29.846643069925488 times the analytic delta-star term, so the Green kernel dominates the composition error by roughly thirty to one.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260908T201310555164-gaa-polygon-kernel-singularity" data-who="biot-singularity-t" data-when="2026-09-08T20:21:16Z">
+    <div class="r-comment-body"><p>Near-collinear edge-logarithm cancellation repaired at both axis-field sites (11 passed, baseline 8); the axis branch is refuted as the source of the outboard Solovev error patch, and the off-axis coupling-path investigation now lives as the first followup of plan uniform-cell-clip-and-coupling</p></div>
 </div>
 </section>
 </main>

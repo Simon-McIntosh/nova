@@ -162,8 +162,14 @@ def diagnose_vertical_mode(output: Path) -> dict[str, Any]:
         "member": member.identity,
         "inputs": inputs,
         "mechanism": (
-            "the cached executable omitted the adaptive Jacobian-refresh threshold "
-            "and therefore ran the refusal-only chord policy"
+            "adaptive versus refusal-only refresh first changes only the refused "
+            "ladder work count and leaves terminal flux identical; compiled-versus-"
+            "host roundoff came from eagerly scoring all six grades in one lax.map "
+            "instead of the host sequence of grade one followed by the five-grade tail"
+        ),
+        "roundoff_operation": (
+            "compiled eager six-grade lax.map replaced by grade kernel then "
+            "conditional five-grade tail kernel"
         ),
         "quantity_moved_first": first_step,
         "trip_comparison_after_repair": trip_rows,

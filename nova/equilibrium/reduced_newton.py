@@ -1375,20 +1375,29 @@ def _compiled_slice_solver(
     """
     factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=jnp.float64)
 
-    def choose(reduced, jacobian, shadow, base_state, merit):
-        direction = kernels["direction"](
-            jacobian,
-            kernels["step_scores"](reduced, shadow, base_state).residual,
+    def choose(reduced, jacobian, residual, shadow, base_state, merit):
+        direction = kernels["direction"](jacobian, residual)
+        first_candidate, first_scores = kernels["grade"](
+            reduced,
+            direction,
+            factors[0],
+            shadow,
+            base_state,
         )
-        candidates = reduced[None, :] + factors[:, None] * direction[None, :]
-        scored = jax.lax.map(
-            lambda candidate: kernels["step_scores"](candidate, shadow, base_state),
-            candidates,
-        )
-        valid = jnp.isfinite(scored.merit) & (scored.merit < merit)
-        accepted = jnp.argmax(valid.astype(jnp.int32))
-        found = jnp.any(valid)
-        return found, accepted, candidates[accepted]
+        first_valid = jnp.isfinite(first_scores.merit) & (first_scores.merit < merit)
+
+        def accept_first(_):
+            return jnp.asarray(True), jnp.asarray(0, dtype=jnp.int32), first_candidate
+
+        def score_tail(_):
+            candidates, scored = kernels["tail"](
+                reduced, direction, shadow, base_state
+            )
+            valid = jnp.isfinite(scored.merit) & (scored.merit < merit)
+            accepted = jnp.argmax(valid.astype(jnp.int32))
+            return jnp.any(valid), accepted + 1, candidates[accepted]
+
+        return jax.lax.cond(first_valid, accept_first, score_tail, None)
 
     def trip_body(reduced, shadow, base_state):
         jacobian = kernels["jacobian"](reduced, shadow, base_state)
@@ -1471,6 +1480,7 @@ def _compiled_slice_solver(
                     first = choose(
                         reduced,
                         prepared_jacobian,
+                        scores.residual,
                         shadow,
                         base_state,
                         scores.merit,
@@ -1481,6 +1491,7 @@ def _compiled_slice_solver(
                         selected = choose(
                             reduced,
                             refreshed,
+                            scores.residual,
                             shadow,
                             base_state,
                             scores.merit,

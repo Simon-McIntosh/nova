@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T16:51:42",
+  "updated": "2026-09-09T17:28:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -146107,6 +146107,249 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T141427041464-ucc-solver-level-discriminator",
+        "plan": "uniform-cell-clip-and-coupling",
+        "section": "",
+        "node": "ucc-solver-level-discriminator",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 382,
+                "cached_input_tokens": 785551,
+                "input_tokens": 785937,
+                "output_tokens": 19,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 785956,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "docs/figures/uniform-cell-clip-and-coupling/solver-discriminator/receipt.json records for 110, 300 and 500 requested cells on both tilings the axis error, terminal residual and outboard-window error enrichment, plus for each rung the fraction of squared flux error removed by re-normalising against the exact axis flux and by substituting the exact axis position into the iteration, with line-contour error maps on shared levels as SVG beside it, produced on all_debug CPU x64 one rung per process",
+          "estimated_hours": null,
+          "goal": "Run the solver-level discriminator of followup f-20260909T1035-solver-level-discriminator on the weak-rotation-reactor-static exact case: the production certificate path on the hex carrier and on a rectangular carrier at matched resolution with error maps on shared levels, and the normalisation-anchor test by re-normalising the terminal state against the exact analytic axis flux",
+          "id": "ucc-solver-level-discriminator",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T14:14:27Z",
+            "read_at": "2026-09-09T14:14:28Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 84.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T141427041464-ucc-solver-level-discriminator/manifest.md",
+          "plan": "uniform-cell-clip-and-coupling",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/solovev_solver_discriminator.py",
+            "docs/figures/uniform-cell-clip-and-coupling/solver-discriminator"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-ucc-solver",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T14:14:38Z",
+        "completed_at": "2026-09-09T15:25:09Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4231,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4231,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "8ae3a7d776c3e067a777336f9bfdc4614568d2b2",
+        "commits": [
+          "1305e81cd950594c3e6985c5a6088003d034c385",
+          "a2ee58ee288a473a4b63e019073acb067eb47cfc",
+          "616c570a7cf9b2e0fcdd6d361b8ae9fa12db4d03"
+        ],
+        "changed_lines": {
+          "added": 18117,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "six all_debug CPU x64 processes (jobs 1267927 to 1267932), one carrier and rung each, exit 0; aggregate exit 0; receipt contract jq assertion passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/uniform-cell-clip-and-coupling/solver-discriminator/receipt.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T141427041464-ucc-solver-level-discriminator/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08685-51ae-7773-9d71-f3970e2f3c45",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 26577280,
+            "cached_input_tokens_cumulative": 26577280,
+            "input_tokens": 26747281,
+            "input_tokens_cumulative": 26747281,
+            "output_tokens": 44031,
+            "output_tokens_cumulative": 44031,
+            "reasoning_output_tokens": 11189,
+            "reasoning_output_tokens_cumulative": 11189
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T15:25:09Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 87.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T15:25:09Z"
+            }
+          ],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "notional_cost_usd": "no_dated_rate",
+            "rate_basis": "no_dated_rate"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: exact differing static host field list=[`flattened_static_state.declared_support`]; classification=equilibrium-dependent stored-LCFS support mask incorrectly classified as static host geometry; mechanism=`DeclaredAnchorOperator.declared_support` is omitted from `_dynamic_extra_names`; so `tree_flatten` retains it in `_OperatorPytreeAux.static_state`; effect=six 1089-cell masks produce six host digests and force six width-2 groups; representative value=flat cell 113 is false for 21978/35 and true for 21983/35; repair scope=`nova/equilibrium/forward_operator.py`; outside this node's fence and held by another worktree; H200 rerun prohibited and not attempted in this turn",
+              "elapsed_seconds": 1077,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 9834,
+              "log_fresh": false,
+              "manifest_commits": [
+                "2071f8c02f7e2d7a13b6cc8748eb8fafa842a7da",
+                "3d0806ef710451cf94dc211aabedca3fe39fa176",
+                "ff38a60b5cc221bc5b4e1f0522546b22407bac2a]; changed_paths: [\"benchmarks/strict_exit_incidence.py",
+                "docs/figures/batched-operator-boundary/exit-incidence/batched-exit-incidence.json"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "9ff9b9b3504ecfb2ff29a00b54885299a26968302a81039880743d910911dafe",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/manifest.md; resolve the blocker before resuming the run",
+              "node": "bob-batched-exit-incidence",
+              "phase": "working",
+              "plan": "batched-operator-boundary",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260909T105115820348-bob-batched-exit-incidence",
+              "session": "s19-review",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260909T105115820348-bob-batched-exit-incidence",
+                "session_id": "01a085cb-6355-7a22-8b6f-f865ccb63c6d",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 9938,
+              "terminal_at": "2026-09-09T11:28:54Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/bob-batched-exit-incidence"
+            }
+          ]
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 26577280,
+          "cumulative_input_tokens": 53324561,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 55220
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/ucc-solver-level-discriminator",
+          "session_id": "01a08685-51ae-7773-9d71-f3970e2f3c45",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T15:25:09Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -146419,6 +146662,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2377
+    "_version": 2378
   }
 }

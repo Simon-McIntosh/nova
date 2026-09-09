@@ -1,146 +1,250 @@
 {
-  "schema": "nova.strict-exit-incidence/2",
-  "measurement_state": "blocked_before_batch_compile",
-  "recorded_at": "2026-09-09T11:08:36Z",
-  "source": {
-    "revision": "2071f8c02f7e2d7a13b6cc8748eb8fafa842a7da",
-    "driver": "benchmarks/strict_exit_incidence.py",
-    "operand_cache": "logs/exact-operand-cache.npz",
-    "operand_cache_sha256": "2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904"
+  "blocker": {
+    "condition": "strict_exit_changed_terminal_state_bits",
+    "elapsed": "00:40:37",
+    "error": "strict exit changed terminal state bits for d3d_shot_00000c4a7b.parquet frame 179",
+    "exit_code": 1,
+    "failing_member": "d3d_shot_00000c4a7b.parquet frame 179",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/batched-exit-incidence-h200-diiid.log",
+    "machine": "DIII-D",
+    "qualification": "both width-5 passes completed, but the strict terminal-state identity check failed before per-member rows could be serialized; no further H200 attempt is authorized",
+    "scheduler_job_id": 1268088,
+    "scheduler_state": "FAILED",
+    "stage": "result_extraction"
+  },
+  "checkpoint": {
+    "completed_machines": [
+      "MAST"
+    ],
+    "pending_machines": [
+      "DIII-D"
+    ],
+    "persistence": "atomically replaced after each completed machine"
+  },
+  "configuration": {
+    "host_memory_limit_mib": 16384,
+    "host_memory_peak_mib": 115509.84765625,
+    "host_memory_stages": [
+      {
+        "current_rss_mib": 792.32421875,
+        "resource_peak_rss_mib": 791.875,
+        "resource_peak_scope": "process lifetime through this stage",
+        "stage": "INPUT_BUILD_START"
+      },
+      {
+        "current_rss_mib": 4422.91796875,
+        "resource_peak_rss_mib": 5014.6875,
+        "resource_peak_scope": "process lifetime through this stage",
+        "stage": "MAST_INPUT_BUILD_DONE"
+      },
+      {
+        "current_rss_mib": 7896.57421875,
+        "resource_peak_rss_mib": 8331.8671875,
+        "resource_peak_scope": "process lifetime through this stage",
+        "stage": "MAST_INPUT_RELEASED"
+      }
+    ],
+    "host_memory_under_limit": false,
+    "paired_control": "each machine program receives the same stacked member arguments for one exit-disabled and one exit-enabled runtime-flag pass",
+    "program_widths": {
+      "DIII-D": 5,
+      "MAST": 12
+    },
+    "real_bank_widths": {
+      "DIII-D": 5,
+      "MAST": 12
+    },
+    "self_check": false,
+    "strict_exit_definition": "zero mask difference, own-mask acceptance, zero accepted Newton promotions, and bit-identical retained incoming state",
+    "trip_limit": 16
+  },
+  "evidence_inputs": {
+    "MAST": {
+      "bank": {
+        "path": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+        "sha256": "58a5d895fe7aed0df31bb62083832b9efdfdf945fe4567e552b611cbec356a10"
+      },
+      "bank_route": {
+        "current_pin": "absolute bank reference plasma current passed as target_current",
+        "path": "benchmarks/bank_revision_reproduction.py",
+        "profile_construction": "passive-inclusive case on the current revision with the exact persisted response carrier",
+        "sha256": "ae73960d2e17e9b4d885036ee2917d7e9a4ff6370029ff51145603e013929f0c"
+      },
+      "member_count": 12,
+      "profile_representation": "six distinct 65-point MAST profile pairs carried as dynamic array leaves",
+      "rebuilt_profile_count": 6,
+      "response_carrier": {
+        "carrier": {
+          "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+          "frozen_reference_count": 6,
+          "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+          "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+          "response_shape": [
+            1126,
+            101
+          ],
+          "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+          "size_bytes": 645864,
+          "stored_circuit_count": 101,
+          "warm_load_seconds": 0.004490637220442295
+        },
+        "loaded_from_persisted_carrier": true,
+        "named_cache_only_check": {
+          "command": [
+            "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+            "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/bob-batched-exit-incidence/benchmarks/mast_response_carrier_warm.py",
+            "check",
+            "--carrier",
+            "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+            "--receipt",
+            "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+          ],
+          "direct_green_operator_builder_entries": 0,
+          "passes": true,
+          "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.021644 direct_builders=0 verdict=PASS"
+        }
+      },
+      "state_cache": {
+        "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/bob-batched-exit-incidence/logs/exact-operand-cache.npz",
+        "sha256": "2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904"
+      },
+      "state_cache_authority": {
+        "response_carrier_semantic_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "schema_revision": 8,
+        "selection_source_commit": "80706f89"
+      }
+    },
+    "retained_compile_memory": {
+      "host_memory_limit_mib": 16384,
+      "host_memory_under_limit": false,
+      "job_id": 1267937,
+      "measurement_state": "cache_retry_failed_before_persistent_lookup",
+      "process_peak_host_rss_mib": 41861.965,
+      "qualification": "cold width-12 compile evidence retained across the cache-enabled rerun"
+    },
+    "sequential_width_one_receipt": {
+      "path": "docs/figures/millisecond-converged-solve/strict-exit-incidence.json",
+      "sha256": "7eb2bb066dfc8f0f7fda66f4ebb144aae68ea171172380c8c645e3adb730a3d0"
+    }
   },
   "execution": {
-    "job_id": 1267675,
-    "scheduler_state": "CANCELLED by owner after the required stacked branch was declined",
-    "elapsed": "00:02:24",
-    "node": "98dci4-gpu-0003",
-    "partition": "betelgeuse",
-    "reservation": "gpu_0003_grpA",
+    "attempt": 4,
     "cpu_count": 1,
+    "device": "NVIDIA H200 NVL",
+    "elapsed_seconds": 1890.888942358084,
+    "exit_marker": null,
     "gpu_count": 1,
-    "device": "NVIDIA H200",
-    "requested_memory": "128G",
+    "host": "98dci4-gpu-0003.iter.org",
+    "input_build_seconds": {
+      "MAST": 92.13646528869867
+    },
     "jax_platforms": [
       "cuda",
       "cpu"
     ],
-    "tmpdir": "/tmp",
-    "shared_venv_python": "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-    "persistent_compilation_cache": true,
-    "stage_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/batched-exit-incidence-h200.log",
-    "stage_log_sha256": "6a85a3f8cbd6af658f178570cc5ba47497438e6d479d79400c5d0f8efd8a195f",
-    "scheduler_step_max_rss_kib": 7190972,
-    "scheduler_step_max_rss_mib": 7022.43359375,
-    "driver_process_peak_rss_mib_before_compile": 5017.0625,
-    "host_memory_under_16_gib_before_compile": true
-  },
-  "configuration": {
-    "requested_program_widths": {
-      "MAST": 12,
-      "DIII-D": 5
-    },
-    "same_arguments_for_exit_passes": true,
-    "exit_passes_requested": [
-      "without_exit",
-      "with_exit"
-    ]
-  },
-  "machines": {
-    "MAST": {
-      "requested_width": 12,
-      "built_member_count": 12,
-      "compile_once": false,
-      "compile_seconds": null,
-      "passes_completed": [],
-      "batched_ms_per_member": {
-        "without_exit": null,
-        "with_exit": null
+    "job_id": 1268060,
+    "job_name": "nova-exit-incidence-corrected",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
       },
-      "per_member_firing_trips": null,
-      "execution_route_selected": "sequential_jitted_geometry_fallback",
-      "operator_identity_group_count": 6,
-      "operator_identity_groups": [
-        [0, 1],
-        [2, 3],
-        [4, 5],
-        [6, 7],
-        [8, 9],
-        [10, 11]
-      ],
-      "member_identities": [
-        "21978/35 pure",
-        "21978/35 mixed",
-        "21983/35 pure",
-        "21983/35 mixed",
-        "21985/51 pure",
-        "21985/51 mixed",
-        "21986/46 pure",
-        "21986/46 mixed",
-        "21989/55 pure",
-        "21989/55 mixed",
-        "22086/43 pure",
-        "22086/43 mixed"
-      ],
-      "geometry_identity_digests": [
-        "368cccf7d7e6f24dee19abe8f6ff54b8ec5d8fefbdced751dba55ee4b1a17399",
-        "368cccf7d7e6f24dee19abe8f6ff54b8ec5d8fefbdced751dba55ee4b1a17399",
-        "dc5f405f8fd96c11ef8612ea5f9270d80be34b291429749c6b64bf0a7cc862c2",
-        "dc5f405f8fd96c11ef8612ea5f9270d80be34b291429749c6b64bf0a7cc862c2",
-        "8cc621daa704a78fca5fce6a8034e9b98f247341b382bbdfd220f4e9a271ce8d",
-        "8cc621daa704a78fca5fce6a8034e9b98f247341b382bbdfd220f4e9a271ce8d",
-        "5442c7438f5690421745640f37c1ffad094b9c82fecad2b1a655bceb22390d57",
-        "5442c7438f5690421745640f37c1ffad094b9c82fecad2b1a655bceb22390d57",
-        "3539ada01babf4295141ad5d5559bde23016bada1241758be50a966748784e93",
-        "3539ada01babf4295141ad5d5559bde23016bada1241758be50a966748784e93",
-        "3f807381009d9cd018c2fa759ccd6bcd5b2e399cd735954165e1b8a624d8d2f3",
-        "3f807381009d9cd018c2fa759ccd6bcd5b2e399cd735954165e1b8a624d8d2f3"
-      ],
-      "group_diagnostic_job_id": 1267678,
-      "group_diagnostic_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/mast-geometry-groups.log",
-      "group_diagnostic_log_sha256": "60f7763fe040704c13a8839536226678b6a84a143a5017829102112b7e2d09f6"
-    },
-    "DIII-D": {
-      "requested_width": 5,
-      "built_member_count": 0,
-      "compile_once": null,
-      "compile_seconds": null,
-      "passes_completed": [],
-      "batched_ms_per_member": {
-        "without_exit": null,
-        "with_exit": null
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 1.0,
+      "root": "/home/ITER/mcintos/.cache",
+      "runtime_identity": {
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "NVIDIA H200 NVL",
+            "platform": "gpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
       },
-      "per_member_firing_trips": null,
-      "not_run_reason": "the required MAST width-12 program was already impossible at the current operator boundary"
-    }
-  },
-  "sequential_width_one_comparison": {
-    "receipt_path": "docs/figures/millisecond-converged-solve/strict-exit-incidence.json",
-    "receipt_sha256": "7eb2bb066dfc8f0f7fda66f4ebb144aae68ea171172380c8c645e3adb730a3d0",
-    "measurement_state": "partial_scheduler_timeout",
-    "MAST": {
-      "paired_timing_member_count": 12,
-      "without_exit_mean_ms": 64354.927120500004,
-      "with_exit_mean_ms": 60188.503989
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-0745ecebea4cb264e054"
     },
-    "DIII-D": {
-      "paired_timing_member_count": 2,
-      "without_exit_mean_ms": 205113.028233,
-      "with_exit_mean_ms": 196694.746691
+    "prior_job_id": 1268040,
+    "requested_memory_mib": 131072,
+    "requested_time_limit": "00:59:00",
+    "reservation": "gpu_0003_grpA",
+    "tmpdir": "/tmp"
+  },
+  "findings": {
+    "mast_per_member_wall": {
+      "batched_minus_sequential_ms_per_member": {
+        "with_exit": 10966.84918175001,
+        "without_exit": 7323.870960166671
+      },
+      "batched_ms_per_member": {
+        "with_exit": 71155.35317075001,
+        "without_exit": 71678.79808066667
+      },
+      "batched_over_sequential": {
+        "with_exit": 1.1822083696207883,
+        "without_exit": 1.1138043548158052
+      },
+      "classification": "plan_level_finding",
+      "qualification": "the measured MAST batch wall is retained as a throughput finding; it is not adjusted or explained away",
+      "sequential_width_one_ms_per_member": {
+        "with_exit": 60188.503989,
+        "without_exit": 64354.927120500004
+      },
+      "verdict": "batched_per_member_wall_not_below_sequential_width_one"
     }
   },
   "host_geometry_discriminator": {
-    "status": "classification_defect_found",
-    "recorded_at": "2026-09-09T11:25:50Z",
-    "diagnostic_execution": {
-      "job_id": 1267690,
-      "partition": "all_debug",
-      "device": "cpu",
-      "jax_enable_x64": true,
-      "raw_comparison_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/host-geometry-discriminator.json",
-      "raw_comparison_sha256": "4a93ab47a1b226c3fa48bf49e571d9244a6d57e7567264b52222ac01f4f9abd2",
-      "run_log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/host-geometry-discriminator-retry.log",
-      "run_log_sha256": "e5b7bc09544313f6307186d1d616bea76f366c8df60af590ef5930adf4337d53"
+    "classification": {
+      "equilibrium_dependence": "the benchmark constructs declared_support from inside_polygon(lattice coordinates, stored LCFS coordinates) intersected with the common machine material mask; the stored LCFS is an equilibrium result for the selected shot and time slice",
+      "mechanism": "DeclaredAnchorOperator.declared_support remains in tree_flatten auxiliary static_state because _dynamic_extra_names emits only declared_axis_flux and declared_boundary_flux",
+      "repair_outcome": "declared_support now rides as a dynamic member leaf; the historical discriminator is retained to explain the prior six-group refusal",
+      "required_repair": "move declared_support from operator static_state to traced member children alongside the two declared flux anchors",
+      "source_binding": "benchmarks/efit_forward_parity_slice.py computes declared_support from _stored_lcfs in _passive_inclusive_case and passes it to DeclaredAnchorOperator",
+      "verdict": "section_1_member_data_classification_defect"
     },
     "comparison": {
+      "arm_qualification": "each pure and mixed pair already has one identical batch identity, so one pure operator represents each shot/slice geometry without discarding a geometry difference",
+      "compared_leaf_count": 87,
+      "differing_dynamic_member_leaf_count": 2,
+      "differing_leaf_count": 3,
+      "differing_static_host_leaf_count": 1,
+      "equal_leaf_count": 84,
       "identities": [
         "21978/35",
         "21983/35",
@@ -149,25 +253,85 @@
         "21989/55",
         "22086/43"
       ],
-      "representative_arm": "pure",
-      "arm_qualification": "each pure and mixed pair already has one identical batch identity, so one pure operator represents each shot/slice geometry without discarding a geometry difference",
-      "compared_leaf_count": 87,
-      "equal_leaf_count": 84,
-      "differing_leaf_count": 3,
-      "differing_static_host_leaf_count": 1,
-      "differing_dynamic_member_leaf_count": 2
+      "representative_arm": "pure"
     },
-    "field_by_field": {
-      "lattice_coordinates": {
-        "equal_across_all_six": true,
-        "compared_fields": [
-          "lattice.radius",
-          "lattice.height",
-          "grid_coordinate"
+    "declared_support_by_identity": {
+      "21978/35": {
+        "dtype": "bool",
+        "sha256": "e9185d1f7e381ec0cd34f745c3d3445c6231bed6150870349873cfbb23358c8e",
+        "shape": [
+          1089
         ]
       },
-      "connectivity": {
+      "21983/35": {
+        "dtype": "bool",
+        "sha256": "19d7065016398a33862c349b20d0b53cae012bf764b7cc6c2dcc89c6646caa98",
+        "shape": [
+          1089
+        ]
+      },
+      "21985/51": {
+        "dtype": "bool",
+        "sha256": "d7e90480123a24cda85356e651850b39caa5da4003d97a337bcec3d8950a8d2d",
+        "shape": [
+          1089
+        ]
+      },
+      "21986/46": {
+        "dtype": "bool",
+        "sha256": "f6e2681d6be4dace00fa97739da43c0f44639f5716b4e5a4d2fbeb83bb790c95",
+        "shape": [
+          1089
+        ]
+      },
+      "21989/55": {
+        "dtype": "bool",
+        "sha256": "11873bcf780603d0c33b81aad7c9cda14649967272e7c39fac6f8ace62636a70",
+        "shape": [
+          1089
+        ]
+      },
+      "22086/43": {
+        "dtype": "bool",
+        "sha256": "1cc0010524a23b4656433f4cbee048498f254aca6fb29b7463c0a488c415d345",
+        "shape": [
+          1089
+        ]
+      }
+    },
+    "diagnostic_execution": {
+      "device": "cpu",
+      "jax_enable_x64": true,
+      "job_id": 1267690,
+      "partition": "all_debug",
+      "raw_comparison_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/host-geometry-discriminator.json",
+      "raw_comparison_sha256": "4a93ab47a1b226c3fa48bf49e571d9244a6d57e7567264b52222ac01f4f9abd2",
+      "run_log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/host-geometry-discriminator-retry.log",
+      "run_log_sha256": "e5b7bc09544313f6307186d1d616bea76f366c8df60af590ef5930adf4337d53"
+    },
+    "differing_host_geometry_fields": [
+      "flattened_static_state.declared_support"
+    ],
+    "differing_value_example": {
+      "21978/35": false,
+      "21983/35": true,
+      "field": "flattened_static_state.declared_support",
+      "flat_cell_index": 113,
+      "pair": [
+        "21978/35",
+        "21983/35"
+      ]
+    },
+    "field_by_field": {
+      "cell_polygons": {
+        "compared_fields": [
+          "cell_polygons",
+          "flattened_static_state.moment_geometry"
+        ],
         "equal_across_all_six": true,
+        "value": null
+      },
+      "connectivity": {
         "compared_fields": [
           "flattened_static_state.topology.connectivity_coordinate",
           "flattened_static_state.topology.connectivity_edge_gather",
@@ -183,28 +347,68 @@
           "flattened_static_state._fixed_design_topology.connectivity_radius",
           "flattened_static_state._fixed_design_topology.connectivity_rings",
           "flattened_static_state._fixed_design_topology.connectivity_shared_edges"
-        ]
-      },
-      "wall_nodes": {
-        "equal_across_all_six": true,
-        "compared_fields": [
-          "wall_nodes",
-          "wall_null.coordinate",
-          "flattened_static_state.topology.wall.coordinate",
-          "flattened_static_state._fixed_design_topology.wall.coordinate",
-          "flattened_static_state._wall_carrier_index"
-        ]
-      },
-      "cell_polygons": {
-        "equal_across_all_six": true,
-        "compared_fields": [
-          "cell_polygons",
-          "flattened_static_state.moment_geometry"
         ],
-        "value": null
+        "equal_across_all_six": true
+      },
+      "lattice_coordinates": {
+        "compared_fields": [
+          "lattice.radius",
+          "lattice.height",
+          "grid_coordinate"
+        ],
+        "equal_across_all_six": true
+      },
+      "material_mask": {
+        "compared_fields": [
+          "material_mask",
+          "flattened_static_state.inside_material"
+        ],
+        "equal_across_all_six": true
+      },
+      "mesh_steps": {
+        "compared_fields": [
+          "lattice.radius",
+          "lattice.height",
+          "flattened_static_state._raster_radius",
+          "flattened_static_state._raster_height",
+          "flattened_static_state._wall_height_hysteresis",
+          "flattened_static_state._x_qualification_distance"
+        ],
+        "equal_across_all_six": true,
+        "qualification": "radial and vertical steps are derived from the exactly equal lattice axes"
+      },
+      "null_and_anchor_positions": {
+        "classification": "the two flux anchors are already emitted as dynamic children by tree_flatten and do not discriminate the host geometry identity",
+        "dynamic_anchor_example": {
+          "declared_axis_flux": [
+            0.3139541104088807,
+            0.3051764380864529
+          ],
+          "declared_boundary_flux": [
+            -0.06830239871478015,
+            -0.1034512467596711
+          ],
+          "pair": [
+            "21978/35",
+            "21983/35"
+          ]
+        },
+        "dynamic_flux_anchors_differ_as_member_data": [
+          "dynamic_flux_anchors.declared_axis_flux",
+          "dynamic_flux_anchors.declared_boundary_flux"
+        ],
+        "equal_null_fields": [
+          "grid_null.coordinate",
+          "grid_null.physical_origin",
+          "grid_null.physical_scale",
+          "wall_null.coordinate",
+          "sample_null",
+          "flattened_static_state.topology.grid.coordinate",
+          "flattened_static_state._fixed_design_topology.grid.locator.coordinate"
+        ],
+        "null_geometry_equal_across_all_six": true
       },
       "stencils": {
-        "equal_across_all_six": true,
         "compared_fields": [
           "cell_average_stencil",
           "cell_average_weight",
@@ -216,117 +420,559 @@
           "flattened_static_state._fixed_design_topology.grid.locator.stencil",
           "flattened_static_state.topology.polish_gather",
           "flattened_static_state._fixed_design_topology.polish_gather"
-        ]
-      },
-      "material_mask": {
-        "equal_across_all_six": true,
-        "compared_fields": [
-          "material_mask",
-          "flattened_static_state.inside_material"
-        ]
-      },
-      "mesh_steps": {
-        "equal_across_all_six": true,
-        "compared_fields": [
-          "lattice.radius",
-          "lattice.height",
-          "flattened_static_state._raster_radius",
-          "flattened_static_state._raster_height",
-          "flattened_static_state._wall_height_hysteresis",
-          "flattened_static_state._x_qualification_distance"
         ],
-        "qualification": "radial and vertical steps are derived from the exactly equal lattice axes"
+        "equal_across_all_six": true
       },
-      "null_and_anchor_positions": {
-        "null_geometry_equal_across_all_six": true,
-        "equal_null_fields": [
-          "grid_null.coordinate",
-          "grid_null.physical_origin",
-          "grid_null.physical_scale",
+      "wall_nodes": {
+        "compared_fields": [
+          "wall_nodes",
           "wall_null.coordinate",
-          "sample_null",
-          "flattened_static_state.topology.grid.coordinate",
-          "flattened_static_state._fixed_design_topology.grid.locator.coordinate"
+          "flattened_static_state.topology.wall.coordinate",
+          "flattened_static_state._fixed_design_topology.wall.coordinate",
+          "flattened_static_state._wall_carrier_index"
         ],
-        "dynamic_flux_anchors_differ_as_member_data": [
-          "dynamic_flux_anchors.declared_axis_flux",
-          "dynamic_flux_anchors.declared_boundary_flux"
-        ],
-        "dynamic_anchor_example": {
-          "pair": [
-            "21978/35",
-            "21983/35"
-          ],
-          "declared_axis_flux": [
-            0.3139541104088807,
-            0.3051764380864529
-          ],
-          "declared_boundary_flux": [
-            -0.06830239871478015,
-            -0.1034512467596711
-          ]
+        "equal_across_all_six": true
+      }
+    },
+    "recorded_at": "2026-09-09T11:25:50Z",
+    "resolution": {
+      "batch_admission_result": "twelve MAST members form one geometry group and one stackable identity",
+      "merged_main_revision": "bddebd03",
+      "repair_revision": "e1540b6b"
+    },
+    "status": "resolved_by_declared_support_member_leaf"
+  },
+  "incomplete_machine_attempts": {
+    "DIII-D": [
+      {
+        "attempt": 5,
+        "batched_ms_per_member": null,
+        "compile_cache": {
+          "key": "jit_batched_solve-8c8017e1e6be060736b3142e83d51c7de037457aba2dd83d11ab48ce8463c72a",
+          "status": "miss"
         },
-        "classification": "the two flux anchors are already emitted as dynamic children by tree_flatten and do not discriminate the host geometry identity"
+        "compile_once": true,
+        "compile_seconds": 1765.206773,
+        "cpu_count": 1,
+        "driver_revision": "194c9cb08cee465923898048ef97c031242515a8",
+        "driver_sha256": "025b21acafd85ac2c0bcbfdfa38e15884898784cc6eaa9b65a5a23f37ee59591",
+        "execution_route": "one_stacked_vmap_program",
+        "extraction_status": "failed_strict_terminal_state_bit_identity",
+        "failing_member": "d3d_shot_00000c4a7b.parquet frame 179",
+        "gpu_count": 1,
+        "jax_platforms": [
+          "cuda",
+          "cpu"
+        ],
+        "job_id": 1268088,
+        "log_sha256": "7addaac468676747f4180106127c34930b9d60d8135756b091d5ad6cbd9d57a8",
+        "machine_artifact_cache": "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache",
+        "machine_artifact_manifest_sha256": "c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
+        "machine_artifact_netcdf_sha256": "11a12df0c2bd70d6dd7a461d2da11181479b16c6cf89602f226ffa353b0879e0",
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "passes_completed": [
+          "without_exit",
+          "with_exit"
+        ],
+        "per_member_trips": null,
+        "prior_job_id": 1268060,
+        "process_peak_host_rss_mib": 115509.84765625,
+        "requested_memory_mib": 131072,
+        "requested_time_limit": "00:59:00",
+        "reservation": "gpu_0003_grpA",
+        "scheduler_step_max_rss_kib": 118171036,
+        "shared_interpreter": "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+        "unavailable_reason": "the driver checks strict terminal-state bit identity while extracting member rows and raised before serializing the measured trips and arm timings",
+        "width": 5
       }
-    },
-    "differing_host_geometry_fields": [
-      "flattened_static_state.declared_support"
-    ],
-    "declared_support_by_identity": {
-      "21978/35": {
-        "shape": [1089],
-        "dtype": "bool",
-        "sha256": "e9185d1f7e381ec0cd34f745c3d3445c6231bed6150870349873cfbb23358c8e"
+    ]
+  },
+  "machines": {
+    "MAST": {
+      "compile_cache": {
+        "event_count": 1,
+        "key": "jit_batched_solve-50e64641268d398cd40610d9db1d7fc9a84d090d345d409a27f633cd2636b35a",
+        "module": "jit_batched_solve",
+        "status": "hit"
       },
-      "21983/35": {
-        "shape": [1089],
-        "dtype": "bool",
-        "sha256": "19d7065016398a33862c349b20d0b53cae012bf764b7cc6c2dcc89c6646caa98"
+      "compile_seconds": 77.20438646059483,
+      "execution_contract": {
+        "arm_order": [
+          "without_exit",
+          "with_exit"
+        ],
+        "compile_count_per_pass": 1,
+        "compile_once": true,
+        "declared_member_count": 12,
+        "execution_route": "one_stacked_vmap_program",
+        "geometry_digests": [
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f"
+        ],
+        "geometry_groups": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ]
+        ],
+        "geometry_identical": true,
+        "same_arguments_for_exit_passes": true,
+        "settlement_flag_is_member_runtime_argument": true,
+        "width": 12
       },
-      "21985/51": {
-        "shape": [1089],
-        "dtype": "bool",
-        "sha256": "d7e90480123a24cda85356e651850b39caa5da4003d97a337bcec3d8950a8d2d"
-      },
-      "21986/46": {
-        "shape": [1089],
-        "dtype": "bool",
-        "sha256": "f6e2681d6be4dace00fa97739da43c0f44639f5716b4e5a4d2fbeb83bb790c95"
-      },
-      "21989/55": {
-        "shape": [1089],
-        "dtype": "bool",
-        "sha256": "11873bcf780603d0c33b81aad7c9cda14649967272e7c39fac6f8ace62636a70"
-      },
-      "22086/43": {
-        "shape": [1089],
-        "dtype": "bool",
-        "sha256": "1cc0010524a23b4656433f4cbee048498f254aca6fb29b7463c0a488c415d345"
-      }
-    },
-    "differing_value_example": {
-      "field": "flattened_static_state.declared_support",
-      "pair": [
-        "21978/35",
-        "21983/35"
+      "members": [
+        {
+          "identity": "21978/35 pure",
+          "initial_state_sha256": "49a4bb64534df249b71c9331da816720ae0e4c4d2ca0317c3a4fe07c149f69cf",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "never",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "batch_elapsed_ms": 853864.238049,
+            "batched_ms_per_member": 71155.35317075001,
+            "executed_trips": 1,
+            "no_op_trips": 15,
+            "terminal_residual": 3.306295264111589E-16,
+            "terminal_state_sha256": "82f777e7df959a71d3c046c81bce9974c7ba0a20159bff830d6ef44cd2aefb28",
+            "termination": "converged"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 860145.576968,
+            "batched_ms_per_member": 71678.79808066667,
+            "executed_trips": 1,
+            "no_op_trips": 15,
+            "terminal_residual": 3.306295264111589E-16,
+            "terminal_state_sha256": "82f777e7df959a71d3c046c81bce9974c7ba0a20159bff830d6ef44cd2aefb28",
+            "termination": "converged"
+          }
+        },
+        {
+          "identity": "21978/35 mixed",
+          "initial_state_sha256": "4325a639df208183fcd56a8121f2a25d17d142792be358ed11f1bf828c949878",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "never",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "batch_elapsed_ms": 853864.238049,
+            "batched_ms_per_member": 71155.35317075001,
+            "executed_trips": 1,
+            "no_op_trips": 15,
+            "terminal_residual": 2.824127204761983E-16,
+            "terminal_state_sha256": "2ef2ea4a604f7147e6f71b40f197a673989934bb3b4c766c2abacf55653c6bc3",
+            "termination": "converged"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 860145.576968,
+            "batched_ms_per_member": 71678.79808066667,
+            "executed_trips": 1,
+            "no_op_trips": 15,
+            "terminal_residual": 2.824127204761983E-16,
+            "terminal_state_sha256": "2ef2ea4a604f7147e6f71b40f197a673989934bb3b4c766c2abacf55653c6bc3",
+            "termination": "converged"
+          }
+        },
+        {
+          "identity": "21983/35 pure",
+          "initial_state_sha256": "b6daf995f26a440a096e9e5f6271ad11943c0ea7cfffa53d466cd51b6af93422",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "fired",
+          "strict_qualification_firing_trip": 14,
+          "terminal_state_bit_identical_where_exit_fired": true,
+          "with_exit": {
+            "batch_elapsed_ms": 853864.238049,
+            "batched_ms_per_member": 71155.35317075001,
+            "executed_trips": 14,
+            "no_op_trips": 2,
+            "terminal_residual": 0.0002459468408216421,
+            "terminal_state_sha256": "544698b1554cd05d352bfcbdbebaaaaac561d2004778a11eabc96ceb87b12c57",
+            "termination": "active_set_settled"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 860145.576968,
+            "batched_ms_per_member": 71678.79808066667,
+            "executed_trips": 14,
+            "no_op_trips": 2,
+            "terminal_residual": 0.0002459468408216421,
+            "terminal_state_sha256": "544698b1554cd05d352bfcbdbebaaaaac561d2004778a11eabc96ceb87b12c57",
+            "termination": "active_set_stagnated"
+          }
+        },
+        {
+          "identity": "21983/35 mixed",
+          "initial_state_sha256": "bf71fa9c6a5fb79c4138fc55e57954a38f2365b2f3ddcc0bd88649c09455addb",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "never",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "batch_elapsed_ms": 853864.238049,
+            "batched_ms_per_member": 71155.35317075001,
+            "executed_trips": 7,
+            "no_op_trips": 9,
+            "terminal_residual": 0.0018120357409988118,
+            "terminal_state_sha256": "87784a82252828031b09bbb08c6e8121cb59507a22c888f5d447153120c00620",
+            "termination": "active_set_cycle_detected"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 860145.576968,
+            "batched_ms_per_member": 71678.79808066667,
+            "executed_trips": 7,
+            "no_op_trips": 9,
+            "terminal_residual": 0.0018120357409988118,
+            "terminal_state_sha256": "87784a82252828031b09bbb08c6e8121cb59507a22c888f5d447153120c00620",
+            "termination": "active_set_cycle_detected"
+          }
+        },
+        {
+          "identity": "21985/51 pure",
+          "initial_state_sha256": "28ff7d8925bf5047dc446d2ebbe73577e1b64d4f4d408c8e2b6912df5b276b22",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "fired",
+          "strict_qualification_firing_trip": 13,
+          "terminal_state_bit_identical_where_exit_fired": true,
+          "with_exit": {
+            "batch_elapsed_ms": 853864.238049,
+            "batched_ms_per_member": 71155.35317075001,
+            "executed_trips": 13,
+            "no_op_trips": 3,
+            "terminal_residual": 0.0006494024983305656,
+            "terminal_state_sha256": "0f7b218c154ed88afe0de516b11a12134d9be3479109dbbb6840ee0d49091866",
+            "termination": "active_set_settled"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 860145.576968,
+            "batched_ms_per_member": 71678.79808066667,
+            "executed_trips": 13,
+            "no_op_trips": 3,
+            "terminal_residual": 0.0006494024983305656,
+            "terminal_state_sha256": "0f7b218c154ed88afe0de516b11a12134d9be3479109dbbb6840ee0d49091866",
+            "termination": "active_set_stagnated"
+          }
+        },
+        {
+          "identity": "21985/51 mixed",
+          "initial_state_sha256": "0fc3ba5b43bd6b37f88a166d8346c3c23d76306dd4850d8c16bb1472d0f2d879",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "fired",
+          "strict_qualification_firing_trip": 12,
+          "terminal_state_bit_identical_where_exit_fired": true,
+          "with_exit": {
+            "batch_elapsed_ms": 853864.238049,
+            "batched_ms_per_member": 71155.35317075001,
+            "executed_trips": 12,
+            "no_op_trips": 4,
+            "terminal_residual": 0.0006386899401206394,
+            "terminal_state_sha256": "67fcc9d4a59fcad4390bd8130132af0578b92b06d97b022ada1d3356d0ddaaf2",
+            "termination": "active_set_settled"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 860145.576968,
+            "batched_ms_per_member": 71678.79808066667,
+            "executed_trips": 12,
+            "no_op_trips": 4,
+            "terminal_residual": 0.0006386899401206394,
+            "terminal_state_sha256": "67fcc9d4a59fcad4390bd8130132af0578b92b06d97b022ada1d3356d0ddaaf2",
+            "termination": "active_set_stagnated"
+          }
+        },
+        {
+          "identity": "21986/46 pure",
+          "initial_state_sha256": "7315e1463e46c8884c6a7fd86404a56cfe5881f7189cedecb446d95353fff647",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "never",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "batch_elapsed_ms": 853864.238049,
+            "batched_ms_per_member": 71155.35317075001,
+            "executed_trips": 16,
+            "no_op_trips": 0,
+            "terminal_residual": 0.0036382744753318706,
+            "terminal_state_sha256": "9f897abe94eb0c9fb1b477de406a07e6ec51f439283aaf043244f4baa2944d0d",
+            "termination": "active_set_iteration_budget_exhausted"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 860145.576968,
+            "batched_ms_per_member": 71678.79808066667,
+            "executed_trips": 16,
+            "no_op_trips": 0,
+            "terminal_residual": 0.0036382744753318706,
+            "terminal_state_sha256": "9f897abe94eb0c9fb1b477de406a07e6ec51f439283aaf043244f4baa2944d0d",
+            "termination": "active_set_iteration_budget_exhausted"
+          }
+        },
+        {
+          "identity": "21986/46 mixed",
+          "initial_state_sha256": "8e9ea51b08ea0a03eb64eba64dff51abf3d9198b9e6dff1a8bec5e9f2b420a80",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "never",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "batch_elapsed_ms": 853864.238049,
+            "batched_ms_per_member": 71155.35317075001,
+            "executed_trips": 16,
+            "no_op_trips": 0,
+            "terminal_residual": 0.0036316721736466,
+            "terminal_state_sha256": "3670c93cc18d178d84fa1fe9ffa6f5760b5ad5506d360a5793cdda81f05e2aef",
+            "termination": "active_set_iteration_budget_exhausted"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 860145.576968,
+            "batched_ms_per_member": 71678.79808066667,
+            "executed_trips": 16,
+            "no_op_trips": 0,
+            "terminal_residual": 0.0036316721736466,
+            "terminal_state_sha256": "3670c93cc18d178d84fa1fe9ffa6f5760b5ad5506d360a5793cdda81f05e2aef",
+            "termination": "active_set_iteration_budget_exhausted"
+          }
+        },
+        {
+          "identity": "21989/55 pure",
+          "initial_state_sha256": "3932613ce52851330fe7718ea3cd4dd9aca2bf77b881461cfba93753a8d4dd03",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "never",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "batch_elapsed_ms": 853864.238049,
+            "batched_ms_per_member": 71155.35317075001,
+            "executed_trips": 16,
+            "no_op_trips": 0,
+            "terminal_residual": 0.0018106199407403436,
+            "terminal_state_sha256": "de88c7d1285477edcc9d2a33c36bf8342c8210ae4cb98f0eacbc8e94127790e3",
+            "termination": "active_set_iteration_budget_exhausted"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 860145.576968,
+            "batched_ms_per_member": 71678.79808066667,
+            "executed_trips": 16,
+            "no_op_trips": 0,
+            "terminal_residual": 0.0018106199407403436,
+            "terminal_state_sha256": "de88c7d1285477edcc9d2a33c36bf8342c8210ae4cb98f0eacbc8e94127790e3",
+            "termination": "active_set_iteration_budget_exhausted"
+          }
+        },
+        {
+          "identity": "21989/55 mixed",
+          "initial_state_sha256": "ba2bb6f4c03c762c971f222d7383be8ef384fea43bfa6107f641361ceb31d2ad",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "never",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "batch_elapsed_ms": 853864.238049,
+            "batched_ms_per_member": 71155.35317075001,
+            "executed_trips": 16,
+            "no_op_trips": 0,
+            "terminal_residual": 0.0018007182744147494,
+            "terminal_state_sha256": "03e57451e66a1af37c08da3388a92a77a01c1c58526c96d6bbe97c20c05f50f0",
+            "termination": "active_set_iteration_budget_exhausted"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 860145.576968,
+            "batched_ms_per_member": 71678.79808066667,
+            "executed_trips": 16,
+            "no_op_trips": 0,
+            "terminal_residual": 0.0018007182744147494,
+            "terminal_state_sha256": "03e57451e66a1af37c08da3388a92a77a01c1c58526c96d6bbe97c20c05f50f0",
+            "termination": "active_set_iteration_budget_exhausted"
+          }
+        },
+        {
+          "identity": "22086/43 pure",
+          "initial_state_sha256": "55849c710d205553f19538bfec0b7b95b20bd9ad20802557de716c69657c6d6f",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "never",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "batch_elapsed_ms": 853864.238049,
+            "batched_ms_per_member": 71155.35317075001,
+            "executed_trips": 1,
+            "no_op_trips": 15,
+            "terminal_residual": 2.68873682681289E-16,
+            "terminal_state_sha256": "5ad03de69b65593a3e6d0bae02da38b5117bc267fe691b43dba2a4b4eefe69ca",
+            "termination": "converged"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 860145.576968,
+            "batched_ms_per_member": 71678.79808066667,
+            "executed_trips": 1,
+            "no_op_trips": 15,
+            "terminal_residual": 2.68873682681289E-16,
+            "terminal_state_sha256": "5ad03de69b65593a3e6d0bae02da38b5117bc267fe691b43dba2a4b4eefe69ca",
+            "termination": "converged"
+          }
+        },
+        {
+          "identity": "22086/43 mixed",
+          "initial_state_sha256": "e84c056ae2c49241f9a794b89937e6d3046c221b965b937223a45913e620b9af",
+          "state_authority": "bank regeneration exact grid plus cubic wall interpolation",
+          "strict_qualification": "never",
+          "strict_qualification_firing_trip": null,
+          "terminal_state_bit_identical_where_exit_fired": null,
+          "with_exit": {
+            "batch_elapsed_ms": 853864.238049,
+            "batched_ms_per_member": 71155.35317075001,
+            "executed_trips": 1,
+            "no_op_trips": 15,
+            "terminal_residual": 3.8090438379849275E-16,
+            "terminal_state_sha256": "6e2fff7b5003bdaaa3b9cbe0df6431b7f297a8e259a67f5d2d30d1cf7c770241",
+            "termination": "converged"
+          },
+          "without_exit": {
+            "batch_elapsed_ms": 860145.576968,
+            "batched_ms_per_member": 71678.79808066667,
+            "executed_trips": 1,
+            "no_op_trips": 15,
+            "terminal_residual": 3.8090438379849275E-16,
+            "terminal_state_sha256": "6e2fff7b5003bdaaa3b9cbe0df6431b7f297a8e259a67f5d2d30d1cf7c770241",
+            "termination": "converged"
+          }
+        }
       ],
-      "flat_cell_index": 113,
-      "21978/35": false,
-      "21983/35": true
-    },
-    "classification": {
-      "verdict": "section_1_member_data_classification_defect",
-      "mechanism": "DeclaredAnchorOperator.declared_support remains in tree_flatten auxiliary static_state because _dynamic_extra_names emits only declared_axis_flux and declared_boundary_flux",
-      "equilibrium_dependence": "the benchmark constructs declared_support from inside_polygon(lattice coordinates, stored LCFS coordinates) intersected with the common machine material mask; the stored LCFS is an equilibrium result for the selected shot and time slice",
-      "source_binding": "benchmarks/efit_forward_parity_slice.py computes declared_support from _stored_lcfs in _passive_inclusive_case and passes it to DeclaredAnchorOperator",
-      "required_repair": "move declared_support from operator static_state to traced member children alongside the two declared flux anchors",
-      "repair_owner": "nova/equilibrium/forward_operator.py is held by another worktree, so this node stops without editing it"
+      "stage_host_memory": [
+        {
+          "current_rss_mib": 4423.11328125,
+          "resource_peak_rss_mib": 5014.6875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_BATCH_READY"
+        },
+        {
+          "current_rss_mib": 4423.11328125,
+          "resource_peak_rss_mib": 5014.6875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_BATCH_COMPILE_START"
+        },
+        {
+          "current_rss_mib": 8011.92578125,
+          "resource_peak_rss_mib": 8331.8671875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_BATCH_COMPILE_DONE"
+        },
+        {
+          "current_rss_mib": 8011.92578125,
+          "resource_peak_rss_mib": 8331.8671875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_WITHOUT_EXIT_START"
+        },
+        {
+          "current_rss_mib": 8023.88671875,
+          "resource_peak_rss_mib": 8331.8671875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_WITHOUT_EXIT_DONE"
+        },
+        {
+          "current_rss_mib": 8023.88671875,
+          "resource_peak_rss_mib": 8331.8671875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_WITH_EXIT_START"
+        },
+        {
+          "current_rss_mib": 8023.890625,
+          "resource_peak_rss_mib": 8331.8671875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_WITH_EXIT_DONE"
+        },
+        {
+          "current_rss_mib": 8025.66796875,
+          "resource_peak_rss_mib": 8331.8671875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_BATCH_COMPLETE"
+        },
+        {
+          "current_rss_mib": 7897.57421875,
+          "resource_peak_rss_mib": 8331.8671875,
+          "resource_peak_scope": "process lifetime through this stage",
+          "stage": "MAST_BATCH_RELEASED"
+        }
+      ],
+      "summary": {
+        "batched_ms_per_member": {
+          "with_exit": 71155.35317075001,
+          "without_exit": 71678.79808066667
+        },
+        "bit_identical_fired_members": 3,
+        "declared_members": 12,
+        "peak_host_rss_mib": 8331.8671875,
+        "strict_exit_fired_members": 3,
+        "strict_exit_never_members": 9
+      }
     }
   },
-  "blocker": {
-    "condition": "DeclaredAnchorOperator.declared_support is equilibrium-dependent member data but remains in the pytree auxiliary static_state",
-    "observable_result": "the six stored-LCFS support masks create six host geometry digests, partitioning the twelve MAST members into six pure/mixed pairs and selecting the sequential fallback",
-    "required_change": "classify declared_support as a dynamic operator leaf alongside declared_axis_flux and declared_boundary_flux",
-    "scope": "the repair belongs in nova/equilibrium/forward_operator.py, which is outside this node's write fence and held by another worktree"
+  "measurement_state": "mast_complete_diiid_pending",
+  "observations": {
+    "batch_compile_count_per_pass": {
+      "MAST": 1
+    },
+    "geometry_fallbacks": {
+      "MAST": {
+        "fallback": false,
+        "geometry_digests": [
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f",
+          "d16b94173193467e58891117728c0a1c70476ab953a53e9182edb6c88c46052f"
+        ]
+      }
+    },
+    "mast_compile_once": true
+  },
+  "recorded_at": "2026-09-09T17:19:29.323003+00:00",
+  "schema": "nova.strict-exit-incidence/2",
+  "sequential_width_one_comparison": {
+    "DIII-D": {
+      "measurement_state": "partial_scheduler_timeout",
+      "paired_timing_member_count": 2,
+      "receipt_path": "docs/figures/millisecond-converged-solve/strict-exit-incidence.json",
+      "with_exit_mean_ms": 196694.746691,
+      "without_exit_mean_ms": 205113.028233
+    },
+    "MAST": {
+      "measurement_state": "partial_scheduler_timeout",
+      "paired_timing_member_count": 12,
+      "receipt_path": "docs/figures/millisecond-converged-solve/strict-exit-incidence.json",
+      "with_exit_mean_ms": 60188.503989,
+      "without_exit_mean_ms": 64354.927120500004
+    }
+  },
+  "source": {
+    "driver": "benchmarks/strict_exit_incidence.py",
+    "driver_sha256": "25b062f661f88fcced1363715750879c280aa2ff56b8ac8833f19abff121baf2",
+    "required_ancestor": "588578a0",
+    "revision": "5e57c75cface3af4406532a8f6da946ab409533a",
+    "solver_source_modified": false
   }
 }

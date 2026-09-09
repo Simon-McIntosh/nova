@@ -9,6 +9,7 @@ import gc
 import hashlib
 from importlib.util import module_from_spec, spec_from_file_location
 import json
+import logging
 import math
 import os
 from pathlib import Path
@@ -718,6 +719,44 @@ class _PeakRssSampler:
         }
 
 
+class _PersistentCacheProbe(logging.Handler):
+    """Capture JAX's authoritative persistent-cache lookup for one compile."""
+
+    def __init__(self) -> None:
+        super().__init__(level=logging.DEBUG)
+        self.events: list[dict[str, str]] = []
+
+    def emit(self, record: logging.LogRecord) -> None:
+        message = record.getMessage()
+        if message.startswith("Persistent compilation cache hit for"):
+            status = "hit"
+        elif message.startswith("PERSISTENT COMPILATION CACHE MISS for"):
+            status = "miss"
+        else:
+            return
+        module = str(record.args[0]) if record.args else "unknown"
+        key = str(record.args[1]) if len(record.args) > 1 else "unknown"
+        self.events.append({"status": status, "module": module, "key": key})
+
+    def result(self, module: str) -> dict[str, Any]:
+        matching = [event for event in self.events if event["module"] == module]
+        if not matching:
+            raise RuntimeError(
+                f"persistent cache lookup for {module} did not emit hit or miss"
+            )
+        statuses = {event["status"] for event in matching}
+        if len(statuses) != 1:
+            raise RuntimeError(
+                f"persistent cache lookup for {module} emitted conflicting events"
+            )
+        return {
+            "status": matching[-1]["status"],
+            "module": module,
+            "key": matching[-1]["key"],
+            "event_count": len(matching),
+        }
+
+
 def _resource_stage(name: str) -> dict[str, Any]:
     """Record the process RSS and its lifetime high-water mark at one stage."""
     stage = {
@@ -1316,15 +1355,32 @@ def _measure_batched_machine(
             return jax.vmap(solver)(operator, data, settlement)
 
         _batch_stage_count(stages, f"{name}_BATCH_COMPILE_START")
+        cache_probe = _PersistentCacheProbe()
+        compiler_logger = logging.getLogger("jax._src.compiler")
+        previous_log_level = compiler_logger.level
+        compiler_logger.setLevel(logging.DEBUG)
+        compiler_logger.addHandler(cache_probe)
         started = time.perf_counter()
-        compiled = (
-            jax.jit(batched_solve)
-            .lower(batch.stacked, member_data, flags["without_exit"])
-            .compile()
-        )
+        try:
+            compiled = (
+                jax.jit(batched_solve)
+                .lower(batch.stacked, member_data, flags["without_exit"])
+                .compile()
+            )
+        finally:
+            compiler_logger.removeHandler(cache_probe)
+            compiler_logger.setLevel(previous_log_level)
         compile_seconds = time.perf_counter() - started
+        compile_cache = cache_probe.result("jit_batched_solve")
         compile_count = 1
         _batch_stage_count(stages, f"{name}_BATCH_COMPILE_DONE")
+        print(
+            f"CACHE_HEADER machine={name} "
+            f"persistent_cache={compile_cache['status']} "
+            f"compile_seconds={compile_seconds:.6f} "
+            f"cache_key={compile_cache['key']}",
+            flush=True,
+        )
 
         arm_results = {}
         arm_timings = {}
@@ -1339,6 +1395,12 @@ def _measure_batched_machine(
             _batch_stage_count(stages, f"{name}_{arm_name.upper()}_DONE")
     else:
         compile_seconds = None
+        compile_cache = {
+            "status": "not_applicable_sequential_geometry_fallback",
+            "module": None,
+            "key": None,
+            "event_count": 0,
+        }
         arm_results = {}
         arm_timings = {}
         for arm_name, settlement in flags.items():
@@ -1421,6 +1483,7 @@ def _measure_batched_machine(
             "compile_once": compile_count == 1,
         },
         "compile_seconds": compile_seconds,
+        "compile_cache": compile_cache,
         "stage_host_memory": stages,
         "members": rows,
         "summary": {
@@ -1726,6 +1789,33 @@ def _banked_sequential_comparison() -> dict[str, Any]:
     return comparison
 
 
+def _mast_per_member_wall_finding(
+    machine: dict[str, Any], baseline: dict[str, Any]
+) -> dict[str, Any]:
+    """Record the measured batch wall against the banked width-one latency."""
+    batched = machine["summary"]["batched_ms_per_member"]
+    sequential = {
+        "without_exit": baseline["without_exit_mean_ms"],
+        "with_exit": baseline["with_exit_mean_ms"],
+    }
+    return {
+        "classification": "plan_level_finding",
+        "verdict": "batched_per_member_wall_not_below_sequential_width_one",
+        "batched_ms_per_member": batched,
+        "sequential_width_one_ms_per_member": sequential,
+        "batched_minus_sequential_ms_per_member": {
+            arm: batched[arm] - sequential[arm] for arm in batched
+        },
+        "batched_over_sequential": {
+            arm: batched[arm] / sequential[arm] for arm in batched
+        },
+        "qualification": (
+            "the measured MAST batch wall is retained as a throughput finding; "
+            "it is not adjusted or explained away"
+        ),
+    }
+
+
 def _write_batched_report(
     report_path: Path,
     payload: dict[str, Any],
@@ -1783,6 +1873,201 @@ def _write_batched_report(
     report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _persist_batched_receipt(output_json: Path, payload: dict[str, Any]) -> None:
+    """Atomically checkpoint each completed machine into the shared receipt."""
+    output_json.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output_json.with_name(f".{output_json.name}.{os.getpid()}.tmp")
+    temporary.write_text(
+        json.dumps(_strict(payload), indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    os.replace(temporary, output_json)
+
+
+def _retained_compile_memory_evidence(output_json: Path) -> dict[str, Any] | None:
+    """Retain a completed cold-compile memory failure across a cache-hit rerun."""
+    if not output_json.is_file():
+        return None
+    previous = _read_json(output_json)
+    retained = previous.get("evidence_inputs", {}).get("retained_compile_memory")
+    if retained is not None:
+        return retained
+    execution = previous.get("execution", {})
+    peak = execution.get("driver_process_peak_rss_mib")
+    if peak is None:
+        return None
+    limit = 16 * 1024
+    return {
+        "job_id": execution.get("job_id"),
+        "process_peak_host_rss_mib": peak,
+        "host_memory_limit_mib": limit,
+        "host_memory_under_limit": float(peak) < limit,
+        "measurement_state": previous.get("measurement_state"),
+        "qualification": (
+            "cold width-12 compile evidence retained across the cache-enabled rerun"
+        ),
+    }
+
+
+def _validated_mast_checkpoint(output_json: Path) -> dict[str, Any]:
+    """Read the complete MAST checkpoint required to resume with DIII-D."""
+    checkpoint = _read_json(output_json)
+    completed = checkpoint.get("checkpoint", {}).get("completed_machines")
+    pending = checkpoint.get("checkpoint", {}).get("pending_machines")
+    mast = checkpoint.get("machines", {}).get("MAST")
+    if (
+        checkpoint.get("schema") != "nova.strict-exit-incidence/2"
+        or checkpoint.get("measurement_state") != "mast_complete_diiid_pending"
+        or completed != ["MAST"]
+        or pending != ["DIII-D"]
+        or mast is None
+        or len(mast.get("members", ())) != 12
+        or not mast.get("execution_contract", {}).get("compile_once", False)
+        or mast.get("execution_contract", {}).get("width") != 12
+    ):
+        raise RuntimeError(
+            "DIII-D resume requires one validated width-12 MAST checkpoint"
+        )
+    return checkpoint
+
+
+def resume_batched_diiid(
+    output_json: Path,
+    diiid_machine_cache: Path,
+    report_path: Path | None,
+) -> dict[str, Any]:
+    """Complete a validated MAST checkpoint with only the DIII-D program."""
+    total_started = time.perf_counter()
+    revision = _require_revision()
+    checkpoint_sha256 = _sha256(output_json)
+    checkpoint = _validated_mast_checkpoint(output_json)
+    configure_dtypes()
+    allocation = _require_gpu_allocation(expected_cpu_count=1)
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    input_stages = list(checkpoint["configuration"]["host_memory_stages"])
+    _batch_stage_count(input_stages, "DIIID_INPUT_BUILD_START")
+    diiid_started = time.perf_counter()
+    diiid_members, diiid_inputs = _build_diiid_members(
+        diiid_machine_cache, member_count=5
+    )
+    diiid_build_seconds = time.perf_counter() - diiid_started
+    _batch_stage_count(input_stages, "DIIID_INPUT_BUILD_DONE")
+    diiid_result = _measure_batched_machine(diiid_members, name="DIIID")
+    del diiid_members
+    gc.collect()
+    _batch_stage_count(input_stages, "DIIID_INPUT_RELEASED")
+
+    machines = {"MAST": checkpoint["machines"]["MAST"], "DIII-D": diiid_result}
+    retained_compile_memory = checkpoint["evidence_inputs"].get(
+        "retained_compile_memory"
+    )
+    peak_candidates = [
+        *[stage["resource_peak_rss_mib"] for stage in input_stages],
+        *[machine["summary"]["peak_host_rss_mib"] for machine in machines.values()],
+    ]
+    if retained_compile_memory is not None:
+        peak_candidates.append(retained_compile_memory["process_peak_host_rss_mib"])
+    peak_rss_mib = max(peak_candidates)
+    sequential_comparison = checkpoint["sequential_width_one_comparison"]
+    mast_execution = checkpoint["execution"]
+    diiid_execution = {
+        **allocation,
+        "elapsed_seconds": time.perf_counter() - total_started,
+        "exit_marker": 0,
+        "persistent_compilation_cache": cache.receipt(),
+        "input_build_seconds": {"DIII-D": diiid_build_seconds},
+    }
+    evidence_inputs = dict(checkpoint["evidence_inputs"])
+    evidence_inputs["DIII-D"] = diiid_inputs
+    findings = dict(checkpoint.get("findings", {}))
+    findings["mast_per_member_wall"] = _mast_per_member_wall_finding(
+        machines["MAST"], sequential_comparison["MAST"]
+    )
+    payload = dict(checkpoint)
+    payload.pop("blocker", None)
+    payload.update(
+        {
+            "measurement_state": "complete",
+            "recorded_at": datetime.now(UTC).isoformat(),
+            "source": {
+                "revision": revision,
+                "required_ancestor": REQUIRED_ANCESTOR,
+                "driver": str(Path(__file__).relative_to(ROOT)),
+                "driver_sha256": _sha256(Path(__file__)),
+                "solver_source_modified": False,
+                "machine_revisions": {
+                    "MAST": checkpoint["source"]["revision"],
+                    "DIII-D": revision,
+                },
+                "machine_driver_sha256": {
+                    "MAST": checkpoint["source"]["driver_sha256"],
+                    "DIII-D": _sha256(Path(__file__)),
+                },
+            },
+            "execution": {
+                **diiid_execution,
+                "machine_runs": {
+                    "MAST": mast_execution,
+                    "DIII-D": diiid_execution,
+                },
+                "resumed_from": {
+                    "receipt_sha256": checkpoint_sha256,
+                    "measurement_state": checkpoint["measurement_state"],
+                    "recorded_at": checkpoint["recorded_at"],
+                },
+            },
+            "configuration": {
+                **checkpoint["configuration"],
+                "program_widths": {"MAST": 12, "DIII-D": 5},
+                "host_memory_peak_mib": peak_rss_mib,
+                "host_memory_under_limit": peak_rss_mib < 16 * 1024,
+                "host_memory_stages": input_stages,
+            },
+            "evidence_inputs": evidence_inputs,
+            "machines": machines,
+            "checkpoint": {
+                "completed_machines": ["MAST", "DIII-D"],
+                "pending_machines": [],
+                "persistence": "atomically replaced after each completed machine",
+            },
+            "observations": {
+                "mast_compile_once": machines["MAST"]["execution_contract"][
+                    "compile_once"
+                ],
+                "batch_compile_count_per_pass": {
+                    name: machine["execution_contract"]["compile_count_per_pass"]
+                    for name, machine in machines.items()
+                },
+                "geometry_fallbacks": {
+                    name: {
+                        "fallback": not machine["execution_contract"][
+                            "geometry_identical"
+                        ],
+                        "geometry_digests": machine["execution_contract"][
+                            "geometry_digests"
+                        ],
+                    }
+                    for name, machine in machines.items()
+                },
+            },
+            "findings": findings,
+        }
+    )
+    payload["execution"]["elapsed_seconds"] = time.perf_counter() - total_started
+    payload["execution"]["machine_runs"]["DIII-D"]["elapsed_seconds"] = payload[
+        "execution"
+    ]["elapsed_seconds"]
+    _persist_batched_receipt(output_json, payload)
+    print(f"BATCHED_MACHINE_RECEIPT_WRITTEN=DIII-D:{output_json}", flush=True)
+    if report_path is not None:
+        _write_batched_report(report_path, payload)
+    print(f"BATCHED_RECEIPT_WRITTEN={output_json}", flush=True)
+    print("EXIT_MARKER=0", flush=True)
+    return payload
+
+
 def run_batched(
     output_json: Path,
     mast_state_cache: Path,
@@ -1794,6 +2079,7 @@ def run_batched(
     """Measure the real banks, or their allocation-free two-member CPU proof."""
     total_started = time.perf_counter()
     revision = _require_revision()
+    retained_compile_memory = _retained_compile_memory_evidence(output_json)
     configure_dtypes()
     allocation = (
         _require_cpu_self_check()
@@ -1815,6 +2101,91 @@ def run_batched(
     del mast_members
     gc.collect()
     _batch_stage_count(input_stages, "MAST_INPUT_RELEASED")
+    sequential_comparison = _banked_sequential_comparison()
+    mast_peak_rss_mib = max(
+        *[stage["resource_peak_rss_mib"] for stage in input_stages],
+        mast_result["summary"]["peak_host_rss_mib"],
+        *(
+            [retained_compile_memory["process_peak_host_rss_mib"]]
+            if retained_compile_memory is not None
+            else []
+        ),
+    )
+    mast_checkpoint = {
+        "schema": "nova.strict-exit-incidence/2",
+        "measurement_state": "mast_complete_diiid_pending",
+        "recorded_at": datetime.now(UTC).isoformat(),
+        "checkpoint": {
+            "completed_machines": ["MAST"],
+            "pending_machines": ["DIII-D"],
+            "persistence": "atomically replaced after each completed machine",
+        },
+        "source": {
+            "revision": revision,
+            "required_ancestor": REQUIRED_ANCESTOR,
+            "driver": str(Path(__file__).relative_to(ROOT)),
+            "driver_sha256": _sha256(Path(__file__)),
+            "solver_source_modified": False,
+        },
+        "execution": {
+            **allocation,
+            "elapsed_seconds": time.perf_counter() - total_started,
+            "exit_marker": None,
+            "persistent_compilation_cache": cache.receipt(),
+            "input_build_seconds": {"MAST": mast_build_seconds},
+        },
+        "configuration": {
+            "trip_limit": TRIP_LIMIT,
+            "program_widths": {"MAST": len(mast_result["members"]), "DIII-D": 5},
+            "real_bank_widths": {"MAST": 12, "DIII-D": 5},
+            "self_check": self_check,
+            "paired_control": (
+                "each machine program receives the same stacked member arguments "
+                "for one exit-disabled and one exit-enabled runtime-flag pass"
+            ),
+            "strict_exit_definition": (
+                "zero mask difference, own-mask acceptance, zero accepted Newton "
+                "promotions, and bit-identical retained incoming state"
+            ),
+            "host_memory_limit_mib": 16 * 1024,
+            "host_memory_peak_mib": mast_peak_rss_mib,
+            "host_memory_under_limit": mast_peak_rss_mib < 16 * 1024,
+            "host_memory_stages": input_stages,
+        },
+        "evidence_inputs": {
+            "MAST": mast_inputs,
+            "retained_compile_memory": retained_compile_memory,
+            "sequential_width_one_receipt": {
+                "path": str(DEFAULT_JSON.relative_to(ROOT)),
+                "sha256": _sha256(DEFAULT_JSON),
+            },
+        },
+        "machines": {"MAST": mast_result},
+        "sequential_width_one_comparison": sequential_comparison,
+        "findings": {
+            "mast_per_member_wall": _mast_per_member_wall_finding(
+                mast_result, sequential_comparison["MAST"]
+            )
+        },
+        "observations": {
+            "mast_compile_once": mast_result["execution_contract"]["compile_once"],
+            "batch_compile_count_per_pass": {
+                "MAST": mast_result["execution_contract"]["compile_count_per_pass"]
+            },
+            "geometry_fallbacks": {
+                "MAST": {
+                    "fallback": not mast_result["execution_contract"][
+                        "geometry_identical"
+                    ],
+                    "geometry_digests": mast_result["execution_contract"][
+                        "geometry_digests"
+                    ],
+                }
+            },
+        },
+    }
+    _persist_batched_receipt(output_json, mast_checkpoint)
+    print(f"BATCHED_MACHINE_RECEIPT_WRITTEN=MAST:{output_json}", flush=True)
 
     diiid_started = time.perf_counter()
     diiid_members, diiid_inputs = _build_diiid_members(
@@ -1830,6 +2201,11 @@ def run_batched(
     peak_rss_mib = max(
         *[stage["resource_peak_rss_mib"] for stage in input_stages],
         *[machine["summary"]["peak_host_rss_mib"] for machine in machines.values()],
+        *(
+            [retained_compile_memory["process_peak_host_rss_mib"]]
+            if retained_compile_memory is not None
+            else []
+        ),
     )
     payload = {
         "schema": "nova.strict-exit-incidence/2",
@@ -1876,13 +2252,24 @@ def run_batched(
         "evidence_inputs": {
             "MAST": mast_inputs,
             "DIII-D": diiid_inputs,
+            "retained_compile_memory": retained_compile_memory,
             "sequential_width_one_receipt": {
                 "path": str(DEFAULT_JSON.relative_to(ROOT)),
                 "sha256": _sha256(DEFAULT_JSON),
             },
         },
         "machines": machines,
-        "sequential_width_one_comparison": _banked_sequential_comparison(),
+        "sequential_width_one_comparison": sequential_comparison,
+        "findings": {
+            "mast_per_member_wall": _mast_per_member_wall_finding(
+                machines["MAST"], sequential_comparison["MAST"]
+            )
+        },
+        "checkpoint": {
+            "completed_machines": ["MAST", "DIII-D"],
+            "pending_machines": [],
+            "persistence": "atomically replaced after each completed machine",
+        },
         "observations": {
             "mast_compile_once": machines["MAST"]["execution_contract"]["compile_once"],
             "batch_compile_count_per_pass": {
@@ -1901,11 +2288,7 @@ def run_batched(
         },
     }
     payload["execution"]["elapsed_seconds"] = time.perf_counter() - total_started
-    output_json.parent.mkdir(parents=True, exist_ok=True)
-    output_json.write_text(
-        json.dumps(_strict(payload), indent=2, sort_keys=True, allow_nan=False) + "\n",
-        encoding="utf-8",
-    )
+    _persist_batched_receipt(output_json, payload)
     if report_path is not None:
         _write_batched_report(report_path, payload)
     print(f"BATCHED_RECEIPT_WRITTEN={output_json}", flush=True)
@@ -2079,9 +2462,15 @@ def run(
     return payload
 
 
-def _validate_arguments(*, batched: bool, self_check: bool) -> None:
+def _validate_arguments(
+    *, batched: bool, self_check: bool, resume_diiid: bool = False
+) -> None:
     if self_check and not batched:
         raise ValueError("--self-check requires --batched")
+    if resume_diiid and not batched:
+        raise ValueError("--resume-diiid requires --batched")
+    if resume_diiid and self_check:
+        raise ValueError("--resume-diiid cannot be combined with --self-check")
 
 
 def main() -> None:
@@ -2099,12 +2488,17 @@ def main() -> None:
     parser.add_argument("--regenerate-mast-state-cache", action="store_true")
     parser.add_argument("--harvest-log", type=Path)
     parser.add_argument("--batched", action="store_true")
+    parser.add_argument("--resume-diiid", action="store_true")
     parser.add_argument("--self-check", action="store_true")
     parser.add_argument("--report", type=Path)
     arguments = parser.parse_args()
     if arguments.repeats < 0:
         raise ValueError("additional timing repetitions cannot be negative")
-    _validate_arguments(batched=arguments.batched, self_check=arguments.self_check)
+    _validate_arguments(
+        batched=arguments.batched,
+        self_check=arguments.self_check,
+        resume_diiid=arguments.resume_diiid,
+    )
     if arguments.regenerate_mast_state_cache:
         regenerate_mast_state_cache(arguments.mast_state_cache.resolve())
         return
@@ -2125,13 +2519,21 @@ def main() -> None:
         output_json = (
             DEFAULT_BATCHED_JSON if arguments.json == DEFAULT_JSON else arguments.json
         )
-        run_batched(
-            output_json.resolve(),
-            arguments.mast_state_cache.resolve(),
-            arguments.diiid_machine_cache.resolve(),
-            None if arguments.report is None else arguments.report.resolve(),
-            self_check=arguments.self_check,
-        )
+        report_path = None if arguments.report is None else arguments.report.resolve()
+        if arguments.resume_diiid:
+            resume_batched_diiid(
+                output_json.resolve(),
+                arguments.diiid_machine_cache.resolve(),
+                report_path,
+            )
+        else:
+            run_batched(
+                output_json.resolve(),
+                arguments.mast_state_cache.resolve(),
+                arguments.diiid_machine_cache.resolve(),
+                report_path,
+                self_check=arguments.self_check,
+            )
         return
     run(
         arguments.json.resolve(),

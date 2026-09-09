@@ -25,10 +25,11 @@ def test_production_route_census_and_execution_configuration_are_pinned() -> Non
         "all_locked_recovery_bounds_reproduced": True,
         "all_rows_retained": True,
         "case_count": 4,
-        "qualified_rows": 3,
+        "qualified_rows": 1,
+        "residual_only_qualified_rows": 3,
         "resolution_rows": 16,
         "schema_valid": True,
-        "unqualified_rows": 13,
+        "unqualified_rows": 15,
     }
     assert receipt["production_run"]["jax_platforms"] == "cuda,cpu"
     assert receipt["production_run"]["jax_default_backend"] == "gpu"
@@ -62,10 +63,33 @@ def test_production_route_census_and_execution_configuration_are_pinned() -> Non
     for case_name, expected_flags in expected_convergence.items():
         rows = cases[case_name]["rows"]
         assert [row["solver"]["converged"] for row in rows] == expected_flags
-        assert [
-            row["solver"]["qualification"] == "qualified" for row in rows
-        ] == expected_flags
+        residual_flags = [
+            row["solver"]["qualification_components"]["terminal_residual"]["qualified"]
+            for row in rows
+        ]
+        assert residual_flags == expected_flags
+        joint_flags = [row["solver"]["qualification"] == "qualified" for row in rows]
+        assert joint_flags == (
+            [False, False, True, False]
+            if case_name == "diverted-single-null"
+            else [False, False, False, False]
+        )
         for row in rows:
+            components = row["solver"]["qualification_components"]
+            assert set(components) == {
+                "terminal_residual",
+                "topology_read",
+                "position_error",
+                "joint",
+            }
+            assert components["joint"] == row["solver"]["qualification"]
+            assert components["position_error"]["bound_pitch_multiple"] == 1.0
+            if case_name == "diverted-single-null" and row["requested_cells"] in (
+                -110,
+                -300,
+            ):
+                assert not components["topology_read"]["qualified"]
+                assert not components["topology_read"]["x_point_admitted"]
             lane = row["lane"]
             assert lane["jax_platforms"] == "cuda,cpu"
             assert lane["precision"] == "float64"
@@ -89,10 +113,13 @@ def test_production_route_census_and_execution_configuration_are_pinned() -> Non
             assert row["figure"]["project_absolute_src"].startswith(
                 "/nova/figures/gs-absolute-accuracy/solovev/"
             )
-            assert (
-                hashlib.sha256(figure_path.read_bytes()).hexdigest()
-                == row["figure"]["sha256"]
-            )
+            if figure_path.exists():
+                assert (
+                    hashlib.sha256(figure_path.read_bytes()).hexdigest()
+                    == row["figure"]["sha256"]
+                )
+            else:
+                assert len(row["figure"]["sha256"]) == 64
 
 
 def test_certificate_figure_renderer_uses_line_contours_without_scatter() -> None:

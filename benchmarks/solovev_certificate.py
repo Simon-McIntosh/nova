@@ -96,6 +96,7 @@ DIVERTED_WALL_CLEARANCE_FRACTION = 0.35
 AXIS_M = DIVERTED_REFERENCE.magnetic_axis
 X_POINT_M = DIVERTED_REFERENCE.x_point
 TERMINAL_RESIDUAL_BOUND = float(LOCKED_RECOVERY_BOUNDS["fixed_point_residual"])
+TOPOLOGY_POSITION_BOUND_PITCHES = 1.0
 THEORETICAL_ORDER = 2.0
 NORM_FIELDS = ("psi", "gradient", "hessian")
 NORM_REGIONS = ("whole_domain", "two_pitch_boundary_band")
@@ -1735,6 +1736,90 @@ def _analytic_diverted_topology(exact: CerfonFreidbergSingleNull) -> dict[str, A
     }
 
 
+def _apply_joint_qualification(row: dict[str, Any]) -> dict[str, Any]:
+    """Apply the certificate predicate to a solved row without entering the solver."""
+
+    solver = row["solver"]
+    geometry = row["geometry"]
+    root_topology = geometry["root_topology"]
+    solver["converged"] = bool(solver["production_telemetry"]["converged"])
+    terminal_residual = solver["terminal_fixed_point_residual"]
+    residual_qualified = bool(
+        terminal_residual is not None
+        and np.isfinite(terminal_residual)
+        and terminal_residual <= TERMINAL_RESIDUAL_BOUND
+    )
+    axis_position = root_topology["axis_rz_m"]
+    axis_admitted = bool(
+        root_topology["read_status"] == "qualified_axis"
+        and axis_position is not None
+        and np.all(np.isfinite(np.asarray(axis_position, dtype=np.float64)))
+    )
+    diverted = _is_diverted_case(row["case"])
+    x_position = root_topology["x_point_rz_m"]
+    x_admitted = bool(
+        not diverted
+        or (
+            x_position is not None
+            and np.all(np.isfinite(np.asarray(x_position, dtype=np.float64)))
+        )
+    )
+    topology_qualified = axis_admitted and x_admitted
+    axis_error = geometry["magnetic_axis_position_error_m"]
+    x_error = geometry["x_point_position_error_m"]
+    pitch = float(row["characteristic_pitch_m"])
+    position_bound = TOPOLOGY_POSITION_BOUND_PITCHES * pitch
+    axis_within_bound = bool(
+        axis_error is not None
+        and np.isfinite(axis_error)
+        and axis_error <= position_bound
+    )
+    x_within_bound = bool(
+        not diverted
+        or (x_error is not None and np.isfinite(x_error) and x_error <= position_bound)
+    )
+    position_qualified = axis_within_bound and x_within_bound
+    joint_qualified = residual_qualified and topology_qualified and position_qualified
+    if not residual_qualified:
+        reason = "fixed_point_residual_outside_qualification_bound"
+    elif not topology_qualified:
+        reason = "topology_read_does_not_admit_required_stationary_points"
+    elif not position_qualified:
+        reason = "stationary_point_error_exceeds_resolution_scaled_bound"
+    else:
+        reason = "residual_topology_and_position_within_qualification_bounds"
+    solver["residual_only_qualification"] = (
+        "qualified" if residual_qualified else "unqualified"
+    )
+    solver["qualification_components"] = {
+        "terminal_residual": {
+            "qualified": residual_qualified,
+            "value": terminal_residual,
+            "bound": TERMINAL_RESIDUAL_BOUND,
+        },
+        "topology_read": {
+            "qualified": topology_qualified,
+            "read_status": root_topology["read_status"],
+            "axis_admitted": axis_admitted,
+            "x_point_required": diverted,
+            "x_point_admitted": x_admitted,
+        },
+        "position_error": {
+            "qualified": position_qualified,
+            "bound_pitch_multiple": TOPOLOGY_POSITION_BOUND_PITCHES,
+            "bound_m": position_bound,
+            "axis_error_m": axis_error,
+            "axis_within_bound": axis_within_bound,
+            "x_point_error_m": x_error,
+            "x_point_within_bound": x_within_bound,
+        },
+        "joint": "qualified" if joint_qualified else "unqualified",
+    }
+    solver["qualification"] = "qualified" if joint_qualified else "unqualified"
+    solver["qualification_reason"] = reason
+    return row
+
+
 def _error_magnitude(values: np.ndarray) -> np.ndarray:
     """Collapse vector and matrix errors into one absolute field."""
 
@@ -2005,6 +2090,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
                 f"requested_cells={requested_cells}",
                 flush=True,
             )
+            _apply_joint_qualification(persisted)
             row = _render_persisted_row(persisted)
             _validate_row(row)
             _write_json(part, row)
@@ -2346,6 +2432,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             "render_source": "fresh_production_solve",
         },
     }
+    _apply_joint_qualification(row)
     _validate_row(row)
     _write_json(_part_path(case_name, requested_cells), row)
     return row
@@ -2609,6 +2696,7 @@ def _aggregate_partial(
             path = _part_path(case_name, requested)
             if path.exists():
                 row = json.loads(path.read_text(encoding="utf-8"))
+                _apply_joint_qualification(row)
                 _validate_row(row)
                 rows.append(row)
             else:
@@ -2763,6 +2851,11 @@ def _validate_partial(receipt: dict[str, Any]) -> None:
 
 
 def _aggregate(output: Path = OUTPUT) -> dict[str, Any]:
+    existing_production_run = None
+    if output.exists():
+        existing_production_run = json.loads(output.read_text(encoding="utf-8")).get(
+            "production_run"
+        )
     case_payload = {}
     for case_name in CASE_NAMES:
         rows = [
@@ -2770,6 +2863,7 @@ def _aggregate(output: Path = OUTPUT) -> dict[str, Any]:
             for requested in REQUESTED_CELLS
         ]
         for row in rows:
+            _apply_joint_qualification(row)
             _validate_row(row)
         fits = {}
         for field in NORM_FIELDS:
@@ -2782,14 +2876,19 @@ def _aggregate(output: Path = OUTPUT) -> dict[str, Any]:
         qualified_count = sum(
             row["solver"]["qualification"] == "qualified" for row in rows
         )
+        residual_only_count = sum(
+            row["solver"]["residual_only_qualification"] == "qualified" for row in rows
+        )
         case_payload[case_name] = {
             "rows": rows,
             "convergence_order_fits": fits,
             "verdict": {
                 "sentence": (
-                    f"The production route qualified {qualified_count} "
+                    f"The production route jointly qualified {qualified_count} "
                     f"of {len(rows)} {case_name} resolution rows against the "
-                    f"{TERMINAL_RESIDUAL_BOUND:.0e} terminal residual bound."
+                    f"{TERMINAL_RESIDUAL_BOUND:.0e} terminal residual, admitted "
+                    "topology and resolution-scaled position bounds; "
+                    f"{residual_only_count} pass the residual bound alone."
                 )
             },
         }
@@ -2804,8 +2903,21 @@ def _aggregate(output: Path = OUTPUT) -> dict[str, Any]:
             "requested_cells": list(REQUESTED_CELLS),
             "terminal_residual_bound": TERMINAL_RESIDUAL_BOUND,
             "qualification_policy": (
-                "retain every terminal row and fit each qualification cohort separately"
+                "retain every terminal row and fit each joint qualification "
+                "cohort separately"
             ),
+            "joint_qualification": {
+                "terminal_residual_bound": TERMINAL_RESIDUAL_BOUND,
+                "topology_read": (
+                    "axis admitted; diverted cases additionally require an "
+                    "admitted X-point"
+                ),
+                "position_error_bound": (
+                    "axis and required X-point errors at most one characteristic pitch"
+                ),
+                "position_error_bound_pitch_multiple": TOPOLOGY_POSITION_BOUND_PITCHES,
+                "residual_only_count_is_retained": True,
+            },
             "boundary_band": "Euclidean distance at most two characteristic pitches",
             "theoretical_discrete_operator_order": THEORETICAL_ORDER,
             "gauge": "shared exact exterior; no post-solve re-zeroing",
@@ -2837,8 +2949,15 @@ def _aggregate(output: Path = OUTPUT) -> dict[str, Any]:
         "cases": case_payload,
         "verdict": {},
     }
+    if existing_production_run is not None:
+        receipt["production_run"] = existing_production_run
     qualifications = [
         row["solver"]["qualification"]
+        for case in case_payload.values()
+        for row in case["rows"]
+    ]
+    residual_only_qualifications = [
+        row["solver"]["residual_only_qualification"]
         for case in case_payload.values()
         for row in case["rows"]
     ]
@@ -2847,6 +2966,7 @@ def _aggregate(output: Path = OUTPUT) -> dict[str, Any]:
         "case_count": len(case_payload),
         "resolution_rows": len(qualifications),
         "qualified_rows": qualifications.count("qualified"),
+        "residual_only_qualified_rows": residual_only_qualifications.count("qualified"),
         "unqualified_rows": qualifications.count("unqualified"),
         "all_rows_retained": len(qualifications)
         == len(CASE_NAMES) * len(REQUESTED_CELLS),

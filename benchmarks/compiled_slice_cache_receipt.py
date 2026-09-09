@@ -138,8 +138,9 @@ def diagnose_vertical_mode(output: Path) -> dict[str, Any]:
     adaptive = _host(member, capture_trip_states=True)
     refusal = _host(member, refresh_threshold=None)
     reduced_newton._compiled_program_cache.clear()
-    _solve(member, capture_trip_states=True)
-    cached = _solve(member, capture_trip_states=True)
+    _solve(member)
+    cached = _solve(member)
+    instrumented = _solve(member, capture_trip_states=True)
     first_step = None
     for adaptive_step, refusal_step in zip(
         adaptive.steps, refusal.steps, strict=False
@@ -163,10 +164,10 @@ def diagnose_vertical_mode(output: Path) -> dict[str, Any]:
     trip_rows = []
     first_state_difference = None
     for trip in range(
-        max(adaptive.active_set_iterations, cached.active_set_iterations)
+        max(adaptive.active_set_iterations, instrumented.active_set_iterations)
     ):
         direct_state = np.asarray(adaptive.state_per_trip[trip], dtype=np.float64)
-        cached_state = np.asarray(cached.state_per_trip[trip], dtype=np.float64)
+        cached_state = np.asarray(instrumented.state_per_trip[trip], dtype=np.float64)
         different = np.flatnonzero(
             direct_state.view(np.uint64) != cached_state.view(np.uint64)
         )
@@ -231,6 +232,10 @@ def diagnose_vertical_mode(output: Path) -> dict[str, Any]:
             "fori_loop versus a separately dispatched host boundary"
         ),
         "capture_omission_found": False,
+        "trip_state_capture_program": {
+            "acceptance_route": False,
+            "terminal_flux_ulp": _ulp_distance(instrumented.state, adaptive.state),
+        },
         "withdrawn_keyed_lookup": WITHDRAWN_KEYED_LOOKUP,
         "rejected_hypotheses": [
             "adaptive Jacobian refresh policy",

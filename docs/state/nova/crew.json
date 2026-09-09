@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T11:55:10",
+  "updated": "2026-09-09T12:41:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -143860,6 +143860,189 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T084043270733-nia-diverted-reference-single-null",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-diverted-reference-single-null",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 595,
+                "cached_input_tokens": 627195,
+                "input_tokens": 627822,
+                "output_tokens": 887,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 628709,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "docs/figures/gs-absolute-accuracy/solovev-diverted-case/diverted-case-geometry.json reports for the new case at -110 and -342 requested cells an inboard separatrix radius of at least 0.85 m, an axis-to-separatrix clearance of at least 0.8 minor radii, the X-point below the magnetic axis and inside the wall polygon, every separatrix point at least 0.3 minor radii inside the wall, the analytic Grad-Shafranov residual of the closed-form flux below 1e-10 relative on the certificate carrier, with tests/test_oracle_axis_admission.py and tests/test_census_spline_value_authority.py green on all_debug CPU x64",
+          "estimated_hours": null,
+          "goal": "Author the diverted exact reference as the Cerfon-Freidberg single-null Solovev solution fixed by the locked decision diverted-reference-geometry (major radius 1.70 m, inverse aspect ratio 0.32, elongation 1.7, triangularity 0.33, lower X-point), replacing the jump-bearing polynomial case in the certificate case table so every consumer of the diverted case name resolves to it",
+          "id": "nia-diverted-reference-single-null",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T08:40:44Z",
+            "read_at": "2026-09-09T08:40:45Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 65.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T084043270733-nia-diverted-reference-single-null/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/split_fit_jump_field.py",
+            "benchmarks/solovev_certificate.py",
+            "nova/equilibrium/analytic_single_null.py",
+            "tests/test_analytic_single_null.py",
+            "tests/test_oracle_axis_admission.py",
+            "tests/test_census_spline_value_authority.py",
+            "docs/figures/gs-absolute-accuracy/solovev-diverted-case"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-nia-diverted",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T08:41:01Z",
+        "completed_at": "2026-09-09T10:37:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7004,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "e7783f0fb30a181b409fcc625b5d0ed76ea8eb54",
+        "commits": [
+          "81b6cc235b55019ad0e640203934615086ed8aca",
+          "1f81cb241dc2604e61ed2a4fe6ba135c97be1af0",
+          "984431cb18676cb247c3b8e348aeba0c5754980f",
+          "4011131e7712229562258cfa579bbcbbe707765d",
+          "68f0498d89b38720e4f41950ceb2b73e416bdd13",
+          "deee1f84d346df16b04faec7ceae8ebcea39ec8f"
+        ],
+        "changed_lines": {
+          "added": 1165,
+          "removed": 187,
+          "files": 7
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug CPU x64 job 1267652: pytest tests/test_analytic_single_null.py tests/test_oracle_axis_admission.py tests/test_census_spline_value_authority.py (9 passed); python benchmarks/solovev_certificate.py --diverted-geometry (exit 0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T084043270733-nia-diverted-reference-single-null/all-debug-cpu-x64-retry.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T084043270733-nia-diverted-reference-single-null/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a08553-def4-73e1-89d7-5e170adc1a81",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2245120,
+            "cached_input_tokens_cumulative": 2245120,
+            "input_tokens": 2318315,
+            "input_tokens_cumulative": 2318315,
+            "output_tokens": 16140,
+            "output_tokens_cumulative": 16140,
+            "reasoning_output_tokens": 2853,
+            "reasoning_output_tokens_cumulative": 2853
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T10:37:45Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 72.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T10:37:45Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2245120,
+          "cumulative_input_tokens": 4563435,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 18993
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "scope_acceptances": [
+          {
+            "path": "scripts/analytic_oracle_fixtures/measure.py",
+            "reason": "scope extension granted at the worker's NEEDS-HELP: cached_machine accepts an explicit wall built as an offset of the exact separatrix, keyed into the cache identity, because tuning an unrelated limited carrier could not meet the 0.3 minor-radii wall clearance"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/nia-diverted-reference-single-null",
+          "session_id": "01a08553-def4-73e1-89d7-5e170adc1a81",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T10:37:45Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -144172,6 +144355,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2353
+    "_version": 2354
   }
 }

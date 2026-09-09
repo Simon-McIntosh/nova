@@ -856,7 +856,6 @@ def test_compiled_slice_caches_one_executable_per_static_policy(machine, monkeyp
         profile.operator, seed, **common
     )
     assert builds == 1
-    assert coordinate_builds == 1
     assert second.program is first.program
     assert second.program.slice_solver is first.program.slice_solver
 

@@ -206,6 +206,29 @@
     "reservation": "gpu_0003_grpA",
     "tmpdir": "/tmp"
   },
+  "findings": {
+    "mast_per_member_wall": {
+      "batched_minus_sequential_ms_per_member": {
+        "with_exit": 10966.84918175001,
+        "without_exit": 7323.870960166671
+      },
+      "batched_ms_per_member": {
+        "with_exit": 71155.35317075001,
+        "without_exit": 71678.79808066667
+      },
+      "batched_over_sequential": {
+        "with_exit": 1.1822083696207883,
+        "without_exit": 1.1138043548158052
+      },
+      "classification": "plan_level_finding",
+      "qualification": "the measured MAST batch wall is retained as a throughput finding; it is not adjusted or explained away",
+      "sequential_width_one_ms_per_member": {
+        "with_exit": 60188.503989,
+        "without_exit": 64354.927120500004
+      },
+      "verdict": "batched_per_member_wall_not_below_sequential_width_one"
+    }
+  },
   "host_geometry_discriminator": {
     "classification": {
       "equilibrium_dependence": "the benchmark constructs declared_support from inside_polygon(lattice coordinates, stored LCFS coordinates) intersected with the common machine material mask; the stored LCFS is an equilibrium result for the selected shot and time slice",

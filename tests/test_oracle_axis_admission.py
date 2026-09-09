@@ -15,6 +15,7 @@ with skip_import("jax"):
         DIVERTED_CASE_NAME,
         X_POINT_M,
         _case,
+        _case_machine,
         _diverted_geometry_row,
         _exact_state,
     )
@@ -31,11 +32,7 @@ def _double_precision():
 def _diverted_exact_read(requested_cells):
     """Build a certificate carrier and read its closed-form flux field."""
     carrier_case, source_case, exact = _case(DIVERTED_CASE_NAME)
-    machine = oracle_fixture.cached_machine(
-        carrier_case,
-        requested_cells,
-        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
-    )
+    machine = _case_machine(DIVERTED_CASE_NAME, carrier_case, exact, requested_cells)
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
@@ -76,6 +73,24 @@ def test_coarse_diverted_exact_field_admits_axis_and_saddle():
     )
 
     assert len(coarse_machine.node) > 0
+    assert len(coarse_machine.wall_node) == oracle_fixture.WALL_POINT_COUNT
+    carrier_case, _source_case, _exact = _case(DIVERTED_CASE_NAME)
+    default_identity = oracle_fixture.cache_identity(
+        carrier_case,
+        requested_cells=-110,
+        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+    )
+    explicit_identity = oracle_fixture.cache_identity(
+        carrier_case,
+        requested_cells=-110,
+        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+        wall=coarse_machine.wall_node,
+    )
+    assert explicit_identity["discretisation"]["wall_source"] == "explicit"
+    assert (
+        explicit_identity["discretisation"]["wall_content"]["sha256"]
+        != default_identity["discretisation"]["wall_content"]["sha256"]
+    )
     np.testing.assert_allclose(np.asarray(coarse_state.axis), AXIS_M, atol=coarse_pitch)
     assert np.all(np.isnan(np.asarray(coarse_state.x_point)))
     assert not bool(coarse_state.diverted)

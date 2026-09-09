@@ -15,6 +15,7 @@ with skip_import("jax"):
         DIVERTED_CASE_NAME,
         X_POINT_M,
         _case,
+        _case_machine,
         _exact_state,
     )
     from nova.biot.null import Null1D, Null2D
@@ -26,7 +27,6 @@ with skip_import("jax"):
     from nova.equilibrium.topology import Topology, TopologyClass
     from nova.geometry.hexstencil import hex_stencil
     from nova.jax.config import configure_dtypes
-    from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -137,11 +137,7 @@ def test_topology_state_consumes_spline_authored_stationary_values():
 def test_diverted_exact_oracle_value_error_favours_tensor_spline():
     """The coarse oracle map reports both stationary-point value errors."""
     carrier_case, _source_case, exact = _case(DIVERTED_CASE_NAME)
-    machine = oracle_fixture.cached_machine(
-        carrier_case,
-        -110,
-        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
-    )
+    machine = _case_machine(DIVERTED_CASE_NAME, carrier_case, exact, -110)
     assert len(machine.node) > 0
     radial = jnp.linspace(float(machine.node[:, 0].min()), machine.node[:, 0].max(), 17)
     vertical = jnp.linspace(

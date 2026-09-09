@@ -62,11 +62,7 @@ from nova.jax.config import (
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.analytic_oracle_fixtures.reduced_oracle import measure_reduced_oracle
 from scripts.oracle_rebaseline import measure as recovery
-from tests.rotating_equilibrium_references import (
-    RotatingEquilibrium,
-    reference_cases,
-    rotating_equilibrium,
-)
+from tests.rotating_equilibrium_references import RotatingEquilibrium, reference_cases
 from tests.test_solovev_recovery_gates import LOCKED_RECOVERY_BOUNDS
 
 
@@ -94,6 +90,7 @@ CASE_NAMES = (
 DIVERTED_CASE_NAME = "diverted-single-null"
 DIVERTED_CASE_ALIASES = frozenset((DIVERTED_CASE_NAME, "diverted-jump-bearing"))
 DIVERTED_REFERENCE = cerfon_freidberg_single_null()
+DIVERTED_WALL_CLEARANCE_FRACTION = 0.35
 AXIS_M = DIVERTED_REFERENCE.magnetic_axis
 X_POINT_M = DIVERTED_REFERENCE.x_point
 TERMINAL_RESIDUAL_BOUND = float(LOCKED_RECOVERY_BOUNDS["fixed_point_residual"])
@@ -511,23 +508,6 @@ def _validate_seed_control(receipt: dict[str, Any]) -> None:
 
 def _is_diverted_case(case_name: str) -> bool:
     return case_name in DIVERTED_CASE_ALIASES
-
-
-def _diverted_carrier(exact: CerfonFreidbergSingleNull) -> RotatingEquilibrium:
-    """Return a mesh carrier whose wall clears the analytic separatrix."""
-    reference = oracle_fixture.analytic_case()
-    return rotating_equilibrium(
-        name="diverted-single-null-carrier",
-        major_radius=exact.major_radius,
-        outboard_radius=2.35,
-        half_height=1.30,
-        vacuum_field=reference.vacuum_field,
-        axis_pressure=reference.axis_pressure,
-        thermal_mach_number=0.0,
-        axis_temperature=reference.axis_temperature,
-        boundary_temperature=reference.boundary_temperature,
-        mean_particle_mass=reference.mean_particle_mass,
-    )
 
 
 def _diverted_source(exact: CerfonFreidbergSingleNull) -> RotatingEquilibrium:
@@ -1039,11 +1019,7 @@ def _nan_census(case_name: str) -> dict[str, Any]:
         requested_cells=requested_cells,
     ):
         carrier_case, source_case, exact = _case(case_name)
-        machine = oracle_fixture.cached_machine(
-            carrier_case,
-            requested_cells,
-            wall_nodes=oracle_fixture.WALL_POINT_COUNT,
-        )
+        machine = _case_machine(case_name, carrier_case, exact, requested_cells)
         coordinates = np.vstack(
             (machine.node, machine.wall_node, machine.sample_coordinates)
         )
@@ -1155,13 +1131,38 @@ def _case(case_name: str) -> tuple[RotatingEquilibrium, RotatingEquilibrium, Any
     if _is_diverted_case(case_name):
         exact = DIVERTED_REFERENCE
         return (
-            _diverted_carrier(exact),
+            oracle_fixture.analytic_case(),
             _diverted_source(exact),
             exact,
         )
     base_name = case_name.removesuffix("-static")
     static = reference_cases()[base_name].static_limit()
     return static, static, static
+
+
+def _diverted_wall(exact: CerfonFreidbergSingleNull) -> np.ndarray:
+    """Return the standard-node wall outside the exact single-null separatrix."""
+    return oracle_fixture.offset_wall(
+        exact.separatrix(1441),
+        clearance=DIVERTED_WALL_CLEARANCE_FRACTION * exact.minor_radius,
+        points=oracle_fixture.WALL_POINT_COUNT,
+    )
+
+
+def _case_machine(
+    case_name: str,
+    carrier_case: RotatingEquilibrium,
+    exact: Any,
+    requested_cells: int,
+) -> Any:
+    """Load the case carrier with its declared wall identity."""
+    wall = _diverted_wall(exact) if _is_diverted_case(case_name) else None
+    return oracle_fixture.cached_machine(
+        carrier_case,
+        requested_cells,
+        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+        wall=wall,
+    )
 
 
 def _exact_state(case_name: str, exact: Any, coordinates: np.ndarray) -> np.ndarray:
@@ -1229,21 +1230,21 @@ def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
     if requested_cells not in {-110, -342}:
         raise ValueError("diverted geometry is measured at -110 and -342 cells")
     carrier_case, _source_case, exact = _case(DIVERTED_CASE_NAME)
-    machine = oracle_fixture.cached_machine(
-        carrier_case,
-        requested_cells,
-        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
-    )
+    machine = _case_machine(DIVERTED_CASE_NAME, carrier_case, exact, requested_cells)
     boundary = _boundary(DIVERTED_CASE_NAME, exact)
     minor_radius = exact.minor_radius
     axis_distance = float(_distance_to_boundary(AXIS_M[None, :], boundary)[0])
     pitch = float(np.sqrt(np.median(np.asarray(machine.area, dtype=np.float64))))
 
     radial = np.linspace(
-        float(np.min(machine.node[:, 0])), float(np.max(machine.node[:, 0])), 241
+        min(float(np.min(machine.node[:, 0])), float(np.min(boundary[:, 0]))) - pitch,
+        max(float(np.max(machine.node[:, 0])), float(np.max(boundary[:, 0]))) + pitch,
+        241,
     )
     vertical = np.linspace(
-        float(np.min(machine.node[:, 1])), float(np.max(machine.node[:, 1])), 241
+        min(float(np.min(machine.node[:, 1])), float(np.min(boundary[:, 1]))) - pitch,
+        max(float(np.max(machine.node[:, 1])), float(np.max(boundary[:, 1]))) + pitch,
+        241,
     )
     radial_grid, vertical_grid = np.meshgrid(radial, vertical)
     coordinates = np.column_stack((radial_grid.ravel(), vertical_grid.ravel()))
@@ -1310,6 +1311,12 @@ def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
             PolygonPath(wall).contains_point(X_POINT_M)
         ),
         "separatrix_inside_wall_polygon": bool(np.all(boundary_inside_wall)),
+        "wall_node_count": int(len(wall)),
+        "wall_source": "explicit_separatrix_offset",
+        "wall_requested_offset_m": DIVERTED_WALL_CLEARANCE_FRACTION * minor_radius,
+        "wall_sha256_binary64": hashlib.sha256(
+            np.ascontiguousarray(wall, dtype="<f8").tobytes()
+        ).hexdigest(),
         "separatrix_minimum_wall_clearance_m": wall_clearance,
         "separatrix_wall_clearance_fraction_of_minor_radius": wall_clearance
         / minor_radius,
@@ -1366,8 +1373,8 @@ def _diverted_geometry_receipt(
             "axis": "closed-form stationary point",
             "minor_radius": "major radius times inverse aspect ratio",
             "contour": (
-                "241 by 241 carrier-grid extraction at the median analytic "
-                "boundary flux"
+                "241 by 241 extraction over the carrier and analytic boundary "
+                "envelope with one-pitch padding, at the median analytic boundary flux"
             ),
             "distance": "symmetric sampled point-to-polyline Hausdorff distance",
         },
@@ -1724,11 +1731,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         requested_cells=requested_cells,
     ):
         carrier_case, source_case, exact = _case(case_name)
-        machine = oracle_fixture.cached_machine(
-            carrier_case,
-            requested_cells,
-            wall_nodes=oracle_fixture.WALL_POINT_COUNT,
-        )
+        machine = _case_machine(case_name, carrier_case, exact, requested_cells)
 
     with _timed_stage(
         "operator_and_seed",

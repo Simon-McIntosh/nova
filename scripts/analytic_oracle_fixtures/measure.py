@@ -19,7 +19,7 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial import Delaunay
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Polygon
 import xarray
 
 from nova.biot.null import Null1D, Null2D
@@ -205,6 +205,56 @@ def limiter_contour(
     ]
 
 
+def offset_wall(
+    boundary: np.ndarray, *, clearance: float, points: int = WALL_POINT_COUNT
+) -> np.ndarray:
+    """Return an arc-length-sampled smooth offset outside a closed boundary."""
+    boundary = np.asarray(boundary, dtype=np.float64)
+    if boundary.ndim != 2 or boundary.shape[1] != 2 or len(boundary) < 3:
+        raise ValueError(
+            "the boundary must contain at least three two-dimensional points"
+        )
+    if not np.all(np.isfinite(boundary)):
+        raise ValueError("the boundary must be finite")
+    if clearance <= 0.0:
+        raise ValueError("wall clearance must be positive")
+    if points < 9 or points % 2 == 0:
+        raise ValueError("the wall needs an odd point count of at least nine")
+
+    polygon = Polygon(boundary)
+    if not polygon.is_valid or polygon.area <= 0.0:
+        raise ValueError("the boundary must define one valid polygon")
+    expanded = polygon.buffer(clearance, quad_segs=64, join_style=1)
+    if expanded.geom_type != "Polygon" or not expanded.is_valid:
+        raise ValueError("the offset wall must remain one valid polygon")
+    loop = expanded.exterior
+    arc = np.linspace(0.0, loop.length, points, endpoint=False)
+    wall = np.asarray([loop.interpolate(value).coords[0] for value in arc])
+    if not Polygon(wall).is_valid:
+        raise ValueError("the sampled offset wall must remain a valid polygon")
+    return wall
+
+
+def _resolved_wall(
+    case: RotatingEquilibrium,
+    *,
+    wall_nodes: int,
+    wall: np.ndarray | None,
+) -> np.ndarray:
+    resolved = (
+        limiter_contour(case, points=wall_nodes)
+        if wall is None
+        else np.asarray(wall, dtype=np.float64)
+    )
+    if resolved.shape != (wall_nodes, 2):
+        raise ValueError(
+            f"the carrier wall must have shape {(wall_nodes, 2)}, got {resolved.shape}"
+        )
+    if not np.all(np.isfinite(resolved)) or not Polygon(resolved).is_valid:
+        raise ValueError("the carrier wall must be a finite valid polygon")
+    return resolved
+
+
 def _square_stencils(radial_count: int, vertical_count: int) -> np.ndarray:
     """Return centre-first cyclic nine-node rings on a tensor lattice."""
     rings = []
@@ -284,10 +334,14 @@ def _array_identity(value: np.ndarray) -> dict[str, object]:
 
 
 def cache_identity(
-    case: RotatingEquilibrium, *, requested_cells: int, wall_nodes: int
+    case: RotatingEquilibrium,
+    *,
+    requested_cells: int,
+    wall_nodes: int,
+    wall: np.ndarray | None = None,
 ) -> dict[str, object]:
     """Return the complete semantic identity of an oracle carrier."""
-    wall = limiter_contour(case, points=wall_nodes)
+    resolved_wall = _resolved_wall(case, wall_nodes=wall_nodes, wall=wall)
     return {
         "schema": CACHE_SCHEMA,
         "analytic_case": case.name,
@@ -307,7 +361,8 @@ def cache_identity(
             "requested_cells": int(requested_cells),
             "plasma_shape": "hex",
             "wall_nodes": int(wall_nodes),
-            "wall_content": _array_identity(wall),
+            "wall_content": _array_identity(resolved_wall),
+            **({"wall_source": "explicit"} if wall is not None else {}),
         },
         "precision": "float64",
         "kernel": "exact-authored-polygon-moments",
@@ -391,10 +446,14 @@ def _flux_blocks(
 
 
 def build_machine(
-    case: RotatingEquilibrium, requested_cells: int, *, wall_nodes: int
+    case: RotatingEquilibrium,
+    requested_cells: int,
+    *,
+    wall_nodes: int,
+    wall: np.ndarray | None = None,
 ) -> OracleMachine:
     """Build a hex carrier without a conductor or external data source."""
-    wall = limiter_contour(case, points=wall_nodes)
+    wall = _resolved_wall(case, wall_nodes=wall_nodes, wall=wall)
     coilset = CoilSet(dplasma=requested_cells, tplasma="hex")
     coilset.firstwall.insert(wall, turn="hex")
     plasma = np.asarray(coilset.subframe.loc[:, "plasma"], dtype=bool)
@@ -552,11 +611,18 @@ def _cache_lock(store: ZarrStore):
 
 
 def cached_machine(
-    case: RotatingEquilibrium, requested_cells: int, *, wall_nodes: int
+    case: RotatingEquilibrium,
+    requested_cells: int,
+    *,
+    wall_nodes: int,
+    wall: np.ndarray | None = None,
 ) -> OracleMachine:
     """Warm-load one semantic carrier or publish a validated cold build."""
     identity = cache_identity(
-        case, requested_cells=requested_cells, wall_nodes=wall_nodes
+        case,
+        requested_cells=requested_cells,
+        wall_nodes=wall_nodes,
+        wall=wall,
     )
     store = ZarrStore(
         filename=f"{CACHE_FILENAME}_{abs(requested_cells)}", dirname=".nova"
@@ -573,7 +639,9 @@ def cached_machine(
         except FileNotFoundError, KeyError, OSError, ValueError:
             load_seconds = perf_counter() - started
             build_started = perf_counter()
-            machine = build_machine(case, requested_cells, wall_nodes=wall_nodes)
+            machine = build_machine(
+                case, requested_cells, wall_nodes=wall_nodes, wall=wall
+            )
             build_seconds = perf_counter() - build_started
             store.data = _dataset(machine, identity, store.group)
             store_started = perf_counter()
@@ -709,9 +777,7 @@ def exact_current_moments(
     case: RotatingEquilibrium, operator: ForwardFluxOperator, state: np.ndarray
 ) -> CellCurrentMoments:
     """Integrate the analytic density over the operator's exact traced supports."""
-    masks, _topology, _sample, support = operator._support_partition(
-        jnp.asarray(state)
-    )
+    masks, _topology, _sample, support = operator._support_partition(jnp.asarray(state))
     counts = np.asarray(support.vertex_count)
     vertices = np.asarray(support.support_vertices)
     centres = np.asarray(operator.moment_geometry.atomic_mesh.centroids)
@@ -747,8 +813,8 @@ def _production_physical_moments(
     operator: ForwardFluxOperator, state: np.ndarray
 ) -> CellCurrentMoments:
     """Evaluate production physical moments from one shared support partition."""
-    masks, _topology, sample_flux, profile_support = (
-        operator._support_partition(jnp.asarray(state))
+    masks, _topology, sample_flux, profile_support = operator._support_partition(
+        jnp.asarray(state)
     )
     return operator.source.current_moments(
         masks,

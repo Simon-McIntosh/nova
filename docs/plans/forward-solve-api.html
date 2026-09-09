@@ -24,8 +24,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-09">
-<meta name="plan-version" content="47">
-<meta name="plan-impl" content="0.7">
+<meta name="plan-version" content="49">
+<meta name="plan-impl" content="0.78">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -172,6 +172,12 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260909T063207696420-s19r-forward-solve-api" data-who="s19r-fsa" data-when="2026-09-09T07:19:33Z">
     <div class="r-comment-body"><p>S19 review: §1 and §4 landed but uncollapsed with two contract details unimplemented (seed_policy typed as explicit only, compilation_cache_hit echoed not observed, cache-root TMPDIR claim stale); §2 migration claim contradicted by four route bodies still calling solve_portfolio directly; §3 transport seam not started; §5 honest negative (30 s per edit, 0 cache hits); sprint done_when carries a rejected api_version and a delegated width-12 batch; verdict rewrite §2 acceptance and complete §3</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260909T141017729577-fsa-contract-details" data-who="s19i-fsa-contract" data-when="2026-09-09T14:17:43Z">
+    <div class="r-comment-body"><p>seed_policy admits ColdSeedPortfolio beside ExplicitSolveSeed with the selected branch (class, plasma current, centroid) recorded as receipt.seed_provenance, and compilation_cache_hit is observed (False then True across identical requests in one process) instead of echoed; resolved-defaults JSON round-trip unchanged; 5 contract cases green</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260909T1620-contract-details-landed" data-who="reckon-ship s19-review" data-when="2026-09-09T16:20:00Z">
+    <div class="r-comment-body">fsa-contract-details landed: commit 4be45c62 merged. The two section 1 details the review found unimplemented are closed: seed_policy admits ColdSeedPortfolio beside ExplicitSolveSeed and the receipt records seed_provenance (portfolio class, limited or diverted selection, plasma current, centroid); compilation_cache_hit is observed, reading False on the first and True on the second identical request in one process, instead of echoing the request field. tests/test_forward_solve_request.py 5 passed on all_debug CPU x64; resolved-defaults round-trip unchanged. Section 1 is now complete in full; sections 3 (transport) and the section 5 rerun remain. impl 0.7 to 0.78.</div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T154423854324" data-who="coordinator" data-when="2026-09-04T15:45:00Z">
     <div class="r-comment-body"><p>§1 landed: commit <code>7b6936bf</code> merged at <code>a675c63f</code>. <code>nova/equilibrium/solve_request.py</code> declares the frozen <code>ForwardSolveRequest</code>, its nested <code>ForwardSolvePolicy</code>, the version-keyed default table (installed Nova version; public policy Newton 10, GMRES 30, warmup 0, kernel tolerance 1e-8, qualification 1e-10) and the frozen <code>ForwardSolveReceipt</code> (qualification, termination, per-trip residual and mask histories, globalisation decisions, amplitude history, topology plus polish receipt, compilation-cache hit or miss, wall seconds, resolved defaults with the resolving version). <code>ForwardProfile.solve</code> accepts a request and returns a receipt by delegating to the unchanged keyword path, proved bit-identical on the CPU fixture; <code>PerturbedSeedPolicy</code> now reads its defaults from the same table. The EFIT parity producer is the migrated exemplar: it builds its request from the table and records Newton 12, GMRES 12 and qualification 1e-8 as explicit deviations in the receipt, closing the drift the inventory named. Gate: schema test plus the seven referee IDs, 12 cases green; evidence anchor <code>forward-solve-api-landed.html#request-and-receipt</code>. §2 route migrations proceed on the seam; the default-wiring test reads <code>resolved_defaults</code> from these receipts.</p></div>

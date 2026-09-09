@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T16:07:03",
+  "updated": "2026-09-09T16:20:15",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5344,17 +5344,6 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
-      },
-      {
-        "id": "session-9d6ba496cc54edb6cbf4",
-        "harness": "codex-luna",
-        "role": "implement",
-        "session_id": "01a08135-9400-77c0-9149-e1c8e3ab0dce",
-        "session_model": "gpt-5.6-luna",
-        "sessions": {
-          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a08135-9400-77c0-9149-e1c8e3ab0dce"
-        },
-        "created": "2026-09-08"
       },
       {
         "id": "shadow-haiku-1",
@@ -145404,6 +145393,242 @@
           "reason": "the node ends on a lead decision (q-nia-boundary-trace-moderate-regression) rather than on work the session can continue: the per-trip diagnostic it was resumed for exhausts 128 GiB of LLVM compile memory on the traced variant twice, and the twelve commits are safe on the retained worktree tip 1c4daf51 for the node the lead's answer creates"
         },
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T141017729577-fsa-contract-details",
+        "plan": "forward-solve-api",
+        "section": "\u00a71",
+        "node": "fsa-contract-details",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 828,
+                "cached_input_tokens": 784333,
+                "input_tokens": 785165,
+                "output_tokens": 22,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 785187,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "tests/test_forward_solve_request.py is green on all_debug CPU x64 with new cases showing a request whose seed_policy names a cold-seed portfolio class solving through ForwardProfile.solve with the seed provenance recorded in the receipt, and a receipt whose compilation_cache_hit reads False on the first call and True on the second identical call in one process, with the resolved-defaults JSON round-trip unchanged",
+          "estimated_hours": null,
+          "goal": "Close the two section 1 contract details the review found unimplemented: seed_policy admits the cold_seed_portfolio class as well as an explicit seed and the receipt carries an observed compilation-cache hit or miss instead of echoing the request field",
+          "id": "fsa-contract-details",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T14:10:18Z",
+            "read_at": "2026-09-09T14:10:19Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 83.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T141017729577-fsa-contract-details/manifest.md",
+          "plan": "forward-solve-api",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "nova/equilibrium/solve_request.py",
+            "nova/equilibrium/forward.py",
+            "tests/test_forward_solve_request.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-fsa-contract",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T14:10:28Z",
+        "completed_at": "2026-09-09T14:17:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 435,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 435,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "8ae3a7d776c3e067a777336f9bfdc4614568d2b2",
+        "commits": [
+          "4be45c6272f93e8db02b7103ad249c42ab70ea5d"
+        ],
+        "changed_lines": {
+          "added": 204,
+          "removed": 5,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug CPU x64: python -m pytest -p no:cacheprovider tests/test_forward_solve_request.py (5 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T141017729577-fsa-contract-details/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T141017729577-fsa-contract-details/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08681-8183-7292-8e5d-7af34417a9f8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3231744,
+            "cached_input_tokens_cumulative": 3231744,
+            "input_tokens": 3388732,
+            "input_tokens_cumulative": 3388732,
+            "output_tokens": 17810,
+            "output_tokens_cumulative": 17810,
+            "reasoning_output_tokens": 8364,
+            "reasoning_output_tokens_cumulative": 8364
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T14:17:43Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 84.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T14:17:43Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: exact differing static host field list=[`flattened_static_state.declared_support`]; classification=equilibrium-dependent stored-LCFS support mask incorrectly classified as static host geometry; mechanism=`DeclaredAnchorOperator.declared_support` is omitted from `_dynamic_extra_names`; so `tree_flatten` retains it in `_OperatorPytreeAux.static_state`; effect=six 1089-cell masks produce six host digests and force six width-2 groups; representative value=flat cell 113 is false for 21978/35 and true for 21983/35; repair scope=`nova/equilibrium/forward_operator.py`; outside this node's fence and held by another worktree; H200 rerun prohibited and not attempted in this turn",
+              "elapsed_seconds": 1077,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 9584,
+              "log_fresh": false,
+              "manifest_commits": [
+                "2071f8c02f7e2d7a13b6cc8748eb8fafa842a7da",
+                "3d0806ef710451cf94dc211aabedca3fe39fa176",
+                "ff38a60b5cc221bc5b4e1f0522546b22407bac2a]; changed_paths: [\"benchmarks/strict_exit_incidence.py",
+                "docs/figures/batched-operator-boundary/exit-incidence/batched-exit-incidence.json"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "9ff9b9b3504ecfb2ff29a00b54885299a26968302a81039880743d910911dafe",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/manifest.md; resolve the blocker before resuming the run",
+              "node": "bob-batched-exit-incidence",
+              "phase": "working",
+              "plan": "batched-operator-boundary",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260909T105115820348-bob-batched-exit-incidence",
+              "session": "s19-review",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260909T105115820348-bob-batched-exit-incidence",
+                "session_id": "01a085cb-6355-7a22-8b6f-f865ccb63c6d",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 9688,
+              "terminal_at": "2026-09-09T11:28:54Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/bob-batched-exit-incidence"
+            }
+          ]
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 3231744,
+          "cumulative_input_tokens": 6620476,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 26174
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/fsa-contract-details",
+          "session_id": "01a08681-8183-7292-8e5d-7af34417a9f8",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T14:17:43Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -145716,6 +145941,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2373
+    "_version": 2375
   }
 }

@@ -656,6 +656,9 @@ def aggregate(output: Path = RECEIPT) -> dict[str, Any]:
             "one_rung_per_fresh_process": True,
             "lane": "all_debug CPU float64",
             "production_solver": "ForwardProfile.solve(ForwardSolveRequest)",
+            "terminal_residual_qualification_bound": (
+                certificate.TERMINAL_RESIDUAL_BOUND
+            ),
             "outboard_window_rz_m": list(OUTBOARD_WINDOW),
         },
         "rows": compact_rows,
@@ -696,6 +699,16 @@ def aggregate(output: Path = RECEIPT) -> dict[str, Any]:
                 controls_bit_identical
             ),
             "high_resolution_outboard_enrichment": high_resolution_enrichment,
+            "qualified_row_count": sum(
+                row["production"]["terminal_residual"]
+                <= certificate.TERMINAL_RESIDUAL_BOUND
+                for row in compact_rows
+            ),
+            "unqualified_row_count": sum(
+                row["production"]["terminal_residual"]
+                > certificate.TERMINAL_RESIDUAL_BOUND
+                for row in compact_rows
+            ),
             "interpretation": (
                 "the in-iteration exact-axis substitution is bit-identical on "
                 "all six static-source rows, excluding the normalisation anchor "

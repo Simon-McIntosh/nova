@@ -21,6 +21,7 @@
       300,
       500
     ],
+    "terminal_residual_qualification_bound": 1e-12,
     "tilings": [
       "hexagonal",
       "rectangular"
@@ -57,6 +58,7 @@
       "rectangular": 4.324939588479596
     },
     "interpretation": "the in-iteration exact-axis substitution is bit-identical on all six static-source rows, excluding the normalisation anchor as the iterative cause on this case; the 500-cell outboard enrichment is nearly equal on both tilings while coarse rows retain carrier-dependent error",
+    "qualified_row_count": 0,
     "terminal_residual_by_tiling_and_requested_cells": {
       "hexagonal": {
         "110": 0.007447526861632626,
@@ -68,7 +70,8 @@
         "300": 0.011429277914500314,
         "500": 0.006841819605275027
       }
-    }
+    },
+    "unqualified_row_count": 6
   },
   "measurement_driver_revision": "1305e81cd950594c3e6985c5a6088003d034c385",
   "rows": [

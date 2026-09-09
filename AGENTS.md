@@ -105,6 +105,30 @@ add a hundred packages the environment never carried.
   not exist on a compute node. Export it before `sbatch`/`srun` and again inside
   the payload; one of the two is not enough.
 
+### One measurement, one SLURM job (binding, lead 2026-09-09)
+
+A measurement over many rows, shots, rungs or frames is ONE scheduler job that
+shards the data inside its allocation, never a job array with one row per task
+and never one job per card. The lead ruled this for the labeller on 2026-09-06
+("batch across shots on device, shard the batch across the job's cards") and
+again on 2026-09-09 when a certificate regeneration was found running as a
+sixteen-task array at concurrency three, each task holding its own H200 card on
+the shared reservation. Rows whose meshes differ in shape cannot share one
+compiled program, and that is a reason to run them sequentially or as a few
+worker processes inside one allocation, not a reason for sixteen jobs.
+
+- Size the allocation to the work: one card for a sequential row loop, or
+  `--gres=gpu:N` with N worker processes sharing the job when rows are
+  independent, with the per-row receipt persisted as each row lands so an
+  expiry loses one row rather than the run.
+- The coordinator names the job shape in the done-when of every heavy node; a
+  worker that finds it unnamed runs one job and says so in the manifest. A
+  manifest whose measurement ran as an array is a scope defect, and the
+  launcher is rewritten before the node completes.
+- Arrays are for genuinely independent submissions that a reader wants to see
+  as separate jobs (a sweep of unrelated configurations), never for the rows of
+  one receipt.
+
 ### Pre-commit Hooks Require Virtual Environment
 
 The pre-commit hook runs checks through `.venv/bin/python3`, so it needs the

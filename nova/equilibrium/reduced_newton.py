@@ -1627,7 +1627,9 @@ def _compiled_slice_solver(
                     fresh,
                 ) = trip_body(reduced, shadow, state)
                 del jacobian_active, trip_active, accepted_norm, fresh
-                closed = kernels["boundary"](solved_reduced, shadow, state)
+                closed = jax.lax.optimization_barrier(
+                    kernels["boundary"](solved_reduced, shadow, state)
+                )
                 next_state, promoted, difference, observed, next_reduced, excluded = (
                     closed
                 )

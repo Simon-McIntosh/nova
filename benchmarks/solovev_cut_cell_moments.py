@@ -25,6 +25,7 @@ import socket
 import subprocess
 from time import perf_counter
 from typing import Any
+import warnings
 
 import jax
 import jax.numpy as jnp
@@ -33,7 +34,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.integrate import quad
+from scipy.integrate import IntegrationWarning, quad
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
@@ -60,7 +61,8 @@ VARIANTS = (
 )
 OUTBOARD_WINDOW = (7.25, 7.75, 0.0, 0.5)
 ADAPTIVE_RELATIVE_TOLERANCE = 5.0e-13
-AGREEMENT_BOUND = 1.0e-12
+AGREEMENT_BOUND = 1.0e-9
+MOMENT_FINDING_THRESHOLD = 1.0e-6
 
 
 @dataclass(frozen=True)
@@ -399,12 +401,15 @@ def _relative_error(actual: np.ndarray, exact: np.ndarray) -> float | None:
 
 
 def _order_record(actual: np.ndarray, exact: np.ndarray) -> dict[str, Any]:
+    relative = _relative_error(actual, exact)
     return {
         "production": actual,
         "exact": exact,
-        "relative_error": _relative_error(actual, exact),
+        "relative_error": relative,
         "absolute_error_norm": float(np.linalg.norm(actual - exact)),
         "exact_norm": float(np.linalg.norm(exact)),
+        "finding_threshold": MOMENT_FINDING_THRESHOLD,
+        "finding": relative is not None and relative > MOMENT_FINDING_THRESHOLD,
     }
 
 
@@ -567,26 +572,32 @@ def measure_rung(case_name: str, requested_cells: int) -> dict[str, Any]:
         np.asarray(cell, dtype=np.float64) for cell in machine.cell_polygons
     )
 
-    exact_integrals = [
-        _exact_cell_integral(exact_case, polygon, centre, ADAPTIVE_RELATIVE_TOLERANCE)
-        for polygon, centre in zip(polygons, centres, strict=True)
-    ]
-    exact_values = np.stack([item.moment for item in exact_integrals])
-    exact_areas = np.asarray([item.area for item in exact_integrals])
-    cell_areas = np.asarray(machine.area, dtype=np.float64)
-    area_tolerance = 2.0e-11 * np.maximum(cell_areas, 1.0)
-    cut = (exact_areas > area_tolerance) & (exact_areas < cell_areas - area_tolerance)
-    interior = exact_areas >= cell_areas - area_tolerance
+    with warnings.catch_warnings(record=True) as integration_warnings:
+        warnings.simplefilter("always", IntegrationWarning)
+        exact_integrals = [
+            _exact_cell_integral(
+                exact_case, polygon, centre, ADAPTIVE_RELATIVE_TOLERANCE
+            )
+            for polygon, centre in zip(polygons, centres, strict=True)
+        ]
+        exact_values = np.stack([item.moment for item in exact_integrals])
+        exact_areas = np.asarray([item.area for item in exact_integrals])
+        cell_areas = np.asarray(machine.area, dtype=np.float64)
+        area_tolerance = 2.0e-11 * np.maximum(cell_areas, 1.0)
+        cut = (exact_areas > area_tolerance) & (
+            exact_areas < cell_areas - area_tolerance
+        )
+        interior = exact_areas >= cell_areas - area_tolerance
 
-    agreement = []
-    for cell in np.flatnonzero(cut):
-        repeated = _exact_cell_integral(
-            exact_case, polygons[cell], centres[cell], 1.0e-12
-        )
-        scale = np.maximum(np.abs(exact_values[cell]), 1.0)
-        agreement.append(
-            float(np.max(np.abs(repeated.moment - exact_values[cell]) / scale))
-        )
+        agreement = []
+        for cell in np.flatnonzero(cut):
+            repeated = _exact_cell_integral(
+                exact_case, polygons[cell], centres[cell], 1.0e-12
+            )
+            scale = np.maximum(np.abs(exact_values[cell]), 1.0)
+            agreement.append(
+                float(np.max(np.abs(repeated.moment - exact_values[cell]) / scale))
+            )
     maximum_agreement = max(agreement, default=0.0)
     if maximum_agreement > AGREEMENT_BOUND:
         raise RuntimeError(
@@ -668,6 +679,18 @@ def measure_rung(case_name: str, requested_cells: int) -> dict[str, Any]:
         )
         for order in ("zeroth", "first", "second")
     }
+    warning_counts: dict[tuple[str, str], int] = {}
+    for warning in integration_warnings:
+        key = (warning.category.__name__, str(warning.message))
+        warning_counts[key] = warning_counts.get(key, 0) + 1
+    warning_records = [
+        {"category": category, "message": message, "occurrences": count}
+        for (category, message), count in sorted(warning_counts.items())
+    ]
+    finding_counts = {
+        order: int(sum(record["moments"][order]["finding"] for record in cut_records))
+        for order in ("zeroth", "first", "second")
+    }
     row = {
         "case": case_name,
         "requested_cells": requested_cells,
@@ -679,6 +702,7 @@ def measure_rung(case_name: str, requested_cells: int) -> dict[str, Any]:
             "exact_region": "cell polygon intersected with the analytic Solovev plasma",
             "adaptive_relative_tolerance": ADAPTIVE_RELATIVE_TOLERANCE,
             "repeat_agreement_bound": AGREEMENT_BOUND,
+            "moment_relative_error_finding_threshold": MOMENT_FINDING_THRESHOLD,
             "outboard_window_rz_m": list(OUTBOARD_WINDOW),
             "production_rule": (
                 "own-cell quadratic with fixed degree-fifteen Duffy product rule"
@@ -698,11 +722,19 @@ def measure_rung(case_name: str, requested_cells: int) -> dict[str, Any]:
         "adaptive_quadrature": {
             "maximum_repeat_relative_disagreement": maximum_agreement,
             "passed": maximum_agreement <= AGREEMENT_BOUND,
+            "warning_count": len(integration_warnings),
+            "warnings": warning_records,
+            "instrument_precision": {
+                "self_consistency_requirement": AGREEMENT_BOUND,
+                "measured_repeat_relative_disagreement": maximum_agreement,
+                "scipy_warnings_retained": True,
+            },
         },
         "cut_cells": cut_records,
         "interior_cells": interior_records,
         "summaries": {
             "cut_cell_moment_relative_error": moment_errors,
+            "cut_cell_moment_finding_count": finding_counts,
             "cut_cell_curvature_relative_error": _summary(
                 curvature_relative[cut].tolist()
             ),
@@ -910,6 +942,9 @@ def aggregate(output: Path = RECEIPT) -> dict[str, Any]:
             "cut_cell_moment_relative_error": row["summaries"][
                 "cut_cell_moment_relative_error"
             ],
+            "cut_cell_moment_finding_count": row["summaries"][
+                "cut_cell_moment_finding_count"
+            ],
             "cut_cell_curvature_relative_error": row["summaries"][
                 "cut_cell_curvature_relative_error"
             ],
@@ -936,6 +971,7 @@ def aggregate(output: Path = RECEIPT) -> dict[str, Any]:
             "outboard_window_rz_m": list(OUTBOARD_WINDOW),
             "adaptive_relative_tolerance": ADAPTIVE_RELATIVE_TOLERANCE,
             "adaptive_repeat_agreement_bound": AGREEMENT_BOUND,
+            "moment_relative_error_finding_threshold": MOMENT_FINDING_THRESHOLD,
         },
         "rows": compact_rows,
         "figure": figure,

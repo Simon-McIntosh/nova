@@ -995,17 +995,26 @@ def _traced_clip(
         inside_slot = jnp.where(next_slot + 1 < vertex_count[:, None], next_slot + 1, 0)
         following_vertex = jnp.take_along_axis(support, next_slot[..., None], axis=1)
         inside_vertex = jnp.take_along_axis(support, inside_slot[..., None], axis=1)
-        arcs = []
-        for support_slot in range(chord_capacity):
-            arcs.append(
-                _traced_level_arc(
-                    support[:, support_slot],
-                    following_vertex[:, support_slot],
-                    curve_evaluator,
-                    inside_vertex[:, support_slot],
-                )
+
+        def trace_gap(_carry, gap_geometry):
+            gap_start, gap_end, gap_inside = gap_geometry
+            return None, _traced_level_arc(
+                gap_start,
+                gap_end,
+                curve_evaluator,
+                gap_inside,
             )
-        arc = jnp.stack(arcs, axis=1)
+
+        _carry, scanned_arc = jax.lax.scan(
+            trace_gap,
+            None,
+            (
+                jnp.moveaxis(support, 1, 0),
+                jnp.moveaxis(following_vertex, 1, 0),
+                jnp.moveaxis(inside_vertex, 1, 0),
+            ),
+        )
+        arc = jnp.moveaxis(scanned_arc, 0, 1)
         expanded_candidate = jnp.concatenate(
             (support[:, :, None, :], arc[:, :, 1:-1, :]), axis=2
         ).reshape(cell_count, chord_capacity * _CURVED_BOUNDARY_SEGMENTS, 2)

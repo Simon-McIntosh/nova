@@ -9,6 +9,7 @@ import gc
 import hashlib
 from importlib.util import module_from_spec, spec_from_file_location
 import json
+import logging
 import math
 import os
 from pathlib import Path
@@ -718,6 +719,44 @@ class _PeakRssSampler:
         }
 
 
+class _PersistentCacheProbe(logging.Handler):
+    """Capture JAX's authoritative persistent-cache lookup for one compile."""
+
+    def __init__(self) -> None:
+        super().__init__(level=logging.WARNING)
+        self.events: list[dict[str, str]] = []
+
+    def emit(self, record: logging.LogRecord) -> None:
+        message = record.getMessage()
+        if message.startswith("Persistent compilation cache hit for"):
+            status = "hit"
+        elif message.startswith("PERSISTENT COMPILATION CACHE MISS for"):
+            status = "miss"
+        else:
+            return
+        module = str(record.args[0]) if record.args else "unknown"
+        key = str(record.args[1]) if len(record.args) > 1 else "unknown"
+        self.events.append({"status": status, "module": module, "key": key})
+
+    def result(self, module: str) -> dict[str, Any]:
+        matching = [event for event in self.events if event["module"] == module]
+        if not matching:
+            raise RuntimeError(
+                f"persistent cache lookup for {module} did not emit hit or miss"
+            )
+        statuses = {event["status"] for event in matching}
+        if len(statuses) != 1:
+            raise RuntimeError(
+                f"persistent cache lookup for {module} emitted conflicting events"
+            )
+        return {
+            "status": matching[-1]["status"],
+            "module": module,
+            "key": matching[-1]["key"],
+            "event_count": len(matching),
+        }
+
+
 def _resource_stage(name: str) -> dict[str, Any]:
     """Record the process RSS and its lifetime high-water mark at one stage."""
     stage = {
@@ -1316,15 +1355,31 @@ def _measure_batched_machine(
             return jax.vmap(solver)(operator, data, settlement)
 
         _batch_stage_count(stages, f"{name}_BATCH_COMPILE_START")
+        jax.config.update("jax_log_compiles", True)
+        jax.config.update("jax_explain_cache_misses", True)
+        cache_probe = _PersistentCacheProbe()
+        compiler_logger = logging.getLogger("jax._src.compiler")
+        compiler_logger.addHandler(cache_probe)
         started = time.perf_counter()
-        compiled = (
-            jax.jit(batched_solve)
-            .lower(batch.stacked, member_data, flags["without_exit"])
-            .compile()
-        )
+        try:
+            compiled = (
+                jax.jit(batched_solve)
+                .lower(batch.stacked, member_data, flags["without_exit"])
+                .compile()
+            )
+        finally:
+            compiler_logger.removeHandler(cache_probe)
         compile_seconds = time.perf_counter() - started
+        compile_cache = cache_probe.result("jit_batched_solve")
         compile_count = 1
         _batch_stage_count(stages, f"{name}_BATCH_COMPILE_DONE")
+        print(
+            f"CACHE_HEADER machine={name} "
+            f"persistent_cache={compile_cache['status']} "
+            f"compile_seconds={compile_seconds:.6f} "
+            f"cache_key={compile_cache['key']}",
+            flush=True,
+        )
 
         arm_results = {}
         arm_timings = {}
@@ -1339,6 +1394,12 @@ def _measure_batched_machine(
             _batch_stage_count(stages, f"{name}_{arm_name.upper()}_DONE")
     else:
         compile_seconds = None
+        compile_cache = {
+            "status": "not_applicable_sequential_geometry_fallback",
+            "module": None,
+            "key": None,
+            "event_count": 0,
+        }
         arm_results = {}
         arm_timings = {}
         for arm_name, settlement in flags.items():
@@ -1421,6 +1482,7 @@ def _measure_batched_machine(
             "compile_once": compile_count == 1,
         },
         "compile_seconds": compile_seconds,
+        "compile_cache": compile_cache,
         "stage_host_memory": stages,
         "members": rows,
         "summary": {
@@ -1794,6 +1856,28 @@ def _persist_batched_receipt(output_json: Path, payload: dict[str, Any]) -> None
     os.replace(temporary, output_json)
 
 
+def _retained_compile_memory_evidence(output_json: Path) -> dict[str, Any] | None:
+    """Retain a completed cold-compile memory failure across a cache-hit rerun."""
+    if not output_json.is_file():
+        return None
+    previous = _read_json(output_json)
+    execution = previous.get("execution", {})
+    peak = execution.get("driver_process_peak_rss_mib")
+    if peak is None:
+        return None
+    limit = 16 * 1024
+    return {
+        "job_id": execution.get("job_id"),
+        "process_peak_host_rss_mib": peak,
+        "host_memory_limit_mib": limit,
+        "host_memory_under_limit": float(peak) < limit,
+        "measurement_state": previous.get("measurement_state"),
+        "qualification": (
+            "cold width-12 compile evidence retained across the cache-enabled rerun"
+        ),
+    }
+
+
 def run_batched(
     output_json: Path,
     mast_state_cache: Path,
@@ -1805,6 +1889,7 @@ def run_batched(
     """Measure the real banks, or their allocation-free two-member CPU proof."""
     total_started = time.perf_counter()
     revision = _require_revision()
+    retained_compile_memory = _retained_compile_memory_evidence(output_json)
     configure_dtypes()
     allocation = (
         _require_cpu_self_check()
@@ -1830,6 +1915,11 @@ def run_batched(
     mast_peak_rss_mib = max(
         *[stage["resource_peak_rss_mib"] for stage in input_stages],
         mast_result["summary"]["peak_host_rss_mib"],
+        *(
+            [retained_compile_memory["process_peak_host_rss_mib"]]
+            if retained_compile_memory is not None
+            else []
+        ),
     )
     mast_checkpoint = {
         "schema": "nova.strict-exit-incidence/2",
@@ -1874,6 +1964,7 @@ def run_batched(
         },
         "evidence_inputs": {
             "MAST": mast_inputs,
+            "retained_compile_memory": retained_compile_memory,
             "sequential_width_one_receipt": {
                 "path": str(DEFAULT_JSON.relative_to(ROOT)),
                 "sha256": _sha256(DEFAULT_JSON),
@@ -1915,6 +2006,11 @@ def run_batched(
     peak_rss_mib = max(
         *[stage["resource_peak_rss_mib"] for stage in input_stages],
         *[machine["summary"]["peak_host_rss_mib"] for machine in machines.values()],
+        *(
+            [retained_compile_memory["process_peak_host_rss_mib"]]
+            if retained_compile_memory is not None
+            else []
+        ),
     )
     payload = {
         "schema": "nova.strict-exit-incidence/2",
@@ -1961,6 +2057,7 @@ def run_batched(
         "evidence_inputs": {
             "MAST": mast_inputs,
             "DIII-D": diiid_inputs,
+            "retained_compile_memory": retained_compile_memory,
             "sequential_width_one_receipt": {
                 "path": str(DEFAULT_JSON.relative_to(ROOT)),
                 "sha256": _sha256(DEFAULT_JSON),

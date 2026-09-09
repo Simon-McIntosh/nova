@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T16:25:55",
+  "updated": "2026-09-09T16:51:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -145864,6 +145864,249 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T142052625800-cank-eliminated-outer-mode",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a72",
+        "node": "cank-eliminated-outer-mode",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2085,
+                "cached_input_tokens": 789189,
+                "input_tokens": 791276,
+                "output_tokens": 1863,
+                "reasoning_output_tokens": 173,
+                "total_tokens": 793139,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "tests/test_equilibrium_constraint_protocol.py gains cases green on all_debug CPU x64 asserting that a registered constraint bound with policy eliminated runs through ForwardProfile.solve, that its receipt carries the outer trace (target, compensating value per outer step, inner receipt per step) and a terminal status among converged, no-root and budget, and that on the synthetic vertical-position fixture the eliminated mode reproduces the imposed mode's terminal state within 4 ulp when the imposed compensating current is zero; docs/figures/constraint-augmented-newton-krylov/eliminated-mode/receipt.json records the synthetic fixture trace and the 21986/46 no-root case with its 2.6 kA minimum",
+          "estimated_hours": null,
+          "goal": "Implement the eliminated constraint policy as a real bounded outer mode through the same ConstraintBinding interface as the imposed centroid row: the inner augmented solve runs with the constraint imposed and the compensating unknown free, and an outer scalar iteration drives the compensating value to zero on the target with warm-started inner solves, explicit refusal or no-root semantics, and a bounded trace",
+          "id": "cank-eliminated-outer-mode",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T14:20:53Z",
+            "read_at": "2026-09-09T14:20:53Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 84.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T142052625800-cank-eliminated-outer-mode/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/constraint.py",
+            "nova/equilibrium/forward.py",
+            "tests/test_equilibrium_constraint_protocol.py",
+            "docs/figures/constraint-augmented-newton-krylov/eliminated-mode"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cank-elim",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T14:21:05Z",
+        "completed_at": "2026-09-09T14:48:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1657,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1657,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "c218900d8ae796d6297d348bcb51c9e297cb0c4c",
+        "commits": [
+          "fa82b39881de11f2e611aeccab48d7e7a1cd4f8a"
+        ],
+        "changed_lines": {
+          "added": 511,
+          "removed": 9,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug CPU x64: pytest tests/test_equilibrium_constraint_protocol.py (baseline 4 passed, after 6 passed in 86.55 s)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T142052625800-cank-eliminated-outer-mode/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T142052625800-cank-eliminated-outer-mode/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0868b-39d7-7b52-8b6c-694a09acaac4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12869888,
+            "cached_input_tokens_cumulative": 12869888,
+            "input_tokens": 13106169,
+            "input_tokens_cumulative": 13106169,
+            "output_tokens": 36998,
+            "output_tokens_cumulative": 36998,
+            "reasoning_output_tokens": 13837,
+            "reasoning_output_tokens_cumulative": 13837
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T14:48:42Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 85.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T14:48:42Z"
+            }
+          ],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "notional_cost_usd": "no_dated_rate",
+            "rate_basis": "no_dated_rate"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: exact differing static host field list=[`flattened_static_state.declared_support`]; classification=equilibrium-dependent stored-LCFS support mask incorrectly classified as static host geometry; mechanism=`DeclaredAnchorOperator.declared_support` is omitted from `_dynamic_extra_names`; so `tree_flatten` retains it in `_OperatorPytreeAux.static_state`; effect=six 1089-cell masks produce six host digests and force six width-2 groups; representative value=flat cell 113 is false for 21978/35 and true for 21983/35; repair scope=`nova/equilibrium/forward_operator.py`; outside this node's fence and held by another worktree; H200 rerun prohibited and not attempted in this turn",
+              "elapsed_seconds": 1077,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 10221,
+              "log_fresh": false,
+              "manifest_commits": [
+                "2071f8c02f7e2d7a13b6cc8748eb8fafa842a7da",
+                "3d0806ef710451cf94dc211aabedca3fe39fa176",
+                "ff38a60b5cc221bc5b4e1f0522546b22407bac2a]; changed_paths: [\"benchmarks/strict_exit_incidence.py",
+                "docs/figures/batched-operator-boundary/exit-incidence/batched-exit-incidence.json"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "9ff9b9b3504ecfb2ff29a00b54885299a26968302a81039880743d910911dafe",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/manifest.md; resolve the blocker before resuming the run",
+              "node": "bob-batched-exit-incidence",
+              "phase": "working",
+              "plan": "batched-operator-boundary",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260909T105115820348-bob-batched-exit-incidence",
+              "session": "s19-review",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260909T105115820348-bob-batched-exit-incidence",
+                "session_id": "01a085cb-6355-7a22-8b6f-f865ccb63c6d",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 10324,
+              "terminal_at": "2026-09-09T11:28:54Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/bob-batched-exit-incidence"
+            }
+          ]
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 12869888,
+          "cumulative_input_tokens": 25976057,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 50835
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cank-eliminated-outer-mode",
+          "session_id": "01a0868b-39d7-7b52-8b6c-694a09acaac4",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T14:48:42Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -146176,6 +146419,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2376
+    "_version": 2377
   }
 }

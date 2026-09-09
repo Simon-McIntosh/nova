@@ -287,6 +287,76 @@ def test_explicit_host_workers_overrides_the_default(monkeypatch):
     assert driver.resolve_host_workers(None) == 7
 
 
+def test_batched_engine_is_selectable_and_adapts_the_array_receipt(monkeypatch):
+    """The production driver exposes the batched solver behind its array seam."""
+
+    class FakeBatchedLabeller:
+        guard_tolerance = 5.0e-2
+
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def solve(self, initial, **arguments):
+            width = initial.shape[0]
+            labelled = SimpleNamespace(
+                _fields=("domain_label",),
+                domain_label=np.zeros((width, 3), dtype=np.int8),
+            )
+            return SimpleNamespace(
+                state=np.asarray(initial),
+                converged=np.ones(width, dtype=bool),
+                termination=np.zeros(width, dtype=np.int32),
+                trips=np.ones(width, dtype=np.int32),
+                terminal_residual=np.zeros(width),
+                achieved_centroid=np.asarray([[0.7, 0.001]] * width),
+                free_centroid=np.asarray([[0.7, 0.1]] * width),
+                free_converged=np.zeros(width, dtype=bool),
+                free_trips=np.ones(width, dtype=np.int32),
+                newton_steps_per_trip=np.asarray([[2, 0]] * width),
+                conditioned=np.ones(width, dtype=bool),
+                guard=np.zeros(width, dtype=bool),
+                applied_current=np.asarray(arguments["prescribed_current"]),
+                labelled_flux=labelled,
+            )
+
+    monkeypatch.setattr(driver, "BatchedLabeller", FakeBatchedLabeller)
+    monkeypatch.setattr(driver.jax, "devices", lambda: [object()])
+    assert driver._parser().parse_args(["out", "--engine", "batched"]).engine == (
+        "batched"
+    )
+    engine = driver.BatchedRouteEngine(
+        SimpleNamespace(profile=object()),
+        device_count=1,
+        condition_on_guard_failure=True,
+    )
+    batch = scheduler.EngineBatch(
+        active=np.asarray([True]),
+        shot=np.asarray([1]),
+        row=np.asarray([2]),
+        time=np.asarray([0.25]),
+        initial_state=np.zeros((1, scheduler.STATE_SIZE)),
+        prescribed_current=np.zeros((1, scheduler.CURRENT_SIZE)),
+        target_current=np.asarray([1.0]),
+        requested_class=np.asarray([int(TopologyClass.LIMITED)], dtype=np.int8),
+        centroid_target_z=np.asarray([0.0]),
+    )
+
+    result = engine.step(batch)
+
+    result.validate(1)
+    solved = result.solved[0]
+    assert solved is not None
+    assert solved.record["conditioned"] is True
+    assert solved.record["free_converged"] is False
+    assert solved.record["conditioned_converged"] is True
+    assert solved.record["free_centroid_error_m"] == 0.1
+    assert solved.record["conditioned_centroid_error_m"] == 0.001
+    assert solved.record["requested_class"] == int(TopologyClass.LIMITED)
+    np.testing.assert_array_equal(
+        result.labelled_fields["domain_label"], np.zeros((1, 3), dtype=np.int8)
+    )
+
+
 # --------------------------------------------------------------------------
 # conditioning-outcome recording: seed admission versus constrained solve
 # --------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T10:03:06",
+  "updated": "2026-09-09T10:18:02",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4603,9 +4603,11 @@
         "id": "s19i-pfs-batched",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0852f-be56-7593-8061-9ebf32d0ee7b",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a0852f-be56-7593-8061-9ebf32d0ee7b"
+        },
         "created": "2026-09-09"
       },
       {
@@ -142472,6 +142474,517 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T074533658232-nia-diverted-case-reauthor",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-diverted-case-reauthor",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 8205,
+                "cached_input_tokens": 547728,
+                "input_tokens": 555965,
+                "output_tokens": 526,
+                "reasoning_output_tokens": 23,
+                "total_tokens": 556491,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "a CPU x64 receipt at docs/figures/gs-absolute-accuracy/solovev-diverted-case/diverted-case-geometry.json reports, for the re-authored case, the minimum distance from the closed-form axis to the analytic zero-flux contour at or above 0.3 of the minor radius, the X-point inside the wall polygon, the Hausdorff distance between _boundary and the extracted analytic contour under one cell pitch at -110 and -342, with tests/test_oracle_axis_admission.py and tests/test_census_spline_value_authority.py green on all_debug",
+          "estimated_hours": null,
+          "goal": "Re-author the diverted-jump-bearing exact case so its separatrix clears its own magnetic axis by at least 0.3 of the minor radius while the X-point stays inside the wall, following the 2026-09-09 measurement comment on section 4 (the current case passes 48-49 mm from the axis, 0.29 and 0.62 cell pitches)",
+          "id": "nia-diverted-case-reauthor",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T07:45:35Z",
+            "read_at": "2026-09-09T07:45:35Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 59.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T074533658232-nia-diverted-case-reauthor/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/split_fit_jump_field.py",
+            "benchmarks/solovev_certificate.py",
+            "tests/test_oracle_axis_admission.py",
+            "tests/test_census_spline_value_authority.py",
+            "docs/figures/gs-absolute-accuracy/solovev-diverted-case"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-nia-diverted",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T07:45:47Z",
+        "completed_at": "2026-09-09T08:09:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1441,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1441,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9ff98552afd6ebd6eb95e02f05e5e988c9b07f9f",
+        "commits": [
+          "a940523e0383fa762d538865ec409b3c0fa2a0b0",
+          "75b787c4e847ef20ee94f2a6ca064c96f691579e",
+          "ca36630dec2626779cd3487196701e326fafd1fa"
+        ],
+        "changed_lines": {
+          "added": 410,
+          "removed": 7,
+          "files": 4
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug CPU x64: python -m pytest tests/test_oracle_axis_admission.py tests/test_census_spline_value_authority.py (6 passed); python -m benchmarks.solovev_certificate --diverted-geometry (exit 0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T074533658232-nia-diverted-case-reauthor/diverted-geometry-all-debug.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T074533658232-nia-diverted-case-reauthor/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08521-4d7c-7200-bfcc-ef61ee630707",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11671424,
+            "cached_input_tokens_cumulative": 11671424,
+            "input_tokens": 11883832,
+            "input_tokens_cumulative": 11883832,
+            "output_tokens": 33779,
+            "output_tokens_cumulative": 33779,
+            "reasoning_output_tokens": 10659,
+            "reasoning_output_tokens_cumulative": 10659
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T08:09:48Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 62.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T08:09:48Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 11671424,
+          "cumulative_input_tokens": 23555256,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 44438
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/nia-diverted-case-reauthor",
+          "session_id": "01a08521-4d7c-7200-bfcc-ef61ee630707",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T08:09:48Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T074927506012-ucc-reuse-map-scout",
+        "plan": "uniform-cell-clip-and-coupling",
+        "section": "",
+        "node": "ucc-reuse-map-scout",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 439,
+                "cached_input_tokens": 557063,
+                "input_tokens": 557506,
+                "output_tokens": 17,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 557523,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "grep -cE '\\.py:[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/ucc-reuse-map.md prints at least 25 with the headings Reuse, Generalise, Replace, Gaps each present once",
+          "estimated_hours": null,
+          "goal": "Write the reuse map for the one-clip-one-moment operator over hexagonal and rectangular tilings (followup f-20260909T053239593645) to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/ucc-reuse-map.md, naming every existing clip, moment, quadrature, mesh and batching component with path:line and stating for each whether the unified path reuses, generalises or replaces it",
+          "id": "ucc-reuse-map-scout",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T07:49:27Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T074927506012-ucc-reuse-map-scout/manifest.md",
+          "plan": "uniform-cell-clip-and-coupling",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/ucc-reuse-map.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "s19i-ucc-scout",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-09T07:49:36Z",
+        "completed_at": "2026-09-09T08:11:13.189Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1284,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1297,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9ff98552afd6ebd6eb95e02f05e5e988c9b07f9f",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -cE '\\.py:[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/ucc-reuse-map.md (78); grep -cE '^#+ *(Reuse|Generalise|Replace|Gaps)' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/ucc-reuse-map.md (4)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/ucc-reuse-map.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T074927506012-ucc-reuse-map-scout/manifest.md",
+        "scope_changed": false,
+        "session_id": "6c7b6492-2088-4cd9-a4b5-3b27cf5ac111",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6706900,
+            "input_tokens_cumulative": 6706900,
+            "output_tokens": 32183,
+            "output_tokens_cumulative": 32183,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-09T08:11:13.189Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 6706900,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1293.21,
+          "generated_tokens": 32183,
+          "generation_seconds": 1287.396,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 19.0,
+          "machine_seconds": 5.814,
+          "peak_input_tokens": 193465,
+          "tokens_per_second": 25.0,
+          "wall_tokens_per_second": 24.89
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "read-only scout; the deliverable is the reuse map report",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/ucc-reuse-map-scout",
+          "session_id": "6c7b6492-2088-4cd9-a4b5-3b27cf5ac111",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T08:11:13.189Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T075309428846-bob-terminal-hash-semantics",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a71",
+        "node": "bob-terminal-hash-semantics",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1040,
+                "cached_input_tokens": 558300,
+                "input_tokens": 559372,
+                "output_tokens": 894,
+                "reasoning_output_tokens": 201,
+                "total_tokens": 560266,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "docs/figures/batched-operator-boundary/terminal-hash/terminal-hash-census.json lists every hashed field with its dtype and shape and, for the pure member, the count of fields equal and differing between the two routes with the maximum absolute difference per differing field, produced on all_debug CPU x64",
+          "estimated_hours": null,
+          "goal": "Establish what the terminal state hash covers (followup f-20260908T162939564568) by enumerating field by field on the width-one pure member what enters the hash and which fields differ between the closure and sampled routes at equal terminal residuals, with a recommendation to keep the bit-identity gate or restate it over physical state with a stated tolerance",
+          "id": "bob-terminal-hash-semantics",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T07:53:10Z",
+            "read_at": "2026-09-09T07:53:11Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 60.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T075309428846-bob-terminal-hash-semantics/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "open",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/terminal_state_hash_census.py",
+            "docs/figures/batched-operator-boundary/terminal-hash"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "s19i-bob-hash",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T07:53:25Z",
+        "completed_at": "2026-09-09T08:13:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1193,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1193,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9ff98552afd6ebd6eb95e02f05e5e988c9b07f9f",
+        "commits": [
+          "3dcb75391fdb273ae3a10fb4acd37bbb6f3697fe"
+        ],
+        "changed_lines": {
+          "added": 2526,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug CPU x64: python benchmarks/terminal_state_hash_census.py (exit 0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/bob-terminal-hash-semantics/logs/terminal-hash-census-all-debug-final-rerun.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T075309428846-bob-terminal-hash-semantics/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08528-4d95-7fa0-8faa-585ceb9017cd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12256256,
+            "cached_input_tokens_cumulative": 12256256,
+            "input_tokens": 12531234,
+            "input_tokens_cumulative": 12531234,
+            "output_tokens": 31421,
+            "output_tokens_cumulative": 31421,
+            "reasoning_output_tokens": 7582,
+            "reasoning_output_tokens_cumulative": 7582
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T08:13:18Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 62.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T08:13:18Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 12256256,
+          "cumulative_input_tokens": 24787490,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 39003
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/bob-terminal-hash-semantics",
+          "session_id": "01a08528-4d95-7fa0-8faa-585ceb9017cd",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T08:13:18Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -142784,6 +143297,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2343
+    "_version": 2347
   }
 }

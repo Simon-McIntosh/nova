@@ -428,9 +428,13 @@ def test_spline_clip_brackets_both_edges_adjacent_to_an_outside_corner():
         participating_cell=jnp.asarray([True]),
     )
 
+    root = np.sqrt(0.5)
+    sliver, _error = integrate.quad(
+        lambda radial: 1.0 - np.sqrt(1.5 - radial**2), root, 1.0
+    )
     assert bool(support.boundary[0])
-    assert 0.0 < float(support.area[0]) < 1.0
     assert int(support.vertex_count[0]) > len(cell)
+    np.testing.assert_allclose(support.area[0], 1.0 - sliver, rtol=5.0e-7, atol=1.0e-12)
 
 
 def test_traced_clip_matches_exact_zero_corner_and_tangential_cells():

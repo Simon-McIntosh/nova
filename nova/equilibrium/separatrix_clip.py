@@ -622,8 +622,8 @@ def _traced_quadratic_arc(start, end, coefficient, centre, scale):
     return chord + root[..., None] * normal[:, None, :]
 
 
-def _traced_level_arc(start, end, evaluator):
-    """Trace a smooth level-set arc from its two polished edge crossings."""
+def _traced_level_arc(start, end, evaluator, outside_vertex):
+    """Trace the local level-set arc on the outside vertex side of its chord."""
     parameter = jnp.linspace(
         0.0,
         1.0,
@@ -633,7 +633,27 @@ def _traced_level_arc(start, end, evaluator):
     chord = start[:, None, :] + parameter[None, :, None] * (end - start)[:, None, :]
     delta = end - start
     normal = jnp.stack((-delta[:, 1], delta[:, 0]), axis=1)
-    root = jnp.zeros(chord.shape[:-1], dtype=start.dtype)
+    squared_length = jnp.sum(delta**2, axis=1)
+    safe_squared_length = jnp.maximum(squared_length, jnp.finfo(start.dtype).tiny)
+    corner_offset = outside_vertex - start
+    corner_along = jnp.sum(corner_offset * delta, axis=1) / safe_squared_length
+    corner_normal = jnp.sum(corner_offset * normal, axis=1) / safe_squared_length
+    parameter_floor = 32.0 * jnp.finfo(start.dtype).eps
+    corner_along = jnp.clip(corner_along, parameter_floor, 1.0 - parameter_floor)
+    left_envelope = corner_normal[:, None] * parameter[None, :] / corner_along[:, None]
+    right_envelope = (
+        corner_normal[:, None]
+        * (1.0 - parameter[None, :])
+        / (1.0 - corner_along[:, None])
+    )
+    envelope = jnp.where(
+        parameter[None, :] <= corner_along[:, None],
+        left_envelope,
+        right_envelope,
+    )
+    lower = jnp.minimum(envelope, 0.0)
+    upper = jnp.maximum(envelope, 0.0)
+    root = 0.5 * envelope
     difference_step = jnp.asarray(1.0e-5, dtype=start.dtype)
 
     def polish(_iteration, current):
@@ -646,7 +666,7 @@ def _traced_level_arc(start, end, evaluator):
         safe_derivative = jnp.where(
             jnp.abs(derivative) > jnp.finfo(start.dtype).tiny, derivative, 1.0
         )
-        candidate = jnp.clip(current - value / safe_derivative, -2.0, 2.0)
+        candidate = jnp.clip(current - value / safe_derivative, lower, upper)
         return jnp.where(
             jnp.abs(derivative) > jnp.finfo(start.dtype).tiny,
             candidate,
@@ -859,6 +879,17 @@ def _traced_clip(
     packed_leaving = _pack_traced_values(
         crossing_edge & start_inside, unique_crossing, width
     )
+    crossing_outside, _outside_count = _pack_traced_vertices(
+        jnp.where(start_inside[..., None], end_point, start_point),
+        unique_crossing,
+        width,
+    )
+    first_packed_leaving = jnp.argmax(packed_leaving, axis=1)
+    outside_vertex = jnp.take_along_axis(
+        crossing_outside,
+        first_packed_leaving[:, None, None],
+        axis=1,
+    )[:, 0]
     saddle = crossing_count == 4
     first_line = crossing[:, 2] - crossing[:, 0]
     second_line = crossing[:, 3] - crossing[:, 1]
@@ -955,7 +986,12 @@ def _traced_clip(
 
     if curved:
         arc = (
-            _traced_level_arc(support[:, 0], support[:, 1], curve_evaluator)
+            _traced_level_arc(
+                support[:, 0],
+                support[:, 1],
+                curve_evaluator,
+                outside_vertex,
+            )
             if curve_evaluator is not None
             else _traced_quadratic_arc(
                 support[:, 0],

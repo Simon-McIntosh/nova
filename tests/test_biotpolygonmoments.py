@@ -3,9 +3,13 @@
 import numpy as np
 
 from nova.biot.greens import greens_bz_br, greens_psi
+from nova.biot.polygon import pad_batch
 from nova.biot.polygonanalytic import (
     _ARCSINH_DIFFERENCE_SWITCH,
+    _horizontal_reflection,
     _near_collinear_arsinh_difference,
+    _section_centroid,
+    packed_analytic_moments,
     polygon_analytic_field_moments,
     polygon_analytic_flux,
     polygon_analytic_flux_moments,
@@ -295,3 +299,61 @@ def test_hexagon_field_moment_parity_zeros():
     assert np.max(np.abs(radial_field[0])) <= 2e-14 * scale
     assert np.max(np.abs(radial_field[1])) <= 2e-14 * scale
     assert np.max(np.abs(vertical_field[2])) <= 2e-14 * scale
+
+
+def _packed_moment_rows(target, vertices, expansion_centre):
+    edge, weight, norm = pad_batch([vertices])
+    section_centre = _section_centroid(vertices)
+    reflection_axis = np.asarray([np.nan])
+    reflection_partner = np.arange(len(vertices), dtype=np.int32)[:, None]
+    reflection = _horizontal_reflection(vertices)
+    if reflection is not None:
+        reflection_axis[0], vertex_partner = reflection
+        for index in range(len(vertices)):
+            reflection_partner[index, 0] = vertex_partner[(index + 1) % len(vertices)]
+    return np.asarray(
+        packed_analytic_moments(
+            np,
+            target[:, 0],
+            target[:, 1],
+            edge,
+            weight,
+            norm,
+            section_centre[:, None],
+            expansion_centre[:, None],
+            reflection_axis,
+            reflection_partner,
+        )
+    )
+
+
+def test_reactor_scale_off_axis_packed_moments_match_scalar_closed_form():
+    """Packed edge arithmetic preserves all moment rows away from machine axis."""
+    angle = np.pi / 6.0 + np.arange(6) * np.pi / 3.0
+    complete = np.column_stack((6.2 + 0.11 * np.cos(angle), 0.11 * np.sin(angle)))
+    clipped = np.asarray(
+        [[7.42, -0.09], [7.56, -0.07], [7.61, 0.03], [7.49, 0.10], [7.39, 0.04]]
+    )
+    rectangle = np.asarray([[6.08, -0.08], [6.32, -0.08], [6.32, 0.08], [6.08, 0.08]])
+    target = np.asarray(
+        [[6.2, 0.0], [6.31, 0.04], [7.5, 0.25], [5.1, -0.63], [8.0, 0.48]]
+    )
+    assert np.all(target[:, 0] > 0.0)
+
+    for vertices in (complete, clipped, rectangle):
+        expansion_centre = _section_centroid(vertices) + np.asarray([0.013, -0.007])
+        flux = polygon_analytic_flux_moments(
+            target[:, 0],
+            target[:, 1],
+            vertices,
+            expansion_point=expansion_centre,
+        )
+        radial, vertical = polygon_analytic_field_moments(
+            target[:, 0],
+            target[:, 1],
+            vertices,
+            expansion_point=expansion_centre,
+        )
+        scalar = np.asarray((*flux, *radial, *vertical))
+        packed = _packed_moment_rows(target, vertices, expansion_centre)
+        np.testing.assert_allclose(packed, scalar, rtol=4.0e-10, atol=3.0e-18)

@@ -1,0 +1,1560 @@
+{
+  "case": "weak-rotation-reactor-static",
+  "clipping_stack": {
+    "held_tip": "1c4daf51",
+    "present_in_measured_revision": false,
+    "reason": "the discriminator intentionally measures the assigned base while the clipping stack remains held outside main"
+  },
+  "completed": true,
+  "contract": {
+    "lane": "all_debug CPU float64",
+    "one_rung_per_fresh_process": true,
+    "outboard_window_rz_m": [
+      7.25,
+      7.75,
+      0.0,
+      0.5
+    ],
+    "production_solver": "ForwardProfile.solve(ForwardSolveRequest)",
+    "requested_cells": [
+      110,
+      300,
+      500
+    ],
+    "tilings": [
+      "hexagonal",
+      "rectangular"
+    ]
+  },
+  "figures": [
+    "docs/figures/uniform-cell-clip-and-coupling/solver-discriminator/error-maps.svg",
+    "docs/figures/uniform-cell-clip-and-coupling/solver-discriminator/exact-axis-control-error-maps.svg"
+  ],
+  "headline": {
+    "axis_error_mm_by_tiling_and_requested_cells": {
+      "hexagonal": {
+        "110": 1.846031263925776,
+        "300": 33.46130394000224,
+        "500": 55.65434041507622
+      },
+      "rectangular": {
+        "110": 15.058117679421613,
+        "300": 39.13866514216117,
+        "500": 46.750684149234296
+      }
+    },
+    "exact_axis_flux_renormalisation_fraction_removed_range": [
+      0.3673746914153784,
+      0.7788877930759514
+    ],
+    "exact_axis_iteration_fraction_removed_range": [
+      0.0,
+      0.0
+    ],
+    "exact_axis_iteration_state_bit_identical_all_rows": true,
+    "high_resolution_outboard_enrichment": {
+      "hexagonal": 4.388384858081682,
+      "rectangular": 4.324939588479596
+    },
+    "interpretation": "the in-iteration exact-axis substitution is bit-identical on all six static-source rows, excluding the normalisation anchor as the iterative cause on this case; the 500-cell outboard enrichment is nearly equal on both tilings while coarse rows retain carrier-dependent error",
+    "terminal_residual_by_tiling_and_requested_cells": {
+      "hexagonal": {
+        "110": 0.007447526861632626,
+        "300": 0.005558930033419124,
+        "500": 0.0012464509730622983
+      },
+      "rectangular": {
+        "110": 0.019104997724264026,
+        "300": 0.011429277914500314,
+        "500": 0.006841819605275027
+      }
+    }
+  },
+  "measurement_driver_revision": "1305e81cd950594c3e6985c5a6088003d034c385",
+  "rows": [
+    {
+      "case": "weak-rotation-reactor-static",
+      "characteristic_pitch_m": 0.46606341035820315,
+      "clipping_stack": {
+        "held_tip": "1c4daf51",
+        "measurement_interpretation": "the clipping stack is absent; this receipt measures the assigned production base exactly as dispatched",
+        "present_in_measured_revision": false
+      },
+      "elapsed_seconds": 555.5602512508631,
+      "exact_axis_flux_renormalisation": {
+        "constant_gauge_shift_wb": -11.449181552999143,
+        "exact_axis_flux_wb": 49.94072179477446,
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.014814814814814815,
+            "enrichment": 27.607907057460352,
+            "node_count": 2,
+            "squared_flux_error_fraction": 0.4090060304808941
+          },
+          "rms_flux_error_wb": 12.92338927837788,
+          "rms_fraction_of_exact_span": 0.2587745794200779,
+          "squared_flux_error_wb2": 22546.88870946646,
+          "sup_flux_error_wb": 72.52067983833271,
+          "sup_fraction_of_exact_span": 1.4521351961300828
+        },
+        "fraction_squared_flux_error_removed": 0.46949603440515364,
+        "operation": "add exact analytic axis flux minus the production topology axis flux to every terminal grid value",
+        "production_axis_flux_wb": 61.389903347773604
+      },
+      "exact_axis_iteration_control": {
+        "emergent_axis_after_restoring_production_read": {
+          "axis_error_mm": 1.846031263925776,
+          "read": {
+            "axis_flux_wb": 61.389903347773604,
+            "axis_rz_m": [
+              6.198220647969845,
+              -0.0004916683640157084
+            ],
+            "boundary_flux_wb": 10.395131850572081,
+            "class": "limited",
+            "exception_text": null,
+            "flux_span_wb": -50.994771497201526,
+            "o_candidate_count": 1,
+            "o_second_best_flux_margin_wb": null,
+            "read_status": "qualified_axis",
+            "x_candidate_count": 0,
+            "x_point_rz_m": null,
+            "x_second_best_flux_margin_wb": null
+          }
+        },
+        "exact_axis_flux_wb": 49.94072179477446,
+        "exact_axis_rz_m": [
+          6.2,
+          0.0
+        ],
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.014814814814814815,
+            "enrichment": 19.98913269987726,
+            "node_count": 2,
+            "squared_flux_error_fraction": 0.2961352992574409
+          },
+          "rms_flux_error_wb": 17.74320658181065,
+          "rms_fraction_of_exact_span": 0.355285345188327,
+          "squared_flux_error_wb2": 42500.88627364918,
+          "sup_flux_error_wb": 83.96986139133186,
+          "sup_fraction_of_exact_span": 1.6813906241963454
+        },
+        "fraction_squared_flux_error_removed": 0.0,
+        "operation": "production solve seam with every topology read instrumented to substitute the closed-form axis position and flux",
+        "solve_wall_seconds": 425.9672272410244,
+        "solver_semantics_modified_in_repository": false,
+        "state_bit_identical_to_production": true,
+        "state_sha256_binary64": "f524fb94f76bc438341482a3b75da34ce59ab89f7f9ce07b63df334d989d459d",
+        "terminal_residual": 0.007447526861632626
+      },
+      "lane": {
+        "cpu_count": 4,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-3141.iter.org",
+        "jax_enable_x64": true,
+        "jax_platform": "cpu",
+        "job_id": "1267927",
+        "node": "98dci4-clu-3141",
+        "partition": "all_debug",
+        "tmpdir": "/tmp"
+      },
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "cpu",
+          "backend_version": "cpu",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": null
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "cpu",
+              "platform": "cpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-ea5c55820be3d80549fe"
+      },
+      "production": {
+        "axis": {
+          "axis_error_mm": 1.846031263925776,
+          "read": {
+            "axis_flux_wb": 61.389903347773604,
+            "axis_rz_m": [
+              6.198220647969845,
+              -0.0004916683640157084
+            ],
+            "boundary_flux_wb": 10.395131850572081,
+            "class": "limited",
+            "exception_text": null,
+            "flux_span_wb": -50.994771497201526,
+            "o_candidate_count": 1,
+            "o_second_best_flux_margin_wb": null,
+            "read_status": "qualified_axis",
+            "x_candidate_count": 0,
+            "x_point_rz_m": null,
+            "x_second_best_flux_margin_wb": null
+          }
+        },
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.014814814814814815,
+            "enrichment": 19.98913269987726,
+            "node_count": 2,
+            "squared_flux_error_fraction": 0.2961352992574409
+          },
+          "rms_flux_error_wb": 17.74320658181065,
+          "rms_fraction_of_exact_span": 0.355285345188327,
+          "squared_flux_error_wb2": 42500.88627364918,
+          "sup_flux_error_wb": 83.96986139133186,
+          "sup_fraction_of_exact_span": 1.6813906241963454
+        },
+        "solve_wall_seconds": 103.58835550025105,
+        "state_sha256_binary64": "f524fb94f76bc438341482a3b75da34ce59ab89f7f9ce07b63df334d989d459d",
+        "terminal_residual": 0.007447526861632626
+      },
+      "production_path": {
+        "operator_builder": "scripts/analytic_oracle_fixtures/measure.py::forward_operator",
+        "requested_class": 0,
+        "seed": {
+          "anchor_available": true,
+          "anchor_m": [
+            7.801395788483331,
+            3.300044206011527e-09
+          ],
+          "branch_index": 0,
+          "construction": "current_centroid_disc",
+          "current_centroid_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "current_target_provenance": {
+            "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+            "current_centroid_m": [
+              6.063530173332898,
+              0.0
+            ],
+            "declared_current_a": 16314773.311828371,
+            "quadrature_current_a": 16314773.311828367,
+            "quadrature_nodes": 512,
+            "quadrature_relative_closure": 2.2833846522164315e-16
+          },
+          "declared_axis_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "declared_boundary_m": [
+            7.801395788483331,
+            3.300044206011527e-09
+          ],
+          "factory": "profile.cold_seed_portfolio",
+          "plasma_current_a": 16314773.311828371,
+          "requested_class": "limited",
+          "seed_radius_m": 1.564079053601776,
+          "state_sha256_binary64": "b5f378bb50c4b5e714d99156463810ec62138138b3b67dcbe64e340c3a627cd1",
+          "stored_flux_samples_used": false,
+          "supported_cell_count": 36
+        },
+        "solver_call": "ForwardProfile.solve(ForwardSolveRequest)",
+        "target_current_a": 16314773.311828371
+      },
+      "realised_cells": 135,
+      "requested_cells": 110,
+      "solver_requested_cells": -110,
+      "source_revision": "1305e81cd950594c3e6985c5a6088003d034c385",
+      "tiling": "hexagonal"
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "characteristic_pitch_m": 0.4660634103582031,
+      "clipping_stack": {
+        "held_tip": "1c4daf51",
+        "measurement_interpretation": "the clipping stack is absent; this receipt measures the assigned production base exactly as dispatched",
+        "present_in_measured_revision": false
+      },
+      "elapsed_seconds": 889.1349219568074,
+      "exact_axis_flux_renormalisation": {
+        "constant_gauge_shift_wb": -6.49563807863813,
+        "exact_axis_flux_wb": 49.94072179477446,
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.0072992700729927005,
+            "enrichment": 55.258299754605645,
+            "node_count": 1,
+            "squared_flux_error_fraction": 0.40334525368325286
+          },
+          "rms_flux_error_wb": 8.790785346608581,
+          "rms_fraction_of_exact_span": 0.17602439513656376,
+          "squared_flux_error_wb2": 10587.0732603903,
+          "sup_flux_error_wb": 65.34711738076369,
+          "sup_fraction_of_exact_span": 1.308493650718546
+        },
+        "fraction_squared_flux_error_removed": 0.3673746914153784,
+        "operation": "add exact analytic axis flux minus the production topology axis flux to every terminal grid value",
+        "production_axis_flux_wb": 56.43635987341259
+      },
+      "exact_axis_iteration_control": {
+        "emergent_axis_after_restoring_production_read": {
+          "axis_error_mm": 15.058117679421613,
+          "read": {
+            "axis_flux_wb": 56.43635987341259,
+            "axis_rz_m": [
+              6.212253359828424,
+              -0.008752261477039457
+            ],
+            "boundary_flux_wb": 6.4435655897987205,
+            "class": "limited",
+            "exception_text": null,
+            "flux_span_wb": -49.99279428361387,
+            "o_candidate_count": 1,
+            "o_second_best_flux_margin_wb": null,
+            "read_status": "qualified_axis",
+            "x_candidate_count": 0,
+            "x_point_rz_m": null,
+            "x_second_best_flux_margin_wb": null
+          }
+        },
+        "exact_axis_flux_wb": 49.94072179477446,
+        "exact_axis_rz_m": [
+          6.2,
+          0.0
+        ],
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.0072992700729927005,
+            "enrichment": 42.25296333818665,
+            "node_count": 1,
+            "squared_flux_error_fraction": 0.30841579078968356
+          },
+          "rms_flux_error_wb": 11.05234402027698,
+          "rms_fraction_of_exact_span": 0.2213092567162984,
+          "squared_flux_error_wb2": 16735.140242929665,
+          "sup_flux_error_wb": 71.84275545940181,
+          "sup_fraction_of_exact_span": 1.4385606150153614
+        },
+        "fraction_squared_flux_error_removed": 0.0,
+        "operation": "production solve seam with every topology read instrumented to substitute the closed-form axis position and flux",
+        "solve_wall_seconds": 414.9932967312634,
+        "solver_semantics_modified_in_repository": false,
+        "state_bit_identical_to_production": true,
+        "state_sha256_binary64": "fa9f4462724bf999b14733f3fbdf54663ddb60b65b62149910ccfaff6e905b3f",
+        "terminal_residual": 0.019104997724264026
+      },
+      "lane": {
+        "cpu_count": 4,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-3143.iter.org",
+        "jax_enable_x64": true,
+        "jax_platform": "cpu",
+        "job_id": "1267929",
+        "node": "98dci4-clu-3143",
+        "partition": "all_debug",
+        "tmpdir": "/tmp"
+      },
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "cpu",
+          "backend_version": "cpu",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": null
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "cpu",
+              "platform": "cpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-ea5c55820be3d80549fe"
+      },
+      "production": {
+        "axis": {
+          "axis_error_mm": 15.058117679421613,
+          "read": {
+            "axis_flux_wb": 56.43635987341259,
+            "axis_rz_m": [
+              6.212253359828424,
+              -0.008752261477039457
+            ],
+            "boundary_flux_wb": 6.4435655897987205,
+            "class": "limited",
+            "exception_text": null,
+            "flux_span_wb": -49.99279428361387,
+            "o_candidate_count": 1,
+            "o_second_best_flux_margin_wb": null,
+            "read_status": "qualified_axis",
+            "x_candidate_count": 0,
+            "x_point_rz_m": null,
+            "x_second_best_flux_margin_wb": null
+          }
+        },
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.0072992700729927005,
+            "enrichment": 42.25296333818665,
+            "node_count": 1,
+            "squared_flux_error_fraction": 0.30841579078968356
+          },
+          "rms_flux_error_wb": 11.05234402027698,
+          "rms_fraction_of_exact_span": 0.2213092567162984,
+          "squared_flux_error_wb2": 16735.140242929665,
+          "sup_flux_error_wb": 71.84275545940181,
+          "sup_fraction_of_exact_span": 1.4385606150153614
+        },
+        "solve_wall_seconds": 404.97340285778046,
+        "state_sha256_binary64": "fa9f4462724bf999b14733f3fbdf54663ddb60b65b62149910ccfaff6e905b3f",
+        "terminal_residual": 0.019104997724264026
+      },
+      "production_path": {
+        "operator_builder": "scripts/analytic_oracle_fixtures/measure.py::forward_operator",
+        "requested_class": 0,
+        "seed": {
+          "anchor_available": true,
+          "anchor_m": [
+            7.79975080486426,
+            0.1453449580803841
+          ],
+          "branch_index": 0,
+          "construction": "current_centroid_disc",
+          "current_centroid_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "current_target_provenance": {
+            "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+            "current_centroid_m": [
+              6.063530173332898,
+              0.0
+            ],
+            "declared_current_a": 16314773.311828371,
+            "quadrature_current_a": 16314773.311828367,
+            "quadrature_nodes": 512,
+            "quadrature_relative_closure": 2.2833846522164315e-16
+          },
+          "declared_axis_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "declared_boundary_m": [
+            7.79975080486426,
+            0.1453449580803841
+          ],
+          "factory": "profile.cold_seed_portfolio",
+          "plasma_current_a": 16314773.311828371,
+          "requested_class": "limited",
+          "seed_radius_m": 1.564079053601776,
+          "state_sha256_binary64": "5148efc25bf5ef1e6899d4400966931d5e11e38ea421c2fc01e57a8c892cfca5",
+          "stored_flux_samples_used": false,
+          "supported_cell_count": 35
+        },
+        "solver_call": "ForwardProfile.solve(ForwardSolveRequest)",
+        "target_current_a": 16314773.311828371
+      },
+      "realised_cells": 137,
+      "requested_cells": 110,
+      "solver_requested_cells": -110,
+      "source_revision": "1305e81cd950594c3e6985c5a6088003d034c385",
+      "tiling": "rectangular"
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "characteristic_pitch_m": 0.28221540988057975,
+      "clipping_stack": {
+        "held_tip": "1c4daf51",
+        "measurement_interpretation": "the clipping stack is absent; this receipt measures the assigned production base exactly as dispatched",
+        "present_in_measured_revision": false
+      },
+      "elapsed_seconds": 970.6612597368658,
+      "exact_axis_flux_renormalisation": {
+        "constant_gauge_shift_wb": 7.665503985688638,
+        "exact_axis_flux_wb": 49.94072179477446,
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.008771929824561403,
+            "enrichment": 0.0010918163319503398,
+            "node_count": 3,
+            "squared_flux_error_fraction": 9.577336245178419e-06
+          },
+          "rms_flux_error_wb": 6.228055238000873,
+          "rms_fraction_of_exact_span": 0.12470895522083832,
+          "squared_flux_error_wb2": 13265.725840275816,
+          "sup_flux_error_wb": 52.512535808434514,
+          "sup_fraction_of_exact_span": 1.0514973336634705
+        },
+        "fraction_squared_flux_error_removed": 0.4082366935478008,
+        "operation": "add exact analytic axis flux minus the production topology axis flux to every terminal grid value",
+        "production_axis_flux_wb": 42.275217809085824
+      },
+      "exact_axis_iteration_control": {
+        "emergent_axis_after_restoring_production_read": {
+          "axis_error_mm": 33.46130394000224,
+          "read": {
+            "axis_flux_wb": 42.275217809085824,
+            "axis_rz_m": [
+              6.166591786599838,
+              0.0018841811946942945
+            ],
+            "boundary_flux_wb": -7.57051330401224,
+            "class": "limited",
+            "exception_text": null,
+            "flux_span_wb": -49.84573111309806,
+            "o_candidate_count": 1,
+            "o_second_best_flux_margin_wb": null,
+            "read_status": "qualified_axis",
+            "x_candidate_count": 0,
+            "x_point_rz_m": null,
+            "x_second_best_flux_margin_wb": null
+          }
+        },
+        "exact_axis_flux_wb": 49.94072179477446,
+        "exact_axis_rz_m": [
+          6.2,
+          0.0
+        ],
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.008771929824561403,
+            "enrichment": 0.9399322634156219,
+            "node_count": 3,
+            "squared_flux_error_fraction": 0.008245019854522999
+          },
+          "rms_flux_error_wb": 8.096148018919704,
+          "rms_fraction_of_exact_span": 0.16211515829086082,
+          "squared_flux_error_wb2": 22417.28355853605,
+          "sup_flux_error_wb": 44.847031822745876,
+          "sup_fraction_of_exact_span": 0.8980052792796926
+        },
+        "fraction_squared_flux_error_removed": 0.0,
+        "operation": "production solve seam with every topology read instrumented to substitute the closed-form axis position and flux",
+        "solve_wall_seconds": 474.16862007044256,
+        "solver_semantics_modified_in_repository": false,
+        "state_bit_identical_to_production": true,
+        "state_sha256_binary64": "c9415b83cd71727fac8ce0f0232f5b1ab785e08d20ec6a4d6dc331a62ed83fd3",
+        "terminal_residual": 0.005558930033419124
+      },
+      "lane": {
+        "cpu_count": 4,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-3142.iter.org",
+        "jax_enable_x64": true,
+        "jax_platform": "cpu",
+        "job_id": "1267928",
+        "node": "98dci4-clu-3142",
+        "partition": "all_debug",
+        "tmpdir": "/tmp"
+      },
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "cpu",
+          "backend_version": "cpu",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": null
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "cpu",
+              "platform": "cpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-ea5c55820be3d80549fe"
+      },
+      "production": {
+        "axis": {
+          "axis_error_mm": 33.46130394000224,
+          "read": {
+            "axis_flux_wb": 42.275217809085824,
+            "axis_rz_m": [
+              6.166591786599838,
+              0.0018841811946942945
+            ],
+            "boundary_flux_wb": -7.57051330401224,
+            "class": "limited",
+            "exception_text": null,
+            "flux_span_wb": -49.84573111309806,
+            "o_candidate_count": 1,
+            "o_second_best_flux_margin_wb": null,
+            "read_status": "qualified_axis",
+            "x_candidate_count": 0,
+            "x_point_rz_m": null,
+            "x_second_best_flux_margin_wb": null
+          }
+        },
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.008771929824561403,
+            "enrichment": 0.9399322634156219,
+            "node_count": 3,
+            "squared_flux_error_fraction": 0.008245019854522999
+          },
+          "rms_flux_error_wb": 8.096148018919704,
+          "rms_fraction_of_exact_span": 0.16211515829086082,
+          "squared_flux_error_wb2": 22417.28355853605,
+          "sup_flux_error_wb": 44.847031822745876,
+          "sup_fraction_of_exact_span": 0.8980052792796926
+        },
+        "solve_wall_seconds": 457.03356631472707,
+        "state_sha256_binary64": "c9415b83cd71727fac8ce0f0232f5b1ab785e08d20ec6a4d6dc331a62ed83fd3",
+        "terminal_residual": 0.005558930033419124
+      },
+      "production_path": {
+        "operator_builder": "scripts/analytic_oracle_fixtures/measure.py::forward_operator",
+        "requested_class": 0,
+        "seed": {
+          "anchor_available": true,
+          "anchor_m": [
+            7.80084745407523,
+            -0.04844887816859062
+          ],
+          "branch_index": 0,
+          "construction": "current_centroid_disc",
+          "current_centroid_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "current_target_provenance": {
+            "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+            "current_centroid_m": [
+              6.063530173332898,
+              0.0
+            ],
+            "declared_current_a": 16314773.311828371,
+            "quadrature_current_a": 16314773.311828367,
+            "quadrature_nodes": 512,
+            "quadrature_relative_closure": 2.2833846522164315e-16
+          },
+          "declared_axis_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "declared_boundary_m": [
+            7.80084745407523,
+            -0.04844887816859062
+          ],
+          "factory": "profile.cold_seed_portfolio",
+          "plasma_current_a": 16314773.311828371,
+          "requested_class": "limited",
+          "seed_radius_m": 1.564079053601776,
+          "state_sha256_binary64": "c41e1cba3a449adf31052577c69f488791545ed484185938387d683fe0b7f4aa",
+          "stored_flux_samples_used": false,
+          "supported_cell_count": 96
+        },
+        "solver_call": "ForwardProfile.solve(ForwardSolveRequest)",
+        "target_current_a": 16314773.311828371
+      },
+      "realised_cells": 342,
+      "requested_cells": 300,
+      "solver_requested_cells": -300,
+      "source_revision": "1305e81cd950594c3e6985c5a6088003d034c385",
+      "tiling": "hexagonal"
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "characteristic_pitch_m": 0.28221540988057997,
+      "clipping_stack": {
+        "held_tip": "1c4daf51",
+        "measurement_interpretation": "the clipping stack is absent; this receipt measures the assigned production base exactly as dispatched",
+        "present_in_measured_revision": false
+      },
+      "elapsed_seconds": 985.9832111671567,
+      "exact_axis_flux_renormalisation": {
+        "constant_gauge_shift_wb": 8.084258469224778,
+        "exact_axis_flux_wb": 49.94072179477446,
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.011594202898550725,
+            "enrichment": 23.592034526989046,
+            "node_count": 4,
+            "squared_flux_error_fraction": 0.27353083509552517
+          },
+          "rms_flux_error_wb": 5.010871357178709,
+          "rms_fraction_of_exact_span": 0.10033638235687295,
+          "squared_flux_error_wb2": 8662.546956576929,
+          "sup_flux_error_wb": 50.198813189910794,
+          "sup_fraction_of_exact_span": 1.005167954844484
+        },
+        "fraction_squared_flux_error_removed": 0.5826158146955932,
+        "operation": "add exact analytic axis flux minus the production topology axis flux to every terminal grid value",
+        "production_axis_flux_wb": 41.85646332554968
+      },
+      "exact_axis_iteration_control": {
+        "emergent_axis_after_restoring_production_read": {
+          "axis_error_mm": 39.13866514216117,
+          "read": {
+            "axis_flux_wb": 41.85646332554968,
+            "axis_rz_m": [
+              6.1610472829640575,
+              0.003810635724915176
+            ],
+            "boundary_flux_wb": -8.03984938801958,
+            "class": "limited",
+            "exception_text": null,
+            "flux_span_wb": -49.89631271356926,
+            "o_candidate_count": 1,
+            "o_second_best_flux_margin_wb": null,
+            "read_status": "qualified_axis",
+            "x_candidate_count": 0,
+            "x_point_rz_m": null,
+            "x_second_best_flux_margin_wb": null
+          }
+        },
+        "exact_axis_flux_wb": 49.94072179477446,
+        "exact_axis_rz_m": [
+          6.2,
+          0.0
+        ],
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.011594202898550725,
+            "enrichment": 7.715279385420718,
+            "node_count": 4,
+            "squared_flux_error_fraction": 0.08945251461357355
+          },
+          "rms_flux_error_wb": 7.756133194956099,
+          "rms_fraction_of_exact_span": 0.15530679005459752,
+          "squared_flux_error_wb2": 20754.37273757547,
+          "sup_flux_error_wb": 42.114554720686016,
+          "sup_fraction_of_exact_span": 0.8432908697986152
+        },
+        "fraction_squared_flux_error_removed": 0.0,
+        "operation": "production solve seam with every topology read instrumented to substitute the closed-form axis position and flux",
+        "solve_wall_seconds": 463.0310776550323,
+        "solver_semantics_modified_in_repository": false,
+        "state_bit_identical_to_production": true,
+        "state_sha256_binary64": "972f38b18890c8ea7aa7b7773c91bb0ba875cdb8e49d71554f3bc82ee5759bb5",
+        "terminal_residual": 0.011429277914500314
+      },
+      "lane": {
+        "cpu_count": 4,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-4074.iter.org",
+        "jax_enable_x64": true,
+        "jax_platform": "cpu",
+        "job_id": "1267931",
+        "node": "98dci4-clu-4074",
+        "partition": "all_debug",
+        "tmpdir": "/tmp"
+      },
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "cpu",
+          "backend_version": "cpu",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": null
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "cpu",
+              "platform": "cpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-ea5c55820be3d80549fe"
+      },
+      "production": {
+        "axis": {
+          "axis_error_mm": 39.13866514216117,
+          "read": {
+            "axis_flux_wb": 41.85646332554968,
+            "axis_rz_m": [
+              6.1610472829640575,
+              0.003810635724915176
+            ],
+            "boundary_flux_wb": -8.03984938801958,
+            "class": "limited",
+            "exception_text": null,
+            "flux_span_wb": -49.89631271356926,
+            "o_candidate_count": 1,
+            "o_second_best_flux_margin_wb": null,
+            "read_status": "qualified_axis",
+            "x_candidate_count": 0,
+            "x_point_rz_m": null,
+            "x_second_best_flux_margin_wb": null
+          }
+        },
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.011594202898550725,
+            "enrichment": 7.715279385420718,
+            "node_count": 4,
+            "squared_flux_error_fraction": 0.08945251461357355
+          },
+          "rms_flux_error_wb": 7.756133194956099,
+          "rms_fraction_of_exact_span": 0.15530679005459752,
+          "squared_flux_error_wb2": 20754.37273757547,
+          "sup_flux_error_wb": 42.114554720686016,
+          "sup_fraction_of_exact_span": 0.8432908697986152
+        },
+        "solve_wall_seconds": 425.54548241198063,
+        "state_sha256_binary64": "972f38b18890c8ea7aa7b7773c91bb0ba875cdb8e49d71554f3bc82ee5759bb5",
+        "terminal_residual": 0.011429277914500314
+      },
+      "production_path": {
+        "operator_builder": "scripts/analytic_oracle_fixtures/measure.py::forward_operator",
+        "requested_class": 0,
+        "seed": {
+          "anchor_available": true,
+          "anchor_m": [
+            7.800374369806052,
+            0.09024901280022181
+          ],
+          "branch_index": 0,
+          "construction": "current_centroid_disc",
+          "current_centroid_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "current_target_provenance": {
+            "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+            "current_centroid_m": [
+              6.063530173332898,
+              0.0
+            ],
+            "declared_current_a": 16314773.311828371,
+            "quadrature_current_a": 16314773.311828367,
+            "quadrature_nodes": 512,
+            "quadrature_relative_closure": 2.2833846522164315e-16
+          },
+          "declared_axis_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "declared_boundary_m": [
+            7.800374369806052,
+            0.09024901280022181
+          ],
+          "factory": "profile.cold_seed_portfolio",
+          "plasma_current_a": 16314773.311828371,
+          "requested_class": "limited",
+          "seed_radius_m": 1.564079053601776,
+          "state_sha256_binary64": "dfdc1b5a0053e0f22138368a4f5c45a13ce9c0b21ed8445a4c91d57b8959108b",
+          "stored_flux_samples_used": false,
+          "supported_cell_count": 95
+        },
+        "solver_call": "ForwardProfile.solve(ForwardSolveRequest)",
+        "target_current_a": 16314773.311828371
+      },
+      "realised_cells": 345,
+      "requested_cells": 300,
+      "solver_requested_cells": -300,
+      "source_revision": "1305e81cd950594c3e6985c5a6088003d034c385",
+      "tiling": "rectangular"
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "characteristic_pitch_m": 0.21860311650211722,
+      "clipping_stack": {
+        "held_tip": "1c4daf51",
+        "measurement_interpretation": "the clipping stack is absent; this receipt measures the assigned production base exactly as dispatched",
+        "present_in_measured_revision": false
+      },
+      "elapsed_seconds": 986.5849724020809,
+      "exact_axis_flux_renormalisation": {
+        "constant_gauge_shift_wb": 12.377204364190504,
+        "exact_axis_flux_wb": 49.94072179477446,
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.014414414414414415,
+            "enrichment": 29.83314469051058,
+            "node_count": 8,
+            "squared_flux_error_fraction": 0.43002731085420653
+          },
+          "rms_flux_error_wb": 5.164427569040365,
+          "rms_fraction_of_exact_span": 0.10341115193054226,
+          "squared_flux_error_wb2": 14802.578224304616,
+          "sup_flux_error_wb": 47.95275503455148,
+          "sup_fraction_of_exact_span": 0.9601934716043493
+        },
+        "fraction_squared_flux_error_removed": 0.7788877930759514,
+        "operation": "add exact analytic axis flux minus the production topology axis flux to every terminal grid value",
+        "production_axis_flux_wb": 37.56351743058396
+      },
+      "exact_axis_iteration_control": {
+        "emergent_axis_after_restoring_production_read": {
+          "axis_error_mm": 55.65434041507622,
+          "read": {
+            "axis_flux_wb": 37.56351743058396,
+            "axis_rz_m": [
+              6.144345659584924,
+              2.6861874877648714e-13
+            ],
+            "boundary_flux_wb": -12.471105576393517,
+            "class": "limited",
+            "exception_text": null,
+            "flux_span_wb": -50.034623006977476,
+            "o_candidate_count": 1,
+            "o_second_best_flux_margin_wb": null,
+            "read_status": "qualified_axis",
+            "x_candidate_count": 0,
+            "x_point_rz_m": null,
+            "x_second_best_flux_margin_wb": null
+          }
+        },
+        "exact_axis_flux_wb": 49.94072179477446,
+        "exact_axis_rz_m": [
+          6.2,
+          0.0
+        ],
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.014414414414414415,
+            "enrichment": 4.388384858081682,
+            "node_count": 8,
+            "squared_flux_error_fraction": 0.06325599795433055
+          },
+          "rms_flux_error_wb": 10.98286969978239,
+          "rms_fraction_of_exact_span": 0.21991812102586752,
+          "squared_flux_error_wb2": 66946.00189753095,
+          "sup_flux_error_wb": 35.575550670360975,
+          "sup_fraction_of_exact_span": 0.7123555565847551
+        },
+        "fraction_squared_flux_error_removed": 0.0,
+        "operation": "production solve seam with every topology read instrumented to substitute the closed-form axis position and flux",
+        "solve_wall_seconds": 476.52407248318195,
+        "solver_semantics_modified_in_repository": false,
+        "state_bit_identical_to_production": true,
+        "state_sha256_binary64": "c5fd9795c608bef72b0d6a1636383cf3ac59080a3c864920b4f16fd34f6c87d1",
+        "terminal_residual": 0.0012464509730622983
+      },
+      "lane": {
+        "cpu_count": 4,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-3144.iter.org",
+        "jax_enable_x64": true,
+        "jax_platform": "cpu",
+        "job_id": "1267930",
+        "node": "98dci4-clu-3144",
+        "partition": "all_debug",
+        "tmpdir": "/tmp"
+      },
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "cpu",
+          "backend_version": "cpu",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": null
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "cpu",
+              "platform": "cpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-ea5c55820be3d80549fe"
+      },
+      "production": {
+        "axis": {
+          "axis_error_mm": 55.65434041507622,
+          "read": {
+            "axis_flux_wb": 37.56351743058396,
+            "axis_rz_m": [
+              6.144345659584924,
+              2.6861874877648714e-13
+            ],
+            "boundary_flux_wb": -12.471105576393517,
+            "class": "limited",
+            "exception_text": null,
+            "flux_span_wb": -50.034623006977476,
+            "o_candidate_count": 1,
+            "o_second_best_flux_margin_wb": null,
+            "read_status": "qualified_axis",
+            "x_candidate_count": 0,
+            "x_point_rz_m": null,
+            "x_second_best_flux_margin_wb": null
+          }
+        },
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.014414414414414415,
+            "enrichment": 4.388384858081682,
+            "node_count": 8,
+            "squared_flux_error_fraction": 0.06325599795433055
+          },
+          "rms_flux_error_wb": 10.98286969978239,
+          "rms_fraction_of_exact_span": 0.21991812102586752,
+          "squared_flux_error_wb2": 66946.00189753095,
+          "sup_flux_error_wb": 35.575550670360975,
+          "sup_fraction_of_exact_span": 0.7123555565847551
+        },
+        "solve_wall_seconds": 469.49551413953304,
+        "state_sha256_binary64": "c5fd9795c608bef72b0d6a1636383cf3ac59080a3c864920b4f16fd34f6c87d1",
+        "terminal_residual": 0.0012464509730622983
+      },
+      "production_path": {
+        "operator_builder": "scripts/analytic_oracle_fixtures/measure.py::forward_operator",
+        "requested_class": 0,
+        "seed": {
+          "anchor_available": true,
+          "anchor_m": [
+            7.801395788455385,
+            8.30678227534929e-10
+          ],
+          "branch_index": 0,
+          "construction": "current_centroid_disc",
+          "current_centroid_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "current_target_provenance": {
+            "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+            "current_centroid_m": [
+              6.063530173332898,
+              0.0
+            ],
+            "declared_current_a": 16314773.311828371,
+            "quadrature_current_a": 16314773.311828367,
+            "quadrature_nodes": 512,
+            "quadrature_relative_closure": 2.2833846522164315e-16
+          },
+          "declared_axis_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "declared_boundary_m": [
+            7.801395788455385,
+            8.30678227534929e-10
+          ],
+          "factory": "profile.cold_seed_portfolio",
+          "plasma_current_a": 16314773.311828371,
+          "requested_class": "limited",
+          "seed_radius_m": 1.564079053601776,
+          "state_sha256_binary64": "35d2a8f1f626ac44afeeea20439ae3ad3659de07c112e9c5c79ca07ac978d537",
+          "stored_flux_samples_used": false,
+          "supported_cell_count": 162
+        },
+        "solver_call": "ForwardProfile.solve(ForwardSolveRequest)",
+        "target_current_a": 16314773.311828371
+      },
+      "realised_cells": 555,
+      "requested_cells": 500,
+      "solver_requested_cells": -500,
+      "source_revision": "1305e81cd950594c3e6985c5a6088003d034c385",
+      "tiling": "hexagonal"
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "characteristic_pitch_m": 0.21860311650211672,
+      "clipping_stack": {
+        "held_tip": "1c4daf51",
+        "measurement_interpretation": "the clipping stack is absent; this receipt measures the assigned production base exactly as dispatched",
+        "present_in_measured_revision": false
+      },
+      "elapsed_seconds": 2488.2594088260084,
+      "exact_axis_flux_renormalisation": {
+        "constant_gauge_shift_wb": 10.185511485892476,
+        "exact_axis_flux_wb": 49.94072179477446,
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.009041591320072333,
+            "enrichment": 17.00801373894635,
+            "node_count": 5,
+            "squared_flux_error_fraction": 0.1537795093937283
+          },
+          "rms_flux_error_wb": 5.095572829584837,
+          "rms_fraction_of_exact_span": 0.10203242256939128,
+          "squared_flux_error_wb2": 14358.568941266582,
+          "sup_flux_error_wb": 48.67324141958006,
+          "sup_fraction_of_exact_span": 0.9746203032386483
+        },
+        "fraction_squared_flux_error_removed": 0.6870207138399459,
+        "operation": "add exact analytic axis flux minus the production topology axis flux to every terminal grid value",
+        "production_axis_flux_wb": 39.755210308881985
+      },
+      "exact_axis_iteration_control": {
+        "emergent_axis_after_restoring_production_read": {
+          "axis_error_mm": 46.750684149234296,
+          "read": {
+            "axis_flux_wb": 39.755210308881985,
+            "axis_rz_m": [
+              6.153610583198154,
+              0.005800730747593841
+            ],
+            "boundary_flux_wb": -10.15390338104083,
+            "class": "limited",
+            "exception_text": null,
+            "flux_span_wb": -49.90911368992282,
+            "o_candidate_count": 1,
+            "o_second_best_flux_margin_wb": null,
+            "read_status": "qualified_axis",
+            "x_candidate_count": 0,
+            "x_point_rz_m": null,
+            "x_second_best_flux_margin_wb": null
+          }
+        },
+        "exact_axis_flux_wb": 49.94072179477446,
+        "exact_axis_rz_m": [
+          6.2,
+          0.0
+        ],
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.009041591320072333,
+            "enrichment": 4.324939588479596,
+            "node_count": 5,
+            "squared_flux_error_fraction": 0.039104336243034325
+          },
+          "rms_flux_error_wb": 9.108255723643797,
+          "rms_fraction_of_exact_span": 0.18238133924201388,
+          "squared_flux_error_wb2": 45877.058246991364,
+          "sup_flux_error_wb": 38.48772993368758,
+          "sup_fraction_of_exact_span": 0.7706682753174532
+        },
+        "fraction_squared_flux_error_removed": 0.0,
+        "operation": "production solve seam with every topology read instrumented to substitute the closed-form axis position and flux",
+        "solve_wall_seconds": 1169.5444272849709,
+        "solver_semantics_modified_in_repository": false,
+        "state_bit_identical_to_production": true,
+        "state_sha256_binary64": "397522aaefe06a6398a6f14651dcdfedb7baf44dcae29cf3f3ffbbb69d1db4be",
+        "terminal_residual": 0.006841819605275027
+      },
+      "lane": {
+        "cpu_count": 4,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-4074.iter.org",
+        "jax_enable_x64": true,
+        "jax_platform": "cpu",
+        "job_id": "1267932",
+        "node": "98dci4-clu-4074",
+        "partition": "all_debug",
+        "tmpdir": "/tmp"
+      },
+      "persistent_compilation_cache": {
+        "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+        "entry_key_fields": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ],
+        "invalidation_scope": {
+          "directory_version_key": [
+            "backend and compiler options",
+            "device topology",
+            "jax and jaxlib/XLA build"
+          ],
+          "jax_entry_key": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ]
+        },
+        "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+        "maximum_bytes": 8589934592,
+        "minimum_compile_seconds": 1.0,
+        "root": "/home/ITER/mcintos/.cache",
+        "runtime_identity": {
+          "backend": "cpu",
+          "backend_version": "cpu",
+          "compiler_options": {
+            "jax_compilation_cache_include_metadata_in_key": false,
+            "jax_default_matmul_precision": null,
+            "jax_enable_x64": true,
+            "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+            "xla_flags": null
+          },
+          "device_topology": [
+            {
+              "id": 0,
+              "kind": "cpu",
+              "platform": "cpu",
+              "process_index": 0
+            }
+          ],
+          "jax_version": "0.11.0",
+          "jaxlib_version": "0.11.0"
+        },
+        "selection": "explicit_per_recipe",
+        "version_key": "runtime-ea5c55820be3d80549fe"
+      },
+      "production": {
+        "axis": {
+          "axis_error_mm": 46.750684149234296,
+          "read": {
+            "axis_flux_wb": 39.755210308881985,
+            "axis_rz_m": [
+              6.153610583198154,
+              0.005800730747593841
+            ],
+            "boundary_flux_wb": -10.15390338104083,
+            "class": "limited",
+            "exception_text": null,
+            "flux_span_wb": -49.90911368992282,
+            "o_candidate_count": 1,
+            "o_second_best_flux_margin_wb": null,
+            "read_status": "qualified_axis",
+            "x_candidate_count": 0,
+            "x_point_rz_m": null,
+            "x_second_best_flux_margin_wb": null
+          }
+        },
+        "flux_error": {
+          "outboard_window": {
+            "bounds_rz_m": [
+              7.25,
+              7.75,
+              0.0,
+              0.5
+            ],
+            "domain_fraction": 0.009041591320072333,
+            "enrichment": 4.324939588479596,
+            "node_count": 5,
+            "squared_flux_error_fraction": 0.039104336243034325
+          },
+          "rms_flux_error_wb": 9.108255723643797,
+          "rms_fraction_of_exact_span": 0.18238133924201388,
+          "squared_flux_error_wb2": 45877.058246991364,
+          "sup_flux_error_wb": 38.48772993368758,
+          "sup_fraction_of_exact_span": 0.7706682753174532
+        },
+        "solve_wall_seconds": 1188.4654241204262,
+        "state_sha256_binary64": "397522aaefe06a6398a6f14651dcdfedb7baf44dcae29cf3f3ffbbb69d1db4be",
+        "terminal_residual": 0.006841819605275027
+      },
+      "production_path": {
+        "operator_builder": "scripts/analytic_oracle_fixtures/measure.py::forward_operator",
+        "requested_class": 0,
+        "seed": {
+          "anchor_available": true,
+          "anchor_m": [
+            7.801184618078802,
+            -0.018658263895337233
+          ],
+          "branch_index": 0,
+          "construction": "current_centroid_disc",
+          "current_centroid_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "current_target_provenance": {
+            "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+            "current_centroid_m": [
+              6.063530173332898,
+              0.0
+            ],
+            "declared_current_a": 16314773.311828371,
+            "quadrature_current_a": 16314773.311828367,
+            "quadrature_nodes": 512,
+            "quadrature_relative_closure": 2.2833846522164315e-16
+          },
+          "declared_axis_m": [
+            6.063530173332898,
+            0.0
+          ],
+          "declared_boundary_m": [
+            7.801184618078802,
+            -0.018658263895337233
+          ],
+          "factory": "profile.cold_seed_portfolio",
+          "plasma_current_a": 16314773.311828371,
+          "requested_class": "limited",
+          "seed_radius_m": 1.564079053601776,
+          "state_sha256_binary64": "18467b0acf1cef2b8af2096f80fde99891488102fa0c56fc0c6ba24dc91b6048",
+          "stored_flux_samples_used": false,
+          "supported_cell_count": 160
+        },
+        "solver_call": "ForwardProfile.solve(ForwardSolveRequest)",
+        "target_current_a": 16314773.311828371
+      },
+      "realised_cells": 553,
+      "requested_cells": 500,
+      "solver_requested_cells": -500,
+      "source_revision": "1305e81cd950594c3e6985c5a6088003d034c385",
+      "tiling": "rectangular"
+    }
+  ],
+  "schema": "nova.solovev-solver-discriminator.v1",
+  "solver_base_revision": "8ae3a7d776c3e067a777336f9bfdc4614568d2b2"
+}

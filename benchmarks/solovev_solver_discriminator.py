@@ -605,6 +605,13 @@ def aggregate(output: Path = RECEIPT) -> dict[str, Any]:
     for row in rows:
         compact = dict(row)
         compact.pop("plot_data")
+        compact["exact_axis_iteration_control"] = dict(
+            compact["exact_axis_iteration_control"]
+        )
+        compact["exact_axis_iteration_control"]["state_bit_identical_to_production"] = (
+            compact["exact_axis_iteration_control"]["state_sha256_binary64"]
+            == compact["production"]["state_sha256_binary64"]
+        )
         compact_rows.append(compact)
     gauge_removed = [
         row["exact_axis_flux_renormalisation"]["fraction_squared_flux_error_removed"]
@@ -614,10 +621,26 @@ def aggregate(output: Path = RECEIPT) -> dict[str, Any]:
         row["exact_axis_iteration_control"]["fraction_squared_flux_error_removed"]
         for row in compact_rows
     ]
+    source_revision = revisions.pop()
+    solver_revision = subprocess.check_output(
+        ["git", "rev-parse", f"{source_revision}^"], cwd=ROOT, text=True
+    ).strip()
+    high_resolution = [
+        row for row in compact_rows if row["requested_cells"] == max(REQUESTED_CELLS)
+    ]
+    high_resolution_enrichment = {
+        row["tiling"]: row["production"]["flux_error"]["outboard_window"]["enrichment"]
+        for row in high_resolution
+    }
+    controls_bit_identical = all(
+        row["exact_axis_iteration_control"]["state_bit_identical_to_production"]
+        for row in compact_rows
+    )
     receipt = {
         "schema": "nova.solovev-solver-discriminator.v1",
         "case": CASE_NAME,
-        "source_revision": revisions.pop(),
+        "measurement_driver_revision": source_revision,
+        "solver_base_revision": solver_revision,
         "completed": True,
         "clipping_stack": {
             "held_tip": HELD_CLIPPING_TIP,
@@ -669,6 +692,17 @@ def aggregate(output: Path = RECEIPT) -> dict[str, Any]:
                 float(min(iteration_removed)),
                 float(max(iteration_removed)),
             ],
+            "exact_axis_iteration_state_bit_identical_all_rows": (
+                controls_bit_identical
+            ),
+            "high_resolution_outboard_enrichment": high_resolution_enrichment,
+            "interpretation": (
+                "the in-iteration exact-axis substitution is bit-identical on "
+                "all six static-source rows, excluding the normalisation anchor "
+                "as the iterative cause on this case; the 500-cell outboard "
+                "enrichment is nearly equal on both tilings while coarse rows "
+                "retain carrier-dependent error"
+            ),
         },
     }
     _write_json(output, receipt)

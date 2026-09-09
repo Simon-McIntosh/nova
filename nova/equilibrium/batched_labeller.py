@@ -609,11 +609,16 @@ class BatchedLabeller:
                 target_current=target_value,
                 requested_class=requested_value,
             ).stack()[1:]
+            free_admitted = self.operator._fixed_design_read(
+                jnp.asarray(free_state)[: self.operator.physical_node_number],
+                requested_value,
+            )[3]
             reference_mask = jnp.isfinite(reference)
             has_reference = jnp.any(reference_mask)
             reference_error = jnp.where(reference_mask, free_centroid - reference, 0.0)
-            guard = jnp.logical_not(has_reference) | (
-                jnp.linalg.norm(reference_error) <= self.guard_tolerance
+            guard = free_admitted & (
+                jnp.logical_not(has_reference)
+                | (jnp.linalg.norm(reference_error) <= self.guard_tolerance)
             )
             needs = (
                 self.condition_on_guard_failure
@@ -687,6 +692,10 @@ class BatchedLabeller:
                 None,
             )
             state_value = solved[0]
+            selected_admitted = self.operator._fixed_design_read(
+                jnp.asarray(state_value)[: self.operator.physical_node_number],
+                requested_value,
+            )[3]
             masks, topology = self.operator.read(state_value, requested_value)
             labelled = self.profile._labelled_flux(state_value, masks, topology)
             centroid = self.profile.current_moment_observation(
@@ -698,7 +707,7 @@ class BatchedLabeller:
             centroid = _reported_centroid(centroid)
             return (
                 jnp.where(active, state_value, initial_value),
-                jnp.where(active, solved[4], False),
+                jnp.where(active, solved[4] & selected_admitted, False),
                 jnp.where(active, solved[5], -1),
                 jnp.where(active, solved[7], 0),
                 jnp.where(active, solved[6], jnp.nan),

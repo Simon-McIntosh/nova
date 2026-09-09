@@ -622,8 +622,8 @@ def _traced_quadratic_arc(start, end, coefficient, centre, scale):
     return chord + root[..., None] * normal[:, None, :]
 
 
-def _traced_level_arc(start, end, evaluator, outside_vertex):
-    """Trace the local level-set arc on the outside vertex side of its chord."""
+def _traced_level_arc(start, end, evaluator, inside_vertex):
+    """Trace the nearest level-set arc on the retained polygon's side."""
     parameter = jnp.linspace(
         0.0,
         1.0,
@@ -635,25 +635,18 @@ def _traced_level_arc(start, end, evaluator, outside_vertex):
     normal = jnp.stack((-delta[:, 1], delta[:, 0]), axis=1)
     squared_length = jnp.sum(delta**2, axis=1)
     safe_squared_length = jnp.maximum(squared_length, jnp.finfo(start.dtype).tiny)
-    corner_offset = outside_vertex - start
-    corner_along = jnp.sum(corner_offset * delta, axis=1) / safe_squared_length
-    corner_normal = jnp.sum(corner_offset * normal, axis=1) / safe_squared_length
-    parameter_floor = 32.0 * jnp.finfo(start.dtype).eps
-    corner_along = jnp.clip(corner_along, parameter_floor, 1.0 - parameter_floor)
-    left_envelope = corner_normal[:, None] * parameter[None, :] / corner_along[:, None]
-    right_envelope = (
-        corner_normal[:, None]
-        * (1.0 - parameter[None, :])
-        / (1.0 - corner_along[:, None])
+    chord_midpoint = 0.5 * (start + end)
+    inside_side = jnp.sum((inside_vertex - chord_midpoint) * normal, axis=1)
+    side = jnp.where(inside_side < 0.0, 1.0, -1.0)
+    local_extent = jnp.minimum(
+        jnp.linalg.norm(inside_vertex - chord_midpoint, axis=1)
+        / jnp.sqrt(safe_squared_length),
+        1.0,
     )
-    envelope = jnp.where(
-        parameter[None, :] <= corner_along[:, None],
-        left_envelope,
-        right_envelope,
-    )
-    lower = jnp.minimum(envelope, 0.0)
-    upper = jnp.maximum(envelope, 0.0)
-    root = 0.5 * envelope
+    signed_extent = side * jnp.maximum(local_extent, 32.0 * jnp.finfo(start.dtype).eps)
+    lower = jnp.minimum(signed_extent, 0.0)[:, None]
+    upper = jnp.maximum(signed_extent, 0.0)[:, None]
+    root = jnp.zeros(chord.shape[:-1], dtype=start.dtype)
     difference_step = jnp.asarray(1.0e-5, dtype=start.dtype)
 
     def polish(_iteration, current):
@@ -835,7 +828,6 @@ def _traced_clip(
         if participating.shape != (cell_count,):
             raise ValueError("participating_cell must carry one flag per cell")
     chord_capacity = support_capacity
-    support_capacity = chord_capacity + (_CURVED_BOUNDARY_SEGMENTS - 1 if curved else 0)
     start_inside = start_flux > 0.0
     end_inside = end_flux > 0.0
     crossing_edge = valid_edge & participating[:, None] & (start_inside != end_inside)
@@ -879,18 +871,7 @@ def _traced_clip(
     packed_leaving = _pack_traced_values(
         crossing_edge & start_inside, unique_crossing, width
     )
-    crossing_outside, _outside_count = _pack_traced_vertices(
-        jnp.where(start_inside[..., None], end_point, start_point),
-        unique_crossing,
-        width,
-    )
-    first_packed_leaving = jnp.argmax(packed_leaving, axis=1)
-    outside_vertex = jnp.take_along_axis(
-        crossing_outside,
-        first_packed_leaving[:, None, None],
-        axis=1,
-    )[:, 0]
-    saddle = crossing_count == 4
+    saddle = (crossing_count == 4) & jnp.asarray(curve_evaluator is None)
     first_line = crossing[:, 2] - crossing[:, 0]
     second_line = crossing[:, 3] - crossing[:, 1]
     denominator = _cross_2d(first_line, second_line)
@@ -941,6 +922,14 @@ def _traced_clip(
         ],
         axis=2,
     ).reshape(cell_count, 3 * width)
+    candidate_crossing = jnp.stack(
+        [
+            jnp.zeros_like(valid_edge),
+            crossing_edge,
+            jnp.zeros_like(valid_edge),
+        ],
+        axis=2,
+    ).reshape(cell_count, 3 * width)
     compact, compact_count = _pack_traced_vertices(
         candidates, candidate_valid, support_capacity
     )
@@ -950,6 +939,9 @@ def _traced_clip(
     compact_leaving = _pack_traced_values(
         candidate_leaving, candidate_valid, support_capacity
     )
+    compact_crossing = _pack_traced_values(
+        candidate_crossing, candidate_valid, support_capacity
+    )
     compact_slot = jnp.arange(support_capacity)
     compact_valid = compact_slot[None, :] < compact_count[:, None]
     previous = jnp.roll(compact, 1, axis=1)
@@ -958,6 +950,7 @@ def _traced_clip(
     support, vertex_count = _pack_traced_vertices(compact, keep, support_capacity)
     support_saddle = _pack_traced_values(compact_saddle, keep, support_capacity)
     support_leaving = _pack_traced_values(compact_leaving, keep, support_capacity)
+    support_crossing = _pack_traced_values(compact_crossing, keep, support_capacity)
     last_slot = jnp.maximum(vertex_count - 1, 0)
     last = jnp.take_along_axis(support, last_slot[:, None, None], axis=1)[:, 0]
     repeated_closure = (vertex_count > 1) & jnp.all(last == support[:, 0], axis=1)
@@ -969,50 +962,105 @@ def _traced_clip(
     first_saddle = jnp.argmax(support_saddle, axis=1)
     first_leaving = jnp.argmax(support_leaving, axis=1)
     simple_boundary = crossing_count == 2
+    evaluator_boundary = (
+        (crossing_count >= 2)
+        & (crossing_count % 2 == 0)
+        & jnp.asarray(curve_evaluator is not None)
+    )
     rotation = jnp.where(
         saddle,
         first_saddle,
-        jnp.where(simple_boundary & curved, first_leaving, 0),
+        jnp.where((simple_boundary & curved) | evaluator_boundary, first_leaving, 0),
     )
     live_count = jnp.maximum(vertex_count, 1)
     rotated_slot = (compact_slot[None, :] + rotation[:, None]) % live_count[:, None]
     support = jnp.take_along_axis(support, rotated_slot[..., None], axis=1)
     support_saddle = jnp.take_along_axis(support_saddle, rotated_slot, axis=1)
     support_leaving = jnp.take_along_axis(support_leaving, rotated_slot, axis=1)
+    support_crossing = jnp.take_along_axis(support_crossing, rotated_slot, axis=1)
     support = jnp.where(
         compact_slot[None, :, None] < vertex_count[:, None, None], support, 0.0
     )
     support_saddle = support_saddle & (compact_slot[None, :] < vertex_count[:, None])
 
-    if curved:
-        arc = (
-            _traced_level_arc(
-                support[:, 0],
-                support[:, 1],
-                curve_evaluator,
-                outside_vertex,
+    if curve_evaluator is not None:
+        base_valid = compact_slot[None, :] < vertex_count[:, None]
+        next_slot = jnp.where(
+            compact_slot[None, :] + 1 < vertex_count[:, None],
+            compact_slot[None, :] + 1,
+            0,
+        )
+        following_crossing = jnp.take_along_axis(support_crossing, next_slot, axis=1)
+        outside_gap = base_valid & support_leaving & following_crossing
+        inside_slot = jnp.where(next_slot + 1 < vertex_count[:, None], next_slot + 1, 0)
+        following_vertex = jnp.take_along_axis(support, next_slot[..., None], axis=1)
+        inside_vertex = jnp.take_along_axis(support, inside_slot[..., None], axis=1)
+        arcs = []
+        for support_slot in range(chord_capacity):
+            arcs.append(
+                _traced_level_arc(
+                    support[:, support_slot],
+                    following_vertex[:, support_slot],
+                    curve_evaluator,
+                    inside_vertex[:, support_slot],
+                )
             )
-            if curve_evaluator is not None
-            else _traced_quadratic_arc(
-                support[:, 0],
-                support[:, 1],
-                coefficient,
-                curve_origin,
-                curve_extent,
-            )
+        arc = jnp.stack(arcs, axis=1)
+        expanded_candidate = jnp.concatenate(
+            (support[:, :, None, :], arc[:, :, 1:-1, :]), axis=2
+        ).reshape(cell_count, chord_capacity * _CURVED_BOUNDARY_SEGMENTS, 2)
+        expanded_valid = jnp.concatenate(
+            (
+                base_valid[:, :, None],
+                jnp.broadcast_to(
+                    outside_gap[:, :, None],
+                    (cell_count, chord_capacity, _CURVED_BOUNDARY_SEGMENTS - 1),
+                ),
+            ),
+            axis=2,
+        ).reshape(cell_count, chord_capacity * _CURVED_BOUNDARY_SEGMENTS)
+        expanded_saddle = jnp.concatenate(
+            (
+                support_saddle[:, :, None],
+                jnp.zeros(
+                    (cell_count, chord_capacity, _CURVED_BOUNDARY_SEGMENTS - 1),
+                    dtype=bool,
+                ),
+            ),
+            axis=2,
+        ).reshape(cell_count, chord_capacity * _CURVED_BOUNDARY_SEGMENTS)
+        support_capacity = chord_capacity * _CURVED_BOUNDARY_SEGMENTS
+        support, vertex_count = _pack_traced_vertices(
+            expanded_candidate, expanded_valid, support_capacity
+        )
+        support_saddle = _pack_traced_values(
+            expanded_saddle, expanded_valid, support_capacity
+        )
+        compact_slot = jnp.arange(support_capacity)
+    elif curved:
+        arc = _traced_quadratic_arc(
+            support[:, 0],
+            support[:, 1],
+            coefficient,
+            curve_origin,
+            curve_extent,
         )
         expanded = jnp.concatenate(
-            (
-                support[:, :1],
-                arc[:, 1:-1],
-                support[:, 1:chord_capacity],
-            ),
-            axis=1,
+            (support[:, :1], arc[:, 1:-1], support[:, 1:chord_capacity]), axis=1
         )
         expanded_count = vertex_count + (_CURVED_BOUNDARY_SEGMENTS - 1)
         use_arc = simple_boundary & (vertex_count >= 3)
-        support = jnp.where(use_arc[:, None, None], expanded, support)
+        padded_support = jnp.pad(
+            support, ((0, 0), (0, _CURVED_BOUNDARY_SEGMENTS - 1), (0, 0))
+        )
+        padded_saddle = jnp.pad(
+            support_saddle, ((0, 0), (0, _CURVED_BOUNDARY_SEGMENTS - 1))
+        )
+        support = jnp.where(use_arc[:, None, None], expanded, padded_support)
+        support_saddle = padded_saddle
         vertex_count = jnp.where(use_arc, expanded_count, vertex_count)
+        support_capacity = chord_capacity + _CURVED_BOUNDARY_SEGMENTS - 1
+        compact_slot = jnp.arange(support_capacity)
 
     branch_number = jnp.cumsum(support_saddle, axis=1) - 1
     branch_vertices = []
@@ -1051,7 +1099,11 @@ def _traced_clip(
     vertex_count = jnp.where(included, vertex_count, 0)
     support = jnp.where(included[:, None, None], support, 0.0)
 
-    boundary = included & ((crossing_count == 2) | saddle)
+    boundary = included & jnp.where(
+        jnp.asarray(curve_evaluator is not None),
+        (crossing_count >= 2) & (crossing_count % 2 == 0),
+        (crossing_count == 2) | saddle,
+    )
     crossing_slot = jnp.arange(width)
     crossing_valid = crossing_slot[None, :] < crossing_count[:, None]
     next_slot = jnp.where(

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T13:49:10",
+  "updated": "2026-09-09T15:40:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -144829,6 +144829,188 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T080116960996-pfs-batched-engine-acceptance",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-batched-engine-acceptance",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2952,
+                "cached_input_tokens": 567316,
+                "input_tokens": 570300,
+                "output_tokens": 976,
+                "reasoning_output_tokens": 247,
+                "total_tokens": 571276,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "docs/figures/playable-forward-solve/batched-labeller/acceptance-receipt.json records fraction_parity true, converged_count greater than zero, zero runtime errors and the chosen B with per-card throughput for 1, 2 and 3 cards, with tests/test_batched_labeller.py and tests/test_labeller_parallel.py green on all_debug CPU",
+          "estimated_hours": null,
+          "goal": "Wire the fixed-shape BatchedLabeller into the production scheduler as a selectable engine and bring the batched engine to acceptance on the H200: nonzero converged counts, no TypeError or ConcretizationError, exact batched-versus-reference fraction parity, and a receipt for the selected batch size on one, two and three cards",
+          "id": "pfs-batched-engine-acceptance",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T08:01:17Z",
+            "read_at": "2026-09-09T08:01:18Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 61.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T080116960996-pfs-batched-engine-acceptance/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "nova/equilibrium/batched_labeller.py",
+            "scripts/labeller_parallel/driver.py",
+            "tests/test_batched_labeller.py",
+            "tests/test_labeller_parallel.py",
+            "docs/figures/playable-forward-solve/batched-labeller"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-pfs-batched",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T08:01:33Z",
+        "completed_at": "2026-09-09T13:37:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 20127,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "8c1b382dcb5f0cd114606629e0d6cd7eef5614b6",
+        "commits": [
+          "752e247286ac1145f536b0b44839237c5362b265",
+          "d6a6e8c5ef9fe8da82500031cdba919480e71d23",
+          "d400e180f1cfac39fac424dbec190ec405c9e691",
+          "cb8818e9ad5fbdff7827450889a8ffed371b42de",
+          "7bc4b7bd5a314fcaa8c444f7700ab8347dbbba33",
+          "85e223ae1c1c75e0fbbf252d84210847040ad4d1",
+          "e3431c477d1fe7477c2c01e5ea6c90cbb6cf52a5"
+        ],
+        "changed_lines": {
+          "added": 2142,
+          "removed": 3500,
+          "files": 6
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug CPU jobs 1267689 and 1267711: tests/test_batched_labeller.py (4 passed), tests/test_labeller_parallel.py (11 passed); H200 jobs 1267721, 1267748, 1267778, 1267802: acceptance_contract status passed, fraction_parity true, converged 38 of 48, runtime errors 0, B=256 on 1, 2, 3 cards",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/playable-forward-solve/batched-labeller/acceptance-receipt.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T080116960996-pfs-batched-engine-acceptance/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0852f-be56-7593-8061-9ebf32d0ee7b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 109367168,
+            "cached_input_tokens_cumulative": 109367168,
+            "input_tokens": 109718386,
+            "input_tokens_cumulative": 109718386,
+            "output_tokens": 74181,
+            "output_tokens_cumulative": 74181,
+            "reasoning_output_tokens": 16820,
+            "reasoning_output_tokens_cumulative": 16820
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T13:37:00Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 83.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T13:37:00Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 151590784,
+          "cumulative_input_tokens": 152198420,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 91001,
+          "generation_seconds": 8359.735,
+          "machine_seconds": 11766.719,
+          "tokens_per_second": 10.89
+        },
+        "follow_on_paths": [
+          "scripts/labeller_parallel/run.sh"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/pfs-batched-engine-acceptance",
+          "session_id": "01a0852f-be56-7593-8061-9ebf32d0ee7b",
+          "session_source": "pointer",
+          "retained_at": "2026-09-09T13:37:00Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -145141,6 +145323,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2366
+    "_version": 2367
   }
 }

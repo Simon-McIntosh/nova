@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="mast-efit-match">
+  <meta name="plan-title" content="MAST EFIT match">
+  <meta name="plan-summary" content="Production Nova forward Grad-Shafranov solve versus EFIT label on six MAST efm frames from the eleven-frame receipt, with the solve-vs-label and label-inconsistency error columns kept independent and each row's convergence flag; five of six nonconverged, all six solve-label RMS fractions below the 0.0116 stride-one label floor.">
+  <meta name="plan-evidence-for" content="gs-absolute-accuracy-gates">
+  <meta name="plan-verifies" content="gs-absolute-accuracy-gates#s3">
+  <meta name="plan-informs" content="forward-solve-api">
+  <meta name="plan-recorded-at" content="2026-09-09">
+  <meta name="plan-verdict" content="unconverged">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,efit,mast,accuracy,forward-solve">
+  <title>MAST EFIT match | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <p class="eyebrow">Evidence · Nova forward Grad-Shafranov versus EFIT on MAST</p>
+    <h1>MAST EFIT match</h1>
+    <p class="lead">The production current-constrained Nova forward solve is compared frame by frame with the EFIT label on six MAST <code>efm/psirz</code> frames. The two error sources are kept in separate columns and read independently: a gauge-aligned solve-label RMS fraction of the label span, and the banked EFIT label's own Grad-Shafranov inconsistency floor. Every solve-label fraction sits below the 0.0116 floor, yet only one of the six frames converges, so the match does not pass as accuracy evidence until the solver stalls are closed.</p>
+  </header>
+
+  <section id="receipt">
+    <h2>Receipt and provenance</h2>
+    <p>Every number and figure in this document is cited from the eleven-frame two-source receipt <code>docs/figures/gs-absolute-accuracy/efit-reproduction.json</code> written by <code>benchmarks/efit_forward_parity_slice.py</code> (the six MAST rows) run on the H200. The receipt's measurement definition is <em>"production forward solve versus EFIT label with independent label-GS floor"</em>. Its recorded execution provenance:</p>
+    <ul>
+      <li><strong>source commit</strong> <code>d5354a5a2323c912866735b6eb65595dff6d6f68</code>, <code>solver_source_modified: false</code>;</li>
+      <li><strong>driver</strong> sha256 <code>6e6010ca7b4aaa875c0b651608fcb597d8db0cbe4cd655bb0fae117c2b419ab0</code>;</li>
+      <li><strong>allocation</strong> job <code>1264715</code>, node <code>98dci4-gpu-0003</code>, partition <code>betelgeuse</code>, reservation <code>gpu_0003_grpA</code>, <code>cuda:0</code>, 8 CPUs;</li>
+      <li><strong>response carrier</strong> the persisted frozen-six MAST carrier <code>mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz</code> (1126 x 101, six frozen reference, 101 stored circuits, semantic identity <code>1d2c4a2b...</code>);</li>
+      <li><strong>zero-iteration control</strong> receipt <code>r-20260901T062947707320-sse-efit-reproduction-completion/job-output/zero_iteration_receipt.json</code> sha256 <code>7d8cf5d0...</code>, fields sha256 <code>26f09051...</code>;</li>
+      <li><strong>reuse map</strong> <a href="/nova/research/forward-accuracy-reuse-map.html#efit-reproduction">forward-accuracy-reuse-map, EFIT reproduction rows 50-55</a>;</li>
+      <li><strong>aggregate</strong> 11 frames, 1 pass, 10 fail, marginal rows <code>21978/35 pure</code> and <code>22086/43 pure</code>, verdict <code>FAIL_ONE_OR_MORE_FRAMES_ABOVE_LABEL_GS_FLOOR_OR_UNCONVERGED</code>.</li>
+    </ul>
+    <p><strong>Resolved-defaults provenance.</strong> The receipt predates the <code>forward-solve-api</code> resolved-defaults recording: it carries no <code>resolved_defaults</code> block, because the route body that produced it was still calling the keyword path when this run was made. What the receipt does record about the solver policy per frame is the <code>solver_qualification</code> block, reproduced below: on MAST every frame ran the production current-constrained forward solve at fixed-point tolerance <code>1e-8</code> with requested class <code>diverted</code>, and all six achieved the diverted class with consistent topology. The forward-solve-api §2 regeneration owns re-emitting these two documents from receipts that carry the version-keyed resolved-defaults block once the routes run through the typed request seam.</p>
+  </section>
+
+  <section id="two-errors">
+    <h2>The two error sources read independently</h2>
+    <p>The two columns are <em>not</em> one measurement and must not be compared on one scale with the DIII-D column of the sibling document. Each is a different quantity:</p>
+    <ul>
+      <li><strong>solve against label</strong> — <code>gauge-aligned solve-label RMS fraction of label span</code>, the RMS of the gauge-aligned difference between the production solve and the EFIT label over the complete registered MAST solve grid after additive gauge alignment, expressed as a fraction of the EFIT label peak-to-peak span;</li>
+      <li><strong>label GS inconsistency</strong> — <code>EFIT label under unchanged Nova interior operator</code>, the relative interior Grad-Shafranov sup of the EFIT label at stride one, expressed as a fraction of the interior drive sup. This is the independent banked floor; the label itself is not an exact Grad-Shafranov solution, so a solve can sit below this floor and still not be a certified match.</li>
+    </ul>
+    <p>The per-frame pass rule is <code>solver converged and solve_against_label.value &lt;= label_gs_inconsistency.value</code>. A frame fails if either arm fails; the two arms are deliberately not averaged.</p>
+  </section>
+
+  <section id="rows">
+    <h2>Six MAST frames</h2>
+    <p>The six frames are shots 21978, 21983, 21985, 21986, 21989 and 22086 read from <code>efm/psirz</code>, matched to the frozen-six response carrier. The scoring band is the <em>edge-adjacent label interior</em> (the banked floor peak is 66.5 mm from the LCFS; the stencil-eroded region labels are retained as a caveat).</p>
+    <table>
+      <caption>Per-frame match values from the receipt. "Solve vs label" is the gauge-aligned RMS fraction of the EFIT label peak-to-peak span over the complete registered solve grid; "Label GS floor" is the independent stride-one interior Grad-Shafranov sup fraction of drive sup; "Converged" and "Fixed-point residual" come from the solver qualification (tolerance 1e-8). The two error columns are independent quantities with different norms and units.</caption>
+      <thead>
+        <tr><th>Frame</th><th>t [s]</th><th>Solve vs label</th><th>Label GS floor</th><th>Converged</th><th>Fixed-point residual</th><th>Passes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>21978/35 pure</td><td>0.19</td><td>0.003413</td><td>0.011615</td><td>no</td><td>2.45065e-3</td><td>no</td></tr>
+        <tr><td>21983/35 pure</td><td>0.19</td><td>0.012388</td><td>0.011615</td><td>no</td><td>5.72108e-3</td><td>no</td></tr>
+        <tr><td>21985/51 pure</td><td>0.275</td><td>0.005797</td><td>0.011615</td><td>no</td><td>3.02823e-3</td><td>no</td></tr>
+        <tr><td>21986/46 pure</td><td>0.25</td><td>0.005901</td><td>0.011615</td><td>no</td><td>5.88986e-3</td><td>no</td></tr>
+        <tr><td>21989/55 pure</td><td>0.295</td><td>0.007151</td><td>0.011615</td><td>no</td><td>3.64673e-3</td><td>no</td></tr>
+        <tr><td>22086/43 pure</td><td>0.23</td><td>0.005381</td><td>0.011615</td><td>yes</td><td>6.02990e-12</td><td>yes</td></tr>
+      </tbody>
+    </table>
+    <p>Six of six solve-label RMS fractions are below the 0.011615 floor, but the gate requires convergence on top of accuracy: five frames terminate with fixed-point residuals in the 3.0e-3 to 5.9e-3 range against the 1e-8 tolerance and are not converged. Only 22086/43 both converges (residual 6.03e-12) and sits below the floor, so it is the single passing frame of the eleven-frame bank.</p>
+  </section>
+
+  <section id="figures">
+    <h2>Frame-by-frame</h2>
+
+    <figure>
+      <img src="/nova/figures/gs-absolute-accuracy/efit/mast-21978-row-35.png" alt="Nova production forward solve terminal flux contours versus EFIT label on MAST shot 21978 slice 35 (pure arm), with the registered grid and labelled interior band." style="max-width:100%">
+      <figcaption><strong>21978/35 pure, t = 0.19 s.</strong> Solve-label RMS fraction of span 0.003413 (gauge <code>-1.980e-4</code> Wb) below the 0.011615 floor, but not converged (fixed-point residual 2.45065e-3) so the frame fails. Solver-basin marginal: 22086/43 is the paired arm; the CPU/GPU trajectories agree inside the declared float64 reduction-order floor, so backend averaging is forbidden.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="/nova/figures/gs-absolute-accuracy/efit/mast-21983-row-35.png" alt="Nova production forward solve terminal flux contours versus EFIT label on MAST shot 21983 slice 35 (pure arm), with the registered grid and labelled interior band." style="max-width:100%">
+      <figcaption><strong>21983/35 pure, t = 0.19 s.</strong> Solve-label RMS fraction of span 0.012388 (gauge <code>-1.925e-4</code> Wb) sits <em>above</em> the 0.011615 floor — the one MAST frame whose solve-label fraction exceeds the label's own inconsistency — and it is also not converged (residual 5.72108e-3). Fails on both arms.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="/nova/figures/gs-absolute-accuracy/efit/mast-21985-row-51.png" alt="Nova production forward solve terminal flux contours versus EFIT label on MAST shot 21985 slice 51 (pure arm), with the registered grid and labelled interior band." style="max-width:100%">
+      <figcaption><strong>21985/51 pure, t = 0.275 s.</strong> Solve-label RMS fraction of span 0.005797 (gauge <code>+5.527e-4</code> Wb) below the 0.011615 floor but not converged (residual 3.02823e-3). Fails on convergence.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="/nova/figures/gs-absolute-accuracy/efit/mast-21986-row-46.png" alt="Nova production forward solve terminal flux contours versus EFIT label on MAST shot 21986 slice 46 (pure arm), with the registered grid and labelled interior band." style="max-width:100%">
+      <figcaption><strong>21986/46 pure, t = 0.25 s.</strong> Solve-label RMS fraction of span 0.005901 (gauge <code>-1.160e-3</code> Wb) below the 0.011615 floor but not converged (residual 5.88986e-3, the largest on the MAST set). Fails on convergence.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="/nova/figures/gs-absolute-accuracy/efit/mast-21989-row-55.png" alt="Nova production forward solve terminal flux contours versus EFIT label on MAST shot 21989 slice 55 (pure arm), with the registered grid and labelled interior band." style="max-width:100%">
+      <figcaption><strong>21989/55 pure, t = 0.295 s.</strong> Solve-label RMS fraction of span 0.007151 (gauge <code>+1.642e-4</code> Wb) below the 0.011615 floor but not converged (residual 3.64673e-3). Fails on convergence.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="/nova/figures/gs-absolute-accuracy/efit/mast-22086-row-43.png" alt="Nova production forward solve terminal flux contours versus EFIT label on MAST shot 22086 slice 43 (pure arm), with the registered grid and labelled interior band." style="max-width:100%">
+      <figcaption><strong>22086/43 pure, t = 0.23 s.</strong> Solve-label RMS fraction of span 0.005381 (gauge <code>+1.478e-3</code> Wb) below the 0.011615 floor <em>and</em> converged (residual 6.02990e-12). The only passing frame on the six MAST rows and in the whole eleven-frame bank. Solver-basin marginal: 21978/35 is the paired arm; the CPU/GPU trajectories agree inside the declared float64 reduction-order floor.</figcaption>
+    </figure>
+  </section>
+
+  <section id="verdict">
+    <h2>Verdict</h2>
+    <p>1 of 6 MAST frames passes; 5 of 6 fail on convergence while sitting below the label floor. The accuracy half is encouraging — every solve-label RMS fraction except 21983/35 is between 0.0034 and 0.0072 against a 0.0116 floor — but it is not claimable as certified accuracy while the solves do not converge. The per-frame difference field is the same up-down antisymmetric vertical mode the solver-convergence-regression forensics identified, at about 1e-2 of span. The receipt's aggregate verdict stands: <code>FAIL_ONE_OR_MORE_FRAMES_ABOVE_LABEL_GS_FLOOR_OR_UNCONVERGED</code>.</p>
+  </section>
+
+  <section id="reproduction">
+    <h2>Reproduction</h2>
+    <p>The receipt is regenerated by <code>benchmarks/efit_reproduction_gate.py</code> over the eleven frames (six MAST, five DIII-D) with the persistent JAX compilation cache active; source, driver and allocation identities are recorded in its <code>execution</code> block, cited above. Regenerating this document from a fresh receipt is a copy of these sections against the new row values; the forward-solve-api §2 regeneration replaces the provenance caveat with the recorded <code>resolved_defaults</code> block once the route runs through the typed request seam.</p>
+  </section>
+</main>
+</body>
+</html>

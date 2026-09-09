@@ -50,6 +50,9 @@ POLYNOMIAL_POWERS = complete_polynomial_powers(3)
 _CURVED_BOUNDARY_SEGMENTS = 512
 """Fixed chord count used to carry a traced quadratic level-set arc."""
 
+_SPLINE_BOUNDARY_SEGMENTS = 128
+"""Fixed sample count used by each spline boundary chain."""
+
 
 def _signed_area(vertices: np.ndarray) -> float:
     if len(vertices) < 3:
@@ -628,7 +631,7 @@ def _traced_level_arc(start, end, evaluator, inside_vertex):
     parameter = jnp.linspace(
         0.0,
         1.0,
-        _CURVED_BOUNDARY_SEGMENTS + 1,
+        _SPLINE_BOUNDARY_SEGMENTS + 1,
         dtype=start.dtype,
     )
     chord = start[:, None, :] + parameter[None, :, None] * (end - start)[:, None, :]
@@ -1018,28 +1021,28 @@ def _traced_clip(
         arc = jnp.moveaxis(scanned_arc, 0, 1)
         expanded_candidate = jnp.concatenate(
             (support[:, :, None, :], arc[:, :, 1:-1, :]), axis=2
-        ).reshape(cell_count, chord_capacity * _CURVED_BOUNDARY_SEGMENTS, 2)
+        ).reshape(cell_count, chord_capacity * _SPLINE_BOUNDARY_SEGMENTS, 2)
         expanded_valid = jnp.concatenate(
             (
                 base_valid[:, :, None],
                 jnp.broadcast_to(
                     outside_gap[:, :, None],
-                    (cell_count, chord_capacity, _CURVED_BOUNDARY_SEGMENTS - 1),
+                    (cell_count, chord_capacity, _SPLINE_BOUNDARY_SEGMENTS - 1),
                 ),
             ),
             axis=2,
-        ).reshape(cell_count, chord_capacity * _CURVED_BOUNDARY_SEGMENTS)
+        ).reshape(cell_count, chord_capacity * _SPLINE_BOUNDARY_SEGMENTS)
         expanded_saddle = jnp.concatenate(
             (
                 support_saddle[:, :, None],
                 jnp.zeros(
-                    (cell_count, chord_capacity, _CURVED_BOUNDARY_SEGMENTS - 1),
+                    (cell_count, chord_capacity, _SPLINE_BOUNDARY_SEGMENTS - 1),
                     dtype=bool,
                 ),
             ),
             axis=2,
-        ).reshape(cell_count, chord_capacity * _CURVED_BOUNDARY_SEGMENTS)
-        support_capacity = chord_capacity * _CURVED_BOUNDARY_SEGMENTS
+        ).reshape(cell_count, chord_capacity * _SPLINE_BOUNDARY_SEGMENTS)
+        support_capacity = chord_capacity * _SPLINE_BOUNDARY_SEGMENTS
         support, vertex_count = _pack_traced_vertices(
             expanded_candidate, expanded_valid, support_capacity
         )

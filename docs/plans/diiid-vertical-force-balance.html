@@ -18,15 +18,17 @@
 <meta name="plan-sprint" content="S19">
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-tags" content="equilibrium,diii-d,efit,convergence">
-<meta name="plan-blocks" content="gs-absolute-accuracy-gates">
+<meta name="plan-blocks" content="">
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-09">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="39">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
 <meta name="plan-impl" content="0.7">
+<meta name="plan-north-star" content="ns-accurate-millisecond-gs">
+<meta name="plan-informs" content="gs-absolute-accuracy-gates,diiid-forward-onboarding,constraint-augmented-newton-krylov">
 </head>
 <body>
 <main class="plan-doc">
@@ -175,6 +177,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260908T095637100137" data-who="reckon-ship" data-when="2026-09-08T09:58:00Z">
     <div class="r-comment-body">dvf-cocos-resolution LANDED (run r-20260908T093857842794, codex-terra, investigate, 8 min, read-only). The DIII-D source is a factor-equivalence class, not a single COCOS index. Measured on all five gate frames: Ip positive and boundary minus axis positive (spans +0.2831, +0.2750, +0.2468, +0.3892, +0.3670 Wb per radian), so sigma_Bp is +1 and the raw EFIT flux is per radian; the map and its axis and boundary values require psi_17 = -2 pi psi_raw, while Ip, B0 and the poloidal-current channels take factor +1. No unique index is provable: treating positive q95 as signed gives COCOS 1 for the two positive-B0 frames (179, 144) and COCOS 5 for the three negative-B0 frames (44, 146, 137), which is not a credible producer convention but a q95 signedness ambiguity, and the source handedness sigma_RphiZ is an implementation assumption rather than a measurement. Stored p prime and FF prime are ABSENT from all five Parquets (57 columns, no profile field), so the -1/(2 pi) derivative factor is algebraic and unconfirmed for any stored DIII-D profile; the forward route extracts both from the converted map instead. Route verdict: benchmarks/diiid_forward_gs_match.py reads the raw Parquet directly with PyArrow and converts the map itself through corpus_flux_to_nova_total, so it never receives the ambix-loaded object and ambix's COCOS 5 to 17 loader conversion does not apply to this route. Two questions the evidence cannot settle and which the prototype node must not assume: the q95 signedness, and whether a same-shot profile store exists carrying the audited psi convention. Report ~/.config/reckon/crew/reports/nova/diiid-vertical-force-balance/cocos-resolution.md (sha256 8a13c7c7). The prototype forward solve of the five frames with p prime and ff prime prescribed in COCOS 17 is next and may now be cut, prescribing the profiles the route already extracts rather than reading a stored profile that does not exist.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260909T062134507567-s19r-diiid-vertical-force-balance" data-who="s19r-dvf" data-when="2026-09-09T07:14:46Z">
+    <div class="r-comment-body"><p>S19 review: §1-§3 landed and receipted but uncollapsed; §4 vacuum reproduction still fails its 1e-12 criterion; §5 prototype not run; f-dvf-003 and f-dvf-006 are one node; plan-blocks gs-absolute-accuracy-gates should be informs and diiid-forward-onboarding §7 duplicates §4 ownership; verdict rewrite §4-§5 then collapse §1-§3</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260906T131920953151-dvf-displacement-decomposition" data-who="dvf-axis-s" data-when="2026-09-07T06:15:02Z">
     <div class="r-comment-body"><p>DIII-D displacement decomposition banked (main merge of ef3a5a1d): benchmarks/diiid_forward_gs_match.py writes per gate frame the radial and vertical offsets of axis, X-point and boundary centroid (Nova minus EFIT, within 1e-12 m of the components) with a stated rigid-shift, tilt or shape-change rule, resuming from completed frame checkpoints; five of five frames banked over jobs 1263373, 1263458 (two-hour timeouts holding two frames each), 1263495, 1263856 and 1263857: four frames tilt (179: axis +1.52 m up, X-point -1.55 m; 44: axis -1.17, X-point -2.59; 146 and 137: axis -0.04, X-point -0.10, centroid -0.25 to -0.28) and 144 is a shape change with the axis unmoved and the centroid -0.17 m; dominant-vertical verdict true; the five nonconverged cohort identities unchanged; the driver also regenerated cohort_match_summary.png outside the fence (left unstaged) and left a checkpoint JSON untracked; codex sol high, 19 h wall across five H200 jobs after the --mem=0 and --export comma faults</p></div>

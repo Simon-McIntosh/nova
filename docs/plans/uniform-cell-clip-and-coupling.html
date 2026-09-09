@@ -17,7 +17,8 @@
 <meta name="plan-modified" content="2026-09-09">
 <meta name="plan-effort-hours" content="40.0">
 <meta name="plan-informs" content="null-identification-authority,gs-absolute-accuracy-gates,batched-operator-boundary,millisecond-converged-solve">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="5">
+<meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 </head>
 <body>
 <main class="plan-doc">
@@ -33,6 +34,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-20260909T053200518442" data-who="reckon-ship" data-when="2026-09-09T07:30:00Z">
     <div class="r-comment-body">WHY THIS PLAN EXISTS: THREE NODES HIT ONE SEAM IN A SINGLE DAY, and two questions the lead asked are unanswerable because of it rather than incidentally. THE MEASURED FACTS, all from 2026-09-08 and all traced rather than asserted. The current-moment path runs profile solve, into the operator's normalised current moments and observation, into the support partition and profile support, into the atomic mesh traced clip, into the partitioned current moments and the coupling conversion, and it NEVER reaches the bicubic arc moment correction or the twelve-node arc rule at any point. The curved path runs flux-surface geometry extraction, into the surface clips, the tensor spline fit, the cell coefficients and the bicubic arc correction, takes rectangular regular-cell inputs, and is consumed by flux-surface geometry alone. They are not merely separate but UNBRIDGEABLE as built: no callable or data conversion connects atomic polygon cells to the tensor-cell arc correction while preserving same-cell identity, so the chord-versus-curve accuracy comparison and the two-route cost profile could not be produced at all. The affine round trip met the same wall from the other side: the EFIT extraction route requires a rectangular flux lattice while our forward receipts are unstructured hex maps flagged unavailable-non-tensor-product, so the route we apply to source data cannot be applied to our own solutions, and every profile extracted from EFIT by it has never been validated against a case whose answer we know. WHAT THE MOMENT PATH DOES TODAY, which is the asymmetry the plan must remove. The separatrix crossing on each atomic edge is a LINEAR interpolation of flux along that edge; the clipped support is the polygon through those crossings; its area and first and second moments are then computed ANALYTICALLY for that polygon, exact for a cellwise-linear current density; and the clipped cell is fanned into triangles under DEGREE-FIFTEEN Duffy quadrature. So we integrate to degree fifteen over a boundary that is first order. The shipped curvature work measured the trade once and found that clipping against the arc moves the EXTREMUM to second order while improving AREA only from second to third, so the gain for current moments may be modest; nobody has measured it on this path because nobody can.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260909T061755932378-s19r-uniform-cell-clip-and-coupling" data-who="s19r-ucc" data-when="2026-09-09T07:11:09.167Z">
+    <div class="r-comment-body"><p>S19 review: code claims current at HEAD; the first followup's compact-patch premise contradicts its own cited census (top 5 percent of nodes carry 14.1 percent of squared error, centre at the axis anchor); plan declares no depends_on and no evidence back-link and was absent from the S19 items; verdict rewrite the evidence paragraph and wiring</p></div>
 </div>
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">

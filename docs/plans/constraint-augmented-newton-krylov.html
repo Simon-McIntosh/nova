@@ -18,15 +18,17 @@
   <meta name="plan-sprint" content="S19">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,convergence,mast">
-  <meta name="plan-depends-on" content="solver-convergence-regression">
+  <meta name="plan-depends-on" content="">
   <title>Constraint-augmented Newton–Krylov | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-09">
-<meta name="plan-version" content="44">
+<meta name="plan-version" content="46">
 <meta name="plan-impl" content="0.42">
 <meta name="plan-commits" content="00ef0610,506c9fa9,eb77480b,e7d90cc8,84b23ee6,0081c3e9,4264668e,595cdd0f,6b9c4f25,989d561c,a283f243,5dd6b790,04ea37b0">
 <meta name="plan-artifacts" content="docs/evidence/archive/constraint-augmented-newton-krylov-landed.html,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.png,nova/equilibrium/constraint.py,benchmarks/constraint_centroid_receipt.py,tests/test_wall_null_flux_tangent.py,nova/geometry/select.py,tests/test_wall_polish_continuity.py,benchmarks/constraint_shape_receipt.py,tests/test_shape_constraints.py,docs/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png,docs/figures/constraint-augmented-newton-krylov/shape-control/two-arms.json,docs/figures/constraint-augmented-newton-krylov/shape-control/vertical-shift.json,docs/figures/constraint-augmented-newton-krylov/shape-control/elongation-raise.json,docs/figures/constraint-augmented-newton-krylov/shape-control/converged.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png">
+<meta name="plan-north-star" content="ns-accurate-millisecond-gs">
+<meta name="plan-informs" content="solver-convergence-regression,playable-forward-solve,diiid-vertical-force-balance">
 </head>
 <body>
 <main class="plan-doc">
@@ -336,6 +338,9 @@ evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylo
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260908T085506597831" data-who="reckon-ship" data-when="2026-09-08T08:58:00Z">
     <div class="r-comment-body">LEAD DIRECTION 2026-09-08 10:55 (Simon McIntosh), recorded here because it governs this plan's Thomson work: the compensator authority finding on the playable plan indicates a major bug in the code that must be fixed; the solver will rely on Newton-Krylov constraints when the Thomson edge constraints are folded in, so it is vital that the solver handles these rows correctly. Consequence for section 4: the constraint machinery's Jacobian must be the derivative of the constrained observable through the equilibrium (the implicit-function tangent in checkpoint 71e6e006, which matched the finite difference to 1.5 percent where the response is local), and the constrained iteration must be globalised (damped, capped, re-linearised) so a nonlocal response such as the flat-top active-set change is followed by iteration rather than predicted by one linear step. That repair is dispatched on the playable plan as f-20260908T085600-constrained-newton-globalisation with a second observable row type (a boundary-flux point row standing in for a Thomson crossing) required to converge beside the centroid row, so the path is proven row-type-agnostic before section 4 C wires the Thomson crossings. The compensating-unknown-class decision stays open and is now downstream of that repair: once the iteration converges on both rows, the unknown class can be chosen on measured convergence rather than on authority magnitude.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260909T063015854087-s19r-constraint-augmented-newton-krylov" data-who="s19r-cank" data-when="2026-09-09T07:13:44Z">
+    <div class="r-comment-body"><p>S19 review: imposed interface and centroid row landed; the eliminated policy is validated but never read, Thomson and Shafranov rows are absent, §4 done-when compound; depends_on solver-convergence-regression should become informs; the generic multi-trip edge proof duplicates playable-forward-solve; verdict rewrite §1-§4 and split the edge demonstration</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

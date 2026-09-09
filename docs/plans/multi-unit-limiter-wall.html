@@ -25,7 +25,8 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-modified" content="2026-09-09">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="10">
+<meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 </head>
 <body>
 <main class="plan-doc">
@@ -140,6 +141,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260908T095558247417" data-who="reckon-ship" data-when="2026-09-08T09:57:00Z">
     <div class="r-comment-body">mulw-painters-draw-units LANDED (run r-20260908T094018702518, codex-luna, 11 min; commits 2116d329, f09658d8, 7fe2faee merged at 6a53ed93). nova/media/poloidal.py draws each wall unit as its own polyline with its own closure, dashes an open structure so it reads differently from a closed one, and never invents a join between units; draw_nulls and the pulse-design view's marker containment evaluate against the same vessel-minus-material occupiable model the solver uses rather than one ring, so a picture and the solve cannot disagree about what is inside; apps/pulsedesign/poloidal_view.py emits separate wall polylines for a multi-unit wall while keeping its historical single-ring channel shape; nova/media/sources/frame.py carries the unit collection and plasma_mesh.py excludes material units from mesh cells. The committed figure docs/figures/multi-unit-limiter-wall/wall-units.png shows the synthetic two-unit fixture and the JT-60SA five-unit description drawn with unit-faithful closure. Gates: poloidal and media tests 50 passed, the pulse-design view 16 passed, ruff clean; the single-closed-ring machines are unchanged. The JT-60SA atlas panel the section also names is not in this landing and stays open. Report ~/.config/reckon/crew/reports/nova/multi-unit-limiter-wall/painters-draw-units.md.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260909T062320067381-s19r-multi-unit-limiter-wall" data-who="s19r-mulw" data-when="2026-09-09T07:10:38.766Z">
+    <div class="r-comment-body"><p>S19 review: §1 and §6 current, §2 §4 §5 landed but uncollapsed, §3 unblocked by the ANCHORS AND SHADOWS ruling and the landed strike crossing (a3f9ac45); one untracked loose end, the JT-60SA atlas panel; verdict collapse-landed-sections</p></div>
 </div>
 </section>
 </main>

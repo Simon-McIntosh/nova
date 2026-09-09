@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T08:22:30",
+  "updated": "2026-09-09T09:33:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -139927,6 +139927,2275 @@
           "reason": "the NEEDS-HELP question was answered by the lead on 2026-09-08 by authoring plan uniform-cell-clip-and-coupling, which owns the adapter work; nothing remains for this session to continue"
         },
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T062320067381-s19r-multi-unit-limiter-wall",
+        "plan": "multi-unit-limiter-wall",
+        "section": "\u00a73",
+        "node": "s19r-multi-unit-limiter-wall",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4380,
+                "cached_input_tokens": 279478,
+                "input_tokens": 283860,
+                "output_tokens": 1761,
+                "reasoning_output_tokens": 1469,
+                "total_tokens": 285621,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/multi-unit-limiter-wall.md prints 5 with grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/multi-unit-limiter-wall.md printing at least 5",
+          "estimated_hours": null,
+          "goal": "Write the S19 review report of plan multi-unit-limiter-wall to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/multi-unit-limiter-wall.md following the protocol at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/PROTOCOL.md",
+          "id": "s19r-multi-unit-limiter-wall",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T06:23:20Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T062320067381-s19r-multi-unit-limiter-wall/manifest.md",
+          "plan": "multi-unit-limiter-wall",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/multi-unit-limiter-wall.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "s19r-mulw",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-09T06:23:28Z",
+        "completed_at": "2026-09-09T07:10:38.766Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2814,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2830,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "8790523d94e40be251539944815969fab33904af",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/multi-unit-limiter-wall.md; grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/multi-unit-limiter-wall.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/multi-unit-limiter-wall.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T062320067381-s19r-multi-unit-limiter-wall/manifest.md",
+        "scope_changed": false,
+        "session_id": "2568cc57-2775-40b4-87dc-9b54909eb1ee",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 5733107,
+            "input_tokens_cumulative": 5733107,
+            "output_tokens": 29233,
+            "output_tokens_cumulative": 29233,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-09T07:10:38.766Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 5733107,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2827.66,
+          "generated_tokens": 29233,
+          "generation_seconds": 2799.676,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 14.4,
+          "machine_seconds": 27.984,
+          "peak_input_tokens": 145924,
+          "tokens_per_second": 10.44,
+          "wall_tokens_per_second": 10.34
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "read-only review node; the deliverable is the report file, not a repository change",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/s19r-multi-unit-limiter-wall",
+          "session_id": "2568cc57-2775-40b4-87dc-9b54909eb1ee",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T07:10:38.766Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T063740615852-s19v-solovev-orientation",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "s19v-solovev-orientation",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 426,
+                "cached_input_tokens": 327724,
+                "input_tokens": 328154,
+                "output_tokens": 28,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 328182,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/solovev-orientation/solovev-orientation-receipt.json exists carrying for each of the eight rungs the axis-to-boundary minimum distance in metres, the Hausdorff distance in metres between _boundary and the extracted analytic boundary contour, the minimum R over all evaluation points, the count of points with R equal to zero, the off-axis non-finite count of the axis branch, the best-matching flip with its residual, with /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/solovev-orientation/REPORT.md beside it",
+          "estimated_hours": null,
+          "goal": "Measure whether the Solovev certificate boundary, axis and renderer orientation drawn in docs/evidence/forward-gs-contour-evidence.html are flipped or touch the machine axis, exactly as specified in the 2026-09-09 lead-review comment on section 4 of the plan, writing the receipt under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/solovev-orientation",
+          "id": "s19v-solovev-orientation",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T06:37:41Z",
+            "read_at": "2026-09-09T06:37:42Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 58.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T063740615852-s19v-solovev-orientation/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/solovev-orientation"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19v-solovev",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T06:37:50Z",
+        "completed_at": "2026-09-09T07:10:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1979,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1979,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "3fa6c15c3b3c657a2efe7bdae3402b0e9e86bb6c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "SLURM job 1267350 all_debug CPU x64: measure_orientation.py eight rungs; receipt completeness validation 8/8",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/solovev-orientation/validation.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T063740615852-s19v-solovev-orientation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a084e3-1c51-7ff3-bc9a-b57f8fabe9ee",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8651520,
+            "cached_input_tokens_cumulative": 8651520,
+            "input_tokens": 8832339,
+            "input_tokens_cumulative": 8832339,
+            "output_tokens": 43209,
+            "output_tokens_cumulative": 43209,
+            "reasoning_output_tokens": 15678,
+            "reasoning_output_tokens_cumulative": 15678
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T07:10:49Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 58.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T07:10:49Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 8651520,
+          "cumulative_input_tokens": 17483859,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 58887
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "measurement-only node; deliverables are the receipt and report under the reports write path",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/s19v-solovev-orientation",
+          "session_id": "01a084e3-1c51-7ff3-bc9a-b57f8fabe9ee",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T07:10:49Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T061755932378-s19r-uniform-cell-clip-and-coupling",
+        "plan": "uniform-cell-clip-and-coupling",
+        "section": "",
+        "node": "s19r-uniform-cell-clip-and-coupling",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 8874,
+                "cached_input_tokens": 253786,
+                "input_tokens": 262692,
+                "output_tokens": 2814,
+                "reasoning_output_tokens": 1373,
+                "total_tokens": 265506,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/uniform-cell-clip-and-coupling.md prints 5 with grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/uniform-cell-clip-and-coupling.md printing at least 5",
+          "estimated_hours": null,
+          "goal": "Write the S19 review report of plan uniform-cell-clip-and-coupling to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/uniform-cell-clip-and-coupling.md following the protocol at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/PROTOCOL.md",
+          "id": "s19r-uniform-cell-clip-and-coupling",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T06:17:56Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T061755932378-s19r-uniform-cell-clip-and-coupling/manifest.md",
+          "plan": "uniform-cell-clip-and-coupling",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/uniform-cell-clip-and-coupling.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "s19r-ucc",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-09T06:18:03Z",
+        "completed_at": "2026-09-09T07:11:09.167Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3167,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3186,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "e39692886c4581a385ba05cdcaf11db7d172ad71",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/uniform-cell-clip-and-coupling.md; grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/uniform-cell-clip-and-coupling.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/uniform-cell-clip-and-coupling.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T061755932378-s19r-uniform-cell-clip-and-coupling/manifest.md",
+        "scope_changed": false,
+        "session_id": "b6f9d654-16fe-4733-b6ed-842b7ad31c65",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3678026,
+            "input_tokens_cumulative": 3678026,
+            "output_tokens": 35564,
+            "output_tokens_cumulative": 35564,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-09T07:11:09.167Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 3678026,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 3181.687,
+          "generated_tokens": 35564,
+          "generation_seconds": 3164.353,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 14.8,
+          "machine_seconds": 17.334,
+          "peak_input_tokens": 150048,
+          "tokens_per_second": 11.24,
+          "wall_tokens_per_second": 11.18
+        },
+        "follow_on_paths": [
+          "clip/coupling"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "read-only review node; the deliverable is the report file",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/s19r-uniform-cell-clip-and-coupling",
+          "session_id": "b6f9d654-16fe-4733-b6ed-842b7ad31c65",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T07:11:09.167Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T063015854087-s19r-constraint-augmented-newton-krylov",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a74",
+        "node": "s19r-constraint-augmented-newton-krylov",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1010,
+                "cached_input_tokens": 312005,
+                "input_tokens": 313017,
+                "output_tokens": 312,
+                "reasoning_output_tokens": 147,
+                "total_tokens": 313329,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/constraint-augmented-newton-krylov.md prints 5 with grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/constraint-augmented-newton-krylov.md printing at least 5",
+          "estimated_hours": null,
+          "goal": "Write the S19 review report of plan constraint-augmented-newton-krylov to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/constraint-augmented-newton-krylov.md following the protocol at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/PROTOCOL.md",
+          "id": "s19r-constraint-augmented-newton-krylov",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T06:30:17Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T063015854087-s19r-constraint-augmented-newton-krylov/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/constraint-augmented-newton-krylov.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "s19r-cank",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-09T06:30:26Z",
+        "completed_at": "2026-09-09T07:13:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2598,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2598,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3fa6c15c3b3c657a2efe7bdae3402b0e9e86bb6c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/constraint-augmented-newton-krylov.md; grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/constraint-augmented-newton-krylov.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/constraint-augmented-newton-krylov.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T063015854087-s19r-constraint-augmented-newton-krylov/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a084fa-2238-7171-8760-758794062c66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9367040,
+            "cached_input_tokens_cumulative": 9367040,
+            "input_tokens": 9686279,
+            "input_tokens_cumulative": 9686279,
+            "output_tokens": 27924,
+            "output_tokens_cumulative": 27924,
+            "reasoning_output_tokens": 10216,
+            "reasoning_output_tokens_cumulative": 10216
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T07:13:44Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 58.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T07:13:44Z"
+            }
+          ]
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "lane-change",
+          "lanes": [
+            {
+              "changed_at": "2026-09-09T07:02:59Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+              "from_backend": "clive",
+              "from_harness": "claude",
+              "reason": "lead direction 2026-09-09: clive slows at high concurrency, so the heavy plan reads move to the codex luna lane",
+              "session": "fresh",
+              "to_backend": "codex-luna",
+              "to_harness": "codex"
+            }
+          ],
+          "root_run_id": "r-20260909T063015854087-s19r-constraint-augmented-newton-krylov"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 9367040,
+          "cumulative_input_tokens": 19053319,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 38140
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "lane-change",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": "read-only review node; the deliverable is the report file",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/s19r-constraint-augmented-newton-krylov",
+          "session_id": "01a084fa-2238-7171-8760-758794062c66",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T07:13:44Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T063548201419-s19r-batched-operator-boundary",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a71",
+        "node": "s19r-batched-operator-boundary",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 403,
+                "cached_input_tokens": 327321,
+                "input_tokens": 327728,
+                "output_tokens": 52,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 327780,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/batched-operator-boundary.md prints 5 with grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/batched-operator-boundary.md printing at least 5",
+          "estimated_hours": null,
+          "goal": "Write the S19 review report of plan batched-operator-boundary to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/batched-operator-boundary.md following the protocol at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/PROTOCOL.md",
+          "id": "s19r-batched-operator-boundary",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T06:35:48Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T063548201419-s19r-batched-operator-boundary/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/batched-operator-boundary.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "s19r-bob",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-09T06:35:56Z",
+        "completed_at": "2026-09-09T07:12:36.784Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2129,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2200,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3fa6c15c3b3c657a2efe7bdae3402b0e9e86bb6c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/batched-operator-boundary.md; grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/batched-operator-boundary.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/batched-operator-boundary.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T063548201419-s19r-batched-operator-boundary/manifest.md",
+        "scope_changed": false,
+        "session_id": "94a438b9-feb0-4078-8511-56ce5e839d8b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 4937497,
+            "input_tokens_cumulative": 4937497,
+            "output_tokens": 23889,
+            "output_tokens_cumulative": 23889,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-09T07:12:36.784Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 4937497,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2197.531,
+          "generated_tokens": 23889,
+          "generation_seconds": 2185.885,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 16.1,
+          "machine_seconds": 11.646,
+          "peak_input_tokens": 163403,
+          "tokens_per_second": 10.93,
+          "wall_tokens_per_second": 10.87
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "read-only review node; the deliverable is the report file",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/s19r-batched-operator-boundary",
+          "session_id": "94a438b9-feb0-4078-8511-56ce5e839d8b",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T07:12:36.784Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T063357894033-s19r-playable-forward-solve",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "s19r-playable-forward-solve",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 631,
+                "cached_input_tokens": 326690,
+                "input_tokens": 327325,
+                "output_tokens": 30,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 327355,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/playable-forward-solve.md prints 5 with grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/playable-forward-solve.md printing at least 5",
+          "estimated_hours": null,
+          "goal": "Write the S19 review report of plan playable-forward-solve to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/playable-forward-solve.md following the protocol at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/PROTOCOL.md",
+          "id": "s19r-playable-forward-solve",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T06:33:58Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T063357894033-s19r-playable-forward-solve/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/playable-forward-solve.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "s19r-pfs",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-09T06:34:06Z",
+        "completed_at": "2026-09-09T07:18:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2655,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2655,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3fa6c15c3b3c657a2efe7bdae3402b0e9e86bb6c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/playable-forward-solve.md; grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/playable-forward-solve.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/playable-forward-solve.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T063357894033-s19r-playable-forward-solve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a084f9-2a6a-74c0-8787-6c842c4b1163",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11136256,
+            "cached_input_tokens_cumulative": 11136256,
+            "input_tokens": 11587050,
+            "input_tokens_cumulative": 11587050,
+            "output_tokens": 34355,
+            "output_tokens_cumulative": 34355,
+            "reasoning_output_tokens": 13139,
+            "reasoning_output_tokens_cumulative": 13139
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T07:18:21Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 58.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T07:18:21Z"
+            }
+          ]
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "lane-change",
+          "lanes": [
+            {
+              "changed_at": "2026-09-09T07:01:56Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+              "from_backend": "clive",
+              "from_harness": "claude",
+              "reason": "lead direction 2026-09-09: clive slows at high concurrency, so the seven heaviest plan reads move to the codex luna lane and clive keeps five",
+              "session": "fresh",
+              "to_backend": "codex-luna",
+              "to_harness": "codex"
+            }
+          ],
+          "root_run_id": "r-20260909T063357894033-s19r-playable-forward-solve"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 11136256,
+          "cumulative_input_tokens": 22723306,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 47494
+        },
+        "follow_on_paths": [
+          "boundary/axis",
+          "program/cache"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "lane-change",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": "read-only review node; the deliverable is the report file",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/s19r-playable-forward-solve",
+          "session_id": "01a084f9-2a6a-74c0-8787-6c842c4b1163",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T07:18:21Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T062134507567-s19r-diiid-vertical-force-balance",
+        "plan": "diiid-vertical-force-balance",
+        "section": "\u00a75",
+        "node": "s19r-diiid-vertical-force-balance",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 9876,
+                "cached_input_tokens": 262660,
+                "input_tokens": 272538,
+                "output_tokens": 492,
+                "reasoning_output_tokens": 80,
+                "total_tokens": 273030,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/diiid-vertical-force-balance.md prints 5 with grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/diiid-vertical-force-balance.md printing at least 5",
+          "estimated_hours": null,
+          "goal": "Write the S19 review report of plan diiid-vertical-force-balance to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/diiid-vertical-force-balance.md following the protocol at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/PROTOCOL.md",
+          "id": "s19r-diiid-vertical-force-balance",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T06:21:35Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T062134507567-s19r-diiid-vertical-force-balance/manifest.md",
+          "plan": "diiid-vertical-force-balance",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/diiid-vertical-force-balance.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "s19r-dvf",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-09T06:21:44Z",
+        "completed_at": "2026-09-09T07:14:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3182,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3182,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "e39692886c4581a385ba05cdcaf11db7d172ad71",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/diiid-vertical-force-balance.md; grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/diiid-vertical-force-balance.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/diiid-vertical-force-balance.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T062134507567-s19r-diiid-vertical-force-balance/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a084f9-96e9-7531-afb1-bdff8b542c3b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14853376,
+            "cached_input_tokens_cumulative": 14853376,
+            "input_tokens": 15209268,
+            "input_tokens_cumulative": 15209268,
+            "output_tokens": 32510,
+            "output_tokens_cumulative": 32510,
+            "reasoning_output_tokens": 11103,
+            "reasoning_output_tokens_cumulative": 11103
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T07:14:46Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 58.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T07:14:46Z"
+            }
+          ]
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "lane-change",
+          "lanes": [
+            {
+              "changed_at": "2026-09-09T07:02:24Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+              "from_backend": "clive",
+              "from_harness": "claude",
+              "reason": "lead direction 2026-09-09: clive slows at high concurrency, so the seven heaviest plan reads move to the codex luna lane and clive keeps five",
+              "session": "fresh",
+              "to_backend": "codex-luna",
+              "to_harness": "codex"
+            }
+          ],
+          "root_run_id": "r-20260909T062134507567-s19r-diiid-vertical-force-balance"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 14853376,
+          "cumulative_input_tokens": 30062644,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 43613
+        },
+        "follow_on_paths": [
+          "rewrite/collapse"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "lane-change",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": "read-only review node; the deliverable is the report file",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/s19r-diiid-vertical-force-balance",
+          "session_id": "01a084f9-96e9-7531-afb1-bdff8b542c3b",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T07:14:46Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T062639785903-s19r-gs-absolute-accuracy-gates",
+        "plan": "gs-absolute-accuracy-gates",
+        "section": "\u00a73",
+        "node": "s19r-gs-absolute-accuracy-gates",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2093,
+                "cached_input_tokens": 292854,
+                "input_tokens": 294979,
+                "output_tokens": 1180,
+                "reasoning_output_tokens": 839,
+                "total_tokens": 296159,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/gs-absolute-accuracy-gates.md prints 5 with grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/gs-absolute-accuracy-gates.md printing at least 5",
+          "estimated_hours": null,
+          "goal": "Write the S19 review report of plan gs-absolute-accuracy-gates to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/gs-absolute-accuracy-gates.md following the protocol at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/PROTOCOL.md",
+          "id": "s19r-gs-absolute-accuracy-gates",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T06:26:40Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T062639785903-s19r-gs-absolute-accuracy-gates/manifest.md",
+          "plan": "gs-absolute-accuracy-gates",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/gs-absolute-accuracy-gates.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "s19r-gaa",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-09T06:26:48Z",
+        "completed_at": "2026-09-09T07:15:29.314Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2901,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2921,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3fa6c15c3b3c657a2efe7bdae3402b0e9e86bb6c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/gs-absolute-accuracy-gates.md; grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/gs-absolute-accuracy-gates.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/gs-absolute-accuracy-gates.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T062639785903-s19r-gs-absolute-accuracy-gates/manifest.md",
+        "scope_changed": false,
+        "session_id": "d441ab9c-15df-4c47-a581-fff78935975a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3883822,
+            "input_tokens_cumulative": 3883822,
+            "output_tokens": 34897,
+            "output_tokens_cumulative": 34897,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-09T07:15:29.314Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 3883822,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2917.516,
+          "generated_tokens": 34897,
+          "generation_seconds": 2907.876,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 14.7,
+          "machine_seconds": 9.64,
+          "peak_input_tokens": 149356,
+          "tokens_per_second": 12.0,
+          "wall_tokens_per_second": 11.96
+        },
+        "follow_on_paths": [
+          "docs/figures/gs-absolute-accuracy/regenerate-solovev-certificate.sh",
+          "s19-labeller/nia-certificate-raster-receipt",
+          "solver-convergence-regression/ordering"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "read-only review node; the deliverable is the report file",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/s19r-gs-absolute-accuracy-gates",
+          "session_id": "d441ab9c-15df-4c47-a581-fff78935975a",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T07:15:29.314Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T063207696420-s19r-forward-solve-api",
+        "plan": "forward-solve-api",
+        "section": "\u00a71",
+        "node": "s19r-forward-solve-api",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 602,
+                "cached_input_tokens": 326088,
+                "input_tokens": 326722,
+                "output_tokens": 261,
+                "reasoning_output_tokens": 62,
+                "total_tokens": 326983,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/forward-solve-api.md prints 5 with grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/forward-solve-api.md printing at least 5",
+          "estimated_hours": null,
+          "goal": "Write the S19 review report of plan forward-solve-api to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/forward-solve-api.md following the protocol at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/PROTOCOL.md",
+          "id": "s19r-forward-solve-api",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T06:32:08Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T063207696420-s19r-forward-solve-api/manifest.md",
+          "plan": "forward-solve-api",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/forward-solve-api.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "s19r-fsa",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-09T06:32:15Z",
+        "completed_at": "2026-09-09T07:19:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2838,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2838,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3fa6c15c3b3c657a2efe7bdae3402b0e9e86bb6c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/forward-solve-api.md; grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/forward-solve-api.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/forward-solve-api.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T063207696420-s19r-forward-solve-api/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a084f9-b1eb-76b2-b53f-4db369aee106",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14034432,
+            "cached_input_tokens_cumulative": 14034432,
+            "input_tokens": 14460062,
+            "input_tokens_cumulative": 14460062,
+            "output_tokens": 35239,
+            "output_tokens_cumulative": 35239,
+            "reasoning_output_tokens": 16857,
+            "reasoning_output_tokens_cumulative": 16857
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T07:19:33Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 58.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T07:19:33Z"
+            }
+          ]
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "lane-change",
+          "lanes": [
+            {
+              "changed_at": "2026-09-09T07:02:30Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+              "from_backend": "clive",
+              "from_harness": "claude",
+              "reason": "lead direction 2026-09-09: clive slows at high concurrency, so the seven heaviest plan reads move to the codex luna lane and clive keeps five",
+              "session": "fresh",
+              "to_backend": "codex-luna",
+              "to_harness": "codex"
+            }
+          ],
+          "root_run_id": "r-20260909T063207696420-s19r-forward-solve-api"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 14034432,
+          "cumulative_input_tokens": 28494494,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 52096
+        },
+        "follow_on_paths": [
+          "sprint/plan"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "lane-change",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": "read-only review node; the deliverable is the report file",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/s19r-forward-solve-api",
+          "session_id": "01a084f9-b1eb-76b2-b53f-4db369aee106",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T07:19:33Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T062828237862-s19r-millisecond-converged-solve",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "s19r-millisecond-converged-solve",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1774,
+                "cached_input_tokens": 308969,
+                "input_tokens": 310775,
+                "output_tokens": 367,
+                "reasoning_output_tokens": 102,
+                "total_tokens": 311142,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/millisecond-converged-solve.md prints 5 with grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/millisecond-converged-solve.md printing at least 5",
+          "estimated_hours": null,
+          "goal": "Write the S19 review report of plan millisecond-converged-solve to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/millisecond-converged-solve.md following the protocol at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/PROTOCOL.md",
+          "id": "s19r-millisecond-converged-solve",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T06:28:29Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T062828237862-s19r-millisecond-converged-solve/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/millisecond-converged-solve.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "s19r-mcs",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-09T06:28:37Z",
+        "completed_at": "2026-09-09T07:16:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2864,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2864,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3fa6c15c3b3c657a2efe7bdae3402b0e9e86bb6c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/millisecond-converged-solve.md; grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/millisecond-converged-solve.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/millisecond-converged-solve.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T062828237862-s19r-millisecond-converged-solve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a084f9-7d41-7e01-896e-5b608737ee18",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10615808,
+            "cached_input_tokens_cumulative": 10615808,
+            "input_tokens": 11003597,
+            "input_tokens_cumulative": 11003597,
+            "output_tokens": 38859,
+            "output_tokens_cumulative": 38859,
+            "reasoning_output_tokens": 14837,
+            "reasoning_output_tokens_cumulative": 14837
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T07:16:21Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 58.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T07:16:21Z"
+            }
+          ]
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "lane-change",
+          "lanes": [
+            {
+              "changed_at": "2026-09-09T07:02:17Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+              "from_backend": "clive",
+              "from_harness": "claude",
+              "reason": "lead direction 2026-09-09: clive slows at high concurrency, so the seven heaviest plan reads move to the codex luna lane and clive keeps five",
+              "session": "fresh",
+              "to_backend": "codex-luna",
+              "to_harness": "codex"
+            }
+          ],
+          "root_run_id": "r-20260909T062828237862-s19r-millisecond-converged-solve"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 10615808,
+          "cumulative_input_tokens": 21619405,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 53696
+        },
+        "follow_on_paths": [
+          "ownership/dependencies:",
+          "width-12/5"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "lane-change",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": "read-only review node; the deliverable is the report file",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/s19r-millisecond-converged-solve",
+          "session_id": "01a084f9-7d41-7e01-896e-5b608737ee18",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T07:16:21Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T062446386032-s19r-null-identification-authority",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "s19r-null-identification-authority",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 519,
+                "cached_input_tokens": 292335,
+                "input_tokens": 292886,
+                "output_tokens": 1941,
+                "reasoning_output_tokens": 568,
+                "total_tokens": 294827,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/null-identification-authority.md prints 5 with grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/null-identification-authority.md printing at least 5",
+          "estimated_hours": null,
+          "goal": "Write the S19 review report of plan null-identification-authority to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/null-identification-authority.md following the protocol at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/PROTOCOL.md",
+          "id": "s19r-null-identification-authority",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T06:24:47Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T062446386032-s19r-null-identification-authority/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/null-identification-authority.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "s19r-nia",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-09T06:24:57Z",
+        "completed_at": "2026-09-09T07:21:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3367,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3367,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3fa6c15c3b3c657a2efe7bdae3402b0e9e86bb6c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/null-identification-authority.md; grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/null-identification-authority.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/null-identification-authority.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T062446386032-s19r-null-identification-authority/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a084f9-4383-7c01-a07b-9a09253880ef",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11358720,
+            "cached_input_tokens_cumulative": 11358720,
+            "input_tokens": 11841293,
+            "input_tokens_cumulative": 11841293,
+            "output_tokens": 42988,
+            "output_tokens_cumulative": 42988,
+            "reasoning_output_tokens": 12993,
+            "reasoning_output_tokens_cumulative": 12993
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T07:21:04Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 58.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T07:21:04Z"
+            }
+          ]
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "lane-change",
+          "lanes": [
+            {
+              "changed_at": "2026-09-09T07:02:02Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+              "from_backend": "clive",
+              "from_harness": "claude",
+              "reason": "lead direction 2026-09-09: clive slows at high concurrency, so the seven heaviest plan reads move to the codex luna lane and clive keeps five",
+              "session": "fresh",
+              "to_backend": "codex-luna",
+              "to_harness": "codex"
+            }
+          ],
+          "root_run_id": "r-20260909T062446386032-s19r-null-identification-authority"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 11358720,
+          "cumulative_input_tokens": 23200013,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 55981
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "lane-change",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": "read-only review node; the deliverable is the report file",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/s19r-null-identification-authority",
+          "session_id": "01a084f9-4383-7c01-a07b-9a09253880ef",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T07:21:04Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T061940684209-s19r-solver-convergence-regression",
+        "plan": "solver-convergence-regression",
+        "section": "\u00a74",
+        "node": "s19r-solver-convergence-regression",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 8874,
+                "cached_input_tokens": 253786,
+                "input_tokens": 262692,
+                "output_tokens": 2814,
+                "reasoning_output_tokens": 1373,
+                "total_tokens": 265506,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/solver-convergence-regression.md prints 5 with grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/solver-convergence-regression.md printing at least 5",
+          "estimated_hours": null,
+          "goal": "Write the S19 review report of plan solver-convergence-regression to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/solver-convergence-regression.md following the protocol at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/PROTOCOL.md",
+          "id": "s19r-solver-convergence-regression",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T06:19:41Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T061940684209-s19r-solver-convergence-regression/manifest.md",
+          "plan": "solver-convergence-regression",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/solver-convergence-regression.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "guided",
+        "member": "s19r-scr",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-09T06:19:51Z",
+        "completed_at": "2026-09-09T07:22:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3749,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3749,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "e39692886c4581a385ba05cdcaf11db7d172ad71",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -cE '^## (Currency|Wiring|Foldable|Remaining|Verdict)$' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/solver-convergence-regression.md; grep -cE '\\.(py|html):[0-9]+' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/solver-convergence-regression.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/solver-convergence-regression.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T061940684209-s19r-solver-convergence-regression/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a084f9-5ebe-7f83-b90a-b8f2e5d97aa3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9425152,
+            "cached_input_tokens_cumulative": 9425152,
+            "input_tokens": 9916208,
+            "input_tokens_cumulative": 9916208,
+            "output_tokens": 45288,
+            "output_tokens_cumulative": 45288,
+            "reasoning_output_tokens": 13655,
+            "reasoning_output_tokens_cumulative": 13655
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T07:22:20Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 58.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T07:22:20Z"
+            }
+          ]
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "lane-change",
+          "lanes": [
+            {
+              "changed_at": "2026-09-09T07:02:09Z",
+              "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+              "from_backend": "clive",
+              "from_harness": "claude",
+              "reason": "lead direction 2026-09-09: clive slows at high concurrency, so the seven heaviest plan reads move to the codex luna lane and clive keeps five",
+              "session": "fresh",
+              "to_backend": "codex-luna",
+              "to_harness": "codex"
+            }
+          ],
+          "root_run_id": "r-20260909T061940684209-s19r-solver-convergence-regression"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 9425152,
+          "cumulative_input_tokens": 19341360,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 58943
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "lane-change",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": "read-only review node; the deliverable is the report file",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/s19r-solver-convergence-regression",
+          "session_id": "01a084f9-5ebe-7f83-b90a-b8f2e5d97aa3",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T07:22:20Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T064004429279-review-of-nia-forward-gs-contour-evidence",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "review-of-nia-forward-gs-contour-evidence",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1398,
+                "cached_input_tokens": 337215,
+                "input_tokens": 338645,
+                "output_tokens": 1077,
+                "reasoning_output_tokens": 353,
+                "total_tokens": 339722,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "grep -c '^SCORE ' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/review-of-nia-forward-gs-contour-evidence.md prints 5 with grep -c '^JUSTIFICATION ' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/review-of-nia-forward-gs-contour-evidence.md printing 5",
+          "estimated_hours": null,
+          "goal": "Write to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/review-of-nia-forward-gs-contour-evidence.md the independent five-dimension review of run r-20260908T193316961328-nia-forward-gs-contour-evidence (manifest /home/ITER/mcintos/.config/reckon/crew/reports/nova/null-identification/forward-gs-contour-evidence.md, commits f2cf8411..97700025 now merged on main, evidence docs/evidence/forward-gs-contour-evidence.html) in exactly the SCORE, JUSTIFICATION, FINDING line form defined by /home/ITER/mcintos/Code/reckon/reckon/crew/prompts/review.md, reading the lead-review comment dated 2026-09-09 on section 4 of the plan as the evidence question the review must answer",
+          "id": "review-of-nia-forward-gs-contour-evidence",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T06:40:05Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T064004429279-review-of-nia-forward-gs-contour-evidence/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/review-of-nia-forward-gs-contour-evidence.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19r-gsce",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-09T06:40:12Z",
+        "completed_at": "2026-09-09T07:29:20.762Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2900,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2948,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3fa6c15c3b3c657a2efe7bdae3402b0e9e86bb6c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -c '^SCORE ' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/review-of-nia-forward-gs-contour-evidence.md; grep -c '^JUSTIFICATION ' /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/review-of-nia-forward-gs-contour-evidence.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/review-of-nia-forward-gs-contour-evidence.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T064004429279-review-of-nia-forward-gs-contour-evidence/manifest.md",
+        "scope_changed": false,
+        "session_id": "3c4f3e47-76c3-48f6-9c2a-caabe7554835",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 4494687,
+            "input_tokens_cumulative": 4494687,
+            "output_tokens": 78632,
+            "output_tokens_cumulative": 78632,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-09T07:29:20.762Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 4494687,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2945.284,
+          "generated_tokens": 78632,
+          "generation_seconds": 2923.311,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 21.0,
+          "machine_seconds": 21.973,
+          "peak_input_tokens": 213859,
+          "tokens_per_second": 26.9,
+          "wall_tokens_per_second": 26.7
+        },
+        "follow_on_paths": [
+          "topology.axis",
+          "render_contour_evidence.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "read-only review node; the deliverable is the five-dimension review record",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/review-of-nia-forward-gs-contour-evidence",
+          "session_id": "3c4f3e47-76c3-48f6-9c2a-caabe7554835",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T07:29:20.762Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -140239,6 +142508,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2318
+    "_version": 2331
   }
 }

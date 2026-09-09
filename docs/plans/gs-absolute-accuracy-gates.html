@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-09">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="39">
 <meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html,benchmarks/solovev_certificate.py,docs/figures/gs-absolute-accuracy/solovev-certificate.json,docs/figures/gs-absolute-accuracy/solovev/,benchmarks/efit_reproduction_gate.py,docs/figures/gs-absolute-accuracy/efit-reproduction.json,docs/figures/gs-absolute-accuracy/efit/,docs/figures/gs-absolute-accuracy/oracle-fixture-assembly.json,tests/test_polygon_analytic_batched_moments.py">
 <meta name="plan-commits" content="3dc4bb57,bf6dcdf9,9b0be0c8,6480a228,69a96bdf,873cfba6,6cecf64e,1f6f3e2c,ebb56768,ae9c0ed6,eca38a8e,5bb6850f,a3ae6bd4,f76e9142,adfff6dc,466b9d02,faec6877,d0a01760,7573d3e7,77a2cd32,6d03967f,dcc671db,b93f9b10,f7d9557b">
 <meta name="plan-impl" content="0.87">
@@ -61,6 +61,11 @@
 <article class="r-fu" data-id="f-gaa-002" data-status="open" data-written-by="reckon-ship-s19" data-written-at="2026-09-02" data-recommends-skill="/reckon-ship gs-absolute-accuracy-gates §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Per-machine evidence and the EFIT gate rerun after the acceptance decision</h4>
     <div class="r-fu-body">Blocked on the acceptance decision on solver-convergence-regression. When a remedy lands: rerun the sixteen-row Solov'ev certificate (the fourteen unqualified rows are the remedy's exact test bed), rerun benchmarks/efit_reproduction_gate.py on the eleven frames with the compilation cache hitting, then author the two per-machine EFIT-match evidence documents (MAST, DIII-D) that forward-solve-api §2 requires, and pin the certificate with a default-lane regression test. If honest stagnation is chosen as final, record the certificate at 2 of 16 as the accuracy floor and ship the plan with that statement.</div>
+    <pre class="r-fu-prompt">/reckon-ship gs-absolute-accuracy-gates §3</pre>
+    </article>
+<article class="r-fu" data-id="f-20260909T1640-certificate-artifact-with-contour-panels" data-status="open" data-written-by="reckon-ship s19-review" data-written-at="2026-09-09T16:40:00Z" data-recommends-skill="/reckon-ship gs-absolute-accuracy-gates §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The certificate artifact: flux contour panels for every rung, error maps as line contours, and the default-lane pin</h4>
+    <div class="r-fu-body">After gaa-certificate-regeneration lands the production-route receipt at current main, author docs/evidence/gs-absolute-accuracy-certificate.html as the section 3 artifact under the binding plotting rules (nova AGENTS.md, Plotting rules): one poloidal line-contour panel per rung showing the solved terminal flux beside the analytic field on one shared level array, both null sets (solved and analytic) in their own styles with the caption saying which is which, the wall units, and the terminal residual, converged flag and axis and X-point errors in the caption; the certificate error-field figures currently painted as scatter by benchmarks/solovev_certificate.py (near lines 1765 to 1795) are converted to unfilled line contours on stated levels before they are cited. Retire or relabel the NaN-era docs/figures/gs-absolute-accuracy/solovev-certificate.json beside the superseding production-route file. Then pin the census in tests/test_certificate_pin.py so drift fires a test rather than a memory, with the threading configuration the receipt declares. Render on a debug partition; audit-doc 0 errors; every src project-absolute.</div>
     <pre class="r-fu-prompt">/reckon-ship gs-absolute-accuracy-gates §3</pre>
     </article>
 </section>

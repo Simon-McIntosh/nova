@@ -1,120 +1,134 @@
 {
   "analytic_flux_regions": {
     "all_carrier_cells": {
-      "absolute_rms_wb": 11.760846926605483,
-      "absolute_sup_wb": 31.811430587024738,
-      "cell_count": 1072,
-      "finite_cell_count": 1072,
+      "absolute_rms_wb": 0.00019209096805786492,
+      "absolute_sup_wb": 0.0017983494944394658,
+      "cell_count": 1074,
+      "finite_cell_count": 1074,
       "measurement_status": "finite",
-      "relative_rms": 0.23549547715904276,
-      "relative_sup": 0.6369820194033768
+      "relative_rms": 0.03364777101875507,
+      "relative_sup": 0.3150093552673705
     },
     "closed_flux_region": {
-      "absolute_rms_wb": 12.348413621075878,
-      "absolute_sup_wb": 31.811430587024738,
-      "cell_count": 847,
-      "finite_cell_count": 847,
+      "absolute_rms_wb": 0.00016736949451805975,
+      "absolute_sup_wb": 0.00046727133143940414,
+      "cell_count": 567,
+      "finite_cell_count": 567,
       "measurement_status": "finite",
-      "relative_rms": 0.24726072671467186,
-      "relative_sup": 0.6369820194033768
+      "relative_rms": 0.029317413952393675,
+      "relative_sup": 0.08184996370659986
     },
     "scrape_off_layer": {
-      "absolute_rms_wb": 7.856601775555258,
-      "absolute_sup_wb": 11.45207500892996,
-      "cell_count": 118,
-      "finite_cell_count": 118,
+      "absolute_rms_wb": 0.00017986566928967243,
+      "absolute_sup_wb": 0.0005349206441892281,
+      "cell_count": 422,
+      "finite_cell_count": 422,
       "measurement_status": "finite",
-      "relative_rms": 0.15731810774591784,
-      "relative_sup": 0.22931272598983785
+      "relative_rms": 0.03150631659355745,
+      "relative_sup": 0.09369981072437603
     },
     "separatrix_band": {
-      "absolute_rms_wb": 10.518928267570024,
-      "absolute_sup_wb": 13.899644432884315,
-      "cell_count": 107,
-      "finite_cell_count": 107,
+      "absolute_rms_wb": 0.00034460458044719225,
+      "absolute_sup_wb": 0.0017983494944394658,
+      "cell_count": 85,
+      "finite_cell_count": 85,
       "measurement_status": "finite",
-      "relative_rms": 0.21062769093349004,
-      "relative_sup": 0.27832208160606453
+      "relative_rms": 0.06036294226706374,
+      "relative_sup": 0.3150093552673705
     }
   },
   "banked_read": {
-    "nova_axis_flux_wb": 36.18624809833924,
+    "nova_axis_flux_wb": 0.005901696167168599,
     "nova_axis_rz_m": [
-      6.135899821642391,
-      -0.005268094049888407
+      1.7904539325875548,
+      0.05565282175541299
     ],
-    "nova_x_point_rz_m": null,
+    "nova_x_point_rz_m": [
+      1.5006183730919134,
+      -0.9908690643140793
+    ],
     "o_candidate_count": 1,
     "o_second_best_flux_margin_wb": null,
     "read_exception_text": null,
     "read_status": "qualified_axis",
     "reference_axis_rz_m": [
-      6.2,
-      0.0
+      1.7870647018106887,
+      0.0467736265648528
     ],
-    "reference_x_points_rz_m": [],
-    "x_candidate_count": 0,
+    "reference_x_points_rz_m": [
+      [
+        1.5025279999999999,
+        -1.01728
+      ]
+    ],
+    "x_candidate_count": 1,
     "x_second_best_flux_margin_wb": null
   },
   "cache": {
-    "build_seconds": 0.0,
-    "hit": true,
-    "load_seconds": 0.245553788729012,
-    "lock_wait_seconds": 1.6932375729084015e-05,
-    "semantic_key": "ba79832d725530c4",
+    "build_seconds": 171.4571933588013,
+    "hit": false,
+    "load_seconds": 0.03046263474971056,
+    "lock_wait_seconds": 2.9034912586212158e-05,
+    "semantic_key": "283239eb6efcd66e",
     "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
-    "store_seconds": 0.0
+    "store_seconds": 0.49086713790893555
   },
-  "case": "weak-rotation-reactor-static",
-  "characteristic_pitch_m": 0.15457574606715999,
-  "derivative_support_cells": 931,
+  "case": "diverted-single-null",
+  "characteristic_pitch_m": 0.050231566935945236,
+  "derivative_support_cells": 926,
   "figure": {
-    "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-1000.png",
-    "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-1000.png",
-    "sha256": "007da980787fecfd7ffa1807a8d08212a3fa87007fc29ebbf11d2dbe10ee0992"
+    "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-1000.png",
+    "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-1000.png",
+    "sha256": "53c149fccfbda573210d7fc3f225901b36e7579ad13b854825d3d5d8a4fcb3aa"
   },
   "geometry": {
-    "boundary_flux_error_wb": 13.708196777092933,
+    "boundary_flux_error_wb": 0.0006441994299933154,
     "exact_topology": {
-      "axis_flux_wb": 49.940861154170086,
+      "axis_flux_wb": 0.0057098089409391,
       "axis_rz_m": [
-        6.198333624122601,
-        -1.5681900222830336e-15
+        1.786273933830745,
+        0.046649791685232485
       ],
-      "boundary_flux_wb": 2.672258221531947e-09,
-      "class": "limited",
+      "boundary_flux_wb": 9.324762605173201e-07,
+      "class": "diverted",
       "exception_text": null,
-      "flux_span_wb": -49.94086115149783,
+      "flux_span_wb": -0.005708876464678583,
       "o_candidate_count": 1,
       "o_second_best_flux_margin_wb": null,
       "read_status": "qualified_axis",
-      "x_candidate_count": 0,
-      "x_point_rz_m": null,
+      "x_candidate_count": 1,
+      "x_point_rz_m": [
+        1.502509916049071,
+        -1.0187961354585344
+      ],
       "x_second_best_flux_margin_wb": null
     },
-    "magnetic_axis_position_error_m": 0.06431629405054216,
+    "magnetic_axis_position_error_m": 0.009504051372489726,
     "root_topology": {
-      "axis_flux_wb": 36.18624809833924,
+      "axis_flux_wb": 0.005901696167168599,
       "axis_rz_m": [
-        6.135899821642391,
-        -0.005268094049888407
+        1.7904539325875548,
+        0.05565282175541299
       ],
-      "boundary_flux_wb": -13.708196774420674,
-      "class": "limited",
+      "boundary_flux_wb": -0.0006432669537327981,
+      "class": "diverted",
       "exception_text": null,
-      "flux_span_wb": -49.89444487275992,
+      "flux_span_wb": -0.006544963120901397,
       "o_candidate_count": 1,
       "o_second_best_flux_margin_wb": null,
       "read_status": "qualified_axis",
-      "x_candidate_count": 0,
-      "x_point_rz_m": null,
+      "x_candidate_count": 1,
+      "x_point_rz_m": [
+        1.5006183730919134,
+        -0.9908690643140793
+      ],
       "x_second_best_flux_margin_wb": null
     },
-    "x_point_position_error_m": null
+    "x_point_position_error_m": 0.02647988290634848
   },
   "lane": {
     "cpu_count": 4,
-    "elapsed_seconds": 592.3862934671342,
+    "elapsed_seconds": 787.8054329669103,
     "execution": "slurm",
     "exit_marker": "SOLOVEV_ROW_EXIT=0",
     "hostname": "98dci4-gpu-0003.iter.org",
@@ -124,7 +138,7 @@
     "partition": "betelgeuse",
     "precision": "float64",
     "reservation": "gpu_0003_grpA",
-    "slurm_job_id": "1267923",
+    "slurm_job_id": "1267913",
     "threaded_settings": {
       "mkl_num_threads": "4",
       "numexpr_num_threads": "4",
@@ -136,56 +150,56 @@
   "norms": {
     "gradient": {
       "two_pitch_boundary_band": {
-        "component_count": 526,
-        "finite_component_count": 526,
+        "component_count": 746,
+        "finite_component_count": 746,
         "measurement_status": "finite",
-        "rms": 23.16453107236968,
-        "sup": 223.70122924722006,
-        "support_cells": 263
+        "rms": 0.0005129384465011709,
+        "sup": 0.003501583301716938,
+        "support_cells": 373
       },
       "whole_domain": {
-        "component_count": 1862,
-        "finite_component_count": 1862,
+        "component_count": 1852,
+        "finite_component_count": 1852,
         "measurement_status": "finite",
-        "rms": 12.396813487404955,
-        "sup": 223.70122924722006,
-        "support_cells": 931
+        "rms": 0.00041765766157648006,
+        "sup": 0.003501583301716938,
+        "support_cells": 926
       }
     },
     "hessian": {
       "two_pitch_boundary_band": {
-        "component_count": 1052,
-        "finite_component_count": 1052,
+        "component_count": 1492,
+        "finite_component_count": 1492,
         "measurement_status": "finite",
-        "rms": 230.94016693530315,
-        "sup": 3091.2904457673676,
-        "support_cells": 263
+        "rms": 0.00653951665831193,
+        "sup": 0.0762179178396375,
+        "support_cells": 373
       },
       "whole_domain": {
-        "component_count": 3724,
-        "finite_component_count": 3724,
+        "component_count": 3704,
+        "finite_component_count": 3704,
         "measurement_status": "finite",
-        "rms": 122.7470747916014,
-        "sup": 3091.2904457673676,
-        "support_cells": 931
+        "rms": 0.004928887180259746,
+        "sup": 0.0762179178396375,
+        "support_cells": 926
       }
     },
     "psi": {
       "two_pitch_boundary_band": {
-        "component_count": 404,
-        "finite_component_count": 404,
+        "component_count": 373,
+        "finite_component_count": 373,
         "measurement_status": "finite",
-        "rms": 10.799714665053916,
-        "sup": 31.811430587024738,
-        "support_cells": 404
+        "rms": 0.00020874784201950765,
+        "sup": 0.0006608097551639932,
+        "support_cells": 373
       },
       "whole_domain": {
-        "component_count": 1072,
-        "finite_component_count": 1072,
+        "component_count": 1074,
+        "finite_component_count": 1074,
         "measurement_status": "finite",
-        "rms": 11.760846926605483,
-        "sup": 31.811430587024738,
-        "support_cells": 1072
+        "rms": 0.00019209096805786492,
+        "sup": 0.0017983494944394658,
+        "support_cells": 1074
       }
     }
   },
@@ -242,20 +256,20 @@
     "selection": "explicit_per_recipe",
     "version_key": "runtime-0745ecebea4cb264e054"
   },
-  "realised_cells": 1072,
+  "realised_cells": 1074,
   "requested_cells": -1000,
   "solver": {
     "call": "profile.solve(ForwardSolveRequest)",
-    "carrier_identity": "solovev:weak-rotation-reactor-static:-1000",
+    "carrier_identity": "solovev:diverted-single-null:-1000",
     "gmres_iterations": 30,
     "lambda_amplitude_history": {
       "samples": [
         {
-          "amplitude": 0.9006009148422283,
+          "amplitude": 1.0063265604499985,
           "state": "seed"
         },
         {
-          "amplitude": 0.9329507848362119,
+          "amplitude": 1.0018529373538663,
           "state": "terminal"
         }
       ],
@@ -265,8 +279,8 @@
     },
     "newton_steps": 10,
     "production_telemetry": {
-      "accepted_newton_promotions": 21,
-      "attempted_newton_promotions": 40,
+      "accepted_newton_promotions": 39,
+      "attempted_newton_promotions": 60,
       "configured_controls": {
         "continue_globalization_state": "production default enabled",
         "continue_newton_trajectory": "production default enabled",
@@ -278,26 +292,26 @@
       "converged": false,
       "exposed_terminal_trip_promotions": 10,
       "finite_residual_trace": [
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836,
-        0.0054014429054834836
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194,
+        0.039507353440882194
       ],
       "finite_trace_indices": [
         0,
@@ -328,11 +342,11 @@
           "decision": "sufficient_decrease_refused",
           "iteration": 1,
           "krylov_qualification": "accepted",
-          "krylov_reduction": 2.1647915493888808e-16,
+          "krylov_reduction": 3.7118552528484924e-17,
           "krylov_tolerance": 1e-05,
-          "proposed_step_norm": 0.194946089798723,
-          "residual_after": 0.0054014429054834836,
-          "residual_before": 0.0054014429054834836
+          "proposed_step_norm": 0.00033349076854899905,
+          "residual_after": 0.039507353440882194,
+          "residual_before": 0.039507353440882194
         },
         {
           "accepted": false,
@@ -340,11 +354,11 @@
           "decision": "sufficient_decrease_refused",
           "iteration": 2,
           "krylov_qualification": "accepted",
-          "krylov_reduction": 2.1647915493888808e-16,
+          "krylov_reduction": 3.7118552528484924e-17,
           "krylov_tolerance": 1e-05,
-          "proposed_step_norm": 0.194946089798723,
-          "residual_after": 0.0054014429054834836,
-          "residual_before": 0.0054014429054834836
+          "proposed_step_norm": 0.00033349076854899905,
+          "residual_after": 0.039507353440882194,
+          "residual_before": 0.039507353440882194
         },
         {
           "accepted": false,
@@ -352,11 +366,11 @@
           "decision": "sufficient_decrease_refused",
           "iteration": 3,
           "krylov_qualification": "accepted",
-          "krylov_reduction": 2.1647915493888808e-16,
+          "krylov_reduction": 3.7118552528484924e-17,
           "krylov_tolerance": 1e-05,
-          "proposed_step_norm": 0.194946089798723,
-          "residual_after": 0.0054014429054834836,
-          "residual_before": 0.0054014429054834836
+          "proposed_step_norm": 0.00033349076854899905,
+          "residual_after": 0.039507353440882194,
+          "residual_before": 0.039507353440882194
         },
         {
           "accepted": false,
@@ -364,11 +378,11 @@
           "decision": "sufficient_decrease_refused",
           "iteration": 4,
           "krylov_qualification": "accepted",
-          "krylov_reduction": 2.1647915493888808e-16,
+          "krylov_reduction": 3.7118552528484924e-17,
           "krylov_tolerance": 1e-05,
-          "proposed_step_norm": 0.194946089798723,
-          "residual_after": 0.0054014429054834836,
-          "residual_before": 0.0054014429054834836
+          "proposed_step_norm": 0.00033349076854899905,
+          "residual_after": 0.039507353440882194,
+          "residual_before": 0.039507353440882194
         },
         {
           "accepted": false,
@@ -376,11 +390,11 @@
           "decision": "sufficient_decrease_refused",
           "iteration": 5,
           "krylov_qualification": "accepted",
-          "krylov_reduction": 2.1647915493888808e-16,
+          "krylov_reduction": 3.7118552528484924e-17,
           "krylov_tolerance": 1e-05,
-          "proposed_step_norm": 0.194946089798723,
-          "residual_after": 0.0054014429054834836,
-          "residual_before": 0.0054014429054834836
+          "proposed_step_norm": 0.00033349076854899905,
+          "residual_after": 0.039507353440882194,
+          "residual_before": 0.039507353440882194
         },
         {
           "accepted": false,
@@ -388,11 +402,11 @@
           "decision": "sufficient_decrease_refused",
           "iteration": 6,
           "krylov_qualification": "accepted",
-          "krylov_reduction": 2.1647915493888808e-16,
+          "krylov_reduction": 3.7118552528484924e-17,
           "krylov_tolerance": 1e-05,
-          "proposed_step_norm": 0.194946089798723,
-          "residual_after": 0.0054014429054834836,
-          "residual_before": 0.0054014429054834836
+          "proposed_step_norm": 0.00033349076854899905,
+          "residual_after": 0.039507353440882194,
+          "residual_before": 0.039507353440882194
         },
         {
           "accepted": false,
@@ -400,11 +414,11 @@
           "decision": "sufficient_decrease_refused",
           "iteration": 7,
           "krylov_qualification": "accepted",
-          "krylov_reduction": 2.1647915493888808e-16,
+          "krylov_reduction": 3.7118552528484924e-17,
           "krylov_tolerance": 1e-05,
-          "proposed_step_norm": 0.194946089798723,
-          "residual_after": 0.0054014429054834836,
-          "residual_before": 0.0054014429054834836
+          "proposed_step_norm": 0.00033349076854899905,
+          "residual_after": 0.039507353440882194,
+          "residual_before": 0.039507353440882194
         },
         {
           "accepted": false,
@@ -412,11 +426,11 @@
           "decision": "sufficient_decrease_refused",
           "iteration": 8,
           "krylov_qualification": "accepted",
-          "krylov_reduction": 2.1647915493888808e-16,
+          "krylov_reduction": 3.7118552528484924e-17,
           "krylov_tolerance": 1e-05,
-          "proposed_step_norm": 0.194946089798723,
-          "residual_after": 0.0054014429054834836,
-          "residual_before": 0.0054014429054834836
+          "proposed_step_norm": 0.00033349076854899905,
+          "residual_after": 0.039507353440882194,
+          "residual_before": 0.039507353440882194
         },
         {
           "accepted": false,
@@ -424,11 +438,11 @@
           "decision": "sufficient_decrease_refused",
           "iteration": 9,
           "krylov_qualification": "accepted",
-          "krylov_reduction": 2.1647915493888808e-16,
+          "krylov_reduction": 3.7118552528484924e-17,
           "krylov_tolerance": 1e-05,
-          "proposed_step_norm": 0.194946089798723,
-          "residual_after": 0.0054014429054834836,
-          "residual_before": 0.0054014429054834836
+          "proposed_step_norm": 0.00033349076854899905,
+          "residual_after": 0.039507353440882194,
+          "residual_before": 0.039507353440882194
         },
         {
           "accepted": false,
@@ -436,38 +450,50 @@
           "decision": "sufficient_decrease_refused",
           "iteration": 10,
           "krylov_qualification": "accepted",
-          "krylov_reduction": 2.1647915493888808e-16,
+          "krylov_reduction": 3.7118552528484924e-17,
           "krylov_tolerance": 1e-05,
-          "proposed_step_norm": 0.194946089798723,
-          "residual_after": 0.0054014429054834836,
-          "residual_before": 0.0054014429054834836
+          "proposed_step_norm": 0.00033349076854899905,
+          "residual_after": 0.039507353440882194,
+          "residual_before": 0.039507353440882194
         }
       ],
       "krylov_action_qualification": "accepted",
       "per_trip_residual_history": [
         {
           "cycle_damping_activated": false,
-          "live_relative_residual": 0.005407294431587042,
-          "mask_difference_cells": 53,
+          "live_relative_residual": 1.1965984058518113,
+          "mask_difference_cells": 148,
           "trip": 1
         },
         {
           "cycle_damping_activated": false,
-          "live_relative_residual": 0.005401443182557179,
-          "mask_difference_cells": 0,
+          "live_relative_residual": 1.3418910168571874,
+          "mask_difference_cells": 154,
           "trip": 2
         },
         {
           "cycle_damping_activated": false,
-          "live_relative_residual": 0.0054014429054834836,
-          "mask_difference_cells": 0,
+          "live_relative_residual": 0.039507635726528864,
+          "mask_difference_cells": 19,
           "trip": 3
         },
         {
           "cycle_damping_activated": false,
-          "live_relative_residual": 0.0054014429054834836,
+          "live_relative_residual": 0.03950735373523492,
           "mask_difference_cells": 0,
           "trip": 4
+        },
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 0.039507353440882194,
+          "mask_difference_cells": 0,
+          "trip": 5
+        },
+        {
+          "cycle_damping_activated": false,
+          "live_relative_residual": 0.039507353440882194,
+          "mask_difference_cells": 0,
+          "trip": 6
         }
       ],
       "promotion_globalisation": [
@@ -634,7 +660,7 @@
       },
       "telemetry_scope": "active-set residuals cover every production trip; detailed inner globalisation arrays describe the terminal frozen-mask trip exposed by FixedPointResult",
       "termination": "active_set_settled",
-      "trip_count": 4
+      "trip_count": 6
     },
     "qualification": "unqualified",
     "qualification_bound": 1e-12,
@@ -643,7 +669,7 @@
       "available": false,
       "status": "unavailable_non_tensor_product_grid"
     },
-    "requested_seed_class": "limited",
+    "requested_seed_class": "diverted",
     "resolved_defaults": {
       "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
       "deviations": {
@@ -676,54 +702,52 @@
     "seed": {
       "anchor_available": true,
       "anchor_m": [
-        7.801288912745821,
-        0.009443302939324053
+        1.5025604540402833,
+        -1.0171586348508235
       ],
-      "branch_index": 0,
-      "construction": "current_centroid_disc",
+      "branch_index": 1,
+      "construction": "axis_saddle_geometry",
       "current_centroid_m": [
-        6.063530173332898,
-        0.0
+        1.7596832207634125,
+        0.030868934600745745
       ],
       "current_target_provenance": {
-        "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+        "closed_form_flux_samples_used_for_current_support_only": true,
+        "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
         "current_centroid_m": [
-          6.063530173332898,
-          0.0
+          1.7596832207634125,
+          0.030868934600745745
         ],
-        "declared_current_a": 16314773.311828371,
-        "quadrature_current_a": 16314773.311828367,
-        "quadrature_nodes": 512,
-        "quadrature_relative_closure": 2.2833846522164315e-16
+        "declared_current_a": 61317.59019101273
       },
       "declared_axis_m": [
-        6.063530173332898,
-        0.0
+        1.7870647018106887,
+        0.0467736265648528
       ],
       "declared_boundary_m": [
-        7.801288912745821,
-        0.009443302939324053
+        1.5025279999999999,
+        -1.01728
       ],
       "factory": "profile.cold_seed_portfolio",
-      "plasma_current_a": 16314773.311828371,
-      "requested_class": "limited",
-      "seed_radius_m": 1.564079053601776,
-      "state_sha256_binary64": "cfcc852bf913a93d146a9691444d585e9aeea214a3fcc23447a3711873c3a290",
+      "plasma_current_a": 61317.59019101273,
+      "requested_class": "diverted",
+      "seed_radius_m": 0.606782374575508,
+      "state_sha256_binary64": "033171d50f1e10ae7f4ec667c9f16f9cf9c70ba47072d6b2323c746b7de5312d",
       "stored_flux_samples_used": false,
-      "supported_cell_count": 321
+      "supported_cell_count": 463
     },
-    "solve_wall_seconds": 562.9361687107012,
-    "target_current_a": 16314773.311828371,
+    "solve_wall_seconds": 566.9191201087087,
+    "target_current_a": 61317.59019101273,
     "target_current_argument": "Ip_closed_form",
-    "terminal_fixed_point_residual": 0.0054014429054834836,
+    "terminal_fixed_point_residual": 0.039507353440882194,
     "terminal_fixed_point_residual_status": "finite",
     "termination": "active_set_settled"
   },
   "stage_wall_seconds": {
-    "accuracy_scoring": 1.2557940175756812,
-    "case_and_machine": 0.2568441992625594,
-    "figure_render": 0.5161457424983382,
-    "operator_and_seed": 25.30610813666135,
-    "production_solve": 562.9361687107012
+    "accuracy_scoring": 1.794207375496626,
+    "case_and_machine": 172.57754299789667,
+    "figure_render": 0.4970679059624672,
+    "operator_and_seed": 43.456883191131055,
+    "production_solve": 566.9191201087087
   }
 }

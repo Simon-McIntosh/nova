@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T12:41:10",
+  "updated": "2026-09-09T13:00:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4555,6 +4555,15 @@
         "created": "2026-09-09"
       },
       {
+        "id": "s19i-bob-measure",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
         "id": "s19i-cank-bound",
         "harness": "codex-terra",
         "role": "implement",
@@ -4586,6 +4595,60 @@
       {
         "id": "s19i-dvf-s5",
         "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-fsa-routes",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-gaa-docs",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-gaa-pin",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-mcs-cache",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-mulw-atlas",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-mulw-s3",
+        "harness": "codex",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -4633,6 +4696,15 @@
       {
         "id": "s19i-ucc-scout",
         "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-ucc-solver",
+        "harness": "codex",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -144043,6 +144115,177 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T075501677943-dvf-prescribed-profile-prototype",
+        "plan": "diiid-vertical-force-balance",
+        "section": "\u00a75",
+        "node": "dvf-prescribed-profile-prototype",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1774,
+                "cached_input_tokens": 559340,
+                "input_tokens": 561116,
+                "output_tokens": 51,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 561167,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "docs/figures/diiid-vertical-force-balance/prescribed-profile-prototype/receipt.json has exactly five gate-frame rows each carrying the sign tuple, the two factors, terminal residual, converged flag, axis and X-point positions and the profile comparison status, with no unqualified single COCOS index claim, run through the H200 lane scripts/h200_test_lane/run.sh or all_debug CPU with the persistent compilation cache on",
+          "estimated_hours": null,
+          "goal": "Run the section 5 prototype: forward solves of the five DIII-D gate frames with p-prime and ff-prime and the currents prescribed from the label in COCOS 17 (map factor -2 pi, current factor +1 from the landed scout), writing one receipt with the source sign tuple, the prescribed arrays, the forward result per frame and the extracted-versus-stored profile comparison marked unavailable where the source has no stored profile",
+          "id": "dvf-prescribed-profile-prototype",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T07:55:02Z",
+            "read_at": "2026-09-09T07:55:03Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 60.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T075501677943-dvf-prescribed-profile-prototype/manifest.md",
+          "plan": "diiid-vertical-force-balance",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "benchmarks/diiid_prescribed_profile_forward.py",
+            "docs/figures/diiid-vertical-force-balance/prescribed-profile-prototype"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-dvf-s5",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T07:55:15Z",
+        "completed_at": "2026-09-09T10:56:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 10903,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "9ff98552afd6ebd6eb95e02f05e5e988c9b07f9f",
+        "commits": [
+          "78a2f7005930654e4f16fca1c53d4f0794209706",
+          "12840a9c745956ae82eeed8fa8097595146bcbf4",
+          "974e9afeb2607d3081bb8ac6c112a416fbca3810",
+          "30b5e6f63526849011d755d4a14025b9d29bf8cd"
+        ],
+        "changed_lines": {
+          "added": 954,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 jobs 1267511, 1267593, 1267533, 1267625 (betelgeuse, direct interpreter, persistent cache): five frame rows persisted; strict receipt validation (5 rows, -2 pi and +1 factors, no COCOS index claim, 5 unavailable stored-profile comparisons)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/diiid-vertical-force-balance/prescribed-profile-prototype/receipt.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T075501677943-dvf-prescribed-profile-prototype/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08529-f95e-7261-9cda-f61681b0bb4c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 75107968,
+            "cached_input_tokens_cumulative": 75107968,
+            "input_tokens": 75794605,
+            "input_tokens_cumulative": 75794605,
+            "output_tokens": 49354,
+            "output_tokens_cumulative": 49354,
+            "reasoning_output_tokens": 11618,
+            "reasoning_output_tokens_cumulative": 11618
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T10:56:58Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 74.0,
+              "resets_at": 1789439333,
+              "observed_at": "2026-09-09T10:56:58Z"
+            }
+          ]
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 75107968,
+          "cumulative_input_tokens": 150902573,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 60972
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/dvf-prescribed-profile-prototype",
+          "session_id": "01a08529-f95e-7261-9cda-f61681b0bb4c",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T10:56:58Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -144355,6 +144598,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2354
+    "_version": 2363
   }
 }

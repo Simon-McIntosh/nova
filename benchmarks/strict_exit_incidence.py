@@ -1783,6 +1783,17 @@ def _write_batched_report(
     report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _persist_batched_receipt(output_json: Path, payload: dict[str, Any]) -> None:
+    """Atomically checkpoint each completed machine into the shared receipt."""
+    output_json.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output_json.with_name(f".{output_json.name}.{os.getpid()}.tmp")
+    temporary.write_text(
+        json.dumps(_strict(payload), indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    os.replace(temporary, output_json)
+
+
 def run_batched(
     output_json: Path,
     mast_state_cache: Path,
@@ -1815,6 +1826,80 @@ def run_batched(
     del mast_members
     gc.collect()
     _batch_stage_count(input_stages, "MAST_INPUT_RELEASED")
+    sequential_comparison = _banked_sequential_comparison()
+    mast_peak_rss_mib = max(
+        *[stage["resource_peak_rss_mib"] for stage in input_stages],
+        mast_result["summary"]["peak_host_rss_mib"],
+    )
+    mast_checkpoint = {
+        "schema": "nova.strict-exit-incidence/2",
+        "measurement_state": "mast_complete_diiid_pending",
+        "recorded_at": datetime.now(UTC).isoformat(),
+        "checkpoint": {
+            "completed_machines": ["MAST"],
+            "pending_machines": ["DIII-D"],
+            "persistence": "atomically replaced after each completed machine",
+        },
+        "source": {
+            "revision": revision,
+            "required_ancestor": REQUIRED_ANCESTOR,
+            "driver": str(Path(__file__).relative_to(ROOT)),
+            "driver_sha256": _sha256(Path(__file__)),
+            "solver_source_modified": False,
+        },
+        "execution": {
+            **allocation,
+            "elapsed_seconds": time.perf_counter() - total_started,
+            "exit_marker": None,
+            "persistent_compilation_cache": cache.receipt(),
+            "input_build_seconds": {"MAST": mast_build_seconds},
+        },
+        "configuration": {
+            "trip_limit": TRIP_LIMIT,
+            "program_widths": {"MAST": len(mast_result["members"]), "DIII-D": 5},
+            "real_bank_widths": {"MAST": 12, "DIII-D": 5},
+            "self_check": self_check,
+            "paired_control": (
+                "each machine program receives the same stacked member arguments "
+                "for one exit-disabled and one exit-enabled runtime-flag pass"
+            ),
+            "strict_exit_definition": (
+                "zero mask difference, own-mask acceptance, zero accepted Newton "
+                "promotions, and bit-identical retained incoming state"
+            ),
+            "host_memory_limit_mib": 16 * 1024,
+            "host_memory_peak_mib": mast_peak_rss_mib,
+            "host_memory_under_limit": mast_peak_rss_mib < 16 * 1024,
+            "host_memory_stages": input_stages,
+        },
+        "evidence_inputs": {
+            "MAST": mast_inputs,
+            "sequential_width_one_receipt": {
+                "path": str(DEFAULT_JSON.relative_to(ROOT)),
+                "sha256": _sha256(DEFAULT_JSON),
+            },
+        },
+        "machines": {"MAST": mast_result},
+        "sequential_width_one_comparison": sequential_comparison,
+        "observations": {
+            "mast_compile_once": mast_result["execution_contract"]["compile_once"],
+            "batch_compile_count_per_pass": {
+                "MAST": mast_result["execution_contract"]["compile_count_per_pass"]
+            },
+            "geometry_fallbacks": {
+                "MAST": {
+                    "fallback": not mast_result["execution_contract"][
+                        "geometry_identical"
+                    ],
+                    "geometry_digests": mast_result["execution_contract"][
+                        "geometry_digests"
+                    ],
+                }
+            },
+        },
+    }
+    _persist_batched_receipt(output_json, mast_checkpoint)
+    print(f"BATCHED_MACHINE_RECEIPT_WRITTEN=MAST:{output_json}", flush=True)
 
     diiid_started = time.perf_counter()
     diiid_members, diiid_inputs = _build_diiid_members(
@@ -1882,7 +1967,12 @@ def run_batched(
             },
         },
         "machines": machines,
-        "sequential_width_one_comparison": _banked_sequential_comparison(),
+        "sequential_width_one_comparison": sequential_comparison,
+        "checkpoint": {
+            "completed_machines": ["MAST", "DIII-D"],
+            "pending_machines": [],
+            "persistence": "atomically replaced after each completed machine",
+        },
         "observations": {
             "mast_compile_once": machines["MAST"]["execution_contract"]["compile_once"],
             "batch_compile_count_per_pass": {
@@ -1901,11 +1991,7 @@ def run_batched(
         },
     }
     payload["execution"]["elapsed_seconds"] = time.perf_counter() - total_started
-    output_json.parent.mkdir(parents=True, exist_ok=True)
-    output_json.write_text(
-        json.dumps(_strict(payload), indent=2, sort_keys=True, allow_nan=False) + "\n",
-        encoding="utf-8",
-    )
+    _persist_batched_receipt(output_json, payload)
     if report_path is not None:
         _write_batched_report(report_path, payload)
     print(f"BATCHED_RECEIPT_WRITTEN={output_json}", flush=True)

@@ -1409,7 +1409,11 @@ class ForwardFluxOperator:
         """Return specialised member scalars that must enter the trace as data."""
         return tuple(
             name
-            for name in ("declared_axis_flux", "declared_boundary_flux")
+            for name in (
+                "declared_axis_flux",
+                "declared_boundary_flux",
+                "declared_support",
+            )
             if name in self.__dict__
         )
 

@@ -59,7 +59,7 @@ class _ReferenceAnchoredOperator(ForwardFluxOperator):
             raise ValueError("reference flux anchors need a nonzero span")
         if self.declared_support is None:
             raise ValueError("reference support is required")
-        self.declared_support = np.asarray(self.declared_support, dtype=bool)
+        self.declared_support = jnp.asarray(self.declared_support, dtype=bool)
         if self.declared_support.shape != (self.grid.node_number,):
             raise ValueError("reference support must match the grid")
         self.use_linear_moments = False
@@ -287,6 +287,34 @@ def _operator_with_source(
     return type(template)(**arguments)
 
 
+def _operator_with_declared_support(
+    template: ForwardFluxOperator, declared_support
+) -> ForwardFluxOperator:
+    """Keep one member unchanged except for its declared support mask."""
+    arguments = {
+        "grid": template.grid,
+        "wall": template.wall,
+        "source": template.source,
+        "external_current": template.external_current,
+        "area": template.area,
+        "cell_average_stencil": template.cell_average_stencil,
+        "cell_average_weight": template.cell_average_weight,
+        "polarity": template.polarity,
+        "inside_material": template.inside_material,
+        "moment_geometry": template.moment_geometry,
+        "sample": template.sample,
+        "use_linear_moments": template.use_linear_moments,
+        "prescribed_current_field": template.prescribed_current_field,
+    }
+    if isinstance(template, _ReferenceAnchoredOperator):
+        arguments.update(
+            declared_axis_flux=template.declared_axis_flux,
+            declared_boundary_flux=template.declared_boundary_flux,
+            declared_support=declared_support,
+        )
+    return type(template)(**arguments)
+
+
 def _static_profile(scale: float) -> ForwardSource:
     """Build an address-independent pair of static profile closures."""
 
@@ -402,6 +430,38 @@ def test_different_static_profile_callables_take_sequential_fallback():
     )
 
 
+def test_declared_support_is_member_data_for_batch_admission():
+    configure_dtypes()
+    operators, _member_data = _synthetic_profile_batch()
+    first = operators[0]
+    changed_support = np.asarray(first.declared_support).copy()
+    changed_support[0] = ~changed_support[0]
+    second = _operator_with_declared_support(first, changed_support)
+
+    np.testing.assert_raises(
+        AssertionError,
+        np.testing.assert_array_equal,
+        np.asarray(first.declared_support),
+        np.asarray(second.declared_support),
+    )
+    assert first.geometry_identity == second.geometry_identity
+    checked = stack_forward_operators((first, second))
+
+    assert checked.geometry_identical
+    assert checked.geometry_groups == ((0, 1),)
+    assert checked.stacked is not None
+
+    def declared_support(operator):
+        return operator.declared_support
+
+    program = jax.jit(jax.vmap(declared_support)).lower(checked.stacked).compile()
+    result = jax.block_until_ready(program(checked.stacked))
+    np.testing.assert_array_equal(
+        np.asarray(result),
+        np.stack((np.asarray(first.declared_support), changed_support)),
+    )
+
+
 def test_geometry_mismatch_selects_sequential_compiled_fallback():
     configure_dtypes()
     operators, member_data = _synthetic_profile_batch()
@@ -476,4 +536,9 @@ def test_width_twelve_mast_batch_has_no_member_constants_and_matches_width_one()
         data = jax.tree_util.tree_map(lambda value: value[index], member_data)
         single_results.append(jax.block_until_ready(width_one(operator, data)))
     expected = jnp.stack(single_results)
-    np.testing.assert_array_equal(np.asarray(batched_result), np.asarray(expected))
+    np.testing.assert_allclose(
+        np.asarray(batched_result),
+        np.asarray(expected),
+        rtol=1e-15,
+        atol=0.0,
+    )

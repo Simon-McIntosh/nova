@@ -23,11 +23,13 @@ from nova.jax.config import configure_dtypes
 
 ROOT = Path(__file__).resolve().parents[4]
 OUTPUT = Path(__file__).resolve().parent
-SOURCE = Path(
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/"
-    "s19-labeller/nia-poloidal-mechanism-evidence/docs/figures/"
-    "null-identification-authority/mechanism-evidence/"
-    "render_mechanism_evidence.py"
+# The committed renderer in the same figure tree, never an unmerged
+# worktree's copy by absolute path: the source must be reachable from this
+# repository alone.
+SOURCE = (
+    Path(__file__).resolve().parents[1]
+    / "mechanism-evidence"
+    / "render_mechanism_evidence.py"
 )
 RECEIPT = Path(
     os.environ.get("CONTOUR_RECEIPT_PATH", OUTPUT / "contour-evidence-receipt.json")
@@ -137,6 +139,26 @@ def _base_payload() -> dict[str, Any]:
     return payload
 
 
+def _section_records(payload: dict[str, Any], key: str) -> list[dict[str, Any]]:
+    """The records list of a receipt section, tolerating a curated dict shape.
+
+    The curated contour receipt stores each section as an object with a
+    ``records`` list (carrying provenance keys like ``record``/``figure``);
+    the incremental wrapper stores a bare list.  Both are updated in place.
+    """
+    section = payload.get(key)
+    if isinstance(section, dict):
+        records = section.setdefault("records", [])
+        if not isinstance(records, list):
+            raise ValueError(f"receipt {key}.records must be a list")
+        return records
+    if section is None:
+        section = payload[key] = []
+    if not isinstance(section, list):
+        raise ValueError(f"receipt {key} must be a list or an object with records")
+    return section
+
+
 def _render_certificate(source: Any, case: str, cells: int) -> None:
     record = source._build_certificate_case(case, cells)
     rendered = source._draw_certificate(record)
@@ -149,14 +171,13 @@ def _render_certificate(source: Any, case: str, cells: int) -> None:
         ("moderate-rotation-conventional-static", -300): 8.455791545012673e-3,
     }[(case, cells)]
     payload = _base_payload()
-    payload["certificate"] = [
+    records = _section_records(payload, "certificate")
+    records[:] = [
         item
-        for item in payload["certificate"]
-        if (item["case"], item["requested_cells"]) != (case, cells)
+        for item in records
+        if (item.get("case"), item.get("requested_cells")) != (case, cells)
     ]
-    payload["certificate"].append(
-        {"case": case, "requested_cells": cells, **rendered}
-    )
+    records.append({"case": case, "requested_cells": cells, **rendered})
     _write_receipt(payload)
     print(f"PERSISTED certificate {case} {cells}", flush=True)
 
@@ -164,10 +185,13 @@ def _render_certificate(source: Any, case: str, cells: int) -> None:
 def _render_clips(source: Any, cells: int) -> None:
     rendered = source._draw_clipped_cells(cells)
     payload = _base_payload()
-    payload["clipped_cells"] = [
-        item for item in payload["clipped_cells"] if item["requested_cells"] != cells
+    records = _section_records(payload, "clipped_cells")
+    records[:] = [
+        item
+        for item in records
+        if item.get("requested_cells") != cells
     ]
-    payload["clipped_cells"].append({"requested_cells": cells, **rendered})
+    records.append({"requested_cells": cells, **rendered})
     _write_receipt(payload)
     print(f"PERSISTED clipped cells {cells}", flush=True)
 

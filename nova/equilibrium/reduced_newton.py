@@ -146,6 +146,11 @@ JACOBIAN_REFRESH_THRESHOLD: float = 1.0
 #: re-linearised before it supplies another Newton direction.
 CONSTRAINT_CURRENT_CHANGE_CAP = 1_000.0
 
+#: Physical fallback for a compensating circuit when a caller has not supplied
+#: the circuit family's machine rating.  It prevents an ill-conditioned row
+#: from reporting a megampere command as a qualified equilibrium.
+DEFAULT_COMPENSATING_CURRENT_CEILING = 100_000.0
+
 #: Optional per-solve stage recording for the keyframe driver.  When enabled,
 #: the host loop records named boundaries (``convert``, ``shadow``, ``bind``,
 #: ``gather``, ``trips``, ``records`` plus a ``tripN:*`` boundary per active-set
@@ -1940,8 +1945,54 @@ class ConstrainedReducedNewtonResult(ReducedNewtonResult):
     compensating_unknown: jax.Array | None = None
     constraints: tuple[ConstraintRecord, ...] = ()
     prescribed_current: jax.Array | None = None
+    compensating_current: jax.Array | None = None
     row_count: int = 0
+    qualified: bool = True
+    refusal_reason: str | None = None
     program: "ReducedProgram | None" = None
+
+
+def _compensating_current_ceiling(ceiling, circuit_count: int) -> np.ndarray | None:
+    """Return one positive compensating-current ceiling per circuit."""
+    if ceiling is None:
+        return None
+    values = np.asarray(ceiling, dtype=float)
+    if values.ndim == 0:
+        values = np.full(circuit_count, float(values))
+    if values.shape != (circuit_count,):
+        raise ValueError(
+            "compensating current ceiling must be a scalar or one value per circuit"
+        )
+    if not np.all(np.isfinite(values)) or np.any(values <= 0.0):
+        raise ValueError(
+            "compensating current ceiling must contain finite positive values"
+        )
+    return values
+
+
+def _constraint_qualification(
+    operator,
+    state: jax.Array,
+    requested_class,
+    compensating_current: jax.Array,
+    ceiling,
+) -> tuple[bool, str | None]:
+    """Return terminal admission after current and topology checks."""
+    limits = _compensating_current_ceiling(ceiling, compensating_current.size)
+    over_ceiling = limits is not None and bool(
+        np.any(np.abs(np.asarray(compensating_current)) > limits)
+    )
+    physical = jnp.asarray(state)[: operator.physical_node_number]
+    _masks, _topology, _connected, axis_admitted = operator._fixed_design_read(
+        physical, requested_class
+    )
+    axis_qualified = bool(np.asarray(jax.device_get(axis_admitted)))
+    reasons = []
+    if over_ceiling:
+        reasons.append("compensating-current-ceiling-exceeded")
+    if not axis_qualified:
+        reasons.append("no-qualified-magnetic-axis")
+    return not reasons, "; ".join(reasons) if reasons else None
 
 
 def _row_augmentation(
@@ -2202,6 +2253,9 @@ def solve_constrained_reduced_newton(
     trip_boundary: str = TRIP_BOUNDARY,
     jacobian_refresh_threshold: float | None = JACOBIAN_REFRESH_THRESHOLD,
     constraint_current_step_cap: float = CONSTRAINT_CURRENT_CHANGE_CAP,
+    constraint_current_ceiling: float | np.ndarray | None = (
+        DEFAULT_COMPENSATING_CURRENT_CEILING
+    ),
     row_arguments: str = TRACED_ROWS,
     program: ReducedProgram | None = None,
     stream: bool = False,
@@ -2257,6 +2311,14 @@ def solve_constrained_reduced_newton(
     taking a one-shot command across a nonlinear plasma-response regime; after
     every accepted constrained candidate the dense Jacobian is rebuilt at the
     accepted state before another direction is formed.
+
+    ``constraint_current_ceiling`` is the terminal per-circuit limit on the
+    accumulated compensating command. A scalar applies to every circuit; a
+    vector supplies one limit per circuit family. ``None`` is reserved for a
+    comparison route that deliberately measures the unbounded solve. A result
+    over its ceiling, or with no qualified magnetic axis, is returned with
+    ``qualified=False`` and a stated refusal reason even when its residual rows
+    have closed.
     """
     operator = profile.operator
     state = jnp.asarray(initial)
@@ -2465,6 +2527,7 @@ def solve_constrained_reduced_newton(
     if circuit_current is None and operator.prescribed_current_field is not None:
         circuit_current = jnp.asarray(operator.prescribed_current_field.current)
     if augmentation is not None:
+        compensating_current = jnp.zeros_like(circuit_current)
         records = constraint_records(
             profile,
             _RowRecordView(augmentation.row_slices, driven["state"], unknowns),
@@ -2482,15 +2545,33 @@ def solve_constrained_reduced_newton(
         )
         if circuit_current is not None:
             for pair, record in zip(pairs, records, strict=True):
-                circuit_current = circuit_current + (
+                contribution = (
                     jnp.asarray(pair.unknown.direction) @ record.physical_unknown
                 )
+                compensating_current = compensating_current + contribution
+                circuit_current = circuit_current + contribution
+        qualified, refusal_reason = _constraint_qualification(
+            operator,
+            driven["state"],
+            requested_class,
+            compensating_current,
+            constraint_current_ceiling,
+        )
+        if not qualified:
+            records = tuple(
+                record._replace(qualified=jnp.zeros_like(record.qualified, dtype=bool))
+                for record in records
+            )
+    else:
+        compensating_current = None
+        qualified = True
+        refusal_reason = None
     _stage_mark("records")
     return ConstrainedReducedNewtonResult(
         state=driven["state"],
         terminal_residual=driven["terminal_residual"],
         active_set_iterations=len(driven["residuals"]),
-        converged=driven["converged"],
+        converged=bool(driven["converged"]) and qualified,
         termination_reason=int(driven["reason"]),
         active_set_residuals=driven["residuals"],
         active_set_mask_differences=driven["differences"],
@@ -2510,7 +2591,10 @@ def solve_constrained_reduced_newton(
         compensating_unknown=unknowns,
         constraints=records,
         prescribed_current=circuit_current,
+        compensating_current=compensating_current,
         row_count=0 if augmentation is None else augmentation.row_count,
+        qualified=qualified,
+        refusal_reason=refusal_reason,
         program=program,
     )
 
@@ -2721,6 +2805,9 @@ def solve_constrained_reduced_newton_compiled(
     tolerance: float = FIXED_POINT_RESIDUAL_TOLERANCE,
     newton_steps: int = NEWTON_STEPS,
     active_set_steps: int = ACTIVE_SET_STEPS,
+    constraint_current_ceiling: float | np.ndarray | None = (
+        DEFAULT_COMPENSATING_CURRENT_CEILING
+    ),
     row_arguments: str = TRACED_ROWS,
     program: ReducedProgram | None = None,
     stream: bool = False,
@@ -2789,15 +2876,28 @@ def solve_constrained_reduced_newton_compiled(
         if prescribed_current is not None
         else jnp.asarray(profile.operator.prescribed_current_field.current)
     )
+    compensating_current = jnp.zeros_like(circuit_current)
     for pair, record in zip(pairs, records, strict=True):
-        circuit_current = circuit_current + (
-            jnp.asarray(pair.unknown.direction) @ record.physical_unknown
+        contribution = jnp.asarray(pair.unknown.direction) @ record.physical_unknown
+        compensating_current = compensating_current + contribution
+        circuit_current = circuit_current + contribution
+    qualified, refusal_reason = _constraint_qualification(
+        profile.operator,
+        fields["state"],
+        requested_class,
+        compensating_current,
+        constraint_current_ceiling,
+    )
+    if not qualified:
+        records = tuple(
+            record._replace(qualified=jnp.zeros_like(record.qualified, dtype=bool))
+            for record in records
         )
     return ConstrainedReducedNewtonResult(
         state=fields["state"],
         terminal_residual=fields["terminal_residual"],
         active_set_iterations=fields["active_set_iterations"],
-        converged=fields["converged"],
+        converged=fields["converged"] and qualified,
         termination_reason=fields["termination_reason"],
         active_set_residuals=fields["active_set_residuals"],
         active_set_mask_differences=fields["active_set_mask_differences"],
@@ -2811,6 +2911,9 @@ def solve_constrained_reduced_newton_compiled(
         compensating_unknown=unknowns,
         constraints=records,
         prescribed_current=circuit_current,
+        compensating_current=compensating_current,
         row_count=augmentation.row_count,
+        qualified=qualified,
+        refusal_reason=refusal_reason,
         program=program,
     )

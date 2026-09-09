@@ -1,15 +1,16 @@
 {
   "arms": [
     {
+      "attempted_slices_per_second": 1.0597475801899894,
       "batch_per_device": 16,
-      "cache_directory": "/tmp/nova-forward-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054",
       "compile_wall_definition": "first call including compilation minus median warmed wall per step",
-      "compile_wall_seconds_estimate": 23.344425842165947,
-      "conditioned_count": 48,
-      "conditioned_fraction": 1.0,
-      "converged_count": 0,
-      "converged_fraction": 0.0,
-      "converged_fraction_matches_sequential": false,
+      "compile_wall_seconds_estimate": 105.34326333800952,
+      "conditioned_count": 42,
+      "conditioned_fraction": 0.875,
+      "converged_count": 38,
+      "converged_fraction": 0.7916666666666666,
+      "converged_fraction_matches_sequential": true,
       "corpus_shots": [
         {
           "admitted_row_count": 82,
@@ -397,30 +398,31 @@
         }
       ],
       "device_count": 1,
-      "first_call_wall_seconds": 23.452810094691813,
-      "first_step_converged_fraction": 0.0,
-      "guard_count": 0,
-      "guard_fraction": 0.0,
-      "guard_fraction_matches_sequential": false,
+      "first_call_wall_seconds": 120.44119826052338,
+      "first_solve_exception_traceback": null,
+      "first_step_converged_fraction": 0.75,
+      "guard_count": 7,
+      "guard_fraction": 0.14583333333333334,
+      "guard_fraction_matches_sequential": true,
       "measured_slices_per_repeat": 48,
       "nvidia_smi": {
         "interval_seconds": 1.0,
         "rows": [
           {
-            "maximum_memory_used_mib": 1207.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
+            "maximum_memory_used_mib": 1851.0,
+            "maximum_utilisation_percent": 100.0,
+            "mean_utilisation_percent": 12.67605633802817,
             "phase": "compile_and_first_execution",
-            "sample_count": 19,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
+            "sample_count": 71,
+            "uuid": "GPU-e58a61a8-1d7c-88f1-49a9-0f516dd162d3"
           },
           {
-            "maximum_memory_used_mib": 1207.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
+            "maximum_memory_used_mib": 1851.0,
+            "maximum_utilisation_percent": 100.0,
+            "mean_utilisation_percent": 99.95121951219512,
             "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
+            "sample_count": 82,
+            "uuid": "GPU-e58a61a8-1d7c-88f1-49a9-0f516dd162d3"
           }
         ],
         "sample_failures": []
@@ -431,109 +433,38 @@
         ],
         "jax": "0.11.0",
         "python": "3.14.2",
-        "slurm_job_id": "1263948"
+        "slurm_job_id": "1267748"
       },
-      "slices_per_second": 147.62292147728363,
-      "solve_exception_classes": [
-        "TypeError"
-      ],
-      "solve_exception_event_count": 10,
-      "solve_exceptions": [
-        {
-          "exception_class": "TypeError",
-          "phase": "compile_and_first_execution",
-          "repeat": null,
-          "slice_count": 16,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 16,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 16,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 16,
-          "step": 2
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 16,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 16,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 16,
-          "step": 2
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 16,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 16,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 16,
-          "step": 2
-        }
-      ],
+      "slices_per_second": 1.0597475801899894,
+      "solve_exception_classes": [],
+      "solve_exception_event_count": 0,
+      "solve_exceptions": [],
       "status": "complete",
       "step_count_per_repeat": 3,
+      "throughput_valid": true,
       "total_batch_per_step": 16,
       "warmed_wall_seconds": {
-        "maximum": 0.33899251837283373,
-        "median": 0.3251527575775981,
-        "minimum": 0.3206563936546445,
+        "maximum": 45.95552522037178,
+        "median": 45.29380476754159,
+        "minimum": 45.292465412057936,
         "samples": [
-          0.33899251837283373,
-          0.3206563936546445,
-          0.3251527575775981
+          45.95552522037178,
+          45.292465412057936,
+          45.29380476754159
         ]
       }
     },
     {
+      "attempted_slices_per_second": 2.3375032984385924,
       "batch_per_device": 64,
-      "cache_directory": "/tmp/nova-forward-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054",
       "compile_wall_definition": "first call including compilation minus median warmed wall per step",
-      "compile_wall_seconds_estimate": 22.433801458838087,
-      "conditioned_count": 192,
-      "conditioned_fraction": 1.0,
-      "converged_count": 0,
-      "converged_fraction": 0.0,
-      "converged_fraction_matches_sequential": false,
+      "compile_wall_seconds_estimate": 112.03080551543583,
+      "conditioned_count": 168,
+      "conditioned_fraction": 0.875,
+      "converged_count": 152,
+      "converged_fraction": 0.7916666666666666,
+      "converged_fraction_matches_sequential": true,
       "corpus_shots": [
         {
           "admitted_row_count": 82,
@@ -921,30 +852,31 @@
         }
       ],
       "device_count": 1,
-      "first_call_wall_seconds": 22.543386114761233,
-      "first_step_converged_fraction": 0.0,
-      "guard_count": 0,
-      "guard_fraction": 0.0,
-      "guard_fraction_matches_sequential": false,
+      "first_call_wall_seconds": 139.41044602449983,
+      "first_solve_exception_traceback": null,
+      "first_step_converged_fraction": 0.78125,
+      "guard_count": 28,
+      "guard_fraction": 0.14583333333333334,
+      "guard_fraction_matches_sequential": true,
       "measured_slices_per_repeat": 192,
       "nvidia_smi": {
         "interval_seconds": 1.0,
         "rows": [
           {
-            "maximum_memory_used_mib": 1207.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
+            "maximum_memory_used_mib": 5379.0,
+            "maximum_utilisation_percent": 100.0,
+            "mean_utilisation_percent": 19.80952380952381,
             "phase": "compile_and_first_execution",
-            "sample_count": 19,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
+            "sample_count": 84,
+            "uuid": "GPU-e58a61a8-1d7c-88f1-49a9-0f516dd162d3"
           },
           {
-            "maximum_memory_used_mib": 1207.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
+            "maximum_memory_used_mib": 5379.0,
+            "maximum_utilisation_percent": 100.0,
+            "mean_utilisation_percent": 99.29452054794521,
             "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
+            "sample_count": 146,
+            "uuid": "GPU-e58a61a8-1d7c-88f1-49a9-0f516dd162d3"
           }
         ],
         "sample_failures": []
@@ -955,109 +887,38 @@
         ],
         "jax": "0.11.0",
         "python": "3.14.2",
-        "slurm_job_id": "1263948"
+        "slurm_job_id": "1267748"
       },
-      "slices_per_second": 584.0233695206687,
-      "solve_exception_classes": [
-        "TypeError"
-      ],
-      "solve_exception_event_count": 10,
-      "solve_exceptions": [
-        {
-          "exception_class": "TypeError",
-          "phase": "compile_and_first_execution",
-          "repeat": null,
-          "slice_count": 64,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 64,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 64,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 64,
-          "step": 2
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 64,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 64,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 64,
-          "step": 2
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 64,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 64,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 64,
-          "step": 2
-        }
-      ],
+      "slices_per_second": 2.3375032984385924,
+      "solve_exception_classes": [],
+      "solve_exception_event_count": 0,
+      "solve_exceptions": [],
       "status": "complete",
       "step_count_per_repeat": 3,
+      "throughput_valid": true,
       "total_batch_per_step": 64,
       "warmed_wall_seconds": {
-        "maximum": 0.33242303039878607,
-        "median": 0.328753967769444,
-        "minimum": 0.3258986510336399,
+        "maximum": 82.7669187085703,
+        "median": 82.138921527192,
+        "minimum": 82.13567927107215,
         "samples": [
-          0.33242303039878607,
-          0.3258986510336399,
-          0.328753967769444
+          82.7669187085703,
+          82.138921527192,
+          82.13567927107215
         ]
       }
     },
     {
+      "attempted_slices_per_second": 3.184991059700392,
       "batch_per_device": 256,
-      "cache_directory": "/tmp/nova-forward-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "cache_directory": "/home/ITER/mcintos/.cache/nova/forward-compilation-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-0745ecebea4cb264e054",
       "compile_wall_definition": "first call including compilation minus median warmed wall per step",
-      "compile_wall_seconds_estimate": 22.333254012589652,
-      "conditioned_count": 768,
-      "conditioned_fraction": 1.0,
-      "converged_count": 0,
-      "converged_fraction": 0.0,
-      "converged_fraction_matches_sequential": false,
+      "compile_wall_seconds_estimate": 114.85106142920752,
+      "conditioned_count": 672,
+      "conditioned_fraction": 0.875,
+      "converged_count": 608,
+      "converged_fraction": 0.7916666666666666,
+      "converged_fraction_matches_sequential": true,
       "corpus_shots": [
         {
           "admitted_row_count": 82,
@@ -1445,30 +1306,31 @@
         }
       ],
       "device_count": 1,
-      "first_call_wall_seconds": 22.44328659120947,
-      "first_step_converged_fraction": 0.0,
-      "guard_count": 0,
-      "guard_fraction": 0.0,
-      "guard_fraction_matches_sequential": false,
+      "first_call_wall_seconds": 195.22805313859135,
+      "first_solve_exception_traceback": null,
+      "first_step_converged_fraction": 0.7890625,
+      "guard_count": 112,
+      "guard_fraction": 0.14583333333333334,
+      "guard_fraction_matches_sequential": true,
       "measured_slices_per_repeat": 768,
       "nvidia_smi": {
         "interval_seconds": 1.0,
         "rows": [
           {
-            "maximum_memory_used_mib": 1207.0,
-            "maximum_utilisation_percent": 2.0,
-            "mean_utilisation_percent": 0.11764705882352941,
+            "maximum_memory_used_mib": 13913.0,
+            "maximum_utilisation_percent": 100.0,
+            "mean_utilisation_percent": 40.80530973451327,
             "phase": "compile_and_first_execution",
-            "sample_count": 17,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
+            "sample_count": 113,
+            "uuid": "GPU-e58a61a8-1d7c-88f1-49a9-0f516dd162d3"
           },
           {
-            "maximum_memory_used_mib": 1207.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
+            "maximum_memory_used_mib": 13913.0,
+            "maximum_utilisation_percent": 100.0,
+            "mean_utilisation_percent": 100.0,
             "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
+            "sample_count": 426,
+            "uuid": "GPU-e58a61a8-1d7c-88f1-49a9-0f516dd162d3"
           }
         ],
         "sample_failures": []
@@ -1479,3243 +1341,24 @@
         ],
         "jax": "0.11.0",
         "python": "3.14.2",
-        "slurm_job_id": "1263948"
+        "slurm_job_id": "1267748"
       },
-      "slices_per_second": 2326.58366468467,
-      "solve_exception_classes": [
-        "TypeError"
-      ],
-      "solve_exception_event_count": 10,
-      "solve_exceptions": [
-        {
-          "exception_class": "TypeError",
-          "phase": "compile_and_first_execution",
-          "repeat": null,
-          "slice_count": 256,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 256,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 256,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 256,
-          "step": 2
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 256,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 256,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 256,
-          "step": 2
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 256,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 256,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 256,
-          "step": 2
-        }
-      ],
+      "slices_per_second": 3.184991059700392,
+      "solve_exception_classes": [],
+      "solve_exception_event_count": 0,
+      "solve_exceptions": [],
       "status": "complete",
       "step_count_per_repeat": 3,
+      "throughput_valid": true,
       "total_batch_per_step": 256,
       "warmed_wall_seconds": {
-        "maximum": 0.3493194207549095,
-        "median": 0.3300977358594537,
-        "minimum": 0.32920910976827145,
+        "maximum": 241.74209337681532,
+        "median": 241.13097512815148,
+        "minimum": 241.12033855263144,
         "samples": [
-          0.3493194207549095,
-          0.3300977358594537,
-          0.32920910976827145
-        ]
-      }
-    },
-    {
-      "batch_per_device": 16,
-      "cache_directory": "/tmp/nova-forward-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-6fdae1ee7e31f3aa7070",
-      "compile_wall_definition": "first call including compilation minus median warmed wall per step",
-      "compile_wall_seconds_estimate": 58.32182604260743,
-      "conditioned_count": 96,
-      "conditioned_fraction": 1.0,
-      "converged_count": 0,
-      "converged_fraction": 0.0,
-      "converged_fraction_matches_sequential": false,
-      "corpus_shots": [
-        {
-          "admitted_row_count": 82,
-          "quartile": 1,
-          "row": 21,
-          "shot": 24751,
-          "source_converged_slice_count": 68,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24751.manifest.json"
-        },
-        {
-          "admitted_row_count": 89,
-          "quartile": 2,
-          "row": 45,
-          "shot": 24774,
-          "source_converged_slice_count": 52,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24774.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 3,
-          "row": 66,
-          "shot": 24766,
-          "source_converged_slice_count": 59,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24766.manifest.json"
-        },
-        {
-          "admitted_row_count": 87,
-          "quartile": 4,
-          "row": 87,
-          "shot": 24765,
-          "source_converged_slice_count": 40,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24765.manifest.json"
-        },
-        {
-          "admitted_row_count": 87,
-          "quartile": 1,
-          "row": 23,
-          "shot": 24761,
-          "source_converged_slice_count": 62,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24761.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 2,
-          "row": 45,
-          "shot": 24753,
-          "source_converged_slice_count": 61,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24753.manifest.json"
-        },
-        {
-          "admitted_row_count": 86,
-          "quartile": 3,
-          "row": 65,
-          "shot": 24760,
-          "source_converged_slice_count": 67,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24760.manifest.json"
-        },
-        {
-          "admitted_row_count": 82,
-          "quartile": 4,
-          "row": 82,
-          "shot": 24752,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24752.manifest.json"
-        },
-        {
-          "admitted_row_count": 81,
-          "quartile": 1,
-          "row": 21,
-          "shot": 24756,
-          "source_converged_slice_count": 67,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24756.manifest.json"
-        },
-        {
-          "admitted_row_count": 97,
-          "quartile": 2,
-          "row": 49,
-          "shot": 18475,
-          "source_converged_slice_count": 73,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18475.manifest.json"
-        },
-        {
-          "admitted_row_count": 78,
-          "quartile": 3,
-          "row": 59,
-          "shot": 24754,
-          "source_converged_slice_count": 66,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24754.manifest.json"
-        },
-        {
-          "admitted_row_count": 76,
-          "quartile": 4,
-          "row": 76,
-          "shot": 24772,
-          "source_converged_slice_count": 37,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24772.manifest.json"
-        },
-        {
-          "admitted_row_count": 72,
-          "quartile": 1,
-          "row": 19,
-          "shot": 24769,
-          "source_converged_slice_count": 36,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24769.manifest.json"
-        },
-        {
-          "admitted_row_count": 72,
-          "quartile": 2,
-          "row": 37,
-          "shot": 24755,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24755.manifest.json"
-        },
-        {
-          "admitted_row_count": 71,
-          "quartile": 3,
-          "row": 53,
-          "shot": 24771,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24771.manifest.json"
-        },
-        {
-          "admitted_row_count": 65,
-          "quartile": 4,
-          "row": 65,
-          "shot": 24763,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24763.manifest.json"
-        },
-        {
-          "admitted_row_count": 95,
-          "quartile": 1,
-          "row": 25,
-          "shot": 18076,
-          "source_converged_slice_count": 76,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18076.manifest.json"
-        },
-        {
-          "admitted_row_count": 118,
-          "quartile": 2,
-          "row": 59,
-          "shot": 21858,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21858.manifest.json"
-        },
-        {
-          "admitted_row_count": 115,
-          "quartile": 3,
-          "row": 87,
-          "shot": 21860,
-          "source_converged_slice_count": 102,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21860.manifest.json"
-        },
-        {
-          "admitted_row_count": 112,
-          "quartile": 4,
-          "row": 112,
-          "shot": 21861,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21861.manifest.json"
-        },
-        {
-          "admitted_row_count": 111,
-          "quartile": 1,
-          "row": 29,
-          "shot": 21862,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21862.manifest.json"
-        },
-        {
-          "admitted_row_count": 113,
-          "quartile": 2,
-          "row": 57,
-          "shot": 21859,
-          "source_converged_slice_count": 100,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21859.manifest.json"
-        },
-        {
-          "admitted_row_count": 106,
-          "quartile": 3,
-          "row": 80,
-          "shot": 21856,
-          "source_converged_slice_count": 99,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21856.manifest.json"
-        },
-        {
-          "admitted_row_count": 94,
-          "quartile": 4,
-          "row": 94,
-          "shot": 21857,
-          "source_converged_slice_count": 85,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21857.manifest.json"
-        },
-        {
-          "admitted_row_count": 63,
-          "quartile": 1,
-          "row": 17,
-          "shot": 24768,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24768.manifest.json"
-        },
-        {
-          "admitted_row_count": 60,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24757,
-          "source_converged_slice_count": 27,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24757.manifest.json"
-        },
-        {
-          "admitted_row_count": 92,
-          "quartile": 3,
-          "row": 69,
-          "shot": 21845,
-          "source_converged_slice_count": 75,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21845.manifest.json"
-        },
-        {
-          "admitted_row_count": 90,
-          "quartile": 4,
-          "row": 90,
-          "shot": 21848,
-          "source_converged_slice_count": 70,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21848.manifest.json"
-        },
-        {
-          "admitted_row_count": 74,
-          "quartile": 1,
-          "row": 19,
-          "shot": 21855,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21855.manifest.json"
-        },
-        {
-          "admitted_row_count": 64,
-          "quartile": 2,
-          "row": 33,
-          "shot": 24775,
-          "source_converged_slice_count": 32,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24775.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 3,
-          "row": 66,
-          "shot": 21849,
-          "source_converged_slice_count": 60,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21849.manifest.json"
-        },
-        {
-          "admitted_row_count": 64,
-          "quartile": 4,
-          "row": 64,
-          "shot": 24764,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24764.manifest.json"
-        },
-        {
-          "admitted_row_count": 67,
-          "quartile": 1,
-          "row": 17,
-          "shot": 21854,
-          "source_converged_slice_count": 47,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21854.manifest.json"
-        },
-        {
-          "admitted_row_count": 62,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24777,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24777.manifest.json"
-        },
-        {
-          "admitted_row_count": 71,
-          "quartile": 3,
-          "row": 53,
-          "shot": 21844,
-          "source_converged_slice_count": 57,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21844.manifest.json"
-        },
-        {
-          "admitted_row_count": 70,
-          "quartile": 4,
-          "row": 70,
-          "shot": 21853,
-          "source_converged_slice_count": 44,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21853.manifest.json"
-        },
-        {
-          "admitted_row_count": 106,
-          "quartile": 1,
-          "row": 27,
-          "shot": 18596,
-          "source_converged_slice_count": 89,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18596.manifest.json"
-        },
-        {
-          "admitted_row_count": 61,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24778,
-          "source_converged_slice_count": 29,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24778.manifest.json"
-        },
-        {
-          "admitted_row_count": 56,
-          "quartile": 3,
-          "row": 42,
-          "shot": 21850,
-          "source_converged_slice_count": 51,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21850.manifest.json"
-        },
-        {
-          "admitted_row_count": 79,
-          "quartile": 4,
-          "row": 79,
-          "shot": 23862,
-          "source_converged_slice_count": 47,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23862.manifest.json"
-        },
-        {
-          "admitted_row_count": 55,
-          "quartile": 1,
-          "row": 15,
-          "shot": 21847,
-          "source_converged_slice_count": 45,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21847.manifest.json"
-        },
-        {
-          "admitted_row_count": 78,
-          "quartile": 2,
-          "row": 39,
-          "shot": 23865,
-          "source_converged_slice_count": 33,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23865.manifest.json"
-        },
-        {
-          "admitted_row_count": 53,
-          "quartile": 3,
-          "row": 40,
-          "shot": 21851,
-          "source_converged_slice_count": 41,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21851.manifest.json"
-        },
-        {
-          "admitted_row_count": 59,
-          "quartile": 4,
-          "row": 59,
-          "shot": 24776,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24776.manifest.json"
-        },
-        {
-          "admitted_row_count": 53,
-          "quartile": 1,
-          "row": 16,
-          "shot": 21846,
-          "source_converged_slice_count": 35,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21846.manifest.json"
-        },
-        {
-          "admitted_row_count": 96,
-          "quartile": 2,
-          "row": 59,
-          "shot": 29547,
-          "source_converged_slice_count": 82,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29547.manifest.json"
-        },
-        {
-          "admitted_row_count": 118,
-          "quartile": 3,
-          "row": 99,
-          "shot": 29371,
-          "source_converged_slice_count": 91,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29371.manifest.json"
-        },
-        {
-          "admitted_row_count": 116,
-          "quartile": 4,
-          "row": 126,
-          "shot": 29364,
-          "source_converged_slice_count": 86,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29364.manifest.json"
-        }
-      ],
-      "device_count": 2,
-      "first_call_wall_seconds": 58.433300849981606,
-      "first_step_converged_fraction": 0.0,
-      "guard_count": 0,
-      "guard_fraction": 0.0,
-      "guard_fraction_matches_sequential": false,
-      "measured_slices_per_repeat": 96,
-      "nvidia_smi": {
-        "interval_seconds": 1.0,
-        "rows": [
-          {
-            "maximum_memory_used_mib": 541.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "compile_and_first_execution",
-            "sample_count": 45,
-            "uuid": "GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae"
-          },
-          {
-            "maximum_memory_used_mib": 1207.0,
-            "maximum_utilisation_percent": 16.0,
-            "mean_utilisation_percent": 0.4,
-            "phase": "compile_and_first_execution",
-            "sample_count": 45,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
-          },
-          {
-            "maximum_memory_used_mib": 541.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae"
-          },
-          {
-            "maximum_memory_used_mib": 1207.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
-          }
-        ],
-        "sample_failures": []
-      },
-      "runtime": {
-        "devices": [
-          "cuda:0",
-          "cuda:1"
-        ],
-        "jax": "0.11.0",
-        "python": "3.14.2",
-        "slurm_job_id": "1263948"
-      },
-      "slices_per_second": 287.0603749292693,
-      "solve_exception_classes": [
-        "TypeError"
-      ],
-      "solve_exception_event_count": 10,
-      "solve_exceptions": [
-        {
-          "exception_class": "TypeError",
-          "phase": "compile_and_first_execution",
-          "repeat": null,
-          "slice_count": 32,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 32,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 32,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 32,
-          "step": 2
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 32,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 32,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 32,
-          "step": 2
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 32,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 32,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 32,
-          "step": 2
-        }
-      ],
-      "status": "complete",
-      "step_count_per_repeat": 3,
-      "total_batch_per_step": 32,
-      "warmed_wall_seconds": {
-        "maximum": 0.34982575848698616,
-        "median": 0.3344244221225381,
-        "minimum": 0.32618633657693863,
-        "samples": [
-          0.34982575848698616,
-          0.3344244221225381,
-          0.32618633657693863
-        ]
-      }
-    },
-    {
-      "batch_per_device": 64,
-      "cache_directory": "/tmp/nova-forward-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-6fdae1ee7e31f3aa7070",
-      "compile_wall_definition": "first call including compilation minus median warmed wall per step",
-      "compile_wall_seconds_estimate": 24.55751766481747,
-      "conditioned_count": 384,
-      "conditioned_fraction": 1.0,
-      "converged_count": 0,
-      "converged_fraction": 0.0,
-      "converged_fraction_matches_sequential": false,
-      "corpus_shots": [
-        {
-          "admitted_row_count": 82,
-          "quartile": 1,
-          "row": 21,
-          "shot": 24751,
-          "source_converged_slice_count": 68,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24751.manifest.json"
-        },
-        {
-          "admitted_row_count": 89,
-          "quartile": 2,
-          "row": 45,
-          "shot": 24774,
-          "source_converged_slice_count": 52,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24774.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 3,
-          "row": 66,
-          "shot": 24766,
-          "source_converged_slice_count": 59,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24766.manifest.json"
-        },
-        {
-          "admitted_row_count": 87,
-          "quartile": 4,
-          "row": 87,
-          "shot": 24765,
-          "source_converged_slice_count": 40,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24765.manifest.json"
-        },
-        {
-          "admitted_row_count": 87,
-          "quartile": 1,
-          "row": 23,
-          "shot": 24761,
-          "source_converged_slice_count": 62,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24761.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 2,
-          "row": 45,
-          "shot": 24753,
-          "source_converged_slice_count": 61,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24753.manifest.json"
-        },
-        {
-          "admitted_row_count": 86,
-          "quartile": 3,
-          "row": 65,
-          "shot": 24760,
-          "source_converged_slice_count": 67,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24760.manifest.json"
-        },
-        {
-          "admitted_row_count": 82,
-          "quartile": 4,
-          "row": 82,
-          "shot": 24752,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24752.manifest.json"
-        },
-        {
-          "admitted_row_count": 81,
-          "quartile": 1,
-          "row": 21,
-          "shot": 24756,
-          "source_converged_slice_count": 67,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24756.manifest.json"
-        },
-        {
-          "admitted_row_count": 97,
-          "quartile": 2,
-          "row": 49,
-          "shot": 18475,
-          "source_converged_slice_count": 73,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18475.manifest.json"
-        },
-        {
-          "admitted_row_count": 78,
-          "quartile": 3,
-          "row": 59,
-          "shot": 24754,
-          "source_converged_slice_count": 66,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24754.manifest.json"
-        },
-        {
-          "admitted_row_count": 76,
-          "quartile": 4,
-          "row": 76,
-          "shot": 24772,
-          "source_converged_slice_count": 37,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24772.manifest.json"
-        },
-        {
-          "admitted_row_count": 72,
-          "quartile": 1,
-          "row": 19,
-          "shot": 24769,
-          "source_converged_slice_count": 36,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24769.manifest.json"
-        },
-        {
-          "admitted_row_count": 72,
-          "quartile": 2,
-          "row": 37,
-          "shot": 24755,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24755.manifest.json"
-        },
-        {
-          "admitted_row_count": 71,
-          "quartile": 3,
-          "row": 53,
-          "shot": 24771,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24771.manifest.json"
-        },
-        {
-          "admitted_row_count": 65,
-          "quartile": 4,
-          "row": 65,
-          "shot": 24763,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24763.manifest.json"
-        },
-        {
-          "admitted_row_count": 95,
-          "quartile": 1,
-          "row": 25,
-          "shot": 18076,
-          "source_converged_slice_count": 76,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18076.manifest.json"
-        },
-        {
-          "admitted_row_count": 118,
-          "quartile": 2,
-          "row": 59,
-          "shot": 21858,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21858.manifest.json"
-        },
-        {
-          "admitted_row_count": 115,
-          "quartile": 3,
-          "row": 87,
-          "shot": 21860,
-          "source_converged_slice_count": 102,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21860.manifest.json"
-        },
-        {
-          "admitted_row_count": 112,
-          "quartile": 4,
-          "row": 112,
-          "shot": 21861,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21861.manifest.json"
-        },
-        {
-          "admitted_row_count": 111,
-          "quartile": 1,
-          "row": 29,
-          "shot": 21862,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21862.manifest.json"
-        },
-        {
-          "admitted_row_count": 113,
-          "quartile": 2,
-          "row": 57,
-          "shot": 21859,
-          "source_converged_slice_count": 100,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21859.manifest.json"
-        },
-        {
-          "admitted_row_count": 106,
-          "quartile": 3,
-          "row": 80,
-          "shot": 21856,
-          "source_converged_slice_count": 99,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21856.manifest.json"
-        },
-        {
-          "admitted_row_count": 94,
-          "quartile": 4,
-          "row": 94,
-          "shot": 21857,
-          "source_converged_slice_count": 85,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21857.manifest.json"
-        },
-        {
-          "admitted_row_count": 63,
-          "quartile": 1,
-          "row": 17,
-          "shot": 24768,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24768.manifest.json"
-        },
-        {
-          "admitted_row_count": 60,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24757,
-          "source_converged_slice_count": 27,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24757.manifest.json"
-        },
-        {
-          "admitted_row_count": 92,
-          "quartile": 3,
-          "row": 69,
-          "shot": 21845,
-          "source_converged_slice_count": 75,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21845.manifest.json"
-        },
-        {
-          "admitted_row_count": 90,
-          "quartile": 4,
-          "row": 90,
-          "shot": 21848,
-          "source_converged_slice_count": 70,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21848.manifest.json"
-        },
-        {
-          "admitted_row_count": 74,
-          "quartile": 1,
-          "row": 19,
-          "shot": 21855,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21855.manifest.json"
-        },
-        {
-          "admitted_row_count": 64,
-          "quartile": 2,
-          "row": 33,
-          "shot": 24775,
-          "source_converged_slice_count": 32,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24775.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 3,
-          "row": 66,
-          "shot": 21849,
-          "source_converged_slice_count": 60,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21849.manifest.json"
-        },
-        {
-          "admitted_row_count": 64,
-          "quartile": 4,
-          "row": 64,
-          "shot": 24764,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24764.manifest.json"
-        },
-        {
-          "admitted_row_count": 67,
-          "quartile": 1,
-          "row": 17,
-          "shot": 21854,
-          "source_converged_slice_count": 47,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21854.manifest.json"
-        },
-        {
-          "admitted_row_count": 62,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24777,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24777.manifest.json"
-        },
-        {
-          "admitted_row_count": 71,
-          "quartile": 3,
-          "row": 53,
-          "shot": 21844,
-          "source_converged_slice_count": 57,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21844.manifest.json"
-        },
-        {
-          "admitted_row_count": 70,
-          "quartile": 4,
-          "row": 70,
-          "shot": 21853,
-          "source_converged_slice_count": 44,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21853.manifest.json"
-        },
-        {
-          "admitted_row_count": 106,
-          "quartile": 1,
-          "row": 27,
-          "shot": 18596,
-          "source_converged_slice_count": 89,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18596.manifest.json"
-        },
-        {
-          "admitted_row_count": 61,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24778,
-          "source_converged_slice_count": 29,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24778.manifest.json"
-        },
-        {
-          "admitted_row_count": 56,
-          "quartile": 3,
-          "row": 42,
-          "shot": 21850,
-          "source_converged_slice_count": 51,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21850.manifest.json"
-        },
-        {
-          "admitted_row_count": 79,
-          "quartile": 4,
-          "row": 79,
-          "shot": 23862,
-          "source_converged_slice_count": 47,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23862.manifest.json"
-        },
-        {
-          "admitted_row_count": 55,
-          "quartile": 1,
-          "row": 15,
-          "shot": 21847,
-          "source_converged_slice_count": 45,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21847.manifest.json"
-        },
-        {
-          "admitted_row_count": 78,
-          "quartile": 2,
-          "row": 39,
-          "shot": 23865,
-          "source_converged_slice_count": 33,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23865.manifest.json"
-        },
-        {
-          "admitted_row_count": 53,
-          "quartile": 3,
-          "row": 40,
-          "shot": 21851,
-          "source_converged_slice_count": 41,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21851.manifest.json"
-        },
-        {
-          "admitted_row_count": 59,
-          "quartile": 4,
-          "row": 59,
-          "shot": 24776,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24776.manifest.json"
-        },
-        {
-          "admitted_row_count": 53,
-          "quartile": 1,
-          "row": 16,
-          "shot": 21846,
-          "source_converged_slice_count": 35,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21846.manifest.json"
-        },
-        {
-          "admitted_row_count": 96,
-          "quartile": 2,
-          "row": 59,
-          "shot": 29547,
-          "source_converged_slice_count": 82,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29547.manifest.json"
-        },
-        {
-          "admitted_row_count": 118,
-          "quartile": 3,
-          "row": 99,
-          "shot": 29371,
-          "source_converged_slice_count": 91,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29371.manifest.json"
-        },
-        {
-          "admitted_row_count": 116,
-          "quartile": 4,
-          "row": 126,
-          "shot": 29364,
-          "source_converged_slice_count": 86,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29364.manifest.json"
-        }
-      ],
-      "device_count": 2,
-      "first_call_wall_seconds": 24.669368157163262,
-      "first_step_converged_fraction": 0.0,
-      "guard_count": 0,
-      "guard_fraction": 0.0,
-      "guard_fraction_matches_sequential": false,
-      "measured_slices_per_repeat": 384,
-      "nvidia_smi": {
-        "interval_seconds": 1.0,
-        "rows": [
-          {
-            "maximum_memory_used_mib": 541.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "compile_and_first_execution",
-            "sample_count": 19,
-            "uuid": "GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae"
-          },
-          {
-            "maximum_memory_used_mib": 1207.0,
-            "maximum_utilisation_percent": 28.0,
-            "mean_utilisation_percent": 1.5263157894736843,
-            "phase": "compile_and_first_execution",
-            "sample_count": 19,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
-          },
-          {
-            "maximum_memory_used_mib": 541.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae"
-          },
-          {
-            "maximum_memory_used_mib": 1207.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
-          }
-        ],
-        "sample_failures": []
-      },
-      "runtime": {
-        "devices": [
-          "cuda:0",
-          "cuda:1"
-        ],
-        "jax": "0.11.0",
-        "python": "3.14.2",
-        "slurm_job_id": "1263948"
-      },
-      "slices_per_second": 1144.3847703797594,
-      "solve_exception_classes": [
-        "TypeError"
-      ],
-      "solve_exception_event_count": 10,
-      "solve_exceptions": [
-        {
-          "exception_class": "TypeError",
-          "phase": "compile_and_first_execution",
-          "repeat": null,
-          "slice_count": 128,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 128,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 128,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 128,
-          "step": 2
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 128,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 128,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 128,
-          "step": 2
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 128,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 128,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 128,
-          "step": 2
-        }
-      ],
-      "status": "complete",
-      "step_count_per_repeat": 3,
-      "total_batch_per_step": 128,
-      "warmed_wall_seconds": {
-        "maximum": 0.3404814200475812,
-        "median": 0.3355514770373702,
-        "minimum": 0.32758385967463255,
-        "samples": [
-          0.3404814200475812,
-          0.32758385967463255,
-          0.3355514770373702
-        ]
-      }
-    },
-    {
-      "batch_per_device": 256,
-      "cache_directory": "/tmp/nova-forward-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-6fdae1ee7e31f3aa7070",
-      "compile_wall_definition": "first call including compilation minus median warmed wall per step",
-      "compile_wall_seconds_estimate": 22.866510079863172,
-      "conditioned_count": 1536,
-      "conditioned_fraction": 1.0,
-      "converged_count": 0,
-      "converged_fraction": 0.0,
-      "converged_fraction_matches_sequential": false,
-      "corpus_shots": [
-        {
-          "admitted_row_count": 82,
-          "quartile": 1,
-          "row": 21,
-          "shot": 24751,
-          "source_converged_slice_count": 68,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24751.manifest.json"
-        },
-        {
-          "admitted_row_count": 89,
-          "quartile": 2,
-          "row": 45,
-          "shot": 24774,
-          "source_converged_slice_count": 52,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24774.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 3,
-          "row": 66,
-          "shot": 24766,
-          "source_converged_slice_count": 59,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24766.manifest.json"
-        },
-        {
-          "admitted_row_count": 87,
-          "quartile": 4,
-          "row": 87,
-          "shot": 24765,
-          "source_converged_slice_count": 40,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24765.manifest.json"
-        },
-        {
-          "admitted_row_count": 87,
-          "quartile": 1,
-          "row": 23,
-          "shot": 24761,
-          "source_converged_slice_count": 62,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24761.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 2,
-          "row": 45,
-          "shot": 24753,
-          "source_converged_slice_count": 61,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24753.manifest.json"
-        },
-        {
-          "admitted_row_count": 86,
-          "quartile": 3,
-          "row": 65,
-          "shot": 24760,
-          "source_converged_slice_count": 67,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24760.manifest.json"
-        },
-        {
-          "admitted_row_count": 82,
-          "quartile": 4,
-          "row": 82,
-          "shot": 24752,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24752.manifest.json"
-        },
-        {
-          "admitted_row_count": 81,
-          "quartile": 1,
-          "row": 21,
-          "shot": 24756,
-          "source_converged_slice_count": 67,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24756.manifest.json"
-        },
-        {
-          "admitted_row_count": 97,
-          "quartile": 2,
-          "row": 49,
-          "shot": 18475,
-          "source_converged_slice_count": 73,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18475.manifest.json"
-        },
-        {
-          "admitted_row_count": 78,
-          "quartile": 3,
-          "row": 59,
-          "shot": 24754,
-          "source_converged_slice_count": 66,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24754.manifest.json"
-        },
-        {
-          "admitted_row_count": 76,
-          "quartile": 4,
-          "row": 76,
-          "shot": 24772,
-          "source_converged_slice_count": 37,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24772.manifest.json"
-        },
-        {
-          "admitted_row_count": 72,
-          "quartile": 1,
-          "row": 19,
-          "shot": 24769,
-          "source_converged_slice_count": 36,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24769.manifest.json"
-        },
-        {
-          "admitted_row_count": 72,
-          "quartile": 2,
-          "row": 37,
-          "shot": 24755,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24755.manifest.json"
-        },
-        {
-          "admitted_row_count": 71,
-          "quartile": 3,
-          "row": 53,
-          "shot": 24771,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24771.manifest.json"
-        },
-        {
-          "admitted_row_count": 65,
-          "quartile": 4,
-          "row": 65,
-          "shot": 24763,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24763.manifest.json"
-        },
-        {
-          "admitted_row_count": 95,
-          "quartile": 1,
-          "row": 25,
-          "shot": 18076,
-          "source_converged_slice_count": 76,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18076.manifest.json"
-        },
-        {
-          "admitted_row_count": 118,
-          "quartile": 2,
-          "row": 59,
-          "shot": 21858,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21858.manifest.json"
-        },
-        {
-          "admitted_row_count": 115,
-          "quartile": 3,
-          "row": 87,
-          "shot": 21860,
-          "source_converged_slice_count": 102,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21860.manifest.json"
-        },
-        {
-          "admitted_row_count": 112,
-          "quartile": 4,
-          "row": 112,
-          "shot": 21861,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21861.manifest.json"
-        },
-        {
-          "admitted_row_count": 111,
-          "quartile": 1,
-          "row": 29,
-          "shot": 21862,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21862.manifest.json"
-        },
-        {
-          "admitted_row_count": 113,
-          "quartile": 2,
-          "row": 57,
-          "shot": 21859,
-          "source_converged_slice_count": 100,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21859.manifest.json"
-        },
-        {
-          "admitted_row_count": 106,
-          "quartile": 3,
-          "row": 80,
-          "shot": 21856,
-          "source_converged_slice_count": 99,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21856.manifest.json"
-        },
-        {
-          "admitted_row_count": 94,
-          "quartile": 4,
-          "row": 94,
-          "shot": 21857,
-          "source_converged_slice_count": 85,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21857.manifest.json"
-        },
-        {
-          "admitted_row_count": 63,
-          "quartile": 1,
-          "row": 17,
-          "shot": 24768,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24768.manifest.json"
-        },
-        {
-          "admitted_row_count": 60,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24757,
-          "source_converged_slice_count": 27,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24757.manifest.json"
-        },
-        {
-          "admitted_row_count": 92,
-          "quartile": 3,
-          "row": 69,
-          "shot": 21845,
-          "source_converged_slice_count": 75,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21845.manifest.json"
-        },
-        {
-          "admitted_row_count": 90,
-          "quartile": 4,
-          "row": 90,
-          "shot": 21848,
-          "source_converged_slice_count": 70,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21848.manifest.json"
-        },
-        {
-          "admitted_row_count": 74,
-          "quartile": 1,
-          "row": 19,
-          "shot": 21855,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21855.manifest.json"
-        },
-        {
-          "admitted_row_count": 64,
-          "quartile": 2,
-          "row": 33,
-          "shot": 24775,
-          "source_converged_slice_count": 32,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24775.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 3,
-          "row": 66,
-          "shot": 21849,
-          "source_converged_slice_count": 60,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21849.manifest.json"
-        },
-        {
-          "admitted_row_count": 64,
-          "quartile": 4,
-          "row": 64,
-          "shot": 24764,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24764.manifest.json"
-        },
-        {
-          "admitted_row_count": 67,
-          "quartile": 1,
-          "row": 17,
-          "shot": 21854,
-          "source_converged_slice_count": 47,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21854.manifest.json"
-        },
-        {
-          "admitted_row_count": 62,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24777,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24777.manifest.json"
-        },
-        {
-          "admitted_row_count": 71,
-          "quartile": 3,
-          "row": 53,
-          "shot": 21844,
-          "source_converged_slice_count": 57,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21844.manifest.json"
-        },
-        {
-          "admitted_row_count": 70,
-          "quartile": 4,
-          "row": 70,
-          "shot": 21853,
-          "source_converged_slice_count": 44,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21853.manifest.json"
-        },
-        {
-          "admitted_row_count": 106,
-          "quartile": 1,
-          "row": 27,
-          "shot": 18596,
-          "source_converged_slice_count": 89,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18596.manifest.json"
-        },
-        {
-          "admitted_row_count": 61,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24778,
-          "source_converged_slice_count": 29,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24778.manifest.json"
-        },
-        {
-          "admitted_row_count": 56,
-          "quartile": 3,
-          "row": 42,
-          "shot": 21850,
-          "source_converged_slice_count": 51,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21850.manifest.json"
-        },
-        {
-          "admitted_row_count": 79,
-          "quartile": 4,
-          "row": 79,
-          "shot": 23862,
-          "source_converged_slice_count": 47,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23862.manifest.json"
-        },
-        {
-          "admitted_row_count": 55,
-          "quartile": 1,
-          "row": 15,
-          "shot": 21847,
-          "source_converged_slice_count": 45,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21847.manifest.json"
-        },
-        {
-          "admitted_row_count": 78,
-          "quartile": 2,
-          "row": 39,
-          "shot": 23865,
-          "source_converged_slice_count": 33,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23865.manifest.json"
-        },
-        {
-          "admitted_row_count": 53,
-          "quartile": 3,
-          "row": 40,
-          "shot": 21851,
-          "source_converged_slice_count": 41,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21851.manifest.json"
-        },
-        {
-          "admitted_row_count": 59,
-          "quartile": 4,
-          "row": 59,
-          "shot": 24776,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24776.manifest.json"
-        },
-        {
-          "admitted_row_count": 53,
-          "quartile": 1,
-          "row": 16,
-          "shot": 21846,
-          "source_converged_slice_count": 35,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21846.manifest.json"
-        },
-        {
-          "admitted_row_count": 96,
-          "quartile": 2,
-          "row": 59,
-          "shot": 29547,
-          "source_converged_slice_count": 82,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29547.manifest.json"
-        },
-        {
-          "admitted_row_count": 118,
-          "quartile": 3,
-          "row": 99,
-          "shot": 29371,
-          "source_converged_slice_count": 91,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29371.manifest.json"
-        },
-        {
-          "admitted_row_count": 116,
-          "quartile": 4,
-          "row": 126,
-          "shot": 29364,
-          "source_converged_slice_count": 86,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29364.manifest.json"
-        }
-      ],
-      "device_count": 2,
-      "first_call_wall_seconds": 22.9794392734766,
-      "first_step_converged_fraction": 0.0,
-      "guard_count": 0,
-      "guard_fraction": 0.0,
-      "guard_fraction_matches_sequential": false,
-      "measured_slices_per_repeat": 1536,
-      "nvidia_smi": {
-        "interval_seconds": 1.0,
-        "rows": [
-          {
-            "maximum_memory_used_mib": 555.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "compile_and_first_execution",
-            "sample_count": 19,
-            "uuid": "GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae"
-          },
-          {
-            "maximum_memory_used_mib": 1207.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "compile_and_first_execution",
-            "sample_count": 19,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
-          },
-          {
-            "maximum_memory_used_mib": 555.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae"
-          },
-          {
-            "maximum_memory_used_mib": 1207.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
-          }
-        ],
-        "sample_failures": []
-      },
-      "runtime": {
-        "devices": [
-          "cuda:0",
-          "cuda:1"
-        ],
-        "jax": "0.11.0",
-        "python": "3.14.2",
-        "slurm_job_id": "1263948"
-      },
-      "slices_per_second": 4533.814362941767,
-      "solve_exception_classes": [
-        "TypeError"
-      ],
-      "solve_exception_event_count": 10,
-      "solve_exceptions": [
-        {
-          "exception_class": "TypeError",
-          "phase": "compile_and_first_execution",
-          "repeat": null,
-          "slice_count": 512,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 512,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 512,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 512,
-          "step": 2
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 512,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 512,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 512,
-          "step": 2
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 512,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 512,
-          "step": 1
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 512,
-          "step": 2
-        }
-      ],
-      "status": "complete",
-      "step_count_per_repeat": 3,
-      "total_batch_per_step": 512,
-      "warmed_wall_seconds": {
-        "maximum": 0.35178306326270103,
-        "median": 0.3387875808402896,
-        "minimum": 0.33569621201604605,
-        "samples": [
-          0.35178306326270103,
-          0.3387875808402896,
-          0.33569621201604605
-        ]
-      }
-    },
-    {
-      "batch_per_device": 16,
-      "cache_directory": "/tmp/nova-forward-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-25e085280f54263e1c4c",
-      "compile_wall_definition": "first call including compilation minus median warmed wall per step",
-      "compile_wall_seconds_estimate": 58.213295893743634,
-      "conditioned_count": 48,
-      "conditioned_fraction": 1.0,
-      "converged_count": 0,
-      "converged_fraction": 0.0,
-      "converged_fraction_matches_sequential": false,
-      "corpus_shots": [
-        {
-          "admitted_row_count": 82,
-          "quartile": 1,
-          "row": 21,
-          "shot": 24751,
-          "source_converged_slice_count": 68,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24751.manifest.json"
-        },
-        {
-          "admitted_row_count": 89,
-          "quartile": 2,
-          "row": 45,
-          "shot": 24774,
-          "source_converged_slice_count": 52,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24774.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 3,
-          "row": 66,
-          "shot": 24766,
-          "source_converged_slice_count": 59,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24766.manifest.json"
-        },
-        {
-          "admitted_row_count": 87,
-          "quartile": 4,
-          "row": 87,
-          "shot": 24765,
-          "source_converged_slice_count": 40,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24765.manifest.json"
-        },
-        {
-          "admitted_row_count": 87,
-          "quartile": 1,
-          "row": 23,
-          "shot": 24761,
-          "source_converged_slice_count": 62,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24761.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 2,
-          "row": 45,
-          "shot": 24753,
-          "source_converged_slice_count": 61,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24753.manifest.json"
-        },
-        {
-          "admitted_row_count": 86,
-          "quartile": 3,
-          "row": 65,
-          "shot": 24760,
-          "source_converged_slice_count": 67,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24760.manifest.json"
-        },
-        {
-          "admitted_row_count": 82,
-          "quartile": 4,
-          "row": 82,
-          "shot": 24752,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24752.manifest.json"
-        },
-        {
-          "admitted_row_count": 81,
-          "quartile": 1,
-          "row": 21,
-          "shot": 24756,
-          "source_converged_slice_count": 67,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24756.manifest.json"
-        },
-        {
-          "admitted_row_count": 97,
-          "quartile": 2,
-          "row": 49,
-          "shot": 18475,
-          "source_converged_slice_count": 73,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18475.manifest.json"
-        },
-        {
-          "admitted_row_count": 78,
-          "quartile": 3,
-          "row": 59,
-          "shot": 24754,
-          "source_converged_slice_count": 66,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24754.manifest.json"
-        },
-        {
-          "admitted_row_count": 76,
-          "quartile": 4,
-          "row": 76,
-          "shot": 24772,
-          "source_converged_slice_count": 37,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24772.manifest.json"
-        },
-        {
-          "admitted_row_count": 72,
-          "quartile": 1,
-          "row": 19,
-          "shot": 24769,
-          "source_converged_slice_count": 36,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24769.manifest.json"
-        },
-        {
-          "admitted_row_count": 72,
-          "quartile": 2,
-          "row": 37,
-          "shot": 24755,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24755.manifest.json"
-        },
-        {
-          "admitted_row_count": 71,
-          "quartile": 3,
-          "row": 53,
-          "shot": 24771,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24771.manifest.json"
-        },
-        {
-          "admitted_row_count": 65,
-          "quartile": 4,
-          "row": 65,
-          "shot": 24763,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24763.manifest.json"
-        },
-        {
-          "admitted_row_count": 95,
-          "quartile": 1,
-          "row": 25,
-          "shot": 18076,
-          "source_converged_slice_count": 76,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18076.manifest.json"
-        },
-        {
-          "admitted_row_count": 118,
-          "quartile": 2,
-          "row": 59,
-          "shot": 21858,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21858.manifest.json"
-        },
-        {
-          "admitted_row_count": 115,
-          "quartile": 3,
-          "row": 87,
-          "shot": 21860,
-          "source_converged_slice_count": 102,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21860.manifest.json"
-        },
-        {
-          "admitted_row_count": 112,
-          "quartile": 4,
-          "row": 112,
-          "shot": 21861,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21861.manifest.json"
-        },
-        {
-          "admitted_row_count": 111,
-          "quartile": 1,
-          "row": 29,
-          "shot": 21862,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21862.manifest.json"
-        },
-        {
-          "admitted_row_count": 113,
-          "quartile": 2,
-          "row": 57,
-          "shot": 21859,
-          "source_converged_slice_count": 100,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21859.manifest.json"
-        },
-        {
-          "admitted_row_count": 106,
-          "quartile": 3,
-          "row": 80,
-          "shot": 21856,
-          "source_converged_slice_count": 99,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21856.manifest.json"
-        },
-        {
-          "admitted_row_count": 94,
-          "quartile": 4,
-          "row": 94,
-          "shot": 21857,
-          "source_converged_slice_count": 85,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21857.manifest.json"
-        },
-        {
-          "admitted_row_count": 63,
-          "quartile": 1,
-          "row": 17,
-          "shot": 24768,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24768.manifest.json"
-        },
-        {
-          "admitted_row_count": 60,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24757,
-          "source_converged_slice_count": 27,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24757.manifest.json"
-        },
-        {
-          "admitted_row_count": 92,
-          "quartile": 3,
-          "row": 69,
-          "shot": 21845,
-          "source_converged_slice_count": 75,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21845.manifest.json"
-        },
-        {
-          "admitted_row_count": 90,
-          "quartile": 4,
-          "row": 90,
-          "shot": 21848,
-          "source_converged_slice_count": 70,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21848.manifest.json"
-        },
-        {
-          "admitted_row_count": 74,
-          "quartile": 1,
-          "row": 19,
-          "shot": 21855,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21855.manifest.json"
-        },
-        {
-          "admitted_row_count": 64,
-          "quartile": 2,
-          "row": 33,
-          "shot": 24775,
-          "source_converged_slice_count": 32,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24775.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 3,
-          "row": 66,
-          "shot": 21849,
-          "source_converged_slice_count": 60,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21849.manifest.json"
-        },
-        {
-          "admitted_row_count": 64,
-          "quartile": 4,
-          "row": 64,
-          "shot": 24764,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24764.manifest.json"
-        },
-        {
-          "admitted_row_count": 67,
-          "quartile": 1,
-          "row": 17,
-          "shot": 21854,
-          "source_converged_slice_count": 47,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21854.manifest.json"
-        },
-        {
-          "admitted_row_count": 62,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24777,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24777.manifest.json"
-        },
-        {
-          "admitted_row_count": 71,
-          "quartile": 3,
-          "row": 53,
-          "shot": 21844,
-          "source_converged_slice_count": 57,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21844.manifest.json"
-        },
-        {
-          "admitted_row_count": 70,
-          "quartile": 4,
-          "row": 70,
-          "shot": 21853,
-          "source_converged_slice_count": 44,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21853.manifest.json"
-        },
-        {
-          "admitted_row_count": 106,
-          "quartile": 1,
-          "row": 27,
-          "shot": 18596,
-          "source_converged_slice_count": 89,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18596.manifest.json"
-        },
-        {
-          "admitted_row_count": 61,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24778,
-          "source_converged_slice_count": 29,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24778.manifest.json"
-        },
-        {
-          "admitted_row_count": 56,
-          "quartile": 3,
-          "row": 42,
-          "shot": 21850,
-          "source_converged_slice_count": 51,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21850.manifest.json"
-        },
-        {
-          "admitted_row_count": 79,
-          "quartile": 4,
-          "row": 79,
-          "shot": 23862,
-          "source_converged_slice_count": 47,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23862.manifest.json"
-        },
-        {
-          "admitted_row_count": 55,
-          "quartile": 1,
-          "row": 15,
-          "shot": 21847,
-          "source_converged_slice_count": 45,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21847.manifest.json"
-        },
-        {
-          "admitted_row_count": 78,
-          "quartile": 2,
-          "row": 39,
-          "shot": 23865,
-          "source_converged_slice_count": 33,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23865.manifest.json"
-        },
-        {
-          "admitted_row_count": 53,
-          "quartile": 3,
-          "row": 40,
-          "shot": 21851,
-          "source_converged_slice_count": 41,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21851.manifest.json"
-        },
-        {
-          "admitted_row_count": 59,
-          "quartile": 4,
-          "row": 59,
-          "shot": 24776,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24776.manifest.json"
-        },
-        {
-          "admitted_row_count": 53,
-          "quartile": 1,
-          "row": 16,
-          "shot": 21846,
-          "source_converged_slice_count": 35,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21846.manifest.json"
-        },
-        {
-          "admitted_row_count": 96,
-          "quartile": 2,
-          "row": 59,
-          "shot": 29547,
-          "source_converged_slice_count": 82,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29547.manifest.json"
-        },
-        {
-          "admitted_row_count": 118,
-          "quartile": 3,
-          "row": 99,
-          "shot": 29371,
-          "source_converged_slice_count": 91,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29371.manifest.json"
-        },
-        {
-          "admitted_row_count": 116,
-          "quartile": 4,
-          "row": 126,
-          "shot": 29364,
-          "source_converged_slice_count": 86,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29364.manifest.json"
-        }
-      ],
-      "device_count": 3,
-      "first_call_wall_seconds": 58.33192781545222,
-      "first_step_converged_fraction": 0.0,
-      "guard_count": 0,
-      "guard_fraction": 0.0,
-      "guard_fraction_matches_sequential": false,
-      "measured_slices_per_repeat": 48,
-      "nvidia_smi": {
-        "interval_seconds": 1.0,
-        "rows": [
-          {
-            "maximum_memory_used_mib": 543.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "compile_and_first_execution",
-            "sample_count": 46,
-            "uuid": "GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae"
-          },
-          {
-            "maximum_memory_used_mib": 1209.0,
-            "maximum_utilisation_percent": 19.0,
-            "mean_utilisation_percent": 0.4782608695652174,
-            "phase": "compile_and_first_execution",
-            "sample_count": 46,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
-          },
-          {
-            "maximum_memory_used_mib": 543.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "compile_and_first_execution",
-            "sample_count": 46,
-            "uuid": "GPU-d20e4d6a-c6d8-0b1b-6ff6-a6a8908e8386"
-          },
-          {
-            "maximum_memory_used_mib": 543.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae"
-          },
-          {
-            "maximum_memory_used_mib": 1209.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
-          },
-          {
-            "maximum_memory_used_mib": 543.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-d20e4d6a-c6d8-0b1b-6ff6-a6a8908e8386"
-          }
-        ],
-        "sample_failures": []
-      },
-      "runtime": {
-        "devices": [
-          "cuda:0",
-          "cuda:1",
-          "cuda:2"
-        ],
-        "jax": "0.11.0",
-        "python": "3.14.2",
-        "slurm_job_id": "1263948"
-      },
-      "slices_per_second": 404.61285047637284,
-      "solve_exception_classes": [
-        "TypeError"
-      ],
-      "solve_exception_event_count": 4,
-      "solve_exceptions": [
-        {
-          "exception_class": "TypeError",
-          "phase": "compile_and_first_execution",
-          "repeat": null,
-          "slice_count": 48,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 48,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 48,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 48,
-          "step": 0
-        }
-      ],
-      "status": "complete",
-      "step_count_per_repeat": 1,
-      "total_batch_per_step": 48,
-      "warmed_wall_seconds": {
-        "maximum": 0.12728897668421268,
-        "median": 0.11863192170858383,
-        "minimum": 0.11152222845703363,
-        "samples": [
-          0.12728897668421268,
-          0.11863192170858383,
-          0.11152222845703363
-        ]
-      }
-    },
-    {
-      "batch_per_device": 64,
-      "cache_directory": "/tmp/nova-forward-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-25e085280f54263e1c4c",
-      "compile_wall_definition": "first call including compilation minus median warmed wall per step",
-      "compile_wall_seconds_estimate": 24.241146315820515,
-      "conditioned_count": 192,
-      "conditioned_fraction": 1.0,
-      "converged_count": 0,
-      "converged_fraction": 0.0,
-      "converged_fraction_matches_sequential": false,
-      "corpus_shots": [
-        {
-          "admitted_row_count": 82,
-          "quartile": 1,
-          "row": 21,
-          "shot": 24751,
-          "source_converged_slice_count": 68,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24751.manifest.json"
-        },
-        {
-          "admitted_row_count": 89,
-          "quartile": 2,
-          "row": 45,
-          "shot": 24774,
-          "source_converged_slice_count": 52,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24774.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 3,
-          "row": 66,
-          "shot": 24766,
-          "source_converged_slice_count": 59,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24766.manifest.json"
-        },
-        {
-          "admitted_row_count": 87,
-          "quartile": 4,
-          "row": 87,
-          "shot": 24765,
-          "source_converged_slice_count": 40,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24765.manifest.json"
-        },
-        {
-          "admitted_row_count": 87,
-          "quartile": 1,
-          "row": 23,
-          "shot": 24761,
-          "source_converged_slice_count": 62,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24761.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 2,
-          "row": 45,
-          "shot": 24753,
-          "source_converged_slice_count": 61,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24753.manifest.json"
-        },
-        {
-          "admitted_row_count": 86,
-          "quartile": 3,
-          "row": 65,
-          "shot": 24760,
-          "source_converged_slice_count": 67,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24760.manifest.json"
-        },
-        {
-          "admitted_row_count": 82,
-          "quartile": 4,
-          "row": 82,
-          "shot": 24752,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24752.manifest.json"
-        },
-        {
-          "admitted_row_count": 81,
-          "quartile": 1,
-          "row": 21,
-          "shot": 24756,
-          "source_converged_slice_count": 67,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24756.manifest.json"
-        },
-        {
-          "admitted_row_count": 97,
-          "quartile": 2,
-          "row": 49,
-          "shot": 18475,
-          "source_converged_slice_count": 73,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18475.manifest.json"
-        },
-        {
-          "admitted_row_count": 78,
-          "quartile": 3,
-          "row": 59,
-          "shot": 24754,
-          "source_converged_slice_count": 66,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24754.manifest.json"
-        },
-        {
-          "admitted_row_count": 76,
-          "quartile": 4,
-          "row": 76,
-          "shot": 24772,
-          "source_converged_slice_count": 37,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24772.manifest.json"
-        },
-        {
-          "admitted_row_count": 72,
-          "quartile": 1,
-          "row": 19,
-          "shot": 24769,
-          "source_converged_slice_count": 36,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24769.manifest.json"
-        },
-        {
-          "admitted_row_count": 72,
-          "quartile": 2,
-          "row": 37,
-          "shot": 24755,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24755.manifest.json"
-        },
-        {
-          "admitted_row_count": 71,
-          "quartile": 3,
-          "row": 53,
-          "shot": 24771,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24771.manifest.json"
-        },
-        {
-          "admitted_row_count": 65,
-          "quartile": 4,
-          "row": 65,
-          "shot": 24763,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24763.manifest.json"
-        },
-        {
-          "admitted_row_count": 95,
-          "quartile": 1,
-          "row": 25,
-          "shot": 18076,
-          "source_converged_slice_count": 76,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18076.manifest.json"
-        },
-        {
-          "admitted_row_count": 118,
-          "quartile": 2,
-          "row": 59,
-          "shot": 21858,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21858.manifest.json"
-        },
-        {
-          "admitted_row_count": 115,
-          "quartile": 3,
-          "row": 87,
-          "shot": 21860,
-          "source_converged_slice_count": 102,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21860.manifest.json"
-        },
-        {
-          "admitted_row_count": 112,
-          "quartile": 4,
-          "row": 112,
-          "shot": 21861,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21861.manifest.json"
-        },
-        {
-          "admitted_row_count": 111,
-          "quartile": 1,
-          "row": 29,
-          "shot": 21862,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21862.manifest.json"
-        },
-        {
-          "admitted_row_count": 113,
-          "quartile": 2,
-          "row": 57,
-          "shot": 21859,
-          "source_converged_slice_count": 100,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21859.manifest.json"
-        },
-        {
-          "admitted_row_count": 106,
-          "quartile": 3,
-          "row": 80,
-          "shot": 21856,
-          "source_converged_slice_count": 99,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21856.manifest.json"
-        },
-        {
-          "admitted_row_count": 94,
-          "quartile": 4,
-          "row": 94,
-          "shot": 21857,
-          "source_converged_slice_count": 85,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21857.manifest.json"
-        },
-        {
-          "admitted_row_count": 63,
-          "quartile": 1,
-          "row": 17,
-          "shot": 24768,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24768.manifest.json"
-        },
-        {
-          "admitted_row_count": 60,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24757,
-          "source_converged_slice_count": 27,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24757.manifest.json"
-        },
-        {
-          "admitted_row_count": 92,
-          "quartile": 3,
-          "row": 69,
-          "shot": 21845,
-          "source_converged_slice_count": 75,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21845.manifest.json"
-        },
-        {
-          "admitted_row_count": 90,
-          "quartile": 4,
-          "row": 90,
-          "shot": 21848,
-          "source_converged_slice_count": 70,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21848.manifest.json"
-        },
-        {
-          "admitted_row_count": 74,
-          "quartile": 1,
-          "row": 19,
-          "shot": 21855,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21855.manifest.json"
-        },
-        {
-          "admitted_row_count": 64,
-          "quartile": 2,
-          "row": 33,
-          "shot": 24775,
-          "source_converged_slice_count": 32,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24775.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 3,
-          "row": 66,
-          "shot": 21849,
-          "source_converged_slice_count": 60,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21849.manifest.json"
-        },
-        {
-          "admitted_row_count": 64,
-          "quartile": 4,
-          "row": 64,
-          "shot": 24764,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24764.manifest.json"
-        },
-        {
-          "admitted_row_count": 67,
-          "quartile": 1,
-          "row": 17,
-          "shot": 21854,
-          "source_converged_slice_count": 47,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21854.manifest.json"
-        },
-        {
-          "admitted_row_count": 62,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24777,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24777.manifest.json"
-        },
-        {
-          "admitted_row_count": 71,
-          "quartile": 3,
-          "row": 53,
-          "shot": 21844,
-          "source_converged_slice_count": 57,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21844.manifest.json"
-        },
-        {
-          "admitted_row_count": 70,
-          "quartile": 4,
-          "row": 70,
-          "shot": 21853,
-          "source_converged_slice_count": 44,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21853.manifest.json"
-        },
-        {
-          "admitted_row_count": 106,
-          "quartile": 1,
-          "row": 27,
-          "shot": 18596,
-          "source_converged_slice_count": 89,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18596.manifest.json"
-        },
-        {
-          "admitted_row_count": 61,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24778,
-          "source_converged_slice_count": 29,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24778.manifest.json"
-        },
-        {
-          "admitted_row_count": 56,
-          "quartile": 3,
-          "row": 42,
-          "shot": 21850,
-          "source_converged_slice_count": 51,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21850.manifest.json"
-        },
-        {
-          "admitted_row_count": 79,
-          "quartile": 4,
-          "row": 79,
-          "shot": 23862,
-          "source_converged_slice_count": 47,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23862.manifest.json"
-        },
-        {
-          "admitted_row_count": 55,
-          "quartile": 1,
-          "row": 15,
-          "shot": 21847,
-          "source_converged_slice_count": 45,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21847.manifest.json"
-        },
-        {
-          "admitted_row_count": 78,
-          "quartile": 2,
-          "row": 39,
-          "shot": 23865,
-          "source_converged_slice_count": 33,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23865.manifest.json"
-        },
-        {
-          "admitted_row_count": 53,
-          "quartile": 3,
-          "row": 40,
-          "shot": 21851,
-          "source_converged_slice_count": 41,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21851.manifest.json"
-        },
-        {
-          "admitted_row_count": 59,
-          "quartile": 4,
-          "row": 59,
-          "shot": 24776,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24776.manifest.json"
-        },
-        {
-          "admitted_row_count": 53,
-          "quartile": 1,
-          "row": 16,
-          "shot": 21846,
-          "source_converged_slice_count": 35,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21846.manifest.json"
-        },
-        {
-          "admitted_row_count": 96,
-          "quartile": 2,
-          "row": 59,
-          "shot": 29547,
-          "source_converged_slice_count": 82,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29547.manifest.json"
-        },
-        {
-          "admitted_row_count": 118,
-          "quartile": 3,
-          "row": 99,
-          "shot": 29371,
-          "source_converged_slice_count": 91,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29371.manifest.json"
-        },
-        {
-          "admitted_row_count": 116,
-          "quartile": 4,
-          "row": 126,
-          "shot": 29364,
-          "source_converged_slice_count": 86,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29364.manifest.json"
-        }
-      ],
-      "device_count": 3,
-      "first_call_wall_seconds": 24.35556717403233,
-      "first_step_converged_fraction": 0.0,
-      "guard_count": 0,
-      "guard_fraction": 0.0,
-      "guard_fraction_matches_sequential": false,
-      "measured_slices_per_repeat": 192,
-      "nvidia_smi": {
-        "interval_seconds": 1.0,
-        "rows": [
-          {
-            "maximum_memory_used_mib": 543.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "compile_and_first_execution",
-            "sample_count": 19,
-            "uuid": "GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae"
-          },
-          {
-            "maximum_memory_used_mib": 1209.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "compile_and_first_execution",
-            "sample_count": 19,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
-          },
-          {
-            "maximum_memory_used_mib": 543.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "compile_and_first_execution",
-            "sample_count": 19,
-            "uuid": "GPU-d20e4d6a-c6d8-0b1b-6ff6-a6a8908e8386"
-          },
-          {
-            "maximum_memory_used_mib": 543.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae"
-          },
-          {
-            "maximum_memory_used_mib": 1209.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
-          },
-          {
-            "maximum_memory_used_mib": 543.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "warmed_execution",
-            "sample_count": 1,
-            "uuid": "GPU-d20e4d6a-c6d8-0b1b-6ff6-a6a8908e8386"
-          }
-        ],
-        "sample_failures": []
-      },
-      "runtime": {
-        "devices": [
-          "cuda:0",
-          "cuda:1",
-          "cuda:2"
-        ],
-        "jax": "0.11.0",
-        "python": "3.14.2",
-        "slurm_job_id": "1263948"
-      },
-      "slices_per_second": 1678.015730703317,
-      "solve_exception_classes": [
-        "TypeError"
-      ],
-      "solve_exception_event_count": 4,
-      "solve_exceptions": [
-        {
-          "exception_class": "TypeError",
-          "phase": "compile_and_first_execution",
-          "repeat": null,
-          "slice_count": 192,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 192,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 192,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 192,
-          "step": 0
-        }
-      ],
-      "status": "complete",
-      "step_count_per_repeat": 1,
-      "total_batch_per_step": 192,
-      "warmed_wall_seconds": {
-        "maximum": 0.11744269449263811,
-        "median": 0.11442085821181536,
-        "minimum": 0.11076187342405319,
-        "samples": [
-          0.11744269449263811,
-          0.11442085821181536,
-          0.11076187342405319
-        ]
-      }
-    },
-    {
-      "batch_per_device": 256,
-      "cache_directory": "/tmp/nova-forward-cache/user-39486/host-98dci4-gpu-0003.iter.org/nova/jax-compilation/runtime-25e085280f54263e1c4c",
-      "compile_wall_definition": "first call including compilation minus median warmed wall per step",
-      "compile_wall_seconds_estimate": 23.01479694712907,
-      "conditioned_count": 768,
-      "conditioned_fraction": 1.0,
-      "converged_count": 0,
-      "converged_fraction": 0.0,
-      "converged_fraction_matches_sequential": false,
-      "corpus_shots": [
-        {
-          "admitted_row_count": 82,
-          "quartile": 1,
-          "row": 21,
-          "shot": 24751,
-          "source_converged_slice_count": 68,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24751.manifest.json"
-        },
-        {
-          "admitted_row_count": 89,
-          "quartile": 2,
-          "row": 45,
-          "shot": 24774,
-          "source_converged_slice_count": 52,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24774.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 3,
-          "row": 66,
-          "shot": 24766,
-          "source_converged_slice_count": 59,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24766.manifest.json"
-        },
-        {
-          "admitted_row_count": 87,
-          "quartile": 4,
-          "row": 87,
-          "shot": 24765,
-          "source_converged_slice_count": 40,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24765.manifest.json"
-        },
-        {
-          "admitted_row_count": 87,
-          "quartile": 1,
-          "row": 23,
-          "shot": 24761,
-          "source_converged_slice_count": 62,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24761.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 2,
-          "row": 45,
-          "shot": 24753,
-          "source_converged_slice_count": 61,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24753.manifest.json"
-        },
-        {
-          "admitted_row_count": 86,
-          "quartile": 3,
-          "row": 65,
-          "shot": 24760,
-          "source_converged_slice_count": 67,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24760.manifest.json"
-        },
-        {
-          "admitted_row_count": 82,
-          "quartile": 4,
-          "row": 82,
-          "shot": 24752,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24752.manifest.json"
-        },
-        {
-          "admitted_row_count": 81,
-          "quartile": 1,
-          "row": 21,
-          "shot": 24756,
-          "source_converged_slice_count": 67,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24756.manifest.json"
-        },
-        {
-          "admitted_row_count": 97,
-          "quartile": 2,
-          "row": 49,
-          "shot": 18475,
-          "source_converged_slice_count": 73,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18475.manifest.json"
-        },
-        {
-          "admitted_row_count": 78,
-          "quartile": 3,
-          "row": 59,
-          "shot": 24754,
-          "source_converged_slice_count": 66,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24754.manifest.json"
-        },
-        {
-          "admitted_row_count": 76,
-          "quartile": 4,
-          "row": 76,
-          "shot": 24772,
-          "source_converged_slice_count": 37,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24772.manifest.json"
-        },
-        {
-          "admitted_row_count": 72,
-          "quartile": 1,
-          "row": 19,
-          "shot": 24769,
-          "source_converged_slice_count": 36,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24769.manifest.json"
-        },
-        {
-          "admitted_row_count": 72,
-          "quartile": 2,
-          "row": 37,
-          "shot": 24755,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24755.manifest.json"
-        },
-        {
-          "admitted_row_count": 71,
-          "quartile": 3,
-          "row": 53,
-          "shot": 24771,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24771.manifest.json"
-        },
-        {
-          "admitted_row_count": 65,
-          "quartile": 4,
-          "row": 65,
-          "shot": 24763,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24763.manifest.json"
-        },
-        {
-          "admitted_row_count": 95,
-          "quartile": 1,
-          "row": 25,
-          "shot": 18076,
-          "source_converged_slice_count": 76,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18076.manifest.json"
-        },
-        {
-          "admitted_row_count": 118,
-          "quartile": 2,
-          "row": 59,
-          "shot": 21858,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21858.manifest.json"
-        },
-        {
-          "admitted_row_count": 115,
-          "quartile": 3,
-          "row": 87,
-          "shot": 21860,
-          "source_converged_slice_count": 102,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21860.manifest.json"
-        },
-        {
-          "admitted_row_count": 112,
-          "quartile": 4,
-          "row": 112,
-          "shot": 21861,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21861.manifest.json"
-        },
-        {
-          "admitted_row_count": 111,
-          "quartile": 1,
-          "row": 29,
-          "shot": 21862,
-          "source_converged_slice_count": 101,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21862.manifest.json"
-        },
-        {
-          "admitted_row_count": 113,
-          "quartile": 2,
-          "row": 57,
-          "shot": 21859,
-          "source_converged_slice_count": 100,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21859.manifest.json"
-        },
-        {
-          "admitted_row_count": 106,
-          "quartile": 3,
-          "row": 80,
-          "shot": 21856,
-          "source_converged_slice_count": 99,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21856.manifest.json"
-        },
-        {
-          "admitted_row_count": 94,
-          "quartile": 4,
-          "row": 94,
-          "shot": 21857,
-          "source_converged_slice_count": 85,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21857.manifest.json"
-        },
-        {
-          "admitted_row_count": 63,
-          "quartile": 1,
-          "row": 17,
-          "shot": 24768,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24768.manifest.json"
-        },
-        {
-          "admitted_row_count": 60,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24757,
-          "source_converged_slice_count": 27,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24757.manifest.json"
-        },
-        {
-          "admitted_row_count": 92,
-          "quartile": 3,
-          "row": 69,
-          "shot": 21845,
-          "source_converged_slice_count": 75,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21845.manifest.json"
-        },
-        {
-          "admitted_row_count": 90,
-          "quartile": 4,
-          "row": 90,
-          "shot": 21848,
-          "source_converged_slice_count": 70,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21848.manifest.json"
-        },
-        {
-          "admitted_row_count": 74,
-          "quartile": 1,
-          "row": 19,
-          "shot": 21855,
-          "source_converged_slice_count": 56,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21855.manifest.json"
-        },
-        {
-          "admitted_row_count": 64,
-          "quartile": 2,
-          "row": 33,
-          "shot": 24775,
-          "source_converged_slice_count": 32,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24775.manifest.json"
-        },
-        {
-          "admitted_row_count": 88,
-          "quartile": 3,
-          "row": 66,
-          "shot": 21849,
-          "source_converged_slice_count": 60,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21849.manifest.json"
-        },
-        {
-          "admitted_row_count": 64,
-          "quartile": 4,
-          "row": 64,
-          "shot": 24764,
-          "source_converged_slice_count": 30,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24764.manifest.json"
-        },
-        {
-          "admitted_row_count": 67,
-          "quartile": 1,
-          "row": 17,
-          "shot": 21854,
-          "source_converged_slice_count": 47,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21854.manifest.json"
-        },
-        {
-          "admitted_row_count": 62,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24777,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24777.manifest.json"
-        },
-        {
-          "admitted_row_count": 71,
-          "quartile": 3,
-          "row": 53,
-          "shot": 21844,
-          "source_converged_slice_count": 57,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21844.manifest.json"
-        },
-        {
-          "admitted_row_count": 70,
-          "quartile": 4,
-          "row": 70,
-          "shot": 21853,
-          "source_converged_slice_count": 44,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21853.manifest.json"
-        },
-        {
-          "admitted_row_count": 106,
-          "quartile": 1,
-          "row": 27,
-          "shot": 18596,
-          "source_converged_slice_count": 89,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/18596.manifest.json"
-        },
-        {
-          "admitted_row_count": 61,
-          "quartile": 2,
-          "row": 31,
-          "shot": 24778,
-          "source_converged_slice_count": 29,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24778.manifest.json"
-        },
-        {
-          "admitted_row_count": 56,
-          "quartile": 3,
-          "row": 42,
-          "shot": 21850,
-          "source_converged_slice_count": 51,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21850.manifest.json"
-        },
-        {
-          "admitted_row_count": 79,
-          "quartile": 4,
-          "row": 79,
-          "shot": 23862,
-          "source_converged_slice_count": 47,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23862.manifest.json"
-        },
-        {
-          "admitted_row_count": 55,
-          "quartile": 1,
-          "row": 15,
-          "shot": 21847,
-          "source_converged_slice_count": 45,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21847.manifest.json"
-        },
-        {
-          "admitted_row_count": 78,
-          "quartile": 2,
-          "row": 39,
-          "shot": 23865,
-          "source_converged_slice_count": 33,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/23865.manifest.json"
-        },
-        {
-          "admitted_row_count": 53,
-          "quartile": 3,
-          "row": 40,
-          "shot": 21851,
-          "source_converged_slice_count": 41,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21851.manifest.json"
-        },
-        {
-          "admitted_row_count": 59,
-          "quartile": 4,
-          "row": 59,
-          "shot": 24776,
-          "source_converged_slice_count": 31,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/24776.manifest.json"
-        },
-        {
-          "admitted_row_count": 53,
-          "quartile": 1,
-          "row": 16,
-          "shot": 21846,
-          "source_converged_slice_count": 35,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/21846.manifest.json"
-        },
-        {
-          "admitted_row_count": 96,
-          "quartile": 2,
-          "row": 59,
-          "shot": 29547,
-          "source_converged_slice_count": 82,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29547.manifest.json"
-        },
-        {
-          "admitted_row_count": 118,
-          "quartile": 3,
-          "row": 99,
-          "shot": 29371,
-          "source_converged_slice_count": 91,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29371.manifest.json"
-        },
-        {
-          "admitted_row_count": 116,
-          "quartile": 4,
-          "row": 126,
-          "shot": 29364,
-          "source_converged_slice_count": 86,
-          "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29364.manifest.json"
-        }
-      ],
-      "device_count": 3,
-      "first_call_wall_seconds": 23.1266251206398,
-      "first_step_converged_fraction": 0.0,
-      "guard_count": 0,
-      "guard_fraction": 0.0,
-      "guard_fraction_matches_sequential": false,
-      "measured_slices_per_repeat": 768,
-      "nvidia_smi": {
-        "interval_seconds": 1.0,
-        "rows": [
-          {
-            "maximum_memory_used_mib": 557.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "compile_and_first_execution",
-            "sample_count": 20,
-            "uuid": "GPU-a9a60ed1-3e39-a65e-f004-ede343f9b2ae"
-          },
-          {
-            "maximum_memory_used_mib": 1209.0,
-            "maximum_utilisation_percent": 32.0,
-            "mean_utilisation_percent": 1.7,
-            "phase": "compile_and_first_execution",
-            "sample_count": 20,
-            "uuid": "GPU-ca419d0a-a452-e2ef-a8dc-90ce956cce04"
-          },
-          {
-            "maximum_memory_used_mib": 557.0,
-            "maximum_utilisation_percent": 0.0,
-            "mean_utilisation_percent": 0.0,
-            "phase": "compile_and_first_execution",
-            "sample_count": 20,
-            "uuid": "GPU-d20e4d6a-c6d8-0b1b-6ff6-a6a8908e8386"
-          }
-        ],
-        "sample_failures": []
-      },
-      "runtime": {
-        "devices": [
-          "cuda:0",
-          "cuda:1",
-          "cuda:2"
-        ],
-        "jax": "0.11.0",
-        "python": "3.14.2",
-        "slurm_job_id": "1263948"
-      },
-      "slices_per_second": 6867.679010480378,
-      "solve_exception_classes": [
-        "TypeError"
-      ],
-      "solve_exception_event_count": 4,
-      "solve_exceptions": [
-        {
-          "exception_class": "TypeError",
-          "phase": "compile_and_first_execution",
-          "repeat": null,
-          "slice_count": 768,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 0,
-          "slice_count": 768,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 1,
-          "slice_count": 768,
-          "step": 0
-        },
-        {
-          "exception_class": "TypeError",
-          "phase": "warmed_execution",
-          "repeat": 2,
-          "slice_count": 768,
-          "step": 0
-        }
-      ],
-      "status": "complete",
-      "step_count_per_repeat": 1,
-      "total_batch_per_step": 768,
-      "warmed_wall_seconds": {
-        "maximum": 0.1258105868473649,
-        "median": 0.11182817351073027,
-        "minimum": 0.11076247319579124,
-        "samples": [
-          0.1258105868473649,
-          0.11076247319579124,
-          0.11182817351073027
+          241.74209337681532,
+          241.12033855263144,
+          241.13097512815148
         ]
       }
     }
@@ -4733,7 +1376,7 @@
     2,
     3
   ],
-  "reference_wall_seconds": 720.642091345042,
+  "reference_wall_seconds": 618.5359453512356,
   "sampling": {
     "excluded_shot_range": [
       22475,
@@ -5136,7 +1779,8 @@
         "source_manifest": "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29364.manifest.json"
       }
     ],
-    "exception_slice_count": 7,
+    "exception_slice_count": 8,
+    "first_exception_traceback": "Traceback (most recent call last):\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/pfs-batched-engine-acceptance/benchmarks/batched_labeller_receipt.py\", line 340, in _sequential_reference\n    centroid = profile.current_moment_observation(\n               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^\n        free.state,\n        ^^^^^^^^^^^\n    ...<2 lines>...\n        requested_class=requested,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ).stack()[1:]\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/pfs-batched-engine-acceptance/nova/equilibrium/forward.py\", line 1037, in current_moment_observation\n    current, _integrals, masks, _topology, _amplitude = self._integral_state(\n                                                        ~~~~~~~~~~~~~~~~~~~~^\n        flux, requested_class=requested_class, target_current=target_current\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/pfs-batched-engine-acceptance/nova/equilibrium/forward.py\", line 1198, in _integral_state\n    masks, topology = self.operator.read(flux, requested_class)\n                      ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/pfs-batched-engine-acceptance/nova/equilibrium/forward_operator.py\", line 1841, in read\n    require_qualified_axis(admitted)\n    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^\n  File \"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/pfs-batched-engine-acceptance/nova/equilibrium/topology.py\", line 181, in require_qualified_axis\n    raise NoQualifiedAxisError(\n        \"no qualified magnetic-axis candidate has a resolved component\"\n    )\nnova.equilibrium.topology.NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component\n",
     "guard_count": 7,
     "guard_fraction": 0.14583333333333334,
     "slice_count": 48,
@@ -5145,6 +1789,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.6988984823618526,
+          -0.0028776364611559275
+        ],
         "guard": false,
         "index": 0
       },
@@ -5155,6 +1804,19 @@
           "NoQualifiedAxisError",
           "NoQualifiedAxisError"
         ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
         "guard": false,
         "index": 1
       },
@@ -5162,6 +1824,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.0339062335904134,
+          -0.005086980117602613
+        ],
         "guard": false,
         "index": 2
       },
@@ -5170,8 +1837,21 @@
         "converged": false,
         "exception_classes": [
           "NoQualifiedAxisError",
-          "NoQualifiedAxisError"
+          "ConcretizationTypeError"
         ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "ConcretizationTypeError",
+            "exception_message": "Abstract tracer value encountered where concrete value is expected: traced array with shape float64[]\nThe problem arose with the `float` function. If trying to convert the data type of a value, try using `x.astype(float)` or `jnp.array(x, float)` instead.\n\nSee https://docs.jax.dev/en/latest/errors.html#jax.errors.ConcretizationTypeError",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
         "guard": false,
         "index": 3
       },
@@ -5179,6 +1859,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.6801421479962487,
+          -0.008456547763011002
+        ],
         "guard": false,
         "index": 4
       },
@@ -5186,6 +1871,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.582789530118108,
+          0.028004731296914182
+        ],
         "guard": false,
         "index": 5
       },
@@ -5193,6 +1883,11 @@
         "conditioned": false,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.8241443306938431,
+          0.025440155463402715
+        ],
         "guard": true,
         "index": 6
       },
@@ -5200,6 +1895,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9596658343572365,
+          -0.006007926380698604
+        ],
         "guard": false,
         "index": 7
       },
@@ -5207,6 +1907,11 @@
         "conditioned": false,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7124636684486297,
+          -0.002780495227470871
+        ],
         "guard": true,
         "index": 8
       },
@@ -5214,13 +1919,23 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.8722704911080437,
+          0.07217365044100044
+        ],
         "guard": false,
         "index": 9
       },
       {
         "conditioned": true,
-        "converged": false,
+        "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7521563834323233,
+          0.017878132802292716
+        ],
         "guard": false,
         "index": 10
       },
@@ -5228,6 +1943,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9892187317589723,
+          0.002339024873622004
+        ],
         "guard": false,
         "index": 11
       },
@@ -5235,6 +1955,11 @@
         "conditioned": false,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.6912104187691954,
+          -0.0025500191561377266
+        ],
         "guard": true,
         "index": 12
       },
@@ -5242,6 +1967,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.5975928058293832,
+          -0.11632710888554096
+        ],
         "guard": false,
         "index": 13
       },
@@ -5252,6 +1982,19 @@
           "NoQualifiedAxisError",
           "NoQualifiedAxisError"
         ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
         "guard": false,
         "index": 14
       },
@@ -5262,6 +2005,19 @@
           "NoQualifiedAxisError",
           "NoQualifiedAxisError"
         ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
         "guard": false,
         "index": 15
       },
@@ -5269,6 +2025,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7112660993394494,
+          -0.0026480396828205376
+        ],
         "guard": false,
         "index": 16
       },
@@ -5276,6 +2037,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.799347025925693,
+          0.01867289418998756
+        ],
         "guard": false,
         "index": 17
       },
@@ -5283,6 +2049,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.0203449715096495,
+          -0.01579969278312484
+        ],
         "guard": false,
         "index": 18
       },
@@ -5290,6 +2061,11 @@
         "conditioned": true,
         "converged": false,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9354968439630544,
+          -0.05100233289599291
+        ],
         "guard": false,
         "index": 19
       },
@@ -5297,13 +2073,34 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7205240299452953,
+          -0.0035935879524435737
+        ],
         "guard": false,
         "index": 20
       },
       {
         "conditioned": true,
-        "converged": true,
-        "exception_classes": [],
+        "converged": false,
+        "exception_classes": [
+          "NoQualifiedAxisError",
+          "NoQualifiedAxisError"
+        ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
         "guard": false,
         "index": 21
       },
@@ -5311,6 +2108,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.0262274073969297,
+          -0.015989634733654882
+        ],
         "guard": false,
         "index": 22
       },
@@ -5318,6 +2120,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.067653397537929,
+          -0.0012720995200543265
+        ],
         "guard": false,
         "index": 23
       },
@@ -5325,6 +2132,11 @@
         "conditioned": false,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.6906083358402538,
+          -0.0027999293350779476
+        ],
         "guard": true,
         "index": 24
       },
@@ -5332,6 +2144,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.695914493219109,
+          0.012868733597348716
+        ],
         "guard": false,
         "index": 25
       },
@@ -5339,6 +2156,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.0001945581826155,
+          -0.008877634119572281
+        ],
         "guard": false,
         "index": 26
       },
@@ -5346,6 +2168,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.0857093118314618,
+          -0.034336982273324386
+        ],
         "guard": false,
         "index": 27
       },
@@ -5353,6 +2180,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7916828644061017,
+          -0.014587909953221937
+        ],
         "guard": true,
         "index": 28
       },
@@ -5360,6 +2192,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7038070819375073,
+          -0.040565696077620686
+        ],
         "guard": false,
         "index": 29
       },
@@ -5367,6 +2204,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9855023925643218,
+          0.010900707575676708
+        ],
         "guard": false,
         "index": 30
       },
@@ -5377,6 +2219,19 @@
           "NoQualifiedAxisError",
           "NoQualifiedAxisError"
         ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
         "guard": false,
         "index": 31
       },
@@ -5384,6 +2239,11 @@
         "conditioned": true,
         "converged": false,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.732133141574653,
+          0.0003041732379847003
+        ],
         "guard": false,
         "index": 32
       },
@@ -5391,6 +2251,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7264208645060559,
+          -0.015569253126091979
+        ],
         "guard": false,
         "index": 33
       },
@@ -5398,6 +2263,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9335371203905514,
+          -0.03315298202216298
+        ],
         "guard": false,
         "index": 34
       },
@@ -5405,6 +2275,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          1.0075384268429215,
+          -0.028866631069012823
+        ],
         "guard": false,
         "index": 35
       },
@@ -5412,6 +2287,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7122272946088084,
+          -0.0031126850206022122
+        ],
         "guard": false,
         "index": 36
       },
@@ -5419,6 +2299,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7245661339390985,
+          -0.008617654663962401
+        ],
         "guard": false,
         "index": 37
       },
@@ -5426,6 +2311,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9368822700451719,
+          -0.017279873741118255
+        ],
         "guard": false,
         "index": 38
       },
@@ -5436,6 +2326,19 @@
           "NoQualifiedAxisError",
           "NoQualifiedAxisError"
         ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
         "guard": false,
         "index": 39
       },
@@ -5443,6 +2346,11 @@
         "conditioned": false,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.709935358790536,
+          -0.019137763812893196
+        ],
         "guard": true,
         "index": 40
       },
@@ -5450,6 +2358,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.7028078177072314,
+          -0.14545847835016873
+        ],
         "guard": false,
         "index": 41
       },
@@ -5457,6 +2370,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9212253229992249,
+          -0.03402078342339249
+        ],
         "guard": false,
         "index": 42
       },
@@ -5467,6 +2385,19 @@
           "NoQualifiedAxisError",
           "NoQualifiedAxisError"
         ],
+        "exceptions": [
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "guard"
+          },
+          {
+            "exception_class": "NoQualifiedAxisError",
+            "exception_message": "no qualified magnetic-axis candidate has a resolved component",
+            "stage": "conditioned"
+          }
+        ],
+        "free_centroid": null,
         "guard": false,
         "index": 43
       },
@@ -5474,6 +2405,11 @@
         "conditioned": false,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.718717092932007,
+          -0.010880955578759547
+        ],
         "guard": true,
         "index": 44
       },
@@ -5481,6 +2417,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.5985281726911346,
+          -0.0402432313736235
+        ],
         "guard": false,
         "index": 45
       },
@@ -5488,6 +2429,11 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9017306567051607,
+          -0.23499502395288935
+        ],
         "guard": false,
         "index": 46
       },
@@ -5495,12 +2441,58 @@
         "conditioned": true,
         "converged": true,
         "exception_classes": [],
+        "exceptions": [],
+        "free_centroid": [
+          0.9845784606417545,
+          -0.15687199330102167
+        ],
         "guard": false,
         "index": 47
       }
     ]
   },
-  "slurm_job_id": "1263948",
-  "source_revision": "6fa5a29cabc9c4ce844213181b65883c50a4c9b8",
-  "status": "failed-fraction-parity"
+  "selected_card_measurements": [
+    {
+      "batch_per_device": 256,
+      "card_count": 1,
+      "converged_count": 608,
+      "fraction_parity": true,
+      "job_id": "1267748",
+      "per_card_slices_per_second": 3.184991059700392,
+      "runtime_error_count": 0,
+      "slices_per_second": 3.184991059700392
+    },
+    {
+      "batch_per_device": 256,
+      "card_count": 2,
+      "converged_count": 1216,
+      "fraction_parity": true,
+      "job_id": "1267778",
+      "per_card_slices_per_second": 3.1493174367831203,
+      "runtime_error_count": 0,
+      "slices_per_second": 6.2986348735662405
+    },
+    {
+      "batch_per_device": 256,
+      "card_count": 3,
+      "converged_count": 608,
+      "fraction_parity": true,
+      "job_id": "1267802",
+      "per_card_slices_per_second": 3.1685084191679693,
+      "runtime_error_count": 0,
+      "slices_per_second": 9.505525257503908
+    }
+  ],
+  "selection": {
+    "completed_device_counts": [
+      1,
+      2,
+      3
+    ],
+    "selected_batch_per_device": 256,
+    "selection_basis": "highest one-card warmed throughput among completed candidates"
+  },
+  "slurm_job_id": "1267748",
+  "source_revision": "cb8818e9ad5fbdff7827450889a8ffed371b42de",
+  "status": "complete-selected"
 }

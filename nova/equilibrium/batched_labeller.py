@@ -54,8 +54,13 @@ class BatchedLabelledResult(NamedTuple):
     trips: jax.Array
     terminal_residual: jax.Array
     achieved_centroid: jax.Array
+    free_centroid: jax.Array
+    free_converged: jax.Array
+    free_trips: jax.Array
+    newton_steps_per_trip: jax.Array
     conditioned: jax.Array
     guard: jax.Array
+    applied_current: jax.Array
     labelled_flux: ForwardLabelledFlux
 
     @property
@@ -479,6 +484,7 @@ class BatchedLabeller:
         newton_steps: int = reduced_newton.NEWTON_STEPS,
         active_set_steps: int = reduced_newton.ACTIVE_SET_STEPS,
         guard_tolerance: float = 5.0e-2,
+        condition_on_guard_failure: bool = True,
         constraint_pairs: tuple[ConstraintPair, ...] = (),
     ):
         self.profile = profile
@@ -487,6 +493,7 @@ class BatchedLabeller:
         self.newton_steps = newton_steps
         self.active_set_steps = active_set_steps
         self.guard_tolerance = guard_tolerance
+        self.condition_on_guard_failure = condition_on_guard_failure
         self.constraint_pairs = tuple(constraint_pairs)
         self._derive_centroid_pairs = not self.constraint_pairs
         self._compiled = None
@@ -568,6 +575,7 @@ class BatchedLabeller:
         def one(
             initial_value,
             external_value,
+            prescribed_value,
             target_value,
             requested_value,
             reference,
@@ -599,16 +607,28 @@ class BatchedLabeller:
                 free_state,
                 support=MomentIntegralSupport.ALL_DOMAIN,
                 target_current=target_value,
+                requested_class=requested_value,
             ).stack()[1:]
-            has_reference = jnp.all(jnp.isfinite(reference))
-            guard = jnp.logical_not(has_reference) | (
-                jnp.linalg.norm(free_centroid - reference) <= self.guard_tolerance
+            free_admitted = self.operator._fixed_design_read(
+                jnp.asarray(free_state)[: self.operator.physical_node_number],
+                requested_value,
+            )[3]
+            reference_mask = jnp.isfinite(reference)
+            has_reference = jnp.any(reference_mask)
+            reference_error = jnp.where(reference_mask, free_centroid - reference, 0.0)
+            guard = free_admitted & (
+                jnp.logical_not(has_reference)
+                | (jnp.linalg.norm(reference_error) <= self.guard_tolerance)
             )
-            needs = active & (jnp.logical_not(free[4]) | jnp.logical_not(guard))
+            needs = (
+                self.condition_on_guard_failure
+                & active
+                & (jnp.logical_not(free[4]) | jnp.logical_not(guard))
+            )
 
             def conditioned(_):
                 if conditioned_solver is None:
-                    return free, jnp.asarray(True)
+                    return free, jnp.asarray(True), jnp.zeros_like(prescribed_value)
                 if self._derive_centroid_pairs:
                     rows = (
                         _centroid_pair(
@@ -652,29 +672,53 @@ class BatchedLabeller:
                     requested_value,
                     row_arguments,
                 )
-                return result, jnp.asarray(True)
+                unknowns = result[1][-initial_unknown.size :]
+                current_delta = jnp.zeros_like(prescribed_value)
+                offset = 0
+                for pair in rows:
+                    width = pair.row_count
+                    normalized = unknowns[offset : offset + width]
+                    current_delta = current_delta + (
+                        jnp.asarray(pair.unknown.direction)
+                        @ pair.unknown.physical_value(normalized)
+                    )
+                    offset += width
+                return result, jnp.asarray(True), current_delta
 
-            solved, conditioned = jax.lax.cond(
-                needs, conditioned, lambda _: (free, False), None
+            solved, conditioned, current_delta = jax.lax.cond(
+                needs,
+                conditioned,
+                lambda _: (free, jnp.asarray(False), jnp.zeros_like(prescribed_value)),
+                None,
             )
             state_value = solved[0]
+            selected_admitted = self.operator._fixed_design_read(
+                jnp.asarray(state_value)[: self.operator.physical_node_number],
+                requested_value,
+            )[3]
             masks, topology = self.operator.read(state_value, requested_value)
             labelled = self.profile._labelled_flux(state_value, masks, topology)
             centroid = self.profile.current_moment_observation(
                 state_value,
                 support=MomentIntegralSupport.ALL_DOMAIN,
                 target_current=target_value,
+                requested_class=requested_value,
             ).stack()[1:]
             centroid = _reported_centroid(centroid)
             return (
                 jnp.where(active, state_value, initial_value),
-                jnp.where(active, solved[4], False),
+                jnp.where(active, solved[4] & selected_admitted, False),
                 jnp.where(active, solved[5], -1),
                 jnp.where(active, solved[7], 0),
                 jnp.where(active, solved[6], jnp.nan),
                 jnp.where(active, centroid, jnp.nan),
+                jnp.where(active, free_centroid, jnp.nan),
+                jnp.where(active, free[4], False),
+                jnp.where(active, free[7], 0),
+                jnp.where(active, solved[12], 0),
                 jnp.where(active, conditioned, False),
                 jnp.where(active, guard, False),
+                jnp.where(active, prescribed_value + current_delta, prescribed_value),
                 labelled,
             )
 
@@ -688,6 +732,7 @@ class BatchedLabeller:
         self._compiled = jax.jit(
             mapped,
             in_shardings=(
+                batch_sharding,
                 batch_sharding,
                 batch_sharding,
                 batch_sharding if target is not None else None,
@@ -726,7 +771,11 @@ class BatchedLabeller:
         )
         target = None if target_current is None else jnp.asarray(target_current)
         requested = None if requested_class is None else jnp.asarray(requested_class)
-        if centroid_target is not None and self._derive_centroid_pairs:
+        if (
+            centroid_target is not None
+            and self.condition_on_guard_failure
+            and self._derive_centroid_pairs
+        ):
             if (
                 prescribed_current is None
                 and self.operator.prescribed_current_field is None
@@ -768,6 +817,16 @@ class BatchedLabeller:
             active_value = jnp.ones((batch,), dtype=bool)
         else:
             active_value = jnp.asarray(active, dtype=bool)
+        field = self.operator.prescribed_current_field
+        if zeros_prescribed is not None:
+            base_prescribed = zeros_prescribed
+        elif field is not None:
+            field_current = jnp.asarray(field.current, dtype=initial.dtype)
+            base_prescribed = jnp.broadcast_to(
+                field_current, (batch, field_current.size)
+            )
+        else:
+            base_prescribed = jnp.zeros((batch, 0), dtype=initial.dtype)
         compiled = self._compiled
         if compiled is None:
             compiled = self._build(
@@ -792,6 +851,7 @@ class BatchedLabeller:
         if batch_sharding is not None:
             initial = jax.device_put(initial, batch_sharding)
             external = jax.device_put(external, batch_sharding)
+            base_prescribed = jax.device_put(base_prescribed, batch_sharding)
             if target is not None:
                 target = jax.device_put(target, batch_sharding)
             if requested is not None:
@@ -802,6 +862,7 @@ class BatchedLabeller:
         output = compiled(
             initial,
             external,
+            base_prescribed,
             target,
             requested,
             reference,
@@ -822,6 +883,7 @@ def solve_batched_labeller(profile, initial, **kwargs) -> BatchedLabelledResult:
             "newton_steps",
             "active_set_steps",
             "guard_tolerance",
+            "condition_on_guard_failure",
             "constraint_pairs",
         }
     }

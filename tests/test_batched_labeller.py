@@ -160,11 +160,28 @@ def test_two_elements_match_compiled_route_and_padded_batch(
     )
 
 
-def test_result_contains_fixed_shape_topology_fields(machine_fixture):  # noqa: F811
-    """The topology payload is returned with the state, not read per field."""
+def test_result_contains_fixed_shape_topology_fields(
+    monkeypatch,
+    machine_fixture,  # noqa: F811
+):
+    """Topology and centroid reads retain the requested solve class."""
     profile, seed = machine_fixture
+    seen_classes = []
+    profile_type = type(profile)
+    original_observation = profile_type.current_moment_observation
+
+    def recording_observation(self, *args, **kwargs):
+        if self is profile:
+            seen_classes.append(kwargs.get("requested_class"))
+        return original_observation(self, *args, **kwargs)
+
+    monkeypatch.setattr(
+        profile_type, "current_moment_observation", recording_observation
+    )
+    requested_class = int(TopologyClass.LIMITED)
     result = BatchedLabeller(profile, newton_steps=1, active_set_steps=1).solve(
-        np.stack((np.asarray(seed), np.asarray(seed)))
+        np.stack((np.asarray(seed), np.asarray(seed))),
+        requested_class=np.asarray([requested_class, requested_class]),
     )
 
     labels = result.labelled_flux
@@ -172,6 +189,8 @@ def test_result_contains_fixed_shape_topology_fields(machine_fixture):  # noqa: 
     assert labels.domain_label.shape[0] == 2
     assert labels.o_point.shape == (2, 2)
     assert result.achieved_centroid.shape == (2, 2)
+    assert seen_classes
+    assert all(value is not None for value in seen_classes)
 
 
 def test_masked_conditioning_keeps_the_augmented_multiplier(machine_fixture):  # noqa: F811

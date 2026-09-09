@@ -4,12 +4,17 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 import json
 import os
 from pathlib import Path
 import sys
+import time
 import traceback
-from typing import Iterator, Sequence
+from typing import ClassVar, Iterator, Sequence
+
+import jax
+import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -18,19 +23,176 @@ if str(ROOT) not in sys.path:
 from scripts.labeller_batch.shard import (  # noqa: E402
     DEFAULT_COHORT_REPORT,
     DEFAULT_MANIFEST,
+    PreparedLabeller,
     ShotWork,
     _write_json,
     decoder_corpus,
     prepare_labeller,
 )
+from nova.equilibrium import reduced_newton  # noqa: E402
+from nova.equilibrium.batched_labeller import BatchedLabeller  # noqa: E402
 from scripts.labeller_parallel.scheduler import (  # noqa: E402
     CorpusScheduler,
+    EngineBatch,
+    EngineResult,
+    FIXED_POINT_CRITERION,
     HostRouteEngine,
+    NEWTON_STEPS,
     SequentialCompiledEngine,
     ShotInput,
+    SolvedSlice,
     SourceIdentity,
     load_shot,
 )
+
+
+@dataclass
+class BatchedRouteEngine:
+    """Adapt the device-batched solver to the production array boundary."""
+
+    name: ClassVar[str] = "batched"
+    prepared: PreparedLabeller
+    device_count: int
+    condition_on_guard_failure: bool
+
+    def __post_init__(self) -> None:
+        if self.device_count < 1:
+            raise ValueError("device_count must be positive")
+        available = len(jax.devices())
+        if available != self.device_count:
+            raise ValueError(
+                f"batched engine requested {self.device_count} devices, "
+                f"JAX exposes {available}"
+            )
+        self.labeller = BatchedLabeller(
+            self.prepared.profile,
+            tolerance=FIXED_POINT_CRITERION,
+            newton_steps=NEWTON_STEPS,
+            condition_on_guard_failure=self.condition_on_guard_failure,
+        )
+
+    def step(self, batch: EngineBatch) -> EngineResult:
+        """Solve all resident rows once and retain scheduler receipt semantics."""
+        size = batch.validate()
+        reference = np.stack(
+            (
+                np.full(size, np.nan),
+                np.asarray(batch.centroid_target_z),
+            ),
+            axis=1,
+        )
+        started = time.perf_counter()
+        result = self.labeller.solve(
+            batch.initial_state,
+            prescribed_current=batch.prescribed_current,
+            target_current=batch.target_current,
+            requested_class=batch.requested_class,
+            reference_centroid=reference,
+            centroid_target=np.asarray(batch.centroid_target_z)[:, None],
+            active=batch.active,
+        )
+        wall_per_active = (time.perf_counter() - started) / max(
+            1, int(np.count_nonzero(batch.active))
+        )
+        solved: list[SolvedSlice | None] = []
+        for index, active in enumerate(np.asarray(batch.active, dtype=bool)):
+            if not active:
+                solved.append(None)
+                continue
+            conditioned = bool(result.conditioned[index])
+            trips = int(result.trips[index])
+            free_trips = int(result.free_trips[index])
+            per_trip_steps = [
+                int(value)
+                for value in np.asarray(result.newton_steps_per_trip[index])[:trips]
+            ]
+            applied_current = np.asarray(result.applied_current[index])
+            result_type = (
+                reduced_newton.ConstrainedReducedNewtonResult
+                if conditioned
+                else reduced_newton.ReducedNewtonResult
+            )
+            result_arguments = {
+                "state": np.asarray(result.state[index]),
+                "terminal_residual": float(result.terminal_residual[index]),
+                "active_set_iterations": trips,
+                "converged": bool(result.converged[index]),
+                "termination_reason": int(result.termination[index]),
+                "newton_steps_per_trip": per_trip_steps,
+            }
+            if conditioned:
+                result_arguments["prescribed_current"] = applied_current
+                result_arguments["row_count"] = 1
+            selected = result_type(**result_arguments)
+            free_centroid = np.asarray(result.free_centroid[index])
+            selected_centroid = np.asarray(result.achieved_centroid[index])
+            target_centroid_z = float(batch.centroid_target_z[index])
+            free_error = float(free_centroid[1] - target_centroid_z)
+            conditioned_error = (
+                float(selected_centroid[1] - target_centroid_z) if conditioned else None
+            )
+            conditioned_guard = (
+                bool(
+                    np.isfinite(conditioned_error)
+                    and abs(conditioned_error) <= self.labeller.guard_tolerance
+                )
+                if conditioned
+                else None
+            )
+            record = {
+                "row": int(batch.row[index]),
+                "time": float(batch.time[index]),
+                "written": True,
+                "excluded": False,
+                "geometry_masked": True,
+                "converged": False,
+                "qualified": False,
+                "terminal_residual": float(result.terminal_residual[index]),
+                "trips": trips,
+                "newton_steps": sum(per_trip_steps),
+                "free_trips": free_trips,
+                "conditioned_trips": trips if conditioned else 0,
+                "wall_seconds": wall_per_active,
+                "free_wall_seconds": wall_per_active if not conditioned else 0.0,
+                "conditioned_wall_seconds": wall_per_active if conditioned else 0.0,
+                "termination": selected.termination_name,
+                "conditioned": conditioned,
+                "conditioning_flag": conditioned,
+                "conditioning_target_source": (
+                    "efm/current_centrd_z" if conditioned else None
+                ),
+                "free_converged": bool(result.free_converged[index]),
+                "conditioned_converged": (
+                    bool(result.converged[index]) if conditioned else None
+                ),
+                "free_branch_guard_ok": bool(result.guard[index]),
+                "conditioned_branch_guard_ok": conditioned_guard,
+                "free_centroid_error_m": free_error,
+                "conditioned_centroid_error_m": conditioned_error,
+                "achieved_current_centroid_r": float(selected_centroid[0]),
+                "achieved_current_centroid_z": float(selected_centroid[1]),
+                "target_current_centroid_z": target_centroid_z,
+                "centroid_error_m": (conditioned_error if conditioned else free_error),
+                "target_source": "efm/current_centrd_z",
+                "branch_guard_ok": False,
+                "requested_class": int(batch.requested_class[index]),
+            }
+            solved.append(SolvedSlice(selected, applied_current, record))
+        labelled = {
+            name: np.asarray(getattr(result.labelled_flux, name))
+            for name in result.labelled_flux._fields
+        }
+        return EngineResult(
+            state=np.asarray(result.state),
+            converged=np.asarray(result.converged),
+            termination=np.asarray(result.termination),
+            trips=np.asarray(result.trips),
+            terminal_residual=np.asarray(result.terminal_residual),
+            centroid=np.asarray(result.achieved_centroid),
+            conditioned=np.asarray(result.conditioned),
+            labelled_fields=labelled,
+            solved=tuple(solved),
+        )
 
 
 def _is_written(output_root: Path, shot: int) -> bool:
@@ -110,6 +272,7 @@ def run_corpus(arguments: argparse.Namespace) -> dict[str, object]:
     engine_type = {
         "host": HostRouteEngine,
         "compiled": SequentialCompiledEngine,
+        "batched": BatchedRouteEngine,
     }[arguments.engine]
     engine = engine_type(
         prepared,
@@ -155,7 +318,9 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("output_root", type=Path)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--cohort-report", type=Path, default=DEFAULT_COHORT_REPORT)
-    parser.add_argument("--engine", choices=("host", "compiled"), default="host")
+    parser.add_argument(
+        "--engine", choices=("host", "compiled", "batched"), default="host"
+    )
     parser.add_argument("--devices", type=int, default=1)
     parser.add_argument("--batch-per-device", type=int, default=1)
     parser.add_argument("--host-workers", type=int)

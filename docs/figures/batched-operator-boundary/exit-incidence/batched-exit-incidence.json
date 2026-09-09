@@ -127,10 +127,206 @@
       "with_exit_mean_ms": 196694.746691
     }
   },
+  "host_geometry_discriminator": {
+    "status": "classification_defect_found",
+    "recorded_at": "2026-09-09T11:25:50Z",
+    "diagnostic_execution": {
+      "job_id": 1267690,
+      "partition": "all_debug",
+      "device": "cpu",
+      "jax_enable_x64": true,
+      "raw_comparison_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/host-geometry-discriminator.json",
+      "raw_comparison_sha256": "4a93ab47a1b226c3fa48bf49e571d9244a6d57e7567264b52222ac01f4f9abd2",
+      "run_log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/host-geometry-discriminator-retry.log",
+      "run_log_sha256": "e5b7bc09544313f6307186d1d616bea76f366c8df60af590ef5930adf4337d53"
+    },
+    "comparison": {
+      "identities": [
+        "21978/35",
+        "21983/35",
+        "21985/51",
+        "21986/46",
+        "21989/55",
+        "22086/43"
+      ],
+      "representative_arm": "pure",
+      "arm_qualification": "each pure and mixed pair already has one identical batch identity, so one pure operator represents each shot/slice geometry without discarding a geometry difference",
+      "compared_leaf_count": 87,
+      "equal_leaf_count": 84,
+      "differing_leaf_count": 3,
+      "differing_static_host_leaf_count": 1,
+      "differing_dynamic_member_leaf_count": 2
+    },
+    "field_by_field": {
+      "lattice_coordinates": {
+        "equal_across_all_six": true,
+        "compared_fields": [
+          "lattice.radius",
+          "lattice.height",
+          "grid_coordinate"
+        ]
+      },
+      "connectivity": {
+        "equal_across_all_six": true,
+        "compared_fields": [
+          "flattened_static_state.topology.connectivity_coordinate",
+          "flattened_static_state.topology.connectivity_edge_gather",
+          "flattened_static_state.topology.connectivity_edge_weight",
+          "flattened_static_state.topology.connectivity_height",
+          "flattened_static_state.topology.connectivity_radius",
+          "flattened_static_state.topology.connectivity_rings",
+          "flattened_static_state.topology.connectivity_shared_edges",
+          "flattened_static_state._fixed_design_topology.connectivity_coordinate",
+          "flattened_static_state._fixed_design_topology.connectivity_edge_gather",
+          "flattened_static_state._fixed_design_topology.connectivity_edge_weight",
+          "flattened_static_state._fixed_design_topology.connectivity_height",
+          "flattened_static_state._fixed_design_topology.connectivity_radius",
+          "flattened_static_state._fixed_design_topology.connectivity_rings",
+          "flattened_static_state._fixed_design_topology.connectivity_shared_edges"
+        ]
+      },
+      "wall_nodes": {
+        "equal_across_all_six": true,
+        "compared_fields": [
+          "wall_nodes",
+          "wall_null.coordinate",
+          "flattened_static_state.topology.wall.coordinate",
+          "flattened_static_state._fixed_design_topology.wall.coordinate",
+          "flattened_static_state._wall_carrier_index"
+        ]
+      },
+      "cell_polygons": {
+        "equal_across_all_six": true,
+        "compared_fields": [
+          "cell_polygons",
+          "flattened_static_state.moment_geometry"
+        ],
+        "value": null
+      },
+      "stencils": {
+        "equal_across_all_six": true,
+        "compared_fields": [
+          "cell_average_stencil",
+          "cell_average_weight",
+          "grid_null.local_coordinate_stencil",
+          "grid_null.stencil",
+          "flattened_static_state.topology.grid.local_coordinate_stencil",
+          "flattened_static_state.topology.grid.stencil",
+          "flattened_static_state._fixed_design_topology.grid.locator.local_coordinate_stencil",
+          "flattened_static_state._fixed_design_topology.grid.locator.stencil",
+          "flattened_static_state.topology.polish_gather",
+          "flattened_static_state._fixed_design_topology.polish_gather"
+        ]
+      },
+      "material_mask": {
+        "equal_across_all_six": true,
+        "compared_fields": [
+          "material_mask",
+          "flattened_static_state.inside_material"
+        ]
+      },
+      "mesh_steps": {
+        "equal_across_all_six": true,
+        "compared_fields": [
+          "lattice.radius",
+          "lattice.height",
+          "flattened_static_state._raster_radius",
+          "flattened_static_state._raster_height",
+          "flattened_static_state._wall_height_hysteresis",
+          "flattened_static_state._x_qualification_distance"
+        ],
+        "qualification": "radial and vertical steps are derived from the exactly equal lattice axes"
+      },
+      "null_and_anchor_positions": {
+        "null_geometry_equal_across_all_six": true,
+        "equal_null_fields": [
+          "grid_null.coordinate",
+          "grid_null.physical_origin",
+          "grid_null.physical_scale",
+          "wall_null.coordinate",
+          "sample_null",
+          "flattened_static_state.topology.grid.coordinate",
+          "flattened_static_state._fixed_design_topology.grid.locator.coordinate"
+        ],
+        "dynamic_flux_anchors_differ_as_member_data": [
+          "dynamic_flux_anchors.declared_axis_flux",
+          "dynamic_flux_anchors.declared_boundary_flux"
+        ],
+        "dynamic_anchor_example": {
+          "pair": [
+            "21978/35",
+            "21983/35"
+          ],
+          "declared_axis_flux": [
+            0.3139541104088807,
+            0.3051764380864529
+          ],
+          "declared_boundary_flux": [
+            -0.06830239871478015,
+            -0.1034512467596711
+          ]
+        },
+        "classification": "the two flux anchors are already emitted as dynamic children by tree_flatten and do not discriminate the host geometry identity"
+      }
+    },
+    "differing_host_geometry_fields": [
+      "flattened_static_state.declared_support"
+    ],
+    "declared_support_by_identity": {
+      "21978/35": {
+        "shape": [1089],
+        "dtype": "bool",
+        "sha256": "e9185d1f7e381ec0cd34f745c3d3445c6231bed6150870349873cfbb23358c8e"
+      },
+      "21983/35": {
+        "shape": [1089],
+        "dtype": "bool",
+        "sha256": "19d7065016398a33862c349b20d0b53cae012bf764b7cc6c2dcc89c6646caa98"
+      },
+      "21985/51": {
+        "shape": [1089],
+        "dtype": "bool",
+        "sha256": "d7e90480123a24cda85356e651850b39caa5da4003d97a337bcec3d8950a8d2d"
+      },
+      "21986/46": {
+        "shape": [1089],
+        "dtype": "bool",
+        "sha256": "f6e2681d6be4dace00fa97739da43c0f44639f5716b4e5a4d2fbeb83bb790c95"
+      },
+      "21989/55": {
+        "shape": [1089],
+        "dtype": "bool",
+        "sha256": "11873bcf780603d0c33b81aad7c9cda14649967272e7c39fac6f8ace62636a70"
+      },
+      "22086/43": {
+        "shape": [1089],
+        "dtype": "bool",
+        "sha256": "1cc0010524a23b4656433f4cbee048498f254aca6fb29b7463c0a488c415d345"
+      }
+    },
+    "differing_value_example": {
+      "field": "flattened_static_state.declared_support",
+      "pair": [
+        "21978/35",
+        "21983/35"
+      ],
+      "flat_cell_index": 113,
+      "21978/35": false,
+      "21983/35": true
+    },
+    "classification": {
+      "verdict": "section_1_member_data_classification_defect",
+      "mechanism": "DeclaredAnchorOperator.declared_support remains in tree_flatten auxiliary static_state because _dynamic_extra_names emits only declared_axis_flux and declared_boundary_flux",
+      "equilibrium_dependence": "the benchmark constructs declared_support from inside_polygon(lattice coordinates, stored LCFS coordinates) intersected with the common machine material mask; the stored LCFS is an equilibrium result for the selected shot and time slice",
+      "source_binding": "benchmarks/efit_forward_parity_slice.py computes declared_support from _stored_lcfs in _passive_inclusive_case and passes it to DeclaredAnchorOperator",
+      "required_repair": "move declared_support from operator static_state to traced member children alongside the two declared flux anchors",
+      "repair_owner": "nova/equilibrium/forward_operator.py is held by another worktree, so this node stops without editing it"
+    }
+  },
   "blocker": {
-    "condition": "the twelve real MAST members do not share one stackable operator identity",
-    "observable_result": "ForwardOperatorBatch partitions the twelve members into six two-arm groups and selects its sequential compiled fallback before the driver can lower one width-12 program",
-    "required_decision": "decide whether the real bank may be rebuilt on one canonical host geometry or whether the operator boundary must support batched differing host geometry",
-    "scope": "the first option changes the benchmark's evidence semantics; the second requires nova/equilibrium changes outside this node's write fence"
+    "condition": "DeclaredAnchorOperator.declared_support is equilibrium-dependent member data but remains in the pytree auxiliary static_state",
+    "observable_result": "the six stored-LCFS support masks create six host geometry digests, partitioning the twelve MAST members into six pure/mixed pairs and selecting the sequential fallback",
+    "required_change": "classify declared_support as a dynamic operator leaf alongside declared_axis_flux and declared_boundary_flux",
+    "scope": "the repair belongs in nova/equilibrium/forward_operator.py, which is outside this node's write fence and held by another worktree"
   }
 }

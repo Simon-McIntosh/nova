@@ -1,0 +1,46 @@
+{
+  "subject": "jt60sa-wall-units",
+  "machine": "JT-60SA",
+  "source": "/home/ITER/mcintos/public/imasdb/jt-60sa_md",
+  "dd_version": "4.1.0",
+  "units": [
+    {
+      "index": 0,
+      "name": "Main vessel (inner+outer+divertors, closed)",
+      "kind": "vessel",
+      "vertex_count": 89,
+      "closed": true
+    },
+    {
+      "index": 1,
+      "name": "LOWER Inner First Wall for Strike-point",
+      "kind": "material",
+      "vertex_count": 6,
+      "closed": false
+    },
+    {
+      "index": 2,
+      "name": "LOWER Outer First Wall for Strike-point",
+      "kind": "material",
+      "vertex_count": 6,
+      "closed": false
+    },
+    {
+      "index": 3,
+      "name": "UPPER Inner First Wall for Strike-point",
+      "kind": "material",
+      "vertex_count": 10,
+      "closed": false
+    },
+    {
+      "index": 4,
+      "name": "UPPER Outer First Wall for Strike-point",
+      "kind": "material",
+      "vertex_count": 8,
+      "closed": false
+    }
+  ],
+  "drawn_as_polylines": 5,
+  "figure": "jt60sa-wall-units.png",
+  "renderer": "render_jt60sa_wall_units.py"
+}

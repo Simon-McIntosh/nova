@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-09">
-<meta name="plan-version" content="49">
+<meta name="plan-version" content="51">
 <meta name="plan-impl" content="0.78">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
@@ -83,6 +83,16 @@
     <h4 class="r-fu-title">Rerun the coil-edit latency driver once the compiled slice traces the prescribed current</h4>
     <div class="r-fu-body">The interactive gate failed for one mechanism: the compiled slice route bakes the edited prescribed current into the program as a constant, so every edit recompiles (30 s median) and the persistent cache never hits after the first edit. When millisecond-converged-solve lands the traced-argument repair in nova/equilibrium/reduced_newton.py, rerun benchmarks/coil_edit_latency.py unchanged on the H200 with the persistent compilation cache and a per-job TMPDIR and restate the receipt: per-edit wall, cache hits after the first edit, convergence with trip counts on all twenty points. Also replace the boundary-displacement fallback (raw topology-boundary norm, about 2.5 m) with the receiver-grid separatrix displacement, which is the boundary read the driver already records per edit.</div>
     <pre class="r-fu-prompt">/reckon-ship forward-solve-api §5</pre>
+    </article>
+<article class="r-fu" data-id="f-20260909T210712175233" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="s19-review coordinator" data-written-at="2026-09-09" data-recommends-skill="/reckon-ship forward-solve-api §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Finish the transport seam: the imas-ambix consumer reads the transport route from the receipt, and the sweep&#x27;s fake portfolio goes</h4>
+    <div class="r-fu-body">d9cab518 landed the request embedding, the single typed solve in equilibrium_sweep and the receipt round-trips, so two parts of the section's done-when remain. The imas-ambix consumer still reads the transport route from its own configuration; it should read ForwardTransportReceipt.provenance.rung and equilibrium_resolved_defaults from the receipt, which is imas-ambix work against this landing SHA. In nova, equilibrium_sweep constructs a ForwardPortfolio from a SimpleNamespace with duplicated residual and availability tuples so select_forward_branch can be called on a single achieved class; replace that with a direct selection path that takes the achieved class and qualification, and delete the shim.</div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solve-api §3</pre>
+    </article>
+<article class="r-fu" data-id="f-20260909T210712175266" data-status="open" data-capability-version="1.0" data-capability-class="routine" data-capability-verification="standard" data-written-by="s19-review coordinator" data-written-at="2026-09-09" data-recommends-skill="/reckon-ship forward-solve-api §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Two pre-existing transport test failures exposed by the seam gates</h4>
+    <div class="r-fu-body">Both fail identically at base bf6cddb and at d9cab518 (logs under the r-20260909T184746517277 run directory). tests/test_transport_evolved_state.py::test_mapped_source_converges_with_force_and_current_receipts reports a current-ledger residual of 1.96e-3 against a 1e-12 bound, so either the mapped-source ledger lost conservation or the bound was never met and the test was never run in a lane; find which and repair the mechanism, never the bound. tests/test_transport_public_surface.py::test_every_declared_public_name_imports_from_transport_package fails because eleven window-batch names exported from nova/transport/__init__.py are absent from the test's expected set; add them with their descriptions.</div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solve-api §3</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -205,6 +215,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260909T1307-route-bodies-landed" data-who="reckon-ship s19-review" data-when="2026-09-09T13:07:00Z">
     <div class="r-comment-body">fsa-route-bodies-on-seam landed: commits 4871a26e, e4e685f4 merged; gate 78 passed (route harness plus default wiring) and the declared-current fixture aligned to the seam; measure: solve_portfolio calls 0 of 4 routes, 9 route-level receipt assertions green. One pre-existing failure stays visible: tests/test_forward_parity_constrained_arm.py::test_reference_native_grid_interpolates_the_stored_map references parity.REFERENCE_NATIVE_GRID_POINTS, which benchmarks/efit_forward_parity_slice.py no longer defines (removed with f51308d1, the current-constrained parity default), so that test needs its own repair node: either restore the constant on the parity module or retarget the test to the resolution the default route now declares. impl 0.55 to 0.7; remaining: the two contract details of section 1 (cold-portfolio seed_policy, observed compilation_cache_hit) once forward.py is released by the clipped-moment worktree, section 3 transport, and the section 5 rerun after the compiled-slice cache lands.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260909T184746517277-fsa-transport-seam" data-who="s19i-fsa-transport" data-when="2026-09-09T21:02:25Z">
+    <div class="r-comment-body"><p>Landed at d9cab518 (merged to main). ForwardTransportInput embeds a ForwardSolveRequest, equilibrium_sweep solves through ForwardProfile.solve(request) instead of the two-branch portfolio, and ForwardTransportReceipt carries the resolved equilibrium defaults with lossless to_dict/from_dict; raw solve_options and solve_portfolio references under nova/transport are zero. Zero added failures against base: the evolved-state current-ledger residual 1.96e-3 against 1e-12 and the public-surface expected-export set missing 11 window-batch names both fail identically at base and are pre-existing. The sweep builds a ForwardPortfolio from a SimpleNamespace to feed branch selection; that shim wants replacing with a direct selection call.</p></div>
 </div>
 </section>
 </main>

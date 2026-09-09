@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T22:11:42",
+  "updated": "2026-09-09T23:06:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -147734,6 +147734,202 @@
         "watch_override": null,
         "tool_steps": 66.0,
         "orientation_input_tokens": null
+      },
+      {
+        "run_id": "r-20260909T184746517277-fsa-transport-seam",
+        "plan": "forward-solve-api",
+        "section": "\u00a73",
+        "node": "fsa-transport-seam",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1483,
+                "cached_input_tokens": 952924,
+                "input_tokens": 954439,
+                "output_tokens": 2438,
+                "reasoning_output_tokens": 1083,
+                "total_tokens": 956877,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "tests/test_transport_forward_seam.py is green on all_debug CPU x64 asserting that a native coupled forward and an ensemble window round-trip through JSON with both the transport receipt and the embedded equilibrium resolved_defaults present and non-empty, that no coupled path passes solve_options to solve_portfolio (grep -c 'solve_options' over nova/transport prints 0 outside the request builder), and the existing transport tests stay green",
+          "estimated_hours": null,
+          "goal": "Bring the coupled transport forward under the declared-defaults discipline of section 3: ForwardTransportInput carries the embedded equilibrium ForwardSolveRequest, the coupled path hands that typed request to the equilibrium solve instead of raw solve_options, and ForwardTransportReceipt records the equilibrium resolved-defaults block beside the native or TORAX transport route and provenance",
+          "id": "fsa-transport-seam",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T18:47:47Z",
+            "read_at": "2026-09-09T18:47:48Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 94.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T184746517277-fsa-transport-seam/manifest.md",
+          "plan": "forward-solve-api",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/transport/forward.py",
+            "nova/transport/coupled_window.py",
+            "nova/transport/AGENTS.md",
+            "tests/test_transport_forward_seam.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-fsa-transport",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T18:47:58Z",
+        "completed_at": "2026-09-09T21:02:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 8067,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "bf6cddb069c609c4f87845d5a8ef18e7ce987395",
+        "commits": [
+          "7c85fc1084d308527722082603b3c028aecb9bf4",
+          "d9cab518345e3dae5705c0a229021b8cb7d85eeb"
+        ],
+        "changed_lines": {
+          "added": 319,
+          "removed": 96,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug CPU x64 at d9cab518, one fresh process per group: final seam 2/2 (cited log), coupled-window 12/12, ensemble 6/6, geometry-reference 6/6, window-batch rerun 5/5, window-gradients 1/1, route-default-wiring 28/28, default-wiring 69/69; zero added failures against base bf6cddb (evolved-state and public-surface fail identically at base, logs all-debug-evolved-baseline.log and all-debug-public-surface.log)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T184746517277-fsa-transport-seam/all-debug-final-seam.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T184746517277-fsa-transport-seam/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a0877f-8d49-7f32-ad77-dec3deef5427",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 32582784,
+            "cached_input_tokens_cumulative": 32582784,
+            "input_tokens": 32660909,
+            "input_tokens_cumulative": 32660909,
+            "output_tokens": 33583,
+            "output_tokens_cumulative": 33583,
+            "reasoning_output_tokens": 4473,
+            "reasoning_output_tokens_cumulative": 4473
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T21:02:25Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 300,
+              "used_percent": 0.0,
+              "resets_at": 1789005698,
+              "observed_at": "2026-09-09T21:02:25Z"
+            },
+            {
+              "window_minutes": 10080,
+              "used_percent": 91.0,
+              "resets_at": 1789452804,
+              "observed_at": "2026-09-09T21:02:25Z"
+            }
+          ],
+          "notional_cost_usd": 162.4363,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 32582784,
+          "cumulative_input_tokens": 65243693,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 38056
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "scope_acceptances": [
+          {
+            "path": "tests/test_transport_coupled_window.py",
+            "reason": "the coordinator extended the write scope mid-run so the migrated coupled-window tests could follow the equilibrium_sweep signature change"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/fsa-transport-seam",
+          "session_id": "01a0877f-8d49-7f32-ad77-dec3deef5427",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T21:02:25Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 45.0,
+        "orientation_input_tokens": 1565689.0
       }
     ],
     "holds": [
@@ -148046,6 +148242,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2392
+    "_version": 2393
   }
 }

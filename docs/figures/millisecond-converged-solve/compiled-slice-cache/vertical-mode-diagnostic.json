@@ -1,4 +1,18 @@
 {
+  "captured_inputs": {
+    "coordinate_cells_equal_recomputed": true,
+    "external_ulp_against_recomputed": 0,
+    "target_current": 874260.4375
+  },
+  "first_state_difference": {
+    "cached_flux": -0.18479577638614655,
+    "direct_flux": -0.18479577638614653,
+    "element_ulp": 1,
+    "flat_index": 290,
+    "producer": "trip boundary reconstructs external plus current-moment image",
+    "trip": 0,
+    "trip_max_ulp": 2
+  },
   "inputs": {
     "bank_route": {
       "current_pin": "absolute bank reference plasma current as target",
@@ -20,7 +34,7 @@
         "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
         "size_bytes": 645864,
         "stored_circuit_count": 101,
-        "warm_load_seconds": 0.007527971640229225
+        "warm_load_seconds": 0.007866814732551575
       },
       "loaded_from_persisted_carrier": true,
       "named_cache_only_check": {
@@ -35,7 +49,7 @@
         ],
         "direct_green_operator_builder_entries": 0,
         "passes": true,
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.019719 direct_builders=0 verdict=PASS"
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.019143 direct_builders=0 verdict=PASS"
       }
     },
     "state_cache": {
@@ -48,7 +62,8 @@
       "sha256": "2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904"
     }
   },
-  "mechanism": "adaptive versus refusal-only refresh first changes only the refused ladder work count and leaves terminal flux identical; compiled-versus-host terminal roundoff remains after matching the grade-one then tail sequence, with every published trip decision and scalar identical",
+  "capture_omission_found": false,
+  "mechanism": "the first state difference is produced by trip-boundary reconstruction; cached external and coordinate inputs equal their recomputed values, so the remaining difference is the boundary image reduction inlined in the compiled loop versus separately dispatched by the host",
   "member": "21986/46 mixed",
   "quantity_moved_first": {
     "adaptive": {
@@ -85,9 +100,10 @@
   "refusal_only_terminal_flux_ulp": 0,
   "rejected_hypotheses": [
     "adaptive Jacobian refresh policy",
-    "eager six-grade lax.map versus grade-one then conditional tail ordering"
+    "eager six-grade lax.map versus grade-one then conditional tail ordering",
+    "cached external or reduced-coordinate capture differs from recomputation"
   ],
-  "roundoff_operation": null,
+  "roundoff_operation": "trip boundary external plus current-moment image, inlined in the compiled fori_loop versus a separately dispatched host boundary",
   "terminal_flux_ulp_after_repair": 16,
   "trip_comparison_after_repair": [
     {
@@ -99,6 +115,8 @@
       "direct_mask_difference": 1,
       "direct_residual": 0.001743384698567222,
       "direct_steps": 1,
+      "first_differing_flat_index": 290,
+      "state_max_ulp": 2,
       "trip": 0
     },
     {
@@ -110,6 +128,8 @@
       "direct_mask_difference": 1,
       "direct_residual": 0.0018105679314074957,
       "direct_steps": 0,
+      "first_differing_flat_index": null,
+      "state_max_ulp": 0,
       "trip": 1
     },
     {
@@ -121,6 +141,8 @@
       "direct_mask_difference": 0,
       "direct_residual": 0.0018836772967004715,
       "direct_steps": 1,
+      "first_differing_flat_index": 96,
+      "state_max_ulp": 16,
       "trip": 2
     }
   ]

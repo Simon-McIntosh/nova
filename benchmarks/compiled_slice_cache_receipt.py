@@ -202,15 +202,20 @@ def diagnose_vertical_mode(output: Path) -> dict[str, Any]:
         "member": member.identity,
         "inputs": inputs,
         "mechanism": (
-            "adaptive versus refusal-only refresh first changes only the refused "
-            "ladder work count and leaves terminal flux identical; compiled-versus-"
-            "host terminal roundoff remains after matching the grade-one then tail "
-            "sequence, with every published trip decision and scalar identical"
+            "the first state difference is produced by trip-boundary reconstruction; "
+            "cached external and coordinate inputs equal their recomputed values, so "
+            "the remaining difference is the boundary image reduction inlined in the "
+            "compiled loop versus separately dispatched by the host"
         ),
-        "roundoff_operation": None,
+        "roundoff_operation": (
+            "trip boundary external plus current-moment image, inlined in the compiled "
+            "fori_loop versus a separately dispatched host boundary"
+        ),
+        "capture_omission_found": False,
         "rejected_hypotheses": [
             "adaptive Jacobian refresh policy",
             "eager six-grade lax.map versus grade-one then conditional tail ordering",
+            "cached external or reduced-coordinate capture differs from recomputation",
         ],
         "quantity_moved_first": first_step,
         "trip_comparison_after_repair": trip_rows,

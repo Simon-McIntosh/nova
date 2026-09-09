@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T23:06:40",
+  "updated": "2026-09-10T01:04:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -147930,6 +147930,192 @@
         "watch_override": null,
         "tool_steps": 45.0,
         "orientation_input_tokens": 1565689.0
+      },
+      {
+        "run_id": "r-20260909T172546102179-ucc-exact-cut-cell-participation",
+        "plan": "uniform-cell-clip-and-coupling",
+        "section": "",
+        "node": "ucc-exact-cut-cell-participation",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1937,
+                "cached_input_tokens": 912598,
+                "input_tokens": 914567,
+                "output_tokens": 4485,
+                "reasoning_output_tokens": 2362,
+                "total_tokens": 919052,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "benchmarks/solovev_cut_cell_moments.py rerun on all_debug CPU x64 reports production participation equal to the analytic cut count and every cut-cell moment within 1e-6 relative of the exact oracle at all three orders on weak -110, moderate -110 and weak -300; weak-rotation-static -110 converges (terminal residual below 1e-12) and moderate-rotation-static -110 terminal residual is at or below its base 0.01246 in fresh all_debug processes; tests/test_equilibrium_separatrix_clip.py, tests/test_forward_moment_class.py and the seven referee tests green; the six static certificate residuals before and after in docs/figures/uniform-cell-clip-and-coupling/exact-participation/receipt.json",
+          "estimated_hours": null,
+          "goal": "Implement followup f-20260909T1845-exact-cut-cell-participation: every analytically cut cell participates in the current support with zeroth, first and second moments of the density over the clipped region taken against the curved spline boundary rather than the chord, on the one clip-and-moment code path for both tilings with cell geometry as data",
+          "id": "ucc-exact-cut-cell-participation",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-09T17:25:47Z",
+            "read_at": "2026-09-09T17:25:48Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 56.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T172546102179-ucc-exact-cut-cell-participation/manifest.md",
+          "plan": "uniform-cell-clip-and-coupling",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/separatrix_clip.py",
+            "nova/equilibrium/stencil_mesh.py",
+            "nova/equilibrium/forward_operator.py",
+            "tests/test_equilibrium_separatrix_clip.py",
+            "tests/test_forward_moment_class.py",
+            "docs/figures/uniform-cell-clip-and-coupling/exact-participation"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-ucc-participation",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-09T17:26:01Z",
+        "completed_at": "2026-09-09T23:03:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 20219,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "5258f78006fd0fe734dec991448a14a23f8fc7c1",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "all_debug weak -110 exact oracle at d85527c5 (43/43 participation, medians below 1e-6, 98.58 percent image error removed, cells 101/102 first-moment relative error 8.9e-3) then H200 job 1268215, one allocation, certificate rows solved sequentially with the exact participation: weak -110 terminal residual 0.4708 versus committed 0.007448, moderate -110 0.1333 versus 0.012458; allocation expired during weak -300",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T172546102179-ucc-exact-cut-cell-participation/exact-weak-restated.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T172546102179-ucc-exact-cut-cell-participation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08734-861c-73a0-a693-2d96ad1d224a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 484864,
+            "cached_input_tokens_cumulative": 484864,
+            "input_tokens": 491909,
+            "input_tokens_cumulative": 491909,
+            "output_tokens": 4356,
+            "output_tokens_cumulative": 4356,
+            "reasoning_output_tokens": 1312,
+            "reasoning_output_tokens_cumulative": 1312
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-09T23:03:00Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 300,
+              "used_percent": 0.0,
+              "resets_at": 1789012958,
+              "observed_at": "2026-09-09T23:03:00Z"
+            },
+            {
+              "window_minutes": 10080,
+              "used_percent": 91.0,
+              "resets_at": 1789452804,
+              "observed_at": "2026-09-09T23:03:00Z"
+            }
+          ],
+          "notional_cost_usd": 715.4142,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 484864,
+          "cumulative_input_tokens": 976773,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 5668
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 10,
+        "scope_acceptances": null,
+        "no_commit": "nineteen commits held unmerged at worktree tip 0372d3fc: the exact cut-cell participation removes 98.6 percent of the linear flux-image error yet the static certificate solves terminate 63x and 11x further from the fixed point than the committed chord-clip baselines, so the stack is a measured negative result for the lead, not a landing",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/ucc-exact-cut-cell-participation",
+          "session_id": "01a08734-861c-73a0-a693-2d96ad1d224a",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T23:03:00Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 70.0,
+        "orientation_input_tokens": null
       }
     ],
     "holds": [
@@ -148242,6 +148428,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2393
+    "_version": 2394
   }
 }

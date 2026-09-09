@@ -1,16 +1,16 @@
 {
   "blocker": {
-    "condition": "machine_artifact_cache_unavailable_on_h200",
-    "elapsed": "00:31:42",
-    "error": "cannot resolve cache root /run/user/39486/reckon-artifact-repaired-ring-cache",
+    "condition": "strict_exit_changed_terminal_state_bits",
+    "elapsed": "00:40:37",
+    "error": "strict exit changed terminal state bits for d3d_shot_00000c4a7b.parquet frame 179",
     "exit_code": 1,
-    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/batched-exit-incidence-h200-corrected.log",
+    "failing_member": "d3d_shot_00000c4a7b.parquet frame 179",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/batched-exit-incidence-h200-diiid.log",
     "machine": "DIII-D",
-    "qualification": "MAST checkpoint was atomically persisted before the DIII-D cache lookup; no further H200 attempt is authorized",
-    "requested_cache": "/run/user/39486/reckon-artifact-repaired-ring-cache",
-    "scheduler_job_id": 1268060,
+    "qualification": "both width-5 passes completed, but the strict terminal-state identity check failed before per-member rows could be serialized; no further H200 attempt is authorized",
+    "scheduler_job_id": 1268088,
     "scheduler_state": "FAILED",
-    "stage": "input_build"
+    "stage": "result_extraction"
   },
   "checkpoint": {
     "completed_machines": [
@@ -23,7 +23,7 @@
   },
   "configuration": {
     "host_memory_limit_mib": 16384,
-    "host_memory_peak_mib": 41861.965,
+    "host_memory_peak_mib": 115509.84765625,
     "host_memory_stages": [
       {
         "current_rss_mib": 792.32421875,
@@ -441,6 +441,52 @@
       "repair_revision": "e1540b6b"
     },
     "status": "resolved_by_declared_support_member_leaf"
+  },
+  "incomplete_machine_attempts": {
+    "DIII-D": [
+      {
+        "attempt": 5,
+        "batched_ms_per_member": null,
+        "compile_cache": {
+          "key": "jit_batched_solve-8c8017e1e6be060736b3142e83d51c7de037457aba2dd83d11ab48ce8463c72a",
+          "status": "miss"
+        },
+        "compile_once": true,
+        "compile_seconds": 1765.206773,
+        "cpu_count": 1,
+        "driver_revision": "194c9cb08cee465923898048ef97c031242515a8",
+        "driver_sha256": "025b21acafd85ac2c0bcbfdfa38e15884898784cc6eaa9b65a5a23f37ee59591",
+        "execution_route": "one_stacked_vmap_program",
+        "extraction_status": "failed_strict_terminal_state_bit_identity",
+        "failing_member": "d3d_shot_00000c4a7b.parquet frame 179",
+        "gpu_count": 1,
+        "jax_platforms": [
+          "cuda",
+          "cpu"
+        ],
+        "job_id": 1268088,
+        "log_sha256": "7addaac468676747f4180106127c34930b9d60d8135756b091d5ad6cbd9d57a8",
+        "machine_artifact_cache": "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache",
+        "machine_artifact_manifest_sha256": "c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
+        "machine_artifact_netcdf_sha256": "11a12df0c2bd70d6dd7a461d2da11181479b16c6cf89602f226ffa353b0879e0",
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "passes_completed": [
+          "without_exit",
+          "with_exit"
+        ],
+        "per_member_trips": null,
+        "prior_job_id": 1268060,
+        "process_peak_host_rss_mib": 115509.84765625,
+        "requested_memory_mib": 131072,
+        "requested_time_limit": "00:59:00",
+        "reservation": "gpu_0003_grpA",
+        "scheduler_step_max_rss_kib": 118171036,
+        "shared_interpreter": "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+        "unavailable_reason": "the driver checks strict terminal-state bit identity while extracting member rows and raised before serializing the measured trips and arm timings",
+        "width": 5
+      }
+    ]
   },
   "machines": {
     "MAST": {

@@ -203,7 +203,7 @@ def _integrate_component(
     total = 0.0
     error = 0.0
     breaks = _radial_breaks(case, vertices, lower, upper)
-    for first, second in zip(breaks, breaks[1:], strict=True):
+    for first, second in zip(breaks, breaks[1:]):
         if second <= first:
             continue
         value, estimate = quad(

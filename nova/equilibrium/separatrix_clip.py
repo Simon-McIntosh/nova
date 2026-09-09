@@ -46,6 +46,9 @@ def complete_polynomial_powers(degree: int) -> tuple[tuple[int, int], ...]:
 
 POLYNOMIAL_POWERS = complete_polynomial_powers(3)
 
+_CURVED_BOUNDARY_SEGMENTS = 512
+"""Fixed chord count used to carry a traced quadratic level-set arc."""
+
 
 def _signed_area(vertices: np.ndarray) -> float:
     if len(vertices) < 3:
@@ -504,6 +507,98 @@ def _cross_2d(first, second):
     return first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0]
 
 
+def _traced_quadratic_value(points, coefficient, centre, scale):
+    """Evaluate one cell-local quadratic at fixed-shape point rows."""
+    local = (points - centre[:, None, :]) / scale[:, None, :]
+    radial = local[..., 0]
+    vertical = local[..., 1]
+    basis = jnp.stack(
+        (
+            jnp.ones_like(radial),
+            radial,
+            vertical,
+            radial * radial,
+            radial * vertical,
+            vertical * vertical,
+        ),
+        axis=-1,
+    )
+    return jnp.einsum("...i,...i->...", basis, coefficient[:, None, :])
+
+
+def _traced_quadratic_segment_root(
+    start, end, start_value, end_value, coefficient, centre, scale
+):
+    """Return the quadratic root on each sign-changing cell edge."""
+    midpoint = 0.5 * (start + end)
+    midpoint_value = _traced_quadratic_value(midpoint, coefficient, centre, scale)
+    quadratic = 2.0 * (end_value + start_value - 2.0 * midpoint_value)
+    linear = end_value - start_value - quadratic
+    constant = start_value
+    linear_fraction = start_value / (start_value - end_value)
+    dtype = start.dtype
+    floor = 64.0 * jnp.finfo(dtype).eps
+    safe_quadratic = jnp.where(jnp.abs(quadratic) > floor, quadratic, 1.0)
+    discriminant = jnp.maximum(linear * linear - 4.0 * quadratic * constant, 0.0)
+    root_scale = jnp.sqrt(discriminant)
+    first_root = (-linear - root_scale) / (2.0 * safe_quadratic)
+    second_root = (-linear + root_scale) / (2.0 * safe_quadratic)
+    first_valid = (first_root >= 0.0) & (first_root <= 1.0)
+    second_valid = (second_root >= 0.0) & (second_root <= 1.0)
+    quadratic_root = jnp.where(
+        first_valid & second_valid,
+        jnp.where(
+            jnp.abs(first_root - linear_fraction)
+            <= jnp.abs(second_root - linear_fraction),
+            first_root,
+            second_root,
+        ),
+        jnp.where(first_valid, first_root, second_root),
+    )
+    return jnp.where(jnp.abs(quadratic) > floor, quadratic_root, linear_fraction)
+
+
+def _traced_quadratic_arc(start, end, coefficient, centre, scale):
+    """Sample the connected quadratic level-set arc between two crossings."""
+    parameter = jnp.linspace(
+        0.0,
+        1.0,
+        _CURVED_BOUNDARY_SEGMENTS + 1,
+        dtype=start.dtype,
+    )
+    chord = start[:, None, :] + parameter[None, :, None] * (end - start)[:, None, :]
+    delta = end - start
+    normal = jnp.stack((-delta[:, 1], delta[:, 0]), axis=1)
+    zero_value = _traced_quadratic_value(chord, coefficient, centre, scale)
+    positive_value = _traced_quadratic_value(
+        chord + normal[:, None, :], coefficient, centre, scale
+    )
+    negative_value = _traced_quadratic_value(
+        chord - normal[:, None, :], coefficient, centre, scale
+    )
+    quadratic = 0.5 * (positive_value + negative_value) - zero_value
+    linear = 0.5 * (positive_value - negative_value)
+    dtype = start.dtype
+    floor = 64.0 * jnp.finfo(dtype).eps
+    safe_quadratic = jnp.where(jnp.abs(quadratic) > floor, quadratic, 1.0)
+    safe_linear = jnp.where(jnp.abs(linear) > floor, linear, 1.0)
+    discriminant = jnp.maximum(linear * linear - 4.0 * quadratic * zero_value, 0.0)
+    root_scale = jnp.sqrt(discriminant)
+    first_root = (-linear - root_scale) / (2.0 * safe_quadratic)
+    second_root = (-linear + root_scale) / (2.0 * safe_quadratic)
+    curved_root = jnp.where(
+        jnp.abs(first_root) <= jnp.abs(second_root), first_root, second_root
+    )
+    root = jnp.where(
+        jnp.abs(quadratic) > floor,
+        curved_root,
+        -zero_value / safe_linear,
+    )
+    root = root.at[:, 0].set(0.0)
+    root = root.at[:, -1].set(0.0)
+    return chord + root[..., None] * normal[:, None, :]
+
+
 def _traced_polygon_moments(vertices, count, centroids):
     """Evaluate fixed-capacity polygon moments with traced reductions."""
     import jax.numpy as jnp
@@ -588,6 +683,9 @@ def _traced_clip(
     support_capacity,
     signed_flux,
     saddle_vertex=None,
+    curve_coefficient=None,
+    curve_centre=None,
+    curve_scale=None,
 ):
     """Clip fixed atomic cells using only traced fixed-shape operations."""
     from nova.jax.config import configure_dtypes
@@ -609,15 +707,56 @@ def _traced_clip(
     valid_edge = slot[None, :] < count[:, None]
     following_slot = jnp.where(slot[None, :] + 1 < count[:, None], slot[None, :] + 1, 0)
     following_nodes = jnp.take_along_axis(nodes, following_slot, axis=1)
-    start_flux = flux[nodes]
-    end_flux = flux[following_nodes]
+    start_point = coordinates[nodes]
+    end_point = coordinates[following_nodes]
+    curved = curve_coefficient is not None
+    if curved:
+        if curve_centre is None or curve_scale is None:
+            raise ValueError(
+                "curve coefficients require cell centres and coordinate scales"
+            )
+        coefficient = jnp.asarray(curve_coefficient, dtype=coordinates.dtype)
+        curve_origin = jnp.asarray(curve_centre, dtype=coordinates.dtype)
+        curve_extent = jnp.asarray(curve_scale, dtype=coordinates.dtype)
+        if coefficient.shape != (cell_count, 6):
+            raise ValueError("curve_coefficient must have shape (cells, 6)")
+        if curve_origin.shape != (cell_count, 2) or curve_extent.shape != (
+            cell_count,
+            2,
+        ):
+            raise ValueError("curve centres and scales must have shape (cells, 2)")
+        start_flux = _traced_quadratic_value(
+            start_point, coefficient, curve_origin, curve_extent
+        )
+        end_flux = _traced_quadratic_value(
+            end_point, coefficient, curve_origin, curve_extent
+        )
+    else:
+        coefficient = jnp.zeros((cell_count, 6), dtype=coordinates.dtype)
+        curve_origin = centre
+        curve_extent = jnp.ones_like(centre)
+        start_flux = flux[nodes]
+        end_flux = flux[following_nodes]
+    support_capacity = support_capacity + (
+        _CURVED_BOUNDARY_SEGMENTS - 1 if curved else 0
+    )
     start_inside = start_flux > 0.0
     end_inside = end_flux > 0.0
     crossing_edge = valid_edge & (start_inside != end_inside)
     denominator = start_flux - end_flux
-    fraction = jnp.where(crossing_edge, start_flux / denominator, 0.0)
-    start_point = coordinates[nodes]
-    end_point = coordinates[following_nodes]
+    linear_fraction = start_flux / denominator
+    curved_fraction = _traced_quadratic_segment_root(
+        start_point,
+        end_point,
+        start_flux,
+        end_flux,
+        coefficient,
+        curve_origin,
+        curve_extent,
+    )
+    fraction = jnp.where(
+        crossing_edge, jnp.where(curved, curved_fraction, linear_fraction), 0.0
+    )
     crossing_point = start_point + fraction[..., None] * (end_point - start_point)
 
     edge_number = jnp.arange(width)
@@ -694,8 +833,24 @@ def _traced_clip(
         compact_slot[None, :, None] < vertex_count[:, None, None], support, 0.0
     )
 
+    packed_leaving = jnp.any(
+        jnp.all(crossing[:, :, None, :] == crossing_point[:, None, :, :], axis=3)
+        & (crossing_edge & start_inside)[:, None, :],
+        axis=2,
+    )
+    support_leaving = jnp.any(
+        jnp.all(support[:, :, None, :] == crossing[:, None, :, :], axis=3)
+        & packed_leaving[:, None, :],
+        axis=2,
+    )
     first_saddle = jnp.argmax(support_saddle, axis=1)
-    rotation = jnp.where(saddle, first_saddle, 0)
+    first_leaving = jnp.argmax(support_leaving, axis=1)
+    simple_boundary = crossing_count == 2
+    rotation = jnp.where(
+        saddle,
+        first_saddle,
+        jnp.where(simple_boundary & curved, first_leaving, 0),
+    )
     live_count = jnp.maximum(vertex_count, 1)
     rotated_slot = (compact_slot[None, :] + rotation[:, None]) % live_count[:, None]
     support = jnp.take_along_axis(support, rotated_slot[..., None], axis=1)
@@ -704,6 +859,28 @@ def _traced_clip(
         compact_slot[None, :, None] < vertex_count[:, None, None], support, 0.0
     )
     support_saddle = support_saddle & (compact_slot[None, :] < vertex_count[:, None])
+
+    if curved:
+        arc = _traced_quadratic_arc(
+            support[:, 0],
+            support[:, 1],
+            coefficient,
+            curve_origin,
+            curve_extent,
+        )
+        chord_capacity = 2 * width
+        expanded = jnp.concatenate(
+            (
+                support[:, :1],
+                arc[:, 1:-1],
+                support[:, 1:chord_capacity],
+            ),
+            axis=1,
+        )
+        expanded_count = vertex_count + (_CURVED_BOUNDARY_SEGMENTS - 1)
+        use_arc = simple_boundary & (vertex_count >= 3)
+        support = jnp.where(use_arc[:, None, None], expanded, support)
+        vertex_count = jnp.where(use_arc, expanded_count, vertex_count)
 
     branch_number = jnp.cumsum(support_saddle, axis=1) - 1
     branch_vertices = []
@@ -751,11 +928,6 @@ def _traced_clip(
         0,
     )
     next_crossing = jnp.take_along_axis(crossing, next_slot[..., None], axis=1)
-    packed_leaving = jnp.any(
-        jnp.all(crossing[:, :, None, :] == crossing_point[:, None, :, :], axis=3)
-        & (crossing_edge & start_inside)[:, None, :],
-        axis=2,
-    )
     direct_cross = _cross_2d(crossing, next_crossing)
     saddle_cross = _cross_2d(crossing, saddle_point[:, None, :]) + _cross_2d(
         saddle_point[:, None, :], next_crossing
@@ -945,7 +1117,15 @@ class AtomicCellMesh:
             raise ValueError("the sampled level field must return one value per node")
         return values
 
-    def traced_clip(self, signed_flux, *, saddle_vertex=None) -> TracedClippedSupports:
+    def traced_clip(
+        self,
+        signed_flux,
+        *,
+        saddle_vertex=None,
+        curve_coefficient=None,
+        curve_centre=None,
+        curve_scale=None,
+    ) -> TracedClippedSupports:
         """Clip this fixed topology inside a JAX transformation."""
         return _traced_clip(
             self.node_coordinates,
@@ -955,6 +1135,9 @@ class AtomicCellMesh:
             self.support_capacity,
             signed_flux,
             saddle_vertex,
+            curve_coefficient,
+            curve_centre,
+            curve_scale,
         )
 
     def clip(self, signed_flux: np.ndarray) -> ClippedSupports:

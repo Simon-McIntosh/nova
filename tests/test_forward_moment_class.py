@@ -23,6 +23,8 @@ import numpy as np
 import pytest
 
 from nova.equilibrium.forward import ForwardProfile
+from nova.equilibrium.forward_operator import ForwardFluxOperator
+from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.observation import (
     ConstraintPinSet,
     MomentIntegralSupport,
@@ -30,6 +32,7 @@ from nova.equilibrium.observation import (
     PinUncertainty,
 )
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
+from nova.equilibrium.separatrix_clip import AtomicCellMesh
 from nova.jax.config import configure_dtypes
 
 COORDINATE = np.asarray([[0.8, -0.1], [1.0, 0.0], [1.2, 0.1], [1.4, 0.0]])
@@ -191,3 +194,35 @@ def test_constraint_residual_forwards_the_solved_class():
 
     profile.constraint_residual(flux, pins, requested_class=TopologyClass.LIMITED)
     assert seen == [TopologyClass.LIMITED]
+
+
+def test_curved_boundary_support_promotes_every_cut_cell_before_moment_selection():
+    """A centroid-excluded cell cut by the curve still carries current."""
+    configure_dtypes()
+    cells = (
+        np.asarray([[0.5, -0.5], [1.5, -0.5], [1.5, 0.5], [0.5, 0.5]]),
+        np.asarray([[1.5, -0.5], [2.5, -0.5], [2.5, 0.5], [1.5, 0.5]]),
+    )
+    centres = np.asarray([[1.0, 0.0], [2.0, 0.0]])
+    atomic_mesh = AtomicCellMesh.from_cells(cells, centroids=centres)
+    operator = object.__new__(ForwardFluxOperator)
+    operator.polarity = 1
+    operator.moment_geometry = SimpleNamespace(atomic_mesh=atomic_mesh)
+    operator._support_curve_centre = centres
+    operator._support_curve_scale = np.ones((2, 2))
+    operator.shared_node_flux = lambda flux: flux
+    operator.support_flux_coefficients = lambda *_args: jnp.asarray(
+        [[1.0, 1.0, 0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]]
+    )
+    labels = jnp.asarray([0, 1], dtype=jnp.int8)
+    masks = DomainMasks(label=labels, psi_norm=jnp.asarray([0.0, 1.0]))
+    topology = SimpleNamespace(boundary_flux=jnp.asarray(0.0))
+    physical = jnp.asarray(1.0 - atomic_mesh.node_coordinates[:, 0])
+
+    support = ForwardFluxOperator._profile_support(
+        operator, masks, topology, physical, jnp.zeros(1)
+    )
+
+    assert bool(support.boundary[0])
+    assert bool(support.included[0])
+    assert float(support.area[0]) > 0.0

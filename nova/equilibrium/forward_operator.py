@@ -41,7 +41,7 @@ import numpy as np
 
 from nova.biot.null import Null2D
 from nova.biot.target import FluxTarget
-from nova.equilibrium.domain import DomainMasks
+from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.cell_partition import cell_partition_geometry
 from nova.equilibrium.connectivity_boundary import (
     traced_boundary_read,
@@ -1637,6 +1637,13 @@ class ForwardFluxOperator:
             )
             stencils.append(stencil)
         self._support_moment_stencils = tuple(stencils)
+        curve_centre = np.zeros((self.grid.node_number, 2), dtype=np.float64)
+        curve_scale = np.ones((self.grid.node_number, 2), dtype=np.float64)
+        for stencil in stencils:
+            curve_centre[stencil.ring_centre] = stencil.ring_sampling_centre
+            curve_scale[stencil.ring_centre] = stencil.ring_coordinate_scale
+        self._support_curve_centre = _host_array(curve_centre, dtype=np.float64)
+        self._support_curve_scale = _host_array(curve_scale, dtype=np.float64)
 
     @property
     def node_number(self) -> int:
@@ -1900,6 +1907,17 @@ class ForwardFluxOperator:
             )
         return CellCurrentMoments(*vectors)
 
+    def support_flux_coefficients(self, centroid_flux, sample_flux) -> jax.Array:
+        """Return one cell-local flux polynomial over either cell tiling."""
+        coefficients = jnp.zeros(
+            (self.grid.node_number, 6), dtype=jnp.asarray(centroid_flux).dtype
+        )
+        for stencil in self._support_moment_stencils:
+            coefficients = coefficients + stencil.flux_coefficients(
+                centroid_flux, sample_flux
+            )
+        return coefficients
+
     def sample_flux_field(self, centroid_flux, sample_flux, points):
         """Evaluate the own-node flux polynomial and gradient in every cell."""
         shape = points.shape[:2]
@@ -1958,20 +1976,30 @@ class ForwardFluxOperator:
             raise ValueError("clipped support moments are required")
         sample_flux = self.sample_node_flux(psi)
         sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
-        profile_support = self._profile_support(masks, physical.dtype)
+        profile_support = self._profile_support(
+            masks, topology, physical, sample_psi_norm
+        )
         return masks, topology, sample_psi_norm, profile_support
 
-    def _profile_support(self, masks, dtype):
-        """Return the fixed clipped support selected by domain labels."""
+    def _profile_support(self, masks, topology, physical, sample_psi_norm):
+        """Return the curved plasma-side support with geometry as traced data."""
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
-        profile_support = self.moment_geometry.atomic_mesh.traced_clip(
-            jnp.ones(
-                len(self.moment_geometry.atomic_mesh.node_coordinates),
-                dtype=dtype,
-            )
-        ).qualify(masks.profile_participation)
-        return profile_support
+        shared_flux = self.shared_node_flux(physical)
+        inside_boundary = self.polarity * (shared_flux - topology.boundary_flux)
+        flux_coefficient = self.support_flux_coefficients(
+            masks.psi_norm, sample_psi_norm
+        )
+        inside_coefficient = -flux_coefficient
+        inside_coefficient = inside_coefficient.at[:, 0].add(1.0)
+        traced_support = self.moment_geometry.atomic_mesh.traced_clip(
+            inside_boundary,
+            curve_coefficient=inside_coefficient,
+            curve_centre=self._support_curve_centre,
+            curve_scale=self._support_curve_scale,
+        )
+        participation = masks.profile_participation | traced_support.boundary
+        return traced_support.qualify(participation)
 
     def _partition_for_state(self, psi, frozen):
         """Revalue one state on an already-decided discrete partition."""
@@ -2008,8 +2036,14 @@ class ForwardFluxOperator:
         masks, _topology, sample_psi_norm, profile_support = partition
         if not self.use_linear_moments:
             return self._point_current_moments(masks)
+        promoted_label = jnp.where(
+            profile_support.included,
+            jnp.asarray(int(PlasmaDomain.CORE), dtype=masks.label.dtype),
+            masks.label,
+        )
+        moment_masks = DomainMasks(label=promoted_label, psi_norm=masks.psi_norm)
         moments = self.source.current_moments(
-            masks,
+            moment_masks,
             self.support_current_moments,
             profile_support,
             sample_flux=sample_psi_norm,
@@ -2273,8 +2307,14 @@ class ForwardFluxOperator:
         direct_sample_shadow = jnp.zeros(
             self.node_number - self.physical_node_number, dtype=bool
         )
+        sample_flux = self.sample_node_flux(psi) if self.use_linear_moments else None
+        sample_psi_norm = (
+            (sample_flux - topology.axis_flux) / topology.flux_span
+            if self.use_linear_moments
+            else None
+        )
         profile_support = (
-            self._profile_support(masks, physical.dtype)
+            self._profile_support(masks, topology, physical, sample_psi_norm)
             if self.use_linear_moments
             else None
         )

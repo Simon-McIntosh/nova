@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-09T09:33:33",
+  "updated": "2026-09-09T10:03:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4535,6 +4535,105 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-07"
+      },
+      {
+        "id": "s19i-bob-cache",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-bob-hash",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-cank-bound",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-cank-thomson",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-dvf-s4",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-dvf-s5",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-nia-diverted",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-pfs-batched",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-renderer",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-ucc-offaxis",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-ucc-scout",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-09"
       },
       {
         "id": "s19r-bob",
@@ -142196,6 +142295,183 @@
         "boundary_waiver": null,
         "resume_waiver": null,
         "watch_override": null
+      },
+      {
+        "run_id": "r-20260909T075118720216-bob-operand-cache-capture",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a72",
+        "node": "bob-operand-cache-capture",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 398,
+                "cached_input_tokens": 557502,
+                "input_tokens": 557904,
+                "output_tokens": 22,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 557926,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "sha256sum logs/exact-operand-cache.npz prints 2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904 and docs/figures/batched-operator-boundary/exit-incidence/operand-cache-capture.json records that digest, the byte count 180876, the source commit and the bank rows the cache covers",
+          "estimated_hours": null,
+          "goal": "Land the regenerated MAST exact operand cache from commit 5c3fdb5b of worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/bob-operand-cache-regeneration at logs/exact-operand-cache.npz in this worktree using git show 5c3fdb5b:logs/exact-operand-cache.npz, force-adding it if logs/ is gitignored, with a capture receipt",
+          "id": "bob-operand-cache-capture",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T07:51:19Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T075118720216-bob-operand-cache-capture/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "logs/exact-operand-cache.npz",
+            "docs/figures/batched-operator-boundary/exit-incidence/operand-cache-capture.json"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19i-bob-cache",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-09T07:51:27Z",
+        "completed_at": "2026-09-09T08:00:46.045Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 548,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 559,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "9ff98552afd6ebd6eb95e02f05e5e988c9b07f9f",
+        "commits": [
+          "b06c0747465a2c4dc2409c2ad0ee62001bc74b28"
+        ],
+        "changed_lines": {
+          "added": 44,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sha256sum logs/exact-operand-cache.npz",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T075118720216-bob-operand-cache-capture/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T075118720216-bob-operand-cache-capture/manifest.md",
+        "scope_changed": false,
+        "session_id": "55c42507-0b0f-45b8-bcbd-a5272205e303",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 1579658,
+            "input_tokens_cumulative": 1579658,
+            "output_tokens": 10738,
+            "output_tokens_cumulative": 10738,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-09T08:00:46.045Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 1579658,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 555.926,
+          "generated_tokens": 10738,
+          "generation_seconds": 545.119,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 9.0,
+          "machine_seconds": 10.807,
+          "peak_input_tokens": 91084,
+          "tokens_per_second": 19.7,
+          "wall_tokens_per_second": 19.32
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/bob-operand-cache-capture",
+          "session_id": "55c42507-0b0f-45b8-bcbd-a5272205e303",
+          "session_source": "stream",
+          "retained_at": "2026-09-09T08:00:46.045Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null
       }
     ],
     "holds": [
@@ -142508,6 +142784,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2331
+    "_version": 2343
   }
 }

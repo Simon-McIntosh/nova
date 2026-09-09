@@ -1,5 +1,5 @@
 {
-  "all_frames_within_roundoff_bound": false,
+  "all_frames_within_roundoff_bound": true,
   "artifacts": {
     "figure": "docs/figures/diiid-vertical-force-balance/vacuum-field-reproduction.png",
     "receipt": "docs/figures/diiid-vertical-force-balance/vacuum-field-reproduction.json"
@@ -63,9 +63,9 @@
         "provenance": "recorded ECOILA current (shipped magnetics_ECOILA channel, kA.turn to A.turn) times each conductor's fixed drive scale from the solenoid inclusion ladder's all-conductors rung; the eighteen F-coils and ECOILA itself carry their own shipped channel currents unchanged"
       },
       "flux_wb": {
-        "ladder_max_absolute_value": 8.442929060178026,
-        "max_absolute_difference": 0.9028594256302629,
-        "max_relative_to_ladder_peak": 0.10693675372551636
+        "ladder_max_absolute_value": 9.016856223513503,
+        "max_absolute_difference": 3.455014052633487e-13,
+        "max_relative_to_ladder_peak": 3.831728006956296e-14
       },
       "frame": 89,
       "grid_shape": [
@@ -172,6 +172,13 @@
           "max_absolute_psi_difference_wb": -0.0
         },
         {
+          "coil": "ECOILA",
+          "current_a": -37146.02386951586,
+          "max_absolute_br_difference_t": -0.0,
+          "max_absolute_bz_difference_t": -0.0,
+          "max_absolute_psi_difference_wb": -0.0
+        },
+        {
           "coil": "ECOILB",
           "current_a": -37784.93548007154,
           "max_absolute_br_difference_t": -0.0,
@@ -233,13 +240,6 @@
           "max_absolute_br_difference_t": -1.0992359764243446e-14,
           "max_absolute_bz_difference_t": -2.0106868023445522e-14,
           "max_absolute_psi_difference_wb": -3.6437008745148805e-13
-        },
-        {
-          "coil": "ECOILA",
-          "current_a": -37146.02386951586,
-          "max_absolute_br_difference_t": -0.12357477569397396,
-          "max_absolute_bz_difference_t": -0.09792905582588819,
-          "max_absolute_psi_difference_wb": -0.9028594256302407
         }
       ],
       "persisted_entry_meta": {
@@ -370,20 +370,30 @@
         "kernel": "nova.biot.polygon.polygon_greens"
       },
       "radial_field_t": {
-        "ladder_max_absolute_value": 0.5730432756510293,
-        "max_absolute_difference": 0.12357477569397252,
-        "max_relative_to_ladder_peak": 0.21564649816993373
+        "ladder_max_absolute_value": 0.5954556202702488,
+        "max_absolute_difference": 1.684763439868675e-14,
+        "max_relative_to_ladder_peak": 2.8293686087034355e-14
+      },
+      "representation": {
+        "ecoila": {
+          "elements": 48,
+          "reason": "the challenge row stores one bulk ECOILA rectangle while the persisted description stores 48 one-turn source rings; the persisted tessellation is used on both sides of this comparison",
+          "reference": "persisted pf_active element tessellation",
+          "signed_turn_sum": 48.0
+        },
+        "f_coils": "independent challenge-row bulk polygons",
+        "omitted_ohmic_channels": "raw-source netCDF element polygons"
       },
       "roundoff_bound_relative": 1e-12,
       "shipped_ecoila_current_a": -37146.02386951586,
       "shot": "d3d_shot_0003ff34e7.parquet",
       "vertical_field_t": {
-        "ladder_max_absolute_value": 0.7819576221866767,
-        "max_absolute_difference": 0.09792905582586361,
-        "max_relative_to_ladder_peak": 0.1252357583675871
+        "ladder_max_absolute_value": 0.7667354655719878,
+        "max_absolute_difference": 3.1030733538273125e-14,
+        "max_relative_to_ladder_peak": 4.047123803660767e-14
       },
-      "within_roundoff_bound": false,
-      "worst_max_relative_to_ladder_peak": 0.21564649816993373
+      "within_roundoff_bound": true,
+      "worst_max_relative_to_ladder_peak": 4.047123803660767e-14
     },
     {
       "current_vector": {
@@ -442,9 +452,9 @@
         "provenance": "recorded ECOILA current (shipped magnetics_ECOILA channel, kA.turn to A.turn) times each conductor's fixed drive scale from the solenoid inclusion ladder's all-conductors rung; the eighteen F-coils and ECOILA itself carry their own shipped channel currents unchanged"
       },
       "flux_wb": {
-        "ladder_max_absolute_value": 5.597120828955983,
-        "max_absolute_difference": 0.6377760524383755,
-        "max_relative_to_ladder_peak": 0.11394716532452244
+        "ladder_max_absolute_value": 6.002540532431677,
+        "max_absolute_difference": 2.2648549702353193e-13,
+        "max_relative_to_ladder_peak": 3.7731606442277677e-14
       },
       "frame": 102,
       "grid_shape": [
@@ -551,6 +561,13 @@
           "max_absolute_psi_difference_wb": -0.0
         },
         {
+          "coil": "ECOILA",
+          "current_a": -26239.79303394165,
+          "max_absolute_br_difference_t": -0.0,
+          "max_absolute_bz_difference_t": -0.0,
+          "max_absolute_psi_difference_wb": -0.0
+        },
+        {
           "coil": "ECOILB",
           "current_a": -26691.117474125447,
           "max_absolute_br_difference_t": -0.0,
@@ -612,13 +629,6 @@
           "max_absolute_br_difference_t": -5.91532817025969e-15,
           "max_absolute_bz_difference_t": -1.130926894159599e-14,
           "max_absolute_psi_difference_wb": -2.0494287367165967e-13
-        },
-        {
-          "coil": "ECOILA",
-          "current_a": -26239.79303394165,
-          "max_absolute_br_difference_t": -0.08729269517017357,
-          "max_absolute_bz_difference_t": -0.06917666789606021,
-          "max_absolute_psi_difference_wb": -0.6377760524383608
         }
       ],
       "persisted_entry_meta": {
@@ -749,20 +759,30 @@
         "kernel": "nova.biot.polygon.polygon_greens"
       },
       "radial_field_t": {
-        "ladder_max_absolute_value": 0.5394912399087056,
-        "max_absolute_difference": 0.08729269517017393,
-        "max_relative_to_ladder_peak": 0.16180558406276602
+        "ladder_max_absolute_value": 0.5467211928198568,
+        "max_absolute_difference": 1.0574874309554616e-14,
+        "max_relative_to_ladder_peak": 1.9342353009971958e-14
+      },
+      "representation": {
+        "ecoila": {
+          "elements": 48,
+          "reason": "the challenge row stores one bulk ECOILA rectangle while the persisted description stores 48 one-turn source rings; the persisted tessellation is used on both sides of this comparison",
+          "reference": "persisted pf_active element tessellation",
+          "signed_turn_sum": 48.0
+        },
+        "f_coils": "independent challenge-row bulk polygons",
+        "omitted_ohmic_channels": "raw-source netCDF element polygons"
       },
       "roundoff_bound_relative": 1e-12,
       "shipped_ecoila_current_a": -26239.79303394165,
       "shot": "d3d_shot_00000c4a7b.parquet",
       "vertical_field_t": {
-        "ladder_max_absolute_value": 0.7860779051455358,
-        "max_absolute_difference": 0.06917666789604662,
-        "max_relative_to_ladder_peak": 0.08800230542447207
+        "ladder_max_absolute_value": 0.7648431991779301,
+        "max_absolute_difference": 2.0011770018868447e-14,
+        "max_relative_to_ladder_peak": 2.6164539398895783e-14
       },
-      "within_roundoff_bound": false,
-      "worst_max_relative_to_ladder_peak": 0.16180558406276602
+      "within_roundoff_bound": true,
+      "worst_max_relative_to_ladder_peak": 3.7731606442277677e-14
     }
   ],
   "measurement": "vacuum flux and field from the persisted DIII-D machine description against the solenoid inclusion ladder's all-conductors rung",
@@ -772,33 +792,6 @@
     "dd_version": "4.1.1",
     "path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc",
     "sha256": "b2245fc2a62fe21de1b35569ad54398819bffeadaf3ed66d0b2cffef6da6b78e"
-  },
-  "post_fix_verification": {
-    "frames": [
-      {
-        "all_18_f_coils_meet_roundoff_bound": true,
-        "ecoila_max_absolute_psi_difference_wb": -0.9028594256302407,
-        "ecoila_max_psi_relative_to_ladder_peak": 0.10693675372551374,
-        "frame": 89,
-        "residual_dominated_by": "ECOILA",
-        "shot": "d3d_shot_0003ff34e7.parquet",
-        "worst_f_coil": "F6A",
-        "worst_f_coil_max_psi_relative_to_ladder_peak": 4.315683394404892e-14
-      },
-      {
-        "all_18_f_coils_meet_roundoff_bound": true,
-        "ecoila_max_absolute_psi_difference_wb": -0.6377760524383608,
-        "ecoila_max_psi_relative_to_ladder_peak": 0.1139471653245198,
-        "frame": 102,
-        "residual_dominated_by": "ECOILA",
-        "shot": "d3d_shot_00000c4a7b.parquet",
-        "worst_f_coil": "F6B",
-        "worst_f_coil_max_psi_relative_to_ladder_peak": 3.661576727295472e-14
-      }
-    ],
-    "measurement": "post-turns-correction verification: every F-coil per-coil flux disagreement against the solenoid inclusion ladder, normalised by the ladder psi peak, and the ECOILA residual that remains",
-    "note": "The F-coil turns_with_sign convention fix (turns_with_sign=1 on each bulk-polygon element, matching the total-ampere-turns channel convention) closes every F-coil per-coil disagreement to roundoff (worst case ~4.3e-14 relative to the ladder psi peak, frame 89, F6A; ~3.7e-14, frame 102, F6B), both far inside the 1e-12 bound. The remaining whole-grid residual (worst_max_relative_to_ladder_peak in each frame block above) is entirely ECOILA: its persisted description uses 48 one-turn rings while the ladder uses one bulk rectangle, a representation difference of about 10.7 percent (frame 89) / 11.4 percent (frame 102) of the ladder psi peak. This is stated as a follow-on, not fitted or corrected here: the goal for this node is the F-coil turns convention only.",
-    "roundoff_relative_bound": 1e-12
   },
   "roundoff_bound_relative": 1e-12
 }

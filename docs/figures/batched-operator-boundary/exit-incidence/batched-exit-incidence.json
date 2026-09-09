@@ -1,11 +1,11 @@
 {
   "schema": "nova.strict-exit-incidence/2",
-  "measurement_state": "partial_scheduler_timeout_after_mast_passes",
-  "recorded_at": "2026-09-09T16:01:48Z",
+  "measurement_state": "cache_retry_failed_before_persistent_lookup",
+  "recorded_at": "2026-09-09T16:20:01Z",
   "source": {
-    "revision": "2f6ed1d14f89815f20c7f435938f9cddaacefdfa",
+    "revision": "5f75d1481d72a589157b84c1647f78524c3d51e7",
     "driver": "benchmarks/strict_exit_incidence.py",
-    "driver_sha256": "6be56ea78232b1fdf31a39454b8d5b7e935273ea0ed48b3808443602eaac8b72",
+    "driver_sha256": "ef8b98080bdd23e545482510e2eeffa88cb8960f214dc2f85a5f9923d33f84b9",
     "operand_cache": "logs/exact-operand-cache.npz",
     "operand_cache_sha256": "2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904"
   },
@@ -122,6 +122,42 @@
       "paired_timing_member_count": 2,
       "without_exit_mean_ms": 205113.028233,
       "with_exit_mean_ms": 196694.746691
+    }
+  },
+  "authorized_cache_retry": {
+    "job_id": 1268040,
+    "prior_job_id": 1267937,
+    "scheduler_state": "FAILED",
+    "elapsed": "00:01:47",
+    "requested_time_limit": "00:59:00",
+    "node": "98dci4-gpu-0003",
+    "cpu_count": 1,
+    "gpu_count": 1,
+    "requested_memory": "128G",
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "persistent_compilation_cache": true,
+    "stage_reached": "MAST_BATCH_COMPILE_START",
+    "cache_outcome": null,
+    "compile_seconds": null,
+    "cache_outcome_unavailable_reason": "jax_explain_cache_misses attempted to explain the tracing cache before persistent-cache lookup and reconstructed Null1D with an internal Leaf sentinel",
+    "failure": {
+      "exception": "AttributeError",
+      "message": "'Leaf' object has no attribute 'shape'",
+      "location": "nova/biot/null.py Null1D.__post_init__ during tracing-miss explanation",
+      "classification": "measurement instrumentation defect before lowering, not a persistent-cache miss or solver failure"
+    },
+    "scheduler_step_max_rss_kib": 4943088,
+    "scheduler_step_max_rss_mib": 4827.234375,
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T105115820348-bob-batched-exit-incidence/logs/batched-exit-incidence-h200-final.log",
+    "log_sha256": "05ac24593de99bb269167afc6fb005c7f35d90c86c1b5d693e11ae086ef5998d",
+    "instrumentation_correction": {
+      "revision": "1ec8bac32606e82c2be08e0fc773411e4694d277",
+      "mechanism": "observe jax._src.compiler at DEBUG without enabling tracing-miss explanations",
+      "verification": "focused tests, Ruff and a logger-mediated hit-event smoke pass",
+      "h200_verification": "not run because the one additional allocation authorization was consumed"
     }
   },
   "host_geometry_discriminator": {
@@ -326,9 +362,9 @@
     }
   },
   "blocker": {
-    "condition": "the 40-minute scheduler limit terminated the process after both MAST passes but before host result extraction and the first machine checkpoint",
-    "observable_result": "the width-12 program compiled once and both synchronized passes emitted DONE markers, but compile seconds, per-member trip results and batched milliseconds remained only in process memory; DIII-D was not reached",
+    "condition": "the authorized cache retry failed in the cache-outcome instrument before persistent-cache lookup, and no further H200 allocation is authorized",
+    "observable_result": "cache hit or miss and compile seconds remain unmeasured; the earlier width-12 program compiled once and both synchronized passes emitted DONE markers, but per-member trip results and batched milliseconds remained only in process memory; DIII-D was not reached",
     "independent_failed_gate": "width-12 compile host RSS peaked at 41861.965 MiB, above the 16384 MiB limit",
-    "next_action": "rerun from the persistent GPU compilation cache with enough foreground time for result extraction and the DIII-D width-5 program; the current node time fence is spent"
+    "next_action": "with renewed allocation authority, run the corrected cache probe at revision 1ec8bac3 for 00:59:00; it will print the authoritative cache outcome and compile seconds before the first pass"
   }
 }

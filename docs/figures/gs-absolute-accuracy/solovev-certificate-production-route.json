@@ -2,14 +2,14 @@
   "aggregation_lane": {
     "execution": "slurm",
     "exit_marker": "SOLOVEV_AGGREGATE_EXIT=0",
-    "hostname": "98dci4-gpu-0003.iter.org",
+    "hostname": "98dci4-clu-3142.iter.org",
     "jax_default_backend": "cpu",
     "jax_platforms": "cpu",
-    "node": "98dci4-gpu-0003",
-    "partition": "betelgeuse",
+    "node": "98dci4-clu-3142",
+    "partition": "all_debug",
     "precision": "float64",
-    "reservation": "gpu_0003_grpA",
-    "slurm_job_id": "1268058"
+    "reservation": null,
+    "slurm_job_id": "1268124"
   },
   "cases": {
     "diverted-single-null": {
@@ -18,63 +18,63 @@
           "two_pitch_boundary_band": {
             "rms": {
               "qualified": {
+                "confidence_interval": null,
+                "order": null,
+                "rung_count": 1,
+                "standard_error": null,
+                "status": "insufficient_same_qualification_rungs",
+                "theoretical_order": 2.0
+              },
+              "unqualified": {
                 "characteristic_pitch": "square root of median carrier-cell area",
                 "confidence_interval": [
-                  1.8282091630433281,
-                  2.074079836795404
+                  -18.65833076542681,
+                  17.0252548801962
                 ],
                 "confidence_level": 0.95,
                 "degrees_of_freedom": 1,
                 "error_quantity": "gradient.two_pitch_boundary_band.rms",
                 "fitted_error": [
-                  0.0002262776845538256,
-                  8.502703306867711e-05,
-                  5.16568049922505e-05
+                  0.0001386986725933321,
+                  0.00020891362245078747,
+                  0.0003415402775605774
                 ],
                 "model": "log(error) = intercept + order*log(characteristic_pitch)",
-                "order": 1.9511444999193661,
-                "qualification": "qualified",
+                "order": -0.8165379426153055,
+                "qualification": "unqualified",
                 "rung_count": 3,
-                "standard_error": 0.009675220841203654,
-                "theoretical_order": 2.0
-              },
-              "unqualified": {
-                "confidence_interval": null,
-                "order": null,
-                "rung_count": 1,
-                "standard_error": null,
-                "status": "insufficient_same_qualification_rungs",
+                "standard_error": 1.4041795479664938,
                 "theoretical_order": 2.0
               }
             },
             "sup": {
               "qualified": {
-                "characteristic_pitch": "square root of median carrier-cell area",
-                "confidence_interval": [
-                  1.8544319764193944,
-                  2.4674774548747918
-                ],
-                "confidence_level": 0.95,
-                "degrees_of_freedom": 1,
-                "error_quantity": "gradient.two_pitch_boundary_band.sup",
-                "fitted_error": [
-                  0.0007611593811717167,
-                  0.0002574428003184781,
-                  0.00014824436699093302
-                ],
-                "model": "log(error) = intercept + order*log(characteristic_pitch)",
-                "order": 2.160954715647093,
-                "qualification": "qualified",
-                "rung_count": 3,
-                "standard_error": 0.02412386275777733,
-                "theoretical_order": 2.0
-              },
-              "unqualified": {
                 "confidence_interval": null,
                 "order": null,
                 "rung_count": 1,
                 "standard_error": null,
                 "status": "insufficient_same_qualification_rungs",
+                "theoretical_order": 2.0
+              },
+              "unqualified": {
+                "characteristic_pitch": "square root of median carrier-cell area",
+                "confidence_interval": [
+                  -24.88566340591961,
+                  21.920231091052386
+                ],
+                "confidence_level": 0.95,
+                "degrees_of_freedom": 1,
+                "error_quantity": "gradient.two_pitch_boundary_band.sup",
+                "fitted_error": [
+                  0.0003998689483250199,
+                  0.0008412955188118107,
+                  0.002053945698281752
+                ],
+                "model": "log(error) = intercept + order*log(characteristic_pitch)",
+                "order": -1.4827161574336098,
+                "qualification": "unqualified",
+                "rung_count": 3,
+                "standard_error": 1.8418518931823575,
                 "theoretical_order": 2.0
               }
             }
@@ -82,63 +82,63 @@
           "whole_domain": {
             "rms": {
               "qualified": {
+                "confidence_interval": null,
+                "order": null,
+                "rung_count": 1,
+                "standard_error": null,
+                "status": "insufficient_same_qualification_rungs",
+                "theoretical_order": 2.0
+              },
+              "unqualified": {
                 "characteristic_pitch": "square root of median carrier-cell area",
                 "confidence_interval": [
-                  1.853339415069299,
-                  2.0566378439999506
+                  -17.391604152624392,
+                  16.139889210986663
                 ],
                 "confidence_level": 0.95,
                 "degrees_of_freedom": 1,
                 "error_quantity": "gradient.whole_domain.rms",
                 "fitted_error": [
-                  0.00022569828607306628,
-                  8.464592623037668e-05,
-                  5.137480306322013e-05
+                  0.00014284780809091776,
+                  0.00019553547965847263,
+                  0.00028500295017710835
                 ],
                 "model": "log(error) = intercept + order*log(characteristic_pitch)",
-                "order": 1.9549886295346248,
-                "qualification": "qualified",
+                "order": -0.6258574708188634,
+                "qualification": "unqualified",
                 "rung_count": 3,
-                "standard_error": 0.007999966675802841,
-                "theoretical_order": 2.0
-              },
-              "unqualified": {
-                "confidence_interval": null,
-                "order": null,
-                "rung_count": 1,
-                "standard_error": null,
-                "status": "insufficient_same_qualification_rungs",
+                "standard_error": 1.3194928800472792,
                 "theoretical_order": 2.0
               }
             },
             "sup": {
               "qualified": {
-                "characteristic_pitch": "square root of median carrier-cell area",
-                "confidence_interval": [
-                  -1.8825570136860212,
-                  5.473625185716791
-                ],
-                "confidence_level": 0.95,
-                "degrees_of_freedom": 1,
-                "error_quantity": "gradient.whole_domain.sup",
-                "fitted_error": [
-                  0.0007267620258208648,
-                  0.0002952633054764197,
-                  0.00018665558167992228
-                ],
-                "model": "log(error) = intercept + order*log(characteristic_pitch)",
-                "order": 1.7955340860153848,
-                "qualification": "qualified",
-                "rung_count": 3,
-                "standard_error": 0.28947204740293875,
-                "theoretical_order": 2.0
-              },
-              "unqualified": {
                 "confidence_interval": null,
                 "order": null,
                 "rung_count": 1,
                 "standard_error": null,
                 "status": "insufficient_same_qualification_rungs",
+                "theoretical_order": 2.0
+              },
+              "unqualified": {
+                "characteristic_pitch": "square root of median carrier-cell area",
+                "confidence_interval": [
+                  -24.88566340591961,
+                  21.920231091052386
+                ],
+                "confidence_level": 0.95,
+                "degrees_of_freedom": 1,
+                "error_quantity": "gradient.whole_domain.sup",
+                "fitted_error": [
+                  0.0003998689483250199,
+                  0.0008412955188118107,
+                  0.002053945698281752
+                ],
+                "model": "log(error) = intercept + order*log(characteristic_pitch)",
+                "order": -1.4827161574336098,
+                "qualification": "unqualified",
+                "rung_count": 3,
+                "standard_error": 1.8418518931823575,
                 "theoretical_order": 2.0
               }
             }
@@ -148,63 +148,63 @@
           "two_pitch_boundary_band": {
             "rms": {
               "qualified": {
+                "confidence_interval": null,
+                "order": null,
+                "rung_count": 1,
+                "standard_error": null,
+                "status": "insufficient_same_qualification_rungs",
+                "theoretical_order": 2.0
+              },
+              "unqualified": {
                 "characteristic_pitch": "square root of median carrier-cell area",
                 "confidence_interval": [
-                  -0.10599604775660665,
-                  2.192183796560471
+                  -19.26103880475322,
+                  16.095670854423602
                 ],
                 "confidence_level": 0.95,
                 "degrees_of_freedom": 1,
                 "error_quantity": "hessian.two_pitch_boundary_band.rms",
                 "fitted_error": [
-                  0.0012194685991780562,
-                  0.0007226328846225749,
-                  0.0005536218026396809
+                  0.0007619983800919877,
+                  0.0016856381831573705,
+                  0.004370591994506636
                 ],
                 "model": "log(error) = intercept + order*log(characteristic_pitch)",
-                "order": 1.0430938744019322,
-                "qualification": "qualified",
+                "order": -1.5826839751648083,
+                "qualification": "unqualified",
                 "rung_count": 3,
-                "standard_error": 0.09043533816884504,
-                "theoretical_order": 2.0
-              },
-              "unqualified": {
-                "confidence_interval": null,
-                "order": null,
-                "rung_count": 1,
-                "standard_error": null,
-                "status": "insufficient_same_qualification_rungs",
+                "standard_error": 1.391316698939846,
                 "theoretical_order": 2.0
               }
             },
             "sup": {
               "qualified": {
-                "characteristic_pitch": "square root of median carrier-cell area",
-                "confidence_interval": [
-                  -3.068446593264162,
-                  3.3032052508065126
-                ],
-                "confidence_level": 0.95,
-                "degrees_of_freedom": 1,
-                "error_quantity": "hessian.two_pitch_boundary_band.sup",
-                "fitted_error": [
-                  0.00794164537274078,
-                  0.007487515365029184,
-                  0.007266369829286213
-                ],
-                "model": "log(error) = intercept + order*log(characteristic_pitch)",
-                "order": 0.11737932877117546,
-                "qualification": "qualified",
-                "rung_count": 3,
-                "standard_error": 0.25072993771029506,
-                "theoretical_order": 2.0
-              },
-              "unqualified": {
                 "confidence_interval": null,
                 "order": null,
                 "rung_count": 1,
                 "standard_error": null,
                 "status": "insufficient_same_qualification_rungs",
+                "theoretical_order": 2.0
+              },
+              "unqualified": {
+                "characteristic_pitch": "square root of median carrier-cell area",
+                "confidence_interval": [
+                  -18.211151917469152,
+                  14.046675918129957
+                ],
+                "confidence_level": 0.95,
+                "degrees_of_freedom": 1,
+                "error_quantity": "hessian.two_pitch_boundary_band.sup",
+                "fitted_error": [
+                  0.005301099632880276,
+                  0.015066461262419025,
+                  0.05277038414073963
+                ],
+                "model": "log(error) = intercept + order*log(characteristic_pitch)",
+                "order": -2.082237999669597,
+                "qualification": "unqualified",
+                "rung_count": 3,
+                "standard_error": 1.2693730545581696,
                 "theoretical_order": 2.0
               }
             }
@@ -212,63 +212,63 @@
           "whole_domain": {
             "rms": {
               "qualified": {
+                "confidence_interval": null,
+                "order": null,
+                "rung_count": 1,
+                "standard_error": null,
+                "status": "insufficient_same_qualification_rungs",
+                "theoretical_order": 2.0
+              },
+              "unqualified": {
                 "characteristic_pitch": "square root of median carrier-cell area",
                 "confidence_interval": [
-                  -2.873164061966688,
-                  4.909557508252388
+                  -19.546333650017537,
+                  16.69714835042774
                 ],
                 "confidence_level": 0.95,
                 "degrees_of_freedom": 1,
                 "error_quantity": "hessian.whole_domain.rms",
                 "fitted_error": [
-                  0.0010621939324212376,
-                  0.0006373457811929756,
-                  0.0004913967507353616
+                  0.0006769268827996007,
+                  0.0013832784792443128,
+                  0.0032610257561990976
                 ],
                 "model": "log(error) = intercept + order*log(characteristic_pitch)",
-                "order": 1.0181967231428504,
-                "qualification": "qualified",
+                "order": -1.424592649794899,
+                "qualification": "unqualified",
                 "rung_count": 3,
-                "standard_error": 0.3062567356585082,
-                "theoretical_order": 2.0
-              },
-              "unqualified": {
-                "confidence_interval": null,
-                "order": null,
-                "rung_count": 1,
-                "standard_error": null,
-                "status": "insufficient_same_qualification_rungs",
+                "standard_error": 1.4262119473511912,
                 "theoretical_order": 2.0
               }
             },
             "sup": {
               "qualified": {
-                "characteristic_pitch": "square root of median carrier-cell area",
-                "confidence_interval": [
-                  -3.068446593264162,
-                  3.3032052508065126
-                ],
-                "confidence_level": 0.95,
-                "degrees_of_freedom": 1,
-                "error_quantity": "hessian.whole_domain.sup",
-                "fitted_error": [
-                  0.00794164537274078,
-                  0.007487515365029184,
-                  0.007266369829286213
-                ],
-                "model": "log(error) = intercept + order*log(characteristic_pitch)",
-                "order": 0.11737932877117546,
-                "qualification": "qualified",
-                "rung_count": 3,
-                "standard_error": 0.25072993771029506,
-                "theoretical_order": 2.0
-              },
-              "unqualified": {
                 "confidence_interval": null,
                 "order": null,
                 "rung_count": 1,
                 "standard_error": null,
                 "status": "insufficient_same_qualification_rungs",
+                "theoretical_order": 2.0
+              },
+              "unqualified": {
+                "characteristic_pitch": "square root of median carrier-cell area",
+                "confidence_interval": [
+                  -18.211151917469152,
+                  14.046675918129957
+                ],
+                "confidence_level": 0.95,
+                "degrees_of_freedom": 1,
+                "error_quantity": "hessian.whole_domain.sup",
+                "fitted_error": [
+                  0.005301099632880276,
+                  0.015066461262419025,
+                  0.05277038414073963
+                ],
+                "model": "log(error) = intercept + order*log(characteristic_pitch)",
+                "order": -2.082237999669597,
+                "qualification": "unqualified",
+                "rung_count": 3,
+                "standard_error": 1.2693730545581696,
                 "theoretical_order": 2.0
               }
             }
@@ -278,63 +278,63 @@
           "two_pitch_boundary_band": {
             "rms": {
               "qualified": {
+                "confidence_interval": null,
+                "order": null,
+                "rung_count": 1,
+                "standard_error": null,
+                "status": "insufficient_same_qualification_rungs",
+                "theoretical_order": 2.0
+              },
+              "unqualified": {
                 "characteristic_pitch": "square root of median carrier-cell area",
                 "confidence_interval": [
-                  -5.141430353892515,
-                  5.508952510230472
+                  -210.2871460858749,
+                  155.17113407110554
                 ],
                 "confidence_level": 0.95,
                 "degrees_of_freedom": 1,
                 "error_quantity": "psi.two_pitch_boundary_band.rms",
                 "fitted_error": [
-                  2.792091159771871e-17,
-                  2.546212334950107e-17,
-                  2.429467171687072e-17
+                  2.0047360225687192e-19,
+                  2.0228443321319815e-13,
+                  3.2412330954553093e-06
                 ],
                 "model": "log(error) = intercept + order*log(characteristic_pitch)",
-                "order": 0.18376107816897877,
-                "qualification": "qualified",
+                "order": -27.55800600738467,
+                "qualification": "unqualified",
                 "rung_count": 3,
-                "standard_error": 0.4191016548710741,
-                "theoretical_order": 2.0
-              },
-              "unqualified": {
-                "confidence_interval": null,
-                "order": null,
-                "rung_count": 1,
-                "standard_error": null,
-                "status": "insufficient_same_qualification_rungs",
+                "standard_error": 14.381095210771987,
                 "theoretical_order": 2.0
               }
             },
             "sup": {
               "qualified": {
-                "characteristic_pitch": "square root of median carrier-cell area",
-                "confidence_interval": [
-                  -2.4046722839004167,
-                  3.062655452191998
-                ],
-                "confidence_level": 0.95,
-                "degrees_of_freedom": 1,
-                "error_quantity": "psi.two_pitch_boundary_band.sup",
-                "fitted_error": [
-                  8.990953223101613e-17,
-                  7.623075515803315e-17,
-                  7.008692985586207e-17
-                ],
-                "model": "log(error) = intercept + order*log(characteristic_pitch)",
-                "order": 0.3289915841457905,
-                "qualification": "qualified",
-                "rung_count": 3,
-                "standard_error": 0.21514401230002522,
-                "theoretical_order": 2.0
-              },
-              "unqualified": {
                 "confidence_interval": null,
                 "order": null,
                 "rung_count": 1,
                 "standard_error": null,
                 "status": "insufficient_same_qualification_rungs",
+                "theoretical_order": 2.0
+              },
+              "unqualified": {
+                "characteristic_pitch": "square root of median carrier-cell area",
+                "confidence_interval": [
+                  -209.76021692133733,
+                  154.62510226438698
+                ],
+                "confidence_level": 0.95,
+                "degrees_of_freedom": 1,
+                "error_quantity": "psi.two_pitch_boundary_band.sup",
+                "fitted_error": [
+                  6.356887204635589e-19,
+                  6.445114927574327e-13,
+                  1.0386651477023002e-05
+                ],
+                "model": "log(error) = intercept + order*log(characteristic_pitch)",
+                "order": -27.56755732847518,
+                "qualification": "unqualified",
+                "rung_count": 3,
+                "standard_error": 14.338873280874957,
                 "theoretical_order": 2.0
               }
             }
@@ -342,63 +342,63 @@
           "whole_domain": {
             "rms": {
               "qualified": {
+                "confidence_interval": null,
+                "order": null,
+                "rung_count": 1,
+                "standard_error": null,
+                "status": "insufficient_same_qualification_rungs",
+                "theoretical_order": 2.0
+              },
+              "unqualified": {
                 "characteristic_pitch": "square root of median carrier-cell area",
                 "confidence_interval": [
-                  -3.865108432088581,
-                  4.32288798003937
+                  -209.22568518810866,
+                  154.27633595099658
                 ],
                 "confidence_level": 0.95,
                 "degrees_of_freedom": 1,
                 "error_quantity": "psi.whole_domain.rms",
                 "fitted_error": [
-                  2.8446209336026934e-17,
-                  2.5360481493480544e-17,
-                  2.392037807915962e-17
+                  2.0680740965947433e-19,
+                  2.001319515342204e-13,
+                  3.0498475139736613e-06
                 ],
                 "model": "log(error) = intercept + order*log(characteristic_pitch)",
-                "order": 0.2288897739753944,
-                "qualification": "qualified",
+                "order": -27.47467461855603,
+                "qualification": "unqualified",
                 "rung_count": 3,
-                "standard_error": 0.32220464655416114,
-                "theoretical_order": 2.0
-              },
-              "unqualified": {
-                "confidence_interval": null,
-                "order": null,
-                "rung_count": 1,
-                "standard_error": null,
-                "status": "insufficient_same_qualification_rungs",
+                "standard_error": 14.304114748923071,
                 "theoretical_order": 2.0
               }
             },
             "sup": {
               "qualified": {
-                "characteristic_pitch": "square root of median carrier-cell area",
-                "confidence_interval": [
-                  -3.609184387419251,
-                  4.064799701180942
-                ],
-                "confidence_level": 0.95,
-                "degrees_of_freedom": 1,
-                "error_quantity": "psi.whole_domain.sup",
-                "fitted_error": [
-                  8.876560314821576e-17,
-                  7.917964607122346e-17,
-                  7.470404775832351e-17
-                ],
-                "model": "log(error) = intercept + order*log(characteristic_pitch)",
-                "order": 0.2278076568808454,
-                "qualification": "qualified",
-                "rung_count": 3,
-                "standard_error": 0.30197782295889986,
-                "theoretical_order": 2.0
-              },
-              "unqualified": {
                 "confidence_interval": null,
                 "order": null,
                 "rung_count": 1,
                 "standard_error": null,
                 "status": "insufficient_same_qualification_rungs",
+                "theoretical_order": 2.0
+              },
+              "unqualified": {
+                "characteristic_pitch": "square root of median carrier-cell area",
+                "confidence_interval": [
+                  -216.72540574069976,
+                  159.7261570118005
+                ],
+                "confidence_level": 0.95,
+                "degrees_of_freedom": 1,
+                "error_quantity": "psi.whole_domain.sup",
+                "fitted_error": [
+                  5.389824656708822e-19,
+                  8.722177399635321e-13,
+                  2.463478803497741e-05
+                ],
+                "model": "log(error) = intercept + order*log(characteristic_pitch)",
+                "order": -28.49962436444962,
+                "qualification": "unqualified",
+                "rung_count": 3,
+                "standard_error": 14.813690262708377,
                 "theoretical_order": 2.0
               }
             }
@@ -10293,14 +10293,39 @@
               "termination": "converged",
               "trip_count": 2
             },
-            "qualification": "qualified",
+            "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_within_qualification_bound",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.005097029898665426,
+                "axis_within_bound": true,
+                "bound_m": 0.15145387287104764,
+                "bound_pitch_multiple": 1.0,
+                "qualified": false,
+                "x_point_error_m": null,
+                "x_point_within_bound": false
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": true,
+                "value": 5.291367049957982e-15
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": false,
+                "read_status": "qualified_axis",
+                "x_point_admitted": false,
+                "x_point_required": true
+              }
+            },
+            "qualification_reason": "topology_read_does_not_admit_required_stationary_points",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "diverted",
+            "residual_only_qualification": "qualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -28421,14 +28446,39 @@
               "termination": "converged",
               "trip_count": 2
             },
-            "qualification": "qualified",
+            "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_within_qualification_bound",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.002596742308116435,
+                "axis_within_bound": true,
+                "bound_m": 0.09170987436549279,
+                "bound_pitch_multiple": 1.0,
+                "qualified": false,
+                "x_point_error_m": null,
+                "x_point_within_bound": false
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": true,
+                "value": 5.626976272072871e-15
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": false,
+                "read_status": "qualified_axis",
+                "x_point_admitted": false,
+                "x_point_required": true
+              }
+            },
+            "qualification_reason": "topology_read_does_not_admit_required_stationary_points",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "diverted",
+            "residual_only_qualification": "qualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -54426,12 +54476,37 @@
             },
             "qualification": "qualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_within_qualification_bound",
+            "qualification_components": {
+              "joint": "qualified",
+              "position_error": {
+                "axis_error_m": 0.0014329635061000813,
+                "axis_within_bound": true,
+                "bound_m": 0.07103816322006563,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": 0.0011992892842295785,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": true,
+                "value": 2.4230081673565618e-17
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": true
+              }
+            },
+            "qualification_reason": "residual_topology_and_position_within_qualification_bounds",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "diverted",
+            "residual_only_qualification": "qualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -100681,12 +100756,37 @@
             },
             "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.009504051372489726,
+                "axis_within_bound": true,
+                "bound_m": 0.050231566935945236,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": 0.02647988290634848,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": false,
+                "value": 0.039507353440882194
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": true
+              }
+            },
+            "qualification_reason": "fixed_point_residual_outside_qualification_bound",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "diverted",
+            "residual_only_qualification": "unqualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -100770,7 +100870,7 @@
         }
       ],
       "verdict": {
-        "sentence": "The production route qualified 3 of 4 diverted-single-null resolution rows against the 1e-12 terminal residual bound."
+        "sentence": "The production route jointly qualified 1 of 4 diverted-single-null resolution rows against the 1e-12 terminal residual, admitted topology and resolution-scaled position bounds; 3 pass the residual bound alone."
       }
     },
     "moderate-rotation-conventional-static": {
@@ -114479,12 +114579,37 @@
             },
             "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.0027041742542355655,
+                "axis_within_bound": true,
+                "bound_m": 0.13143160656791236,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": null,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": false,
+                "value": 0.012457640060526081
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": false
+              }
+            },
+            "qualification_reason": "fixed_point_residual_outside_qualification_bound",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "limited",
+            "residual_only_qualification": "unqualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -135801,12 +135926,37 @@
             },
             "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.011291968233627754,
+                "axis_within_bound": true,
+                "bound_m": 0.07958579003298841,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": null,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": false,
+                "value": 0.008455791545012673
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": false
+              }
+            },
+            "qualification_reason": "fixed_point_residual_outside_qualification_bound",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "limited",
+            "residual_only_qualification": "unqualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -164926,12 +165076,37 @@
             },
             "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.014621870933969388,
+                "axis_within_bound": true,
+                "bound_m": 0.06164688787850487,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": null,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": false,
+                "value": 0.007015683538184138
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": false
+              }
+            },
+            "qualification_reason": "fixed_point_residual_outside_qualification_bound",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "limited",
+            "residual_only_qualification": "unqualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -213839,12 +214014,37 @@
             },
             "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.018301630837409266,
+                "axis_within_bound": true,
+                "bound_m": 0.04359093245793756,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": null,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": false,
+                "value": 0.005744063730954687
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": false
+              }
+            },
+            "qualification_reason": "fixed_point_residual_outside_qualification_bound",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "limited",
+            "residual_only_qualification": "unqualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -213930,7 +214130,7 @@
         }
       ],
       "verdict": {
-        "sentence": "The production route qualified 0 of 4 moderate-rotation-conventional-static resolution rows against the 1e-12 terminal residual bound."
+        "sentence": "The production route jointly qualified 0 of 4 moderate-rotation-conventional-static resolution rows against the 1e-12 terminal residual, admitted topology and resolution-scaled position bounds; 0 pass the residual bound alone."
       }
     },
     "strong-rotation-compact-static": {
@@ -227596,12 +227796,37 @@
             },
             "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.0025629548500197214,
+                "axis_within_bound": true,
+                "bound_m": 0.05262896701751417,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": null,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": false,
+                "value": 0.013545021492433489
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": false
+              }
+            },
+            "qualification_reason": "fixed_point_residual_outside_qualification_bound",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "limited",
+            "residual_only_qualification": "unqualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -248852,12 +249077,37 @@
             },
             "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.004054620568397191,
+                "axis_within_bound": true,
+                "bound_m": 0.03186842212527238,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": null,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": false,
+                "value": 0.01738831511268224
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": false
+              }
+            },
+            "qualification_reason": "fixed_point_residual_outside_qualification_bound",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "limited",
+            "residual_only_qualification": "unqualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -278076,12 +278326,37 @@
             },
             "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.005953148446503598,
+                "axis_within_bound": true,
+                "bound_m": 0.024685173632217606,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": null,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": false,
+                "value": 0.005933569012161509
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": false
+              }
+            },
+            "qualification_reason": "fixed_point_residual_outside_qualification_bound",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "limited",
+            "residual_only_qualification": "unqualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -326940,12 +327215,37 @@
             },
             "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.007113968554850267,
+                "axis_within_bound": true,
+                "bound_m": 0.01745505367010842,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": null,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": false,
+                "value": 0.004242860669978417
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": false
+              }
+            },
+            "qualification_reason": "fixed_point_residual_outside_qualification_bound",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "limited",
+            "residual_only_qualification": "unqualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -327031,7 +327331,7 @@
         }
       ],
       "verdict": {
-        "sentence": "The production route qualified 0 of 4 strong-rotation-compact-static resolution rows against the 1e-12 terminal residual bound."
+        "sentence": "The production route jointly qualified 0 of 4 strong-rotation-compact-static resolution rows against the 1e-12 terminal residual, admitted topology and resolution-scaled position bounds; 0 pass the residual bound alone."
       }
     },
     "weak-rotation-reactor-static": {
@@ -340727,12 +341027,37 @@
             },
             "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.0018460312639213298,
+                "axis_within_bound": true,
+                "bound_m": 0.46606341035820315,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": null,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": false,
+                "value": 0.007447526861632619
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": false
+              }
+            },
+            "qualification_reason": "fixed_point_residual_outside_qualification_bound",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "limited",
+            "residual_only_qualification": "unqualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -362020,12 +362345,37 @@
             },
             "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.033461303940010775,
+                "axis_within_bound": true,
+                "bound_m": 0.28221540988057975,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": null,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": false,
+                "value": 0.0055589300334190185
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": false
+              }
+            },
+            "qualification_reason": "fixed_point_residual_outside_qualification_bound",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "limited",
+            "residual_only_qualification": "unqualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -391422,12 +391772,37 @@
             },
             "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.05565434041507267,
+                "axis_within_bound": true,
+                "bound_m": 0.21860311650211722,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": null,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": false,
+                "value": 0.0012464509730622084
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": false
+              }
+            },
+            "qualification_reason": "fixed_point_residual_outside_qualification_bound",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "limited",
+            "residual_only_qualification": "unqualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -440421,12 +440796,37 @@
             },
             "qualification": "unqualified",
             "qualification_bound": 1e-12,
-            "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+            "qualification_components": {
+              "joint": "unqualified",
+              "position_error": {
+                "axis_error_m": 0.06431629405054216,
+                "axis_within_bound": true,
+                "bound_m": 0.15457574606715999,
+                "bound_pitch_multiple": 1.0,
+                "qualified": true,
+                "x_point_error_m": null,
+                "x_point_within_bound": true
+              },
+              "terminal_residual": {
+                "bound": 1e-12,
+                "qualified": false,
+                "value": 0.0054014429054834836
+              },
+              "topology_read": {
+                "axis_admitted": true,
+                "qualified": true,
+                "read_status": "qualified_axis",
+                "x_point_admitted": true,
+                "x_point_required": false
+              }
+            },
+            "qualification_reason": "fixed_point_residual_outside_qualification_bound",
             "raster_flux_receipt": {
               "available": false,
               "status": "unavailable_non_tensor_product_grid"
             },
             "requested_seed_class": "limited",
+            "residual_only_qualification": "unqualified",
             "resolved_defaults": {
               "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
               "deviations": {
@@ -440512,7 +440912,7 @@
         }
       ],
       "verdict": {
-        "sentence": "The production route qualified 0 of 4 weak-rotation-reactor-static resolution rows against the 1e-12 terminal residual bound."
+        "sentence": "The production route jointly qualified 0 of 4 weak-rotation-reactor-static resolution rows against the 1e-12 terminal residual, admitted topology and resolution-scaled position bounds; 0 pass the residual bound alone."
       }
     }
   },
@@ -440533,13 +440933,20 @@
       "tests/test_solovev_recovery_gates.py::LOCKED_RECOVERY_BOUNDS"
     ],
     "gauge": "shared exact exterior; no post-solve re-zeroing",
+    "joint_qualification": {
+      "position_error_bound": "axis and required X-point errors at most one characteristic pitch",
+      "position_error_bound_pitch_multiple": 1.0,
+      "residual_only_count_is_retained": true,
+      "terminal_residual_bound": 1e-12,
+      "topology_read": "axis admitted; diverted cases additionally require an admitted X-point"
+    },
     "lane_policy": {
       "fine": "H200 betelgeuse reservation gpu_0003_grpA with JAX_PLATFORMS=cuda,cpu",
       "other": "CPU lane used by the closed-form recovery gates"
     },
     "machine_factory": "cached_machine at every rung including reduced",
     "measurement": "ForwardProfile production solves against independently evaluated closed-form total flux",
-    "qualification_policy": "retain every terminal row and fit each qualification cohort separately",
+    "qualification_policy": "retain every terminal row and fit each joint qualification cohort separately",
     "requested_cells": [
       -110,
       -300,
@@ -440550,7 +440957,7 @@
     "seed_factory": "profile.cold_seed_portfolio",
     "solver_route": "profile.solve(seed, route='newton_krylov', target_current=Ip_closed_form)",
     "solver_source_modified": false,
-    "source_revision": "a8d7c0bdaede3c98eb3415d74821a82f648278ad",
+    "source_revision": "e9e7cae57b5a58212286c3288ea80dcb8e03cd20",
     "terminal_residual_bound": 1e-12,
     "theoretical_discrete_operator_order": 2.0
   },
@@ -440755,7 +441162,7 @@
     "realised_cells": 136,
     "registry_entry_count": 14,
     "requested_cells": -110,
-    "wall_seconds": 37.37720360327512
+    "wall_seconds": 40.24964792467654
   },
   "schema": {
     "$id": "nova.solovev-production-route-absolute-accuracy-certificate",
@@ -440783,8 +441190,7 @@
       "preregistration",
       "reduced_oracle_registry_reproduction",
       "cases",
-      "verdict",
-      "production_run"
+      "verdict"
     ],
     "required_solver_telemetry": [
       "termination",
@@ -440818,9 +441224,10 @@
     "all_locked_recovery_bounds_reproduced": true,
     "all_rows_retained": true,
     "case_count": 4,
-    "qualified_rows": 3,
+    "qualified_rows": 1,
+    "residual_only_qualified_rows": 3,
     "resolution_rows": 16,
     "schema_valid": true,
-    "unqualified_rows": 13
+    "unqualified_rows": 15
   }
 }

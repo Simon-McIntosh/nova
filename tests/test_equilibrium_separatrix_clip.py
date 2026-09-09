@@ -437,6 +437,30 @@ def test_spline_clip_brackets_both_edges_adjacent_to_an_outside_corner():
     np.testing.assert_allclose(support.area[0], 1.0 - sliver, rtol=5.0e-7, atol=1.0e-12)
 
 
+def test_spline_arc_samples_remain_inside_the_atomic_cell():
+    """A traced boundary chain cannot add area outside its owning cell."""
+    configure_dtypes()
+    cell = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+    mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.5, 0.5]]))
+
+    def level(points):
+        radial, vertical = points[..., 0], points[..., 1]
+        return 1.2 - 1.6 * (vertical - 0.5) ** 2 - radial
+
+    support = mesh.traced_clip(
+        level(jnp.asarray(mesh.node_coordinates)),
+        curve_evaluator=level,
+        participating_cell=jnp.asarray([True]),
+    )
+
+    polygon = np.asarray(support.support_vertices[0, : support.vertex_count[0]])
+    assert bool(support.boundary[0])
+    assert int(support.vertex_count[0]) > len(cell)
+    assert np.all(polygon >= -1.0e-14)
+    assert np.all(polygon <= 1.0 + 1.0e-14)
+    assert float(support.area[0]) <= 1.0 + 1.0e-14
+
+
 def test_traced_clip_matches_exact_zero_corner_and_tangential_cells():
     cells = [
         np.asarray([[r, z], [r + 1, z], [r + 1, z + 1], [r, z + 1]], dtype=float)

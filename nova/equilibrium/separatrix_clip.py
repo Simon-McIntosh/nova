@@ -676,6 +676,61 @@ def _traced_level_arc(start, end, evaluator, inside_vertex):
     return chord + root[..., None] * normal[:, None, :]
 
 
+def _project_arc_to_cell(points, edge_start, edge_end, valid_edge):
+    """Project samples outside a convex atomic cell onto its nearest edge."""
+    import jax.numpy as jnp
+
+    inside = jnp.ones(points.shape[:-1], dtype=bool)
+    best_distance = jnp.full(points.shape[:-1], jnp.inf, dtype=points.dtype)
+    best_point = points
+    floor = 128.0 * jnp.finfo(points.dtype).eps
+
+    def project_edge(carry, edge_geometry):
+        current_inside, current_distance, current_point = carry
+        start, end, valid = edge_geometry
+        edge = end - start
+        relative = points - start[:, None, :]
+        squared_length = jnp.sum(edge**2, axis=1)
+        safe_squared_length = jnp.maximum(squared_length, jnp.finfo(points.dtype).tiny)
+        cross = (
+            edge[:, None, 0] * relative[..., 1] - edge[:, None, 1] * relative[..., 0]
+        )
+        scale = jnp.maximum(
+            1.0,
+            jnp.sqrt(safe_squared_length)[:, None]
+            * jnp.maximum(
+                jnp.max(jnp.abs(points), axis=-1),
+                jnp.max(jnp.abs(start), axis=-1)[:, None],
+            ),
+        )
+        current_inside = current_inside & (~valid[:, None] | (cross >= -floor * scale))
+        fraction = jnp.clip(
+            jnp.sum(relative * edge[:, None, :], axis=-1)
+            / safe_squared_length[:, None],
+            0.0,
+            1.0,
+        )
+        candidate = start[:, None, :] + fraction[..., None] * edge[:, None, :]
+        distance = jnp.sum((points - candidate) ** 2, axis=-1)
+        nearer = valid[:, None] & (distance < current_distance)
+        return (
+            current_inside,
+            jnp.where(nearer, distance, current_distance),
+            jnp.where(nearer[..., None], candidate, current_point),
+        ), None
+
+    (inside, _distance, projected), _unused = jax.lax.scan(
+        project_edge,
+        (inside, best_distance, best_point),
+        (
+            jnp.moveaxis(edge_start, 1, 0),
+            jnp.moveaxis(edge_end, 1, 0),
+            jnp.moveaxis(valid_edge, 1, 0),
+        ),
+    )
+    return jnp.where(inside[..., None], points, projected)
+
+
 def _traced_polygon_moments(vertices, count, centroids):
     """Evaluate fixed-capacity polygon moments with traced reductions."""
     import jax.numpy as jnp
@@ -1002,11 +1057,17 @@ def _traced_clip(
 
         def trace_gap(_carry, gap_geometry):
             gap_start, gap_end, gap_inside = gap_geometry
-            return None, _traced_level_arc(
+            traced = _traced_level_arc(
                 gap_start,
                 gap_end,
                 curve_evaluator,
                 gap_inside,
+            )
+            return None, _project_arc_to_cell(
+                traced,
+                cell_start_point,
+                cell_end_point,
+                valid_edge,
             )
 
         _carry, scanned_arc = jax.lax.scan(

@@ -164,13 +164,14 @@ def diagnose_vertical_mode(output: Path) -> dict[str, Any]:
         "mechanism": (
             "adaptive versus refusal-only refresh first changes only the refused "
             "ladder work count and leaves terminal flux identical; compiled-versus-"
-            "host roundoff came from eagerly scoring all six grades in one lax.map "
-            "instead of the host sequence of grade one followed by the five-grade tail"
+            "host terminal roundoff remains after matching the grade-one then tail "
+            "sequence, with every published trip decision and scalar identical"
         ),
-        "roundoff_operation": (
-            "compiled eager six-grade lax.map replaced by grade kernel then "
-            "conditional five-grade tail kernel"
-        ),
+        "roundoff_operation": None,
+        "rejected_hypotheses": [
+            "adaptive Jacobian refresh policy",
+            "eager six-grade lax.map versus grade-one then conditional tail ordering",
+        ],
         "quantity_moved_first": first_step,
         "trip_comparison_after_repair": trip_rows,
         "terminal_flux_ulp_after_repair": _ulp_distance(cached.state, adaptive.state),

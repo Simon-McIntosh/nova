@@ -85,6 +85,83 @@ __all__ = [
 _PRODUCTION_STATIONARY_POINT_CAPACITY = 30
 """Candidate slots retained by the topology reader used by forward solves."""
 
+_SUPPORT_CLIP_MODE = "exact"
+"""Plasma-support clip mode for solver construction.
+
+``exact`` (the default committed behaviour) traces the curved boundary
+support with every cut cell participating; ``chord`` reproduces the
+prior committed chord clip, full cells selected by the profile partition
+label only; ``chord_cells`` keeps the exact support everywhere except a
+named pair of cells whose entries revert to their chord-moment values.
+The benchmark discriminator selects the non-default modes explicitly;
+production never changes them.
+"""
+
+
+def set_support_clip_mode(mode: str) -> str:
+    """Select the plasma-support clip mode for subsequent solves."""
+    global _SUPPORT_CLIP_MODE
+    if mode not in ("exact", "chord", "chord_cells"):
+        raise ValueError(f"unknown support clip mode {mode!r}")
+    _SUPPORT_CLIP_MODE = mode
+    return _SUPPORT_CLIP_MODE
+
+
+def support_clip_mode() -> str:
+    """Return the active plasma-support clip mode."""
+    return _SUPPORT_CLIP_MODE
+
+
+#: The two boundary cells whose contaminated moments the discriminator
+#: reverts to their chord values to test the two-cell-destabilisation arm.
+_CHORD_REVERTED_CELLS = (101, 102)
+
+
+def _substitute_chord_cell_supports(exact, chord, cell_indices, participation):
+    """Return the exact support with named cells' geometry reverted to chord."""
+    import jax.numpy as jnp
+
+    cell_count = exact.vertex_count.shape[0]
+    substitute = (
+        jnp.zeros(cell_count, dtype=bool)
+        .at[jnp.asarray(cell_indices, dtype=jnp.int32)]
+        .set(True)
+    )
+    mask1 = substitute[:, None]
+    mask2 = substitute[:, None, None]
+    mask3 = substitute[:, None, None, None]
+    mixed = exact._replace(
+        support_vertices=jnp.where(
+            mask2, chord.support_vertices, exact.support_vertices
+        ),
+        vertex_count=jnp.where(substitute, chord.vertex_count, exact.vertex_count),
+        included=jnp.where(substitute, chord.included, exact.included),
+        boundary=jnp.where(substitute, chord.boundary, exact.boundary),
+        area=jnp.where(substitute, chord.area, exact.area),
+        full_area=jnp.where(substitute, chord.full_area, exact.full_area),
+        first_area_moment=jnp.where(
+            mask1, chord.first_area_moment, exact.first_area_moment
+        ),
+        second_area_moment=jnp.where(
+            mask2, chord.second_area_moment, exact.second_area_moment
+        ),
+        branch_vertex_count=jnp.where(
+            mask1, chord.branch_vertex_count, exact.branch_vertex_count
+        ),
+        branch_area=jnp.where(mask1, chord.branch_area, exact.branch_area),
+        branch_first_area_moment=jnp.where(
+            mask2, chord.branch_first_area_moment, exact.branch_first_area_moment
+        ),
+        branch_second_area_moment=jnp.where(
+            mask3, chord.branch_second_area_moment, exact.branch_second_area_moment
+        ),
+        branch_support_vertices=jnp.where(
+            mask3, chord.branch_support_vertices, exact.branch_support_vertices
+        ),
+        saddle=jnp.where(substitute, chord.saddle, exact.saddle),
+    )
+    return mixed.qualify(participation)
+
 
 @jax.jit
 def axis_cell_seed(coordinate, axis, inside_material):
@@ -1986,6 +2063,8 @@ class ForwardFluxOperator:
     @staticmethod
     def _moment_support_masks(masks, profile_support):
         """Promote every curved cut support into the profile-owned partition."""
+        if _SUPPORT_CLIP_MODE == "chord":
+            return masks
         promoted_label = jnp.where(
             profile_support.included,
             jnp.asarray(int(PlasmaDomain.CORE), dtype=masks.label.dtype),
@@ -2007,9 +2086,24 @@ class ForwardFluxOperator:
         return (positive & negative) | near_level
 
     def _profile_support(self, masks, topology, physical, sample_psi_norm):
-        """Return the curved plasma-side support with geometry as traced data."""
+        """Return the curved plasma-side support with geometry as traced data.
+
+        The committed mode traces the curved boundary with every cut cell
+        participating.  The discriminator's chord mode reproduces the prior
+        committed clip - full atomic cells selected by the profile partition
+        label alone - and its chord-cells mode replaces only the two named
+        cells' geometry with that chord result.
+        """
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
+        atomic_mesh = self.moment_geometry.atomic_mesh
+        chord_support = None
+        if _SUPPORT_CLIP_MODE in ("chord", "chord_cells"):
+            chord_support = atomic_mesh.traced_clip(
+                jnp.ones(len(atomic_mesh.node_coordinates), dtype=physical.dtype)
+            ).qualify(masks.profile_participation)
+            if _SUPPORT_CLIP_MODE == "chord":
+                return chord_support
         shared_flux = self.shared_node_flux(physical)
         inside_boundary = self.polarity * (shared_flux - topology.boundary_flux)
         flux_coefficient = self.support_flux_coefficients(
@@ -2048,7 +2142,6 @@ class ForwardFluxOperator:
             )
             return jnp.where(surface.fit_executed, spline_level, local_level)
 
-        atomic_mesh = self.moment_geometry.atomic_mesh
         cell_vertices = jnp.asarray(atomic_mesh.node_coordinates)[
             jnp.asarray(atomic_mesh.cell_nodes)
         ]
@@ -2062,7 +2155,15 @@ class ForwardFluxOperator:
             curve_evaluator=curved_level,
             participating_cell=participation,
         )
-        return traced_support.qualify(participation)
+        exact_support = traced_support.qualify(participation)
+        if _SUPPORT_CLIP_MODE == "chord_cells":
+            return _substitute_chord_cell_supports(
+                exact_support,
+                chord_support,
+                _CHORD_REVERTED_CELLS,
+                participation,
+            )
+        return exact_support
 
     def _partition_for_state(self, psi, frozen):
         """Revalue one state on an already-decided discrete partition."""

@@ -163,6 +163,27 @@ DEFAULT_COMPENSATING_CURRENT_CEILING = 100_000.0
 _STAGE_TIMING_ENABLED = _os.environ.get("NOVA_REDUCED_STAGE_TIMING") == "1"
 _STAGE_MARKS: list[tuple[str, float]] = []
 
+#: Newton-step damping scale.  Unity is the committed step; a discriminator
+#: sweeps values below it to test whether the exact-participation fixed point
+#: needs a relaxation tuned to its steeper map.  A python float read at trace
+#: time, so each distinct value compiles its own direction program under the
+#: persistent compilation cache.
+_STEP_RELAXATION = 1.0
+
+
+def set_step_relaxation(value: float) -> float:
+    """Damp the fixed-point Newton step by ``value`` (1.0 is the committed step)."""
+    global _STEP_RELAXATION
+    if not np.isfinite(value) or value <= 0.0:
+        raise ValueError(f"step relaxation must be finite and positive, got {value!r}")
+    _STEP_RELAXATION = float(value)
+    return _STEP_RELAXATION
+
+
+def step_relaxation() -> float:
+    """Return the active Newton-step damping scale."""
+    return _STEP_RELAXATION
+
 
 def set_stage_timing(enabled: bool = True) -> None:
     """Enable or disable the named stage recording (measurement hook only)."""
@@ -1141,6 +1162,8 @@ def _plain_newton_trip(
                 direction, _ = _timed(kernels["direction"], jacobian, scores.residual)
             else:
                 direction = kernels["direction"](jacobian, scores.residual)
+            if _STEP_RELAXATION != 1.0:
+                direction = direction * _STEP_RELAXATION
             if project_candidate is None:
                 accepted, _tried, promotion = grader(
                     kernels,

@@ -23,8 +23,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-09">
-<meta name="plan-version" content="36">
-<meta name="plan-impl" content="0.8">
+<meta name="plan-version" content="38">
+<meta name="plan-impl" content="0.88">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="forward-solve-api,millisecond-converged-solve,playable-forward-solve">
 </head>
@@ -77,10 +77,11 @@
     <pre class="r-fu-prompt">/reckon-ship batched-operator-boundary</pre>
     <p class="r-fu-outcome">Measured (bob-terminal-hash-semantics, commit 3dcb7539, all_debug CPU x64): the production terminal hash is SHA-256 over the flux array alone (float64, 1126 values); of 130 receipt fields, 117 are equal and 13 differ between the closure and sampled routes on 21978/35 pure, the hashed flux by at most 1.1e-16 absolute and 1.1e-16 relative, with both routes converged in one active-set iteration at residual 4.959e-16. Equal residuals conceal different hashes by roundoff alone, so the section 1 bit-identity gate is restated as identity of the physical flux within a declared tolerance of 4 binary64 ulp (relative 1e-15), and the literal-hash comparison is retired. Receipt docs/figures/batched-operator-boundary/terminal-hash/terminal-hash-census.json.</p>
     </article>
-<article class="r-fu" data-id="f-20260909T1331-declared-support-is-member-data" data-status="open" data-written-by="reckon-ship s19-review" data-written-at="2026-09-09T13:31:00Z" data-recommends-skill="/reckon-ship batched-operator-boundary §1" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-20260909T1331-declared-support-is-member-data" data-status="resolved" data-written-by="reckon-ship s19-review" data-written-at="2026-09-09T13:31:00Z" data-recommends-skill="/reckon-ship batched-operator-boundary §1" data-resolved-at="2026-09-09T14:28:25+00:00" data-resolved-by="reckon-ship s19-review">
     <h4 class="r-fu-title">Move declared_support from static host state to member data, then rerun the batched exit incidence</h4>
     <div class="r-fu-body">Measured 2026-09-09 (bob-batched-exit-incidence, receipt docs/figures/batched-operator-boundary/exit-incidence/batched-exit-incidence.json, sha256 of the discriminator 4a93ab47): the twelve MAST bank members share every machine-geometry field exactly (lattice radius and height, connectivity and rings, wall nodes and carrier index, stencils, inside-material mask, raster axes, mesh-step scalars, null-locator coordinates), yet the operator refuses to stack them into one width-12 program and falls back to six width-2 groups. The single differing static field is DeclaredAnchorOperator.declared_support in nova/equilibrium/forward_operator.py: the per-shot stored-LCFS polygon intersected with the common material mask, an equilibrium quantity, omitted from _dynamic_extra_names and therefore retained by tree_flatten in _OperatorPytreeAux.static_state (flat cell 113 is false for 21978/35 and true for 21983/35). The declared axis flux and boundary flux, which differ likewise, already ride as dynamic children. THE REPAIR: reclassify declared_support as a stacked member leaf beside the declared flux anchors, keep the width-12 test's identity assertion in the restated physical-flux form (4 ulp), and prove no width-one result moves. THEN RERUN the section 2 measurement: resume run r-20260909T105115820348 (its driver and preflight are landed and its session remembers the launch) rather than redispatching, on the H200 with the landed operand cache, width 12 MAST and width 5 DIII-D, compile_once true, peak RSS under 16 GiB. The reclassification waits for forward_operator.py to be released by the clipped-moment worktree of null-identification-authority.</div>
     <pre class="r-fu-prompt">/reckon-ship batched-operator-boundary §1</pre>
+    <p class="r-fu-outcome">Landed (bob-declared-support-member-leaf, commit e1540b6b, merged): declared_support rides as a dynamic pytree child beside declared_axis_flux and declared_boundary_flux; a support-only regression stacks two members into one width-two program and the width-twelve MAST batch is one geometry group whose batched physical flux matches width one at rtol 1e-15, atol 0; tests/test_batched_operator_boundary.py 7 passed on all_debug CPU x64. The section 2 measurement (run r-20260909T105115820348) is resumed on the H200 against main with the reclassification merged.</p>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -131,6 +132,12 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260909T1018-hash-census-landed" data-who="reckon-ship s19-review" data-when="2026-09-09T10:18:00Z">
     <div class="r-comment-body">bob-terminal-hash-semantics landed: commit 3dcb7539 merged to main. The section 1 bit-identity gate is restated: identity of the physical flux within 4 ulp (relative 1e-15) between batched and width-one solves, since the literal hash differs by roundoff (1.1e-16) between two routes that converge to the same residual. The width-12 test's assertion should adopt the tolerance form in the same change that reruns section 2.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260909T140813234720-bob-declared-support-member-leaf" data-who="s19i-bob-declared" data-when="2026-09-09T14:20:52Z">
+    <div class="r-comment-body"><p>declared_support moved from static host state to a dynamic member leaf beside the declared flux anchors: the support-only regression stacks two members into one width-two program, the width-twelve MAST batch is one geometry group with batched physical flux matching width one at rtol 1e-15 and atol 0; 7 tests green</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260909T1626-declared-support-landed" data-who="reckon-ship s19-review" data-when="2026-09-09T16:26:00Z">
+    <div class="r-comment-body">Section 1 classification defect closed: the twelve real MAST bank members now share one host-geometry digest (e1540b6b). Section 1 is complete in full; section 2 is the rerun in flight. impl 0.8 to 0.88.</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260908T072650548440-bob-exit-incidence-batch" data-who="bob-batch-t" data-when="2026-09-08T07:52:26Z">
     <div class="r-comment-body"><p>Batched strict-exit incidence not measured (codex-terra): the driver gained a batched mode and a committed H200 launcher (c783e464, dc936be7; preflight 12 MAST cache members and 5 DIII-D members), but job 1265049 failed after 13 s before compilation because all twelve MAST exact operand cache members (sha256 05d664ce) are stale against the current bank (sha256 58a5d895, rebanked by the banked-reads landing at 906d3f09): every arm's residual metadata disagrees. The brief presumed a current cache, so the node was malformed. Follow-on: regenerate the twelve-arm exact operand cache from the current bank on the H200, then rerun this measurement from these commits. Only memory point measured: 795 MiB RSS at input build.</p></div>

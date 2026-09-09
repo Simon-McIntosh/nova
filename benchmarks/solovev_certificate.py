@@ -27,6 +27,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm, Normalize
+from matplotlib.path import Path as PolygonPath
 import numpy as np
 from scipy import stats
 
@@ -37,12 +38,15 @@ from benchmarks.diiid_forward_gs_match import (
     candidate_flux_margins,
 )
 from benchmarks.split_fit_jump_field import (
+    AXIS_M,
     BOUNDARY_BAND_PITCHES,
+    X_POINT_M,
     _distance_to_boundary,
     _lcfs,
     _polynomial_flux,
     _polynomial_gradient,
     _polynomial_hessian,
+    _solve_coefficients,
 )
 from nova.equilibrium import (
     ColdSeedConstruction,
@@ -60,11 +64,6 @@ from nova.jax.config import (
 )
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.analytic_oracle_fixtures.reduced_oracle import measure_reduced_oracle
-from scripts.dual_basin_fixtures.build_diverted_fixture import (
-    AXIS_M,
-    X_POINT_M,
-    _solve_coefficients,
-)
 from scripts.oracle_rebaseline import measure as recovery
 from tests.rotating_equilibrium_references import RotatingEquilibrium, reference_cases
 from tests.test_solovev_recovery_gates import LOCKED_RECOVERY_BOUNDS
@@ -80,6 +79,10 @@ SEED_CONTROL_OUTPUT = (
 FIGURE_ROOT = ROOT / "docs/figures/gs-absolute-accuracy/solovev"
 PART_ROOT = FIGURE_ROOT / "production-route-parts"
 DIAGNOSTIC_ROOT = FIGURE_ROOT / "production-route-diagnostics"
+DIVERTED_GEOMETRY_ROOT = (
+    ROOT / "docs/figures/gs-absolute-accuracy/solovev-diverted-case"
+)
+DIVERTED_GEOMETRY_OUTPUT = DIVERTED_GEOMETRY_ROOT / "diverted-case-geometry.json"
 REQUESTED_CELLS = (-110, -300, -500, -1000)
 CASE_NAMES = (
     "weak-rotation-reactor-static",
@@ -1176,6 +1179,164 @@ def _boundary(case_name: str, exact: Any) -> np.ndarray:
             np.column_stack((radius[::-1], -half_height[::-1])),
         )
     )
+
+
+def _without_duplicate_endpoint(polyline: np.ndarray) -> np.ndarray:
+    """Drop a contour's repeated closing vertex before distance evaluation."""
+    if len(polyline) > 2 and np.array_equal(polyline[0], polyline[-1]):
+        return polyline[:-1]
+    return polyline
+
+
+def _symmetric_polyline_distance(first: np.ndarray, second: np.ndarray) -> float:
+    """Return the sampled symmetric Hausdorff distance between two polylines."""
+    first = _without_duplicate_endpoint(np.asarray(first, dtype=np.float64))
+    second = _without_duplicate_endpoint(np.asarray(second, dtype=np.float64))
+    return max(
+        float(np.max(_distance_to_boundary(first, second))),
+        float(np.max(_distance_to_boundary(second, first))),
+    )
+
+
+def _diverted_geometry_row(requested_cells: int) -> dict[str, Any]:
+    """Measure the closed-form diverted lobe against one certificate carrier."""
+    if requested_cells not in {-110, -342}:
+        raise ValueError("diverted geometry is measured at -110 and -342 cells")
+    carrier_case, _source_case, coefficients = _case("diverted-jump-bearing")
+    machine = oracle_fixture.cached_machine(
+        carrier_case,
+        requested_cells,
+        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+    )
+    boundary = _boundary("diverted-jump-bearing", coefficients)
+    minor_radius = 0.5 * float(np.ptp(boundary[:, 0]))
+    axis_distance = float(_distance_to_boundary(AXIS_M[None, :], boundary)[0])
+    pitch = float(np.sqrt(np.median(np.asarray(machine.area, dtype=np.float64))))
+
+    radial = np.linspace(
+        float(np.min(machine.node[:, 0])), float(np.max(machine.node[:, 0])), 241
+    )
+    vertical = np.linspace(
+        float(np.min(machine.node[:, 1])), float(np.max(machine.node[:, 1])), 241
+    )
+    radial_grid, vertical_grid = np.meshgrid(radial, vertical)
+    coordinates = np.column_stack((radial_grid.ravel(), vertical_grid.ravel()))
+    field = _exact_state("diverted-jump-bearing", coefficients, coordinates).reshape(
+        vertical_grid.shape
+    )
+    boundary_level = float(
+        np.median(_exact_state("diverted-jump-bearing", coefficients, boundary))
+    )
+    figure, axis = plt.subplots()
+    contour_set = axis.contour(
+        radial,
+        vertical,
+        field,
+        levels=[boundary_level],
+    )
+    components = [
+        np.asarray(component, dtype=np.float64)
+        for component in contour_set.allsegs[0]
+        if len(component) >= 3
+    ]
+    plt.close(figure)
+    if not components:
+        raise RuntimeError(
+            "analytic zero-flux contour extraction returned no component"
+        )
+    distances = [
+        _symmetric_polyline_distance(boundary, component) for component in components
+    ]
+    selected_index = int(np.argmin(distances))
+    selected = components[selected_index]
+    hausdorff = distances[selected_index]
+    wall = np.asarray(machine.wall_node, dtype=np.float64)
+    axis_eigenvalues = np.linalg.eigvalsh(
+        _polynomial_hessian(AXIS_M[None, :], coefficients)[0]
+    )
+    x_eigenvalues = np.linalg.eigvalsh(
+        _polynomial_hessian(X_POINT_M[None, :], coefficients)[0]
+    )
+    return {
+        "requested_cells": requested_cells,
+        "realised_cells": int(len(machine.node)),
+        "characteristic_cell_pitch_m": pitch,
+        "closed_form_axis_rz_m": AXIS_M.tolist(),
+        "closed_form_x_point_rz_m": X_POINT_M.tolist(),
+        "minor_radius_m": minor_radius,
+        "axis_to_boundary_min_distance_m": axis_distance,
+        "axis_clearance_fraction_of_minor_radius": axis_distance / minor_radius,
+        "axis_clearance_threshold_fraction": 0.3,
+        "axis_clearance_passed": axis_distance >= 0.3 * minor_radius,
+        "x_point_inside_wall_polygon": bool(
+            PolygonPath(wall).contains_point(X_POINT_M)
+        ),
+        "axis_hessian_eigenvalues": axis_eigenvalues.tolist(),
+        "x_point_hessian_eigenvalues": x_eigenvalues.tolist(),
+        "boundary_r_span_m": [
+            float(np.min(boundary[:, 0])),
+            float(np.max(boundary[:, 0])),
+        ],
+        "boundary_z_span_m": [
+            float(np.min(boundary[:, 1])),
+            float(np.max(boundary[:, 1])),
+        ],
+        "analytic_boundary_flux_wb": boundary_level,
+        "analytic_contour_component_count": len(components),
+        "selected_contour_component_index": selected_index,
+        "selected_contour_point_count": int(len(selected)),
+        "hausdorff_distance_m": hausdorff,
+        "hausdorff_distance_in_cell_pitches": hausdorff / pitch,
+        "hausdorff_under_one_cell_pitch": hausdorff < pitch,
+        "contour_grid_shape": list(radial_grid.shape),
+        "contour_grid_r_span_m": [float(radial[0]), float(radial[-1])],
+        "contour_grid_z_span_m": [float(vertical[0]), float(vertical[-1])],
+        "cache": machine.cache,
+    }
+
+
+def _diverted_geometry_receipt(
+    output: Path = DIVERTED_GEOMETRY_OUTPUT,
+) -> dict[str, Any]:
+    """Write the two-rung geometric admission receipt for the exact case."""
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("diverted geometry requires JAX extended precision")
+    rows = [_diverted_geometry_row(requested) for requested in (-110, -342)]
+    receipt = {
+        "schema": {
+            "$id": "nova.solovev-diverted-case-geometry",
+            "version": 1,
+            "required_requested_cells": [-110, -342],
+        },
+        "source_revision": _source_revision(),
+        "lane": _lane(),
+        "method": {
+            "boundary": "benchmarks.solovev_certificate._boundary",
+            "field": "benchmarks.solovev_certificate._exact_state",
+            "axis": "closed-form stationary point",
+            "minor_radius": "half the analytic boundary radial span",
+            "contour": (
+                "241 by 241 carrier-grid extraction at the median analytic "
+                "boundary flux"
+            ),
+            "distance": "symmetric sampled point-to-polyline Hausdorff distance",
+        },
+        "rows": rows,
+        "verdict": {
+            "axis_clearance_passed": all(row["axis_clearance_passed"] for row in rows),
+            "x_point_inside_wall_polygon": all(
+                row["x_point_inside_wall_polygon"] for row in rows
+            ),
+            "hausdorff_under_one_cell_pitch": all(
+                row["hausdorff_under_one_cell_pitch"] for row in rows
+            ),
+        },
+    }
+    if not all(receipt["verdict"].values()):
+        raise RuntimeError(f"diverted geometry gate failed: {receipt['verdict']}")
+    _write_json(output, receipt)
+    return receipt
 
 
 def _quadratic_derivatives(
@@ -2351,6 +2512,7 @@ def _parse() -> argparse.Namespace:
     parser.add_argument("--seed-control", action="store_true")
     parser.add_argument("--validate-seed-control", action="store_true")
     parser.add_argument("--nan-census", action="store_true")
+    parser.add_argument("--diverted-geometry", action="store_true")
     parser.add_argument("--scheduler-job-id", action="append", default=[])
     parser.add_argument("--output", type=Path, default=OUTPUT)
     return parser.parse_args()
@@ -2358,6 +2520,13 @@ def _parse() -> argparse.Namespace:
 
 def main() -> None:
     arguments = _parse()
+    if arguments.diverted_geometry:
+        output = (
+            DIVERTED_GEOMETRY_OUTPUT if arguments.output == OUTPUT else arguments.output
+        )
+        receipt = _diverted_geometry_receipt(output)
+        print(json.dumps(receipt["verdict"], sort_keys=True), flush=True)
+        return
     if arguments.nan_census:
         if arguments.case is None:
             raise SystemExit("--nan-census requires one --case")

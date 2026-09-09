@@ -1,17 +1,18 @@
 {
+  "capture_omission_found": false,
   "captured_inputs": {
     "coordinate_cells_equal_recomputed": true,
     "external_ulp_against_recomputed": 0,
     "target_current": 874260.4375
   },
   "first_state_difference": {
-    "cached_flux": -0.18479577638614655,
-    "direct_flux": -0.18479577638614653,
+    "cached_flux": -0.008173067784577059,
+    "direct_flux": -0.00817306778457706,
     "element_ulp": 1,
-    "flat_index": 290,
+    "flat_index": 132,
     "producer": "trip boundary reconstructs external plus current-moment image",
     "trip": 0,
-    "trip_max_ulp": 2
+    "trip_max_ulp": 16
   },
   "inputs": {
     "bank_route": {
@@ -34,7 +35,7 @@
         "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
         "size_bytes": 645864,
         "stored_circuit_count": 101,
-        "warm_load_seconds": 0.007866814732551575
+        "warm_load_seconds": 0.007635992020368576
       },
       "loaded_from_persisted_carrier": true,
       "named_cache_only_check": {
@@ -49,7 +50,7 @@
         ],
         "direct_green_operator_builder_entries": 0,
         "passes": true,
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.019143 direct_builders=0 verdict=PASS"
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.022944 direct_builders=0 verdict=PASS"
       }
     },
     "state_cache": {
@@ -62,9 +63,30 @@
       "sha256": "2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904"
     }
   },
-  "capture_omission_found": false,
   "mechanism": "the first state difference is produced by trip-boundary reconstruction; cached external and coordinate inputs equal their recomputed values, so the remaining difference is the boundary image reduction inlined in the compiled loop versus separately dispatched by the host",
   "member": "21986/46 mixed",
+  "repair_attempts": [
+    {
+      "repair": "optimization barrier around the compiled trip-boundary result",
+      "terminal_flux_ulp": 16,
+      "trip_state_max_ulp": [
+        2,
+        0,
+        16
+      ],
+      "within_tolerance": false
+    },
+    {
+      "repair": "shared non-inline jitted trip-boundary reconstruction",
+      "terminal_flux_ulp": 512,
+      "trip_state_max_ulp": [
+        16,
+        8,
+        512
+      ],
+      "within_tolerance": false
+    }
+  ],
   "quantity_moved_first": {
     "adaptive": {
       "accepted_factor": null,
@@ -72,7 +94,7 @@
       "grades_tried": 6,
       "jacobian_refreshed": true,
       "map_evaluations": 6,
-      "merit": 0.0019355965612684858,
+      "merit": 0.0019355965612684854,
       "reduced_residual": 132.87103341952698,
       "step": 1,
       "trip": 0,
@@ -88,7 +110,7 @@
       "grades_tried": 12,
       "jacobian_refreshed": true,
       "map_evaluations": 12,
-      "merit": 0.0019355965612684858,
+      "merit": 0.0019355965612684854,
       "reduced_residual": 132.87103341952698,
       "step": 1,
       "trip": 0,
@@ -104,7 +126,7 @@
     "cached external or reduced-coordinate capture differs from recomputation"
   ],
   "roundoff_operation": "trip boundary external plus current-moment image, inlined in the compiled fori_loop versus a separately dispatched host boundary",
-  "terminal_flux_ulp_after_repair": 16,
+  "terminal_flux_ulp_after_repair": 512,
   "trip_comparison_after_repair": [
     {
       "cached_jacobian_builds": 2,
@@ -115,35 +137,40 @@
       "direct_mask_difference": 1,
       "direct_residual": 0.001743384698567222,
       "direct_steps": 1,
-      "first_differing_flat_index": 290,
-      "state_max_ulp": 2,
+      "first_differing_flat_index": 132,
+      "state_max_ulp": 16,
       "trip": 0
     },
     {
       "cached_jacobian_builds": 1,
       "cached_mask_difference": 1,
-      "cached_residual": 0.0018105679314074957,
+      "cached_residual": 0.0018105679314074094,
       "cached_steps": 0,
       "direct_jacobian_builds": 1,
       "direct_mask_difference": 1,
       "direct_residual": 0.0018105679314074957,
       "direct_steps": 0,
-      "first_differing_flat_index": null,
-      "state_max_ulp": 0,
+      "first_differing_flat_index": 101,
+      "state_max_ulp": 8,
       "trip": 1
     },
     {
       "cached_jacobian_builds": 2,
       "cached_mask_difference": 0,
-      "cached_residual": 0.0018836772967004715,
+      "cached_residual": 0.0018836772967005583,
       "cached_steps": 1,
       "direct_jacobian_builds": 2,
       "direct_mask_difference": 0,
       "direct_residual": 0.0018836772967004715,
       "direct_steps": 1,
-      "first_differing_flat_index": 96,
-      "state_max_ulp": 16,
+      "first_differing_flat_index": 0,
+      "state_max_ulp": 512,
       "trip": 2
     }
-  ]
+  ],
+  "verdict": {
+    "passes": false,
+    "reason": "both authorized trip-boundary repairs exceed the terminal-flux contract",
+    "terminal_flux_max_ulp": 4
+  }
 }

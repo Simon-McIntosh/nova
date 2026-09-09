@@ -1237,9 +1237,11 @@ def _single_null_core_lobe(
     saddle_radius = 2.5 * grid_spacing
     for component_index, component in enumerate(components):
         component = np.asarray(component, dtype=np.float64)
-        if np.linalg.norm(component[0] - component[-1]) <= grid_spacing and PolygonPath(
-            component
-        ).contains_point(magnetic_axis):
+        closure_scale = max(float(np.max(np.abs(component))), 1.0)
+        closure_tolerance = 128.0 * np.finfo(np.float64).eps * closure_scale
+        if np.linalg.norm(
+            component[0] - component[-1]
+        ) <= closure_tolerance and PolygonPath(component).contains_point(magnetic_axis):
             candidates.append((component, [], component_index))
             continue
 

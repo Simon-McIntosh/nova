@@ -22,8 +22,8 @@
   <title>SOL Current Demonstration | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="7">
+<meta name="plan-modified" content="2026-09-10">
+<meta name="plan-version" content="8">
 <meta name="plan-commits" content="11105450,88d60dd8,f2bce371,a67dc1b3,39555e0f">
 <meta name="plan-artifacts" content="scripts/sol_demonstration_reuse/report.md,nova/equilibrium/sol_closure.py,tests/test_sol_closure.py,tests/test_saddle_partition.py,benchmarks/sol_current_demonstration.py,docs/figures/sol-current-demonstration/results.json,docs/evidence/archive/sol-current-demonstration-landed.html">
 <meta name="plan-impl" content="1.0">
@@ -153,6 +153,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260821T1240" data-who="reckon-ship" data-when="2026-08-21T12:40:00+00:00">
     <div class="r-comment-body">sol-two-solution-demonstration landed - commits a67dc1b3/39555e0f, merged 903e09d9; gate PASSED after one answered NEEDS-HELP; worker 2406 s. THE PLAN SHIPS. The stored DINA core profile ends with exactly zero gradient at psi_N=1 (a banked property of that reference), so both arms share a declared analytic cubic-Hermite C1 shoulder over the final tabulated interval (value jump exactly 0, gradient mismatch 5.7e-16, no tolerance or product-code change; continuation.py, source.py and forward.py untouched). Both roots converged (residuals 1.4e-15 / 8.3e-16) at identical net current -14,819,192.090 A with relative identity error exactly 0; SOL ledger core/common-SOL/private = -14,819,195.378/+3.288/0 A; private-flux current exactly zero by topology label; strike-adjacent common-SOL cells carry current at both legs; the saddle machine cell partitions through the additive branch lanes with area closure -2e-18 m2. Separatrix crossing finite and continuous at -6365.9 A/m2; measured 1e-6 extents psi_N=1.005943 single / 1.023637 dual with Bp,OMP=1.3299 T, lambda_q=0.4488 mm. Axis/X-point displacements 2.7e-5 m; strike samples unchanged at carrier resolution, not overclaimed. Record: /nova/evidence/archive/sol-current-demonstration-landed#two-solution.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260910T041755591129" data-who="s19-review coordinator" data-when="">
+    <div class="r-comment-body">2026-09-10: the recorded prerequisite from the boundary-ring saddle-gap audit (the X-point cell needs the saddle carried as a clip vertex, branch-paired chords and per-branch supports; the audited saddle cell takes four separatrix crossings where production draws one chord) is no longer deferred. It is carried as cut-cell-current-attribution §2, dispatched from S19, because the single-chord X-point cell is first-order for the topology read on the single-null certificate rows and the exact cut-cell participation was found to move the static solve to a different equilibrium. This plan stays a record; nothing is owed here.</div>
 </div>
 </section>
 </main>

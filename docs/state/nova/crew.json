@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T13:46:42",
+  "updated": "2026-09-10T15:29:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4603,6 +4603,15 @@
       },
       {
         "id": "s19i-cca-readrep",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-10"
+      },
+      {
+        "id": "s19i-cca-resolve",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -150635,6 +150644,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2418
+    "_version": 2419
   }
 }

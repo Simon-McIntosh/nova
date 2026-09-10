@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T09:34:17",
+  "updated": "2026-09-10T09:51:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -149134,6 +149134,199 @@
         "watch_override": null,
         "tool_steps": 111.0,
         "orientation_input_tokens": 10170600.0
+      },
+      {
+        "run_id": "r-20260910T052538012361-fsa-sol-ledger-current-census",
+        "plan": "forward-solve-api",
+        "section": "\u00a73",
+        "node": "fsa-sol-ledger-current-census",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5478,
+                "cached_input_tokens": 484644,
+                "input_tokens": 490154,
+                "output_tokens": 4622,
+                "reasoning_output_tokens": 1746,
+                "total_tokens": 494776,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "One all_debug CPU job (one sbatch, never an srun child of your shell, root venv python directly, PYTHONPATH at the worktree, JAX_PLATFORMS=cpu, TMPDIR=/tmp in submit environment and payload, --output in the run directory) rebuilds the mapped_case equilibrium of tests/test_transport_evolved_state.py exactly as the test does (same fixture, route anderson, same evaluations) and writes a receipt JSON with: the ledger totals core, common_sol, private_flux, excluded_material and total with common_sol divided by the plasma current (expected 1.96e-3); for every cell with nonzero current the cell index, its domain label, its current, whether the production clip cut it (participating in the boundary clip) and whether the analytic or fitted separatrix passes through it; the summed common-SOL current in cut cells against uncut cells; and the same table for the committed chord clip versus the exact support mode if the mapped_case machine exposes set_support_clip_mode, else a stated reason. One figure obeying the plotting rules (imas-ink through nova.media, no axes, line contours, both null sets, wall): the per-cell current in common-SOL-labelled cells as a whole-domain line-contour panel with those cells outlined. The report states in one sentence whether the scrape-off-layer current is entirely cut-cell attribution, entirely full-cell labelling, or a stated split, with the code line that books it, path:line. Never read an image. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 1.5,
+          "goal": "Locate the 0.196 percent of plasma current the current ledger books in common scrape-off-layer cells on the mapped-source transport test machine, cell by cell, and state whether all of it sits in boundary-cut cells",
+          "id": "fsa-sol-ledger-current-census",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T05:25:38Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T052538012361-fsa-sol-ledger-current-census/manifest.md",
+          "plan": "forward-solve-api",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/sol_ledger_current_census.py",
+            "docs/figures/forward-solve-api/sol-ledger-census",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/sol-ledger-census"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-fsa-solledger",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T05:25:46Z",
+        "completed_at": "2026-09-10T07:49:22.732Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 8607,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 8616,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "8efffd4658a90d723d1522934605516f8bc3e259",
+        "commits": [
+          "98064a49001fee20249f01fb24d69123895e8f6d",
+          "a49c9920193f59f450df305516f0b042bfa49c82"
+        ],
+        "changed_lines": {
+          "added": 1969,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug sbatch 1268399 and rerun 1268443: benchmarks/sol_ledger_current_census.py rebuilding the mapped_case equilibrium of tests/test_transport_evolved_state.py (anderson, 240 evaluations); bit-identical receipts on both runs; EXIT=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T052538012361-fsa-sol-ledger-current-census/census.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T052538012361-fsa-sol-ledger-current-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "29774a4a-1878-49d6-87ed-c6edf5fe4609",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 19084237,
+            "input_tokens_cumulative": 19084237,
+            "output_tokens": 77269,
+            "output_tokens_cumulative": 77269,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T07:49:22.732Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 19084237,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 8612.846,
+          "generated_tokens": 77269,
+          "generation_seconds": 6848.796,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 23.4,
+          "machine_seconds": 1764.05,
+          "peak_input_tokens": 238113,
+          "tokens_per_second": 11.28,
+          "wall_tokens_per_second": 8.97
+        },
+        "follow_on_paths": [
+          "844.3",
+          "228.4"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/fsa-sol-ledger-current-census",
+          "session_id": "29774a4a-1878-49d6-87ed-c6edf5fe4609",
+          "session_source": "stream",
+          "retained_at": "2026-09-10T07:49:22.732Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 124.0,
+        "orientation_input_tokens": 9797701.0
       }
     ],
     "holds": [
@@ -149446,6 +149639,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2408
+    "_version": 2409
   }
 }

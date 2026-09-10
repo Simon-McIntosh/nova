@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-10">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
 <main class="plan-doc">
@@ -120,6 +120,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-20260910T052924121403" data-who="s19-review coordinator" data-when="">
     <div class="r-comment-body">Lead direction 2026-09-10 adopted: merge the robust work and then RCA the required fixes. The held stacks are merged only with production defaults unchanged, which at 28a49bcb they are not: _SUPPORT_CLIP_MODE defaults to 'exact' in nova/equilibrium/forward_operator.py, so the merge node flips the default to 'chord', proves the committed certificate rows bit-identical at the merged head (the control arm already reproduces weak -110 exactly under the chord flag), and lands the exact path behind the flag for the RCA to work from main. The boundary-support trace stack (1c4daf51) carries retain_boundary_cut_current defaulting False, but the trace itself has no switch, so landing it means adding one that defaults off (the lead's option b) or holding it. Three census nodes now run on the local lane: the X-point cell allocation RCA, the unit-amplitude current census, and the scrape-off-layer ledger census on the transport machine (the 0.196 percent common-SOL current: is it all cut-cell attribution).</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260910T075153550445" data-who="s19-review coordinator" data-when="">
+    <div class="r-comment-body">ROOT CAUSE FOUND, 2026-09-10, from two census nodes reading the same code. The production current moments have not clipped any cell at the separatrix since 2026-08-27: commit c9a89e58 (fix(equilibrium): use profile-owned residual support) replaced traced_clip(signed_flux) and traced_clip(-signed_flux), a real chord clip against the signed flux, with traced_clip(jnp.ones(...)) qualified by the profile participation label, so every cell is booked whole or not at all by which side of the separatrix its centroid falls on (nova/equilibrium/forward_operator.py _profile_support, main; observation.py:558 current_ledger; domain.py open_field_line). Everything measured since is downstream of that: the 16-of-43 participation on weak -110 is the count of cut cells whose centroids sit inside; the dominated error cells on the single-null 110 row are two-crossing cells booked whole (840.6 A against 85.6 A analytic, 717.5 against 34.9, 654.9 against 21.2); the four-crossing X-point cell is booked whole (459.7 A against a 10.5 A sliver); and the 0.196 percent scrape-off-layer current on the transport machine is 844 A in sixteen separatrix-crossing cells with outside centroids plus 228 A in fifteen open cells carrying the edge-extrapolated profile, none of it geometric clipping. The exact-support mode on the held stack is the first real clip since then, which is why it carries less than half the current at unit amplitude that the whole-cell booking carries and needs 2.2 to 5.6 times the amplitude: it is being compared against a baseline that was never clipping. Consequences for this plan: §1's second question (why exact placement moves the fixed point) is reframed as which of the two is right at unit amplitude against the analytic total, the census node cca-unit-amplitude-current-census measures exactly that; and the chord clip as a baseline is retired as a concept, the committed behaviour is whole-cell booking and must be named so in every table.</div>
 </div>
 </section>
 

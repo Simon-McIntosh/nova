@@ -1,0 +1,25 @@
+{
+  "amplitude_within_one_percent": false,
+  "case": "weak-rotation-reactor-static",
+  "converged": false,
+  "figure": {
+    "filesystem_path": "docs/figures/cut-cell-current-attribution/rung-a-certificate/weak-rotation-reactor-static-production-route-cells-300.png",
+    "project_absolute_src": "/nova/figures/cut-cell-current-attribution/rung-a-certificate/weak-rotation-reactor-static-production-route-cells-300.png",
+    "render_source": "fresh_production_solve",
+    "sha256": "7e6766109acbfc0889ef224108f12bf87ddd378256893bc1337d7548a9922d33"
+  },
+  "magnetic_axis_position_error_m": 1.2064865511849943,
+  "part": "docs/figures/cut-cell-current-attribution/rung-a-certificate/parts/weak-rotation-reactor-static-production-route-cells-300.json",
+  "qualification": "unqualified",
+  "qualification_bound": 1e-12,
+  "qualification_reason": "fixed_point_residual_outside_qualification_bound",
+  "realised_cells": 342,
+  "requested_cells": -300,
+  "seed_amplitude": 2.025096307971429,
+  "terminal_amplitude": 17.77141104037696,
+  "terminal_fixed_point_residual": 0.005724782913627495,
+  "terminal_fixed_point_residual_status": "finite",
+  "termination": "active_set_cycle_detected",
+  "trip_count": 8,
+  "x_point_position_error_m": null
+}

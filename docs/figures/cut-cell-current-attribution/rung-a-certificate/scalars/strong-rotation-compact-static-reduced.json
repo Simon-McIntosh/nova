@@ -1,0 +1,25 @@
+{
+  "amplitude_within_one_percent": false,
+  "case": "strong-rotation-compact-static",
+  "converged": false,
+  "figure": {
+    "filesystem_path": "docs/figures/cut-cell-current-attribution/rung-a-certificate/strong-rotation-compact-static-production-route-reduced.png",
+    "project_absolute_src": "/nova/figures/cut-cell-current-attribution/rung-a-certificate/strong-rotation-compact-static-production-route-reduced.png",
+    "render_source": "fresh_production_solve",
+    "sha256": "a0cbdf55e09a6962ea3719bf237bd22cc4a7c6b199045dd6c0e6ad95eea04c3b"
+  },
+  "magnetic_axis_position_error_m": 0.12385461763779969,
+  "part": "docs/figures/cut-cell-current-attribution/rung-a-certificate/parts/strong-rotation-compact-static-production-route-reduced.json",
+  "qualification": "unqualified",
+  "qualification_bound": 1e-12,
+  "qualification_reason": "fixed_point_residual_outside_qualification_bound",
+  "realised_cells": 135,
+  "requested_cells": -110,
+  "seed_amplitude": 1.9050666308609827,
+  "terminal_amplitude": 11.447517030592591,
+  "terminal_fixed_point_residual": 0.03917251491245838,
+  "terminal_fixed_point_residual_status": "finite",
+  "termination": "active_set_cycle_detected",
+  "trip_count": 9,
+  "x_point_position_error_m": null
+}

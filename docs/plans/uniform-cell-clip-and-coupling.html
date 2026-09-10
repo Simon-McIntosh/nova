@@ -17,7 +17,7 @@
 <meta name="plan-modified" content="2026-09-10">
 <meta name="plan-effort-hours" content="40.0">
 <meta name="plan-informs" content="null-identification-authority,gs-absolute-accuracy-gates,batched-operator-boundary,millisecond-converged-solve">
-<meta name="plan-version" content="20">
+<meta name="plan-version" content="21">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-impl" content="0.45">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
@@ -69,6 +69,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260910T035754118776-ucc-xpoint-cell-allocation-rca" data-who="s19i-xcell-rca" data-when="2026-09-10T06:32:30.335Z">
     <div class="r-comment-body"><p>Partial measurement, decisive on the X-point cell. Diverted -110: cell 9 is crossed four times by the analytic separatrix; the chord support is the whole hexagon and books 459.7 A against a 10.5 A analytic core-side sliver; the exact chain yields zero vertices and 0 A; the read finds zero X candidates, classifies the row limited and sets the boundary flux at 0.0010 Wb against the analytic 0; the dominated error cells 96, 75, 112, 18, 70 are two-crossing cells booked whole (840, 840, 718, 655, 779 A against 86, 131, 35, 21, 169 A analytic), so in production a cut cell participates whole or not at all. Diverted -300 and weak -110 not measured: the three rows did not fit one allocation and the worker session died before relaunching. Driver validated: exact density agrees with production to 1.3e-10, banked cut-cell moments reproduce to 1e-9.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260910T053253958929-ucc-merge-prep-chord-default" data-who="s19i-ucc-mergeprep" data-when="2026-09-10T08:16:33.908Z">
+    <div class="r-comment-body"><p>Landed in the worktree at 8d0e9224 on the held stack. _SUPPORT_CLIP_MODE defaults to chord (whole-cell booking by participation label, the committed production behaviour) with exact and chord_cells opt-in through set_support_clip_mode; tests/test_forward_support_clip_mode.py pins the default, the bit-identity of default per-cell moments against main&#x27;s operator on the weak -110 seed state, and a live opt-in path. Deterministic across 8 fresh processes. Not yet merged: a merged-head integration gate over every test file importing the changed modules runs first.</p></div>
 </div>
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">

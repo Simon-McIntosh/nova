@@ -1,0 +1,120 @@
+{
+  "arm_c_relaxation_sweep": {
+    "notes": "c-r100, c-r050 and c-r025 report bit-identical terminal residual 0.4708482702914733 and bit-identical magnetic axis (0.6575698955284317 m error) to sixteen digits; c-r012 was lost to the allocation time limit. The certificate newton-krylov route resolves to the accelerated Krylov ladder (forward_operator._solve_accelerated -> fixed_point.newton_krylov), which never reads the step relaxation; the only read site is the reduced Newton host loop (_plain_newton_trip), so the relaxation setter is provably inert for this route. The setter and step-site counters now emit STEP_RELAXATION_SET / STEP_RELAXATION_APPLIED so a future run proves the mechanism from its log. Recorded as 'relaxation inert, not measured'.",
+    "relaxation_changed_program": false,
+    "relaxations_completed": [
+      "c-r025",
+      "c-r050",
+      "c-r100"
+    ]
+  },
+  "arms": [
+    {
+      "arm": "control",
+      "axis_rz_m": [
+        6.198220647969848,
+        -0.0004916683640086572
+      ],
+      "clip_mode": "chord",
+      "converged": false,
+      "figure_filesystem_path": "docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/figures/control/weak-rotation-reactor-static-production-route-reduced.png",
+      "figure_sha256": "1624f12aa9fee4ade39a5d0dc0f2aeff34af676a69eb2014ee2f8e920b5fd3f1",
+      "magnetic_axis_position_error_m": 0.0018460312639213298,
+      "part": "docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/parts/control/weak-rotation-reactor-static-production-route-reduced.json",
+      "qualification": "unqualified",
+      "requested_cells": -110,
+      "residual_ratio_to_baseline": 1.0,
+      "terminal_fixed_point_residual": 0.007447526861632619,
+      "x_point_position_error_m": null,
+      "x_point_rz_m": null
+    },
+    {
+      "arm": "b",
+      "axis_rz_m": [
+        6.732850664275443,
+        0.002003804401195771
+      ],
+      "clip_mode": "chord_cells",
+      "converged": true,
+      "figure_filesystem_path": "docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/figures/b/weak-rotation-reactor-static-production-route-reduced.png",
+      "figure_sha256": "57250d55dc7209e4ff2db31bc1a9f9f4f37079909434feba551a8a66e7e9399f",
+      "magnetic_axis_position_error_m": 0.5328544319519718,
+      "part": "docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/parts/b/weak-rotation-reactor-static-production-route-reduced.json",
+      "qualification": "qualified",
+      "requested_cells": -110,
+      "residual_ratio_to_baseline": 8.29960848834703e-11,
+      "terminal_fixed_point_residual": 6.181155715799861e-13,
+      "x_point_position_error_m": null,
+      "x_point_rz_m": null
+    },
+    {
+      "arm": "c-r100",
+      "axis_rz_m": [
+        6.8370382372874365,
+        -0.16303512424931157
+      ],
+      "clip_mode": "exact",
+      "converged": false,
+      "figure_filesystem_path": "docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/figures/c-r100/weak-rotation-reactor-static-production-route-reduced.png",
+      "figure_sha256": "d5af399d14d49a45d36ed38ee61ebbd3113a1e0c5fd3f7c2345ed67a9edecc68",
+      "magnetic_axis_position_error_m": 0.6575698955284317,
+      "part": "docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/parts/c-r100/weak-rotation-reactor-static-production-route-reduced.json",
+      "qualification": "unqualified",
+      "requested_cells": -110,
+      "residual_ratio_to_baseline": 63.22209762238517,
+      "terminal_fixed_point_residual": 0.4708482702914733,
+      "x_point_position_error_m": null,
+      "x_point_rz_m": null
+    },
+    {
+      "arm": "c-r050",
+      "axis_rz_m": [
+        6.8370382372874365,
+        -0.16303512424931157
+      ],
+      "clip_mode": "exact",
+      "converged": false,
+      "figure_filesystem_path": "docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/figures/c-r050/weak-rotation-reactor-static-production-route-reduced.png",
+      "figure_sha256": "d5af399d14d49a45d36ed38ee61ebbd3113a1e0c5fd3f7c2345ed67a9edecc68",
+      "magnetic_axis_position_error_m": 0.6575698955284317,
+      "part": "docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/parts/c-r050/weak-rotation-reactor-static-production-route-reduced.json",
+      "qualification": "unqualified",
+      "requested_cells": -110,
+      "residual_ratio_to_baseline": 63.22209762238517,
+      "terminal_fixed_point_residual": 0.4708482702914733,
+      "x_point_position_error_m": null,
+      "x_point_rz_m": null
+    },
+    {
+      "arm": "c-r025",
+      "axis_rz_m": [
+        6.8370382372874365,
+        -0.16303512424931157
+      ],
+      "clip_mode": "exact",
+      "converged": false,
+      "figure_filesystem_path": "docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/figures/c-r025/weak-rotation-reactor-static-production-route-reduced.png",
+      "figure_sha256": "d5af399d14d49a45d36ed38ee61ebbd3113a1e0c5fd3f7c2345ed67a9edecc68",
+      "magnetic_axis_position_error_m": 0.6575698955284317,
+      "part": "docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/parts/c-r025/weak-rotation-reactor-static-production-route-reduced.json",
+      "qualification": "unqualified",
+      "requested_cells": -110,
+      "residual_ratio_to_baseline": 63.22209762238517,
+      "terminal_fixed_point_residual": 0.4708482702914733,
+      "x_point_position_error_m": null,
+      "x_point_rz_m": null
+    }
+  ],
+  "banked_chord_axis_error_m": 0.0018460312639213298,
+  "banked_chord_residual": 0.007447526861632619,
+  "banked_weak_110_residual": 0.007447526861632619,
+  "case": "weak-rotation-reactor-static",
+  "mechanism": [
+    "The numbers support candidate (a): the flux read and the current placement are inconsistent. The discrete Green's coupling and the boundary flux interpolant were tuned to chord moments, so feeding the map exact cut-cell moments solves a different problem than the one the flux read was balanced against.",
+    "Armed exact participation without the two contaminated boundary cells (arm b) converges to a self-consistent fixed point of the discrete map (residual 6.2e-13, converged True) - but it is a different equilibrium: its magnetic axis sits 0.533 m outboard of the analytic axis while the chord control's axis is within 1.8 mm, and its contour panel shows a smooth equilibrium that is not the reference Solov'ev one.",
+    "Including the two contaminated cells (cells 101 and 102) prevents even that self-consistent fixed point: the exact-arm terminal residual stays at 0.4708 (63.2x the banked chord residual), unqualified, never converged. Two-cell contamination is therefore a secondary effect layered on the primary flux-read/current-placement inconsistency.",
+    "Step damping was not measured: the relaxation selector is inert for the certificate route (arm c), so the damping candidate (c) is unadjudicated."
+  ],
+  "recorded_at_unix_seconds": 1788998671.7154982,
+  "requested_cells": -110
+}

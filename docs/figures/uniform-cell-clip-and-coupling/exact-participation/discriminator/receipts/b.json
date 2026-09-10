@@ -1,0 +1,22 @@
+{
+  "arm": "b",
+  "axis_rz_m": [
+    6.732850664275443,
+    0.002003804401195771
+  ],
+  "case": "weak-rotation-reactor-static",
+  "clip_mode": "chord_cells",
+  "completed_at_unix_seconds": 1789000999.6863456,
+  "converged": true,
+  "exit_status": 0,
+  "figure_filesystem_path": "docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/figures/b/weak-rotation-reactor-static-production-route-reduced.png",
+  "figure_sha256": "57250d55dc7209e4ff2db31bc1a9f9f4f37079909434feba551a8a66e7e9399f",
+  "magnetic_axis_position_error_m": 0.5328544319519718,
+  "part": "docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/parts/b/weak-rotation-reactor-static-production-route-reduced.json",
+  "qualification": "qualified",
+  "requested_cells": -110,
+  "residual_ratio_to_baseline": 8.29960848834703e-11,
+  "terminal_fixed_point_residual": 6.181155715799861e-13,
+  "x_point_position_error_m": null,
+  "x_point_rz_m": null
+}

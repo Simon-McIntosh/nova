@@ -118,7 +118,13 @@ _CHORD_REVERTED_CELLS = (101, 102)
 
 
 def _substitute_chord_cell_supports(exact, chord, cell_indices, participation):
-    """Return the exact support with named cells' geometry reverted to chord."""
+    """Return the exact support with named cells' geometry reverted to chord.
+
+    The curved clip expands each cell's polygon to the spline-segment
+    capacity while the chord clip holds the atomic capacity, so the chord
+    vertex geometry is padded before selection and the per-cell scalar and
+    small-moment fields are spliced directly.
+    """
     import jax.numpy as jnp
 
     cell_count = exact.vertex_count.shape[0]
@@ -130,13 +136,31 @@ def _substitute_chord_cell_supports(exact, chord, cell_indices, participation):
     mask1 = substitute[:, None]
     mask2 = substitute[:, None, None]
     mask3 = substitute[:, None, None, None]
+    exact_capacity = exact.support_vertices.shape[1]
+    chord_capacity = chord.support_vertices.shape[1]
+    if exact_capacity < chord_capacity:
+        raise ValueError(
+            f"cannot substitute chord support (capacity {chord_capacity}) "
+            f"into exact support (capacity {exact_capacity})"
+        )
+    vertex_pad = (
+        (0, 0),
+        (0, exact_capacity - chord_capacity),
+        (0, 0),
+    )
+    branch_pad = (
+        (0, 0),
+        (0, 0),
+        (0, exact_capacity - chord_capacity),
+        (0, 0),
+    )
     mixed = exact._replace(
         support_vertices=jnp.where(
-            mask2, chord.support_vertices, exact.support_vertices
+            mask2,
+            jnp.pad(chord.support_vertices, vertex_pad),
+            exact.support_vertices,
         ),
         vertex_count=jnp.where(substitute, chord.vertex_count, exact.vertex_count),
-        included=jnp.where(substitute, chord.included, exact.included),
-        boundary=jnp.where(substitute, chord.boundary, exact.boundary),
         area=jnp.where(substitute, chord.area, exact.area),
         full_area=jnp.where(substitute, chord.full_area, exact.full_area),
         first_area_moment=jnp.where(
@@ -156,9 +180,10 @@ def _substitute_chord_cell_supports(exact, chord, cell_indices, participation):
             mask3, chord.branch_second_area_moment, exact.branch_second_area_moment
         ),
         branch_support_vertices=jnp.where(
-            mask3, chord.branch_support_vertices, exact.branch_support_vertices
+            mask3,
+            jnp.pad(chord.branch_support_vertices, branch_pad),
+            exact.branch_support_vertices,
         ),
-        saddle=jnp.where(substitute, chord.saddle, exact.saddle),
     )
     return mixed.qualify(participation)
 

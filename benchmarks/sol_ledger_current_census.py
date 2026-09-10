@@ -115,6 +115,7 @@ def _cell_table(equilibrium, profile, straddle_fitted, straddle_analytic):
     cell_current = np.asarray(equilibrium.cell_current, dtype=float)
     label = np.asarray(equilibrium.domains.label, dtype=np.int64)
     psi_norm = np.asarray(equilibrium.domains.psi_norm, dtype=float)
+    participating = np.asarray(equilibrium.domains.profile_participation, dtype=bool)
     rows = []
     for cell in np.flatnonzero(cell_current != 0.0):
         rows.append(
@@ -123,6 +124,11 @@ def _cell_table(equilibrium, profile, straddle_fitted, straddle_analytic):
                 "domain": DOMAIN_NAMES[int(label[cell])],
                 "current_a": float(cell_current[cell]),
                 "centroid_psi_norm": float(psi_norm[cell]),
+                "production_clip_included": bool(participating[cell]),
+                # The committed clip traces its support at all-ones flux, so no
+                # cell ever carries a geometric crossing: its boundary flag is
+                # false everywhere by construction.
+                "production_clip_cut": False,
                 "fitted_separatrix_through": bool(straddle_fitted[cell]),
                 "analytic_separatrix_through": bool(straddle_analytic[cell]),
             }
@@ -214,7 +220,7 @@ def _measure():
     }, (profile, equilibrium, grid_flux)
 
 
-def _draw_figure(profile, equilibrium, grid_flux, rows, output: Path):
+def _draw_figure(profile, equilibrium, grid_flux, rows, output: Path, split=None):
     """Render the whole-domain panel with common-SOL cells outlined."""
     operator = profile.operator
     node = np.asarray(operator.grid.coordinate, dtype=float)
@@ -273,38 +279,45 @@ def _draw_figure(profile, equilibrium, grid_flux, rows, output: Path):
         style=solved_style,
         contain=wall,
     )
-    figure.suptitle(
-        "Mapped-source current ledger: common-SOL cells\n"
-        "red outlines: carrying common-SOL cells with per-cell A; "
-        "red LCFS and nulls over grey solved flux contours"
-    )
+    caption = "red outlines: carrying common-SOL cells with per-cell A; "
+    caption += "red LCFS and nulls over grey solved flux contours"
+    if split is not None:
+        caption += (
+            f"; {split['common_sol_total_a']:.2f} A split "
+            f"{split['common_sol_in_fitted_cut_cells_a']:.2f} A "
+            f"({split['common_sol_cut_cell_count']} fitted-cut cells) + "
+            f"{split['common_sol_in_uncut_cells_a']:.2f} A "
+            f"({split['common_sol_uncut_cell_count']} fully open cells)"
+        )
+    figure.suptitle("Mapped-source current ledger: common-SOL cells\n" + caption)
     output.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(output)
     plt.close(figure)
 
 
 def _verdict(sol_split):
-    """Return the one-sentence attribution statement."""
+    """Return the one-sentence attribution statement.
+
+    The class is full-cell labelling: the committed clip traces its support at
+    all-ones flux, so no cell is geometrically cut and every booked ampere is
+    an integral over a whole cell assigned by its centroid's flux side.  The
+    reported split is the internal subdivision between cells the fitted
+    separatrix cuts and cells entirely beyond it.
+    """
     cut = sol_split["common_sol_in_fitted_cut_cells_a"]
     uncut = sol_split["common_sol_in_uncut_cells_a"]
     total = cut + uncut
     if total == 0.0:
         return "the scrape-off-layer ledger carries no current"
-    if uncut == 0.0:
-        return (
-            "the scrape-off-layer current is entirely full-cell labelling of "
-            "cells the fitted separatrix cuts whose centroids fall on the open "
-            "side - no cell is geometrically cut"
-        )
-    if cut == 0.0:
-        return (
-            "the scrape-off-layer current is entirely full-cell labelling of "
-            "fully open in-board cells the fitted separatrix does not cut"
-        )
+    cut_share = cut / max(total, 1e-30)
+    uncut_share = uncut / max(total, 1e-30)
     return (
-        f"the scrape-off-layer current is a split: "
-        f"{cut / max(total, 1e-30):.6f} in cells the fitted separatrix cuts, "
-        f"{uncut / max(total, 1e-30):.6f} in fully open cells"
+        "the scrape-off-layer current is entirely full-cell labelling - no "
+        "cell is geometrically cut - split "
+        f"{cut_share:.6f} in the {sol_split['common_sol_cut_cell_count']} "
+        "cells the fitted separatrix cuts and "
+        f"{uncut_share:.6f} in the "
+        f"{sol_split['common_sol_uncut_cell_count']} fully open cells"
     )
 
 
@@ -321,7 +334,14 @@ def main() -> int:
         "project_src": "/nova/figures/forward-solve-api/sol-ledger-census/"
         + FIGURE.name,
     }
-    _draw_figure(profile, equilibrium, grid_flux, payload["per_cell"], FIGURE)
+    _draw_figure(
+        profile,
+        equilibrium,
+        grid_flux,
+        payload["per_cell"],
+        FIGURE,
+        split=payload["common_sol_split"],
+    )
     RECEIPT.parent.mkdir(parents=True, exist_ok=True)
     RECEIPT.write_text(json.dumps(payload, indent=2) + "\n")
     print(json.dumps(payload, indent=2))

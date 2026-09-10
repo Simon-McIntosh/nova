@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T09:51:33",
+  "updated": "2026-09-10T10:18:15",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4984,6 +4984,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-09"
+      },
+      {
+        "id": "s19t-clip-stack-gate",
+        "harness": "clive",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-10"
       },
       {
         "id": "s19v-solovev",
@@ -149639,6 +149648,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2409
+    "_version": 2410
   }
 }

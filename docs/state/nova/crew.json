@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T07:32:49",
+  "updated": "2026-09-10T08:34:15",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4861,6 +4861,15 @@
       },
       {
         "id": "s19i-xcell-rca",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-10"
+      },
+      {
+        "id": "s19i-xcell-rca2",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -149061,6 +149070,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2405
+    "_version": 2406
   }
 }

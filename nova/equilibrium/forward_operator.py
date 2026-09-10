@@ -85,16 +85,17 @@ __all__ = [
 _PRODUCTION_STATIONARY_POINT_CAPACITY = 30
 """Candidate slots retained by the topology reader used by forward solves."""
 
-_SUPPORT_CLIP_MODE = "exact"
+_SUPPORT_CLIP_MODE = "chord"
 """Plasma-support clip mode for solver construction.
 
-``exact`` (the default committed behaviour) traces the curved boundary
-support with every cut cell participating; ``chord`` reproduces the
-prior committed chord clip, full cells selected by the profile partition
-label only; ``chord_cells`` keeps the exact support everywhere except a
-named pair of cells whose entries revert to their chord-moment values.
-The benchmark discriminator selects the non-default modes explicitly;
-production never changes them.
+``chord`` (the committed production default) reproduces the prior
+committed chord clip, full cells selected by the profile partition label
+only, so production results are unchanged; ``exact`` traces the curved
+boundary support with every cut cell participating; ``chord_cells`` keeps
+the exact support everywhere except a named pair of cells whose entries
+revert to their chord-moment values.  ``exact`` and ``chord_cells`` are
+opt-in through :func:`set_support_clip_mode`; production never changes
+the mode.
 """
 
 
@@ -2111,13 +2112,13 @@ class ForwardFluxOperator:
         return (positive & negative) | near_level
 
     def _profile_support(self, masks, topology, physical, sample_psi_norm):
-        """Return the curved plasma-side support with geometry as traced data.
+        """Return the plasma-side support for the active clip mode.
 
-        The committed mode traces the curved boundary with every cut cell
-        participating.  The discriminator's chord mode reproduces the prior
-        committed clip - full atomic cells selected by the profile partition
-        label alone - and its chord-cells mode replaces only the two named
-        cells' geometry with that chord result.
+        The committed chord clip reproduces the prior committed clip:
+        full atomic cells selected by the profile partition label alone.
+        The opt-in exact mode traces the curved boundary with every cut
+        cell participating, and its chord-cells variant replaces only the
+        two named cells' geometry with that chord result.
         """
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")

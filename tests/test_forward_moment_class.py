@@ -23,7 +23,11 @@ import numpy as np
 import pytest
 
 from nova.equilibrium.forward import ForwardProfile
-from nova.equilibrium.forward_operator import ForwardFluxOperator
+from nova.equilibrium.forward_operator import (
+    ForwardFluxOperator,
+    set_support_clip_mode,
+    support_clip_mode,
+)
 from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.observation import (
     ConstraintPinSet,
@@ -34,6 +38,15 @@ from nova.equilibrium.observation import (
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.equilibrium.separatrix_clip import AtomicCellMesh
 from nova.jax.config import configure_dtypes
+
+
+@pytest.fixture(autouse=True)
+def _restore_support_clip_mode_default():
+    """Return the clip mode to the module default after each test."""
+    previous = support_clip_mode()
+    yield
+    set_support_clip_mode(previous)
+
 
 COORDINATE = np.asarray([[0.8, -0.1], [1.0, 0.0], [1.2, 0.1], [1.4, 0.0]])
 CELL_CURRENT = jnp.asarray([100.0, 200.0, 300.0, 400.0])
@@ -199,6 +212,7 @@ def test_constraint_residual_forwards_the_solved_class():
 def test_curved_boundary_support_promotes_every_cut_cell_before_moment_selection():
     """A centroid-excluded cell cut by the curve still carries current."""
     configure_dtypes()
+    set_support_clip_mode("exact")
     cells = (
         np.asarray([[0.5, -0.5], [1.5, -0.5], [1.5, 0.5], [0.5, 0.5]]),
         np.asarray([[1.5, -0.5], [2.5, -0.5], [2.5, 0.5], [1.5, 0.5]]),

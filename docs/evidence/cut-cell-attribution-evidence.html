@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-evidence-for" content="uniform-cell-clip-and-coupling,cut-cell-current-attribution,null-identification-authority">
+  <meta name="plan-slug" content="cut-cell-attribution-evidence">
+  <meta name="plan-title" content="Cut-cell current attribution evidence — what the low-field-side error is, what exact placement does to the solve, and where the X-point cell stands">
+  <meta name="plan-summary" content="Contour evidence for the boundary-cut cell attribution defect, the exact-participation basin jump and the unread X-point on the Solov'ev certificate.">
+  <meta name="plan-tags" content="equilibrium,solovev,topology,grad-shafranov">
+  <title>cut-cell-attribution-evidence</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+<h2 id="summary">What this record shows</h2>
+<p>Every figure here is a poloidal panel of a terminal forward state on the Solov'ev certificate machine, drawn as line contours on shared physical levels with the analytic field in blue, the solved field in ochre, both null sets marked and the wall drawn, and every number is read from a persisted receipt named beside it. Read top to bottom it tells one story in four steps. The production chord clip leaves a localised current-attribution error in the boundary-cut cells on the low-field side (§1). Exact cut-cell moments remove nearly all of that error from the linear flux image (§2). Put into the solve, exact placement does not converge to the reference: it either stalls far from its fixed point or converges to a different equilibrium (§3). On the single-null case the solve is already exact and it is the topology read of the X-point cell that fails (§4). The cells the RCA node is drawing close up are named in §5 and its figures land there when the node reports.</p>
+
+<h2 id="s1">§1 — The defect as it looks in production: a low-field-side patch on every limited row</h2>
+<p>The committed certificate solves the limited Solov'ev cases with the chord clip. At 300 cells the weak-rotation reactor case reproduces the analytic flux everywhere except a handful of boundary-cut cells on the outboard side, where the error appears as small closed structures that sit on cells rather than following any flux surface. The row is unqualified: it never converges (active-set settled at a terminal residual of 5.6e-3) and its axis error grows with resolution, 13.4 mm at 110 cells, 30.2 at 300, 52.4 at 500 and 62.7 at 1000, which a converging discretisation cannot do.</p>
+<figure>
+  <img src="/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-300.png" alt="Weak-rotation reactor case at 300 cells with the chord clip: solved field matches analytic except small closed error structures on outboard boundary-cut cells">
+  <figcaption>Weak-rotation reactor case, 300 cells, chord clip (committed certificate row, receipt <code>docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json</code>). The flux, gradient and Hessian error panels all localise to the same few outboard cells; the rest of the domain agrees with the analytic field. Unqualified, not converged.</figcaption>
+</figure>
+<figure>
+  <img src="/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-reduced.png" alt="Weak-rotation reactor case at 110 cells with the chord clip: the coarsest committed row, axis error 13.4 mm, terminal residual 7.4e-3">
+  <figcaption>The same case at 110 cells, the row every experiment below is run on. Terminal residual 0.007447526861632619, axis error 1.8 mm on the read, unqualified. This is the baseline every arm in §3 is compared against.</figcaption>
+</figure>
+<p>The census on the 500-cell weak row (<a href="/nova/forward-gs-contour-evidence.html">forward GS contour evidence</a>) put the mechanism in numbers: the outboard window R 7.25 to 7.75 m, Z 0 to 0.5 m holds 1.44 percent of nodes and 6.33 percent of squared flux error, a 4.39-fold enrichment, and the same patch appears on a rectangular tiling at matched resolution (enrichment 4.32), so the site is the clip-and-moment path the two tilings share and not the kernel or the tiling (<code>docs/figures/uniform-cell-clip-and-coupling/solver-discriminator/error-maps.svg</code>). The polygon-analytic kernel was exonerated separately: packed-to-scalar relative RMS 3e-11 to 1.2e-10 with no correlation of kernel error with cut cells.</p>
+
+<h2 id="s2">§2 — Where the error comes from: the boundary-cut cells' current moments</h2>
+<p>The cut-cell moment discriminator (<code>benchmarks/solovev_cut_cell_moments.py</code>, receipts under <code>docs/figures/uniform-cell-clip-and-coupling/cut-cell-moments</code>) compared, cell by cell, the current moments production attributes to each cell the analytic separatrix cuts against the exact Solov'ev density integrated over the exact clipped region.</p>
+<table>
+  <thead><tr><th>Row</th><th>Cells cut by the analytic separatrix</th><th>Cells production gives current to</th><th>Moment error of the participating cells</th><th>Squared flux-image error removed by exact moments</th><th>Imaged axis error, chord to exact</th></tr></thead>
+  <tbody>
+    <tr><td>weak, 110 cells</td><td>43</td><td>16</td><td>above 1e-6 relative at every order</td><td>99.4 percent</td><td>348 mm to 69 mm</td></tr>
+    <tr><td>moderate, 110 cells</td><td>46</td><td>25</td><td>above 1e-6 relative at every order</td><td>97.7 percent</td><td>71 mm to 7 mm</td></tr>
+    <tr><td>weak, 300 cells</td><td>75</td><td>47</td><td>above 1e-6 relative at every order</td><td>49.2 percent</td><td>143 mm to 12 mm</td></tr>
+  </tbody>
+</table>
+<p>Two candidate causes were closed negative by the same instrument. The lead's hypothesis that the quadrature-built second-order compatibility terms were incompatible with steep edge gradients was tested by zeroing the second-order coupling everywhere: the error moved by +0.46 and +0.87 percent, and cut-cell curvature errors equal interior ones. And the axis anchor read was excluded on the solver discriminator: substituting the exact axis position and flux into the iteration leaves every terminal state bit-identical. What remains is that more than half of the cut cells carry no current at all under the chord clip and the rest carry the wrong moments.</p>
+<p>The general ordered spline-chain clip built on the exact-participation node (worktree tip 0372d3fc, nineteen commits) then attributed current to every cut cell. Parts under <code>docs/figures/uniform-cell-clip-and-coupling/exact-participation/parts</code>:</p>
+<table>
+  <thead><tr><th>Row</th><th>Participation</th><th>Median relative moment error (zeroth, first, second)</th><th>Maximum relative moment error</th><th>Squared flux-image error removed</th></tr></thead>
+  <tbody>
+    <tr><td>weak, 110</td><td>43 of 43</td><td>1.3e-7, 2.7e-7, 1.5e-7</td><td>1.0e-5, 8.9e-3, 4.2e-5 (cells 101 and 102)</td><td>98.58 percent</td></tr>
+    <tr><td>moderate, 110</td><td>46 of 46</td><td>at most 1.8e-7</td><td>below 1e-3</td><td>99.999999 percent</td></tr>
+    <tr><td>weak, 300</td><td>75 of 75</td><td>at most 1.4e-7</td><td>below 1e-3</td><td>99.99999 percent</td></tr>
+  </tbody>
+</table>
+<p>Cells 101 and 102 on the weak 110 row are the two cells that resisted. They sit on the outboard midplane at R about 7.79 m, Z about -0.49 m and 0 m, where the separatrix runs nearly parallel to a hex edge and crosses the cell with a chain of several outside vertices between two edge roots. Before the arc chain was confined to the cell their clipped area fraction read 1.0022 of the atomic cell, that is the inserted arc left the cell and the polygon owned area the cell does not have, and the first-moment relative error was 1.42. Confining the chain took the area fraction to 0.99915 against an exact 0.99916 and the first-moment error to 8.9e-3 (diagnostic <code>docs/figures/uniform-cell-clip-and-coupling/exact-participation/corner-arc-diagnostic.json</code>). Each of the two cells carries 0.2 percent of the plasma current, so they are not slivers, and their remaining absolute first-moment error is 9.7 A m.</p>
+
+<h2 id="s3">§3 — What exact placement does to the solve: a different basin, not a better residual</h2>
+<p>With the exact participation in production, the static certificate rows were re-solved on the H200 (one job, rows sequential, <code>docs/figures/uniform-cell-clip-and-coupling/exact-participation/certificate-parts</code>).</p>
+<table>
+  <thead><tr><th>Row</th><th>Committed chord residual</th><th>Exact participation residual</th><th>Ratio</th><th>Converged</th></tr></thead>
+  <tbody>
+    <tr><td>weak, 110</td><td>0.007447526861632619</td><td>0.4708482702914733</td><td>63.2</td><td>no</td></tr>
+    <tr><td>moderate, 110</td><td>0.012457640060526081</td><td>0.13326858363884744</td><td>10.7</td><td>no</td></tr>
+  </tbody>
+</table>
+<figure>
+  <img src="/nova/figures/uniform-cell-clip-and-coupling/exact-participation/certificate-figures/weak-rotation-reactor-static-production-route-reduced.png" alt="Weak-rotation case at 110 cells solved with exact cut-cell participation: axis displaced outboard, a spurious closed structure at the outboard midplane, terminal residual 0.47">
+  <figcaption>Weak-rotation reactor case, 110 cells, exact participation in production. The solved axis (ochre triangle) is displaced outboard of the analytic one (blue), the solved separatrix no longer follows the analytic boundary, and a spurious closed structure appears at the outboard midplane where cells 101 and 102 sit. Terminal residual 0.4708, unqualified.</figcaption>
+</figure>
+<figure>
+  <img src="/nova/figures/uniform-cell-clip-and-coupling/exact-participation/certificate-figures/moderate-rotation-conventional-static-production-route-reduced.png" alt="Moderate-rotation case at 110 cells solved with exact cut-cell participation: terminal residual 0.133 against the committed 0.0125">
+  <figcaption>Moderate-rotation conventional case, 110 cells, exact participation in production. Terminal residual 0.1333 against the committed 0.0125. Here every cut cell passed the per-cell moment bounds, so the regression is not the two resisting cells.</figcaption>
+</figure>
+<p>The discriminator (<code>benchmarks/exact_placement_discriminator.py</code> at worktree tip 28a49bcb, receipts under <code>docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator</code>) then separated three candidates on the weak 110 row in one measurement with a positive control.</p>
+<table>
+  <thead><tr><th>Arm</th><th>What it changes</th><th>Terminal residual</th><th>Ratio to baseline</th><th>Converged</th><th>Axis error against analytic</th></tr></thead>
+  <tbody>
+    <tr><td>control</td><td>committed chord clip</td><td>0.007447526861632619</td><td>1.0</td><td>no</td><td>1.8 mm</td></tr>
+    <tr><td>b</td><td>exact participation, cells 101 and 102 on chord moments</td><td>6.181155715799861e-13</td><td>8.3e-11</td><td>yes</td><td>533 mm</td></tr>
+    <tr><td>c at relaxation 1.0, 0.5, 0.25</td><td>exact participation, step relaxation</td><td>0.4708482702914733 (identical to 16 digits)</td><td>63.2</td><td>no</td><td>658 mm</td></tr>
+  </tbody>
+</table>
+<figure>
+  <img src="/nova/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/figures/control/weak-rotation-reactor-static-production-route-reduced.png" alt="Discriminator control arm: the chord clip reproduces the banked residual exactly">
+  <figcaption>Control arm. The chord clip at the discriminator's head reproduces the banked residual to the last digit, so the instrument measures the change and not the harness.</figcaption>
+</figure>
+<figure>
+  <img src="/nova/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/figures/b/weak-rotation-reactor-static-production-route-reduced.png" alt="Discriminator arm b: exact participation with cells 101 and 102 on chord moments converges to 6.2e-13 but with the axis 0.533 m outboard of the analytic axis">
+  <figcaption>Arm b. Exact participation everywhere except the two resisting cells. The fixed-point iteration converges (6.2e-13, ten orders better than the chord) and the equilibrium it converges to is smooth, self-consistent and wrong: its axis sits 0.533 m outboard of the analytic axis and its flux surfaces are a different family. The discrete map with exact current placement has a fixed point that is not the Grad-Shafranov solution.</figcaption>
+</figure>
+<figure>
+  <img src="/nova/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/figures/c-r100/weak-rotation-reactor-static-production-route-reduced.png" alt="Discriminator arm c at relaxation 1.0: exact participation including cells 101 and 102, terminal residual 0.47, axis 0.66 m outboard">
+  <figcaption>Arm c at relaxation 1.0, which is exact participation with the two resisting cells included. Identical to the §3 production run. The three relaxation values gave bit-identical results because the certificate's newton-krylov route resolves to the accelerated Krylov ladder, which never reads the step relaxation; damping is therefore unmeasured, not excluded.</figcaption>
+</figure>
+<p>Reading the arms together. Two-cell contamination is real but secondary: removing it lets the iteration converge, and what it converges to is the wrong equilibrium. Damping is unadjudicated. What remains is that the flux read that locates the boundary and the current placement that feeds the coupling were balanced against each other under chord moments, so exact moments alone change the problem the map solves. The lead's reading on 2026-09-10 is the rule the new plan is built on: an improved component that reduces acceptance is evidence that the model is not correct, and a discretisation that lands near the reference because two errors cancel has been scoring the cancellation.</p>
+
+<h2 id="s4">§4 — The single-null case: the solve is exact and the X-point is not read</h2>
+<p>The diverted rows use the Cerfon-Freidberg single-null reference with the plasma 0.836 minor radii clear of the machine axis, replacing the degenerate polynomial lens whose separatrix passed 49 mm from its own axis. Under the chord clip the solve reaches the analytic field: flux error at the 1e-17 level at 300 cells, converged. The joint qualification rule landed this session (residual, admitted topology read, position inside one pitch) then finds that no X-point is admitted at 110 or 300 cells, so only the 500-cell row qualifies jointly (axis error 1.43 mm, X-point error 1.20 mm against a 71 mm pitch bound), 1 of 4 diverted rows and 1 of 16 overall.</p>
+<figure>
+  <img src="/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png" alt="Single-null case at 300 cells: flux error 1e-17, gradient and Hessian error concentrated at the X-point and along the legs, no X-point marker because none is admitted">
+  <figcaption>Single-null case, 300 cells, chord clip. Flux error 2.6e-19 to 6.7e-17 across the domain, gradient and Hessian error concentrated at the X-point and along the divertor legs, and only the axis marker drawn because the read admits no X-point. The row passes the residual bound and fails joint qualification.</figcaption>
+</figure>
+<figure>
+  <img src="/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-500.png" alt="Single-null case at 500 cells: the only jointly qualified certificate row, axis error 1.4 mm and X-point error 1.2 mm">
+  <figcaption>Single-null case, 500 cells, the one jointly qualified row. Both null sets drawn; axis error 1.43 mm and X-point error 1.20 mm against a 71 mm pitch bound.</figcaption>
+</figure>
+<p>The cell containing the saddle is the case the boundary-ring saddle-gap audit measured on the earlier reference (<a href="/nova/evidence/archive/boundary-ring-source-completion-landed.html#saddle-gap-current-check">saddle-gap-current-check</a>): the analytic separatrix crosses it four times, production clips it with one straight chord with endpoint-to-crossing displacement up to 14.95 mm, and the mishandling was bounded at about 0.2 A because Solov'ev current carries almost nothing in the throat. That bound held for confined current. It says nothing about the read, which is what fails here, and the mechanism recorded then as a prerequisite for the SOL closure (the saddle carried as a clip vertex, branch-paired chords, per-branch supports) is now <a href="/nova/cut-cell-current-attribution.html">cut-cell-current-attribution</a> §2.</p>
+
+<h2 id="s5">§5 — The cells under the microscope</h2>
+<p>The root-cause node <code>ucc-xpoint-cell-allocation-rca</code> (run r-20260910T035754118776, base 28a49bcb) is drawing three figures per row for the single-null case at 110 and 300 cells and the weak case at 110 cells: a close-up of the X-point cell (cells 101 and 102 with their edge-sharing neighbours on the weak row) with the atomic hex, the analytic separatrix branches, the chord polygon, the exact spline-chain polygon and the analytic core-side region; a whole-domain line-contour panel of the per-cell attribution error with every cut cell outlined; and a ranked bar chart of absolute per-cell error, chord beside exact. Its receipt tabulates crossing count, analytic core-side current, chord and exact attribution and the three moment errors for every cut cell, and for the X-point cell the analytic saddle position inside it, the chord endpoints, the exact chain vertices and the nearest topology-read saddle candidate with its containment verdict. The figures are embedded here from <code>docs/figures/uniform-cell-clip-and-coupling/xpoint-cell-rca</code> when the node lands; until then this section names what they will show and where.</p>
+
+<h2 id="provenance">Provenance</h2>
+<table>
+  <thead><tr><th>Measurement</th><th>Run</th><th>Head</th><th>Receipts</th></tr></thead>
+  <tbody>
+    <tr><td>Committed certificate rows and joint qualification</td><td>r-20260909T185031896287</td><td>98f4269f (main)</td><td><code>docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json</code></td></tr>
+    <tr><td>Cut-cell moment discriminator</td><td>r-20260909T1750 series</td><td>main</td><td><code>docs/figures/uniform-cell-clip-and-coupling/cut-cell-moments</code></td></tr>
+    <tr><td>Exact participation oracle and certificate rows</td><td>r-20260909T172546102179</td><td>0372d3fc (held)</td><td><code>docs/figures/uniform-cell-clip-and-coupling/exact-participation</code></td></tr>
+    <tr><td>Exact-placement discriminator</td><td>r-20260909T230955345920</td><td>28a49bcb (held)</td><td><code>docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator</code></td></tr>
+    <tr><td>X-point cell allocation RCA</td><td>r-20260910T035754118776</td><td>28a49bcb</td><td><code>docs/figures/uniform-cell-clip-and-coupling/xpoint-cell-rca</code> (in flight)</td></tr>
+  </tbody>
+</table>
+
+</main>
+</body>
+</html>

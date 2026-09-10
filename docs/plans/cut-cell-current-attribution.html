@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-10">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 </head>
 <body>
 <main class="plan-doc">
@@ -141,6 +141,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260910T075153550445" data-who="s19-review coordinator" data-when="">
     <div class="r-comment-body">ROOT CAUSE FOUND, 2026-09-10, from two census nodes reading the same code. The production current moments have not clipped any cell at the separatrix since 2026-08-27: commit c9a89e58 (fix(equilibrium): use profile-owned residual support) replaced traced_clip(signed_flux) and traced_clip(-signed_flux), a real chord clip against the signed flux, with traced_clip(jnp.ones(...)) qualified by the profile participation label, so every cell is booked whole or not at all by which side of the separatrix its centroid falls on (nova/equilibrium/forward_operator.py _profile_support, main; observation.py:558 current_ledger; domain.py open_field_line). Everything measured since is downstream of that: the 16-of-43 participation on weak -110 is the count of cut cells whose centroids sit inside; the dominated error cells on the single-null 110 row are two-crossing cells booked whole (840.6 A against 85.6 A analytic, 717.5 against 34.9, 654.9 against 21.2); the four-crossing X-point cell is booked whole (459.7 A against a 10.5 A sliver); and the 0.196 percent scrape-off-layer current on the transport machine is 844 A in sixteen separatrix-crossing cells with outside centroids plus 228 A in fifteen open cells carrying the edge-extrapolated profile, none of it geometric clipping. The exact-support mode on the held stack is the first real clip since then, which is why it carries less than half the current at unit amplitude that the whole-cell booking carries and needs 2.2 to 5.6 times the amplitude: it is being compared against a baseline that was never clipping. Consequences for this plan: §1's second question (why exact placement moves the fixed point) is reframed as which of the two is right at unit amplitude against the analytic total, the census node cca-unit-amplitude-current-census measures exactly that; and the chord clip as a baseline is retired as a concept, the committed behaviour is whole-cell booking and must be named so in every table.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260910T104323131412" data-who="s19-review coordinator" data-when="">
+    <div class="r-comment-body">Rung B's merge half landed 2026-09-10 12:40: the exact-participation clip stack (0372d3fc), the discriminator (28a49bcb), the whole-cell default restoration (8d0e9224), the X-point cell RCA driver (88d82b4f) and the unit-amplitude census driver (637ebebd) are on main. Gate: 57 test files importing forward_operator, stencil_mesh, separatrix_clip or reduced_newton, one fresh CPU process each at the merged head b6630c41 and at main 658a465b, zero files whose failure set differs (17 pre-existing failures on both sides), run r-20260910T081852746967. Production default remains whole-cell booking, pinned bit-identical to main by tests/test_forward_support_clip_mode.py; exact and chord_cells are opt-in through set_support_clip_mode. What rung B still owes: the exact-clip tables on the same rows as rung A once rung A lands, and the eight-cell spline-versus-inside sign disagreement the census found in the exact path's curved_level evaluator. Rung A (cca-rung-a-reinstate-clip, run r-20260910T091931092593) is in flight on this base.</div>
 </div>
 </section>
 

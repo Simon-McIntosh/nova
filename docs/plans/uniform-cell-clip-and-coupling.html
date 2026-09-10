@@ -17,7 +17,7 @@
 <meta name="plan-modified" content="2026-09-10">
 <meta name="plan-effort-hours" content="40.0">
 <meta name="plan-informs" content="null-identification-authority,gs-absolute-accuracy-gates,batched-operator-boundary,millisecond-converged-solve">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="23">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-impl" content="0.45">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
@@ -75,6 +75,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260910T063601455264-ucc-xpoint-cell-rca-remaining-rows" data-who="s19i-xcell-rca2" data-when="2026-09-10T09:04:21.323Z">
     <div class="r-comment-body"><p>Three-row root cause complete (report under the session reports directory, xpoint-cell-rca). Whole-cell booking by centroid side makes both families wrong in mirror image: on the single-null rows boundary cells with inside centroids are booked whole (654 to 841 A against 21 to 247 A analytic at 110 cells; 259 to 314 A against 0.01 to 1.8 A at 300 cells; the four-crossing X-point cell 459.7 A against 10.5 A and 187.9 A against 1.15 A, empty under the exact chain), while on the weak row boundary cells with outside centroids are booked zero (27 of 43 cut cells dropped, six of them carrying 165 to 192 kA of analytic core current each) and cells 101 and 102 are six-crossing cells with the separatrix along a hexagon edge. Every row reads limited with no saddle candidate, per the census assertion. Figure captions repaired and cut-cell outlines tied to the analytic separatrix. Commits sit on the held clip stack and merge with it.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260910T052734465931-cca-unit-amplitude-current-census" data-who="s19i-ucc-amplitude" data-when="2026-09-10T09:28:18.151Z">
+    <div class="r-comment-body"><p>Landed in the worktree at 637ebebd on the held clip stack; receipt, panels and report banked on main under docs/figures/uniform-cell-clip-and-coupling/amplitude-census. On the committed terminal state the analytic total is 1.6315e7 A; whole-cell booking gives 1.5541e7 A (0.9526) and the exact clip 1.5149e7 A (0.9285); both under-book through the same outboard-midplane cells 106 (analytic interior, 192 kA), 104, 108, 83 and 116 (analytic cut, 116 to 192 kA each), all booked zero because their participation flag is false, so the exact mode inherits the label-driven exclusion and is not the cause of missing current. Seed-state ratio 2.37 (75 cells excluded) is the cold disc seed&#x27;s own flux; the banked 5.56 was recorded on the drifted exact-arm terminal. The spline level disagrees in sign with inside_boundary on 8 cells at the terminal state, a defect in the exact path&#x27;s curved_level evaluator recorded for rung B.</p></div>
 </div>
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">

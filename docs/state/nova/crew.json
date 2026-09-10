@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T11:19:26",
+  "updated": "2026-09-10T11:31:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -149734,6 +149734,204 @@
           "status": "failed",
           "error": "OperationalError: table runs has no column named payload"
         }
+      },
+      {
+        "run_id": "r-20260910T052734465931-cca-unit-amplitude-current-census",
+        "plan": "uniform-cell-clip-and-coupling",
+        "section": "",
+        "node": "cca-unit-amplitude-current-census",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1870,
+                "cached_input_tokens": 495640,
+                "input_tokens": 497542,
+                "output_tokens": 1573,
+                "reasoning_output_tokens": 54,
+                "total_tokens": 499115,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "The banked lambda amplitude history says the chord clip needs amplitude 0.93 at the seed and 1.05 at the terminal state to meet the plasma current while the exact clip needs 2.20 and 5.56 on the same row (docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/parts/control and c-r100), so at unit amplitude the exact support carries less than half the current the chord support carries on the same state. One all_debug CPU job (one sbatch, never srun as a child of your shell, root venv python directly, PYTHONPATH at the worktree, JAX_PLATFORMS=cpu, TMPDIR=/tmp in submit environment and payload, --output in the run directory) evaluates, on the weak-rotation-reactor-static -110 certificate seed state and again on the committed chord terminal state, the per-cell zeroth current moment at unit amplitude under set_support_clip_mode('chord') and set_support_clip_mode('exact') in nova/equilibrium/forward_operator.py, and writes a receipt JSON under docs/figures/uniform-cell-clip-and-coupling/amplitude-census with: the two totals and their ratio; for every cell the chord current, the exact current, the difference, the analytic exact current over the cell's analytic plasma intersection, whether the cell is cut by the analytic separatrix, its profile_participation label and its vertex_participation flag; the count and summed current of cells that are uncut yet differ by more than 1e-6 of the plasma current between the two modes; and the sign convention check of the curved_level evaluator (spline_level and local_level agree in sign with inside_boundary at every cell centroid, with the count of disagreements). Two figures obeying the plotting rules (imas-ink through nova.media, no axes, line contours, nulls and wall drawn): the per-cell chord-minus-exact current difference as a whole-domain line-contour panel with cut cells outlined, and a one-dimensional ranked bar chart of the difference over all cells with cut cells marked. The report states which cell class carries the missing current (uncut interior cells, cut cells, or cells the exact mode excludes by qualify) and names the code line responsible with path:line. Never read an image. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 2.0,
+          "goal": "Find which cells lose plasma current when the support clip mode changes from chord to exact, by comparing the per-cell current at unit amplitude on the identical seed state of the weak-rotation -110 certificate row",
+          "id": "cca-unit-amplitude-current-census",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T05:27:35Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T052734465931-cca-unit-amplitude-current-census/manifest.md",
+          "plan": "uniform-cell-clip-and-coupling",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/unit_amplitude_current_census.py",
+            "docs/figures/uniform-cell-clip-and-coupling/amplitude-census",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/amplitude-census"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-ucc-amplitude",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T05:27:46Z",
+        "completed_at": "2026-09-10T09:28:18.151Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 14421,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 14432,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "28a49bcbfddf81a950adce8651785a54cd3e52fb",
+        "commits": [
+          "637ebebd660d91dcdc7cb818f141f77bee1ffe6a"
+        ],
+        "changed_lines": {
+          "added": 13438,
+          "removed": 0,
+          "files": 7
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug sbatch 1268821: benchmarks/unit_amplitude_current_census.py on the weak-rotation -110 seed and committed terminal states under chord and exact clip modes (159 s, EXIT=0); amplitude gate reproduces the banked whole-cell amplitudes 0.9297775 and 1.0497961 to 1e-6 at both states",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T052734465931-cca-unit-amplitude-current-census/amplitude-census-1268821.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T052734465931-cca-unit-amplitude-current-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "c8d7f44b-69e6-4269-9b75-caa082b51cf2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 42425193,
+            "input_tokens_cumulative": 42425193,
+            "output_tokens": 143417,
+            "output_tokens_cumulative": 143417,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T09:28:18.151Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 42425193,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 14428.981,
+          "generated_tokens": 143417,
+          "generation_seconds": 13665.971,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 32.7,
+          "machine_seconds": 763.01,
+          "peak_input_tokens": 332770,
+          "tokens_per_second": 10.49,
+          "wall_tokens_per_second": 9.94
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": [
+          {
+            "path": "scripts/run_amplitude_census.sh",
+            "reason": "the sbatch launcher for the census job, a nineteen-line companion to the benchmark that belongs with it"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-unit-amplitude-current-census",
+          "session_id": "c8d7f44b-69e6-4269-9b75-caa082b51cf2",
+          "session_source": "stream",
+          "retained_at": "2026-09-10T09:28:18.151Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 205.0,
+        "orientation_input_tokens": 8693842.0,
+        "store_write": {
+          "status": "failed",
+          "error": "OperationalError: table runs has no column named payload"
+        }
       }
     ],
     "holds": [
@@ -150046,6 +150244,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2413
+    "_version": 2414
   }
 }

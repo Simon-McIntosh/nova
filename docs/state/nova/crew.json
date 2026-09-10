@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T17:15:17",
+  "updated": "2026-09-10T17:22:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -150550,6 +150550,194 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T133059074855-cca-rung-a-certificate-resolve",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-rung-a-certificate-resolve",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1008,
+                "cached_input_tokens": 741174,
+                "input_tokens": 742214,
+                "output_tokens": 1796,
+                "reasoning_output_tokens": 191,
+                "total_tokens": 744010,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file, and never open the aggregate certificate receipt in an editor: it is twelve megabytes; load it with json in a script and pull only the per-row scalar fields you need. ONE H200 job, never an array and never an srun child of your shell: sbatch to betelgeuse under reservation gpu_0003_grpA with --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:59:00, JAX_PLATFORMS=cuda,cpu and TMPDIR=/tmp exported in the submit environment and again in the payload, the root venv python directly with PYTHONPATH at your worktree, the persistent compilation cache enabled through the certificate driver's own call, --output in the run directory. The payload runs benchmarks/rung_a_certificate_resolve.py, which drives the committed certificate machinery in benchmarks/solovev_certificate.py (its per-row measure function, exactly as the committed rows were produced, one row per fresh process inside the allocation) over the sixteen rows in the order weak, moderate, strong and diverted at 110 cells, then the same four at 300, 500 and 1000, writing each row's part receipt and its poloidal flux contour panel (line contours, both null sets, wall, residual and converged flag in the caption, the committed renderer) under docs/figures/cut-cell-current-attribution/rung-a-certificate as it lands so an expiry loses one row; if the allocation expires, the manifest names the rows landed and the coordinator resumes you for one further job on the remainder. The receipt tables every landed row beside its committed counterpart, read programmatically from the aggregate certificate receipt in the gs-absolute-accuracy figures directory: terminal residual, converged flag, axis position error, X-point position error where applicable, joint qualification verdict, plasma current amplitude at seed and terminal, and the trip count; the report states per case whether the fixed point moved toward the analytic equilibrium (axis error and residual both smaller) and quotes the amplitude rule (within one percent of unity). Change nothing in production code; this node measures. Manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 3.0,
+          "goal": "Re-solve the sixteen Solov'ev certificate rows with the signed-flux profile-support clip in production and table each against its committed row",
+          "id": "cca-rung-a-certificate-resolve",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T13:31:00Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T133059074855-cca-rung-a-certificate-resolve/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/rung_a_certificate_resolve.py",
+            "docs/figures/cut-cell-current-attribution/rung-a-certificate",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/rung-a-certificate"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-resolve",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T13:31:12Z",
+        "completed_at": "2026-09-10T14:51:49.955Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4795,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4837,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "ef0f38b6ae6c367b2554c4521d6fae6e1f5611f5",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "H200 job 1269040 (betelgeuse gpu_0003_grpA, one card, rows sequential, persistent cache) re-solving the certificate rows with the live-flux signed clip in production; five rows landed before the 59-minute limit (weak, moderate, strong, diverted at 110 cells and weak at 300), every one unconverged and far from the reference",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T133059074855-cca-rung-a-certificate-resolve/sweep.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T133059074855-cca-rung-a-certificate-resolve/manifest.md",
+        "scope_changed": false,
+        "session_id": "8486ba76-bb3c-489b-b206-1fd83e080c41",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 18423671,
+            "input_tokens_cumulative": 18423671,
+            "output_tokens": 88309,
+            "output_tokens_cumulative": 88309,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T14:51:49.955Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 18423671,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 4834.064,
+          "generated_tokens": 88309,
+          "generation_seconds": 4410.377,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 21.2,
+          "machine_seconds": 423.687,
+          "peak_input_tokens": 215967,
+          "tokens_per_second": 20.02,
+          "wall_tokens_per_second": 18.27
+        },
+        "follow_on_paths": [
+          "plan/read-representation-discriminator"
+        ],
+        "predecessor_run": "r-20260910T113535191293-cca-rung-a-test-gate",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "driver commits e60d56ee and 3fb951a3 sit on the rung A line above ef0f38b6 and stay with it; the five landed rows (scalars, parts, panels) were banked on main by the coordinator under docs/figures/cut-cell-current-attribution/rung-a-certificate",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-rung-a-certificate-resolve",
+          "session_id": "8486ba76-bb3c-489b-b206-1fd83e080c41",
+          "session_source": "stream",
+          "retained_at": "2026-09-10T14:51:49.955Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 135.0,
+        "orientation_input_tokens": 3792810.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -150862,6 +151050,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2422
+    "_version": 2423
   }
 }

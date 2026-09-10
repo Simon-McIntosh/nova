@@ -17,7 +17,7 @@
 <meta name="plan-modified" content="2026-09-10">
 <meta name="plan-effort-hours" content="40.0">
 <meta name="plan-informs" content="null-identification-authority,gs-absolute-accuracy-gates,batched-operator-boundary,millisecond-converged-solve">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-impl" content="0.45">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
@@ -66,6 +66,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260910T041640363806" data-who="s19-review coordinator" data-when="">
     <div class="r-comment-body">Repointed 2026-09-10 after the exact-placement discriminator. The plan's centre (one clip and one moment method over both tilings) now depends on cut-cell-current-attribution: that plan owns the root cause of why exact cut-cell moments move the solve to a different equilibrium (arm b, axis 0.533 m outboard at 6.2e-13), the X-point cell treatment (saddle vertex as a clip vertex, branch-paired chords, per-branch supports) and the acceptance rule that the unified path must satisfy, which is convergence to the analytic equilibrium under exact inputs rather than a residual. The design constraint it fixes for the unified path: the clipped geometry enters the flux read and the current placement together, as one discretisation per cell; a clip that is exact on its own oracle and regresses the certificate is evidence of the remaining inconsistency, never a reason to revert to the chord. Both held stacks (0372d3fc, 28a49bcb) are inputs there. Cut the unified-path node only after cut-cell-current-attribution §1 reports and its representation decision is locked.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260910T035754118776-ucc-xpoint-cell-allocation-rca" data-who="s19i-xcell-rca" data-when="2026-09-10T06:32:30.335Z">
+    <div class="r-comment-body"><p>Partial measurement, decisive on the X-point cell. Diverted -110: cell 9 is crossed four times by the analytic separatrix; the chord support is the whole hexagon and books 459.7 A against a 10.5 A analytic core-side sliver; the exact chain yields zero vertices and 0 A; the read finds zero X candidates, classifies the row limited and sets the boundary flux at 0.0010 Wb against the analytic 0; the dominated error cells 96, 75, 112, 18, 70 are two-crossing cells booked whole (840, 840, 718, 655, 779 A against 86, 131, 35, 21, 169 A analytic), so in production a cut cell participates whole or not at all. Diverted -300 and weak -110 not measured: the three rows did not fit one allocation and the worker session died before relaunching. Driver validated: exact density agrees with production to 1.3e-10, banked cut-cell moments reproduce to 1e-9.</p></div>
 </div>
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">

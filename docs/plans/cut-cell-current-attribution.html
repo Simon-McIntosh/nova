@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="cut-cell-current-attribution">
+<meta name="reckon-type" content="plan">
+<title>cut-cell-current-attribution</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Cut-cell current attribution — exact current where the separatrix cuts a cell, the X-point cell included, and a flux read consistent with it">
+<meta name="plan-summary" content="Make the discrete GS map converge to the reference when its inputs are exact: exact cut-cell moments, an explicit X-point cell, one consistent flux read.">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-sprint" content="S19">
+<meta name="plan-effort-hours" content="34.0">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="elevated">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-tags" content="equilibrium,solovev,topology,grad-shafranov">
+<meta name="plan-north-star" content="ns-accurate-millisecond-gs">
+<meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
+<meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
+</head>
+<body>
+<main class="plan-doc">
+
+<h2 id="s0">Why this plan exists</h2>
+<p>Three measurements made on 2026-09-09 and 2026-09-10 do not fit together, and the misfit is the plan. First, the production chord clip attributes current to only 16 of the 43 cells the analytic separatrix cuts on the weak-rotation Solov'ev case at 110 cells, and every participating cut cell's zeroth, first and second moments are wrong against the exact density over the exact clipped region; substituting exact cut-cell moments into the linear flux image removes 98.6 percent of the squared flux error (<a href="/nova/uniform-cell-clip-and-coupling.html">uniform-cell-clip-and-coupling</a>, cut-cell moment discriminator). Second, putting that exact participation into the production solve does not improve it: the weak and moderate static certificate rows terminate 63 and 11 times further from their fixed point, and when the two cells that resisted the general clip are placed back on chord moments the solve converges to 6.2e-13 but to a different equilibrium, its magnetic axis 0.533 m outboard of the analytic axis, while the never-converged chord baseline sits within 1.8 mm (the exact-placement discriminator, receipts under <code>docs/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator</code>). Third, on the single-null case the solved flux already matches the analytic field to 1e-17 at 300 cells, yet the topology read admits no X-point at 110 or 300 cells, so the row fails joint qualification while its gradient and Hessian error concentrate around the X-point and along the legs.</p>
+<p>The lead's reading, 2026-09-10, is the rule this plan is built on: an improved component that reduces acceptance is evidence that the model is not correct, not evidence against the component. A discretisation that lands near the reference only because its clip error cancels an error elsewhere is compensating, and what the certificate has been scoring is the compensation. The acceptance of this plan is therefore convergence to the reference with exact inputs, never a residual or a pass count on its own. The X-point cell mechanism that <a href="/nova/sol-current-demonstration.html">sol-current-demonstration</a> recorded as a prerequisite and deferred while confined current made it a 0.2 A effect (the saddle cell is crossed four times by the analytic separatrix and production draws one chord with up to 15 mm endpoint displacement; evidence anchor <a href="/nova/evidence/archive/boundary-ring-source-completion-landed.html#saddle-gap-current-check">saddle-gap-current-check</a>) is now first-order for the read and is carried here as §2. The time is now.</p>
+<figure>
+  <img src="/nova/figures/uniform-cell-clip-and-coupling/exact-participation/discriminator/figures/b/weak-rotation-reactor-static-production-route-reduced.png" alt="Exact participation with the two contaminated cells on chord moments converges to 6.2e-13 but to an equilibrium whose axis sits 0.533 m outboard of the analytic axis">
+  <figcaption>Arm b of the exact-placement discriminator, weak-rotation reactor case at 110 cells: exact cut-cell participation everywhere except cells 101 and 102 (chord moments). Analytic blue, solved ochre on shared Wb levels, both axes marked. Terminal residual 6.2e-13, converged, and wrong: the discrete map has a self-consistent fixed point that is not the Grad-Shafranov solution.</figcaption>
+</figure>
+<figure>
+  <img src="/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png" alt="Single-null certificate row at 300 cells: flux error 1e-17, no admitted X-point, gradient and Hessian error concentrated at the X-point and along the legs">
+  <figcaption>Single-null certificate row at 300 cells with the production chord clip. Flux error at the 1e-17 level everywhere, gradient and Hessian error concentrated at the X-point and along the divertor legs, and no X-point admitted by the read (only the axis marker is drawn). The solve is right and the read of its own answer is not.</figcaption>
+</figure>
+
+<h2 id="s1">§1 — Root cause: where the attribution error lives and why exact placement changes the basin</h2>
+<p>Two questions, both answerable with the machinery already in the held stacks. Where, cell by cell, does the chord clip misattribute current, and is the X-point cell of the single-null case the four-crossing cell the saddle-gap audit predicted, handled by one chord? And what does exact placement change in the solve such that its fixed point moves half a metre: the total current normalisation, the boundary flux level the read returns, the profile's placement in normalised flux, or the coupling image itself. The node in flight (<code>ucc-xpoint-cell-allocation-rca</code>, run r-20260910T035754118776, base 28a49bcb) delivers the first question with three figures per row on diverted -110 and -300 and weak -110: a close-up of the cell with the atomic hex, the analytic separatrix branches, the chord polygon, the exact spline-chain polygon and the analytic core-side region; a whole-domain line-contour panel of the per-cell attribution error with every cut cell outlined; and a ranked bar chart of absolute per-cell error, chord beside exact. Its receipt tabulates crossing count, analytic core current, chord and exact attribution and the three moment errors for every cut cell, and for the X-point cell the analytic X-point position inside it, the chord endpoints, the exact chain vertices and the nearest topology-read saddle candidate with its containment verdict and distance.</p>
+<p>The second question is a paired measurement on arm b's terminal state against the analytic equilibrium: plasma current and its centroid, the boundary flux value the read returns against the analytic separatrix level, the normalisation anchor (axis flux) used for psi_N, and the flux image of the analytic current through the exact operator versus through the chord operator, each reported as a difference from the reference with its own contour panel. Whichever of these moves by more than one part in a thousand names the mechanism; if none does, the inconsistency is inside the coupling image and §3 designs around that.</p>
+<p><strong>Done-when.</strong> The RCA receipt and report are banked under <code>docs/figures/uniform-cell-clip-and-coupling/xpoint-cell-rca</code> and the reports path, the X-point cell's crossing count and chord treatment are stated with the figure, the mechanism behind arm b's displaced fixed point is named from the paired differences with its panel, and the plan's §2 and §3 done-whens are re-read against those numbers in the same session.</p>
+
+<h2 id="s2">§2 — The X-point cell: saddle vertex as a clip vertex, branch-paired chords, per-branch supports</h2>
+<p>The single-chord clip cannot represent a cell the separatrix enters and leaves twice. The mechanism recorded on the boundary-ring audit and the SOL demonstration is carried here unchanged in shape and made concrete: the fitted saddle position is inserted as a vertex of the clipped polygon; the four edge roots are paired by branch (the two roots each branch connects through the saddle) so the clip yields the core-side wedge, the private-flux wedge and the two common-SOL wedges as separate polygons of fixed vertex capacity; and the current moments integrate per wedge with the profile of that wedge's region (the confined profile on the core wedge, zero or the SOL closure elsewhere). The complement-clip machinery already exists (<code>common_support</code>), and the general ordered spline-chain clip on the held stack (0372d3fc) already inserts every edge root in polygon order, so the X-point cell is the case where two chains meet at one interior vertex. Fixed shapes are kept by padding: every cut cell carries capacity for four roots and one interior vertex, with unused slots exact zero, so the traced program does not branch on the cell's crossing count.</p>
+<p>The read follows the clip. With the saddle carried as a vertex of the cut, the cell partition on the plasma cells (the saddle-aware flood of <a href="/nova/plasma-cell-topology-authority.html">plasma-cell-topology-authority</a>) sees the X-point cell split into its four regions, and the null census has a cell whose geometry states where the saddle is instead of one that straddles it; the no-admitted-X-point verdicts at 110 and 300 cells on the single-null case are the first test of whether that is sufficient, and if the read still refuses, the refusal names its reason per candidate.</p>
+<p><strong>Done-when.</strong> On the single-null certificate case at 110, 300 and 500 cells, one all_debug oracle job reports the X-point cell's core-side current within 1e-6 relative of the analytic wedge integral and exactly zero private-flux and common-SOL current for the confined profile; one H200 job (one card, rows sequential, receipts and contour panels persisted per row) re-solves the four diverted certificate rows with the treatment on and reports the admitted X-point at 110 and 300 cells with position error inside one characteristic pitch, the joint-qualified diverted count against the committed 1 of 4, and every terminal residual beside its committed baseline with no regression. The four limited rows are re-run in the same job as the negative control and must be bit-identical, since they have no saddle to cut.</p>
+
+<h2 id="s3">§3 — One discretisation: the flux read and the current placement from the same clipped geometry</h2>
+<p>The chord clip and the exact clip both take their edge roots and density coordinates from the same flux interpolant (<code>shared_node_flux</code>, <code>support_flux_coefficients</code>), and the current moments feed the polygon coupling (<code>coupling_current_moments</code> into <code>current_moment_image</code>) with zeroth, first and second moments. Exact moments under a boundary located by a linear edge interpolation, or a boundary located exactly under moments computed on a chord, are two halves of two different discretisations, and the solve finds the fixed point of whichever pair it is given. This section makes the pair one: the boundary the read returns, the region the current integrates over and the polynomial space the density is evaluated in are the same object per cell, so that with the analytic flux supplied the operator returns the analytic current image and the analytic boundary, and with the analytic current supplied the solve converges to the analytic equilibrium. The unified clip-and-moment path on <a href="/nova/uniform-cell-clip-and-coupling.html">uniform-cell-clip-and-coupling</a> is where this is built; this section owns its acceptance and the design constraint, which the S19 discriminator established: the clipped geometry enters the flux read and the current placement together or exact moments alone move the answer away from the reference.</p>
+<p>The design question the lead decides after §1 is which representation carries the read: the six-point ring quadratic extended to the clipped support, the global tensor spline the extraction route already fits, or the cellwise polynomial the moments are evaluated in. Each is a candidate for one reason and disqualified for one reason today, and §1's paired differences are what makes the choice an evidence question rather than a preference.</p>
+<p><strong>Done-when.</strong> The certificate is re-run with exact participation and the consistent read in one H200 job, and on every row at 300 cells and finer the solve converges to the analytic axis within one characteristic pitch with terminal residual at or below 1e-12, the diverted rows additionally admitting the X-point inside one pitch; arm b of the exact-placement discriminator is re-run as a preregistered test and lands on the analytic axis; the joint-qualified count is reported before and after; and every remaining error term is recorded by cell class with its magnitude, none retained because it improves a score. The chord clip is retired as the production default only when this done-when holds on all sixteen rows; until then it stays the default and the exact path stays behind the benchmark flag.</p>
+
+<h2 id="s4">§4 — Acceptance rule and the held stacks</h2>
+<p>Acceptance for this plan and for every plan it informs is convergence to the reference with exact inputs: position of the axis and of every admitted X-point inside one characteristic pitch, terminal residual inside the locked recovery bound, and the joint qualification rule of null-identification-authority, reported per row. A pass count is a summary of that, never the gate. A component that is closer to the analytic answer on its own oracle and regresses the certificate is retained as evidence of a remaining inconsistency and is never reverted to recover the score. Two held stacks are inputs to §3 and are neither merged nor discarded until it lands: the exact participation stack at 0372d3fc (nineteen commits: general ordered spline-chain clip, cell confinement, memory-safe scan) and the discriminator stack at 28a49bcb (five commits: the arm driver, the support-splice padding fix, the relaxation instrumentation that showed the accelerated Krylov route never reads a step relaxation). The clipped-moment stack at 1c4daf51 on null-identification-authority (boundary-support trace, converges weak to 6.6e-13, breaks moderate to 0.105) is a third witness of the same inconsistency and its lead question stays open until §1 reports.</p>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+  <h2><span class="sec">§</span> Decisions</h2>
+  <div class="r-dec" data-key="acceptance-is-convergence-to-the-reference" data-choice="convergence-to-the-reference" data-by="lead" data-when="2026-09-10">
+    <p class="r-dec-q">What is the acceptance for cut-cell attribution work: a terminal residual, a pass count, or convergence to the analytic equilibrium?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="residual-bound">residual-bound</button>
+      <button class="r-opt" data-value="pass-count">pass-count</button>
+      <button class="r-opt" data-value="convergence-to-the-reference">convergence-to-the-reference</button>
+    </p>
+    <p class="r-dec-rat">Lead, 2026-09-10: a 100 percent pass rate is not a hard gate, and an improved model that reduces acceptance is an indication that the model is not correct. Exact inputs must give the exact answer: axis and admitted X-points inside one pitch, residual inside the locked bound, jointly. A component that regresses the certificate while agreeing better with its own oracle is evidence about the remaining components and is kept, not reverted.</p>
+  </div>
+  <div class="r-dec" data-key="x-point-cell-treatment-now" data-choice="now" data-by="lead" data-when="2026-09-10">
+    <p class="r-dec-q">Does the deferred X-point cell mechanism (saddle vertex as a clip vertex, branch-paired chords, per-branch supports) get built now or stay a prerequisite for the SOL closure?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="now">now</button>
+      <button class="r-opt" data-value="when-the-sol-closure-dispatches">when-the-sol-closure-dispatches</button>
+    </p>
+    <p class="r-dec-rat">Lead, 2026-09-10: we developed a plan to treat this correctly when the time comes, and the time is now. The single-chord X-point cell is first-order for the topology read on the single-null certificate rows (no admitted X-point at 110 and 300 cells while the flux is exact) and a lot of the visible error is driven from the placement of the primary X-point.</p>
+  </div>
+  <div class="r-dec" data-key="consistent-read-representation" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which representation carries the flux read that the current placement must be consistent with: the six-point ring quadratic extended over the clipped support, the global tensor spline, or the cellwise polynomial the moments are evaluated in?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="ring-quadratic">ring-quadratic</button>
+      <button class="r-opt" data-value="global-tensor-spline">global-tensor-spline</button>
+      <button class="r-opt" data-value="cellwise-moment-polynomial">cellwise-moment-polynomial</button>
+    </p>
+    <p class="r-dec-rat"></p>
+  </div>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+  <h2><span class="sec">§</span> Followups</h2>
+  <article class="r-fu" data-id="f-cca-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="s19-review coordinator" data-written-at="2026-09-10">
+    <h4 class="r-fu-title">Land the root cause: the RCA node's figures and the paired differences behind arm b's displaced fixed point</h4>
+    <div class="r-fu-body"><p>The X-point cell allocation RCA is in flight on the local lane at base 28a49bcb (run r-20260910T035754118776); bank its receipt, report and nine figures, then run the paired measurement of §1 on arm b's terminal state (plasma current and centroid, boundary flux level, normalisation anchor, analytic-current image through both operators) in one all_debug job with a contour panel per difference. Re-read §2 and §3 done-whens against the numbers and lock the consistent-read-representation decision or state what evidence it still needs.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §1</pre>
+  </article>
+  <article class="r-fu" data-id="f-cca-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="s19-review coordinator" data-written-at="2026-09-10">
+    <h4 class="r-fu-title">Build the X-point cell treatment on the held clip stack and re-solve the diverted certificate rows</h4>
+    <div class="r-fu-body"><p>Start from the general ordered spline-chain clip at 0372d3fc: insert the fitted saddle as a clip vertex, pair the four edge roots by branch, emit the four wedges as fixed-capacity polygons with exact-zero padding, integrate moments per wedge with that wedge's profile, and let the plasma-cell partition and null census see the split cell. Gate exactly as §2 states: the oracle job on the X-point cell at three resolutions, then one H200 job over the eight certificate rows with the four limited rows as the bit-identical negative control.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §2</pre>
+  </article>
+  <article class="r-fu" data-id="f-cca-003" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="s19-review coordinator" data-written-at="2026-09-10">
+    <h4 class="r-fu-title">Make the flux read and the current placement one discretisation and prove convergence to the reference</h4>
+    <div class="r-fu-body"><p>After the representation decision is locked: the boundary the read returns, the region the moments integrate over and the density's polynomial space become one object per cell on the unified path of uniform-cell-clip-and-coupling; the certificate re-runs with exact participation in one H200 job and must converge to the analytic axis within one pitch at 300 cells and finer with residual at or below 1e-12; arm b re-runs as the preregistered test; every remaining error term is recorded by cell class. Only then does the chord clip stop being the production default.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §3</pre>
+  </article>
+</section>
+
+<section data-reckon="questions" id="questions" class="r-questions">
+  <h2><span class="sec">§</span> Open questions</h2>
+</section>
+
+<section data-reckon="comments" id="comments" class="r-comments">
+  <h2><span class="sec">§</span> Comments</h2>
+</section>
+
+</main>
+</body>
+</html>

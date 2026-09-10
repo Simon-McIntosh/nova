@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T08:34:51",
+  "updated": "2026-09-10T09:34:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -148941,6 +148941,199 @@
         "watch_override": null,
         "tool_steps": 136.0,
         "orientation_input_tokens": 10068486.0
+      },
+      {
+        "run_id": "r-20260910T053033936623-nia-sign-change-census-assertion",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-sign-change-census-assertion",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2105,
+                "cached_input_tokens": 505246,
+                "input_tokens": 507383,
+                "output_tokens": 1438,
+                "reasoning_output_tokens": 22,
+                "total_tokens": 508821,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "One all_debug CPU job (one sbatch, never an srun child of your shell, root venv python directly, PYTHONPATH at the worktree, JAX_PLATFORMS=cpu, TMPDIR=/tmp in submit environment and payload, --output in the run directory) loads the persisted terminal flux of the committed diverted-single-null parts at requested cells -110, -300 and -500 (docs/figures/gs-absolute-accuracy/solovev parts, the 500 row is the positive control where the X-point IS admitted with 1.20 mm error) and runs the production topology read stage by stage on each: the sign-change census over the rotated centroid neighbourhood (report every saddle candidate it finds with position, level and the distance to the analytic X-point of the Cerfon-Freidberg reference), then containment against the wall and the occupiable region, then the split-spline polish, then the candidate dedupe radius, then the Hessian-type gate and the admission verdict, recording at each stage which candidates survive and the stated reason each one is dropped. The receipt states for each row whether the sign-change census finds a candidate within one characteristic pitch of the analytic saddle and, if it does, the exact stage and code line (path:line) that removes it; if it does not, the census is the defect and the receipt lists the cells around the analytic saddle with the sign pattern each carries. One figure per row obeying the plotting rules (imas-ink through nova.media, no axes, line contours of the solved flux, wall, analytic nulls in the analytic style, every census candidate as a hollow marker and the admitted one filled): a close-up of the saddle region with the cells around the analytic X-point outlined. The report names the failing stage in one sentence per row. Never read an image. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 2.0,
+          "goal": "Assert, stage by stage, where the topology read stops admitting the X-point on the single-null certificate rows at 110 and 300 cells whose solved flux matches the analytic field to 1e-17",
+          "id": "nia-sign-change-census-assertion",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T05:30:34Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T053033936623-nia-sign-change-census-assertion/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/null_census_assertion.py",
+            "docs/figures/null-identification-authority/census-assertion",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/census-assertion"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-nia-census-assert",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T05:30:46Z",
+        "completed_at": "2026-09-10T07:31:30.018Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 7228,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 7244,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "a744dfab4a55bc8f247c910933f483fdca6fe082",
+        "commits": [
+          "6001bddc573995777a1374a7e54bc89614515d02",
+          "bb6759fe77fd01b5d26214790abe173328dc9560",
+          "c8295c730eac757c02685b41873ad708fc8f9511"
+        ],
+        "changed_lines": {
+          "added": 616,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug sbatch 1268438: benchmarks/null_census_assertion.py on the persisted single-null certificate parts at -110, -300, -500 through the production fixed-design topology read, stage by stage (52 s, EXIT=0); machine cache keys match the parts exactly; positive control -500 admits the saddle at 1.199 mm",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T053033936623-nia-sign-change-census-assertion/slurm-1268438.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T053033936623-nia-sign-change-census-assertion/manifest.md",
+        "scope_changed": false,
+        "session_id": "1a37f788-d643-420d-b276-8a35f6e46fce",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 19673635,
+            "input_tokens_cumulative": 19673635,
+            "output_tokens": 78142,
+            "output_tokens_cumulative": 78142,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T07:31:30.018Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 19673635,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 7241.127,
+          "generated_tokens": 78142,
+          "generation_seconds": 6905.057,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 24.8,
+          "machine_seconds": 336.07,
+          "peak_input_tokens": 252055,
+          "tokens_per_second": 11.32,
+          "wall_tokens_per_second": 10.79
+        },
+        "follow_on_paths": [
+          "\u00a74/\u00a75"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/nia-sign-change-census-assertion",
+          "session_id": "1a37f788-d643-420d-b276-8a35f6e46fce",
+          "session_source": "stream",
+          "retained_at": "2026-09-10T07:31:30.018Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 111.0,
+        "orientation_input_tokens": 10170600.0
       }
     ],
     "holds": [
@@ -149253,6 +149446,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2407
+    "_version": 2408
   }
 }

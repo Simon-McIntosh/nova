@@ -1,0 +1,1455 @@
+{
+  "acceptance": "a representation whose exact-input ratio is within 0.1 percent of unity carries no representation error",
+  "exit_marker": "READ_REPRESENTATION_EXIT=0",
+  "lane": {
+    "execution": "slurm",
+    "jax_default_backend": "cpu",
+    "jax_platforms": "cpu",
+    "node": "98dci4-clu-3141",
+    "slurm_job_id": "1269084"
+  },
+  "rows": [
+    {
+      "analytic_cut_cell_count": 69,
+      "analytic_total_a": 1624924.685586703,
+      "analytic_total_closed_form_a": 1624991.1778605897,
+      "case": "moderate-rotation-conventional-static",
+      "characteristic_pitch_m": 0.13143160656791236,
+      "exact_read_boundary_displacement_m": 1.9767701181452702e-11,
+      "exact_read_boundary_level_wb": 6.797341186628906e-11,
+      "exact_read_boundary_share_of_span": 4.9217665708361296e-11,
+      "realised_cells": 136,
+      "requested_cells": -110,
+      "row": "moderate",
+      "solver_qualification": "unqualified",
+      "states": {
+        "exact": {
+          "boundary_level_error_vs_analytic_wb": 0.0,
+          "boundary_level_wb": 0.0,
+          "representations": {
+            "linear": {
+              "analytic_cut_cells_participating": 61,
+              "booked_cells": 121,
+              "boundary_error_max_m": 0.0020371253994227877,
+              "boundary_error_max_pitches": 0.01549950923235637,
+              "boundary_error_median_m": 0.0004032496459121516,
+              "boundary_error_median_pitches": 0.00306813297381241,
+              "boundary_roots": 90,
+              "ratio_of_analytic_total": 0.9946690377522523,
+              "sign_disagreement_cells": 0,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 1616262.273432407,
+              "worst_cells": [
+                {
+                  "analytic_a": 10734.347180646786,
+                  "booked_a": 9647.019455876554,
+                  "cell": 69,
+                  "difference_a": -1087.3277247702317
+                },
+                {
+                  "analytic_a": 4602.018436340546,
+                  "booked_a": 3832.55780255812,
+                  "cell": 6,
+                  "difference_a": -769.4606337824262
+                },
+                {
+                  "analytic_a": 7305.91724713863,
+                  "booked_a": 6576.143573051933,
+                  "cell": 70,
+                  "difference_a": -729.7736740866967
+                },
+                {
+                  "analytic_a": 14429.618292455405,
+                  "booked_a": 13801.630373541497,
+                  "cell": 130,
+                  "difference_a": -627.9879189139083
+                },
+                {
+                  "analytic_a": 10043.052436789967,
+                  "booked_a": 9436.45397419523,
+                  "cell": 7,
+                  "difference_a": -606.5984625947367
+                },
+                {
+                  "analytic_a": 1883.9526964555143,
+                  "booked_a": 1391.7818723921364,
+                  "cell": 135,
+                  "difference_a": -492.17082406337795
+                }
+              ]
+            },
+            "quadratic": {
+              "analytic_cut_cells_participating": 61,
+              "booked_cells": 121,
+              "boundary_error_max_m": 0.0001509294784963637,
+              "boundary_error_max_pitches": 0.001148349947456334,
+              "boundary_error_median_m": 6.0577617833190234e-05,
+              "boundary_error_median_pitches": 0.00046090601351577495,
+              "boundary_roots": 92,
+              "ratio_of_analytic_total": 0.9999737215486063,
+              "sign_disagreement_cells": 7,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 1624881.9850823344,
+              "worst_cells": [
+                {
+                  "analytic_a": 10951.154475001122,
+                  "booked_a": 10940.482372832153,
+                  "cell": 123,
+                  "difference_a": -10.672102168968195
+                },
+                {
+                  "analytic_a": 14150.714485339762,
+                  "booked_a": 14140.08905818799,
+                  "cell": 77,
+                  "difference_a": -10.625427151771873
+                },
+                {
+                  "analytic_a": 13979.375190174604,
+                  "booked_a": 13971.043797395812,
+                  "cell": 126,
+                  "difference_a": -8.331392778791269
+                },
+                {
+                  "analytic_a": 16546.69632306117,
+                  "booked_a": 16538.67262651378,
+                  "cell": 110,
+                  "difference_a": -8.023696547388681
+                },
+                {
+                  "analytic_a": 12683.59469225909,
+                  "booked_a": 12690.803309150811,
+                  "cell": 20,
+                  "difference_a": 7.208616891721249
+                },
+                {
+                  "analytic_a": 7055.175264699153,
+                  "booked_a": 7048.420561212884,
+                  "cell": 74,
+                  "difference_a": -6.754703486268227
+                }
+              ]
+            },
+            "spline": {
+              "analytic_cut_cells_participating": 61,
+              "booked_cells": 121,
+              "boundary_error_max_m": 1.5707039841248845e-13,
+              "boundary_error_max_pitches": 1.1950732591199683e-12,
+              "boundary_error_median_m": 4.365983069458049e-14,
+              "boundary_error_median_pitches": 3.3218669264322586e-13,
+              "boundary_roots": 92,
+              "ratio_of_analytic_total": 1.0000278511745746,
+              "sign_disagreement_cells": 7,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 1624969.941647792,
+              "worst_cells": [
+                {
+                  "analytic_a": 10734.347180646786,
+                  "booked_a": 10736.607392102589,
+                  "cell": 69,
+                  "difference_a": 2.2602114558030735
+                },
+                {
+                  "analytic_a": 7305.91724713863,
+                  "booked_a": 7308.031585920684,
+                  "cell": 70,
+                  "difference_a": 2.114338782053892
+                },
+                {
+                  "analytic_a": 4602.018436340546,
+                  "booked_a": 4603.895333382829,
+                  "cell": 6,
+                  "difference_a": 1.8768970422834172
+                },
+                {
+                  "analytic_a": 13979.375190174604,
+                  "booked_a": 13981.125294063062,
+                  "cell": 126,
+                  "difference_a": 1.7501038884583977
+                },
+                {
+                  "analytic_a": 14429.618292455405,
+                  "booked_a": 14431.358897751412,
+                  "cell": 130,
+                  "difference_a": 1.7406052960068337
+                },
+                {
+                  "analytic_a": 7055.175264699153,
+                  "booked_a": 7056.897502328167,
+                  "cell": 74,
+                  "difference_a": 1.7222376290146713
+                }
+              ]
+            }
+          },
+          "state": "exact"
+        },
+        "terminal": {
+          "boundary_level_error_vs_analytic_wb": 0.07700907369295953,
+          "boundary_level_wb": 0.07700907369295953,
+          "representations": {
+            "linear": {
+              "analytic_cut_cells_participating": 60,
+              "booked_cells": 120,
+              "boundary_error_max_m": 0.013098704888161596,
+              "boundary_error_max_pitches": 0.09966175739770274,
+              "boundary_error_median_m": 0.007681481939818104,
+              "boundary_error_median_pitches": 0.05844470854770375,
+              "boundary_roots": 76,
+              "ratio_of_analytic_total": 0.9813746539691923,
+              "sign_disagreement_cells": 0,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 1594659.9010436493,
+              "worst_cells": [
+                {
+                  "analytic_a": 10734.347180646786,
+                  "booked_a": 8299.535717141785,
+                  "cell": 69,
+                  "difference_a": -2434.8114635050006
+                },
+                {
+                  "analytic_a": 14429.618292455405,
+                  "booked_a": 12705.21780328972,
+                  "cell": 130,
+                  "difference_a": -1724.4004891656841
+                },
+                {
+                  "analytic_a": 4602.018436340546,
+                  "booked_a": 2912.6068650998272,
+                  "cell": 6,
+                  "difference_a": -1689.4115712407188
+                },
+                {
+                  "analytic_a": 7305.91724713863,
+                  "booked_a": 5708.576692420447,
+                  "cell": 70,
+                  "difference_a": -1597.3405547181828
+                },
+                {
+                  "analytic_a": 9439.199972084763,
+                  "booked_a": 8082.064372396968,
+                  "cell": 62,
+                  "difference_a": -1357.1355996877955
+                },
+                {
+                  "analytic_a": 5599.016851632427,
+                  "booked_a": 4315.847590338686,
+                  "cell": 18,
+                  "difference_a": -1283.1692612937404
+                }
+              ]
+            },
+            "quadratic": {
+              "analytic_cut_cells_participating": 60,
+              "booked_cells": 120,
+              "boundary_error_max_m": 0.011134627355124195,
+              "boundary_error_max_pitches": 0.08471803431369299,
+              "boundary_error_median_m": 0.006528208701191,
+              "boundary_error_median_pitches": 0.04967000610935843,
+              "boundary_roots": 82,
+              "ratio_of_analytic_total": 0.9865590119198937,
+              "sign_disagreement_cells": 5,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 1603084.0922566617,
+              "worst_cells": [
+                {
+                  "analytic_a": 4602.018436340546,
+                  "booked_a": 3374.9311904021265,
+                  "cell": 6,
+                  "difference_a": -1227.0872459384195
+                },
+                {
+                  "analytic_a": 10734.347180646786,
+                  "booked_a": 9515.176314594399,
+                  "cell": 69,
+                  "difference_a": -1219.1708660523873
+                },
+                {
+                  "analytic_a": 5599.016851632427,
+                  "booked_a": 4509.291706492183,
+                  "cell": 18,
+                  "difference_a": -1089.7251451402435
+                },
+                {
+                  "analytic_a": 6104.754847976847,
+                  "booked_a": 5016.457153510595,
+                  "cell": 27,
+                  "difference_a": -1088.2976944662514
+                },
+                {
+                  "analytic_a": 9439.199972084763,
+                  "booked_a": 8380.174367489815,
+                  "cell": 62,
+                  "difference_a": -1059.0256045949482
+                },
+                {
+                  "analytic_a": 3791.3888891640445,
+                  "booked_a": 2793.7969060333044,
+                  "cell": 3,
+                  "difference_a": -997.5919831307401
+                }
+              ]
+            },
+            "spline": {
+              "analytic_cut_cells_participating": 60,
+              "booked_cells": 119,
+              "boundary_error_max_m": 0.03271313429919552,
+              "boundary_error_max_pitches": 0.24889853478502702,
+              "boundary_error_median_m": 0.009339274516413176,
+              "boundary_error_median_pitches": 0.07105805643171116,
+              "boundary_roots": 72,
+              "ratio_of_analytic_total": 0.9904655870765193,
+              "sign_disagreement_cells": 16,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 1609431.9826647623,
+              "worst_cells": [
+                {
+                  "analytic_a": 10734.347180646786,
+                  "booked_a": 13927.986609477897,
+                  "cell": 69,
+                  "difference_a": 3193.639428831111
+                },
+                {
+                  "analytic_a": 13979.375190174604,
+                  "booked_a": 10795.94038645592,
+                  "cell": 126,
+                  "difference_a": -3183.434803718683
+                },
+                {
+                  "analytic_a": 7305.91724713863,
+                  "booked_a": 10085.750739870371,
+                  "cell": 70,
+                  "difference_a": 2779.833492731741
+                },
+                {
+                  "analytic_a": 8953.109256715381,
+                  "booked_a": 6210.409865644299,
+                  "cell": 51,
+                  "difference_a": -2742.6993910710817
+                },
+                {
+                  "analytic_a": 7533.576453268235,
+                  "booked_a": 5288.20866141001,
+                  "cell": 53,
+                  "difference_a": -2245.3677918582252
+                },
+                {
+                  "analytic_a": 1883.9526964555143,
+                  "booked_a": 3859.8663922739897,
+                  "cell": 135,
+                  "difference_a": 1975.9136958184754
+                }
+              ]
+            }
+          },
+          "state": "terminal"
+        }
+      },
+      "verdict": {
+        "at_fault": [
+          "linear"
+        ],
+        "best": "spline",
+        "exact_shortfall": {
+          "linear": 0.00533096224774765,
+          "quadratic": 2.6278451393690894e-05,
+          "spline": -2.785117457460018e-05
+        },
+        "free": {
+          "linear": false,
+          "quadratic": true,
+          "spline": true
+        },
+        "representation_fault": [
+          "linear"
+        ],
+        "sentence": "moderate: the spline boundary carries no representation error (exact-input shortfall -0.0000) while linear falls short by 0.0053 even on the exact input; the terminal shortfall of 0.0095 is 100.0 percent state error.",
+        "state_error": 0.009562264098055273,
+        "state_error_share_of_terminal_shortfall": 1.002921121079832,
+        "terminal_shortfall_best": 0.009534412923480673
+      }
+    },
+    {
+      "analytic_cut_cell_count": 201,
+      "analytic_total_a": 37174.30375967835,
+      "analytic_total_closed_form_a": null,
+      "case": "diverted-single-null",
+      "characteristic_pitch_m": 0.09170987436549279,
+      "exact_read_boundary_displacement_m": 0.05710452887696998,
+      "exact_read_boundary_level_wb": 0.0010032882096473244,
+      "exact_read_boundary_share_of_span": 0.21318094153041392,
+      "realised_cells": 340,
+      "requested_cells": -300,
+      "row": "single-null",
+      "solver_qualification": "qualified",
+      "states": {
+        "exact": {
+          "boundary_level_error_vs_analytic_wb": 0.0,
+          "boundary_level_wb": 0.0,
+          "representations": {
+            "linear": {
+              "analytic_cut_cells_participating": 142,
+              "booked_cells": 218,
+              "boundary_error_max_m": 0.005007536958694074,
+              "boundary_error_max_pitches": 0.05460193892249224,
+              "boundary_error_median_m": 0.0003400057275052407,
+              "boundary_error_median_pitches": 0.0037074058803113243,
+              "boundary_roots": 140,
+              "ratio_of_analytic_total": 1.0098537961926866,
+              "sign_disagreement_cells": 0,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 37540.611772531236,
+              "worst_cells": [
+                {
+                  "analytic_a": 0.0,
+                  "booked_a": 180.16297009207486,
+                  "cell": 2,
+                  "difference_a": 180.16297009207486
+                },
+                {
+                  "analytic_a": 0.0,
+                  "booked_a": 110.82161867404008,
+                  "cell": 13,
+                  "difference_a": 110.82161867404008
+                },
+                {
+                  "analytic_a": 1.4060997542157223,
+                  "booked_a": 87.92110635194317,
+                  "cell": 5,
+                  "difference_a": 86.51500659772745
+                },
+                {
+                  "analytic_a": 0.0,
+                  "booked_a": 68.2305067540897,
+                  "cell": 11,
+                  "difference_a": 68.2305067540897
+                },
+                {
+                  "analytic_a": 5.024653810198579,
+                  "booked_a": 36.31737698185935,
+                  "cell": 15,
+                  "difference_a": 31.292723171660768
+                },
+                {
+                  "analytic_a": 0.0,
+                  "booked_a": 12.360589045781193,
+                  "cell": 1,
+                  "difference_a": 12.360589045781193
+                }
+              ]
+            },
+            "quadratic": {
+              "analytic_cut_cells_participating": 142,
+              "booked_cells": 218,
+              "boundary_error_max_m": 0.0033289267780129256,
+              "boundary_error_max_pitches": 0.03629845533040534,
+              "boundary_error_median_m": 2.9872657079131128e-05,
+              "boundary_error_median_pitches": 0.00032572999675126765,
+              "boundary_roots": 140,
+              "ratio_of_analytic_total": 1.0154197705940518,
+              "sign_disagreement_cells": 0,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 37747.522995646184,
+              "worst_cells": [
+                {
+                  "analytic_a": 0.0,
+                  "booked_a": 183.00450134796247,
+                  "cell": 2,
+                  "difference_a": 183.00450134796247
+                },
+                {
+                  "analytic_a": 1.4060997542157223,
+                  "booked_a": 122.25632757402835,
+                  "cell": 5,
+                  "difference_a": 120.85022781981263
+                },
+                {
+                  "analytic_a": 0.0,
+                  "booked_a": 109.770335386905,
+                  "cell": 13,
+                  "difference_a": 109.770335386905
+                },
+                {
+                  "analytic_a": 0.0,
+                  "booked_a": 68.2305067540897,
+                  "cell": 11,
+                  "difference_a": 68.2305067540897
+                },
+                {
+                  "analytic_a": 5.024653810198579,
+                  "booked_a": 68.58114823489069,
+                  "cell": 15,
+                  "difference_a": 63.55649442469211
+                },
+                {
+                  "analytic_a": 0.0,
+                  "booked_a": 12.651142951616647,
+                  "cell": 1,
+                  "difference_a": 12.651142951616647
+                }
+              ]
+            },
+            "spline": {
+              "analytic_cut_cells_participating": 142,
+              "booked_cells": 218,
+              "boundary_error_max_m": 1.0725845953778068e-05,
+              "boundary_error_max_pitches": 0.00011695410148565014,
+              "boundary_error_median_m": 2.1514861613295807e-06,
+              "boundary_error_median_pitches": 2.3459700236369635e-05,
+              "boundary_roots": 140,
+              "ratio_of_analytic_total": 1.0139577557622883,
+              "sign_disagreement_cells": 0,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 37693.17361218906,
+              "worst_cells": [
+                {
+                  "analytic_a": 0.0,
+                  "booked_a": 182.51257276026902,
+                  "cell": 2,
+                  "difference_a": 182.51257276026902
+                },
+                {
+                  "analytic_a": 0.0,
+                  "booked_a": 109.67614846433626,
+                  "cell": 13,
+                  "difference_a": 109.67614846433626
+                },
+                {
+                  "analytic_a": 1.4060997542157223,
+                  "booked_a": 100.1665009280739,
+                  "cell": 5,
+                  "difference_a": 98.76040117385818
+                },
+                {
+                  "analytic_a": 0.0,
+                  "booked_a": 68.2305067540897,
+                  "cell": 11,
+                  "difference_a": 68.2305067540897
+                },
+                {
+                  "analytic_a": 5.024653810198579,
+                  "booked_a": 37.812056043563416,
+                  "cell": 15,
+                  "difference_a": 32.78740223336484
+                },
+                {
+                  "analytic_a": 0.0,
+                  "booked_a": 12.641646152601254,
+                  "cell": 1,
+                  "difference_a": 12.641646152601254
+                }
+              ]
+            }
+          },
+          "state": "exact"
+        },
+        "terminal": {
+          "boundary_level_error_vs_analytic_wb": 0.0010032882096473587,
+          "boundary_level_wb": 0.0010032882096473587,
+          "representations": {
+            "linear": {
+              "analytic_cut_cells_participating": 113,
+              "booked_cells": 169,
+              "boundary_error_max_m": 0.13970390031624477,
+              "boundary_error_max_pitches": 1.523324519663833,
+              "boundary_error_median_m": 0.07484558105403158,
+              "boundary_error_median_pitches": 0.8161125677236054,
+              "boundary_roots": 110,
+              "ratio_of_analytic_total": 0.8009759884183043,
+              "sign_disagreement_cells": 0,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 29775.724697670652,
+              "worst_cells": [
+                {
+                  "analytic_a": 202.44352050410578,
+                  "booked_a": 0.25362637114741304,
+                  "cell": 25,
+                  "difference_a": -202.18989413295836
+                },
+                {
+                  "analytic_a": 195.02811706431424,
+                  "booked_a": 4.3169066591741885,
+                  "cell": 245,
+                  "difference_a": -190.71121040514006
+                },
+                {
+                  "analytic_a": 187.89486103101834,
+                  "booked_a": 0.0,
+                  "cell": 23,
+                  "difference_a": -187.89486103101834
+                },
+                {
+                  "analytic_a": 195.25527483366238,
+                  "booked_a": 9.046100528017115,
+                  "cell": 27,
+                  "difference_a": -186.20917430564526
+                },
+                {
+                  "analytic_a": 173.11232886414456,
+                  "booked_a": 0.0,
+                  "cell": 19,
+                  "difference_a": -173.11232886414456
+                },
+                {
+                  "analytic_a": 168.69943142732566,
+                  "booked_a": 0.0,
+                  "cell": 308,
+                  "difference_a": -168.69943142732566
+                }
+              ]
+            },
+            "quadratic": {
+              "analytic_cut_cells_participating": 113,
+              "booked_cells": 169,
+              "boundary_error_max_m": 0.14048775150495135,
+              "boundary_error_max_pitches": 1.5318715948193684,
+              "boundary_error_median_m": 0.07456297945962591,
+              "boundary_error_median_pitches": 0.8130310937126455,
+              "boundary_roots": 110,
+              "ratio_of_analytic_total": 0.8053621555055213,
+              "sign_disagreement_cells": 0,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 29938.777405311557,
+              "worst_cells": [
+                {
+                  "analytic_a": 202.44352050410578,
+                  "booked_a": 0.3755197068738422,
+                  "cell": 25,
+                  "difference_a": -202.06800079723195
+                },
+                {
+                  "analytic_a": 195.02811706431424,
+                  "booked_a": 5.800687353993007,
+                  "cell": 245,
+                  "difference_a": -189.22742971032125
+                },
+                {
+                  "analytic_a": 187.89486103101834,
+                  "booked_a": 0.0,
+                  "cell": 23,
+                  "difference_a": -187.89486103101834
+                },
+                {
+                  "analytic_a": 195.25527483366238,
+                  "booked_a": 10.513132402907571,
+                  "cell": 27,
+                  "difference_a": -184.74214243075482
+                },
+                {
+                  "analytic_a": 173.11232886414456,
+                  "booked_a": 0.0,
+                  "cell": 19,
+                  "difference_a": -173.11232886414456
+                },
+                {
+                  "analytic_a": 168.69943142732566,
+                  "booked_a": 0.0,
+                  "cell": 308,
+                  "difference_a": -168.69943142732566
+                }
+              ]
+            },
+            "spline": {
+              "analytic_cut_cells_participating": 113,
+              "booked_cells": 169,
+              "boundary_error_max_m": 0.14029878817193672,
+              "boundary_error_max_pitches": 1.5298111478465426,
+              "boundary_error_median_m": 0.07459007941529684,
+              "boundary_error_median_pitches": 0.8133265903083875,
+              "boundary_roots": 110,
+              "ratio_of_analytic_total": 0.8053556872576462,
+              "sign_disagreement_cells": 0,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 29938.536952700255,
+              "worst_cells": [
+                {
+                  "analytic_a": 202.44352050410578,
+                  "booked_a": 0.3554929754794488,
+                  "cell": 25,
+                  "difference_a": -202.08802752862633
+                },
+                {
+                  "analytic_a": 195.02811706431424,
+                  "booked_a": 5.754170593970925,
+                  "cell": 245,
+                  "difference_a": -189.27394647034333
+                },
+                {
+                  "analytic_a": 187.89486103101834,
+                  "booked_a": 0.0,
+                  "cell": 23,
+                  "difference_a": -187.89486103101834
+                },
+                {
+                  "analytic_a": 195.25527483366238,
+                  "booked_a": 10.490740791650097,
+                  "cell": 27,
+                  "difference_a": -184.7645340420123
+                },
+                {
+                  "analytic_a": 173.11232886414456,
+                  "booked_a": 0.0,
+                  "cell": 19,
+                  "difference_a": -173.11232886414456
+                },
+                {
+                  "analytic_a": 168.69943142732566,
+                  "booked_a": 0.0,
+                  "cell": 308,
+                  "difference_a": -168.69943142732566
+                }
+              ]
+            }
+          },
+          "state": "terminal"
+        }
+      },
+      "verdict": {
+        "at_fault": [
+          "linear",
+          "quadratic",
+          "spline"
+        ],
+        "best": "linear",
+        "exact_shortfall": {
+          "linear": -0.00985379619268656,
+          "quadratic": -0.015419770594051752,
+          "spline": -0.013957755762288304
+        },
+        "free": {
+          "linear": false,
+          "quadratic": false,
+          "spline": false
+        },
+        "representation_fault": [
+          "linear",
+          "quadratic",
+          "spline"
+        ],
+        "sentence": "single-null: no representation is within the 0.1 percent band on the exact input (linear -0.0099, quadratic -0.0154, spline -0.0140); the terminal shortfall of 0.1990 is the read boundary level, which sits 0.0010 Wb (21.3 percent of the flux span, about 57.1 mm inward) on both the exact and the terminal state, so it is a read error under every representation, not a representation or terminal-field error.",
+        "state_error": 0.20887780777438225,
+        "state_error_share_of_terminal_shortfall": 1.0495105897744492,
+        "terminal_shortfall_best": 0.1990240115816957
+      }
+    },
+    {
+      "analytic_cut_cell_count": 66,
+      "analytic_total_a": 251236.00849998088,
+      "analytic_total_closed_form_a": 251245.90891804622,
+      "case": "strong-rotation-compact-static",
+      "characteristic_pitch_m": 0.05262896701751417,
+      "exact_read_boundary_displacement_m": 7.450581851970831e-12,
+      "exact_read_boundary_level_wb": 5.862676260693672e-12,
+      "exact_read_boundary_share_of_span": 5.0708534581115905e-11,
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "row": "strong",
+      "solver_qualification": "unqualified",
+      "states": {
+        "exact": {
+          "boundary_level_error_vs_analytic_wb": 0.0,
+          "boundary_level_wb": 0.0,
+          "representations": {
+            "linear": {
+              "analytic_cut_cells_participating": 60,
+              "booked_cells": 122,
+              "boundary_error_max_m": 0.0012733265932987918,
+              "boundary_error_max_pitches": 0.02419440596041049,
+              "boundary_error_median_m": 0.00021647884816197794,
+              "boundary_error_median_pitches": 0.004113302244559291,
+              "boundary_roots": 88,
+              "ratio_of_analytic_total": 0.9941214142659738,
+              "sign_disagreement_cells": 0,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 249759.0960845392,
+              "worst_cells": [
+                {
+                  "analytic_a": 1397.155496601703,
+                  "booked_a": 1253.1137292170501,
+                  "cell": 69,
+                  "difference_a": -144.04176738465276
+                },
+                {
+                  "analytic_a": 679.4195825479522,
+                  "booked_a": 561.9199091273167,
+                  "cell": 7,
+                  "difference_a": -117.49967342063553
+                },
+                {
+                  "analytic_a": 1756.1507899710527,
+                  "booked_a": 1642.6099065094445,
+                  "cell": 8,
+                  "difference_a": -113.54088346160825
+                },
+                {
+                  "analytic_a": 2196.5991716267663,
+                  "booked_a": 2089.4707229225273,
+                  "cell": 129,
+                  "difference_a": -107.12844870423896
+                },
+                {
+                  "analytic_a": 799.5371851040584,
+                  "booked_a": 721.078164532496,
+                  "cell": 70,
+                  "difference_a": -78.4590205715624
+                },
+                {
+                  "analytic_a": 1821.5200690978368,
+                  "booked_a": 1744.9840908909068,
+                  "cell": 125,
+                  "difference_a": -76.53597820692994
+                }
+              ]
+            },
+            "quadratic": {
+              "analytic_cut_cells_participating": 59,
+              "booked_cells": 121,
+              "boundary_error_max_m": 4.33818014948889e-05,
+              "boundary_error_max_pitches": 0.0008242951354232748,
+              "boundary_error_median_m": 1.5244722938045062e-05,
+              "boundary_error_median_pitches": 0.0002896641108872959,
+              "boundary_roots": 88,
+              "ratio_of_analytic_total": 0.9999877469398673,
+              "sign_disagreement_cells": 7,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 251232.9300900612,
+              "worst_cells": [
+                {
+                  "analytic_a": 1920.2753624687325,
+                  "booked_a": 1919.1056320987645,
+                  "cell": 76,
+                  "difference_a": -1.169730369967965
+                },
+                {
+                  "analytic_a": 1408.3774096499315,
+                  "booked_a": 1407.3921832698397,
+                  "cell": 122,
+                  "difference_a": -0.9852263800917171
+                },
+                {
+                  "analytic_a": 2323.4449917788766,
+                  "booked_a": 2322.4661728964384,
+                  "cell": 109,
+                  "difference_a": -0.9788188824381905
+                },
+                {
+                  "analytic_a": 1734.422894434258,
+                  "booked_a": 1735.3534918859636,
+                  "cell": 59,
+                  "difference_a": 0.9305974517055802
+                },
+                {
+                  "analytic_a": 640.6518493075521,
+                  "booked_a": 641.5370102308841,
+                  "cell": 97,
+                  "difference_a": 0.8851609233320232
+                },
+                {
+                  "analytic_a": 1803.0058709273262,
+                  "booked_a": 1803.8094284676677,
+                  "cell": 63,
+                  "difference_a": 0.8035575403414441
+                }
+              ]
+            },
+            "spline": {
+              "analytic_cut_cells_participating": 59,
+              "booked_cells": 121,
+              "boundary_error_max_m": 2.122492218527721e-13,
+              "boundary_error_max_pitches": 4.032935356343563e-12,
+              "boundary_error_median_m": 2.3573845448526535e-14,
+              "boundary_error_median_pitches": 4.479252925614424e-13,
+              "boundary_roots": 88,
+              "ratio_of_analytic_total": 1.0000276523951548,
+              "sign_disagreement_cells": 7,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 251242.95577736502,
+              "worst_cells": [
+                {
+                  "analytic_a": 1397.155496601703,
+                  "booked_a": 1397.478682424459,
+                  "cell": 69,
+                  "difference_a": 0.3231858227561588
+                },
+                {
+                  "analytic_a": 1821.5200690978368,
+                  "booked_a": 1821.8071972911355,
+                  "cell": 125,
+                  "difference_a": 0.2871281932987131
+                },
+                {
+                  "analytic_a": 679.4195825479522,
+                  "booked_a": 679.7001930074578,
+                  "cell": 7,
+                  "difference_a": 0.28061045950551033
+                },
+                {
+                  "analytic_a": 799.5371851040584,
+                  "booked_a": 799.8142734559377,
+                  "cell": 70,
+                  "difference_a": 0.27708835187934255
+                },
+                {
+                  "analytic_a": 2196.5991716267663,
+                  "booked_a": 2196.86978355009,
+                  "cell": 129,
+                  "difference_a": 0.2706119233234858
+                },
+                {
+                  "analytic_a": 1756.1507899710527,
+                  "booked_a": 1756.4137575046946,
+                  "cell": 8,
+                  "difference_a": 0.26296753364181313
+                }
+              ]
+            }
+          },
+          "state": "exact"
+        },
+        "terminal": {
+          "boundary_level_error_vs_analytic_wb": -0.001905623835038407,
+          "boundary_level_wb": -0.001905623835038407,
+          "representations": {
+            "linear": {
+              "analytic_cut_cells_participating": 59,
+              "booked_cells": 121,
+              "boundary_error_max_m": 0.002563473562936818,
+              "boundary_error_max_pitches": 0.048708414932098716,
+              "boundary_error_median_m": 0.0005720923074805523,
+              "boundary_error_median_pitches": 0.01087029329855872,
+              "boundary_roots": 72,
+              "ratio_of_analytic_total": 0.9974419308610466,
+              "sign_disagreement_cells": 0,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 250593.32942004324,
+              "worst_cells": [
+                {
+                  "analytic_a": 1397.155496601703,
+                  "booked_a": 1226.8903073801432,
+                  "cell": 69,
+                  "difference_a": -170.2651892215597
+                },
+                {
+                  "analytic_a": 679.4195825479522,
+                  "booked_a": 544.7738110613778,
+                  "cell": 7,
+                  "difference_a": -134.6457714865744
+                },
+                {
+                  "analytic_a": 1756.1507899710527,
+                  "booked_a": 1624.924285648302,
+                  "cell": 8,
+                  "difference_a": -131.22650432275077
+                },
+                {
+                  "analytic_a": 799.5371851040584,
+                  "booked_a": 694.3609894061342,
+                  "cell": 70,
+                  "difference_a": -105.17619569792419
+                },
+                {
+                  "analytic_a": 1213.9672987327704,
+                  "booked_a": 1309.2806668763565,
+                  "cell": 54,
+                  "difference_a": 95.3133681435861
+                },
+                {
+                  "analytic_a": 1682.8210998241814,
+                  "booked_a": 1604.166336218042,
+                  "cell": 2,
+                  "difference_a": -78.65476360613934
+                }
+              ]
+            },
+            "quadratic": {
+              "analytic_cut_cells_participating": 59,
+              "booked_cells": 121,
+              "boundary_error_max_m": 0.0029962465845623293,
+              "boundary_error_max_pitches": 0.056931510427807204,
+              "boundary_error_median_m": 0.0005492534767626428,
+              "boundary_error_median_pitches": 0.010436333978963697,
+              "boundary_roots": 80,
+              "ratio_of_analytic_total": 1.0027866139053343,
+              "sign_disagreement_cells": 5,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 251936.1062547876,
+              "worst_cells": [
+                {
+                  "analytic_a": 1213.9672987327704,
+                  "booked_a": 1367.9847395048891,
+                  "cell": 54,
+                  "difference_a": 154.0174407721188
+                },
+                {
+                  "analytic_a": 736.708057014825,
+                  "booked_a": 844.3434430674482,
+                  "cell": 56,
+                  "difference_a": 107.63538605262318
+                },
+                {
+                  "analytic_a": 1414.6486022378767,
+                  "booked_a": 1516.0410396572795,
+                  "cell": 52,
+                  "difference_a": 101.39243741940277
+                },
+                {
+                  "analytic_a": 1347.999436575372,
+                  "booked_a": 1409.2725352522139,
+                  "cell": 30,
+                  "difference_a": 61.273098676841755
+                },
+                {
+                  "analytic_a": 1734.422894434258,
+                  "booked_a": 1785.7624299350064,
+                  "cell": 59,
+                  "difference_a": 51.3395355007483
+                },
+                {
+                  "analytic_a": 121.8216277658222,
+                  "booked_a": 170.88583323247298,
+                  "cell": 67,
+                  "difference_a": 49.064205466650776
+                }
+              ]
+            },
+            "spline": {
+              "analytic_cut_cells_participating": 59,
+              "booked_cells": 121,
+              "boundary_error_max_m": 0.010786245853244527,
+              "boundary_error_max_pitches": 0.2049488421396342,
+              "boundary_error_median_m": 0.0032016006837681157,
+              "boundary_error_median_pitches": 0.06083343195207819,
+              "boundary_roots": 64,
+              "ratio_of_analytic_total": 1.0107478123525921,
+              "sign_disagreement_cells": 17,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 253936.24597555294,
+              "worst_cells": [
+                {
+                  "analytic_a": 799.5371851040584,
+                  "booked_a": 1214.0184251989376,
+                  "cell": 70,
+                  "difference_a": 414.48124009487924
+                },
+                {
+                  "analytic_a": 1397.155496601703,
+                  "booked_a": 1810.0978190085489,
+                  "cell": 69,
+                  "difference_a": 412.94232240684596
+                },
+                {
+                  "analytic_a": 736.708057014825,
+                  "booked_a": 1092.8334228065928,
+                  "cell": 56,
+                  "difference_a": 356.12536579176776
+                },
+                {
+                  "analytic_a": 1821.5200690978368,
+                  "booked_a": 2141.2666747188555,
+                  "cell": 125,
+                  "difference_a": 319.7466056210187
+                },
+                {
+                  "analytic_a": 1756.1507899710527,
+                  "booked_a": 1455.757478172709,
+                  "cell": 8,
+                  "difference_a": -300.3933117983438
+                },
+                {
+                  "analytic_a": 390.99132043659523,
+                  "booked_a": 679.081775481875,
+                  "cell": 130,
+                  "difference_a": 288.0904550452797
+                }
+              ]
+            }
+          },
+          "state": "terminal"
+        }
+      },
+      "verdict": {
+        "at_fault": [
+          "linear"
+        ],
+        "best": "spline",
+        "exact_shortfall": {
+          "linear": 0.00587858573402622,
+          "quadratic": 1.2253060132749738e-05,
+          "spline": -2.7652395154786902e-05
+        },
+        "free": {
+          "linear": false,
+          "quadratic": true,
+          "spline": true
+        },
+        "representation_fault": [
+          "linear"
+        ],
+        "sentence": "strong: the spline boundary carries no representation error (exact-input shortfall -0.0000) while linear falls short by 0.0059 even on the exact input; the terminal shortfall of -0.0107 is 99.7 percent state error.",
+        "state_error": -0.010720159957437358,
+        "state_error_share_of_terminal_shortfall": 0.9974271605934656,
+        "terminal_shortfall_best": -0.010747812352592145
+      }
+    },
+    {
+      "analytic_cut_cell_count": 62,
+      "analytic_total_a": 16314109.346658468,
+      "analytic_total_closed_form_a": 16314773.311828371,
+      "case": "weak-rotation-reactor-static",
+      "characteristic_pitch_m": 0.46606341035820315,
+      "exact_read_boundary_displacement_m": 7.4260667528565e-11,
+      "exact_read_boundary_level_wb": 2.672258221531947e-09,
+      "exact_read_boundary_share_of_span": 5.350282393941371e-11,
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "row": "weak",
+      "solver_qualification": "unqualified",
+      "states": {
+        "exact": {
+          "boundary_level_error_vs_analytic_wb": 0.0,
+          "boundary_level_wb": 0.0,
+          "representations": {
+            "linear": {
+              "analytic_cut_cells_participating": 56,
+              "booked_cells": 121,
+              "boundary_error_max_m": 0.0057339581882753935,
+              "boundary_error_max_pitches": 0.012302957196035698,
+              "boundary_error_median_m": 0.0018220496743290835,
+              "boundary_error_median_pitches": 0.003909445869026079,
+              "boundary_roots": 74,
+              "ratio_of_analytic_total": 0.994525363669876,
+              "sign_disagreement_cells": 0,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 16224795.530935636,
+              "worst_cells": [
+                {
+                  "analytic_a": 76371.5000328173,
+                  "booked_a": 66026.27089736017,
+                  "cell": 134,
+                  "difference_a": -10345.229135457135
+                },
+                {
+                  "analytic_a": 76371.50003281704,
+                  "booked_a": 66026.27089735994,
+                  "cell": 75,
+                  "difference_a": -10345.229135457106
+                },
+                {
+                  "analytic_a": 78213.05055301773,
+                  "booked_a": 71437.37276317265,
+                  "cell": 3,
+                  "difference_a": -6775.677789845082
+                },
+                {
+                  "analytic_a": 78213.05055301788,
+                  "booked_a": 71437.37276317281,
+                  "cell": 125,
+                  "difference_a": -6775.677789845067
+                },
+                {
+                  "analytic_a": 43309.102143179756,
+                  "booked_a": 38576.908622463605,
+                  "cell": 120,
+                  "difference_a": -4732.193520716151
+                },
+                {
+                  "analytic_a": 43309.10214317966,
+                  "booked_a": 38576.9086224637,
+                  "cell": 76,
+                  "difference_a": -4732.193520715962
+                }
+              ]
+            },
+            "quadratic": {
+              "analytic_cut_cells_participating": 56,
+              "booked_cells": 121,
+              "boundary_error_max_m": 0.00048765449454258426,
+              "boundary_error_max_pitches": 0.0010463264948599737,
+              "boundary_error_median_m": 0.00015357113798951112,
+              "boundary_error_median_pitches": 0.0003295069610194902,
+              "boundary_roots": 82,
+              "ratio_of_analytic_total": 0.9999693900644699,
+              "sign_disagreement_cells": 10,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 16313609.972823137,
+              "worst_cells": [
+                {
+                  "analytic_a": 116063.56198123033,
+                  "booked_a": 115954.36605275035,
+                  "cell": 83,
+                  "difference_a": -109.19592847998138
+                },
+                {
+                  "analytic_a": 116063.56198123035,
+                  "booked_a": 115954.36605275045,
+                  "cell": 116,
+                  "difference_a": -109.19592847989406
+                },
+                {
+                  "analytic_a": 165355.2163482913,
+                  "booked_a": 165274.40620884643,
+                  "cell": 85,
+                  "difference_a": -80.8101394448604
+                },
+                {
+                  "analytic_a": 165355.21634829135,
+                  "booked_a": 165274.4062088466,
+                  "cell": 113,
+                  "difference_a": -80.81013944474398
+                },
+                {
+                  "analytic_a": 162742.84836648434,
+                  "booked_a": 162663.18121384922,
+                  "cell": 78,
+                  "difference_a": -79.66715263511287
+                },
+                {
+                  "analytic_a": 162742.8483664842,
+                  "booked_a": 162663.18121384914,
+                  "cell": 119,
+                  "difference_a": -79.66715263505466
+                }
+              ]
+            },
+            "spline": {
+              "analytic_cut_cells_participating": 56,
+              "booked_cells": 121,
+              "boundary_error_max_m": 7.640446676973212e-13,
+              "boundary_error_max_pitches": 1.6393577584434232e-12,
+              "boundary_error_median_m": 7.017333466557623e-14,
+              "boundary_error_median_pitches": 1.505660669899896e-13,
+              "boundary_roots": 86,
+              "ratio_of_analytic_total": 1.0000277938914688,
+              "sign_disagreement_cells": 12,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 16314562.77924306,
+              "worst_cells": [
+                {
+                  "analytic_a": 76371.5000328173,
+                  "booked_a": 76394.28671271371,
+                  "cell": 134,
+                  "difference_a": 22.786679896409623
+                },
+                {
+                  "analytic_a": 76371.50003281704,
+                  "booked_a": 76394.28671268765,
+                  "cell": 75,
+                  "difference_a": 22.786679870609078
+                },
+                {
+                  "analytic_a": 43309.10214317966,
+                  "booked_a": 43327.28520268258,
+                  "cell": 76,
+                  "difference_a": 18.183059502916876
+                },
+                {
+                  "analytic_a": 43309.102143179756,
+                  "booked_a": 43327.285202671126,
+                  "cell": 120,
+                  "difference_a": 18.18305949136993
+                },
+                {
+                  "analytic_a": 78213.05055301788,
+                  "booked_a": 78229.94671307722,
+                  "cell": 125,
+                  "difference_a": 16.896160059346585
+                },
+                {
+                  "analytic_a": 78213.05055301773,
+                  "booked_a": 78229.94671307194,
+                  "cell": 3,
+                  "difference_a": 16.89616005420976
+                }
+              ]
+            }
+          },
+          "state": "exact"
+        },
+        "terminal": {
+          "boundary_level_error_vs_analytic_wb": 10.395131850572088,
+          "boundary_level_wb": 10.395131850572088,
+          "representations": {
+            "linear": {
+              "analytic_cut_cells_participating": 54,
+              "booked_cells": 119,
+              "boundary_error_max_m": 0.08063929662793887,
+              "boundary_error_max_pitches": 0.17302215714801938,
+              "boundary_error_median_m": 0.03748857169240117,
+              "boundary_error_median_pitches": 0.08043663342631535,
+              "boundary_roots": 70,
+              "ratio_of_analytic_total": 0.9670963312042097,
+              "sign_disagreement_cells": 0,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 15777315.29601771,
+              "worst_cells": [
+                {
+                  "analytic_a": 112545.63424393433,
+                  "booked_a": 85059.09402016296,
+                  "cell": 68,
+                  "difference_a": -27486.54022377137
+                },
+                {
+                  "analytic_a": 112545.6342439343,
+                  "booked_a": 85392.45306575284,
+                  "cell": 28,
+                  "difference_a": -27153.18117818146
+                },
+                {
+                  "analytic_a": 76371.5000328173,
+                  "booked_a": 50185.71675745498,
+                  "cell": 134,
+                  "difference_a": -26185.783275362322
+                },
+                {
+                  "analytic_a": 76371.50003281704,
+                  "booked_a": 50185.7167574643,
+                  "cell": 75,
+                  "difference_a": -26185.78327535274
+                },
+                {
+                  "analytic_a": 125708.5744351474,
+                  "booked_a": 99991.72156263105,
+                  "cell": 72,
+                  "difference_a": -25716.85287251635
+                },
+                {
+                  "analytic_a": 125708.57443514743,
+                  "booked_a": 100352.62585890974,
+                  "cell": 13,
+                  "difference_a": -25355.948576237686
+                }
+              ]
+            },
+            "quadratic": {
+              "analytic_cut_cells_participating": 54,
+              "booked_cells": 119,
+              "boundary_error_max_m": 0.07825386406171383,
+              "boundary_error_max_pitches": 0.16790389960364005,
+              "boundary_error_median_m": 0.032950538133623926,
+              "boundary_error_median_pitches": 0.07069968892923621,
+              "boundary_roots": 82,
+              "ratio_of_analytic_total": 0.9731110300736847,
+              "sign_disagreement_cells": 12,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 15875439.75106155,
+              "worst_cells": [
+                {
+                  "analytic_a": 112545.63424393433,
+                  "booked_a": 87136.2697048958,
+                  "cell": 68,
+                  "difference_a": -25409.36453903852
+                },
+                {
+                  "analytic_a": 112545.6342439343,
+                  "booked_a": 87136.26970490797,
+                  "cell": 28,
+                  "difference_a": -25409.364539026326
+                },
+                {
+                  "analytic_a": 125708.57443514743,
+                  "booked_a": 102588.37948847696,
+                  "cell": 13,
+                  "difference_a": -23120.19494667047
+                },
+                {
+                  "analytic_a": 125708.5744351474,
+                  "booked_a": 102588.37948849719,
+                  "cell": 72,
+                  "difference_a": -23120.194946650212
+                },
+                {
+                  "analytic_a": 39010.76298612688,
+                  "booked_a": 17257.817647975906,
+                  "cell": 14,
+                  "difference_a": -21752.945338150974
+                },
+                {
+                  "analytic_a": 39010.76298612697,
+                  "booked_a": 17257.8176479768,
+                  "cell": 71,
+                  "difference_a": -21752.945338150166
+                }
+              ]
+            },
+            "spline": {
+              "analytic_cut_cells_participating": 53,
+              "booked_cells": 117,
+              "boundary_error_max_m": 0.1947906508420268,
+              "boundary_error_max_pitches": 0.4179488166477523,
+              "boundary_error_median_m": 0.08627867059992435,
+              "boundary_error_median_pitches": 0.1851221715380167,
+              "boundary_roots": 86,
+              "ratio_of_analytic_total": 0.9830954004916033,
+              "sign_disagreement_cells": 24,
+              "spline_fit_executed": true,
+              "unit_amplitude_total_a": 16038325.861817015,
+              "worst_cells": [
+                {
+                  "analytic_a": 162742.8483664842,
+                  "booked_a": 124146.37470647352,
+                  "cell": 119,
+                  "difference_a": -38596.47366001067
+                },
+                {
+                  "analytic_a": 162742.84836648434,
+                  "booked_a": 124146.37471273697,
+                  "cell": 78,
+                  "difference_a": -38596.473653747365
+                },
+                {
+                  "analytic_a": 76371.50003281704,
+                  "booked_a": 112032.12954630761,
+                  "cell": 75,
+                  "difference_a": 35660.62951349057
+                },
+                {
+                  "analytic_a": 76371.5000328173,
+                  "booked_a": 112032.12953550415,
+                  "cell": 134,
+                  "difference_a": 35660.62950268685
+                },
+                {
+                  "analytic_a": 80928.27647271025,
+                  "booked_a": 115815.10685965825,
+                  "cell": 50,
+                  "difference_a": 34886.830386948
+                },
+                {
+                  "analytic_a": 112545.63424393433,
+                  "booked_a": 82261.15238752526,
+                  "cell": 68,
+                  "difference_a": -30284.481856409067
+                }
+              ]
+            }
+          },
+          "state": "terminal"
+        }
+      },
+      "verdict": {
+        "at_fault": [
+          "linear"
+        ],
+        "best": "spline",
+        "exact_shortfall": {
+          "linear": 0.005474636330124016,
+          "quadratic": 3.0609935530057086e-05,
+          "spline": -2.779389146878586e-05
+        },
+        "free": {
+          "linear": false,
+          "quadratic": true,
+          "spline": true
+        },
+        "representation_fault": [
+          "linear"
+        ],
+        "sentence": "weak: the spline boundary carries no representation error (exact-input shortfall -0.0000) while linear falls short by 0.0055 even on the exact input; the terminal shortfall of 0.0169 is 100.0 percent state error.",
+        "state_error": 0.01693239339986552,
+        "state_error_share_of_terminal_shortfall": 1.001644161487232,
+        "terminal_shortfall_best": 0.016904599508396734
+      }
+    }
+  ],
+  "schema": "nova.read-representation-discriminator",
+  "source_revision": "676d6bebcf8284d7459fb6b7f4feda2e98b92330"
+}

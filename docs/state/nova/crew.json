@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T13:32:39",
+  "updated": "2026-09-10T13:34:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -150125,6 +150125,195 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T091931092593-cca-rung-a-reinstate-clip",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-rung-a-reinstate-clip",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 585,
+                "cached_input_tokens": 683141,
+                "input_tokens": 683728,
+                "output_tokens": 2909,
+                "reasoning_output_tokens": 643,
+                "total_tokens": 686637,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "In nova/equilibrium/forward_operator.py _profile_support, the chord mode (the production default) clips every atomic cell against inside_boundary = polarity * (shared_node_flux - topology.boundary_flux) with traced_clip(inside_boundary) instead of traced_clip(ones), and a cell is a candidate when any of its vertices lies on the confined side (vertex_participation from the sign of inside_boundary at the cell's vertices, OR-ed with profile_participation), never excluded by the label alone; the ledger in nova/equilibrium/observation.py books a cut cell's clipped current to the confined side and any remainder the profile places outside to the open-side class, so common_sol carries only current the profile actually puts past the separatrix. The exact mode keeps its behaviour but adopts the same geometric candidacy. Gate one, all_debug CPU x64 (one sbatch, never an srun child of your shell, root venv python directly, PYTHONPATH at the worktree, JAX_PLATFORMS=cpu, TMPDIR=/tmp in submit environment and payload, --output in the run directory): benchmarks/profile_support_amplitude_gate.py evaluates, on the committed terminal state of the weak-rotation-reactor-static, moderate-rotation-conventional-static and strong-rotation-compact-static -110 certificate rows (persisted render_data terminal flux of the parts under docs/figures/gs-absolute-accuracy/solovev), the sum of cell current at unit amplitude under the new default against the analytic total from the exact density over the analytic plasma region, and writes a receipt with the ratio per row (acceptance: within one percent of unity on all three; the pre-change ratios are 0.9526 on weak, to be measured on the other two as the before column), the count of analytic cut cells participating (acceptance: all of them), and the per-cell difference for the six worst cells; plus one line-contour panel per row of the booked-minus-analytic per-cell current with cut cells outlined, nulls and wall drawn, under docs/figures/cut-cell-current-attribution/rung-a. Gate two, all_debug in a second process: tests/test_forward_support_clip_mode.py updated so its bit-identity assertion against main becomes an explicit before/after receipt (the default is meant to change now) while the opt-in and default-name assertions stay, a new tests/test_forward_profile_support_clip.py pinning on a synthetic two-cell case that a cell with its centroid outside but a vertex inside participates with the clipped polygon's area fraction, and tests/test_equilibrium_separatrix_clip.py, tests/test_forward_moment_class.py, tests/test_equilibrium_density_moments.py, tests/test_forward_operator_domain.py passing with zero added failures against b6630c41 (run the same files at the base in your worktree's parent checkout at /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/integration-clip-stack with PYTHONPATH swapped, one process per revision). Do not touch the certificate solve or the H200 lane: the re-solve is the next node. Write the manifest before waiting on any job. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 4.0,
+          "goal": "Make the production profile support clip each cell against the signed flux of the current iterate with candidacy decided by the clip geometry, so the current booked at unit amplitude matches the analytic total on the Solov'ev certificate rows",
+          "id": "cca-rung-a-reinstate-clip",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T09:19:31Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T091931092593-cca-rung-a-reinstate-clip/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/observation.py",
+            "tests/test_forward_support_clip_mode.py",
+            "tests/test_forward_profile_support_clip.py",
+            "benchmarks/profile_support_amplitude_gate.py",
+            "docs/figures/cut-cell-current-attribution/rung-a"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-rung-a",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T09:19:45Z",
+        "completed_at": "2026-09-10T11:31:58.558Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 7912,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 7933,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "b6630c41766cf954b3e251289c8f81978f1f5b1d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "all_debug gate1.sh (profile_support_amplitude_gate.py on the weak, moderate and strong -110 committed terminal states, GATE1_EXIT=0, receipt written) then gate2.sh whose pytest output went to the compute node's /tmp and whose base half pointed at a worktree the coordinator had already removed; the worker session then died on an image read (deepseek-v4-flash is not multimodal)",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T091931092593-cca-rung-a-reinstate-clip/gate1.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T091931092593-cca-rung-a-reinstate-clip/manifest.md",
+        "scope_changed": false,
+        "session_id": "5aa6a1d6-e561-4741-97d4-792654d747ce",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 30222665,
+            "input_tokens_cumulative": 30222665,
+            "output_tokens": 160577,
+            "output_tokens_cumulative": 160577,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T11:31:58.558Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 30222665,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 7929.779,
+          "generated_tokens": 160577,
+          "generation_seconds": 6362.555,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 31.4,
+          "machine_seconds": 1567.224,
+          "peak_input_tokens": 319694,
+          "tokens_per_second": 25.24,
+          "wall_tokens_per_second": 20.25
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "implementation commit 91172471 (signed-flux clip of the profile support with geometric candidacy, ledger booking by clipped side, two test files, the amplitude gate benchmark) stays in the worktree as the base of the continuation node; the receipt and three panels are uncommitted there",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-rung-a-reinstate-clip",
+          "session_id": "5aa6a1d6-e561-4741-97d4-792654d747ce",
+          "session_source": "stream",
+          "retained_at": "2026-09-10T11:31:58.558Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 155.0,
+        "orientation_input_tokens": 8281032.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -150437,6 +150626,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2416
+    "_version": 2417
   }
 }

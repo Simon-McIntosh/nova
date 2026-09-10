@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T18:17:17",
+  "updated": "2026-09-10T22:42:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4603,6 +4603,17 @@
       },
       {
         "id": "s19i-cca-gate-b",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": "bb9a629d-c62e-42ca-9427-8d45106d4477",
+        "session_model": "deepseek-v4-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "bb9a629d-c62e-42ca-9427-8d45106d4477"
+        },
+        "created": "2026-09-10"
+      },
+      {
+        "id": "s19i-cca-gate-b2",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -151441,6 +151452,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2425
+    "_version": 2427
   }
 }

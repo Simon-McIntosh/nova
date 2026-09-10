@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T15:29:41",
+  "updated": "2026-09-10T15:30:43",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -150332,6 +150332,206 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T113535191293-cca-rung-a-test-gate",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-rung-a-test-gate",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1021,
+                "cached_input_tokens": 724972,
+                "input_tokens": 725997,
+                "output_tokens": 1806,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 727803,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file: this lane is text-only and a PNG read kills the session. First commit the uncommitted receipt.json, receipt.md and three PNGs under docs/figures/cut-cell-current-attribution/rung-a (git add -f for the PNGs). Then one all_debug sbatch (never srun as a child of your shell; root venv python directly; JAX_PLATFORMS=cpu; TMPDIR=/tmp in submit environment and payload; every pytest log written under the run directory, never /tmp) runs, at your worktree head with PYTHONPATH at the worktree, tests/test_forward_support_clip_mode.py tests/test_forward_profile_support_clip.py tests/test_equilibrium_separatrix_clip.py tests/test_forward_moment_class.py tests/test_equilibrium_density_moments.py tests/test_forward_operator_domain.py one file per fresh process with -p no:cacheprovider -q -rA, and the same four pre-existing files at the base with PYTHONPATH=/home/ITER/mcintos/Code/nova (main, which contains the merged clip stack) in a second set of processes; the receipt at the reports path lists per file passed, failed, errored and failure ids at each revision and the added-failure set, which must be empty; if tests/test_forward_support_clip_mode.py's bit-identity assertion fails because the default now clips, convert that assertion into a before/after receipt of the per-cell moments (the default is meant to change) while keeping the default-name and opt-in assertions, and if any other file gains a failure, fix the mechanism in the two equilibrium files and rerun. Manifest with the job id before waiting, then end the turn; when resumed, finish the receipt and set status complete. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 1.5,
+          "goal": "Land the test gate for the signed-flux profile-support clip at commit 91172471 against main, with the pytest logs kept, and commit the amplitude receipt and panels the first session left uncommitted",
+          "id": "cca-rung-a-test-gate",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T11:35:36Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T113535191293-cca-rung-a-test-gate/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/observation.py",
+            "tests/test_forward_support_clip_mode.py",
+            "tests/test_forward_profile_support_clip.py",
+            "benchmarks/profile_support_amplitude_gate.py",
+            "docs/figures/cut-cell-current-attribution/rung-a",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/rung-a"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19i-cca-rung-a2",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T11:35:48Z",
+        "completed_at": "2026-09-10T13:27:59.271Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6717,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6731,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "91172471480ecc6913c2da2b76e3824d59b448e2",
+        "commits": [
+          "ef0f38b6ae6c367b2554c4521d6fae6e1f5611f5"
+        ],
+        "changed_lines": {
+          "added": 215,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug sbatch 1268997: six head files and four base files one fresh process each, -p no:cacheprovider -q -rA; head 91172471: support_clip_mode 3 passed, profile_support_clip 3 passed, separatrix_clip 22, moment_class 7, density_moments 3, operator_domain 3 passed 3 failed; base main 0ae03cda: 22, 7, 3, 3 passed 3 failed; added-failure set empty",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T113535191293-cca-rung-a-test-gate/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T113535191293-cca-rung-a-test-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "efa514c3-f385-44b3-97d9-9eb0aaa6b928",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 5998435,
+            "input_tokens_cumulative": 5998435,
+            "output_tokens": 68186,
+            "output_tokens_cumulative": 68186,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T13:27:59.271Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 5998435,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 6728.104,
+          "generated_tokens": 68186,
+          "generation_seconds": 6651.142,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 17.1,
+          "machine_seconds": 76.962,
+          "peak_input_tokens": 173749,
+          "tokens_per_second": 10.25,
+          "wall_tokens_per_second": 10.13
+        },
+        "follow_on_paths": [
+          "test_forward_operator_domain.py",
+          "/",
+          "internal/external"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest log",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-rung-a-test-gate",
+          "session_id": "efa514c3-f385-44b3-97d9-9eb0aaa6b928",
+          "session_source": "stream",
+          "retained_at": "2026-09-10T13:27:59.271Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 55.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -150644,6 +150844,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2419
+    "_version": 2420
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T17:22:39",
+  "updated": "2026-09-10T17:48:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -150738,6 +150738,204 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T145511513273-cca-rung-a2-frozen-support",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-rung-a2-frozen-support",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1640,
+                "cached_input_tokens": 759007,
+                "input_tokens": 760679,
+                "output_tokens": 2291,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 762970,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. Facts you build on: at ef0f38b6 the chord mode of _profile_support in nova/equilibrium/forward_operator.py clips against inside_boundary computed from the LIVE physical flux passed into the moment path, and the H200 re-solve of the weak, moderate and strong -110 rows with it diverged (seed amplitude 2.05, 2.08, 1.91; terminal amplitude 9.28, 11.86, 11.45; axis errors 1.61 m, 0.573 m, 0.124 m; residuals 0.142, 0.0366, 0.0392) while whole-cell booking by the frozen partition label was stable because its geometry was piecewise constant within a trip. Change: the clipped support becomes part of the frozen partition, computed once per trip from the trip's frozen state (the same state whose labels acfefa64 already freezes in _partition_for_state and the frozen record it reads) and held constant for every evaluation inside the trip, including the Jacobian-vector products and the amplitude normalisation, so the live-flux argument no longer reaches the clip; the clip is refreshed at the trip boundary when the partition is. Keep the live-flux variant selectable behind the existing set_support_clip_mode switch for the discriminator. Gate one, all_debug CPU x64 (one sbatch, never an srun child of your shell, root venv python directly, PYTHONPATH at the worktree, JAX_PLATFORMS=cpu, TMPDIR=/tmp in submit environment and payload, logs under the run directory): benchmarks/profile_support_amplitude_gate.py at the committed terminal states of the weak, moderate and strong -110 rows reproduces the frozen-support current totals of ef0f38b6 exactly (0.967057, 0.981334, 0.997403 over the analytic total) since the support at a frozen state is the same geometry, and a new test in tests/test_forward_profile_support_clip.py pins that within one trip two different live flux states yield the identical support (array_equal) while a trip boundary refreshes it. Gate two in a second process: tests/test_forward_support_clip_mode.py, tests/test_equilibrium_separatrix_clip.py, tests/test_forward_moment_class.py, tests/test_equilibrium_density_moments.py, tests/test_forward_operator_domain.py with zero added failures against ef0f38b6 (run at the base with PYTHONPATH=/home/ITER/mcintos/Code/nova only for files unchanged there, else record the base as the committed failure ids of run r-20260910T113535191293: operator_domain 3 failed, others 0). Do not launch the H200 re-solve; that is the next node. Manifest with the job ids before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 4.0,
+          "goal": "Hold the clipped profile support fixed within each Newton trip by evaluating it on the trip's frozen state, so the signed-flux clip no longer couples geometry to the live iterate and the certificate solve stays on its reference from the cold seed",
+          "id": "cca-rung-a2-frozen-support",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T14:55:12Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T145511513273-cca-rung-a2-frozen-support/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/observation.py",
+            "tests/test_forward_profile_support_clip.py",
+            "tests/test_forward_support_clip_mode.py",
+            "benchmarks/profile_support_amplitude_gate.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/rung-a2"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-rung-a3",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T14:55:25Z",
+        "completed_at": "2026-09-10T15:45:56.665Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3019,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3031,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "ef0f38b6ae6c367b2554c4521d6fae6e1f5611f5",
+        "commits": [
+          "1046dc4fa2418957362f90ea81c5a23368be0cd0"
+        ],
+        "changed_lines": {
+          "added": 116,
+          "removed": 16,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug sbatch 1269076 (profile_support_amplitude_gate.py reproduces the ef0f38b6 frozen-state totals 0.967057, 0.981334, 0.997403 to 5e-7) and sbatch 1269077 (six test files one fresh process each: 3, 4, 22, 7, 3 passed and operator_domain 3 passed 3 failed with the same three pre-existing ids; added-failure set empty)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T145511513273-cca-rung-a2-frozen-support/gate1.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T145511513273-cca-rung-a2-frozen-support/manifest.md",
+        "scope_changed": false,
+        "session_id": "30648c73-56d3-480c-84e4-1763da91b6f8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 16853604,
+            "input_tokens_cumulative": 16853604,
+            "output_tokens": 60951,
+            "output_tokens_cumulative": 60951,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T15:45:56.665Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 16853604,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 3027.436,
+          "generated_tokens": 60951,
+          "generation_seconds": 2609.253,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 22.9,
+          "machine_seconds": 418.183,
+          "peak_input_tokens": 232697,
+          "tokens_per_second": 23.36,
+          "wall_tokens_per_second": 20.13
+        },
+        "follow_on_paths": [
+          "benchmarks/exact_placement_discriminator.py",
+          "observation.py"
+        ],
+        "predecessor_run": "r-20260910T113535191293-cca-rung-a-test-gate",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-rung-a2-frozen-support",
+          "session_id": "30648c73-56d3-480c-84e4-1763da91b6f8",
+          "session_source": "stream",
+          "retained_at": "2026-09-10T15:45:56.665Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 112.0,
+        "orientation_input_tokens": 5990545.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -151050,6 +151248,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2423
+    "_version": 2424
   }
 }

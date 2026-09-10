@@ -1,0 +1,152 @@
+{
+  "gate": "profile-support-amplitude",
+  "cells": -110,
+  "measured_on": "committed terminal states",
+  "rows": [
+    {
+      "row": "weak",
+      "ratio_before": 0.9525658875492415,
+      "ratio_after": 0.9670569731164455,
+      "sum_current_a": 15777315.29601771,
+      "analytic_total_a": 16314773.311828371,
+      "amplitude_terminal": 1.0497961485612264,
+      "cut_cell_count": 43,
+      "cut_cells_participating": 41,
+      "worst_cells": [
+        {
+          "cell": 68,
+          "booked_a": 85059.09402016296,
+          "analytic_a": 112545.63424393433,
+          "difference_a": -27486.54022377137
+        },
+        {
+          "cell": 28,
+          "booked_a": 85392.45306575284,
+          "analytic_a": 112545.6342439343,
+          "difference_a": -27153.18117818146
+        },
+        {
+          "cell": 134,
+          "booked_a": 50185.71675745498,
+          "analytic_a": 76371.5000328173,
+          "difference_a": -26185.783275362322
+        },
+        {
+          "cell": 75,
+          "booked_a": 50185.7167574643,
+          "analytic_a": 76371.50003281704,
+          "difference_a": -26185.78327535274
+        },
+        {
+          "cell": 72,
+          "booked_a": 99991.72156263105,
+          "analytic_a": 125708.5744351474,
+          "difference_a": -25716.85287251635
+        },
+        {
+          "cell": 13,
+          "booked_a": 100352.62585890974,
+          "analytic_a": 125708.57443514743,
+          "difference_a": -25355.948576237686
+        }
+      ]
+    },
+    {
+      "row": "moderate",
+      "ratio_before": 0.98028797672725,
+      "ratio_after": 0.9813344975467045,
+      "sum_current_a": 1594659.9010436493,
+      "analytic_total_a": 1624991.1778605897,
+      "amplitude_terminal": 1.020108400532015,
+      "cut_cell_count": 46,
+      "cut_cells_participating": 45,
+      "worst_cells": [
+        {
+          "cell": 69,
+          "booked_a": 8299.535717141785,
+          "analytic_a": 10734.347180646786,
+          "difference_a": -2434.8114635050006
+        },
+        {
+          "cell": 130,
+          "booked_a": 12705.21780328972,
+          "analytic_a": 14429.618292455405,
+          "difference_a": -1724.4004891656841
+        },
+        {
+          "cell": 6,
+          "booked_a": 2912.6068650998272,
+          "analytic_a": 4602.018436340546,
+          "difference_a": -1689.4115712407188
+        },
+        {
+          "cell": 70,
+          "booked_a": 5708.576692420447,
+          "analytic_a": 7305.91724713863,
+          "difference_a": -1597.3405547181828
+        },
+        {
+          "cell": 62,
+          "booked_a": 8082.064372396968,
+          "analytic_a": 9439.199972084763,
+          "difference_a": -1357.1355996877955
+        },
+        {
+          "cell": 18,
+          "booked_a": 4315.847590338686,
+          "analytic_a": 5599.016851632427,
+          "difference_a": -1283.1692612937404
+        }
+      ]
+    },
+    {
+      "row": "strong",
+      "ratio_before": 1.0043088395321667,
+      "ratio_after": 0.9974026263718553,
+      "sum_current_a": 250593.32942004324,
+      "analytic_total_a": 251245.90891804622,
+      "amplitude_terminal": 0.9957096469108309,
+      "cut_cell_count": 44,
+      "cut_cells_participating": 44,
+      "worst_cells": [
+        {
+          "cell": 69,
+          "booked_a": 1226.8903073801432,
+          "analytic_a": 1397.155496601703,
+          "difference_a": -170.2651892215597
+        },
+        {
+          "cell": 7,
+          "booked_a": 544.7738110613778,
+          "analytic_a": 679.4195825479522,
+          "difference_a": -134.6457714865744
+        },
+        {
+          "cell": 8,
+          "booked_a": 1624.924285648302,
+          "analytic_a": 1756.1507899710527,
+          "difference_a": -131.22650432275077
+        },
+        {
+          "cell": 70,
+          "booked_a": 694.3609894061342,
+          "analytic_a": 799.5371851040584,
+          "difference_a": -105.17619569792419
+        },
+        {
+          "cell": 54,
+          "booked_a": 1309.2806668763565,
+          "analytic_a": 1213.9672987327704,
+          "difference_a": 95.3133681435861
+        },
+        {
+          "cell": 2,
+          "booked_a": 1604.166336218042,
+          "analytic_a": 1682.8210998241814,
+          "difference_a": -78.65476360613934
+        }
+      ]
+    }
+  ],
+  "acceptance": "ratio within one percent of unity; every analytic cut cell participating"
+}

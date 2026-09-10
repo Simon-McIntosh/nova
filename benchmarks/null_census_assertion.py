@@ -207,6 +207,10 @@ def census_candidates(fgrid, psi_grid) -> dict:
                 )
         return result
 
+    retained_valid = np.asarray(census["retained_valid"], dtype=bool)
+    retained_kind = np.asarray(census["retained_candidate"][:, :, 3], dtype=np.float64)
+    saddle_retained = retained_valid[1]
+    saddle_kind = retained_kind[1][saddle_retained]
     return {
         "elapsed_seconds": elapsed,
         "o_candidate_count": int(np.asarray(status["candidate_count"])[0]),
@@ -216,6 +220,20 @@ def census_candidates(fgrid, psi_grid) -> dict:
         "spline_authored": bool(np.asarray(census["spline_authored"]).item()),
         "overflow": bool(np.asarray(census["overflow"]).any()),
         "raw_ring_saddle_count": int(np.asarray(census["raw_ring_count"])[1]),
+        "dedupe_and_type_gate": {
+            "mechanism": (
+                "the hex carrier runs the compatibility census, whose retained "
+                "slice caps at the fixed slot capacity and requires the local "
+                "quadratic kind to equal the expected type (saddles expect "
+                "kind 0.0); no uncertainty-based dedupe radius runs on this "
+                "non-structured route"
+            ),
+            "retained_x_slots": int(saddle_retained.sum()),
+            "saddle_retained_kind": [float(value) for value in saddle_kind.tolist()],
+            "saddle_kind_matches_expected": [
+                bool(np.isfinite(value) and value == 0.0) for value in saddle_kind
+            ],
+        },
     }
 
 

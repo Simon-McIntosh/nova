@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T22:42:10",
+  "updated": "2026-09-10T22:44:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -151140,6 +151140,192 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T151523673841-cca-gate-b-frozen-current-flux-image",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-gate-b-frozen-current-flux-image",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2430,
+                "cached_input_tokens": 764232,
+                "input_tokens": 766664,
+                "output_tokens": 2552,
+                "reasoning_output_tokens": 556,
+                "total_tokens": 769216,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. One all_debug CPU x64 sbatch (never an srun child of your shell; root venv python directly; PYTHONPATH at the worktree; JAX_PLATFORMS=cpu; TMPDIR=/tmp in submit environment and payload; logs under the run directory) runs benchmarks/frozen_current_flux_image_gate.py over six rows: weak, moderate and strong rotation static and diverted single-null at 110 cells, and weak and diverted at 300 cells. For each row it takes the oracle's per-cell current moments frozen: the exact zeroth, first and second moments of the analytic density integrated over each cell's exact analytic plasma intersection with the shared adaptive oracle (the machinery benchmarks/solovev_cut_cell_moments.py and benchmarks/unit_amplitude_current_census.py already carry; interior cells whole, cut cells over their analytic region, exterior cells zero), feeds them through the production coupling exactly as the operator does (coupling_current_moments into current_moment_image, the polygon-analytic kernel with zeroth, first and second moments, plus the same external and coil contribution the certificate row uses) and compares the predicted flux at every mesh node with the oracle flux. The receipt reports per row: the maximum and root-mean-square absolute flux error in weber and as a fraction of the flux span, the same restricted to the interior nodes, the two-pitch boundary band and the nodes adjacent to cut cells, the error with the second-order moments zeroed (first order only) and with first and second zeroed (zeroth only) so the moment truncation order is read directly, and the six worst nodes with their nearest cell and its class. Figures obeying the plotting rules (imas-ink through nova.media, no axes, line contours on stated levels, analytic nulls and wall drawn): one panel per row of the absolute flux error of the frozen-current prediction, and one comparison panel on the weak 110 row showing the frozen-current prediction, the analytic flux and the committed terminal state on shared levels. The report states in one sentence per row how large the coupling's own error is relative to the span and whether it is second order in the pitch across the 110 to 300 pair, and names the code lines that form the image. Manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 3.0,
+          "goal": "Measure the Biot coupling on its own by forming the flux prediction from the oracle's frozen per-cell currents and comparing it with the oracle flux map, with no clip decision and no iteration involved",
+          "id": "cca-gate-b-frozen-current-flux-image",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T15:15:25Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T151523673841-cca-gate-b-frozen-current-flux-image/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/frozen_current_flux_image_gate.py",
+            "docs/figures/cut-cell-current-attribution/gate-b",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/gate-b"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-gate-b",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T15:15:37Z",
+        "completed_at": "2026-09-10T20:22:29.239Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 18390,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 18412,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "ef0f38b6ae6c367b2554c4521d6fae6e1f5611f5",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "all_debug sbatch 1269139: benchmarks/frozen_current_flux_image_gate.py six rows as parallel processes in one job, every row exited 0 and reported its part, but the four static parts were no longer on disk when the aggregate ran (FileNotFoundError, AGGREGATE_EXIT=1) and the worker session exhausted at 136k stream records before it could report",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T151523673841-cca-gate-b-frozen-current-flux-image/gate-b-job-1269139.out",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T151523673841-cca-gate-b-frozen-current-flux-image/manifest.md",
+        "scope_changed": false,
+        "session_id": "bb9a629d-c62e-42ca-9427-8d45106d4477",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 82977913,
+            "input_tokens_cumulative": 82977913,
+            "output_tokens": 431942,
+            "output_tokens_cumulative": 431942,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T20:22:29.239Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 82977913,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 18407.948,
+          "generated_tokens": 431942,
+          "generation_seconds": 15293.261,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 62.7,
+          "machine_seconds": 3114.687,
+          "peak_input_tokens": 637271,
+          "tokens_per_second": 28.24,
+          "wall_tokens_per_second": 23.46
+        },
+        "follow_on_paths": [],
+        "predecessor_run": "r-20260910T113535191293-cca-rung-a-test-gate",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "driver commit e7e6cb39 (benchmarks/frozen_current_flux_image_gate.py) stays in the worktree as the base of the follow-on node; the two diverted parts that survived were banked on main by the coordinator",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-gate-b-frozen-current-flux-image",
+          "session_id": "bb9a629d-c62e-42ca-9427-8d45106d4477",
+          "session_source": "pointer",
+          "retained_at": "2026-09-10T20:22:29.239Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 204.0,
+        "orientation_input_tokens": 28217632.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -151452,6 +151638,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2427
+    "_version": 2428
   }
 }

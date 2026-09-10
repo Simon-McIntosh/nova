@@ -1,0 +1,1805 @@
+{
+  "completed": true,
+  "contract": {
+    "coupling": "frozen exact per-cell currents through the shipped polygon kernel with the certificate row's exterior; no clip, no iteration",
+    "lane": "all_debug CPU float64",
+    "moment_ladder": "full (zeroth + first) and zeroth-only (total current per cell); the kernel carries no density second-moment block, so second-order-zeroed equals full by construction",
+    "one_rung_per_fresh_process": true,
+    "one_scheduler_job": true,
+    "requests": [
+      {
+        "case": "weak-rotation-reactor-static",
+        "requested_cells": -110
+      },
+      {
+        "case": "moderate-rotation-conventional-static",
+        "requested_cells": -110
+      },
+      {
+        "case": "strong-rotation-compact-static",
+        "requested_cells": -110
+      },
+      {
+        "case": "diverted-single-null",
+        "requested_cells": -110
+      },
+      {
+        "case": "weak-rotation-reactor-static",
+        "requested_cells": -300
+      },
+      {
+        "case": "diverted-single-null",
+        "requested_cells": -300
+      }
+    ]
+  },
+  "figures": {
+    "absolute_error": {
+      "path": "docs/figures/cut-cell-current-attribution/gate-b/absolute-flux-error.svg",
+      "project_src": "/nova/figures/cut-cell-current-attribution/gate-b/absolute-flux-error.svg",
+      "shared_absolute_error_levels_wb": [
+        8.639237138781939e-05,
+        0.0002773650618188217,
+        0.0008904880868752903,
+        0.0028589362613550507,
+        0.009178692749469052,
+        0.02946844311570084,
+        0.09460923939452368,
+        0.3037455403961002,
+        0.975183331997693
+      ]
+    },
+    "weak_110_comparison": {
+      "path": "docs/figures/cut-cell-current-attribution/gate-b/weak-110-frozen-prediction-analytic-terminal.svg",
+      "project_src": "/nova/figures/cut-cell-current-attribution/gate-b/weak-110-frozen-prediction-analytic-terminal.svg",
+      "shared_flux_levels_wb": [
+        0.8155201436775865,
+        10.02522822403525,
+        19.23493630439291,
+        28.444644384750575,
+        37.65435246510824,
+        46.8640605454659,
+        56.07376862582357,
+        65.28347670618123,
+        74.49318478653888,
+        83.70289286689655,
+        92.91260094725422
+      ]
+    }
+  },
+  "headline": {
+    "diverted-single-null-110": {
+      "cell_census": {
+        "cut": 36,
+        "exterior": 46,
+        "interior": 50
+      },
+      "first_order_image_identical_to_full": true,
+      "flux_span_wb": 0.012026798646366708,
+      "full": {
+        "max_absolute_error_wb": 0.0014569477685669643,
+        "max_error_over_span": 0.12114177774208498,
+        "rms_absolute_error_wb": 0.0007430717067926251,
+        "rms_error_over_span": 0.061784663453820006
+      },
+      "pitch_m": 0.15145387287104764,
+      "zeroth_only": {
+        "max_absolute_error_wb": 0.0014630017533499122,
+        "max_error_over_span": 0.12164515232753852,
+        "rms_absolute_error_wb": 0.0005745941979797337
+      }
+    },
+    "diverted-single-null-300": {
+      "cell_census": {
+        "cut": 66,
+        "exterior": 128,
+        "interior": 146
+      },
+      "first_order_image_identical_to_full": true,
+      "flux_span_wb": 0.012708666511624691,
+      "full": {
+        "max_absolute_error_wb": 0.002944004976240768,
+        "max_error_over_span": 0.23165333463962326,
+        "rms_absolute_error_wb": 0.0006748418968930315,
+        "rms_error_over_span": 0.05310092103492917
+      },
+      "pitch_m": 0.09170987436549279,
+      "zeroth_only": {
+        "max_absolute_error_wb": 0.002933630005489524,
+        "max_error_over_span": 0.23083696490155878,
+        "rms_absolute_error_wb": 0.000727545414338517
+      }
+    },
+    "moderate-rotation-conventional-static-110": {
+      "cell_census": {
+        "cut": 46,
+        "exterior": 15,
+        "interior": 75
+      },
+      "first_order_image_identical_to_full": true,
+      "flux_span_wb": 1.6259775755479557,
+      "full": {
+        "max_absolute_error_wb": 0.02835970219876177,
+        "max_error_over_span": 0.01744163180676371,
+        "rms_absolute_error_wb": 0.016252297846318313,
+        "rms_error_over_span": 0.00999540097645029
+      },
+      "pitch_m": 0.13143160656791236,
+      "zeroth_only": {
+        "max_absolute_error_wb": 0.02657469087584173,
+        "max_error_over_span": 0.016343823725174095,
+        "rms_absolute_error_wb": 0.008970098952526904
+      }
+    },
+    "strong-rotation-compact-static-110": {
+      "cell_census": {
+        "cut": 44,
+        "exterior": 14,
+        "interior": 77
+      },
+      "first_order_image_identical_to_full": true,
+      "flux_span_wb": 0.13811055868232106,
+      "full": {
+        "max_absolute_error_wb": 0.0027201205145546492,
+        "max_error_over_span": 0.019695239382902012,
+        "rms_absolute_error_wb": 0.0018814559274295713,
+        "rms_error_over_span": 0.013622824680314673
+      },
+      "pitch_m": 0.05262896701751417,
+      "zeroth_only": {
+        "max_absolute_error_wb": 0.0024806606840146097,
+        "max_error_over_span": 0.017961412274933825,
+        "rms_absolute_error_wb": 0.0012124480237937264
+      }
+    },
+    "weak-rotation-reactor-static-110": {
+      "cell_census": {
+        "cut": 43,
+        "exterior": 14,
+        "interior": 78
+      },
+      "first_order_image_identical_to_full": true,
+      "flux_span_wb": 58.09302686748424,
+      "full": {
+        "max_absolute_error_wb": 0.975183331997693,
+        "max_error_over_span": 0.01678658153279187,
+        "rms_absolute_error_wb": 0.6137609756112722,
+        "rms_error_over_span": 0.010565140236388779
+      },
+      "pitch_m": 0.46606341035820315,
+      "zeroth_only": {
+        "max_absolute_error_wb": 0.8339510184661014,
+        "max_error_over_span": 0.01435544097862939,
+        "rms_absolute_error_wb": 0.331594780328423
+      }
+    },
+    "weak-rotation-reactor-static-300": {
+      "cell_census": {
+        "cut": 75,
+        "exterior": 35,
+        "interior": 232
+      },
+      "first_order_image_identical_to_full": true,
+      "flux_span_wb": 59.31138996700427,
+      "full": {
+        "max_absolute_error_wb": 0.4057041769495746,
+        "max_error_over_span": 0.006840240587436467,
+        "rms_absolute_error_wb": 0.26681636542742326,
+        "rms_error_over_span": 0.004498568750047113
+      },
+      "pitch_m": 0.28221540988057975,
+      "zeroth_only": {
+        "max_absolute_error_wb": 0.4057801677585675,
+        "max_error_over_span": 0.006841521805243622,
+        "rms_absolute_error_wb": 0.15477651573428583
+      }
+    }
+  },
+  "measurement_driver_revision": "48a5764b5fe40465da16c2b65ae0f5b5af0c9fb5",
+  "report": {
+    "image_formation_lines": "nova/equilibrium/forward_operator.py: coupling_current_moments and current_moment_image (the polygon-analytic kernel blocks built by nova/biot/polygonanalytic.polygon_analytic_flux_moments), contracted with the frozen exact per-cell moments and added to the certificate operator's external field",
+    "per_row_statements": {
+      "diverted-single-null-110": "Coupling's own error on diverted-single-null -110 is 0.0014569 Wb maximum (0.00074307 Wb rms), 0.12114 of the 0.012027 Wb flux span, with the image formed by coupling_current_moments into current_moment_image over the fixed polygon-analytic kernel blocks plus the certificate row's external.",
+      "diverted-single-null-300": "Coupling's own error on diverted-single-null -300 is 0.002944 Wb maximum (0.00067484 Wb rms), 0.23165 of the 0.012709 Wb flux span, with the image formed by coupling_current_moments into current_moment_image over the fixed polygon-analytic kernel blocks plus the certificate row's external.",
+      "moderate-rotation-conventional-static-110": "Coupling's own error on moderate-rotation-conventional-static -110 is 0.02836 Wb maximum (0.016252 Wb rms), 0.017442 of the 1.626 Wb flux span, with the image formed by coupling_current_moments into current_moment_image over the fixed polygon-analytic kernel blocks plus the certificate row's external.",
+      "strong-rotation-compact-static-110": "Coupling's own error on strong-rotation-compact-static -110 is 0.0027201 Wb maximum (0.0018815 Wb rms), 0.019695 of the 0.13811 Wb flux span, with the image formed by coupling_current_moments into current_moment_image over the fixed polygon-analytic kernel blocks plus the certificate row's external.",
+      "weak-rotation-reactor-static-110": "Coupling's own error on weak-rotation-reactor-static -110 is 0.97518 Wb maximum (0.61376 Wb rms), 0.016787 of the 58.093 Wb flux span, with the image formed by coupling_current_moments into current_moment_image over the fixed polygon-analytic kernel blocks plus the certificate row's external.",
+      "weak-rotation-reactor-static-300": "Coupling's own error on weak-rotation-reactor-static -300 is 0.4057 Wb maximum (0.26682 Wb rms), 0.0068402 of the 59.311 Wb flux span, with the image formed by coupling_current_moments into current_moment_image over the fixed polygon-analytic kernel blocks plus the certificate row's external."
+    },
+    "second_order_in_pitch_pairs": {
+      "diverted-single-null-110-vs-300": {
+        "high_max_error_over_span": 0.23165333463962326,
+        "high_max_error_wb": 0.002944004976240768,
+        "high_row": "diverted-single-null-300",
+        "low_max_error_over_span": 0.12114177774208498,
+        "low_max_error_wb": 0.0014569477685669643,
+        "low_row": "diverted-single-null-110",
+        "measured_order_in_pitch": -1.4869352655609802,
+        "pitch_ratio_low_to_high": 1.6049166881048922
+      },
+      "weak-rotation-reactor-static-110-vs-300": {
+        "high_max_error_over_span": 0.006840240587436467,
+        "high_max_error_wb": 0.4057041769495746,
+        "high_row": "weak-rotation-reactor-static-300",
+        "low_max_error_over_span": 0.01678658153279187,
+        "low_max_error_wb": 0.975183331997693,
+        "low_row": "weak-rotation-reactor-static-110",
+        "measured_order_in_pitch": 1.8869656675099127,
+        "pitch_ratio_low_to_high": 1.591644851508443
+      }
+    }
+  },
+  "rows": [
+    {
+      "attribution": null,
+      "case": "weak-rotation-reactor-static",
+      "cell_census": {
+        "cut": 43,
+        "exterior": 14,
+        "interior": 78
+      },
+      "certificate_anchor": {
+        "boundary_level_source": "topology read of the state",
+        "origin": "production traced support on the analytic state"
+      },
+      "contract": {
+        "adaptive_relative_tolerance": 5e-13,
+        "coupling": "production coupling_current_moments into current_moment_image over the polygon-analytic kernel blocks, plus the certificate row's external and coil contribution; no clip decision, no iteration",
+        "frozen_currents": "exact zeroth, first and second density moments over the analytic plasma intersection; interior whole, cut over the analytic region, exterior zero"
+      },
+      "elapsed_seconds": 56.408454759046435,
+      "flux_span_wb": 58.09302686748424,
+      "images": {
+        "first_order": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.8725900023734408,
+              "max_error_over_span": 0.015020563558581689,
+              "node_count": 47,
+              "rms_absolute_error_wb": 0.6095956069461886,
+              "rms_error_over_span": 0.01049343853844515
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.8725900023734408,
+              "max_error_over_span": 0.015020563558581689,
+              "node_count": 78,
+              "rms_absolute_error_wb": 0.6040150454496572,
+              "rms_error_over_span": 0.010397376036670862
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.975183331997693,
+              "max_error_over_span": 0.01678658153279187,
+              "node_count": 103,
+              "rms_absolute_error_wb": 0.6263287319234767,
+              "rms_error_over_span": 0.010781478702292317
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.975183331997693,
+              "max_error_over_span": 0.01678658153279187,
+              "node_count": 135,
+              "rms_absolute_error_wb": 0.6137609756112722,
+              "rms_error_over_span": 0.010565140236388779
+            }
+          },
+          "state_sha256_binary64": "2797c486e675c617a6eec36ff356b5d647369cb3220b3571b023a33e40b0da41"
+        },
+        "full": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.8725900023734408,
+              "max_error_over_span": 0.015020563558581689,
+              "node_count": 47,
+              "rms_absolute_error_wb": 0.6095956069461886,
+              "rms_error_over_span": 0.01049343853844515
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.8725900023734408,
+              "max_error_over_span": 0.015020563558581689,
+              "node_count": 78,
+              "rms_absolute_error_wb": 0.6040150454496572,
+              "rms_error_over_span": 0.010397376036670862
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.975183331997693,
+              "max_error_over_span": 0.01678658153279187,
+              "node_count": 103,
+              "rms_absolute_error_wb": 0.6263287319234767,
+              "rms_error_over_span": 0.010781478702292317
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.975183331997693,
+              "max_error_over_span": 0.01678658153279187,
+              "node_count": 135,
+              "rms_absolute_error_wb": 0.6137609756112722,
+              "rms_error_over_span": 0.010565140236388779
+            }
+          },
+          "state_sha256_binary64": "2797c486e675c617a6eec36ff356b5d647369cb3220b3571b023a33e40b0da41"
+        },
+        "zeroth_only": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.8339510184661014,
+              "max_error_over_span": 0.01435544097862939,
+              "node_count": 47,
+              "rms_absolute_error_wb": 0.37311212965033863,
+              "rms_error_over_span": 0.0064226663640963855
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.4078548936033979,
+              "max_error_over_span": 0.007020720310094255,
+              "node_count": 78,
+              "rms_absolute_error_wb": 0.20473632074310438,
+              "rms_error_over_span": 0.0035242839249903014
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.8339510184661014,
+              "max_error_over_span": 0.01435544097862939,
+              "node_count": 103,
+              "rms_absolute_error_wb": 0.3671293547813126,
+              "rms_error_over_span": 0.0063196802538585195
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.8339510184661014,
+              "max_error_over_span": 0.01435544097862939,
+              "node_count": 135,
+              "rms_absolute_error_wb": 0.331594780328423,
+              "rms_error_over_span": 0.005707996264075247
+            }
+          },
+          "state_sha256_binary64": "eec55ce1c6863a38cb3138cd1c95b236be83fe368961fd3be098d5884be2a84a"
+        }
+      },
+      "lane": {
+        "cpu_count": 28,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-3141.iter.org",
+        "jax_enable_x64": true,
+        "jax_platform": "cpu",
+        "job_id": "1269153",
+        "node": "98dci4-clu-3141",
+        "partition": "all_debug",
+        "tmpdir": "/tmp"
+      },
+      "pitch_m": 0.46606341035820315,
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "smoothness": {
+        "affine_coefficients_wb": {
+          "constant": 0.14129220757968272,
+          "radial": 0.07789134165592528,
+          "vertical": 0.0009861699291269681
+        },
+        "affine_explains_rms_fraction": 0.9657646067881345,
+        "error_by_nearest_cell_class": {
+          "cut": {
+            "max_absolute_error_wb": 0.975183331997693,
+            "max_error_over_span": 0.01678658153279187,
+            "node_count": 43,
+            "rms_absolute_error_wb": 0.6510399551613039,
+            "rms_error_over_span": 0.011206852014207977
+          },
+          "exterior": {
+            "max_absolute_error_wb": 0.7775191060444149,
+            "max_error_over_span": 0.013384035020554368,
+            "node_count": 14,
+            "rms_absolute_error_wb": 0.5459000818657183,
+            "rms_error_over_span": 0.009396998423080427
+          },
+          "interior": {
+            "max_absolute_error_wb": 0.8725900023734408,
+            "max_error_over_span": 0.015020563558581689,
+            "node_count": 78,
+            "rms_absolute_error_wb": 0.6040150454496572,
+            "rms_error_over_span": 0.010397376036670862
+          }
+        },
+        "mean_error_wb": 0.5970075497105019,
+        "mean_explains_rms_fraction": 0.9461524176839081,
+        "rms_error_wb": 0.6137609756112722
+      },
+      "source_revision": "48a5764b5fe40465da16c2b65ae0f5b5af0c9fb5",
+      "worst_nodes": [
+        {
+          "absolute_error_wb": 0.975183331997693,
+          "coordinate_rz_m": [
+            6.5988389321960526,
+            3.451154225808449
+          ],
+          "nearest_cell": 134,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 8.881784197001252e-16,
+          "node": 134
+        },
+        {
+          "absolute_error_wb": 0.9713288625239342,
+          "coordinate_rz_m": [
+            6.598838932196052,
+            -3.4511542258084478
+          ],
+          "nearest_cell": 75,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 1.2560739669470201e-15,
+          "node": 75
+        },
+        {
+          "absolute_error_wb": 0.9359487239479916,
+          "coordinate_rz_m": [
+            6.95989591224726,
+            3.1733380861258684
+          ],
+          "nearest_cell": 120,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 8.881784197001252e-16,
+          "node": 120
+        },
+        {
+          "absolute_error_wb": 0.9324766066475567,
+          "coordinate_rz_m": [
+            6.9598959122472595,
+            -3.1733380861258675
+          ],
+          "nearest_cell": 76,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 8.881784197001252e-16,
+          "node": 76
+        },
+        {
+          "absolute_error_wb": 0.8805295584752255,
+          "coordinate_rz_m": [
+            6.189467706884566,
+            3.652376088629998
+          ],
+          "nearest_cell": 126,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 1.9860273225978185e-15,
+          "node": 126
+        },
+        {
+          "absolute_error_wb": 0.8763001005682065,
+          "coordinate_rz_m": [
+            6.189467706884566,
+            -3.6523760886299983
+          ],
+          "nearest_cell": 2,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 1.9860273225978185e-15,
+          "node": 2
+        }
+      ]
+    },
+    {
+      "attribution": null,
+      "case": "moderate-rotation-conventional-static",
+      "cell_census": {
+        "cut": 46,
+        "exterior": 15,
+        "interior": 75
+      },
+      "certificate_anchor": {
+        "boundary_level_source": "topology read of the state",
+        "origin": "production traced support on the analytic state"
+      },
+      "contract": {
+        "adaptive_relative_tolerance": 5e-13,
+        "coupling": "production coupling_current_moments into current_moment_image over the polygon-analytic kernel blocks, plus the certificate row's external and coil contribution; no clip decision, no iteration",
+        "frozen_currents": "exact zeroth, first and second density moments over the analytic plasma intersection; interior whole, cut over the analytic region, exterior zero"
+      },
+      "elapsed_seconds": 55.29477224871516,
+      "flux_span_wb": 1.6259775755479557,
+      "images": {
+        "first_order": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.026465396667244998,
+              "max_error_over_span": 0.016276606187712112,
+              "node_count": 46,
+              "rms_absolute_error_wb": 0.016250258070081198,
+              "rms_error_over_span": 0.009994146484218792
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.024669948229001926,
+              "max_error_over_span": 0.015172379127484667,
+              "node_count": 75,
+              "rms_absolute_error_wb": 0.015744523544418722,
+              "rms_error_over_span": 0.009683112351111488
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.02835970219876177,
+              "max_error_over_span": 0.01744163180676371,
+              "node_count": 102,
+              "rms_absolute_error_wb": 0.016597796117408144,
+              "rms_error_over_span": 0.010207887468444744
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.02835970219876177,
+              "max_error_over_span": 0.01744163180676371,
+              "node_count": 136,
+              "rms_absolute_error_wb": 0.016252297846318313,
+              "rms_error_over_span": 0.00999540097645029
+            }
+          },
+          "state_sha256_binary64": "ca4b61f1282d3a5856e68f5cf3f460f74d4f279d4efa17ff20bace3b957cec7b"
+        },
+        "full": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.026465396667244998,
+              "max_error_over_span": 0.016276606187712112,
+              "node_count": 46,
+              "rms_absolute_error_wb": 0.016250258070081198,
+              "rms_error_over_span": 0.009994146484218792
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.024669948229001926,
+              "max_error_over_span": 0.015172379127484667,
+              "node_count": 75,
+              "rms_absolute_error_wb": 0.015744523544418722,
+              "rms_error_over_span": 0.009683112351111488
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.02835970219876177,
+              "max_error_over_span": 0.01744163180676371,
+              "node_count": 102,
+              "rms_absolute_error_wb": 0.016597796117408144,
+              "rms_error_over_span": 0.010207887468444744
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.02835970219876177,
+              "max_error_over_span": 0.01744163180676371,
+              "node_count": 136,
+              "rms_absolute_error_wb": 0.016252297846318313,
+              "rms_error_over_span": 0.00999540097645029
+            }
+          },
+          "state_sha256_binary64": "ca4b61f1282d3a5856e68f5cf3f460f74d4f279d4efa17ff20bace3b957cec7b"
+        },
+        "zeroth_only": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.02657469087584173,
+              "max_error_over_span": 0.016343823725174095,
+              "node_count": 46,
+              "rms_absolute_error_wb": 0.010213219668613271,
+              "rms_error_over_span": 0.006281279534357298
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.01087665854481712,
+              "max_error_over_span": 0.006689304150551816,
+              "node_count": 75,
+              "rms_absolute_error_wb": 0.005272584814986573,
+              "rms_error_over_span": 0.003242716808815588
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.02657469087584173,
+              "max_error_over_span": 0.016343823725174095,
+              "node_count": 102,
+              "rms_absolute_error_wb": 0.00998563333366748,
+              "rms_error_over_span": 0.006141310608359598
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.02657469087584173,
+              "max_error_over_span": 0.016343823725174095,
+              "node_count": 136,
+              "rms_absolute_error_wb": 0.008970098952526904,
+              "rms_error_over_span": 0.005516742104825138
+            }
+          },
+          "state_sha256_binary64": "c09e01f9720efac75a94c420ac7627fc5a4bcaaecab9566c8fb5f1edf432f9b8"
+        }
+      },
+      "lane": {
+        "cpu_count": 28,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-3141.iter.org",
+        "jax_enable_x64": true,
+        "jax_platform": "cpu",
+        "job_id": "1269153",
+        "node": "98dci4-clu-3141",
+        "partition": "all_debug",
+        "tmpdir": "/tmp"
+      },
+      "pitch_m": 0.13143160656791236,
+      "realised_cells": 136,
+      "requested_cells": -110,
+      "smoothness": {
+        "affine_coefficients_wb": {
+          "constant": 0.002198412012392473,
+          "radial": 0.008434493316318133,
+          "vertical": -0.002202875488110268
+        },
+        "affine_explains_rms_fraction": 0.9696127892895124,
+        "error_by_nearest_cell_class": {
+          "cut": {
+            "max_absolute_error_wb": 0.02835970219876177,
+            "max_error_over_span": 0.01744163180676371,
+            "node_count": 46,
+            "rms_absolute_error_wb": 0.01719638440807653,
+            "rms_error_over_span": 0.01057602802565179
+          },
+          "exterior": {
+            "max_absolute_error_wb": 0.026465396667244998,
+            "max_error_over_span": 0.016276606187712112,
+            "node_count": 15,
+            "rms_absolute_error_wb": 0.015764911009555436,
+            "rms_error_over_span": 0.009695650940476622
+          },
+          "interior": {
+            "max_absolute_error_wb": 0.024669948229001926,
+            "max_error_over_span": 0.015172379127484667,
+            "node_count": 75,
+            "rms_absolute_error_wb": 0.015744523544418722,
+            "rms_error_over_span": 0.009683112351111488
+          }
+        },
+        "mean_error_wb": 0.015726501964471687,
+        "mean_explains_rms_fraction": 0.9363424682944945,
+        "rms_error_wb": 0.016252297846318313
+      },
+      "source_revision": "48a5764b5fe40465da16c2b65ae0f5b5af0c9fb5",
+      "worst_nodes": [
+        {
+          "absolute_error_wb": 0.02835970219876177,
+          "coordinate_rz_m": [
+            1.8117939786416233,
+            -0.9465989606218279
+          ],
+          "nearest_cell": 69,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 4.577566798522237e-16,
+          "node": 69
+        },
+        {
+          "absolute_error_wb": 0.027439748566368813,
+          "coordinate_rz_m": [
+            1.9170526783578077,
+            -0.8658409840092666
+          ],
+          "nearest_cell": 70,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 0.0,
+          "node": 70
+        },
+        {
+          "absolute_error_wb": 0.026465396667244998,
+          "coordinate_rz_m": [
+            1.7801144903814792,
+            -1.0268718348248709
+          ],
+          "nearest_cell": 68,
+          "nearest_cell_class": "exterior",
+          "nearest_cell_distance_m": 0.0,
+          "node": 68
+        },
+        {
+          "absolute_error_wb": 0.025881756985327797,
+          "coordinate_rz_m": [
+            1.6929585404541232,
+            -1.0049762524776755
+          ],
+          "nearest_cell": 6,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 4.965068306494546e-16,
+          "node": 6
+        },
+        {
+          "absolute_error_wb": 0.024669948229001926,
+          "coordinate_rz_m": [
+            1.817099420507351,
+            -0.8120866019275558
+          ],
+          "nearest_cell": 71,
+          "nearest_cell_class": "interior",
+          "nearest_cell_distance_m": 0.0,
+          "node": 71
+        },
+        {
+          "absolute_error_wb": 0.024407527890600578,
+          "coordinate_rz_m": [
+            1.6947885287956561,
+            -0.8827028281821259
+          ],
+          "nearest_cell": 8,
+          "nearest_cell_class": "interior",
+          "nearest_cell_distance_m": 0.0,
+          "node": 8
+        }
+      ]
+    },
+    {
+      "attribution": null,
+      "case": "strong-rotation-compact-static",
+      "cell_census": {
+        "cut": 44,
+        "exterior": 14,
+        "interior": 77
+      },
+      "certificate_anchor": {
+        "boundary_level_source": "topology read of the state",
+        "origin": "production traced support on the analytic state"
+      },
+      "contract": {
+        "adaptive_relative_tolerance": 5e-13,
+        "coupling": "production coupling_current_moments into current_moment_image over the polygon-analytic kernel blocks, plus the certificate row's external and coil contribution; no clip decision, no iteration",
+        "frozen_currents": "exact zeroth, first and second density moments over the analytic plasma intersection; interior whole, cut over the analytic region, exterior zero"
+      },
+      "elapsed_seconds": 53.57825203984976,
+      "flux_span_wb": 0.13811055868232106,
+      "images": {
+        "first_order": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.0024949789379262698,
+              "max_error_over_span": 0.018065084680927015,
+              "node_count": 46,
+              "rms_absolute_error_wb": 0.001850702504875713,
+              "rms_error_over_span": 0.013400152186283303
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.0024949789379262698,
+              "max_error_over_span": 0.018065084680927015,
+              "node_count": 77,
+              "rms_absolute_error_wb": 0.0018685396903145982,
+              "rms_error_over_span": 0.013529303683526277
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.0027201205145546492,
+              "max_error_over_span": 0.019695239382902012,
+              "node_count": 101,
+              "rms_absolute_error_wb": 0.0018968140246939473,
+              "rms_error_over_span": 0.013734026151157337
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.0027201205145546492,
+              "max_error_over_span": 0.019695239382902012,
+              "node_count": 135,
+              "rms_absolute_error_wb": 0.0018814559274295713,
+              "rms_error_over_span": 0.013622824680314673
+            }
+          },
+          "state_sha256_binary64": "bb1c438e0b9612fcc6c7d5097f948e11204df964b01baf0236cdb33f5c1c5ea5"
+        },
+        "full": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.0024949789379262698,
+              "max_error_over_span": 0.018065084680927015,
+              "node_count": 46,
+              "rms_absolute_error_wb": 0.001850702504875713,
+              "rms_error_over_span": 0.013400152186283303
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.0024949789379262698,
+              "max_error_over_span": 0.018065084680927015,
+              "node_count": 77,
+              "rms_absolute_error_wb": 0.0018685396903145982,
+              "rms_error_over_span": 0.013529303683526277
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.0027201205145546492,
+              "max_error_over_span": 0.019695239382902012,
+              "node_count": 101,
+              "rms_absolute_error_wb": 0.0018968140246939473,
+              "rms_error_over_span": 0.013734026151157337
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.0027201205145546492,
+              "max_error_over_span": 0.019695239382902012,
+              "node_count": 135,
+              "rms_absolute_error_wb": 0.0018814559274295713,
+              "rms_error_over_span": 0.013622824680314673
+            }
+          },
+          "state_sha256_binary64": "bb1c438e0b9612fcc6c7d5097f948e11204df964b01baf0236cdb33f5c1c5ea5"
+        },
+        "zeroth_only": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.0024806606840146097,
+              "max_error_over_span": 0.017961412274933825,
+              "node_count": 46,
+              "rms_absolute_error_wb": 0.0012640648915658098,
+              "rms_error_over_span": 0.00915255794796533
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.0014030023439722504,
+              "max_error_over_span": 0.010158545134839447,
+              "node_count": 77,
+              "rms_absolute_error_wb": 0.000956993538705699,
+              "rms_error_over_span": 0.006929184472470024
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.0024806606840146097,
+              "max_error_over_span": 0.017961412274933825,
+              "node_count": 101,
+              "rms_absolute_error_wb": 0.0012949352004125569,
+              "rms_error_over_span": 0.009376076766086646
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.0024806606840146097,
+              "max_error_over_span": 0.017961412274933825,
+              "node_count": 135,
+              "rms_absolute_error_wb": 0.0012124480237937264,
+              "rms_error_over_span": 0.008778822092687159
+            }
+          },
+          "state_sha256_binary64": "471a9a779229129416bce2f494655c4de9ddbe5c2e72e885ba442a175f53fbac"
+        }
+      },
+      "lane": {
+        "cpu_count": 28,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-3141.iter.org",
+        "jax_enable_x64": true,
+        "jax_platform": "cpu",
+        "job_id": "1269153",
+        "node": "98dci4-clu-3141",
+        "partition": "all_debug",
+        "tmpdir": "/tmp"
+      },
+      "pitch_m": 0.05262896701751417,
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "smoothness": {
+        "affine_coefficients_wb": {
+          "constant": 0.00040413256265176115,
+          "radial": 0.0016760544084841469,
+          "vertical": -0.00030101434756719166
+        },
+        "affine_explains_rms_fraction": 0.9887807825806985,
+        "error_by_nearest_cell_class": {
+          "cut": {
+            "max_absolute_error_wb": 0.0027201205145546492,
+            "max_error_over_span": 0.019695239382902012,
+            "node_count": 44,
+            "rms_absolute_error_wb": 0.001962916430773678,
+            "rms_error_over_span": 0.014212645647815648
+          },
+          "exterior": {
+            "max_absolute_error_wb": 0.0023141113006336558,
+            "max_error_over_span": 0.016755498802640607,
+            "node_count": 14,
+            "rms_absolute_error_wb": 0.0016798935017603063,
+            "rms_error_over_span": 0.012163396613465024
+          },
+          "interior": {
+            "max_absolute_error_wb": 0.0024949789379262698,
+            "max_error_over_span": 0.018065084680927015,
+            "node_count": 77,
+            "rms_absolute_error_wb": 0.0018685396903145982,
+            "rms_error_over_span": 0.013529303683526277
+          }
+        },
+        "mean_error_wb": 0.0018575257609724448,
+        "mean_explains_rms_fraction": 0.9747238479823147,
+        "rms_error_wb": 0.0018814559274295713
+      },
+      "source_revision": "48a5764b5fe40465da16c2b65ae0f5b5af0c9fb5",
+      "worst_nodes": [
+        {
+          "absolute_error_wb": 0.0027201205145546492,
+          "coordinate_rz_m": [
+            0.9533068415030421,
+            -0.3773381825498368
+          ],
+          "nearest_cell": 69,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 1.6653345369377348e-16,
+          "node": 69
+        },
+        {
+          "absolute_error_wb": 0.0026269530031258976,
+          "coordinate_rz_m": [
+            0.9945326829797161,
+            -0.34504391909071025
+          ],
+          "nearest_cell": 70,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 0.0,
+          "node": 70
+        },
+        {
+          "absolute_error_wb": 0.002591550804163875,
+          "coordinate_rz_m": [
+            0.9062861649997758,
+            -0.4020592778190084
+          ],
+          "nearest_cell": 7,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 1.5700924586837752e-16,
+          "node": 7
+        },
+        {
+          "absolute_error_wb": 0.0024949789379262698,
+          "coordinate_rz_m": [
+            0.9078916053070951,
+            -0.3534594093747101
+          ],
+          "nearest_cell": 9,
+          "nearest_cell_class": "interior",
+          "nearest_cell_distance_m": 0.0,
+          "node": 9
+        },
+        {
+          "absolute_error_wb": 0.002490215272505005,
+          "coordinate_rz_m": [
+            0.956868377743118,
+            -0.3251826566247333
+          ],
+          "nearest_cell": 71,
+          "nearest_cell_class": "interior",
+          "nearest_cell_distance_m": 0.0,
+          "node": 71
+        },
+        {
+          "absolute_error_wb": 0.0024318781694001763,
+          "coordinate_rz_m": [
+            1.005412524964348,
+            -0.2967405606055892
+          ],
+          "nearest_cell": 72,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 0.0,
+          "node": 72
+        }
+      ]
+    },
+    {
+      "attribution": {
+        "analytic_anchor_error_over_span": {
+          "max": 0.12114177774208498,
+          "rms": 0.061784663453820006
+        },
+        "analytic_anchor_total_current_a": 37054.964270779004,
+        "analytic_boundary_level_wb": -1.524015784867935e-16,
+        "cause": "the certificate anchor clips its support at the topology read's unadmitted-saddle level (a fraction of the way inside the core lobe) instead of the analytic separatrix level, excluding the outer-flux shell of the core lobe from its own current; the frozen currents integrate the full core lobe, so the gate's error is the flux image of that excluded shell",
+        "hypothesis_coil_or_external_omitted": "refuted: the certificate row's external is included by construction",
+        "hypothesis_core_lobe_integration": "confirmed: the production oracle currents clip at the read's level, not the core lobe; pinning the clip to the analytic separatrix restores the core lobe and removes the anomaly",
+        "hypothesis_gauge": "consistent: the production error is the shell field (corr 0.9957), not a constant or scale offset",
+        "hypothesis_homogeneous_harmonics": "refuted: both current sets omit the same harmonic part, which cancels in the frozen-minus-certificate difference",
+        "hypothesis_private_flux_region": "refuted: the missing current is the outer core-lobe shell, not the region below the X-point",
+        "missing_shell_current_a": 7544.237209309958,
+        "missing_shell_fraction_of_core": 0.2035958570673682,
+        "production_anchor_error_over_span": {
+          "max": 1.865380654878782,
+          "rms": 1.3532073330154575
+        },
+        "production_anchor_total_current_a": 29510.727061469046,
+        "read_boundary_level_wb": 0.001003288209647327,
+        "shell_field_correlation_with_production_error": 0.9956855476041822,
+        "smoothness_production_anchor": {
+          "affine_coefficients_wb": {
+            "constant": -0.0004139300351211866,
+            "radial": 0.009796744732518117,
+            "vertical": -0.00035732518495573
+          },
+          "affine_explains_rms_fraction": 0.9915345369435286,
+          "error_by_nearest_cell_class": {
+            "cut": {
+              "max_absolute_error_wb": 0.02243455753505478,
+              "max_error_over_span": 1.865380654878782,
+              "node_count": 36,
+              "rms_absolute_error_wb": 0.016799356389369597,
+              "rms_error_over_span": 1.3968269431736664
+            },
+            "exterior": {
+              "max_absolute_error_wb": 0.020866772215141754,
+              "max_error_over_span": 1.7350229956203347,
+              "node_count": 46,
+              "rms_absolute_error_wb": 0.01483048609305012,
+              "rms_error_over_span": 1.2331200121597117
+            },
+            "interior": {
+              "max_absolute_error_wb": 0.02193660618693967,
+              "max_error_over_span": 1.8239771723098324,
+              "node_count": 50,
+              "rms_absolute_error_wb": 0.01713783145603127,
+              "rms_error_over_span": 1.4249703482986809
+            }
+          },
+          "mean_error_wb": 0.01575726505221436,
+          "mean_explains_rms_fraction": 0.9374171948956846,
+          "rms_error_wb": 0.01627475212096381
+        }
+      },
+      "case": "diverted-single-null",
+      "cell_census": {
+        "cut": 36,
+        "exterior": 46,
+        "interior": 50
+      },
+      "certificate_anchor": {
+        "analytic_anchor_total_current_a": 37054.964270779004,
+        "analytic_boundary_level_wb": -1.524015784867935e-16,
+        "boundary_level_source": "analytic boundary level",
+        "origin": "traced support clipped at the analytic separatrix level",
+        "production_anchor_total_current_a": 29510.727061469046,
+        "read_boundary_level_wb": 0.001003288209647327
+      },
+      "contract": {
+        "adaptive_relative_tolerance": 5e-13,
+        "coupling": "production coupling_current_moments into current_moment_image over the polygon-analytic kernel blocks, plus the certificate row's external and coil contribution; no clip decision, no iteration",
+        "frozen_currents": "exact zeroth, first and second density moments over the analytic plasma intersection; interior whole, cut over the analytic region, exterior zero"
+      },
+      "elapsed_seconds": 1923.9858800843358,
+      "flux_span_wb": 0.012026798646366708,
+      "images": {
+        "first_order": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.0013369015009619977,
+              "max_error_over_span": 0.11116021314332682,
+              "node_count": 65,
+              "rms_absolute_error_wb": 0.000733708034728818,
+              "rms_error_over_span": 0.06100609616096558
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.0012165642312867678,
+              "max_error_over_span": 0.10115445240735708,
+              "node_count": 50,
+              "rms_absolute_error_wb": 0.0007203148006159959,
+              "rms_error_over_span": 0.059892480268105494
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.0014569477685669643,
+              "max_error_over_span": 0.12114177774208498,
+              "node_count": 115,
+              "rms_absolute_error_wb": 0.0007489619948104952,
+              "rms_error_over_span": 0.062274427038549976
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.0014569477685669643,
+              "max_error_over_span": 0.12114177774208498,
+              "node_count": 132,
+              "rms_absolute_error_wb": 0.0007430717067926251,
+              "rms_error_over_span": 0.061784663453820006
+            }
+          },
+          "state_sha256_binary64": "34f2010e9fac2ee5f9c16f89c5e260826ef69579b5ebf06b312fea928e69aff9"
+        },
+        "full": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.0013369015009619977,
+              "max_error_over_span": 0.11116021314332682,
+              "node_count": 65,
+              "rms_absolute_error_wb": 0.000733708034728818,
+              "rms_error_over_span": 0.06100609616096558
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.0012165642312867678,
+              "max_error_over_span": 0.10115445240735708,
+              "node_count": 50,
+              "rms_absolute_error_wb": 0.0007203148006159959,
+              "rms_error_over_span": 0.059892480268105494
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.0014569477685669643,
+              "max_error_over_span": 0.12114177774208498,
+              "node_count": 115,
+              "rms_absolute_error_wb": 0.0007489619948104952,
+              "rms_error_over_span": 0.062274427038549976
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.0014569477685669643,
+              "max_error_over_span": 0.12114177774208498,
+              "node_count": 132,
+              "rms_absolute_error_wb": 0.0007430717067926251,
+              "rms_error_over_span": 0.061784663453820006
+            }
+          },
+          "state_sha256_binary64": "34f2010e9fac2ee5f9c16f89c5e260826ef69579b5ebf06b312fea928e69aff9"
+        },
+        "production_anchor": {
+          "error": {
+            "whole_domain": {
+              "max_absolute_error_wb": 0.02243455753505478,
+              "max_error_over_span": 1.865380654878782,
+              "node_count": 132,
+              "rms_absolute_error_wb": 0.01627475212096381,
+              "rms_error_over_span": 1.3532073330154575
+            }
+          }
+        },
+        "zeroth_only": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.0014630017533499122,
+              "max_error_over_span": 0.12164515232753852,
+              "node_count": 65,
+              "rms_absolute_error_wb": 0.0006386004117982176,
+              "rms_error_over_span": 0.0530981211688564
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.0004341430192675269,
+              "max_error_over_span": 0.03609797021077437,
+              "node_count": 50,
+              "rms_absolute_error_wb": 0.00018971396332925815,
+              "rms_error_over_span": 0.015774269521554737
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.0014630017533499122,
+              "max_error_over_span": 0.12164515232753852,
+              "node_count": 115,
+              "rms_absolute_error_wb": 0.0006125681618931025,
+              "rms_error_over_span": 0.05093360086128648
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.0014630017533499122,
+              "max_error_over_span": 0.12164515232753852,
+              "node_count": 132,
+              "rms_absolute_error_wb": 0.0005745941979797337,
+              "rms_error_over_span": 0.04777615514111217
+            }
+          },
+          "state_sha256_binary64": "a8764c55e012943c584f264b0253399346d809cb5f76b1f63f8d7c10872c0d72"
+        }
+      },
+      "lane": {
+        "cpu_count": 28,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-3141.iter.org",
+        "jax_enable_x64": true,
+        "jax_platform": "cpu",
+        "job_id": "1269153",
+        "node": "98dci4-clu-3141",
+        "partition": "all_debug",
+        "tmpdir": "/tmp"
+      },
+      "pitch_m": 0.15145387287104764,
+      "realised_cells": 132,
+      "requested_cells": -110,
+      "smoothness": {
+        "affine_coefficients_wb": {
+          "constant": -0.0007684894080409392,
+          "radial": 0.0008016434178090007,
+          "vertical": 0.0004198007548158716
+        },
+        "affine_explains_rms_fraction": 0.8667332402138815,
+        "error_by_nearest_cell_class": {
+          "cut": {
+            "max_absolute_error_wb": 0.0013387773188097774,
+            "max_error_over_span": 0.111316182982262,
+            "node_count": 36,
+            "rms_absolute_error_wb": 0.0007518806914483082,
+            "rms_error_over_span": 0.06251710979425527
+          },
+          "exterior": {
+            "max_absolute_error_wb": 0.0014569477685669643,
+            "max_error_over_span": 0.12114177774208498,
+            "node_count": 46,
+            "rms_absolute_error_wb": 0.0007602942628261092,
+            "rms_error_over_span": 0.06321667845131787
+          },
+          "interior": {
+            "max_absolute_error_wb": 0.0012165642312867678,
+            "max_error_over_span": 0.10115445240735708,
+            "node_count": 50,
+            "rms_absolute_error_wb": 0.0007203148006159959,
+            "rms_error_over_span": 0.059892480268105494
+          }
+        },
+        "mean_error_wb": 0.0005580982404266686,
+        "mean_explains_rms_fraction": 0.5641048786277831,
+        "rms_error_wb": 0.0007430717067926251
+      },
+      "source_revision": "48a5764b5fe40465da16c2b65ae0f5b5af0c9fb5",
+      "worst_nodes": [
+        {
+          "absolute_error_wb": 0.0014569477685669643,
+          "coordinate_rz_m": [
+            1.536692043038079,
+            -1.194439281435823
+          ],
+          "nearest_cell": 0,
+          "nearest_cell_class": "exterior",
+          "nearest_cell_distance_m": 9.42055475210265e-16,
+          "node": 0
+        },
+        {
+          "absolute_error_wb": 0.0013387773188097774,
+          "coordinate_rz_m": [
+            2.263674489277167,
+            -0.04649136776469387
+          ],
+          "nearest_cell": 79,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 6.938893903907228e-18,
+          "node": 79
+        },
+        {
+          "absolute_error_wb": 0.0013369015009619977,
+          "coordinate_rz_m": [
+            1.435653989077147,
+            -1.150953184448082
+          ],
+          "nearest_cell": 7,
+          "nearest_cell_class": "exterior",
+          "nearest_cell_distance_m": 9.930136612989092e-16,
+          "node": 7
+        },
+        {
+          "absolute_error_wb": 0.0013354001372481365,
+          "coordinate_rz_m": [
+            2.263674489277167,
+            0.11625641008075904
+          ],
+          "nearest_cell": 93,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 0.0,
+          "node": 93
+        },
+        {
+          "absolute_error_wb": 0.0012674836165666064,
+          "coordinate_rz_m": [
+            2.263674489277167,
+            0.2790041879262122
+          ],
+          "nearest_cell": 96,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 0.0,
+          "node": 96
+        },
+        {
+          "absolute_error_wb": 0.0012438831802308152,
+          "coordinate_rz_m": [
+            2.122730779253539,
+            0.36037807684893863
+          ],
+          "nearest_cell": 97,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 0.0,
+          "node": 97
+        }
+      ]
+    },
+    {
+      "attribution": null,
+      "case": "weak-rotation-reactor-static",
+      "cell_census": {
+        "cut": 75,
+        "exterior": 35,
+        "interior": 232
+      },
+      "certificate_anchor": {
+        "boundary_level_source": "topology read of the state",
+        "origin": "production traced support on the analytic state"
+      },
+      "contract": {
+        "adaptive_relative_tolerance": 5e-13,
+        "coupling": "production coupling_current_moments into current_moment_image over the polygon-analytic kernel blocks, plus the certificate row's external and coil contribution; no clip decision, no iteration",
+        "frozen_currents": "exact zeroth, first and second density moments over the analytic plasma intersection; interior whole, cut over the analytic region, exterior zero"
+      },
+      "elapsed_seconds": 78.3154496178031,
+      "flux_span_wb": 59.31138996700427,
+      "images": {
+        "first_order": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.40045482986934955,
+              "max_error_over_span": 0.0067517357136989715,
+              "node_count": 93,
+              "rms_absolute_error_wb": 0.2644045999528696,
+              "rms_error_over_span": 0.004457905978935268
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.38423741352563034,
+              "max_error_over_span": 0.0064783073493874755,
+              "node_count": 232,
+              "rms_absolute_error_wb": 0.2652122824120557,
+              "rms_error_over_span": 0.004471523640899275
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.4057041769495746,
+              "max_error_over_span": 0.006840240587436467,
+              "node_count": 187,
+              "rms_absolute_error_wb": 0.27400799553971933,
+              "rms_error_over_span": 0.004619820842036474
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.4057041769495746,
+              "max_error_over_span": 0.006840240587436467,
+              "node_count": 342,
+              "rms_absolute_error_wb": 0.26681636542742326,
+              "rms_error_over_span": 0.004498568750047113
+            }
+          },
+          "state_sha256_binary64": "0ec549604e3ab6e558445ea09758b687cbe3330346b4e816e32cf52b0540b753"
+        },
+        "full": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.40045482986934955,
+              "max_error_over_span": 0.0067517357136989715,
+              "node_count": 93,
+              "rms_absolute_error_wb": 0.2644045999528696,
+              "rms_error_over_span": 0.004457905978935268
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.38423741352563034,
+              "max_error_over_span": 0.0064783073493874755,
+              "node_count": 232,
+              "rms_absolute_error_wb": 0.2652122824120557,
+              "rms_error_over_span": 0.004471523640899275
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.4057041769495746,
+              "max_error_over_span": 0.006840240587436467,
+              "node_count": 187,
+              "rms_absolute_error_wb": 0.27400799553971933,
+              "rms_error_over_span": 0.004619820842036474
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.4057041769495746,
+              "max_error_over_span": 0.006840240587436467,
+              "node_count": 342,
+              "rms_absolute_error_wb": 0.26681636542742326,
+              "rms_error_over_span": 0.004498568750047113
+            }
+          },
+          "state_sha256_binary64": "0ec549604e3ab6e558445ea09758b687cbe3330346b4e816e32cf52b0540b753"
+        },
+        "zeroth_only": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.4057801677585675,
+              "max_error_over_span": 0.006841521805243622,
+              "node_count": 93,
+              "rms_absolute_error_wb": 0.18056704442480798,
+              "rms_error_over_span": 0.0030443907068315188
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.2133947839052457,
+              "max_error_over_span": 0.0035978719099984016,
+              "node_count": 232,
+              "rms_absolute_error_wb": 0.11861167782600114,
+              "rms_error_over_span": 0.0019998128165936834
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.4057801677585675,
+              "max_error_over_span": 0.006841521805243622,
+              "node_count": 187,
+              "rms_absolute_error_wb": 0.1822700687069801,
+              "rms_error_over_span": 0.0030731039823612195
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.4057801677585675,
+              "max_error_over_span": 0.006841521805243622,
+              "node_count": 342,
+              "rms_absolute_error_wb": 0.15477651573428583,
+              "rms_error_over_span": 0.0026095580599340214
+            }
+          },
+          "state_sha256_binary64": "27cc2d863f8022a31c92c2ac4936d80d2d76386b3cfcda5ca5ebff99bc11c953"
+        }
+      },
+      "lane": {
+        "cpu_count": 28,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-3141.iter.org",
+        "jax_enable_x64": true,
+        "jax_platform": "cpu",
+        "job_id": "1269153",
+        "node": "98dci4-clu-3141",
+        "partition": "all_debug",
+        "tmpdir": "/tmp"
+      },
+      "pitch_m": 0.28221540988057975,
+      "realised_cells": 342,
+      "requested_cells": -300,
+      "smoothness": {
+        "affine_coefficients_wb": {
+          "constant": -0.011529542855019993,
+          "radial": 0.0462026893891146,
+          "vertical": 0.0009299199172045989
+        },
+        "affine_explains_rms_fraction": 0.9782092392637455,
+        "error_by_nearest_cell_class": {
+          "cut": {
+            "max_absolute_error_wb": 0.4057041769495746,
+            "max_error_over_span": 0.006840240587436467,
+            "node_count": 75,
+            "rms_absolute_error_wb": 0.28535309525039027,
+            "rms_error_over_span": 0.004811101129296347
+          },
+          "exterior": {
+            "max_absolute_error_wb": 0.40045482986934955,
+            "max_error_over_span": 0.0067517357136989715,
+            "node_count": 35,
+            "rms_absolute_error_wb": 0.23433924402878206,
+            "rms_error_over_span": 0.003950999026648139
+          },
+          "interior": {
+            "max_absolute_error_wb": 0.38423741352563034,
+            "max_error_over_span": 0.0064783073493874755,
+            "node_count": 232,
+            "rms_absolute_error_wb": 0.2652122824120557,
+            "rms_error_over_span": 0.004471523640899275
+          }
+        },
+        "mean_error_wb": 0.2590508369590798,
+        "mean_explains_rms_fraction": 0.9426382788905431,
+        "rms_error_wb": 0.26681636542742326
+      },
+      "source_revision": "48a5764b5fe40465da16c2b65ae0f5b5af0c9fb5",
+      "worst_nodes": [
+        {
+          "absolute_error_wb": 0.4057041769495746,
+          "coordinate_rz_m": [
+            6.8201729271285965,
+            3.2590583301786005
+          ],
+          "nearest_cell": 300,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 1.831026719408895e-15,
+          "node": 300
+        },
+        {
+          "absolute_error_wb": 0.40374517518142783,
+          "coordinate_rz_m": [
+            6.558247025084404,
+            3.411677179742936
+          ],
+          "nearest_cell": 304,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 0.0,
+          "node": 304
+        },
+        {
+          "absolute_error_wb": 0.4026243600881035,
+          "coordinate_rz_m": [
+            6.790178966784977,
+            -3.3804403606411966
+          ],
+          "nearest_cell": 6,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 9.930136612989092e-16,
+          "node": 6
+        },
+        {
+          "absolute_error_wb": 0.40045482986934955,
+          "coordinate_rz_m": [
+            6.984598885994585,
+            3.291772397121317
+          ],
+          "nearest_cell": 301,
+          "nearest_cell_class": "exterior",
+          "nearest_cell_distance_m": 0.0,
+          "node": 301
+        },
+        {
+          "absolute_error_wb": 0.40043937961455,
+          "coordinate_rz_m": [
+            7.04071678805387,
+            3.08062105092514
+          ],
+          "nearest_cell": 298,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 0.0,
+          "node": 298
+        },
+        {
+          "absolute_error_wb": 0.4003268400638527,
+          "coordinate_rz_m": [
+            6.5466024226541775,
+            -3.543959827629325
+          ],
+          "nearest_cell": 5,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 9.930136612989092e-16,
+          "node": 5
+        }
+      ]
+    },
+    {
+      "attribution": {
+        "analytic_anchor_error_over_span": {
+          "max": 0.23165333463962326,
+          "rms": 0.05310092103492917
+        },
+        "analytic_anchor_total_current_a": 37540.61177253267,
+        "analytic_boundary_level_wb": -1.524015784867935e-16,
+        "cause": "the certificate anchor clips its support at the topology read's unadmitted-saddle level (a fraction of the way inside the core lobe) instead of the analytic separatrix level, excluding the outer-flux shell of the core lobe from its own current; the frozen currents integrate the full core lobe, so the gate's error is the flux image of that excluded shell",
+        "hypothesis_coil_or_external_omitted": "refuted: the certificate row's external is included by construction",
+        "hypothesis_core_lobe_integration": "confirmed: the production oracle currents clip at the read's level, not the core lobe; pinning the clip to the analytic separatrix restores the core lobe and removes the anomaly",
+        "hypothesis_gauge": "consistent: the production error is the shell field (corr 0.9902), not a constant or scale offset",
+        "hypothesis_homogeneous_harmonics": "refuted: both current sets omit the same harmonic part, which cancels in the frozen-minus-certificate difference",
+        "hypothesis_private_flux_region": "refuted: the missing current is the outer core-lobe shell, not the region below the X-point",
+        "missing_shell_current_a": 7764.887074861905,
+        "missing_shell_fraction_of_core": 0.2068396519990449,
+        "production_anchor_error_over_span": {
+          "max": 1.7221980837428523,
+          "rms": 1.2361045161627475
+        },
+        "production_anchor_total_current_a": 29775.724697670765,
+        "read_boundary_level_wb": 0.001003288209647327,
+        "shell_field_correlation_with_production_error": 0.990205644749227,
+        "smoothness_production_anchor": {
+          "affine_coefficients_wb": {
+            "constant": -0.0003577808167531535,
+            "radial": 0.009464463495858043,
+            "vertical": -0.00042484493377322445
+          },
+          "affine_explains_rms_fraction": 0.9917999704838231,
+          "error_by_nearest_cell_class": {
+            "cut": {
+              "max_absolute_error_wb": 0.021886841113247003,
+              "max_error_over_span": 1.7221980837428523,
+              "node_count": 66,
+              "rms_absolute_error_wb": 0.016401006959606706,
+              "rms_error_over_span": 1.2905372050328499
+            },
+            "exterior": {
+              "max_absolute_error_wb": 0.020997174842297964,
+              "max_error_over_span": 1.6521933928387944,
+              "node_count": 128,
+              "rms_absolute_error_wb": 0.014280740760144555,
+              "rms_error_over_span": 1.1237009600560277
+            },
+            "interior": {
+              "max_absolute_error_wb": 0.021298713612598132,
+              "max_error_over_span": 1.6759204117218809,
+              "node_count": 146,
+              "rms_absolute_error_wb": 0.016561937056785457,
+              "rms_error_over_span": 1.3032002249517018
+            }
+          },
+          "mean_error_wb": 0.015205451059279815,
+          "mean_explains_rms_fraction": 0.9368892635799977,
+          "rms_error_wb": 0.01570924006942555
+        }
+      },
+      "case": "diverted-single-null",
+      "cell_census": {
+        "cut": 66,
+        "exterior": 128,
+        "interior": 146
+      },
+      "certificate_anchor": {
+        "analytic_anchor_total_current_a": 37540.61177253267,
+        "analytic_boundary_level_wb": -1.524015784867935e-16,
+        "boundary_level_source": "analytic boundary level",
+        "origin": "traced support clipped at the analytic separatrix level",
+        "production_anchor_total_current_a": 29775.724697670765,
+        "read_boundary_level_wb": 0.001003288209647327
+      },
+      "contract": {
+        "adaptive_relative_tolerance": 5e-13,
+        "coupling": "production coupling_current_moments into current_moment_image over the polygon-analytic kernel blocks, plus the certificate row's external and coil contribution; no clip decision, no iteration",
+        "frozen_currents": "exact zeroth, first and second density moments over the analytic plasma intersection; interior whole, cut over the analytic region, exterior zero"
+      },
+      "elapsed_seconds": 2176.456380704418,
+      "flux_span_wb": 0.012708666511624691,
+      "images": {
+        "first_order": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.002944004976240768,
+              "max_error_over_span": 0.23165333463962326,
+              "node_count": 106,
+              "rms_absolute_error_wb": 0.0007500248163943478,
+              "rms_error_over_span": 0.0590167989464745
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.0014930502695877845,
+              "max_error_over_span": 0.11748284276891544,
+              "node_count": 146,
+              "rms_absolute_error_wb": 0.0004465137423096589,
+              "rms_error_over_span": 0.035134586457299055
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.002944004976240768,
+              "max_error_over_span": 0.23165333463962326,
+              "node_count": 236,
+              "rms_absolute_error_wb": 0.000746784290686783,
+              "rms_error_over_span": 0.05876181344468321
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.002944004976240768,
+              "max_error_over_span": 0.23165333463962326,
+              "node_count": 340,
+              "rms_absolute_error_wb": 0.0006748418968930315,
+              "rms_error_over_span": 0.05310092103492917
+            }
+          },
+          "state_sha256_binary64": "54e284f5f080d80d743a0b3f76893d512af72cef9b938930b2b3472b5851fa7c"
+        },
+        "full": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.002944004976240768,
+              "max_error_over_span": 0.23165333463962326,
+              "node_count": 106,
+              "rms_absolute_error_wb": 0.0007500248163943478,
+              "rms_error_over_span": 0.0590167989464745
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.0014930502695877845,
+              "max_error_over_span": 0.11748284276891544,
+              "node_count": 146,
+              "rms_absolute_error_wb": 0.0004465137423096589,
+              "rms_error_over_span": 0.035134586457299055
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.002944004976240768,
+              "max_error_over_span": 0.23165333463962326,
+              "node_count": 236,
+              "rms_absolute_error_wb": 0.000746784290686783,
+              "rms_error_over_span": 0.05876181344468321
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.002944004976240768,
+              "max_error_over_span": 0.23165333463962326,
+              "node_count": 340,
+              "rms_absolute_error_wb": 0.0006748418968930315,
+              "rms_error_over_span": 0.05310092103492917
+            }
+          },
+          "state_sha256_binary64": "54e284f5f080d80d743a0b3f76893d512af72cef9b938930b2b3472b5851fa7c"
+        },
+        "production_anchor": {
+          "error": {
+            "whole_domain": {
+              "max_absolute_error_wb": 0.021886841113247003,
+              "max_error_over_span": 1.7221980837428523,
+              "node_count": 340,
+              "rms_absolute_error_wb": 0.01570924006942555,
+              "rms_error_over_span": 1.2361045161627475
+            }
+          }
+        },
+        "zeroth_only": {
+          "error": {
+            "cut_adjacent_nodes": {
+              "max_absolute_error_wb": 0.002933630005489524,
+              "max_error_over_span": 0.23083696490155878,
+              "node_count": 106,
+              "rms_absolute_error_wb": 0.0007916180236088485,
+              "rms_error_over_span": 0.06228962125056558
+            },
+            "interior_nodes": {
+              "max_absolute_error_wb": 0.0016623325028246793,
+              "max_error_over_span": 0.1308030627213433,
+              "node_count": 146,
+              "rms_absolute_error_wb": 0.0006006098488704677,
+              "rms_error_over_span": 0.04725986383552408
+            },
+            "two_pitch_boundary_band": {
+              "max_absolute_error_wb": 0.002933630005489524,
+              "max_error_over_span": 0.23083696490155878,
+              "node_count": 236,
+              "rms_absolute_error_wb": 0.000779932367724103,
+              "rms_error_over_span": 0.06137011833701784
+            },
+            "whole_domain": {
+              "max_absolute_error_wb": 0.002933630005489524,
+              "max_error_over_span": 0.23083696490155878,
+              "node_count": 340,
+              "rms_absolute_error_wb": 0.000727545414338517,
+              "rms_error_over_span": 0.05724797433885191
+            }
+          },
+          "state_sha256_binary64": "a76103962657996dac1bfcdf8feaae8c5f1151ed72435f7666abb8fbc0891826"
+        }
+      },
+      "lane": {
+        "cpu_count": 28,
+        "execution": "slurm",
+        "hostname": "98dci4-clu-3141.iter.org",
+        "jax_enable_x64": true,
+        "jax_platform": "cpu",
+        "job_id": "1269153",
+        "node": "98dci4-clu-3141",
+        "partition": "all_debug",
+        "tmpdir": "/tmp"
+      },
+      "pitch_m": 0.09170987436549279,
+      "realised_cells": 340,
+      "requested_cells": -300,
+      "smoothness": {
+        "affine_coefficients_wb": {
+          "constant": -0.0005991961549884821,
+          "radial": 0.00011910716930344517,
+          "vertical": 0.0007986333752815826
+        },
+        "affine_explains_rms_fraction": 0.8101528737121235,
+        "error_by_nearest_cell_class": {
+          "cut": {
+            "max_absolute_error_wb": 0.002606636095847614,
+            "max_error_over_span": 0.20510697117304233,
+            "node_count": 66,
+            "rms_absolute_error_wb": 0.000705770294128531,
+            "rms_error_over_span": 0.055534567177678226
+          },
+          "exterior": {
+            "max_absolute_error_wb": 0.002944004976240768,
+            "max_error_over_span": 0.23165333463962326,
+            "node_count": 128,
+            "rms_absolute_error_wb": 0.0008517256665579552,
+            "rms_error_over_span": 0.0670192789919286
+          },
+          "interior": {
+            "max_absolute_error_wb": 0.0014930502695877845,
+            "max_error_over_span": 0.11748284276891544,
+            "node_count": 146,
+            "rms_absolute_error_wb": 0.0004465137423096589,
+            "rms_error_over_span": 0.035134586457299055
+          }
+        },
+        "mean_error_wb": -0.0003889746001988187,
+        "mean_explains_rms_fraction": 0.3322296672214018,
+        "rms_error_wb": 0.0006748418968930315
+      },
+      "source_revision": "48a5764b5fe40465da16c2b65ae0f5b5af0c9fb5",
+      "worst_nodes": [
+        {
+          "absolute_error_wb": 0.002944004976240768,
+          "coordinate_rz_m": [
+            1.5290141917903004,
+            -1.1547222660539582
+          ],
+          "nearest_cell": 2,
+          "nearest_cell_class": "exterior",
+          "nearest_cell_distance_m": 3.1401849173675503e-16,
+          "node": 2
+        },
+        {
+          "absolute_error_wb": 0.0027012948154541867,
+          "coordinate_rz_m": [
+            1.4518954539310887,
+            -1.1787912203701794
+          ],
+          "nearest_cell": 11,
+          "nearest_cell_class": "exterior",
+          "nearest_cell_distance_m": 7.021666937153402e-16,
+          "node": 11
+        },
+        {
+          "absolute_error_wb": 0.0026900887528289565,
+          "coordinate_rz_m": [
+            1.4438626850461413,
+            -1.10588960729278
+          ],
+          "nearest_cell": 13,
+          "nearest_cell_class": "exterior",
+          "nearest_cell_distance_m": 0.0,
+          "node": 13
+        },
+        {
+          "absolute_error_wb": 0.0026551217179587305,
+          "coordinate_rz_m": [
+            1.5092364983201616,
+            -1.2056176907721234
+          ],
+          "nearest_cell": 0,
+          "nearest_cell_class": "exterior",
+          "nearest_cell_distance_m": 3.1401849173675503e-16,
+          "node": 0
+        },
+        {
+          "absolute_error_wb": 0.002606636095847614,
+          "coordinate_rz_m": [
+            1.5292083397583118,
+            -1.0566152705705434
+          ],
+          "nearest_cell": 5,
+          "nearest_cell_class": "cut",
+          "nearest_cell_distance_m": 0.0,
+          "node": 5
+        },
+        {
+          "absolute_error_wb": 0.0024977617323973713,
+          "coordinate_rz_m": [
+            1.5944169061282083,
+            -1.1707688517943677
+          ],
+          "nearest_cell": 1,
+          "nearest_cell_class": "exterior",
+          "nearest_cell_distance_m": 3.1401849173675503e-16,
+          "node": 1
+        }
+      ]
+    }
+  ],
+  "schema": "nova.frozen-current-flux-image.v1"
+}

@@ -552,7 +552,15 @@ def declared_body_force(
 
 
 def current_ledger(cell_current: jax.Array, masks: DomainMasks) -> CurrentLedger:
-    """Return current split by live solve support and diagnostic exclusions."""
+    """Return current split by live solve support and diagnostic exclusions.
+
+    Flux chooses each cell's side at evaluation time, so ``masks`` carries
+    the clip geometry with it: a cell whose clipped polygon lies on the
+    confined side is reported on that side (its normalised flux is clamped
+    at the boundary by the clipped integral measure), and the common-SOL
+    class carries only the current the profile actually places past the
+    separatrix, never the confined-side sliver a cut cell keeps.
+    """
     return CurrentLedger(
         core=jnp.sum(jnp.where(masks.confined_profile, cell_current, 0.0)),
         common_sol=jnp.sum(jnp.where(masks.open_field_line, cell_current, 0.0)),

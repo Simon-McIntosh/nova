@@ -88,14 +88,15 @@ _PRODUCTION_STATIONARY_POINT_CAPACITY = 30
 _SUPPORT_CLIP_MODE = "chord"
 """Plasma-support clip mode for solver construction.
 
-``chord`` (the committed production default) reproduces the prior
-committed chord clip, full cells selected by the profile partition label
-only, so production results are unchanged; ``exact`` traces the curved
-boundary support with every cut cell participating; ``chord_cells`` keeps
-the exact support everywhere except a named pair of cells whose entries
-revert to their chord-moment values.  ``exact`` and ``chord_cells`` are
-opt-in through :func:`set_support_clip_mode`; production never changes
-the mode.
+``chord`` (the committed production default) clips every atomic cell
+against the signed flux of the current iterate, a cell participating when
+any of its vertices lies on the confined side of the boundary level so a
+cut cell's current carries its clipped polygon rather than its whole
+centroid; ``exact`` traces the curved boundary support with every cut cell
+participating; ``chord_cells`` keeps the exact support everywhere except a
+named pair of cells whose entries revert to their chord-moment values.
+``exact`` and ``chord_cells`` are opt-in through
+:func:`set_support_clip_mode`; production never changes the mode.
 """
 
 
@@ -2141,9 +2142,13 @@ class ForwardFluxOperator:
 
     @staticmethod
     def _moment_support_masks(masks, profile_support):
-        """Promote every curved cut support into the profile-owned partition."""
-        if _SUPPORT_CLIP_MODE == "chord":
-            return masks
+        """Promote every clipped support into the profile-owned partition.
+
+        A cell whose clipped polygon lies on the confined side carries the
+        core label, so the current and the geometry share one side and the
+        whole-cell partition label only names the region a clipped piece
+        belongs to.
+        """
         promoted_label = jnp.where(
             profile_support.included,
             jnp.asarray(int(PlasmaDomain.CORE), dtype=masks.label.dtype),
@@ -2164,27 +2169,52 @@ class ForwardFluxOperator:
         near_level = jnp.any(valid & (jnp.abs(level) <= roundoff[:, None]), axis=1)
         return (positive & negative) | near_level
 
+    @staticmethod
+    def _chord_vertex_participation(atomic_mesh, inside_boundary):
+        """Select cells with a vertex on the confined side of the level.
+
+        A cell is a candidate when any of its vertices carries the signed
+        flux of the boundary level or a positive value on its confined side,
+        whatever the whole-cell partition label says.  The roundoff keeps a
+        cell sitting exactly on the level from being dropped by floating-point
+        noise.
+        """
+        vertex_flux = jnp.asarray(inside_boundary)[jnp.asarray(atomic_mesh.cell_nodes)]
+        slot = jnp.arange(vertex_flux.shape[1])
+        valid = slot[None, :] < jnp.asarray(atomic_mesh.cell_vertex_count)[:, None]
+        magnitude = jnp.max(jnp.where(valid, jnp.abs(vertex_flux), 0.0), axis=1)
+        roundoff = (
+            256.0 * jnp.finfo(vertex_flux.dtype).eps * jnp.maximum(magnitude, 1.0)
+        )
+        return jnp.any(valid & (vertex_flux >= -roundoff[:, None]), axis=1)
+
     def _profile_support(self, masks, topology, physical, sample_psi_norm):
         """Return the plasma-side support for the active clip mode.
 
-        The committed chord clip reproduces the prior committed clip:
-        full atomic cells selected by the profile partition label alone.
-        The opt-in exact mode traces the curved boundary with every cut
-        cell participating, and its chord-cells variant replaces only the
-        two named cells' geometry with that chord result.
+        The committed chord clip clips every atomic cell against the signed
+        flux of the current iterate, a cell participating when any of its
+        vertices lies on the confined side of the boundary level rather than
+        when its centroid does.  The opt-in exact mode traces the curved
+        boundary with every cut cell participating, and its chord-cells
+        variant replaces only the two named cells' geometry with that chord
+        result.
         """
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
         atomic_mesh = self.moment_geometry.atomic_mesh
         chord_support = None
-        if _SUPPORT_CLIP_MODE in ("chord", "chord_cells"):
-            chord_support = atomic_mesh.traced_clip(
-                jnp.ones(len(atomic_mesh.node_coordinates), dtype=physical.dtype)
-            ).qualify(masks.profile_participation)
-            if _SUPPORT_CLIP_MODE == "chord":
-                return chord_support
         shared_flux = self.shared_node_flux(physical)
         inside_boundary = self.polarity * (shared_flux - topology.boundary_flux)
+        if _SUPPORT_CLIP_MODE in ("chord", "chord_cells"):
+            participation = (
+                masks.profile_participation
+                | self._chord_vertex_participation(atomic_mesh, inside_boundary)
+            )
+            chord_support = atomic_mesh.traced_clip(inside_boundary).qualify(
+                participation
+            )
+            if _SUPPORT_CLIP_MODE == "chord":
+                return chord_support
         flux_coefficient = self.support_flux_coefficients(
             masks.psi_norm, sample_psi_norm
         )
@@ -2347,6 +2377,16 @@ class ForwardFluxOperator:
                 + radial_second
             )
         )
+        receipt_masks = DomainMasks(
+            label=masks.label,
+            psi_norm=jnp.where(
+                profile_support.included,
+                jnp.minimum(
+                    masks.psi_norm, jnp.asarray(1.0, dtype=masks.psi_norm.dtype)
+                ),
+                masks.psi_norm,
+            ),
+        )
         return ClippedIntegralMeasure(
             area=area,
             volume=volume,
@@ -2354,7 +2394,7 @@ class ForwardFluxOperator:
             cell_current=cell_current,
             pressure_volume=jnp.sum(pressure * volume_weight, axis=1),
             field_volume=jnp.sum(field_squared * volume_weight, axis=1),
-            masks=masks,
+            masks=receipt_masks,
         )
 
     def cell_current_moments(self, psi, requested_class=None) -> CellCurrentMoments:

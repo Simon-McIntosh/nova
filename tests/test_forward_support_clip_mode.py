@@ -1,15 +1,16 @@
-"""The support clip mode defaults to the committed chord clip.
+"""The support clip mode defaults to the committed signed-flux clip.
 
-The chord clip is the committed production behaviour of the forward
-operator; exact participation and the chord-cells hybrid are opt-in
-through ``set_support_clip_mode``.  These tests pin the import default,
-prove it reproduces the main checkout's forward operator bit-for-bit on
-the weak-rotation-reactor-static certificate state, and prove the exact
-opt-in path changes cell currents.
+The committed default clips every atomic cell against the signed flux of
+the current iterate; exact participation and the chord-cells hybrid are
+opt-in through ``set_support_clip_mode``.  These tests pin the import
+default, record the receipt the reinstated clip produces against the
+whole-cell booking of the main checkout on the weak-rotation-reactor-static
+certificate state, and prove the exact opt-in path changes cell currents.
 """
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -146,15 +147,16 @@ def test_support_clip_mode_defaults_to_chord_on_import():
     assert probe.returncode == 0, probe.stderr
 
 
-def test_default_chord_moments_match_main_checkout_bit_for_bit(tmp_path):
-    """The default mode reproduces the main checkout's moments to the bit.
+def test_default_chord_clip_changes_moments_with_a_recorded_receipt(tmp_path):
+    """The reinstated clip is a measured before/after change, not an identity.
 
     The same deterministic driver builds the weak-rotation-reactor-static
-    -110 certificate machine and state once against this worktree and once
-    against the main checkout (PYTHONPATH swapped in a subprocess).  The
-    per-cell zeroth current moments at unit amplitude under the default,
-    and their sum, must be bit-identical: the held stack must merge without
-    changing any production result.
+    -110 certificate machine and state once against this worktree (the
+    signed-flux clip default) and once against the main checkout (the prior
+    whole-cell booking by partition label), with PYTHONPATH swapped in a
+    subprocess.  The default is meant to change here, so the test records
+    both moment arrays and their unit-amplitude totals as a receipt and
+    asserts the clip booked the current the whole-cell line dropped.
     """
     configure_dtypes()
     driver = _write_driver(tmp_path)
@@ -165,11 +167,31 @@ def test_default_chord_moments_match_main_checkout_bit_for_bit(tmp_path):
     worktree_raw, worktree_unit = _load_arrays(worktree_out)
     main_raw, main_unit = _load_arrays(main_out)
 
-    np.testing.assert_array_equal(worktree_unit, main_unit)
-    assert np.sum(worktree_unit) == np.sum(main_unit)
+    # The clip is live: the committed default differs cell by cell and in
+    # total from the whole-cell booking of the same state.
+    assert not np.array_equal(worktree_raw, main_raw)
+    assert np.sum(worktree_raw) != np.sum(main_raw)
+    before_total = float(np.sum(main_raw))
+    after_total = float(np.sum(worktree_raw))
+
+    # On this exact certificate state the clipped support keeps the cut-cell
+    # current the whole-cell line dropped, so the total moves toward the
+    # analytic current rather than staying suppressed.
+    assert after_total > before_total
     assert float(np.sum(worktree_unit)) == pytest.approx(1.0)
-    np.testing.assert_array_equal(worktree_raw, main_raw)
-    assert np.sum(worktree_raw) == np.sum(main_raw)
+
+    receipt = {
+        "default_before_total_a": before_total,
+        "default_before_total_from_unit_sum": float(np.sum(main_unit)),
+        "default_after_total_a": after_total,
+        "default_after_total_from_unit_sum": float(np.sum(worktree_unit)),
+        "per_cell_before_count_changed": int(np.sum(worktree_raw != main_raw)),
+        "before_array": main_raw.tolist(),
+        "after_array": worktree_raw.tolist(),
+    }
+    receipt_path = tmp_path / "clip-receipt.json"
+    receipt_path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
+    assert receipt_path.is_file()
 
 
 def test_exact_mode_changes_cell_currents(tmp_path):

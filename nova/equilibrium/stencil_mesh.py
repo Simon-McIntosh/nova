@@ -176,6 +176,28 @@ class InteriorCurrentMomentStencil:
         vectors = vectors.at[:, ring].set(entries)
         return CellCurrentMoments(*vectors)
 
+    def flux_coefficients(self, centroid_flux, sample_flux):
+        """Return each carried cell's fixed-basis flux polynomial."""
+        if self.ring_centre is None or len(self.ring_centre) == 0:
+            raise ValueError("own-node profile geometry was not built")
+
+        sample_value = jnp.asarray(sample_flux)
+        if sample_value.shape != (self.ring_sample_node_count,):
+            raise ValueError("one flux value is needed per direct sampling node")
+        centroid_value = jnp.asarray(centroid_flux)
+        value_pool = jnp.concatenate([centroid_value, sample_value])
+        gathered = value_pool[self.ring_gather_index]
+        coefficient = jnp.einsum(
+            "rps,rs->rp",
+            jnp.asarray(self.ring_flux_weight, dtype=value_pool.dtype),
+            gathered,
+        )
+        return (
+            jnp.zeros((self.cell_count, coefficient.shape[1]), dtype=coefficient.dtype)
+            .at[self.ring_centre]
+            .set(coefficient)
+        )
+
     def sample_flux_field(self, centroid_flux, sample_flux, points):
         """Evaluate the own-node quadratic and its gradient at fixed points."""
         if self.ring_centre is None or len(self.ring_centre) == 0:

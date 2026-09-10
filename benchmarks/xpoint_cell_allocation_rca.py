@@ -471,28 +471,47 @@ def _analytic_region_integrals(
     def vertical_length(radius: float) -> float:
         return float(sum(high - low for low, high in plasma_intervals(radius)))
 
+    _SCALE_NODES, _SCALE_WEIGHTS = np.polynomial.legendre.leggauss(5)
+
+    def scale_of(callable_integrand: Any, first: float, second: float) -> float:
+        """Return a representative magnitude of an integrand on one interval."""
+        midpoint = 0.5 * (first + second)
+        half = 0.5 * (second - first)
+        nodes = midpoint + half * _SCALE_NODES
+        values = np.abs(np.asarray([callable_integrand(float(node)) for node in nodes]))
+        return float(np.median(values)) if values.size else 0.0
+
     for first, second in zip(breaks, breaks[1:]):
         if second <= first:
             continue
         intra = tuple(value for value in breaks if first < value < second)
+        span = second - first
         for index, (radial_power, vertical_power) in enumerate(powers):
+
+            def integrand(radius: float) -> float:
+                return inner(radius, radial_power, vertical_power)
+
+            scale = scale_of(integrand, first, second)
+            abs_floor = max(ADAPTIVE_ABS_ERROR, 1.0e-14 * scale * span)
             value, error = quad(
-                lambda radius: inner(radius, radial_power, vertical_power),
+                integrand,
                 first,
                 second,
                 points=intra,
-                epsabs=ADAPTIVE_ABS_ERROR,
+                epsabs=abs_floor,
                 epsrel=relative_tolerance,
                 limit=300,
             )
             moment_values[index] += value
             moment_errors[index] += error
+        scale = scale_of(vertical_length, first, second)
+        abs_floor = max(ADAPTIVE_ABS_ERROR, 1.0e-14 * scale * span)
         area_value, _area_error = quad(
             vertical_length,
             first,
             second,
             points=intra,
-            epsabs=ADAPTIVE_ABS_ERROR,
+            epsabs=abs_floor,
             epsrel=relative_tolerance,
             limit=300,
         )

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T10:18:15",
+  "updated": "2026-09-10T10:18:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -149336,6 +149336,200 @@
         "watch_override": null,
         "tool_steps": 124.0,
         "orientation_input_tokens": 9797701.0
+      },
+      {
+        "run_id": "r-20260910T053253958929-ucc-merge-prep-chord-default",
+        "plan": "uniform-cell-clip-and-coupling",
+        "section": "",
+        "node": "ucc-merge-prep-chord-default",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 585,
+                "cached_input_tokens": 510630,
+                "input_tokens": 511247,
+                "output_tokens": 2550,
+                "reasoning_output_tokens": 1038,
+                "total_tokens": 513797,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "In nova/equilibrium/forward_operator.py the module default _SUPPORT_CLIP_MODE becomes 'chord' with the docstring corrected (chord is the committed behaviour, exact and chord_cells are opt-in through set_support_clip_mode), and a new tests/test_forward_support_clip_mode.py pins three facts and passes in one all_debug CPU x64 process (one sbatch, never an srun child of your shell, root venv python directly, PYTHONPATH at the worktree, JAX_PLATFORMS=cpu, TMPDIR=/tmp in submit environment and payload, --output in the run directory, log path in the manifest): support_clip_mode() returns 'chord' on import; on the weak-rotation-reactor-static -110 certificate seed state the per-cell zeroth current moments at unit amplitude under the default are bit-identical (numpy array_equal, no tolerance) to the same moments computed by the main checkout's forward operator imported from /home/ITER/mcintos/Code/nova with PYTHONPATH swapped in a subprocess, and their sum equals main's to the bit; and set_support_clip_mode('exact') changes at least one cell's current so the opt-in path is live. The existing exact-participation tests (tests/test_equilibrium_separatrix_clip.py, tests/test_forward_moment_class.py) still pass in a second all_debug process with zero added failures. The manifest lists the two log paths, the commit, and the array-equal result. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 1.5,
+          "goal": "Restore the committed chord clip as the production default on the held exact-participation stack so the stack can merge to main without changing any production result",
+          "id": "ucc-merge-prep-chord-default",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T05:32:54Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T053253958929-ucc-merge-prep-chord-default/manifest.md",
+          "plan": "uniform-cell-clip-and-coupling",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "tests/test_forward_support_clip_mode.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/merge-prep"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19i-ucc-mergeprep",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T05:33:03Z",
+        "completed_at": "2026-09-10T08:16:33.908Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 9792,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 9810,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "28a49bcbfddf81a950adce8651785a54cd3e52fb",
+        "commits": [
+          "8d0e922425379371541cdf2ffee13019885735d4"
+        ],
+        "changed_lines": {
+          "added": 229,
+          "removed": 15,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug sbatch 1268481 tests/test_forward_support_clip_mode.py (3 passed: default chord; default per-cell moments bit-identical to main's operator in a PYTHONPATH-swapped subprocess; exact changes 80 of 135 cells) and sbatch 1268482 existing exact-participation tests (29 passed, zero added failures against the 28a49bcb baseline of 29)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T053253958929-ucc-merge-prep-chord-default/test_forward_support_clip_mode-all_debug.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T053253958929-ucc-merge-prep-chord-default/manifest.md",
+        "scope_changed": false,
+        "session_id": "66f67150-ba35-49c3-86c8-9ec764175d03",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 16279370,
+            "input_tokens_cumulative": 16279370,
+            "output_tokens": 93560,
+            "output_tokens_cumulative": 93560,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T08:16:33.908Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 16279370,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 9807.53,
+          "generated_tokens": 93560,
+          "generation_seconds": 8977.218,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 23.4,
+          "machine_seconds": 830.312,
+          "peak_input_tokens": 238353,
+          "tokens_per_second": 10.42,
+          "wall_tokens_per_second": 9.54
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": [
+          {
+            "path": "tests/test_forward_moment_class.py",
+            "reason": "the exact-participation promotion test must select the exact mode once exact is opt-in; an autouse fixture restores the default after each test"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/ucc-merge-prep-chord-default",
+          "session_id": "66f67150-ba35-49c3-86c8-9ec764175d03",
+          "session_source": "stream",
+          "retained_at": "2026-09-10T08:16:33.908Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 111.0,
+        "orientation_input_tokens": 5200011.0
       }
     ],
     "holds": [
@@ -149648,6 +149842,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2410
+    "_version": 2411
   }
 }

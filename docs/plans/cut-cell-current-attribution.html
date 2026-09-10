@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-10">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 </head>
 <body>
 <main class="plan-doc">
@@ -149,7 +149,10 @@
     <div class="r-comment-body"><p>Integration gate passed: zero added test failures across 57 files at the merged clip stack head against main, with the 17 pre-existing failures identical on both sides; the two chunk-five timeouts were symmetric and their seven files were re-measured in a second wave. Receipt at the session reports directory (clip-stack-gate/receipt.md). The coordinator merged b6630c41 into main on this verdict.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260910T091931092593-cca-rung-a-reinstate-clip" data-who="s19i-cca-rung-a" data-when="2026-09-10T11:31:58.558Z">
-    <div class="r-comment-body"><p>Rung A implemented and its first gate measured, second gate lost. On the committed terminal states the unit-amplitude ratio to the analytic total moved from 0.9526 to 0.9671 on weak (41 of 43 cut cells participating), 0.9803 to 0.9813 on moderate (45 of 46), 1.0043 to 0.9974 on strong (44 of 44). The chord clip against the iterate flux is now real, and the remaining shortfall on weak and moderate is in cut cells booked at about 75 percent of their analytic current (cells 68, 28, 134, 75, 72, 13 on weak), which is the read boundary sitting inside the analytic separatrix on the outboard side: the flux-read consistency item, not the clip. The one-percent acceptance is met on strong only. Gate two (test files at head and base) produced no readable log because pytest output went to the node&#x27;s /tmp and the base checkout path no longer existed; the worker then died reading a PNG. Continuation dispatched at 91172471.</p></div>
+    <div class="r-comment-body"><p>Rung A implemented and its first gate measured, second gate lost. On the committed terminal states the unit-amplitude ratio to the analytic total moved from 0.9526 to 0.9671 on weak (41 of 43 cut cells participating), 0.9803 to 0.9813 on moderate (45 of 46), 1.0043 to 0.9974 on strong (44 of 44). The chord clip against the iterate flux is now real, and the remaining shortfall on weak and moderate is in cut cells booked at about 75 percent of their analytic current (cells 68, 28, 134, 75, 72, 13 on weak), which is the read boundary sitting inside the analytic separatrix on the outboard side: the flux-read consistency item, not the clip. The one-percent acceptance is met on strong only. Gate two (test files at head and base) produced no readable log because pytest output went to the node's /tmp and the base checkout path no longer existed; the worker then died reading a PNG. Continuation dispatched at 91172471.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260910T113535191293-cca-rung-a-test-gate" data-who="s19i-cca-rung-a2" data-when="2026-09-10T13:27:59.271Z">
+    <div class="r-comment-body"><p>Rung A test gate passed with an empty added-failure set: the three test_forward_operator_domain failures are pre-existing and identical at both revisions. The amplitude receipt and three booked-minus-analytic panels are committed at ef0f38b6 on top of the implementation 91172471 (signed-flux chord clip with geometric candidacy, ledger booking by clipped side). Not merged: the one-percent amplitude acceptance holds on strong only (0.9974) and not on weak (0.9671) or moderate (0.9813), and the read-representation discriminator decides how much of that is state error before the default changes on main; the certificate re-solve runs at this tip.</p></div>
 </div>
 </section>
 

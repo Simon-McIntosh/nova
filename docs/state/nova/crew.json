@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T01:32:29",
+  "updated": "2026-09-10T02:28:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -148336,6 +148336,193 @@
         "watch_override": null,
         "tool_steps": 60.0,
         "orientation_input_tokens": 2869063.0
+      },
+      {
+        "run_id": "r-20260909T230900376403-fsa-transport-test-health",
+        "plan": "forward-solve-api",
+        "section": "\u00a73",
+        "node": "fsa-transport-test-health",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 551,
+                "cached_input_tokens": 304962,
+                "input_tokens": 305545,
+                "output_tokens": 2614,
+                "reasoning_output_tokens": 21,
+                "total_tokens": 308159,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Both tests/test_transport_evolved_state.py::test_mapped_source_converges_with_force_and_current_receipts and tests/test_transport_public_surface.py::test_every_declared_public_name_imports_from_transport_package pass in fresh all_debug CPU x64 processes (one srun each, root venv python directly, PYTHONPATH at the worktree, log per process, EXIT=0 printed), the evolved-state repair changes the mechanism behind the 1.96e-3 current-ledger residual and not the 1e-12 bound (state in the manifest what conserved quantity was lost and where), the public-surface expected set gains the eleven window-batch names with descriptions, and tests/test_transport_forward_seam.py plus tests/test_transport_coupled_window.py still pass in one further all_debug process with zero added failures against base. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv at all.",
+          "estimated_hours": 2.0,
+          "goal": "Repair the two pre-existing transport test failures that the seam gates exposed so both tests pass without any bound being widened",
+          "id": "fsa-transport-test-health",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-09T23:09:00Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T230900376403-fsa-transport-test-health/manifest.md",
+          "plan": "forward-solve-api",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/transport",
+            "tests/test_transport_evolved_state.py",
+            "tests/test_transport_public_surface.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-fsa-health",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-09T23:09:08Z",
+        "completed_at": "2026-09-10T00:26:31.219Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4635,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4643,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "5855dc7d5242d45a470b7d17994126cad6290f06",
+        "commits": [
+          "d13330c884199e17db2978e27f8b64a7e495d5e7",
+          "7b08dd46a6b566fb7fc32419fc45b50cf0623a26",
+          "12488bc2eb8a10cee962b4389a126917f8c57cb7"
+        ],
+        "changed_lines": {
+          "added": 76,
+          "removed": 12,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug CPU x64 fresh processes at 12488bc2: tests/test_transport_evolved_state.py (1 passed, 1 xfailed strict, 723.83s), tests/test_transport_public_surface.py (1 passed), tests/test_transport_coupled_window.py (14 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T230900376403-fsa-transport-test-health/evolved_state_final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260909T230900376403-fsa-transport-test-health/manifest.md",
+        "scope_changed": false,
+        "session_id": "5fa79ed6-6644-433a-bb6f-620d7cdd2744",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2385125,
+            "input_tokens_cumulative": 2385125,
+            "output_tokens": 17473,
+            "output_tokens_cumulative": 17473,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T00:26:31.219Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 2385125,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1192.026,
+          "generated_tokens": 17473,
+          "generation_seconds": 535.118,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 17.5,
+          "machine_seconds": 656.908,
+          "peak_input_tokens": 177976,
+          "tokens_per_second": 32.65,
+          "wall_tokens_per_second": 14.66
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/fsa-transport-test-health",
+          "session_id": "5fa79ed6-6644-433a-bb6f-620d7cdd2744",
+          "session_source": "stream",
+          "retained_at": "2026-09-10T00:26:31.219Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 66.0,
+        "orientation_input_tokens": 2622709.0
       }
     ],
     "holds": [
@@ -148648,6 +148835,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2398
+    "_version": 2399
   }
 }

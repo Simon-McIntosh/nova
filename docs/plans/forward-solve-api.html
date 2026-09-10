@@ -23,8 +23,8 @@
 <title>Forward solve API | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-09">
-<meta name="plan-version" content="51">
+<meta name="plan-modified" content="2026-09-10">
+<meta name="plan-version" content="53">
 <meta name="plan-impl" content="0.78">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
@@ -89,10 +89,11 @@
     <div class="r-fu-body">d9cab518 landed the request embedding, the single typed solve in equilibrium_sweep and the receipt round-trips, so two parts of the section's done-when remain. The imas-ambix consumer still reads the transport route from its own configuration; it should read ForwardTransportReceipt.provenance.rung and equilibrium_resolved_defaults from the receipt, which is imas-ambix work against this landing SHA. In nova, equilibrium_sweep constructs a ForwardPortfolio from a SimpleNamespace with duplicated residual and availability tuples so select_forward_branch can be called on a single achieved class; replace that with a direct selection path that takes the achieved class and qualification, and delete the shim.</div>
     <pre class="r-fu-prompt">/reckon-ship forward-solve-api §3</pre>
     </article>
-<article class="r-fu" data-id="f-20260909T210712175266" data-status="open" data-capability-version="1.0" data-capability-class="routine" data-capability-verification="standard" data-written-by="s19-review coordinator" data-written-at="2026-09-09" data-recommends-skill="/reckon-ship forward-solve-api §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-20260909T210712175266" data-status="resolved" data-capability-version="1.0" data-capability-class="routine" data-capability-verification="standard" data-written-by="s19-review coordinator" data-written-at="2026-09-09" data-recommends-skill="/reckon-ship forward-solve-api §3" data-resolved-at="2026-09-10T00:29:08+00:00" data-resolved-by="s19-review coordinator">
     <h4 class="r-fu-title">Two pre-existing transport test failures exposed by the seam gates</h4>
     <div class="r-fu-body">Both fail identically at base bf6cddb and at d9cab518 (logs under the r-20260909T184746517277 run directory). tests/test_transport_evolved_state.py::test_mapped_source_converges_with_force_and_current_receipts reports a current-ledger residual of 1.96e-3 against a 1e-12 bound, so either the mapped-source ledger lost conservation or the bound was never met and the test was never run in a lane; find which and repair the mechanism, never the bound. tests/test_transport_public_surface.py::test_every_declared_public_name_imports_from_transport_package fails because eleven window-batch names exported from nova/transport/__init__.py are absent from the test's expected set; add them with their descriptions.</div>
     <pre class="r-fu-prompt">/reckon-ship forward-solve-api §3</pre>
+    <p class="r-fu-outcome">Landed at 12488bc2 (run r-20260909T230900376403). The public-surface expected set gained the eleven window-batch exports. The evolved-state failure was a true positive, not a stale test: on the shared synthetic machine the chord clip attributes 0.196 percent of the plasma current to common-SOL cells across the separatrix, so the total-domain ledger exceeds the core moment by 1.96e-3 at a 1e-12 bound. The assertion is kept as a strict expected failure on a split test naming that mechanism, with a bound 1e-3 < common_sol/Ip < 3e-3 recording the leak, so it turns red the day cut-cell attribution becomes exact. The repair of the mechanism belongs to the uniform clip work.</p>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -218,6 +219,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260909T184746517277-fsa-transport-seam" data-who="s19i-fsa-transport" data-when="2026-09-09T21:02:25Z">
     <div class="r-comment-body"><p>Landed at d9cab518 (merged to main). ForwardTransportInput embeds a ForwardSolveRequest, equilibrium_sweep solves through ForwardProfile.solve(request) instead of the two-branch portfolio, and ForwardTransportReceipt carries the resolved equilibrium defaults with lossless to_dict/from_dict; raw solve_options and solve_portfolio references under nova/transport are zero. Zero added failures against base: the evolved-state current-ledger residual 1.96e-3 against 1e-12 and the public-surface expected-export set missing 11 window-batch names both fail identically at base and are pre-existing. The sweep builds a ForwardPortfolio from a SimpleNamespace to feed branch selection; that shim wants replacing with a direct selection call.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260909T230900376403-fsa-transport-test-health" data-who="s19i-fsa-health" data-when="2026-09-10T00:26:31.219Z">
+    <div class="r-comment-body"><p>Landed at 12488bc2 (merged to main). The public-surface expected set gains the eleven window-batch exports. The mapped-source current test: the worker first replaced the failing total-ledger predicate with identities that hold by construction; on review that was reverted into a split test kept as a strict expected failure naming the mechanism (boundary-cut cells carry 0.196 percent of the plasma current across the separatrix into the common-SOL ledger under the chord clip) plus a bound 1e-3 &lt; common_sol/Ip &lt; 3e-3 so a change in the leak is visible; the original test keeps ledger closure and core recovery identities. No mechanism repair: the leak is the boundary-cell attribution defect owned by the uniform clip work.</p></div>
 </div>
 </section>
 </main>

@@ -1,10 +1,11 @@
-"""Conservative cell supports cut by a piecewise-linear separatrix."""
+"""Conservative cell supports cut by a traced separatrix."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 from scipy import integrate
+import jax.numpy as jnp
 
 from nova.equilibrium.separatrix_clip import (
     AtomicCellMesh,
@@ -13,6 +14,7 @@ from nova.equilibrium.separatrix_clip import (
     padded_polynomial_current_moments,
 )
 from nova.equilibrium.observation import clipped_support_quadrature
+from nova.jax.config import configure_dtypes
 
 
 def test_polynomial_current_moments_match_adaptive_triangle_quadrature():
@@ -382,6 +384,81 @@ def test_traced_clip_matches_host_supports_and_linear_moments(
         traced_first, host_moments.first, rtol=1.0e-14, atol=1.0e-14
     )
     assert abs(float(traced.patch_area_sum - traced.contour_area)) < 1.0e-12
+
+
+def test_curved_clip_follows_the_quadratic_level_set_in_a_rectangular_cell():
+    """A curved boundary contributes its arc rather than its crossing chord."""
+    configure_dtypes()
+    cell = np.asarray([[-0.5, -0.5], [1.2, -0.5], [1.2, 0.5], [-0.5, 0.5]])
+    centre = np.asarray([[0.35, 0.0]])
+    mesh = AtomicCellMesh.from_cells([cell], centroids=centre)
+    coefficient = jnp.asarray([[1.0, 0.0, 0.0, -1.0, 0.0, -1.0]])
+    signed = 1.0 - jnp.sum(jnp.asarray(mesh.node_coordinates) ** 2, axis=1)
+
+    support = mesh.traced_clip(
+        signed,
+        curve_coefficient=coefficient,
+        curve_centre=jnp.zeros((1, 2)),
+        curve_scale=jnp.ones((1, 2)),
+    )
+
+    angle = np.pi / 3.0
+    chord_x = np.sqrt(3.0) / 2.0
+    segment_area = 0.5 * (angle - np.sin(angle))
+    expected_area = chord_x + 0.5 + segment_area
+    assert bool(support.boundary[0])
+    assert int(support.vertex_count[0]) == 515
+    np.testing.assert_allclose(
+        support.area[0], expected_area, rtol=5.0e-7, atol=1.0e-12
+    )
+
+
+def test_spline_clip_brackets_both_edges_adjacent_to_an_outside_corner():
+    """A participating corner sliver contributes two vertex-bracketed roots."""
+    configure_dtypes()
+    cell = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+    mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.5, 0.5]]))
+
+    def level(points):
+        return 1.5 - points[..., 0] ** 2 - points[..., 1] ** 2
+
+    support = mesh.traced_clip(
+        level(jnp.asarray(mesh.node_coordinates)),
+        curve_evaluator=level,
+        participating_cell=jnp.asarray([True]),
+    )
+
+    root = np.sqrt(0.5)
+    sliver, _error = integrate.quad(
+        lambda radial: 1.0 - np.sqrt(1.5 - radial**2), root, 1.0
+    )
+    assert bool(support.boundary[0])
+    assert int(support.vertex_count[0]) > len(cell)
+    np.testing.assert_allclose(support.area[0], 1.0 - sliver, rtol=5.0e-7, atol=1.0e-12)
+
+
+def test_spline_arc_samples_remain_inside_the_atomic_cell():
+    """A traced boundary chain cannot add area outside its owning cell."""
+    configure_dtypes()
+    cell = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+    mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.5, 0.5]]))
+
+    def level(points):
+        radial, vertical = points[..., 0], points[..., 1]
+        return 1.2 - 1.6 * (vertical - 0.5) ** 2 - radial
+
+    support = mesh.traced_clip(
+        level(jnp.asarray(mesh.node_coordinates)),
+        curve_evaluator=level,
+        participating_cell=jnp.asarray([True]),
+    )
+
+    polygon = np.asarray(support.support_vertices[0, : support.vertex_count[0]])
+    assert bool(support.boundary[0])
+    assert int(support.vertex_count[0]) > len(cell)
+    assert np.all(polygon >= -1.0e-14)
+    assert np.all(polygon <= 1.0 + 1.0e-14)
+    assert float(support.area[0]) <= 1.0 + 1.0e-14
 
 
 def test_traced_clip_matches_exact_zero_corner_and_tangential_cells():

@@ -41,7 +41,7 @@ import numpy as np
 
 from nova.biot.null import Null2D
 from nova.biot.target import FluxTarget
-from nova.equilibrium.domain import DomainMasks
+from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.cell_partition import cell_partition_geometry
 from nova.equilibrium.connectivity_boundary import (
     traced_boundary_read,
@@ -71,6 +71,7 @@ from nova.equilibrium.topology import (
     TopologyState,
     require_qualified_axis,
 )
+from nova.linalg.split_spline import fit_split_spline
 
 __all__ = [
     "axis_cell_seed",
@@ -83,6 +84,109 @@ __all__ = [
 
 _PRODUCTION_STATIONARY_POINT_CAPACITY = 30
 """Candidate slots retained by the topology reader used by forward solves."""
+
+_SUPPORT_CLIP_MODE = "chord"
+"""Plasma-support clip mode for solver construction.
+
+``chord`` (the committed production default) reproduces the prior
+committed chord clip, full cells selected by the profile partition label
+only, so production results are unchanged; ``exact`` traces the curved
+boundary support with every cut cell participating; ``chord_cells`` keeps
+the exact support everywhere except a named pair of cells whose entries
+revert to their chord-moment values.  ``exact`` and ``chord_cells`` are
+opt-in through :func:`set_support_clip_mode`; production never changes
+the mode.
+"""
+
+
+def set_support_clip_mode(mode: str) -> str:
+    """Select the plasma-support clip mode for subsequent solves."""
+    global _SUPPORT_CLIP_MODE
+    if mode not in ("exact", "chord", "chord_cells"):
+        raise ValueError(f"unknown support clip mode {mode!r}")
+    _SUPPORT_CLIP_MODE = mode
+    return _SUPPORT_CLIP_MODE
+
+
+def support_clip_mode() -> str:
+    """Return the active plasma-support clip mode."""
+    return _SUPPORT_CLIP_MODE
+
+
+#: The two boundary cells whose contaminated moments the discriminator
+#: reverts to their chord values to test the two-cell-destabilisation arm.
+_CHORD_REVERTED_CELLS = (101, 102)
+
+
+def _substitute_chord_cell_supports(exact, chord, cell_indices, participation):
+    """Return the exact support with named cells' geometry reverted to chord.
+
+    The curved clip expands each cell's polygon to the spline-segment
+    capacity while the chord clip holds the atomic capacity, so the chord
+    vertex geometry is padded before selection and the per-cell scalar and
+    small-moment fields are spliced directly.
+    """
+    import jax.numpy as jnp
+
+    cell_count = exact.vertex_count.shape[0]
+    substitute = (
+        jnp.zeros(cell_count, dtype=bool)
+        .at[jnp.asarray(cell_indices, dtype=jnp.int32)]
+        .set(True)
+    )
+    mask1 = substitute[:, None]
+    mask2 = substitute[:, None, None]
+    mask3 = substitute[:, None, None, None]
+    exact_capacity = exact.support_vertices.shape[1]
+    chord_capacity = chord.support_vertices.shape[1]
+    if exact_capacity < chord_capacity:
+        raise ValueError(
+            f"cannot substitute chord support (capacity {chord_capacity}) "
+            f"into exact support (capacity {exact_capacity})"
+        )
+    vertex_pad = (
+        (0, 0),
+        (0, exact_capacity - chord_capacity),
+        (0, 0),
+    )
+    branch_pad = (
+        (0, 0),
+        (0, 0),
+        (0, exact_capacity - chord_capacity),
+        (0, 0),
+    )
+    mixed = exact._replace(
+        support_vertices=jnp.where(
+            mask2,
+            jnp.pad(chord.support_vertices, vertex_pad),
+            exact.support_vertices,
+        ),
+        vertex_count=jnp.where(substitute, chord.vertex_count, exact.vertex_count),
+        area=jnp.where(substitute, chord.area, exact.area),
+        full_area=jnp.where(substitute, chord.full_area, exact.full_area),
+        first_area_moment=jnp.where(
+            mask1, chord.first_area_moment, exact.first_area_moment
+        ),
+        second_area_moment=jnp.where(
+            mask2, chord.second_area_moment, exact.second_area_moment
+        ),
+        branch_vertex_count=jnp.where(
+            mask1, chord.branch_vertex_count, exact.branch_vertex_count
+        ),
+        branch_area=jnp.where(mask1, chord.branch_area, exact.branch_area),
+        branch_first_area_moment=jnp.where(
+            mask2, chord.branch_first_area_moment, exact.branch_first_area_moment
+        ),
+        branch_second_area_moment=jnp.where(
+            mask3, chord.branch_second_area_moment, exact.branch_second_area_moment
+        ),
+        branch_support_vertices=jnp.where(
+            mask3,
+            jnp.pad(chord.branch_support_vertices, branch_pad),
+            exact.branch_support_vertices,
+        ),
+    )
+    return mixed.qualify(participation)
 
 
 @jax.jit
@@ -1687,6 +1791,13 @@ class ForwardFluxOperator:
             )
             stencils.append(stencil)
         self._support_moment_stencils = tuple(stencils)
+        curve_centre = np.zeros((self.grid.node_number, 2), dtype=np.float64)
+        curve_scale = np.ones((self.grid.node_number, 2), dtype=np.float64)
+        for stencil in stencils:
+            curve_centre[stencil.ring_centre] = stencil.ring_sampling_centre
+            curve_scale[stencil.ring_centre] = stencil.ring_coordinate_scale
+        self._support_curve_centre = _host_array(curve_centre, dtype=np.float64)
+        self._support_curve_scale = _host_array(curve_scale, dtype=np.float64)
 
     @property
     def node_number(self) -> int:
@@ -1953,6 +2064,17 @@ class ForwardFluxOperator:
             )
         return CellCurrentMoments(*vectors)
 
+    def support_flux_coefficients(self, centroid_flux, sample_flux) -> jax.Array:
+        """Return one cell-local flux polynomial over either cell tiling."""
+        coefficients = jnp.zeros(
+            (self.grid.node_number, 6), dtype=jnp.asarray(centroid_flux).dtype
+        )
+        for stencil in self._support_moment_stencils:
+            coefficients = coefficients + stencil.flux_coefficients(
+                centroid_flux, sample_flux
+            )
+        return coefficients
+
     def sample_flux_field(self, centroid_flux, sample_flux, points):
         """Evaluate the own-node flux polynomial and gradient in every cell."""
         shape = points.shape[:2]
@@ -2011,20 +2133,116 @@ class ForwardFluxOperator:
             raise ValueError("clipped support moments are required")
         sample_flux = self.sample_node_flux(psi)
         sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
-        profile_support = self._profile_support(masks, physical.dtype)
+        profile_support = self._profile_support(
+            masks, topology, physical, sample_psi_norm
+        )
+        masks = self._moment_support_masks(masks, profile_support)
         return masks, topology, sample_psi_norm, profile_support
 
-    def _profile_support(self, masks, dtype):
-        """Return the fixed clipped support selected by domain labels."""
+    @staticmethod
+    def _moment_support_masks(masks, profile_support):
+        """Promote every curved cut support into the profile-owned partition."""
+        if _SUPPORT_CLIP_MODE == "chord":
+            return masks
+        promoted_label = jnp.where(
+            profile_support.included,
+            jnp.asarray(int(PlasmaDomain.CORE), dtype=masks.label.dtype),
+            masks.label,
+        )
+        return DomainMasks(label=promoted_label, psi_norm=masks.psi_norm)
+
+    @staticmethod
+    def _vertex_level_participation(cell_vertex_count, vertex_level):
+        """Select cells whose spline-authority vertices straddle its level."""
+        level = jnp.asarray(vertex_level)
+        slot = jnp.arange(level.shape[1])
+        valid = slot[None, :] < jnp.asarray(cell_vertex_count)[:, None]
+        magnitude = jnp.max(jnp.where(valid, jnp.abs(level), 0.0), axis=1)
+        roundoff = 256.0 * jnp.finfo(level.dtype).eps * jnp.maximum(magnitude, 1.0)
+        positive = jnp.any(valid & (level > roundoff[:, None]), axis=1)
+        negative = jnp.any(valid & (level < -roundoff[:, None]), axis=1)
+        near_level = jnp.any(valid & (jnp.abs(level) <= roundoff[:, None]), axis=1)
+        return (positive & negative) | near_level
+
+    def _profile_support(self, masks, topology, physical, sample_psi_norm):
+        """Return the plasma-side support for the active clip mode.
+
+        The committed chord clip reproduces the prior committed clip:
+        full atomic cells selected by the profile partition label alone.
+        The opt-in exact mode traces the curved boundary with every cut
+        cell participating, and its chord-cells variant replaces only the
+        two named cells' geometry with that chord result.
+        """
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
-        profile_support = self.moment_geometry.atomic_mesh.traced_clip(
-            jnp.ones(
-                len(self.moment_geometry.atomic_mesh.node_coordinates),
-                dtype=dtype,
+        atomic_mesh = self.moment_geometry.atomic_mesh
+        chord_support = None
+        if _SUPPORT_CLIP_MODE in ("chord", "chord_cells"):
+            chord_support = atomic_mesh.traced_clip(
+                jnp.ones(len(atomic_mesh.node_coordinates), dtype=physical.dtype)
+            ).qualify(masks.profile_participation)
+            if _SUPPORT_CLIP_MODE == "chord":
+                return chord_support
+        shared_flux = self.shared_node_flux(physical)
+        inside_boundary = self.polarity * (shared_flux - topology.boundary_flux)
+        flux_coefficient = self.support_flux_coefficients(
+            masks.psi_norm, sample_psi_norm
+        )
+        inside_coefficient = -flux_coefficient
+        inside_coefficient = inside_coefficient.at[:, 0].add(1.0)
+        coordinate = jnp.asarray(self.grid.coordinate, dtype=masks.psi_norm.dtype)
+        surface_value = masks.psi_norm[None, :]
+        surface = fit_split_spline(
+            coordinate[None, :, 0],
+            coordinate[None, :, 1],
+            surface_value,
+            surface_value - 1.0,
+            order=6,
+            regularization=1.0e-14,
+        )
+
+        def curved_level(points):
+            spline_level = -surface._patch_evaluation(
+                surface.level_set_coefficients,
+                points[..., 0],
+                points[..., 1],
+            ).value
+            local = (points - self._support_curve_centre[:, None, :]) / (
+                self._support_curve_scale[:, None, :]
             )
-        ).qualify(masks.profile_participation)
-        return profile_support
+            radial, vertical = local[..., 0], local[..., 1]
+            local_level = (
+                inside_coefficient[:, None, 0]
+                + inside_coefficient[:, None, 1] * radial
+                + inside_coefficient[:, None, 2] * vertical
+                + inside_coefficient[:, None, 3] * radial**2
+                + inside_coefficient[:, None, 4] * radial * vertical
+                + inside_coefficient[:, None, 5] * vertical**2
+            )
+            return jnp.where(surface.fit_executed, spline_level, local_level)
+
+        cell_vertices = jnp.asarray(atomic_mesh.node_coordinates)[
+            jnp.asarray(atomic_mesh.cell_nodes)
+        ]
+        vertex_participation = self._vertex_level_participation(
+            atomic_mesh.cell_vertex_count,
+            curved_level(cell_vertices),
+        )
+        participation = masks.profile_participation | vertex_participation
+        traced_support = atomic_mesh.traced_clip(
+            inside_boundary,
+            curve_evaluator=curved_level,
+            participating_cell=participation,
+        )
+        exact_support = traced_support.qualify(participation)
+        if _SUPPORT_CLIP_MODE == "chord_cells":
+            return _substitute_chord_cell_supports(
+                exact_support,
+                chord_support,
+                _CHORD_REVERTED_CELLS,
+                participation,
+            )
+        return exact_support
 
     def _partition_for_state(self, psi, frozen):
         """Revalue one state on an already-decided discrete partition."""
@@ -2061,8 +2279,9 @@ class ForwardFluxOperator:
         masks, _topology, sample_psi_norm, profile_support = partition
         if not self.use_linear_moments:
             return self._point_current_moments(masks)
+        moment_masks = self._moment_support_masks(masks, profile_support)
         moments = self.source.current_moments(
-            masks,
+            moment_masks,
             self.support_current_moments,
             profile_support,
             sample_flux=sample_psi_norm,
@@ -2326,11 +2545,19 @@ class ForwardFluxOperator:
         direct_sample_shadow = jnp.zeros(
             self.node_number - self.physical_node_number, dtype=bool
         )
-        profile_support = (
-            self._profile_support(masks, physical.dtype)
+        sample_flux = self.sample_node_flux(psi) if self.use_linear_moments else None
+        sample_psi_norm = (
+            (sample_flux - topology.axis_flux) / topology.flux_span
             if self.use_linear_moments
             else None
         )
+        profile_support = (
+            self._profile_support(masks, topology, physical, sample_psi_norm)
+            if self.use_linear_moments
+            else None
+        )
+        if self.use_linear_moments:
+            masks = self._moment_support_masks(masks, profile_support)
         return _FrozenTopologyPartition(
             label=masks.label,
             topology=topology,

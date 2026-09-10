@@ -1462,8 +1462,8 @@ def _draw_figure_one(
     crossing = int(plot["analytic_crossing_count"][cell])
     axis.set_title(
         f"cell {int(cell)}: analytic separatrix crossing count {crossing}\n"
-        f"grey hex: atomic cell; blue: chord support; green: exact chain; "
-        f"black: analytic core-side region; red: analytic separatrix",
+        f"grey: atomic cell | blue: chord support | green: exact chain\n"
+        f"black: analytic core-side region | red: analytic separatrix",
         fontsize=7,
     )
 
@@ -1505,6 +1505,22 @@ def _draw_figure_two(axis: Any, row: dict[str, Any]) -> None:
     for cell in np.flatnonzero(cut_mask):
         polygon = polygons[int(cell)]
         axis.plot(polygon[:, 0], polygon[:, 1], color="0.3", linewidth=0.5)
+    # analytic separatrix reference: the outlined grey cells are exactly the
+    # cells this curve crosses (analytic cut cells, not the read's boundary)
+    lobe = np.asarray(plot["core_lobe_rz_m"], dtype=np.float64)
+    axis.plot(
+        lobe[:, 0],
+        lobe[:, 1],
+        color="0.1",
+        linewidth=1.0,
+        linestyle=(0, (4, 2)),
+        zorder=2,
+    )
+    for leg in plot["divertor_legs_rz_m"]:
+        leg = np.asarray(leg, dtype=np.float64)
+        axis.plot(
+            leg[:, 0], leg[:, 1], color="0.1", linewidth=1.0, linestyle=(0, (4, 2))
+        )
     exact = np.asarray(plot["exact_state_wb"], dtype=np.float64)
     node = np.asarray(plot["node_rz_m"], dtype=np.float64)
     flux_raster = LinearNDInterpolator(node, exact, fill_value=np.nan)(
@@ -1535,9 +1551,13 @@ def _draw_figure_two(axis: Any, row: dict[str, Any]) -> None:
             f"{item['cell']}({item['crossing_count']})" for item in dominated[:4]
         )
     )
+    outlined = int(np.count_nonzero(cut_mask))
     axis.set_title(
-        f"{row['case']} {row['requested_cells']} cells: chord minus analytic\n"
-        f"per-cell current magnitude; cut cells outlined; dominated {text}",
+        f"{row['case']} {row['requested_cells']} cells: |chord - analytic| "
+        f"per-cell current\n"
+        f"grey outlines: {outlined} cells the analytic separatrix crosses; "
+        f"dashed: analytic separatrix\n"
+        f"dominated {text}",
         fontsize=7,
     )
 

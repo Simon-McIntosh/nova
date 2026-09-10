@@ -169,6 +169,8 @@ _STAGE_MARKS: list[tuple[str, float]] = []
 #: time, so each distinct value compiles its own direction program under the
 #: persistent compilation cache.
 _STEP_RELAXATION = 1.0
+#: measurement-only count of relaxed Newton directions executed this trip
+_RELAXED_STEP_EXECUTIONS = 0
 
 
 def set_step_relaxation(value: float) -> float:
@@ -177,6 +179,9 @@ def set_step_relaxation(value: float) -> float:
     if not np.isfinite(value) or value <= 0.0:
         raise ValueError(f"step relaxation must be finite and positive, got {value!r}")
     _STEP_RELAXATION = float(value)
+    if value != 1.0:
+        #: measurement-only: proves which solver loop the damping reached
+        print(f"STEP_RELAXATION_SET value={value!r}", flush=True)
     return _STEP_RELAXATION
 
 
@@ -1102,6 +1107,7 @@ def _plain_newton_trip(
     rule replaces; a threshold of one fires additionally only where an
     accepted step grew the reduced residual.
     """
+    global _RELAXED_STEP_EXECUTIONS
     jacobian, jacobian_wall = _timed(kernels["jacobian"], reduced, shadow, base_state)
     census = {
         "steps": 0,
@@ -1163,6 +1169,7 @@ def _plain_newton_trip(
             else:
                 direction = kernels["direction"](jacobian, scores.residual)
             if _STEP_RELAXATION != 1.0:
+                _RELAXED_STEP_EXECUTIONS += 1
                 direction = direction * _STEP_RELAXATION
             if project_candidate is None:
                 accepted, _tried, promotion = grader(
@@ -1235,6 +1242,12 @@ def _plain_newton_trip(
             fresh = False
         census["steps"] += 1
         accepted_norm = scores.residual_norm
+    if _RELAXED_STEP_EXECUTIONS:
+        print(
+            f"STEP_RELAXATION_APPLIED count={_RELAXED_STEP_EXECUTIONS} trip={trip}",
+            flush=True,
+        )
+        _RELAXED_STEP_EXECUTIONS = 0
     return reduced, census
 
 

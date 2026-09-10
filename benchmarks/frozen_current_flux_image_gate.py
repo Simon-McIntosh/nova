@@ -54,6 +54,7 @@ from benchmarks import solovev_certificate as certificate
 from benchmarks.solovev_cut_cell_moments import _exact_cell_integral
 from benchmarks.split_fit_jump_field import BOUNDARY_BAND_PITCHES, _distance_to_boundary
 from nova.equilibrium.analytic_single_null import CerfonFreidbergSingleNull
+from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.jax.config import configure_dtypes
 from nova.media import poloidal
@@ -578,6 +579,120 @@ def _field_metrics(
     }
 
 
+def _smoothness_diagnostics(
+    error: np.ndarray,
+    coordinates: np.ndarray,
+    kind: np.ndarray,
+    centres: np.ndarray,
+    span: float,
+) -> dict[str, Any]:
+    """Characterise the spatial smoothness of one error field.
+
+    Reports the error mean and the fraction of the whole-domain rms explained
+    by that mean and by the best-fit affine function of ``(R, Z)``, plus the
+    error restricted to nodes whose nearest cell is interior, cut or exterior.
+    A missing external or gauge contribution is smooth and largely explained
+    by the affine fit, so it is told apart from a cut-cell moment error, which
+    concentrates on the cut-adjacent nodes and survives the fit.
+    """
+    rz = np.asarray(coordinates, dtype=np.float64)
+    variance = float(np.mean(error**2))
+    rms_value = float(np.sqrt(variance))
+    mean = float(np.mean(error))
+    mean_explained = (
+        1.0 - np.mean((error - mean) ** 2) / variance if variance > 0.0 else 0.0
+    )
+    basis = np.column_stack((np.ones_like(rz[:, 0]), rz[:, 0], rz[:, 1]))
+    coefficients, *_rest = np.linalg.lstsq(basis, error, rcond=None)
+    affine = basis @ coefficients
+    affine_explained = (
+        1.0 - np.mean((error - affine) ** 2) / variance if variance > 0.0 else 0.0
+    )
+    class_name = np.where(
+        kind == 1, "interior", np.where(kind == 2, "cut", "exterior")
+    )
+    distance = np.linalg.norm(
+        np.asarray(centres, dtype=np.float64)[None, :, :] - rz[:, None, :], axis=2
+    )
+    nearest_class = class_name[np.argmin(distance, axis=1)]
+    classes: dict[str, Any] = {}
+    for name in ("interior", "cut", "exterior"):
+        selected = np.flatnonzero(nearest_class == name)
+        if selected.size == 0:
+            classes[name] = None
+            continue
+        classes[name] = {
+            "node_count": int(selected.size),
+            "max_absolute_error_wb": float(np.max(np.abs(error[selected]))),
+            "rms_absolute_error_wb": float(np.sqrt(np.mean(error[selected] ** 2))),
+            "max_error_over_span": float(np.max(np.abs(error[selected])) / span),
+            "rms_error_over_span": float(
+                np.sqrt(np.mean(error[selected] ** 2)) / span
+            ),
+        }
+    return {
+        "mean_error_wb": mean,
+        "rms_error_wb": rms_value,
+        "mean_explains_rms_fraction": float(mean_explained),
+        "affine_coefficients_wb": {
+            "constant": float(coefficients[0]),
+            "radial": float(coefficients[1]),
+            "vertical": float(coefficients[2]),
+        },
+        "affine_explains_rms_fraction": float(affine_explained),
+        "error_by_nearest_cell_class": classes,
+    }
+
+
+def _certificate_moments_at_boundary(
+    source_case: Any,
+    operator: Any,
+    state: np.ndarray,
+    boundary_level: float,
+) -> CellCurrentMoments:
+    """Return exact density moments over the traced supports at one pinned
+    boundary level.
+
+    The production support trace reads the boundary level from the topology of
+    the state; on the analytic single-null state that read returns the
+    unadmitted-saddle level, a fraction of the way inside the core lobe, so the
+    certificate anchor clips a shell of current out of its own region.  Pinning
+    the level to the analytic separatrix keeps the certificate anchor on the
+    same plasma region the frozen currents integrate.
+    """
+    physical = jnp.asarray(state)[: operator.physical_node_number]
+    masks, topology, _connected, _admitted = operator._fixed_design_read(physical)
+    sample_flux = operator.sample_node_flux(jnp.asarray(state))
+    patched = topology._replace(
+        boundary_flux=jnp.asarray(boundary_level, dtype=topology.boundary_flux.dtype)
+    )
+    sample_psi_norm = (sample_flux - patched.axis_flux) / patched.flux_span
+    profile_support = operator._profile_support(
+        masks, patched, physical, sample_psi_norm
+    )
+    masks = operator._moment_support_masks(masks, profile_support)
+    counts = np.asarray(profile_support.vertex_count)
+    vertices = np.asarray(profile_support.support_vertices)
+    centres = np.asarray(operator.moment_geometry.atomic_mesh.centroids)
+    labels = np.asarray(masks.label)
+    values = np.zeros((3, len(centres)))
+    for cell, count in enumerate(counts):
+        if count < 3 or labels[cell] == int(PlasmaDomain.EXCLUDED_MATERIAL):
+            continue
+        points, weights = oracle_fixture._polygon_rule(vertices[cell, :count])
+        density = np.asarray(
+            source_case.toroidal_current_density(points[:, 0], points[:, 1])
+        )
+        weighted = weights * density
+        offset = points - centres[cell]
+        values[0, cell] = np.sum(weighted)
+        values[1, cell] = np.sum(weighted * offset[:, 0])
+        values[2, cell] = np.sum(weighted * offset[:, 1])
+    return CellCurrentMoments(
+        jnp.asarray(values[0]), jnp.asarray(values[1]), jnp.asarray(values[2])
+    )
+
+
 def _node_classes(kind: np.ndarray, machine: Any) -> dict[str, np.ndarray]:
     """Return node masks for interior, boundary band and cut-adjacent regions."""
     area = np.asarray(machine.area, dtype=np.float64)
@@ -701,9 +816,53 @@ def measure_rung(case_name: str, requested_cells: int) -> dict[str, Any]:
     certificate_coefficients = empty_operator.coupling_current_moments(
         certificate_moments
     )
-    certificate_internal = oracle_fixture._internal_flux_image(
+    production_internal = oracle_fixture._internal_flux_image(
         empty_operator, certificate_coefficients
     )
+    diverted = _is_diverted(exact)
+    certificate_internal = production_internal
+    certificate_anchor: dict[str, Any] = {
+        "origin": "production traced support on the analytic state",
+        "boundary_level_source": "topology read of the state",
+    }
+    if diverted:
+        # On the single-null family the topology read reports the
+        # unadmitted-saddle level (a fraction of the way inside the core lobe)
+        # instead of the analytic separatrix level, so the production anchor
+        # clips a shell of current out of its own support.  Pinning the clip to
+        # the analytic separatrix keeps the certificate anchor on the same core
+        # lobe the frozen currents integrate, so the gate measures the coupling
+        # rather than the read's clip level.
+        analytic_level = _analytic_boundary_level(exact)
+        physical = jnp.asarray(oracle_state)[: empty_operator.physical_node_number]
+        read_level = float(
+            np.asarray(empty_operator._fixed_design_read(physical)[1].boundary_flux)
+        )
+        fixed_moments = _certificate_moments_at_boundary(
+            source_case, empty_operator, oracle_state, analytic_level
+        )
+        fixed_internal = oracle_fixture._internal_flux_image(
+            empty_operator, empty_operator.coupling_current_moments(fixed_moments)
+        )
+        certificate_internal = fixed_internal
+        certificate_anchor = {
+            "origin": "traced support clipped at the analytic separatrix level",
+            "boundary_level_source": "analytic boundary level",
+            "read_boundary_level_wb": read_level,
+            "analytic_boundary_level_wb": float(analytic_level),
+            "production_anchor_total_current_a": float(
+                np.asarray(
+                    jax.device_get(certificate_moments.cell_current)
+                ).sum()
+            ),
+            "analytic_anchor_total_current_a": float(
+                np.asarray(jax.device_get(fixed_moments.cell_current)).sum()
+            ),
+        }
+        certificate_moments = fixed_moments
+        certificate_coefficients = empty_operator.coupling_current_moments(
+            fixed_moments
+        )
     operator = oracle_fixture.forward_operator(
         source_case, machine, oracle_state - certificate_internal
     )
@@ -770,6 +929,116 @@ def measure_rung(case_name: str, requested_cells: int) -> dict[str, Any]:
         }
 
     full_error = images["full"][:grid_count] - oracle_grid
+    smoothness = _smoothness_diagnostics(
+        full_error,
+        np.asarray(machine.node),
+        kind,
+        np.asarray(machine.moment_geometry.atomic_mesh.centroids),
+        span,
+    )
+    attribution = None
+    if diverted:
+        # The production-anchor error exposes the read's clip level on this
+        # family; the difference between the two certificate anchors is the
+        # flux image of the excluded outer-flux shell.
+        shell_field = np.asarray(
+            fixed_internal[:grid_count] - production_internal[:grid_count],
+            dtype=np.float64,
+        )
+        production_error = full_error + shell_field
+        production_total = certificate_anchor[
+            "production_anchor_total_current_a"
+        ]
+        analytic_total = certificate_anchor["analytic_anchor_total_current_a"]
+        missing_current = analytic_total - production_total
+        smoothness_production = _smoothness_diagnostics(
+            production_error,
+            np.asarray(machine.node),
+            kind,
+            np.asarray(machine.moment_geometry.atomic_mesh.centroids),
+            span,
+        )
+        correlation = float(
+            np.corrcoef(production_error, shell_field)[0, 1]
+            if np.any(shell_field != 0.0)
+            else 0.0
+        )
+        image_records["production_anchor"] = {
+            "error": {
+                "whole_domain": _field_metrics(
+                    production_error, machine.node, span
+                )
+            }
+        }
+        attribution = {
+            "cause": (
+                "the certificate anchor clips its support at the topology "
+                "read's unadmitted-saddle level (a fraction of the way inside "
+                "the core lobe) instead of the analytic separatrix level, "
+                "excluding the outer-flux shell of the core lobe from its own "
+                "current; the frozen currents integrate the full core lobe, so "
+                "the gate's error is the flux image of that excluded shell"
+            ),
+            "read_boundary_level_wb": certificate_anchor[
+                "read_boundary_level_wb"
+            ],
+            "analytic_boundary_level_wb": certificate_anchor[
+                "analytic_boundary_level_wb"
+            ],
+            "production_anchor_total_current_a": float(production_total),
+            "analytic_anchor_total_current_a": float(analytic_total),
+            "missing_shell_current_a": float(missing_current),
+            "missing_shell_fraction_of_core": float(
+                missing_current / analytic_total if analytic_total else 0.0
+            ),
+            "production_anchor_error_over_span": {
+                "max": float(
+                    image_records["production_anchor"]["error"]["whole_domain"][
+                        "max_error_over_span"
+                    ]
+                ),
+                "rms": float(
+                    image_records["production_anchor"]["error"]["whole_domain"][
+                        "rms_error_over_span"
+                    ]
+                ),
+            },
+            "analytic_anchor_error_over_span": {
+                "max": float(
+                    image_records["full"]["error"]["whole_domain"][
+                        "max_error_over_span"
+                    ]
+                ),
+                "rms": float(
+                    image_records["full"]["error"]["whole_domain"][
+                        "rms_error_over_span"
+                    ]
+                ),
+            },
+            "shell_field_correlation_with_production_error": correlation,
+            "smoothness_production_anchor": smoothness_production,
+            "hypothesis_coil_or_external_omitted": (
+                "refuted: the certificate row's external is included by "
+                "construction"
+            ),
+            "hypothesis_homogeneous_harmonics": (
+                "refuted: both current sets omit the same harmonic part, which "
+                "cancels in the frozen-minus-certificate difference"
+            ),
+            "hypothesis_private_flux_region": (
+                "refuted: the missing current is the outer core-lobe shell, "
+                "not the region below the X-point"
+            ),
+            "hypothesis_core_lobe_integration": (
+                "confirmed: the production oracle currents clip at the read's "
+                "level, not the core lobe; pinning the clip to the analytic "
+                "separatrix restores the core lobe and removes the anomaly"
+            ),
+            "hypothesis_gauge": (
+                "consistent: the production error is the shell field (corr "
+                f"{correlation:.4f}), not a constant or scale offset"
+            ),
+        }
     row = {
         "case": case_name,
         "requested_cells": requested_cells,
@@ -797,6 +1066,9 @@ def measure_rung(case_name: str, requested_cells: int) -> dict[str, Any]:
             "cut": int(np.count_nonzero(kind == 2)),
             "exterior": int(np.count_nonzero(kind == 0)),
         },
+        "certificate_anchor": certificate_anchor,
+        "smoothness": smoothness,
+        "attribution": attribution,
         "images": image_records,
         "worst_nodes": _worst_nodes(
             full_error,

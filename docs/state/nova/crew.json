@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T17:48:35",
+  "updated": "2026-09-10T18:17:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -150936,6 +150936,199 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T114647655089-cca-read-representation-discriminator",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a74",
+        "node": "cca-read-representation-discriminator",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 186,
+                "cached_input_tokens": 728729,
+                "input_tokens": 728917,
+                "output_tokens": 3400,
+                "reasoning_output_tokens": 1442,
+                "total_tokens": 732317,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file: this lane is text-only and a PNG read kills the session. One all_debug sbatch (never srun as a child of your shell; root venv python directly; PYTHONPATH at the worktree; JAX_PLATFORMS=cpu; TMPDIR=/tmp in submit environment and payload; logs under the run directory) runs benchmarks/read_representation_discriminator.py over the weak, moderate and strong -110 rows and the single-null -300 row. For each row it builds two flux states on the mesh nodes: the analytic Solov'ev or Cerfon-Freidberg flux sampled exactly at the nodes (exact input), and the committed terminal state (persisted render_data). For each state it locates the boundary level set under three representations and clips every cell against it with the same chord clip the production support now uses (traced_clip against inside_boundary, geometric candidacy): (a) linear interpolation of the nodal flux along each edge, which is what inside_boundary gives today; (b) the six-point ring quadratic of stencil_mesh evaluated on the cell (the local centroid-plus-vertex support); (c) the order-6 global split spline fit_split_spline that the exact mode uses for curved_level. For each row, state and representation it writes to a receipt: the unit-amplitude current total over the analytic total, the count of analytic cut cells participating, the six worst per-cell booked-minus-analytic currents, the median and maximum boundary position error of the edge roots against the analytic separatrix in metres and in cell pitches, and the sign check of the representation's level against the nodal flux at every cell (count of cells where they disagree). The decisive comparison is the exact-input state: a representation whose ratio is within 0.1 percent of unity there carries no representation error and the shortfall measured on the terminal state is state error; a representation that falls short on the exact input is at fault by that amount. One line-contour panel per row on the exact-input state showing the analytic separatrix beside the three representations' level sets with the cells where they differ outlined, nulls and wall drawn, under docs/figures/cut-cell-current-attribution/read-representation. The report at the reports path answers in one sentence per row whether the global spline, the ring quadratic or the linear edge root is at fault and by how much, and states the state-error share of the terminal shortfall. Manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 3.0,
+          "goal": "Separate state error from boundary-representation error in the cut-cell current shortfall by clipping against the analytic flux itself under each candidate representation of the boundary level",
+          "id": "cca-read-representation-discriminator",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T11:46:48Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T114647655089-cca-read-representation-discriminator/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/read_representation_discriminator.py",
+            "docs/figures/cut-cell-current-attribution/read-representation",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/read-representation"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-readrep",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T11:46:57Z",
+        "completed_at": "2026-09-10T16:13:45.324Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 15980,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 16008,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "91172471480ecc6913c2da2b76e3824d59b448e2",
+        "commits": [
+          "676d6bebcf8284d7459fb6b7f4feda2e98b92330",
+          "9a31a915538b021e6a6aeb2c070b5ac0e550fad2"
+        ],
+        "changed_lines": {
+          "added": 2665,
+          "removed": 0,
+          "files": 7
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug sbatch read_representation_final.sh: benchmarks/read_representation_discriminator.py over weak, moderate, strong -110 and single-null -300, exact-input and committed terminal states, linear edge root, ring quadratic and global split spline; rows measured 4 at 676d6beb, EXIT=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T114647655089-cca-read-representation-discriminator/read_representation_final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T114647655089-cca-read-representation-discriminator/manifest.md",
+        "scope_changed": false,
+        "session_id": "91ee0fae-0682-48c4-a95c-541b459fb531",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 47860541,
+            "input_tokens_cumulative": 47860541,
+            "output_tokens": 164410,
+            "output_tokens_cumulative": 164410,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T16:13:45.324Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 47860541,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 16004.516,
+          "generated_tokens": 164410,
+          "generation_seconds": 12456.402,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 34.1,
+          "machine_seconds": 3548.114,
+          "peak_input_tokens": 346995,
+          "tokens_per_second": 13.2,
+          "wall_tokens_per_second": 10.27
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-read-representation-discriminator",
+          "session_id": "91ee0fae-0682-48c4-a95c-541b459fb531",
+          "session_source": "stream",
+          "retained_at": "2026-09-10T16:13:45.324Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 215.0,
+        "orientation_input_tokens": 20842639.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -151248,6 +151441,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2424
+    "_version": 2425
   }
 }

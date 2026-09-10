@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-10">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 </head>
 <body>
 <main class="plan-doc">
@@ -144,6 +144,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260910T104323131412" data-who="s19-review coordinator" data-when="">
     <div class="r-comment-body">Rung B's merge half landed 2026-09-10 12:40: the exact-participation clip stack (0372d3fc), the discriminator (28a49bcb), the whole-cell default restoration (8d0e9224), the X-point cell RCA driver (88d82b4f) and the unit-amplitude census driver (637ebebd) are on main. Gate: 57 test files importing forward_operator, stencil_mesh, separatrix_clip or reduced_newton, one fresh CPU process each at the merged head b6630c41 and at main 658a465b, zero files whose failure set differs (17 pre-existing failures on both sides), run r-20260910T081852746967. Production default remains whole-cell booking, pinned bit-identical to main by tests/test_forward_support_clip_mode.py; exact and chord_cells are opt-in through set_support_clip_mode. What rung B still owes: the exact-clip tables on the same rows as rung A once rung A lands, and the eight-cell spline-versus-inside sign disagreement the census found in the exact path's curved_level evaluator. Rung A (cca-rung-a-reinstate-clip, run r-20260910T091931092593) is in flight on this base.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260910T081852746967-cca-clip-stack-merged-head-gate" data-who="s19t-clip-stack-gate" data-when="2026-09-10T10:58:14.686Z">
+    <div class="r-comment-body"><p>Integration gate passed: zero added test failures across 57 files at the merged clip stack head against main, with the 17 pre-existing failures identical on both sides; the two chunk-five timeouts were symmetric and their seven files were re-measured in a second wave. Receipt at the session reports directory (clip-stack-gate/receipt.md). The coordinator merged b6630c41 into main on this verdict.</p></div>
 </div>
 </section>
 

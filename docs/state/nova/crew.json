@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T11:31:39",
+  "updated": "2026-09-10T13:00:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -149932,6 +149932,190 @@
           "status": "failed",
           "error": "OperationalError: table runs has no column named payload"
         }
+      },
+      {
+        "run_id": "r-20260910T081852746967-cca-clip-stack-merged-head-gate",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-clip-stack-merged-head-gate",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1018,
+                "cached_input_tokens": 638620,
+                "input_tokens": 639670,
+                "output_tokens": 1766,
+                "reasoning_output_tokens": 479,
+                "total_tokens": 641436,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "For the 56 test files under tests/ that import nova.equilibrium.forward_operator, stencil_mesh, separatrix_clip or reduced_newton (list them with grep -l and record the list), run each file in its own fresh process at both revisions with pytest -p no:cacheprovider -m 'not slow' and the default CPU x64 lane (JAX_PLATFORMS=cpu, root venv python directly, PYTHONPATH at the revision's checkout: your worktree for b6630c41 and /home/ITER/mcintos/Code/nova for 658a465b), as sbatch jobs on all_debug with files sequential inside each job and at most 55 minutes per job, splitting the file list across as many one-hour jobs as needed with per-file logs and a per-file JSON result row written as each file finishes (never srun as a child of your shell; TMPDIR=/tmp in submit environment and payload; --output in the run directory). Files whose slow-marked tests are excluded by -m 'not slow' are noted, not run. The receipt at the reports path lists per file: collected, passed, failed, errored and the failure ids at each revision, then the added failures (present at b6630c41 and absent at 658a465b) and the removed ones; the gate is added failures equal to zero. Write the manifest with the job ids before waiting and end the turn; when resumed, assemble the receipt and the one-paragraph verdict. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 2.0,
+          "goal": "Measure the added test failures of the merged clip stack at b6630c41 against main at 658a465b over every test file that imports the changed equilibrium modules",
+          "id": "cca-clip-stack-merged-head-gate",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T08:18:52Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T081852746967-cca-clip-stack-merged-head-gate/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-stack-gate"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "s19t-clip-stack-gate",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T08:19:03Z",
+        "completed_at": "2026-09-10T10:58:14.686Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 9541,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 9551,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "b6630c41766cf954b3e251289c8f81978f1f5b1d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "twenty all_debug sbatch jobs (wave one 1268809-1268820, wave two 1268883-1268890): 57 test files importing forward_operator, stencil_mesh, separatrix_clip or reduced_newton, one fresh CPU x64 pytest process per file with -m 'not slow' at the merged head b6630c41 and at main 658a465b; added failures 0, 17 pre-existing failures on both sides, one file present at head only (3 of 3 pass)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T081852746967-cca-clip-stack-merged-head-gate/results/head-c1.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T081852746967-cca-clip-stack-merged-head-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "2a8c59db-ee18-46c1-9466-2adb451cd149",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 1385608,
+            "input_tokens_cumulative": 1385608,
+            "output_tokens": 10786,
+            "output_tokens_cumulative": 10786,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T10:58:14.686Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 1385608,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1089.014,
+          "generated_tokens": 10786,
+          "generation_seconds": 1085.653,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 14.7,
+          "machine_seconds": 3.361,
+          "peak_input_tokens": 149179,
+          "tokens_per_second": 9.94,
+          "wall_tokens_per_second": 9.9
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "scope_acceptances": null,
+        "no_commit": "report-only test node; the measured merge b6630c41 was integrated into main by the coordinator on this verdict",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-stack-merged-head-gate",
+          "session_id": "2a8c59db-ee18-46c1-9466-2adb451cd149",
+          "session_source": "stream",
+          "retained_at": "2026-09-10T10:58:14.686Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 34.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -150244,6 +150428,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2414
+    "_version": 2415
   }
 }

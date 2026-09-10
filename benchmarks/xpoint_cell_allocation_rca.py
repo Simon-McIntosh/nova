@@ -80,6 +80,7 @@ CHORD_REVERTED_CELLS = (101, 102)  # the two cells the discriminator reverts
 ADAPTIVE_RELATIVE_TOLERANCE = 5.0e-13
 ADAPTIVE_ABS_ERROR = 1.0e-12
 FIXED_INTERIOR_POINTS = 9  # Gauss points per axis on the fixed interior rule
+BANKED_ZEROTH_REPRODUCTION_BOUND = 1.0e-9  # relative banked exact-moment gate
 BANKED_WEAK_110_CUT_RECEIPT = (
     ROOT / "docs/figures/uniform-cell-clip-and-coupling/cut-cell-moments/receipt.json"
 )
@@ -310,9 +311,7 @@ def _plasma_half_height(case: Any, radius: float) -> float:
     The reference boundary is the flux surface ``flux(R, Z) = 0``, so
     ``|Z| = sqrt((axis_flux - G(u)) / field_coefficient)`` exactly.
     """
-    remaining = float(
-        case.axis_flux - case._flux_offset(case._flux_label(radius))
-    )
+    remaining = float(case.axis_flux - case._flux_offset(case._flux_label(radius)))
     if remaining <= 0.0:
         return 0.0
     return float(np.sqrt(remaining / float(case.field_coefficient)))
@@ -380,6 +379,35 @@ def _plasma_z_interval(
     return lower, upper
 
 
+_GAUSS_NODES, _GAUSS_WEIGHTS = np.polynomial.legendre.leggauss(16)
+
+
+def _fused_vertical_integral(
+    case: Any,
+    radius: float,
+    z_lower: float,
+    z_upper: float,
+    centre_z: float,
+    vertical_power: int,
+) -> float:
+    """Integrate ``j(R, z) (z - centre_z)**p`` over ``[z_lower, z_upper]``.
+
+    The z-dependence of the exact density is smooth between the plasma
+    crossings, so a fixed 16-point Gauss-Legendre rule (degree 31) resolves it
+    without adaptivity; the boundary kinks live at the radial crossings, which
+    the outer quadrature splits at explicitly.
+    """
+    half = 0.5 * (z_upper - z_lower)
+    midpoint = 0.5 * (z_upper + z_lower)
+    heights = midpoint + half * _GAUSS_NODES
+    density = _exact_density(
+        case, np.column_stack((np.full(16, radius, dtype=np.float64), heights))
+    )
+    return half * float(
+        np.sum(_GAUSS_WEIGHTS * density * (heights - centre_z) ** vertical_power)
+    )
+
+
 def _analytic_region_integrals(
     case: Any,
     cell_vertices: np.ndarray,
@@ -392,10 +420,12 @@ def _analytic_region_integrals(
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """Integrate the exact density moments and area over the plasma in a cell.
 
-    Nested adaptive quadrature along the radial axis, split at every cell and
-    region vertex.  At each radius the cell's vertical extent is clipped to the
-    analytic plasma interval (:func:`_plasma_z_interval`), so the region is the
-    exact analytic plasma intersection, not a sampled-polyline approximation.
+    Nested quadrature along the radial axis, split at every cell and region
+    vertex -- the separatrix crossings enter the break set, so the outer
+    ``quad`` receives every kink of the boundary integrand as an explicit
+    ``points`` member and never subdivides across one.  At each radius the
+    cell's vertical extent is clipped to the analytic plasma interval
+    (:func:`_plasma_z_interval`) and integrated with the fixed Gauss rule.
     Returns (region area, six density moments about ``centre``, error bounds).
     """
     region_vertices = np.asarray(region_vertices, dtype=np.float64)
@@ -416,49 +446,41 @@ def _analytic_region_integrals(
     area = 0.0
     powers = ((0, 0), (1, 0), (0, 1), (2, 0), (1, 1), (0, 2))
 
-    def inner(radius: float, radial_power: int, vertical_power: int) -> float:
+    def plasma_intervals(radius: float) -> list[tuple[float, float]]:
         cell_bounds = _vertical_bounds(cell_vertices, radius)
         if cell_bounds is None:
-            return 0.0
-        plasma = _plasma_z_interval(case, radius, boundary_level, lobe_loop)
-        if plasma is None:
-            return 0.0
-        z_lower = max(cell_bounds[0], plasma[0])
-        z_upper = min(cell_bounds[1], plasma[1])
-        if z_upper <= z_lower:
-            return 0.0
-
-        def vertical_integrand(z: float) -> float:
-            density = _exact_density(case, np.asarray([[radius, z]]))[0]
-            return density * (z - centre[1]) ** vertical_power
-
-        value, _error = quad(
-            vertical_integrand,
-            z_lower,
-            z_upper,
-            epsabs=ADAPTIVE_ABS_ERROR,
-            epsrel=relative_tolerance,
-            limit=200,
+            return []
+        interval = _plasma_z_interval(case, radius, boundary_level, lobe_loop)
+        if interval is None:
+            return []
+        low, high = interval
+        clipped = (
+            max(cell_bounds[0], low),
+            min(cell_bounds[1], high),
         )
-        return value * (radius - centre[0]) ** radial_power
+        return [clipped] if clipped[1] > clipped[0] else []
+
+    def inner(radius: float, radial_power: int, vertical_power: int) -> float:
+        total = 0.0
+        for z_lower, z_upper in plasma_intervals(radius):
+            total += _fused_vertical_integral(
+                case, radius, z_lower, z_upper, centre[1], vertical_power
+            )
+        return total * (radius - centre[0]) ** radial_power
 
     def vertical_length(radius: float) -> float:
-        cell_bounds = _vertical_bounds(cell_vertices, radius)
-        if cell_bounds is None:
-            return 0.0
-        plasma = _plasma_z_interval(case, radius, boundary_level, lobe_loop)
-        if plasma is None:
-            return 0.0
-        return max(0.0, min(cell_bounds[1], plasma[1]) - max(cell_bounds[0], plasma[0]))
+        return float(sum(high - low for low, high in plasma_intervals(radius)))
 
     for first, second in zip(breaks, breaks[1:]):
         if second <= first:
             continue
+        intra = tuple(value for value in breaks if first < value < second)
         for index, (radial_power, vertical_power) in enumerate(powers):
             value, error = quad(
                 lambda radius: inner(radius, radial_power, vertical_power),
                 first,
                 second,
+                points=intra,
                 epsabs=ADAPTIVE_ABS_ERROR,
                 epsrel=relative_tolerance,
                 limit=300,
@@ -469,6 +491,7 @@ def _analytic_region_integrals(
             vertical_length,
             first,
             second,
+            points=intra,
             epsabs=ADAPTIVE_ABS_ERROR,
             epsrel=relative_tolerance,
             limit=300,
@@ -865,7 +888,7 @@ def _analytic_self_test() -> dict[str, Any]:
                     "banked_exact_zeroth": exact_value,
                     "measured_exact_zeroth": float(moments[0]),
                     "relative_disagreement": relative,
-                    "passed": relative < 1.0e-6,
+                    "passed": relative < BANKED_ZEROTH_REPRODUCTION_BOUND,
                 }
             )
     records["all_passed"] = all(
@@ -1683,12 +1706,12 @@ def _aggregate(output: Path = RECEIPT) -> dict[str, Any]:
     if len(job_ids) != 1:
         raise RuntimeError("the rows must share one scheduler allocation")
     figures = []
-    for row in rows:
-        figures.extend(_render_row_figures(row, OUTPUT_ROOT))
     compact_rows = []
     for row in rows:
+        figures.extend(row.get("figures", _render_row_figures(row, OUTPUT_ROOT)))
         compact = dict(row)
         compact.pop("plot_data")
+        compact.pop("figures", None)
         compact_rows.append(compact)
 
     headline = {}
@@ -1756,6 +1779,7 @@ def main() -> None:
         raise SystemExit("the requested case-resolution pair is outside the contract")
     part = _part_path(arguments.case, arguments.requested_cells)
     row = measure_row(arguments.case, arguments.requested_cells)
+    row["figures"] = _render_row_figures(row, OUTPUT_ROOT)
     _write_json(part, row)
     print(f"XPOINT_ROW_EXIT=0 part={part}", flush=True)
 

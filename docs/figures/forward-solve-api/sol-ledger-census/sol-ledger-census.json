@@ -1,0 +1,1616 @@
+{
+  "ledger": {
+    "core": 547973.1120441942,
+    "common_sol": 1072.7116485306433,
+    "private_flux": 0.0,
+    "excluded_material": 0.0,
+    "total": 549045.8236927249
+  },
+  "plasma_current_a": 547973.1120441941,
+  "common_sol_over_plasma_current": 0.0019575990590650163,
+  "per_cell": [
+    {
+      "cell_index": 135,
+      "domain": "common_sol",
+      "current_a": 9.889436005853808,
+      "centroid_psi_norm": 1.129702752603136,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 136,
+      "domain": "common_sol",
+      "current_a": 28.401734572567726,
+      "centroid_psi_norm": 1.0966616270508895,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 137,
+      "domain": "common_sol",
+      "current_a": 34.84871458727926,
+      "centroid_psi_norm": 1.0852262233782328,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 138,
+      "domain": "common_sol",
+      "current_a": 28.401734572633156,
+      "centroid_psi_norm": 1.0966616270507752,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 139,
+      "domain": "common_sol",
+      "current_a": 9.889436005975787,
+      "centroid_psi_norm": 1.129702752602923,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 158,
+      "domain": "common_sol",
+      "current_a": 3.9689616906912204,
+      "centroid_psi_norm": 1.125001991592529,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 159,
+      "domain": "common_sol",
+      "current_a": 58.518012032097054,
+      "centroid_psi_norm": 1.0429655971321234,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 160,
+      "domain": "core",
+      "current_a": 311.0466696768412,
+      "centroid_psi_norm": 0.9769118233945396,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 161,
+      "domain": "core",
+      "current_a": 721.2653213603048,
+      "centroid_psi_norm": 0.9336924508814588,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 162,
+      "domain": "core",
+      "current_a": 870.4839894803773,
+      "centroid_psi_norm": 0.9186411362196897,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 163,
+      "domain": "core",
+      "current_a": 721.2653213618204,
+      "centroid_psi_norm": 0.933692450881306,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 164,
+      "domain": "core",
+      "current_a": 311.046669679505,
+      "centroid_psi_norm": 0.9769118233942549,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 165,
+      "domain": "common_sol",
+      "current_a": 58.51801203243273,
+      "centroid_psi_norm": 1.042965597131739,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 166,
+      "domain": "common_sol",
+      "current_a": 3.9689616909364123,
+      "centroid_psi_norm": 1.125001991592083,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 182,
+      "domain": "common_sol",
+      "current_a": 9.534037878760328,
+      "centroid_psi_norm": 1.1036299892955361,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 183,
+      "domain": "core",
+      "current_a": 193.1216441716978,
+      "centroid_psi_norm": 0.9907375037118595,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 184,
+      "domain": "core",
+      "current_a": 1181.6292586409404,
+      "centroid_psi_norm": 0.8865138945540727,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 185,
+      "domain": "core",
+      "current_a": 2028.9464587000225,
+      "centroid_psi_norm": 0.8019682633400137,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 186,
+      "domain": "core",
+      "current_a": 2593.5947566361842,
+      "centroid_psi_norm": 0.7468075367643876,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 187,
+      "domain": "core",
+      "current_a": 2789.781479591534,
+      "centroid_psi_norm": 0.7276388402414442,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 188,
+      "domain": "core",
+      "current_a": 2593.5947566382074,
+      "centroid_psi_norm": 0.7468075367641895,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 189,
+      "domain": "core",
+      "current_a": 2028.9464587038176,
+      "centroid_psi_norm": 0.801968263339643,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 190,
+      "domain": "core",
+      "current_a": 1181.6292586458865,
+      "centroid_psi_norm": 0.886513894553574,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 191,
+      "domain": "core",
+      "current_a": 193.12164417712015,
+      "centroid_psi_norm": 0.9907375037112873,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 192,
+      "domain": "common_sol",
+      "current_a": 9.534037879324751,
+      "centroid_psi_norm": 1.1036299892949384,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 206,
+      "domain": "common_sol",
+      "current_a": 5.565076188069107,
+      "centroid_psi_norm": 1.123145501768315,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 207,
+      "domain": "core",
+      "current_a": 230.35092181454644,
+      "centroid_psi_norm": 0.9870384571394084,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 208,
+      "domain": "core",
+      "current_a": 1556.7475982575068,
+      "centroid_psi_norm": 0.8483442587333744,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 209,
+      "domain": "core",
+      "current_a": 2873.1583530146218,
+      "centroid_psi_norm": 0.7199679850456002,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 210,
+      "domain": "core",
+      "current_a": 3937.644032838638,
+      "centroid_psi_norm": 0.6161393983772384,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 211,
+      "domain": "core",
+      "current_a": 4629.38825576833,
+      "centroid_psi_norm": 0.5486673406250272,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 212,
+      "domain": "core",
+      "current_a": 4869.181690997579,
+      "centroid_psi_norm": 0.5252780911308836,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 213,
+      "domain": "core",
+      "current_a": 4629.388255770754,
+      "centroid_psi_norm": 0.5486673406247919,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 214,
+      "domain": "core",
+      "current_a": 3937.644032843339,
+      "centroid_psi_norm": 0.616139398376779,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 215,
+      "domain": "core",
+      "current_a": 2873.15835302102,
+      "centroid_psi_norm": 0.7199679850449756,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 216,
+      "domain": "core",
+      "current_a": 1556.7475982648089,
+      "centroid_psi_norm": 0.8483442587326644,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 217,
+      "domain": "core",
+      "current_a": 230.35092182161839,
+      "centroid_psi_norm": 0.9870384571386649,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 218,
+      "domain": "common_sol",
+      "current_a": 5.565076188388338,
+      "centroid_psi_norm": 1.123145501767602,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 231,
+      "domain": "common_sol",
+      "current_a": 70.24639380256471,
+      "centroid_psi_norm": 1.0351624446124188,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 232,
+      "domain": "core",
+      "current_a": 1304.1037334825635,
+      "centroid_psi_norm": 0.8748071842354747,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 233,
+      "domain": "core",
+      "current_a": 2978.884466033581,
+      "centroid_psi_norm": 0.710541933400086,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 234,
+      "domain": "core",
+      "current_a": 4536.496114256142,
+      "centroid_psi_norm": 0.5590894933401046,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 235,
+      "domain": "core",
+      "current_a": 5791.847334125383,
+      "centroid_psi_norm": 0.43702489366573705,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 236,
+      "domain": "core",
+      "current_a": 6605.866540079856,
+      "centroid_psi_norm": 0.3578732246606783,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 237,
+      "domain": "core",
+      "current_a": 6887.733875523776,
+      "centroid_psi_norm": 0.3304655910094107,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 238,
+      "domain": "core",
+      "current_a": 6605.866540082744,
+      "centroid_psi_norm": 0.3578732246603967,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 239,
+      "domain": "core",
+      "current_a": 5791.847334130856,
+      "centroid_psi_norm": 0.437024893665207,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 240,
+      "domain": "core",
+      "current_a": 4536.496114263765,
+      "centroid_psi_norm": 0.5590894933393636,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 241,
+      "domain": "core",
+      "current_a": 2978.8844660424616,
+      "centroid_psi_norm": 0.7105419333992211,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 242,
+      "domain": "core",
+      "current_a": 1304.1037334913533,
+      "centroid_psi_norm": 0.8748071842345867,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 243,
+      "domain": "common_sol",
+      "current_a": 70.24639380336967,
+      "centroid_psi_norm": 1.035162444611578,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 255,
+      "domain": "common_sol",
+      "current_a": 16.31083008103059,
+      "centroid_psi_norm": 1.1249962997832081,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 256,
+      "domain": "core",
+      "current_a": 458.31983377832154,
+      "centroid_psi_norm": 0.9623160741424875,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 257,
+      "domain": "core",
+      "current_a": 2271.591419401305,
+      "centroid_psi_norm": 0.7802312500125557,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 258,
+      "domain": "core",
+      "current_a": 4196.948684332642,
+      "centroid_psi_norm": 0.5938480789470638,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 259,
+      "domain": "core",
+      "current_a": 5966.78289921408,
+      "centroid_psi_norm": 0.4225078561082958,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 260,
+      "domain": "core",
+      "current_a": 7390.674100231604,
+      "centroid_psi_norm": 0.2846579098770628,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 261,
+      "domain": "core",
+      "current_a": 8313.072611930897,
+      "centroid_psi_norm": 0.19535805555783936,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 262,
+      "domain": "core",
+      "current_a": 8632.318306791092,
+      "centroid_psi_norm": 0.16445091238904755,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 263,
+      "domain": "core",
+      "current_a": 8313.07261193411,
+      "centroid_psi_norm": 0.1953580555575314,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 264,
+      "domain": "core",
+      "current_a": 7390.67410023798,
+      "centroid_psi_norm": 0.28465790987644357,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 265,
+      "domain": "core",
+      "current_a": 5966.7828992229115,
+      "centroid_psi_norm": 0.42250785610743957,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 266,
+      "domain": "core",
+      "current_a": 4196.948684342761,
+      "centroid_psi_norm": 0.5938480789460872,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 267,
+      "domain": "core",
+      "current_a": 2271.5914194119664,
+      "centroid_psi_norm": 0.7802312500115233,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 268,
+      "domain": "core",
+      "current_a": 458.31983378768354,
+      "centroid_psi_norm": 0.9623160741415117,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 269,
+      "domain": "common_sol",
+      "current_a": 16.31083008145299,
+      "centroid_psi_norm": 1.1249962997823535,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 280,
+      "domain": "common_sol",
+      "current_a": 36.98016160185488,
+      "centroid_psi_norm": 1.0908153778727119,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 281,
+      "domain": "core",
+      "current_a": 921.6804235516537,
+      "centroid_psi_norm": 0.9150532427805921,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 282,
+      "domain": "core",
+      "current_a": 2937.6707285799725,
+      "centroid_psi_norm": 0.7172561633420111,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 283,
+      "domain": "core",
+      "current_a": 5040.96057958479,
+      "centroid_psi_norm": 0.5147434529303063,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 284,
+      "domain": "core",
+      "current_a": 6973.717013894185,
+      "centroid_psi_norm": 0.3286463493815035,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 285,
+      "domain": "core",
+      "current_a": 8528.494509520664,
+      "centroid_psi_norm": 0.17894287905582404,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 286,
+      "domain": "core",
+      "current_a": 9535.664489743065,
+      "centroid_psi_norm": 0.08196631185055242,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 287,
+      "domain": "core",
+      "current_a": 9884.195338788131,
+      "centroid_psi_norm": 0.048402807272160606,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 288,
+      "domain": "core",
+      "current_a": 9535.664489746816,
+      "centroid_psi_norm": 0.08196631185018832,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 289,
+      "domain": "core",
+      "current_a": 8528.49450952751,
+      "centroid_psi_norm": 0.17894287905516973,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 290,
+      "domain": "core",
+      "current_a": 6973.717013903969,
+      "centroid_psi_norm": 0.3286463493805594,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 291,
+      "domain": "core",
+      "current_a": 5040.960579596108,
+      "centroid_psi_norm": 0.5147434529292156,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 292,
+      "domain": "core",
+      "current_a": 2937.670728591803,
+      "centroid_psi_norm": 0.7172561633408714,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 293,
+      "domain": "core",
+      "current_a": 921.6804235624136,
+      "centroid_psi_norm": 0.9150532427795192,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 294,
+      "domain": "common_sol",
+      "current_a": 36.980161602321964,
+      "centroid_psi_norm": 1.090815377871769,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 305,
+      "domain": "common_sol",
+      "current_a": 42.67852248831054,
+      "centroid_psi_norm": 1.0841016949879057,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 306,
+      "domain": "core",
+      "current_a": 1054.0252997386813,
+      "centroid_psi_norm": 0.9026211379776331,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 307,
+      "domain": "core",
+      "current_a": 3162.045746700322,
+      "centroid_psi_norm": 0.6975347776301815,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 308,
+      "domain": "core",
+      "current_a": 5362.976555406743,
+      "centroid_psi_norm": 0.4869714800793453,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 309,
+      "domain": "core",
+      "current_a": 7389.614929941867,
+      "centroid_psi_norm": 0.29307953585088686,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 310,
+      "domain": "core",
+      "current_a": 9022.369653674368,
+      "centroid_psi_norm": 0.1368716906274667,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 311,
+      "domain": "core",
+      "current_a": 10081.060090638981,
+      "centroid_psi_norm": 0.03558079299254041,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 312,
+      "domain": "core",
+      "current_a": 10446.705971609446,
+      "centroid_psi_norm": 0.0005068577154757323,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 313,
+      "domain": "core",
+      "current_a": 10081.060090642926,
+      "centroid_psi_norm": 0.03558079299216393,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 314,
+      "domain": "core",
+      "current_a": 9022.369653681808,
+      "centroid_psi_norm": 0.1368716906267542,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 315,
+      "domain": "core",
+      "current_a": 7389.61492995221,
+      "centroid_psi_norm": 0.2930795358498961,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 316,
+      "domain": "core",
+      "current_a": 5362.9765554185415,
+      "centroid_psi_norm": 0.4869714800782204,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 317,
+      "domain": "core",
+      "current_a": 3162.0457467127067,
+      "centroid_psi_norm": 0.6975347776289996,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 318,
+      "domain": "core",
+      "current_a": 1054.0252997501593,
+      "centroid_psi_norm": 0.9026211379764933,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 319,
+      "domain": "common_sol",
+      "current_a": 42.67852248881008,
+      "centroid_psi_norm": 1.084101694986933,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 330,
+      "domain": "common_sol",
+      "current_a": 30.912358859338532,
+      "centroid_psi_norm": 1.1079488140073168,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 331,
+      "domain": "core",
+      "current_a": 782.8461118695246,
+      "centroid_psi_norm": 0.9300004796726355,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 332,
+      "domain": "core",
+      "current_a": 2865.0977762206603,
+      "centroid_psi_norm": 0.7278440982588549,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 333,
+      "domain": "core",
+      "current_a": 5063.839968420793,
+      "centroid_psi_norm": 0.5190054604727445,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 334,
+      "domain": "core",
+      "current_a": 7098.087911041065,
+      "centroid_psi_norm": 0.32578830758159855,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 335,
+      "domain": "core",
+      "current_a": 8742.630853511078,
+      "centroid_psi_norm": 0.16958730589157162,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 336,
+      "domain": "core",
+      "current_a": 9811.412368916628,
+      "centroid_psi_norm": 0.06807360981756784,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 337,
+      "domain": "core",
+      "current_a": 10181.865748408041,
+      "centroid_psi_norm": 0.03288299239496029,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 338,
+      "domain": "core",
+      "current_a": 9811.412368920694,
+      "centroid_psi_norm": 0.0680736098171798,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 339,
+      "domain": "core",
+      "current_a": 8742.630853518536,
+      "centroid_psi_norm": 0.16958730589086818,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 340,
+      "domain": "core",
+      "current_a": 7098.087911051644,
+      "centroid_psi_norm": 0.3257883075805921,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 341,
+      "domain": "core",
+      "current_a": 5063.839968432998,
+      "centroid_psi_norm": 0.5190054604715841,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 342,
+      "domain": "core",
+      "current_a": 2865.0977762334473,
+      "centroid_psi_norm": 0.7278440982576384,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 343,
+      "domain": "core",
+      "current_a": 782.846111881086,
+      "centroid_psi_norm": 0.9300004796714987,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 344,
+      "domain": "common_sol",
+      "current_a": 30.912358859840584,
+      "centroid_psi_norm": 1.1079488140063323,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 355,
+      "domain": "common_sol",
+      "current_a": 1.7341471891362201,
+      "centroid_psi_norm": 1.161326877879131,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 356,
+      "domain": "core",
+      "current_a": 151.0819803424564,
+      "centroid_psi_norm": 0.9961056774044558,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 357,
+      "domain": "core",
+      "current_a": 2035.8218967072685,
+      "centroid_psi_norm": 0.8080251188179324,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 358,
+      "domain": "core",
+      "current_a": 4118.102727481594,
+      "centroid_psi_norm": 0.6118413192780694,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 359,
+      "domain": "core",
+      "current_a": 6061.385364164469,
+      "centroid_psi_norm": 0.4287283287328092,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 360,
+      "domain": "core",
+      "current_a": 7642.249559461453,
+      "centroid_psi_norm": 0.2797662779352341,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 361,
+      "domain": "core",
+      "current_a": 8673.786258622482,
+      "centroid_psi_norm": 0.18256729964260293,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 362,
+      "domain": "core",
+      "current_a": 9032.09002482517,
+      "centroid_psi_norm": 0.148805470413766,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 363,
+      "domain": "core",
+      "current_a": 8673.786258626375,
+      "centroid_psi_norm": 0.182567299642238,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 364,
+      "domain": "core",
+      "current_a": 7642.249559469005,
+      "centroid_psi_norm": 0.27976627793451997,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 365,
+      "domain": "core",
+      "current_a": 6061.385364174754,
+      "centroid_psi_norm": 0.4287283287318391,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 366,
+      "domain": "core",
+      "current_a": 4118.10272749313,
+      "centroid_psi_norm": 0.6118413192769883,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 367,
+      "domain": "core",
+      "current_a": 2035.8218967194532,
+      "centroid_psi_norm": 0.808025118816786,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 368,
+      "domain": "core",
+      "current_a": 151.08198035314211,
+      "centroid_psi_norm": 0.9961056774033696,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 369,
+      "domain": "common_sol",
+      "current_a": 1.734147189619876,
+      "centroid_psi_norm": 1.161326877878195,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 381,
+      "domain": "common_sol",
+      "current_a": 33.05448518006955,
+      "centroid_psi_norm": 1.0939491060755917,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 382,
+      "domain": "core",
+      "current_a": 820.7584688080726,
+      "centroid_psi_norm": 0.930293857971488,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 383,
+      "domain": "core",
+      "current_a": 2590.8019623104437,
+      "centroid_psi_norm": 0.7577113843673351,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 384,
+      "domain": "core",
+      "current_a": 4340.897667849832,
+      "centroid_psi_norm": 0.5942350338099277,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 385,
+      "domain": "core",
+      "current_a": 5779.832358713831,
+      "centroid_psi_norm": 0.45980701445132266,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 386,
+      "domain": "core",
+      "current_a": 6725.224634588715,
+      "centroid_psi_norm": 0.37148800617957894,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 387,
+      "domain": "core",
+      "current_a": 7054.723444692553,
+      "centroid_psi_norm": 0.3407061846596588,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 388,
+      "domain": "core",
+      "current_a": 6725.224634592349,
+      "centroid_psi_norm": 0.37148800617924044,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 389,
+      "domain": "core",
+      "current_a": 5779.832358720726,
+      "centroid_psi_norm": 0.45980701445068034,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 390,
+      "domain": "core",
+      "current_a": 4340.897667859348,
+      "centroid_psi_norm": 0.5942350338090373,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 391,
+      "domain": "core",
+      "current_a": 2590.8019623212126,
+      "centroid_psi_norm": 0.7577113843663307,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 392,
+      "domain": "core",
+      "current_a": 820.7584688184646,
+      "centroid_psi_norm": 0.9302938579704386,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 393,
+      "domain": "common_sol",
+      "current_a": 33.05448518102471,
+      "centroid_psi_norm": 1.0939491060746338,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 407,
+      "domain": "common_sol",
+      "current_a": 58.33557927317755,
+      "centroid_psi_norm": 1.081407769587331,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 408,
+      "domain": "core",
+      "current_a": 737.7318277151924,
+      "centroid_psi_norm": 0.9404470375473439,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 409,
+      "domain": "core",
+      "current_a": 2120.5769201171315,
+      "centroid_psi_norm": 0.8047721408234029,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 410,
+      "domain": "core",
+      "current_a": 3329.8152400656336,
+      "centroid_psi_norm": 0.6913720395070814,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 411,
+      "domain": "core",
+      "current_a": 4144.544071487606,
+      "centroid_psi_norm": 0.6159629241607268,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 412,
+      "domain": "core",
+      "current_a": 4430.1742477291455,
+      "centroid_psi_norm": 0.5895219971493704,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 413,
+      "domain": "core",
+      "current_a": 4144.544071490961,
+      "centroid_psi_norm": 0.615962924160414,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 414,
+      "domain": "core",
+      "current_a": 3329.8152400716413,
+      "centroid_psi_norm": 0.6913720395065277,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 415,
+      "domain": "core",
+      "current_a": 2120.576920125017,
+      "centroid_psi_norm": 0.8047721408226486,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": false,
+      "analytic_separatrix_through": false
+    },
+    {
+      "cell_index": 416,
+      "domain": "core",
+      "current_a": 737.7318277237952,
+      "centroid_psi_norm": 0.9404470375464832,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 417,
+      "domain": "common_sol",
+      "current_a": 58.33557927403952,
+      "centroid_psi_norm": 1.0814077695864839,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 434,
+      "domain": "common_sol",
+      "current_a": 112.80173012455855,
+      "centroid_psi_norm": 1.0357639105245267,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 435,
+      "domain": "core",
+      "current_a": 676.485195909677,
+      "centroid_psi_norm": 0.9470999891245292,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 436,
+      "domain": "core",
+      "current_a": 1293.5517747994418,
+      "centroid_psi_norm": 0.8872024596866681,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 437,
+      "domain": "core",
+      "current_a": 1517.210069633438,
+      "centroid_psi_norm": 0.8660429753893858,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 438,
+      "domain": "core",
+      "current_a": 1293.55177480207,
+      "centroid_psi_norm": 0.88720245968642,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 439,
+      "domain": "core",
+      "current_a": 676.4851959142867,
+      "centroid_psi_norm": 0.947099989124066,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    },
+    {
+      "cell_index": 440,
+      "domain": "common_sol",
+      "current_a": 112.80173012511297,
+      "centroid_psi_norm": 1.035763910523929,
+      "production_clip_included": true,
+      "production_clip_cut": false,
+      "fitted_separatrix_through": true,
+      "analytic_separatrix_through": true
+    }
+  ],
+  "common_sol_split": {
+    "common_sol_total_a": 1072.711648530643,
+    "common_sol_in_fitted_cut_cells_a": 844.2978447678297,
+    "common_sol_in_uncut_cells_a": 228.41380376281336,
+    "common_sol_cut_cell_count": 16,
+    "common_sol_uncut_cell_count": 15
+  },
+  "support_clip_mode": {
+    "available": false,
+    "reason": "the mapped-case machine exposes no set_support_clip_mode or support_clip_mode symbol on this revision (package-wide grep returns none), so the committed chord clip cannot be compared against an exact-support clip here; that switch is the in-flight uniform-clip work"
+  },
+  "fixed_point_residual": 1.2267194322973272e-14,
+  "converged_boolean": true,
+  "topology_branch": {
+    "axis": [
+      1.013798041127812,
+      9.450771985972123e-14
+    ],
+    "x_point": [
+      NaN,
+      NaN
+    ],
+    "boundary_flux": 1.5405547998976097
+  },
+  "verdict": "the scrape-off-layer current is entirely full-cell labelling - no cell is geometrically cut - split 0.787069 in the 16 cells the fitted separatrix cuts and 0.212931 in the 15 fully open cells",
+  "booking_line": {
+    "receptor": "nova/equilibrium/observation.py:558 (current_ledger, common_sol)",
+    "mechanism": "nova/equilibrium/forward_operator.py:2021-2026 (_profile_support traces the support at all-ones flux, so no cell is geometrically cut; the open-field-line selection tests the cell centroid flux against the separatrix)"
+  },
+  "figure": {
+    "path": "docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-current.png",
+    "project_src": "/nova/figures/forward-solve-api/sol-ledger-census/sol-ledger-current.png"
+  }
+}

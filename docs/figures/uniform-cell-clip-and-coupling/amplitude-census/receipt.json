@@ -1,0 +1,5725 @@
+{
+  "analytic_cells": {
+    "exact_cut_count": 43,
+    "exterior_count": 14,
+    "interior_count": 78
+  },
+  "case": "weak-rotation-reactor-static",
+  "contract": {
+    "analytic_exact_current": "density integrated over the cell's analytic plasma intersection by the shared adaptive oracle",
+    "clip_modes": [
+      "chord",
+      "exact"
+    ],
+    "difference_threshold": "1e-06 of the plasma current",
+    "seed": "production cold seed regenerated through the certificate route and verified structurally and against the committed row's banked amplitude history (the digest itself is GPU-lane specific)",
+    "target_current_a": 16314773.311828371,
+    "terminal_state": "committed chord row render_data terminal flux",
+    "unit_amplitude": "cell_current_moments zeroth moment with no declared-current scaling; amplitude = target_current / sum(cell_current)"
+  },
+  "elapsed_seconds": 139.81951169669628,
+  "figures": {
+    "difference_contours": {
+      "png": {
+        "bytes": 428290,
+        "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-unit-amplitude-current-census/docs/figures/uniform-cell-clip-and-coupling/amplitude-census/difference-contours.png",
+        "sha256": "96c7c8db3a03a045d482a82e91136f1b6b3d2c0ba555fa0e8a41d23fc33f8502"
+      },
+      "svg": {
+        "bytes": 88495,
+        "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-unit-amplitude-current-census/docs/figures/uniform-cell-clip-and-coupling/amplitude-census/difference-contours.svg",
+        "sha256": "b9a46dca2a2fc67cc531293129b7c769c36b5e24c92850c324f3ca7dcd91e7a7"
+      }
+    },
+    "difference_ranked": {
+      "png": {
+        "bytes": 57795,
+        "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-unit-amplitude-current-census/docs/figures/uniform-cell-clip-and-coupling/amplitude-census/difference-ranked.png",
+        "sha256": "62ab95a3c14f34b8b5cc9f09a55820c737e58b9e465d63cf16aea2178fc4a48c"
+      },
+      "svg": {
+        "bytes": 93763,
+        "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-unit-amplitude-current-census/docs/figures/uniform-cell-clip-and-coupling/amplitude-census/difference-ranked.svg",
+        "sha256": "7cb787e87e42b7d2cb11c0b05896169ab25430919f4c8f3a445b65fd6227f259"
+      }
+    }
+  },
+  "lane": {
+    "cpu_count": 8,
+    "execution": "slurm",
+    "hostname": "98dci4-clu-4074.iter.org",
+    "jax_enable_x64": true,
+    "jax_platform": "cpu",
+    "job_id": "1268821",
+    "node": "98dci4-clu-4074",
+    "partition": "all_debug",
+    "tmpdir": "/tmp"
+  },
+  "per_cell": {
+    "seed": [
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 0,
+        "centre_rz_m": [
+          5.894188145256963,
+          -3.762148518501515
+        ],
+        "chord_clip_vertex_count": 5,
+        "chord_current_a": 496.9809874031913,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 496.9809874031913,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 1,
+        "centre_rz_m": [
+          5.452646818736717,
+          -3.558780034207491
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 10271.27630219994,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 10271.27630219994,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 23242.041893558366,
+        "analytic_plasma_area_fraction": 0.25877622432667957,
+        "analytic_surface_class": "cut",
+        "cell": 2,
+        "centre_rz_m": [
+          6.189467706884564,
+          -3.6523760886299974
+        ],
+        "chord_clip_vertex_count": 15,
+        "chord_current_a": 89700.69485507498,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 89700.69485507498,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 78230.32171836322,
+        "analytic_plasma_area_fraction": 0.4989911680923601,
+        "analytic_surface_class": "cut",
+        "cell": 3,
+        "centre_rz_m": [
+          5.774561160094202,
+          -3.4960779454540525
+        ],
+        "chord_clip_vertex_count": 13,
+        "chord_current_a": 156130.58650770521,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 156130.58650770521,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 68570.46682096357,
+        "analytic_plasma_area_fraction": 0.4555268290979326,
+        "analytic_surface_class": "cut",
+        "cell": 4,
+        "centre_rz_m": [
+          5.343137408875683,
+          -3.2462471424163715
+        ],
+        "chord_clip_vertex_count": 11,
+        "chord_current_a": 149526.3011787112,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 149526.3011787112,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 5,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -3.255315226111403
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007245,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 169828.27027007245,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372802,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 6,
+        "centre_rz_m": [
+          5.770353929839329,
+          -3.0049063625643724
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372875,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 162918.38092372875,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.34316069403,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 7,
+        "centre_rz_m": [
+          5.336633055510289,
+          -2.754497499017341
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069435,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 156427.34316069435,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 8,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -2.754497499017341
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007248,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 169828.27027007248,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.3809237279,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 9,
+        "centre_rz_m": [
+          5.770353929839329,
+          -2.50408863547031
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.3809237286,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 162918.3809237286,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 10,
+        "centre_rz_m": [
+          5.04993742326072,
+          -3.280898835692093
+        ],
+        "chord_clip_vertex_count": 5,
+        "chord_current_a": 994.703575063375,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 994.703575063375,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 22660.70277259633,
+        "analytic_plasma_area_fraction": 0.20669398371783496,
+        "analytic_surface_class": "cut",
+        "cell": 11,
+        "centre_rz_m": [
+          4.951659081913038,
+          -2.9634455489802405
+        ],
+        "chord_clip_vertex_count": 12,
+        "chord_current_a": 108607.66370821357,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 108607.66370821357,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 12,
+        "centre_rz_m": [
+          4.61031890890049,
+          -2.661015017862054
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 38255.23119839127,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 38255.23119839127,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 125716.31782122221,
+        "analytic_plasma_area_fraction": 0.8331733114085262,
+        "analytic_surface_class": "cut",
+        "cell": 13,
+        "centre_rz_m": [
+          4.902912181181249,
+          -2.50408863547031
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.6015729135,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 150466.6015729135,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 39018.85722138792,
+        "analytic_plasma_area_fraction": 0.3092724468276255,
+        "analytic_surface_class": "cut",
+        "cell": 14,
+        "centre_rz_m": [
+          4.498437116329783,
+          -2.237640256507944
+        ],
+        "chord_clip_vertex_count": 12,
+        "chord_current_a": 124994.88516155232,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 124994.88516155232,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 15,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -2.253679771923279
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.2702700724,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 169828.2702700724,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.34316069403,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 16,
+        "centre_rz_m": [
+          5.336633055510289,
+          -2.253679771923279
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.3431606943,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 156427.3431606943,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372793,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 17,
+        "centre_rz_m": [
+          5.770353929839329,
+          -2.003270908376248
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372857,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 130059.65600655496,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 32858.72491717362,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 169828.2702700716,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 18,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007245,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 34736.90394234925,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 135091.3663277232,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 19,
+        "centre_rz_m": [
+          6.63779567849741,
+          -1.5024531812821862
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302117,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 7916.764393717807,
+        "exact_clip_vertex_count": 134,
+        "exact_current_a": 169157.99697930337,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 162918.380923728,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 20,
+        "centre_rz_m": [
+          5.770353929839329,
+          -1.5024531812821862
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.3809237287,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.3809237287,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 21,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.2702700724,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.2702700724,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.7613730203,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 22,
+        "centre_rz_m": [
+          6.63779567849741,
+          -1.0016354541881238
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.7613730212,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.7613730212,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.380923728,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 23,
+        "centre_rz_m": [
+          5.770353929839329,
+          -1.0016354541881238
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372866,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372866,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.9999999999999977,
+        "analytic_surface_class": "interior",
+        "cell": 24,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -0.7512265906410929
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.2702700722,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.2702700722,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 25,
+        "centre_rz_m": [
+          4.200115896910771,
+          -1.9281388330797045
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 30909.432709319648,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 30909.432709319648,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 150466.60157291373,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 26,
+        "centre_rz_m": [
+          4.902912181181249,
+          -2.003270908376248
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.6015729134,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 150466.6015729134,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.34316069403,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 27,
+        "centre_rz_m": [
+          5.336633055510289,
+          -1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069435,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 95016.79739178294,
+        "exact_clip_vertex_count": 132,
+        "exact_current_a": 61410.54576891141,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 112553.36217587654,
+        "analytic_plasma_area_fraction": 0.7723818908738682,
+        "analytic_surface_class": "cut",
+        "cell": 28,
+        "centre_rz_m": [
+          4.46919130685221,
+          -1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724597,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 145191.02274724597,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 150466.60157291376,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 29,
+        "centre_rz_m": [
+          4.902912181181249,
+          -1.5024531812821862
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.60157291353,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 118315.91639586297,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 32150.68517705056,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 145191.02274724538,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 30,
+        "centre_rz_m": [
+          4.46919130685221,
+          -1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724608,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 145191.02274724608,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.343160694,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 31,
+        "centre_rz_m": [
+          5.336633055510289,
+          -1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069435,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.34316069435,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 150466.6015729138,
+        "analytic_plasma_area_fraction": 1.0000000000000022,
+        "analytic_surface_class": "interior",
+        "cell": 32,
+        "centre_rz_m": [
+          4.902912181181249,
+          -1.0016354541881238
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.6015729135,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 17066.99867487658,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 133399.60289803692,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 156427.343160694,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 33,
+        "centre_rz_m": [
+          5.336633055510289,
+          -0.7512265906410929
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069432,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.34316069432,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 145191.02274724538,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 34,
+        "centre_rz_m": [
+          4.46919130685221,
+          -0.7512265906410929
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724594,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 114013.7391955449,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 31177.283551701043,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 8850.331339327793,
+        "analytic_plasma_area_fraction": 0.09763383134746788,
+        "analytic_surface_class": "cut",
+        "cell": 35,
+        "centre_rz_m": [
+          4.113972879609135,
+          -1.4780901886377467
+        ],
+        "chord_clip_vertex_count": 11,
+        "chord_current_a": 89790.31511026973,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 89790.31511026973,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 45424.70139178028,
+        "analytic_plasma_area_fraction": 0.35030264627768837,
+        "analytic_surface_class": "cut",
+        "cell": 36,
+        "centre_rz_m": [
+          4.056046366305996,
+          -0.9968357654414408
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 128597.69519252093,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 128597.69519252093,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 37,
+        "centre_rz_m": [
+          3.824653262107825,
+          -0.7220621952528966
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 10237.29925288854,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 10237.29925288854,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 72126.96509035546,
+        "analytic_plasma_area_fraction": 0.5101590748532744,
+        "analytic_surface_class": "cut",
+        "cell": 38,
+        "centre_rz_m": [
+          4.036270968485171,
+          -0.5008058097149954
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 140421.88263094256,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 140421.88263094256,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 150466.6015729138,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 39,
+        "centre_rz_m": [
+          4.902912181181249,
+          -0.5008177270940619
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.60157291347,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 150466.60157291347,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 145191.02274724538,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 40,
+        "centre_rz_m": [
+          4.46919130685221,
+          -0.25040886354703096
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.022747246,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 78837.63914211813,
+        "exact_clip_vertex_count": 132,
+        "exact_current_a": 66353.38360512786,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 156427.34316069403,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 41,
+        "centre_rz_m": [
+          5.336633055510289,
+          -0.25040886354703096
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069455,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.34316069455,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 150466.6015729138,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 42,
+        "centre_rz_m": [
+          4.902912181181249,
+          -2.822757854823703e-17
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.60157291347,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 150466.60157291347,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.343160694,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 43,
+        "centre_rz_m": [
+          5.336633055510289,
+          0.2504088635470314
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069447,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.34316069447,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 145191.02274724538,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 44,
+        "centre_rz_m": [
+          4.46919130685221,
+          0.2504088635470314
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724597,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 78837.63914227544,
+        "exact_clip_vertex_count": 132,
+        "exact_current_a": 66353.38360497053,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 150466.6015729138,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 45,
+        "centre_rz_m": [
+          4.902912181181249,
+          0.5008177270940619
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.6015729134,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 150466.6015729134,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 145191.02274724538,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 46,
+        "centre_rz_m": [
+          4.46919130685221,
+          0.7512265906410933
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724594,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 114013.73919566188,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 31177.28355158405,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 156427.343160694,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 47,
+        "centre_rz_m": [
+          5.336633055510289,
+          0.7512265906410933
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.3431606945,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.3431606945,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 150466.60157291376,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 48,
+        "centre_rz_m": [
+          4.902912181181249,
+          1.0016354541881238
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.60157291344,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 17066.99867476776,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 133399.60289814568,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 49,
+        "centre_rz_m": [
+          3.7947078687914786,
+          -0.23713743190133724
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 22886.418152418304,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 22886.418152418304,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 80937.11290004579,
+        "analytic_plasma_area_fraction": 0.5713219732234246,
+        "analytic_surface_class": "cut",
+        "cell": 50,
+        "centre_rz_m": [
+          4.035470432523169,
+          -7.082065072939336e-17
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 140822.35067544028,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 140822.35067544028,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 51,
+        "centre_rz_m": [
+          3.7947078687914786,
+          0.2371374319013375
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 22886.418152418293,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 22886.418152418293,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 72126.96509035546,
+        "analytic_plasma_area_fraction": 0.5101590748532745,
+        "analytic_surface_class": "cut",
+        "cell": 52,
+        "centre_rz_m": [
+          4.036270968485171,
+          0.5008058097149952
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 140421.88263094262,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 140421.88263094262,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 53,
+        "centre_rz_m": [
+          3.824653262107825,
+          0.7220621952528968
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 10237.299252888475,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 10237.299252888475,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 45424.7013917803,
+        "analytic_plasma_area_fraction": 0.35030264627768837,
+        "analytic_surface_class": "cut",
+        "cell": 54,
+        "centre_rz_m": [
+          4.056046366305996,
+          0.9968357654414407
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 128597.69519252077,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 128597.69519252077,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372796,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 55,
+        "centre_rz_m": [
+          5.770353929839329,
+          1.0016354541881238
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372872,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372872,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 56,
+        "centre_rz_m": [
+          6.2040748041683695,
+          1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.2702700724,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.2702700724,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.343160694,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 57,
+        "centre_rz_m": [
+          5.336633055510289,
+          1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.3431606943,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.3431606943,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.380923728,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 58,
+        "centre_rz_m": [
+          5.770353929839329,
+          1.5024531812821857
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372875,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372875,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 59,
+        "centre_rz_m": [
+          6.2040748041683695,
+          1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.2702700725,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 34736.90394324763,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 135091.36632682488,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 162918.380923728,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 60,
+        "centre_rz_m": [
+          5.770353929839329,
+          2.0032709083762485
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372855,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 130059.65600691826,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 32858.724916810286,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 61,
+        "centre_rz_m": [
+          6.63779567849741,
+          2.0032709083762485
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302106,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 172848.62294858065,
+        "exact_clip_vertex_count": 130,
+        "exact_current_a": 4226.138424440409,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 62,
+        "centre_rz_m": [
+          6.2040748041683695,
+          2.253679771923279
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007221,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 169828.27027007221,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372802,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 63,
+        "centre_rz_m": [
+          5.770353929839329,
+          2.5040886354703105
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.3809237286,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 162918.3809237286,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.7613730203,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 64,
+        "centre_rz_m": [
+          6.63779567849741,
+          2.5040886354703105
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302117,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 177074.76137302117,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 145191.02274724538,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 65,
+        "centre_rz_m": [
+          4.46919130685221,
+          1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724594,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 145191.02274724594,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 150466.60157291376,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 66,
+        "centre_rz_m": [
+          4.902912181181249,
+          1.5024531812821857
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.60157291355,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 118315.91639571416,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 32150.68517719939,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 156427.343160694,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 67,
+        "centre_rz_m": [
+          5.336633055510289,
+          1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069447,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 95016.7973919319,
+        "exact_clip_vertex_count": 132,
+        "exact_current_a": 61410.54576876256,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 112553.36217587651,
+        "analytic_plasma_area_fraction": 0.7723818908738681,
+        "analytic_surface_class": "cut",
+        "cell": 68,
+        "centre_rz_m": [
+          4.46919130685221,
+          1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724602,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 145191.02274724602,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 150466.60157291376,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 69,
+        "centre_rz_m": [
+          4.902912181181249,
+          2.0032709083762485
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.6015729134,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 150466.6015729134,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.34316069403,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 70,
+        "centre_rz_m": [
+          5.336633055510289,
+          2.253679771923279
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.3431606943,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 156427.3431606943,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 39018.85722138798,
+        "analytic_plasma_area_fraction": 0.309272446827626,
+        "analytic_surface_class": "cut",
+        "cell": 71,
+        "centre_rz_m": [
+          4.498437116329783,
+          2.237640256507944
+        ],
+        "chord_clip_vertex_count": 12,
+        "chord_current_a": 124994.88516155229,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 124994.88516155229,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 125716.31782122217,
+        "analytic_plasma_area_fraction": 0.8331733114085258,
+        "analytic_surface_class": "cut",
+        "cell": 72,
+        "centre_rz_m": [
+          4.902912181181249,
+          2.5040886354703105
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.60157291344,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 150466.60157291344,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 73,
+        "centre_rz_m": [
+          4.61031890890049,
+          2.6610150178620535
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 38255.23119839141,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 38255.23119839141,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.34316069403,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 74,
+        "centre_rz_m": [
+          5.336633055510289,
+          2.754497499017341
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069423,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 156427.34316069423,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 76394.81586403257,
+        "analytic_plasma_area_fraction": 0.6167808936008342,
+        "analytic_surface_class": "cut",
+        "cell": 75,
+        "centre_rz_m": [
+          6.5988389321960526,
+          -3.4511542258084487
+        ],
+        "chord_clip_vertex_count": 13,
+        "chord_current_a": 124114.08691970678,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 124114.08691970678,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 43327.51886376779,
+        "analytic_plasma_area_fraction": 0.6219355037293927,
+        "analytic_surface_class": "cut",
+        "cell": 76,
+        "centre_rz_m": [
+          6.95989591224726,
+          -3.1733380861258675
+        ],
+        "chord_clip_vertex_count": 12,
+        "chord_current_a": 69829.88413116994,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 69829.88413116994,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.7613730203,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 77,
+        "centre_rz_m": [
+          6.63779567849741,
+          -3.0049063625643724
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.761373021,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 177074.761373021,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162756.79961178932,
+        "analytic_plasma_area_fraction": 0.931273172166933,
+        "analytic_surface_class": "cut",
+        "cell": 78,
+        "centre_rz_m": [
+          7.0602671137051995,
+          -2.749075137501855
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 174985.203699075,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 174985.203699075,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302024,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 79,
+        "centre_rz_m": [
+          6.63779567849741,
+          -2.50408863547031
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302077,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 177074.76137302077,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 44172.74769949377,
+        "analytic_plasma_area_fraction": 0.8145945232062478,
+        "analytic_surface_class": "cut",
+        "cell": 80,
+        "centre_rz_m": [
+          7.353666344897873,
+          -2.4459378492199204
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 54283.178125489496,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 54283.178125489496,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540057,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 81,
+        "centre_rz_m": [
+          7.07151655282645,
+          -2.253679771923279
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.82360540127,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 184595.82360540127,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302024,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 82,
+        "centre_rz_m": [
+          6.63779567849741,
+          -2.003270908376248
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302088,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 172848.62294808068,
+        "exact_clip_vertex_count": 130,
+        "exact_current_a": 4226.1384249401935,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 116079.1397235576,
+        "analytic_plasma_area_fraction": 0.9484589985911245,
+        "analytic_surface_class": "cut",
+        "cell": 83,
+        "centre_rz_m": [
+          7.426847453850328,
+          -1.9839175843463568
+        ],
+        "chord_clip_vertex_count": 11,
+        "chord_current_a": 122465.72853844271,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 122465.72853844271,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540057,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 84,
+        "centre_rz_m": [
+          7.07151655282645,
+          -1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.82360540103,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 179826.4585774905,
+        "exact_clip_vertex_count": 130,
+        "exact_current_a": 4769.365027910533,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 165366.68356562324,
+        "analytic_plasma_area_fraction": 0.9840307969801307,
+        "analytic_surface_class": "cut",
+        "cell": 85,
+        "centre_rz_m": [
+          7.476694258988684,
+          -1.4962400011084995
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 168097.3372019192,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 168097.3372019192,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540054,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 86,
+        "centre_rz_m": [
+          7.07151655282645,
+          -1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.82360540127,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 28475.399541277613,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 156120.42406412365,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 188227.93698525894,
+        "analytic_plasma_area_fraction": 0.997760176047713,
+        "analytic_surface_class": "cut",
+        "cell": 87,
+        "centre_rz_m": [
+          7.500354309463739,
+          -1.0014307996984273
+        ],
+        "chord_clip_vertex_count": 9,
+        "chord_current_a": 188660.17623305286,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 101767.09875164556,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 86893.0774814073,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540057,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 88,
+        "centre_rz_m": [
+          7.07151655282645,
+          -0.7512265906410929
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.82360540115,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.82360540115,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 6228.287508545468,
+        "analytic_plasma_area_fraction": 0.8783951085786541,
+        "analytic_surface_class": "cut",
+        "cell": 89,
+        "centre_rz_m": [
+          7.696059694078659,
+          -1.2330813452947538
+        ],
+        "chord_clip_vertex_count": 5,
+        "chord_current_a": 7092.334231142044,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 7092.334231142044,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 22664.5074534745,
+        "analytic_plasma_area_fraction": 0.9814242407441249,
+        "analytic_surface_class": "cut",
+        "cell": 90,
+        "centre_rz_m": [
+          7.73150523242393,
+          -0.7321972380841619
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 23094.940392638604,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 23094.940392638604,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 91,
+        "centre_rz_m": [
+          6.63779567849741,
+          -0.5008177270940619
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302097,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.76137302097,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372802,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 92,
+        "centre_rz_m": [
+          5.770353929839329,
+          -0.5008177270940619
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372857,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372857,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 93,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -0.25040886354703096
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007233,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.27027007233,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 94,
+        "centre_rz_m": [
+          6.63779567849741,
+          -2.822757854823703e-17
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.7613730212,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.7613730212,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372802,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 95,
+        "centre_rz_m": [
+          5.770353929839329,
+          -2.822757854823703e-17
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372846,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372846,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.9999999999999981,
+        "analytic_surface_class": "interior",
+        "cell": 96,
+        "centre_rz_m": [
+          6.2040748041683695,
+          0.2504088635470314
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007221,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.27027007221,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 97,
+        "centre_rz_m": [
+          6.63779567849741,
+          0.5008177270940619
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302112,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.76137302112,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.380923728,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 98,
+        "centre_rz_m": [
+          5.770353929839329,
+          0.5008177270940619
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372863,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372863,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 99,
+        "centre_rz_m": [
+          6.2040748041683695,
+          0.7512265906410933
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.2702700721,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.2702700721,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 100,
+        "centre_rz_m": [
+          6.63779567849741,
+          1.0016354541881238
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302082,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.76137302082,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 33795.623381188874,
+        "analytic_plasma_area_fraction": 0.999155061671289,
+        "analytic_surface_class": "cut",
+        "cell": 101,
+        "centre_rz_m": [
+          7.747795906173484,
+          -0.24325612001788238
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -25439.879354015575,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 25439.879354015575,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 33795.623549187825,
+        "analytic_plasma_area_fraction": 0.9991550616627881,
+        "analytic_surface_class": "cut",
+        "cell": 102,
+        "centre_rz_m": [
+          7.747795906435065,
+          0.24325611916730788
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -25439.879353976496,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 25439.879353976496,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 22664.507453474474,
+        "analytic_plasma_area_fraction": 0.9814242407441248,
+        "analytic_surface_class": "cut",
+        "cell": 103,
+        "centre_rz_m": [
+          7.731505232423929,
+          0.7321972380841625
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 23094.940392638677,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 23094.940392638677,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 192266.5887937482,
+        "analytic_plasma_area_fraction": 0.9999830224259939,
+        "analytic_surface_class": "cut",
+        "cell": 104,
+        "centre_rz_m": [
+          7.5051309965354855,
+          -0.5008174333478981
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -181279.09216451453,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 181279.09216451453,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540057,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 105,
+        "centre_rz_m": [
+          7.07151655282645,
+          -0.25040886354703096
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.82360540138,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.82360540138,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 192343.79043466577,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 106,
+        "centre_rz_m": [
+          7.505237427155491,
+          -2.822757854823703e-17
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": false,
+        "profile_participation": false,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540057,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 107,
+        "centre_rz_m": [
+          7.07151655282645,
+          0.2504088635470314
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.8236054011,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.8236054011,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 192266.5887937482,
+        "analytic_plasma_area_fraction": 0.9999830224259939,
+        "analytic_surface_class": "cut",
+        "cell": 108,
+        "centre_rz_m": [
+          7.5051309965354855,
+          0.5008174333478983
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -181279.09216433737,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 181279.09216433737,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540054,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 109,
+        "centre_rz_m": [
+          7.07151655282645,
+          0.7512265906410933
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.8236054011,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.8236054011,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 188227.93698525894,
+        "analytic_plasma_area_fraction": 0.9977601760477129,
+        "analytic_surface_class": "cut",
+        "cell": 110,
+        "centre_rz_m": [
+          7.500354309463739,
+          1.001430799698427
+        ],
+        "chord_clip_vertex_count": 9,
+        "chord_current_a": 188660.17623305268,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 101767.09875255283,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 86893.07748049985,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540054,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 111,
+        "centre_rz_m": [
+          7.07151655282645,
+          1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.8236054011,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 28475.39954234328,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 156120.4240630578,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 112,
+        "centre_rz_m": [
+          6.63779567849741,
+          1.5024531812821857
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302115,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 7916.76439442698,
+        "exact_clip_vertex_count": 134,
+        "exact_current_a": 169157.99697859416,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 165366.68356562324,
+        "analytic_plasma_area_fraction": 0.9840307969801315,
+        "analytic_surface_class": "cut",
+        "cell": 113,
+        "centre_rz_m": [
+          7.476694258988684,
+          1.496240001108499
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 168097.3372019193,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 168097.3372019193,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 6228.287508545469,
+        "analytic_plasma_area_fraction": 0.878395108578654,
+        "analytic_surface_class": "cut",
+        "cell": 114,
+        "centre_rz_m": [
+          7.696059694078659,
+          1.2330813452947538
+        ],
+        "chord_clip_vertex_count": 5,
+        "chord_current_a": 7092.334231142049,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 7092.334231142049,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540054,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 115,
+        "centre_rz_m": [
+          7.07151655282645,
+          1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.82360540103,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 179826.458577996,
+        "exact_clip_vertex_count": 130,
+        "exact_current_a": 4769.3650274050415,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 116079.13972355747,
+        "analytic_plasma_area_fraction": 0.9484589985911236,
+        "analytic_surface_class": "cut",
+        "cell": 116,
+        "centre_rz_m": [
+          7.426847453850328,
+          1.983917584346357
+        ],
+        "chord_clip_vertex_count": 11,
+        "chord_current_a": 122465.72853844272,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 122465.72853844272,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540057,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 117,
+        "centre_rz_m": [
+          7.07151655282645,
+          2.253679771923279
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.8236054011,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 184595.8236054011,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 44172.74769949357,
+        "analytic_plasma_area_fraction": 0.814594523206245,
+        "analytic_surface_class": "cut",
+        "cell": 118,
+        "centre_rz_m": [
+          7.353666344897873,
+          2.445937849219921
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 54283.17812548955,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 54283.17812548955,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162756.79961178915,
+        "analytic_plasma_area_fraction": 0.9312731721669322,
+        "analytic_surface_class": "cut",
+        "cell": 119,
+        "centre_rz_m": [
+          7.0602671137051995,
+          2.749075137501855
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 174985.20369907492,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 174985.20369907492,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 43327.518863767786,
+        "analytic_plasma_area_fraction": 0.6219355037293918,
+        "analytic_surface_class": "cut",
+        "cell": 120,
+        "centre_rz_m": [
+          6.95989591224726,
+          3.1733380861258675
+        ],
+        "chord_clip_vertex_count": 12,
+        "chord_current_a": 69829.88413117011,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 69829.88413117011,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 121,
+        "centre_rz_m": [
+          6.2040748041683695,
+          2.754497499017341
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007221,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 169828.27027007221,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.7613730203,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 122,
+        "centre_rz_m": [
+          6.63779567849741,
+          3.0049063625643724
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302106,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 177074.76137302106,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372802,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 123,
+        "centre_rz_m": [
+          5.770353929839329,
+          3.0049063625643724
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.3809237286,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 162918.3809237286,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 124,
+        "centre_rz_m": [
+          6.2040748041683695,
+          3.255315226111403
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007221,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 169828.27027007221,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 78230.32171836338,
+        "analytic_plasma_area_fraction": 0.4989911680923609,
+        "analytic_surface_class": "cut",
+        "cell": 125,
+        "centre_rz_m": [
+          5.774561160094203,
+          3.496077945454052
+        ],
+        "chord_clip_vertex_count": 13,
+        "chord_current_a": 156130.58650770536,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 156130.58650770536,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 23242.041893558566,
+        "analytic_plasma_area_fraction": 0.25877622432668085,
+        "analytic_surface_class": "cut",
+        "cell": 126,
+        "centre_rz_m": [
+          6.189467706884564,
+          3.652376088629997
+        ],
+        "chord_clip_vertex_count": 15,
+        "chord_current_a": 89700.69485507518,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 89700.69485507518,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 127,
+        "centre_rz_m": [
+          5.894188145256963,
+          3.7621485185015144
+        ],
+        "chord_clip_vertex_count": 5,
+        "chord_current_a": 496.98098740323553,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 496.98098740323553,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 8850.331339327831,
+        "analytic_plasma_area_fraction": 0.09763383134746834,
+        "analytic_surface_class": "cut",
+        "cell": 128,
+        "centre_rz_m": [
+          4.113972879609135,
+          1.478090188637746
+        ],
+        "chord_clip_vertex_count": 11,
+        "chord_current_a": 89790.31511026967,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 89790.31511026967,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 129,
+        "centre_rz_m": [
+          4.200115896910771,
+          1.9281388330797047
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 30909.43270931969,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 30909.43270931969,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 22660.702772596407,
+        "analytic_plasma_area_fraction": 0.20669398371783548,
+        "analytic_surface_class": "cut",
+        "cell": 130,
+        "centre_rz_m": [
+          4.951659081913038,
+          2.9634455489802405
+        ],
+        "chord_clip_vertex_count": 12,
+        "chord_current_a": 108607.6637082136,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 108607.6637082136,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 68570.4668209636,
+        "analytic_plasma_area_fraction": 0.45552682909793274,
+        "analytic_surface_class": "cut",
+        "cell": 131,
+        "centre_rz_m": [
+          5.343137408875683,
+          3.2462471424163715
+        ],
+        "chord_clip_vertex_count": 11,
+        "chord_current_a": 149526.3011787113,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 149526.3011787113,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 132,
+        "centre_rz_m": [
+          5.04993742326072,
+          3.280898835692093
+        ],
+        "chord_clip_vertex_count": 5,
+        "chord_current_a": 994.7035750633961,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 994.7035750633961,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 133,
+        "centre_rz_m": [
+          5.452646818736718,
+          3.558780034207491
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 10271.276302200053,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 10271.276302200053,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 76394.81586403266,
+        "analytic_plasma_area_fraction": 0.6167808936008342,
+        "analytic_surface_class": "cut",
+        "cell": 134,
+        "centre_rz_m": [
+          6.5988389321960526,
+          3.451154225808448
+        ],
+        "chord_clip_vertex_count": 13,
+        "chord_current_a": 124114.08691970704,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 124114.08691970704,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      }
+    ],
+    "terminal": [
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 0,
+        "centre_rz_m": [
+          5.894188145256963,
+          -3.762148518501515
+        ],
+        "chord_clip_vertex_count": 5,
+        "chord_current_a": 496.9809874031913,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 496.9809874031913,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 1,
+        "centre_rz_m": [
+          5.452646818736717,
+          -3.558780034207491
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 10271.27630219994,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 10271.27630219994,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 23242.041893558366,
+        "analytic_plasma_area_fraction": 0.25877622432667957,
+        "analytic_surface_class": "cut",
+        "cell": 2,
+        "centre_rz_m": [
+          6.189467706884564,
+          -3.6523760886299974
+        ],
+        "chord_clip_vertex_count": 15,
+        "chord_current_a": 89700.69485507498,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 59443.979865509566,
+        "exact_clip_vertex_count": 260,
+        "exact_current_a": 30256.71498956541,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 78230.32171836322,
+        "analytic_plasma_area_fraction": 0.4989911680923601,
+        "analytic_surface_class": "cut",
+        "cell": 3,
+        "centre_rz_m": [
+          5.774561160094202,
+          -3.4960779454540525
+        ],
+        "chord_clip_vertex_count": 13,
+        "chord_current_a": 156130.58650770521,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 52943.171550648185,
+        "exact_clip_vertex_count": 132,
+        "exact_current_a": 103187.41495705703,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 68570.46682096357,
+        "analytic_plasma_area_fraction": 0.4555268290979326,
+        "analytic_surface_class": "cut",
+        "cell": 4,
+        "centre_rz_m": [
+          5.343137408875683,
+          -3.2462471424163715
+        ],
+        "chord_clip_vertex_count": 11,
+        "chord_current_a": 149526.3011787112,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 106634.12833418534,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 42892.17284452587,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 5,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -3.255315226111403
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007245,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 14050.810971332772,
+        "exact_clip_vertex_count": 134,
+        "exact_current_a": 155777.45929873968,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372802,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 6,
+        "centre_rz_m": [
+          5.770353929839329,
+          -3.0049063625643724
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372875,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372875,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.34316069403,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 7,
+        "centre_rz_m": [
+          5.336633055510289,
+          -2.754497499017341
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069435,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 5088.7479411406675,
+        "exact_clip_vertex_count": 134,
+        "exact_current_a": 151338.59521955368,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 8,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -2.754497499017341
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007248,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.27027007248,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.3809237279,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 9,
+        "centre_rz_m": [
+          5.770353929839329,
+          -2.50408863547031
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.3809237286,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.3809237286,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 10,
+        "centre_rz_m": [
+          5.04993742326072,
+          -3.280898835692093
+        ],
+        "chord_clip_vertex_count": 5,
+        "chord_current_a": 994.703575063375,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 994.703575063375,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 22660.70277259633,
+        "analytic_plasma_area_fraction": 0.20669398371783496,
+        "analytic_surface_class": "cut",
+        "cell": 11,
+        "centre_rz_m": [
+          4.951659081913038,
+          -2.9634455489802405
+        ],
+        "chord_clip_vertex_count": 12,
+        "chord_current_a": 108607.66370821357,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 106764.51250071812,
+        "exact_clip_vertex_count": 130,
+        "exact_current_a": 1843.151207495448,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 12,
+        "centre_rz_m": [
+          4.61031890890049,
+          -2.661015017862054
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 38255.23119839127,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 38255.23119839127,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 125716.31782122221,
+        "analytic_plasma_area_fraction": 0.8331733114085262,
+        "analytic_surface_class": "cut",
+        "cell": 13,
+        "centre_rz_m": [
+          4.902912181181249,
+          -2.50408863547031
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.6015729135,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 37864.23576240605,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 112602.36581050744,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 39018.85722138792,
+        "analytic_plasma_area_fraction": 0.3092724468276255,
+        "analytic_surface_class": "cut",
+        "cell": 14,
+        "centre_rz_m": [
+          4.498437116329783,
+          -2.237640256507944
+        ],
+        "chord_clip_vertex_count": 12,
+        "chord_current_a": 124994.88516155232,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 103814.6902646072,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 21180.19489694512,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 15,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -2.253679771923279
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.2702700724,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.2702700724,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.34316069403,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 16,
+        "centre_rz_m": [
+          5.336633055510289,
+          -2.253679771923279
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.3431606943,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.3431606943,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372793,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 17,
+        "centre_rz_m": [
+          5.770353929839329,
+          -2.003270908376248
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372857,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372857,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.2702700716,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 18,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007245,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.27027007245,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 19,
+        "centre_rz_m": [
+          6.63779567849741,
+          -1.5024531812821862
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302117,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.76137302117,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.380923728,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 20,
+        "centre_rz_m": [
+          5.770353929839329,
+          -1.5024531812821862
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.3809237287,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.3809237287,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 21,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.2702700724,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.2702700724,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.7613730203,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 22,
+        "centre_rz_m": [
+          6.63779567849741,
+          -1.0016354541881238
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.7613730212,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.7613730212,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.380923728,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 23,
+        "centre_rz_m": [
+          5.770353929839329,
+          -1.0016354541881238
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372866,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372866,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.9999999999999977,
+        "analytic_surface_class": "interior",
+        "cell": 24,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -0.7512265906410929
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.2702700722,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.2702700722,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 25,
+        "centre_rz_m": [
+          4.200115896910771,
+          -1.9281388330797045
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 30909.432709319648,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 30909.432709319648,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 150466.60157291373,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 26,
+        "centre_rz_m": [
+          4.902912181181249,
+          -2.003270908376248
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.6015729134,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 150466.6015729134,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.34316069403,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 27,
+        "centre_rz_m": [
+          5.336633055510289,
+          -1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069435,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.34316069435,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 112553.36217587654,
+        "analytic_plasma_area_fraction": 0.7723818908738682,
+        "analytic_surface_class": "cut",
+        "cell": 28,
+        "centre_rz_m": [
+          4.46919130685221,
+          -1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724597,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 62929.870359578505,
+        "exact_clip_vertex_count": 132,
+        "exact_current_a": 82261.15238766746,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 150466.60157291376,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 29,
+        "centre_rz_m": [
+          4.902912181181249,
+          -1.5024531812821862
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.60157291353,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 150466.60157291353,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 145191.02274724538,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 30,
+        "centre_rz_m": [
+          4.46919130685221,
+          -1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724608,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 14276.114218415838,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 130914.90852883024,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 156427.343160694,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 31,
+        "centre_rz_m": [
+          5.336633055510289,
+          -1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069435,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.34316069435,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 150466.6015729138,
+        "analytic_plasma_area_fraction": 1.0000000000000022,
+        "analytic_surface_class": "interior",
+        "cell": 32,
+        "centre_rz_m": [
+          4.902912181181249,
+          -1.0016354541881238
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.6015729135,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 150466.6015729135,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.343160694,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 33,
+        "centre_rz_m": [
+          5.336633055510289,
+          -0.7512265906410929
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069432,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.34316069432,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 145191.02274724538,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 34,
+        "centre_rz_m": [
+          4.46919130685221,
+          -0.7512265906410929
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724594,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 145191.02274724594,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 8850.331339327793,
+        "analytic_plasma_area_fraction": 0.09763383134746788,
+        "analytic_surface_class": "cut",
+        "cell": 35,
+        "centre_rz_m": [
+          4.113972879609135,
+          -1.4780901886377467
+        ],
+        "chord_clip_vertex_count": 11,
+        "chord_current_a": 89790.31511026973,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 89790.31511026973,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 45424.70139178028,
+        "analytic_plasma_area_fraction": 0.35030264627768837,
+        "analytic_surface_class": "cut",
+        "cell": 36,
+        "centre_rz_m": [
+          4.056046366305996,
+          -0.9968357654414408
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 128597.69519252093,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 100420.37904597529,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 28177.316146545636,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 37,
+        "centre_rz_m": [
+          3.824653262107825,
+          -0.7220621952528966
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 10237.29925288854,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 10237.29925288854,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 72126.96509035546,
+        "analytic_plasma_area_fraction": 0.5101590748532744,
+        "analytic_surface_class": "cut",
+        "cell": 38,
+        "centre_rz_m": [
+          4.036270968485171,
+          -0.5008058097149954
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 140421.88263094256,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 49632.53740659928,
+        "exact_clip_vertex_count": 132,
+        "exact_current_a": 90789.34522434328,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 150466.6015729138,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 39,
+        "centre_rz_m": [
+          4.902912181181249,
+          -0.5008177270940619
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.60157291347,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 150466.60157291347,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 145191.02274724538,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 40,
+        "centre_rz_m": [
+          4.46919130685221,
+          -0.25040886354703096
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.022747246,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 145191.022747246,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.34316069403,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 41,
+        "centre_rz_m": [
+          5.336633055510289,
+          -0.25040886354703096
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069455,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.34316069455,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 150466.6015729138,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 42,
+        "centre_rz_m": [
+          4.902912181181249,
+          -2.822757854823703e-17
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.60157291347,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 150466.60157291347,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.343160694,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 43,
+        "centre_rz_m": [
+          5.336633055510289,
+          0.2504088635470314
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069447,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.34316069447,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 145191.02274724538,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 44,
+        "centre_rz_m": [
+          4.46919130685221,
+          0.2504088635470314
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724597,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 145191.02274724597,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 150466.6015729138,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 45,
+        "centre_rz_m": [
+          4.902912181181249,
+          0.5008177270940619
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.6015729134,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 150466.6015729134,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 145191.02274724538,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 46,
+        "centre_rz_m": [
+          4.46919130685221,
+          0.7512265906410933
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724594,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 145191.02274724594,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.343160694,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 47,
+        "centre_rz_m": [
+          5.336633055510289,
+          0.7512265906410933
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.3431606945,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.3431606945,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 150466.60157291376,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 48,
+        "centre_rz_m": [
+          4.902912181181249,
+          1.0016354541881238
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.60157291344,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 150466.60157291344,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 49,
+        "centre_rz_m": [
+          3.7947078687914786,
+          -0.23713743190133724
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 22886.418152418304,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 22886.418152418304,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 80937.11290004579,
+        "analytic_plasma_area_fraction": 0.5713219732234246,
+        "analytic_surface_class": "cut",
+        "cell": 50,
+        "centre_rz_m": [
+          4.035470432523169,
+          -7.082065072939336e-17
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -115815.10685965825,
+        "exact_clip_vertex_count": 132,
+        "exact_current_a": 115815.10685965825,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 51,
+        "centre_rz_m": [
+          3.7947078687914786,
+          0.2371374319013375
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 22886.418152418293,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 22886.418152418293,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 72126.96509035546,
+        "analytic_plasma_area_fraction": 0.5101590748532745,
+        "analytic_surface_class": "cut",
+        "cell": 52,
+        "centre_rz_m": [
+          4.036270968485171,
+          0.5008058097149952
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 140421.88263094262,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 49632.5374199675,
+        "exact_clip_vertex_count": 132,
+        "exact_current_a": 90789.34521097512,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 53,
+        "centre_rz_m": [
+          3.824653262107825,
+          0.7220621952528968
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 10237.299252888475,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 10237.299252888475,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 45424.7013917803,
+        "analytic_plasma_area_fraction": 0.35030264627768837,
+        "analytic_surface_class": "cut",
+        "cell": 54,
+        "centre_rz_m": [
+          4.056046366305996,
+          0.9968357654414407
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 128597.69519252077,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 100420.37905395967,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 28177.3161385611,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372796,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 55,
+        "centre_rz_m": [
+          5.770353929839329,
+          1.0016354541881238
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372872,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372872,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 56,
+        "centre_rz_m": [
+          6.2040748041683695,
+          1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.2702700724,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.2702700724,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.343160694,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 57,
+        "centre_rz_m": [
+          5.336633055510289,
+          1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.3431606943,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.3431606943,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.380923728,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 58,
+        "centre_rz_m": [
+          5.770353929839329,
+          1.5024531812821857
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372875,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372875,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 59,
+        "centre_rz_m": [
+          6.2040748041683695,
+          1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.2702700725,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.2702700725,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.380923728,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 60,
+        "centre_rz_m": [
+          5.770353929839329,
+          2.0032709083762485
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372855,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372855,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 61,
+        "centre_rz_m": [
+          6.63779567849741,
+          2.0032709083762485
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302106,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.76137302106,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 62,
+        "centre_rz_m": [
+          6.2040748041683695,
+          2.253679771923279
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007221,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.27027007221,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372802,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 63,
+        "centre_rz_m": [
+          5.770353929839329,
+          2.5040886354703105
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.3809237286,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.3809237286,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.7613730203,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 64,
+        "centre_rz_m": [
+          6.63779567849741,
+          2.5040886354703105
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302117,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.76137302117,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 145191.02274724538,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 65,
+        "centre_rz_m": [
+          4.46919130685221,
+          1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724594,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 14276.11421957535,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 130914.90852767059,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 150466.60157291376,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 66,
+        "centre_rz_m": [
+          4.902912181181249,
+          1.5024531812821857
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.60157291355,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 150466.60157291355,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.343160694,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 67,
+        "centre_rz_m": [
+          5.336633055510289,
+          1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069447,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.34316069447,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 112553.36217587651,
+        "analytic_plasma_area_fraction": 0.7723818908738681,
+        "analytic_surface_class": "cut",
+        "cell": 68,
+        "centre_rz_m": [
+          4.46919130685221,
+          1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 145191.02274724602,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 62929.870359720764,
+        "exact_clip_vertex_count": 132,
+        "exact_current_a": 82261.15238752526,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 150466.60157291376,
+        "analytic_plasma_area_fraction": 1.000000000000002,
+        "analytic_surface_class": "interior",
+        "cell": 69,
+        "centre_rz_m": [
+          4.902912181181249,
+          2.0032709083762485
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.6015729134,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 150466.6015729134,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.34316069403,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 70,
+        "centre_rz_m": [
+          5.336633055510289,
+          2.253679771923279
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.3431606943,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 156427.3431606943,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 39018.85722138798,
+        "analytic_plasma_area_fraction": 0.309272446827626,
+        "analytic_surface_class": "cut",
+        "cell": 71,
+        "centre_rz_m": [
+          4.498437116329783,
+          2.237640256507944
+        ],
+        "chord_clip_vertex_count": 12,
+        "chord_current_a": 124994.88516155229,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 103814.69026346278,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 21180.194898089518,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 125716.31782122217,
+        "analytic_plasma_area_fraction": 0.8331733114085258,
+        "analytic_surface_class": "cut",
+        "cell": 72,
+        "centre_rz_m": [
+          4.902912181181249,
+          2.5040886354703105
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 150466.60157291344,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 37864.235752645385,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 112602.36582026805,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 73,
+        "centre_rz_m": [
+          4.61031890890049,
+          2.6610150178620535
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 38255.23119839141,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 38255.23119839141,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 156427.34316069403,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 74,
+        "centre_rz_m": [
+          5.336633055510289,
+          2.754497499017341
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 156427.34316069423,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 5088.747946587391,
+        "exact_clip_vertex_count": 134,
+        "exact_current_a": 151338.59521410684,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 76394.81586403257,
+        "analytic_plasma_area_fraction": 0.6167808936008342,
+        "analytic_surface_class": "cut",
+        "cell": 75,
+        "centre_rz_m": [
+          6.5988389321960526,
+          -3.4511542258084487
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -112032.12954630761,
+        "exact_clip_vertex_count": 269,
+        "exact_current_a": 112032.12954630761,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 43327.51886376779,
+        "analytic_plasma_area_fraction": 0.6219355037293927,
+        "analytic_surface_class": "cut",
+        "cell": 76,
+        "centre_rz_m": [
+          6.95989591224726,
+          -3.1733380861258675
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -32580.732032213,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 32580.732032213,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 177074.7613730203,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 77,
+        "centre_rz_m": [
+          6.63779567849741,
+          -3.0049063625643724
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.761373021,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.761373021,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162756.79961178932,
+        "analytic_plasma_area_fraction": 0.931273172166933,
+        "analytic_surface_class": "cut",
+        "cell": 78,
+        "centre_rz_m": [
+          7.0602671137051995,
+          -2.749075137501855
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -124146.37471273697,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 124146.37471273697,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302024,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 79,
+        "centre_rz_m": [
+          6.63779567849741,
+          -2.50408863547031
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302077,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.76137302077,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 44172.74769949377,
+        "analytic_plasma_area_fraction": 0.8145945232062478,
+        "analytic_surface_class": "cut",
+        "cell": 80,
+        "centre_rz_m": [
+          7.353666344897873,
+          -2.4459378492199204
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -39553.1299599824,
+        "exact_clip_vertex_count": 134,
+        "exact_current_a": 39553.1299599824,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540057,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 81,
+        "centre_rz_m": [
+          7.07151655282645,
+          -2.253679771923279
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.82360540127,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.82360540127,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302024,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 82,
+        "centre_rz_m": [
+          6.63779567849741,
+          -2.003270908376248
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302088,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.76137302088,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 116079.1397235576,
+        "analytic_plasma_area_fraction": 0.9484589985911245,
+        "analytic_surface_class": "cut",
+        "cell": 83,
+        "centre_rz_m": [
+          7.426847453850328,
+          -1.9839175843463568
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": false,
+        "profile_participation": false,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540057,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 84,
+        "centre_rz_m": [
+          7.07151655282645,
+          -1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.82360540103,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.82360540103,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 165366.68356562324,
+        "analytic_plasma_area_fraction": 0.9840307969801307,
+        "analytic_surface_class": "cut",
+        "cell": 85,
+        "centre_rz_m": [
+          7.476694258988684,
+          -1.4962400011084995
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -155735.0907358867,
+        "exact_clip_vertex_count": 135,
+        "exact_current_a": 155735.0907358867,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540054,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 86,
+        "centre_rz_m": [
+          7.07151655282645,
+          -1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.82360540127,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.82360540127,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 188227.93698525894,
+        "analytic_plasma_area_fraction": 0.997760176047713,
+        "analytic_surface_class": "cut",
+        "cell": 87,
+        "centre_rz_m": [
+          7.500354309463739,
+          -1.0014307996984273
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -176674.50523611248,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 176674.50523611248,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540057,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 88,
+        "centre_rz_m": [
+          7.07151655282645,
+          -0.7512265906410929
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.82360540115,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.82360540115,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 6228.287508545468,
+        "analytic_plasma_area_fraction": 0.8783951085786541,
+        "analytic_surface_class": "cut",
+        "cell": 89,
+        "centre_rz_m": [
+          7.696059694078659,
+          -1.2330813452947538
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": false,
+        "profile_participation": false,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 22664.5074534745,
+        "analytic_plasma_area_fraction": 0.9814242407441249,
+        "analytic_surface_class": "cut",
+        "cell": 90,
+        "centre_rz_m": [
+          7.73150523242393,
+          -0.7321972380841619
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -23053.84461101023,
+        "exact_clip_vertex_count": 135,
+        "exact_current_a": 23053.84461101023,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 91,
+        "centre_rz_m": [
+          6.63779567849741,
+          -0.5008177270940619
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302097,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.76137302097,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372802,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 92,
+        "centre_rz_m": [
+          5.770353929839329,
+          -0.5008177270940619
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372857,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372857,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 93,
+        "centre_rz_m": [
+          6.2040748041683695,
+          -0.25040886354703096
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007233,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.27027007233,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 94,
+        "centre_rz_m": [
+          6.63779567849741,
+          -2.822757854823703e-17
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.7613730212,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.7613730212,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372802,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 95,
+        "centre_rz_m": [
+          5.770353929839329,
+          -2.822757854823703e-17
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372846,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372846,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.9999999999999981,
+        "analytic_surface_class": "interior",
+        "cell": 96,
+        "centre_rz_m": [
+          6.2040748041683695,
+          0.2504088635470314
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007221,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.27027007221,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 97,
+        "centre_rz_m": [
+          6.63779567849741,
+          0.5008177270940619
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302112,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.76137302112,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.380923728,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 98,
+        "centre_rz_m": [
+          5.770353929839329,
+          0.5008177270940619
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.38092372863,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.38092372863,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 99,
+        "centre_rz_m": [
+          6.2040748041683695,
+          0.7512265906410933
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.2702700721,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.2702700721,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 100,
+        "centre_rz_m": [
+          6.63779567849741,
+          1.0016354541881238
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302082,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.76137302082,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 33795.623381188874,
+        "analytic_plasma_area_fraction": 0.999155061671289,
+        "analytic_surface_class": "cut",
+        "cell": 101,
+        "centre_rz_m": [
+          7.747795906173484,
+          -0.24325612001788238
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": false,
+        "profile_participation": false,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 33795.623549187825,
+        "analytic_plasma_area_fraction": 0.9991550616627881,
+        "analytic_surface_class": "cut",
+        "cell": 102,
+        "centre_rz_m": [
+          7.747795906435065,
+          0.24325611916730788
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": false,
+        "profile_participation": false,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 22664.507453474474,
+        "analytic_plasma_area_fraction": 0.9814242407441248,
+        "analytic_surface_class": "cut",
+        "cell": 103,
+        "centre_rz_m": [
+          7.731505232423929,
+          0.7321972380841625
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -23053.844610481396,
+        "exact_clip_vertex_count": 135,
+        "exact_current_a": 23053.844610481396,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 192266.5887937482,
+        "analytic_plasma_area_fraction": 0.9999830224259939,
+        "analytic_surface_class": "cut",
+        "cell": 104,
+        "centre_rz_m": [
+          7.5051309965354855,
+          -0.5008174333478981
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": false,
+        "profile_participation": false,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540057,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 105,
+        "centre_rz_m": [
+          7.07151655282645,
+          -0.25040886354703096
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.82360540138,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.82360540138,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 192343.79043466577,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 106,
+        "centre_rz_m": [
+          7.505237427155491,
+          -2.822757854823703e-17
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": false,
+        "profile_participation": false,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540057,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 107,
+        "centre_rz_m": [
+          7.07151655282645,
+          0.2504088635470314
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.8236054011,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.8236054011,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 192266.5887937482,
+        "analytic_plasma_area_fraction": 0.9999830224259939,
+        "analytic_surface_class": "cut",
+        "cell": 108,
+        "centre_rz_m": [
+          7.5051309965354855,
+          0.5008174333478983
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": false,
+        "profile_participation": false,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540054,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 109,
+        "centre_rz_m": [
+          7.07151655282645,
+          0.7512265906410933
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.8236054011,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.8236054011,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 188227.93698525894,
+        "analytic_plasma_area_fraction": 0.9977601760477129,
+        "analytic_surface_class": "cut",
+        "cell": 110,
+        "centre_rz_m": [
+          7.500354309463739,
+          1.001430799698427
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -176674.50523006998,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 176674.50523006998,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540054,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 111,
+        "centre_rz_m": [
+          7.07151655282645,
+          1.2520443177351552
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.8236054011,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.8236054011,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.76137302027,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 112,
+        "centre_rz_m": [
+          6.63779567849741,
+          1.5024531812821857
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302115,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.76137302115,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 165366.68356562324,
+        "analytic_plasma_area_fraction": 0.9840307969801315,
+        "analytic_surface_class": "cut",
+        "cell": 113,
+        "centre_rz_m": [
+          7.476694258988684,
+          1.496240001108499
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -155735.0907462152,
+        "exact_clip_vertex_count": 135,
+        "exact_current_a": 155735.0907462152,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 6228.287508545469,
+        "analytic_plasma_area_fraction": 0.878395108578654,
+        "analytic_surface_class": "cut",
+        "cell": 114,
+        "centre_rz_m": [
+          7.696059694078659,
+          1.2330813452947538
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": false,
+        "profile_participation": false,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540054,
+        "analytic_plasma_area_fraction": 0.9999999999999978,
+        "analytic_surface_class": "interior",
+        "cell": 115,
+        "centre_rz_m": [
+          7.07151655282645,
+          1.7528620448292171
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.82360540103,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.82360540103,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 116079.13972355747,
+        "analytic_plasma_area_fraction": 0.9484589985911236,
+        "analytic_surface_class": "cut",
+        "cell": 116,
+        "centre_rz_m": [
+          7.426847453850328,
+          1.983917584346357
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": false,
+        "profile_participation": false,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 184595.82360540057,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 117,
+        "centre_rz_m": [
+          7.07151655282645,
+          2.253679771923279
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 184595.8236054011,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 184595.8236054011,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 44172.74769949357,
+        "analytic_plasma_area_fraction": 0.814594523206245,
+        "analytic_surface_class": "cut",
+        "cell": 118,
+        "centre_rz_m": [
+          7.353666344897873,
+          2.445937849219921
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -39553.12995247969,
+        "exact_clip_vertex_count": 134,
+        "exact_current_a": 39553.12995247969,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 162756.79961178915,
+        "analytic_plasma_area_fraction": 0.9312731721669322,
+        "analytic_surface_class": "cut",
+        "cell": 119,
+        "centre_rz_m": [
+          7.0602671137051995,
+          2.749075137501855
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -124146.37470647352,
+        "exact_clip_vertex_count": 133,
+        "exact_current_a": 124146.37470647352,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 43327.518863767786,
+        "analytic_plasma_area_fraction": 0.6219355037293918,
+        "analytic_surface_class": "cut",
+        "cell": 120,
+        "centre_rz_m": [
+          6.95989591224726,
+          3.1733380861258675
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -32580.732040240466,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 32580.732040240466,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 121,
+        "centre_rz_m": [
+          6.2040748041683695,
+          2.754497499017341
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007221,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 169828.27027007221,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 177074.7613730203,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 122,
+        "centre_rz_m": [
+          6.63779567849741,
+          3.0049063625643724
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 177074.76137302106,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 177074.76137302106,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 162918.38092372802,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 123,
+        "centre_rz_m": [
+          5.770353929839329,
+          3.0049063625643724
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 162918.3809237286,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 0.0,
+        "exact_clip_vertex_count": 6,
+        "exact_current_a": 162918.3809237286,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 169828.27027007157,
+        "analytic_plasma_area_fraction": 0.999999999999998,
+        "analytic_surface_class": "interior",
+        "cell": 124,
+        "centre_rz_m": [
+          6.2040748041683695,
+          3.255315226111403
+        ],
+        "chord_clip_vertex_count": 6,
+        "chord_current_a": 169828.27027007221,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 14050.810979272443,
+        "exact_clip_vertex_count": 134,
+        "exact_current_a": 155777.45929079977,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 78230.32171836338,
+        "analytic_plasma_area_fraction": 0.4989911680923609,
+        "analytic_surface_class": "cut",
+        "cell": 125,
+        "centre_rz_m": [
+          5.774561160094203,
+          3.496077945454052
+        ],
+        "chord_clip_vertex_count": 13,
+        "chord_current_a": 156130.58650770536,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 52943.17153577943,
+        "exact_clip_vertex_count": 132,
+        "exact_current_a": 103187.41497192593,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 23242.041893558566,
+        "analytic_plasma_area_fraction": 0.25877622432668085,
+        "analytic_surface_class": "cut",
+        "cell": 126,
+        "centre_rz_m": [
+          6.189467706884564,
+          3.652376088629997
+        ],
+        "chord_clip_vertex_count": 15,
+        "chord_current_a": 89700.69485507518,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 59443.97986183317,
+        "exact_clip_vertex_count": 260,
+        "exact_current_a": 30256.714993242014,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 127,
+        "centre_rz_m": [
+          5.894188145256963,
+          3.7621485185015144
+        ],
+        "chord_clip_vertex_count": 5,
+        "chord_current_a": 496.98098740323553,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 496.98098740323553,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 8850.331339327831,
+        "analytic_plasma_area_fraction": 0.09763383134746834,
+        "analytic_surface_class": "cut",
+        "cell": 128,
+        "centre_rz_m": [
+          4.113972879609135,
+          1.478090188637746
+        ],
+        "chord_clip_vertex_count": 11,
+        "chord_current_a": 89790.31511026967,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 89790.31511026967,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 129,
+        "centre_rz_m": [
+          4.200115896910771,
+          1.9281388330797047
+        ],
+        "chord_clip_vertex_count": 10,
+        "chord_current_a": 30909.43270931969,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 30909.43270931969,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 22660.702772596407,
+        "analytic_plasma_area_fraction": 0.20669398371783548,
+        "analytic_surface_class": "cut",
+        "cell": 130,
+        "centre_rz_m": [
+          4.951659081913038,
+          2.9634455489802405
+        ],
+        "chord_clip_vertex_count": 12,
+        "chord_current_a": 108607.6637082136,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 106755.98534945484,
+        "exact_clip_vertex_count": 130,
+        "exact_current_a": 1851.6783587587586,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 68570.4668209636,
+        "analytic_plasma_area_fraction": 0.45552682909793274,
+        "analytic_surface_class": "cut",
+        "cell": 131,
+        "centre_rz_m": [
+          5.343137408875683,
+          3.2462471424163715
+        ],
+        "chord_clip_vertex_count": 11,
+        "chord_current_a": 149526.3011787113,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": 106634.1283454497,
+        "exact_clip_vertex_count": 131,
+        "exact_current_a": 42892.17283326159,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 132,
+        "centre_rz_m": [
+          5.04993742326072,
+          3.280898835692093
+        ],
+        "chord_clip_vertex_count": 5,
+        "chord_current_a": 994.7035750633961,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 994.7035750633961,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 0.0,
+        "analytic_plasma_area_fraction": 0.0,
+        "analytic_surface_class": "exterior",
+        "cell": 133,
+        "centre_rz_m": [
+          5.452646818736718,
+          3.558780034207491
+        ],
+        "chord_clip_vertex_count": 7,
+        "chord_current_a": 10271.276302200053,
+        "cut_by_analytic_separatrix": false,
+        "difference_a": 10271.276302200053,
+        "exact_clip_vertex_count": 0,
+        "exact_current_a": 0.0,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": false
+      },
+      {
+        "analytic_exact_current_a": 76394.81586403266,
+        "analytic_plasma_area_fraction": 0.6167808936008342,
+        "analytic_surface_class": "cut",
+        "cell": 134,
+        "centre_rz_m": [
+          6.5988389321960526,
+          3.451154225808448
+        ],
+        "chord_clip_vertex_count": 0,
+        "chord_current_a": 0.0,
+        "cut_by_analytic_separatrix": true,
+        "difference_a": -112032.12953550415,
+        "exact_clip_vertex_count": 269,
+        "exact_current_a": 112032.12953550415,
+        "participation": true,
+        "profile_participation": true,
+        "vertex_participation": true
+      }
+    ]
+  },
+  "realised_cells": 135,
+  "requested_cells": -110,
+  "seed": {
+    "certificate_row_seed_sha256": "7712eda154ce7568c76be8c2b9e0697f8fae692b55ac99988a6d033f09ea7b53",
+    "construction": "current_centroid_disc",
+    "digest_matches_commit": false,
+    "digest_mismatch_explanation": "the committed digest was produced by the GPU certificate lane; the CPU lane cannot reproduce a JAX reduction bit-for-bit, so identity is verified structurally and through the amplitude history instead (see seed_structural and amplitude verification gate)",
+    "state_sha256_binary64": "a95977eaa781d8d75911ea3f5dcf7d0f58fee1a769a9d44fdb2eac355507a75e",
+    "structural_verification": {
+      "all_structural_fields_identical": true,
+      "field_comparisons": {
+        "anchor_available": {
+          "banked": true,
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": true
+        },
+        "construction": {
+          "banked": "current_centroid_disc",
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": "current_centroid_disc"
+        },
+        "current_centroid_m": {
+          "banked": [
+            6.063530173332898,
+            0.0
+          ],
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": [
+            6.063530173332898,
+            0.0
+          ]
+        },
+        "declared_axis_m": {
+          "banked": [
+            6.063530173332898,
+            0.0
+          ],
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": [
+            6.063530173332898,
+            0.0
+          ]
+        },
+        "factory": {
+          "banked": "profile.cold_seed_portfolio",
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": "profile.cold_seed_portfolio"
+        },
+        "plasma_current_a": {
+          "banked": 16314773.311828371,
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": 16314773.311828371
+        },
+        "requested_class": {
+          "banked": "limited",
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": "limited"
+        },
+        "seed_radius_m": {
+          "banked": 1.564079053601776,
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": 1.564079053601776
+        },
+        "stored_flux_samples_used": {
+          "banked": false,
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": false
+        },
+        "supported_cell_count": {
+          "banked": 36,
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": 36
+        }
+      },
+      "fields_compared": [
+        "construction",
+        "plasma_current_a",
+        "current_centroid_m",
+        "seed_radius_m",
+        "supported_cell_count",
+        "anchor_available",
+        "declared_axis_m",
+        "stored_flux_samples_used",
+        "requested_class",
+        "factory"
+      ],
+      "worst_max_relative_difference": 0.0
+    }
+  },
+  "source_revision": "28a49bcbfddf81a950adce8651785a54cd3e52fb",
+  "states": {
+    "seed": {
+      "amplitude_verification": {
+        "chord": {
+          "banked_amplitude": 0.9297775241954396,
+          "bound": 1e-06,
+          "cross_check_available": true,
+          "measured_amplitude": 0.9297775241954396,
+          "passed": true,
+          "relative_disagreement": 0.0,
+          "unit_amplitude_total_a": 17546964.60956718
+        },
+        "exact": {
+          "banked_amplitude": 2.200602886684049,
+          "bound": 1e-06,
+          "cross_check_available": true,
+          "measured_amplitude": 2.2006028866836513,
+          "passed": true,
+          "relative_disagreement": 1.806140695446935e-13,
+          "unit_amplitude_total_a": 7413774.3845347
+        },
+        "gate": {
+          "all_cross_checkable_modes_within_bank": true,
+          "bound": 1e-06,
+          "meaning": "census total at unit amplitude reproduces the committed row's banked amplitude for every mode-state pair that shares the state with the banked reference; this is the identity statement that both modes are evaluated on the same states the row persisted"
+        }
+      },
+      "chord_over_exact_total_ratio": 2.3668058534625147,
+      "class_totals_a": {
+        "by_mode_mechanism": {
+          "exact_excluded_cells": 8388864.178141607,
+          "uncut_interior_differing_cells": 6147490.93608022
+        },
+        "by_surface": {
+          "cut": 3985699.288952263,
+          "exterior": 228102.68435536884,
+          "interior": 5919388.25172485
+        }
+      },
+      "exact_excluded_cells": {
+        "cells": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          25,
+          26,
+          28,
+          30,
+          35,
+          36,
+          37,
+          38,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          62,
+          63,
+          64,
+          65,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          83,
+          85,
+          89,
+          90,
+          103,
+          113,
+          114,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134
+        ],
+        "count": 75,
+        "summed_difference_a": 8388864.178141607
+      },
+      "sign_check": {
+        "cells_checked": 135,
+        "cells_skipped_zero": 0,
+        "first_disagreement_cells": {
+          "local_vs_inside": [],
+          "spline_vs_inside": [],
+          "spline_vs_local": []
+        },
+        "local_inside_disagreement_count": 0,
+        "skipped_cell_indices": [],
+        "spline_inside_disagreement_count": 0,
+        "spline_local_disagreement_count": 0
+      },
+      "state_sha256_binary64": "a95977eaa781d8d75911ea3f5dcf7d0f58fee1a769a9d44fdb2eac355507a75e",
+      "uncut_differing_cells": {
+        "cells": [
+          0,
+          1,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          12,
+          15,
+          16,
+          17,
+          18,
+          19,
+          25,
+          26,
+          27,
+          29,
+          30,
+          32,
+          34,
+          37,
+          40,
+          44,
+          46,
+          48,
+          49,
+          51,
+          53,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          69,
+          70,
+          73,
+          74,
+          77,
+          79,
+          81,
+          82,
+          84,
+          86,
+          111,
+          112,
+          115,
+          117,
+          121,
+          122,
+          123,
+          124,
+          127,
+          129,
+          132,
+          133
+        ],
+        "count": 60,
+        "summed_difference_a": 6147490.93608022,
+        "threshold_a": 16.31477331182837,
+        "threshold_as_plasma_current_fraction": 1e-06
+      },
+      "unit_amplitude_totals_a": {
+        "chord": 17546964.60956718,
+        "exact": 7413774.3845347
+      }
+    },
+    "terminal": {
+      "amplitude_verification": {
+        "chord": {
+          "banked_amplitude": 1.0497961485612264,
+          "bound": 1e-06,
+          "cross_check_available": true,
+          "measured_amplitude": 1.0497961485612264,
+          "passed": true,
+          "relative_disagreement": 0.0,
+          "unit_amplitude_total_a": 15540896.519946469
+        },
+        "exact": {
+          "banked_amplitude": 5.561246574411268,
+          "banked_reference_note": "the committed row's exact-terminal amplitude was recorded on the c-r100 arm's own terminal state, a different flux state from the committed chord terminal evaluated here; it is not a reference for this census and is reported for provenance only",
+          "bound": 1e-06,
+          "cross_check_available": false,
+          "measured_amplitude": 1.0769636166609966,
+          "passed": null,
+          "relative_disagreement": 0.8063449260429514,
+          "unit_amplitude_total_a": 15148862.096577108
+        },
+        "gate": {
+          "all_cross_checkable_modes_within_bank": true,
+          "bound": 1e-06,
+          "meaning": "census total at unit amplitude reproduces the committed row's banked amplitude for every mode-state pair that shares the state with the banked reference; this is the identity statement that both modes are evaluated on the same states the row persisted"
+        }
+      },
+      "chord_over_exact_total_ratio": 1.0258788033629234,
+      "class_totals_a": {
+        "by_mode_mechanism": {
+          "exact_excluded_cells": 407683.31457590824,
+          "uncut_interior_differing_cells": 294934.03063169325
+        },
+        "by_surface": {
+          "cut": 97100.39273766812,
+          "exterior": 228102.68435536884,
+          "interior": 66831.34627632446
+        }
+      },
+      "exact_excluded_cells": {
+        "cells": [
+          0,
+          1,
+          10,
+          12,
+          25,
+          35,
+          37,
+          49,
+          51,
+          53,
+          73,
+          127,
+          128,
+          129,
+          132,
+          133
+        ],
+        "count": 16,
+        "summed_difference_a": 407683.31457590824
+      },
+      "sign_check": {
+        "cells_checked": 135,
+        "cells_skipped_zero": 0,
+        "first_disagreement_cells": {
+          "local_vs_inside": [],
+          "spline_vs_inside": [
+            3,
+            38,
+            52,
+            76,
+            89,
+            114,
+            120,
+            125
+          ],
+          "spline_vs_local": [
+            3,
+            38,
+            52,
+            76,
+            89,
+            114,
+            120,
+            125
+          ]
+        },
+        "local_inside_disagreement_count": 0,
+        "skipped_cell_indices": [],
+        "spline_inside_disagreement_count": 8,
+        "spline_local_disagreement_count": 8
+      },
+      "state_sha256_binary64": "130765dbec85d8d2d37e4f29b974ecc31af75b65cc5e9dcfa0f0c17d10c746ed",
+      "uncut_differing_cells": {
+        "cells": [
+          0,
+          1,
+          5,
+          7,
+          10,
+          12,
+          25,
+          30,
+          37,
+          49,
+          51,
+          53,
+          65,
+          73,
+          74,
+          124,
+          127,
+          129,
+          132,
+          133
+        ],
+        "count": 20,
+        "summed_difference_a": 294934.03063169325,
+        "threshold_a": 16.31477331182837,
+        "threshold_as_plasma_current_fraction": 1e-06
+      },
+      "unit_amplitude_totals_a": {
+        "chord": 15540896.519946469,
+        "exact": 15148862.096577108
+      }
+    }
+  },
+  "target_current_a": 16314773.311828371,
+  "verification": {
+    "amplitude_gate": {
+      "seed": true,
+      "terminal": true
+    },
+    "seed_structure": {
+      "all_structural_fields_identical": true,
+      "field_comparisons": {
+        "anchor_available": {
+          "banked": true,
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": true
+        },
+        "construction": {
+          "banked": "current_centroid_disc",
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": "current_centroid_disc"
+        },
+        "current_centroid_m": {
+          "banked": [
+            6.063530173332898,
+            0.0
+          ],
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": [
+            6.063530173332898,
+            0.0
+          ]
+        },
+        "declared_axis_m": {
+          "banked": [
+            6.063530173332898,
+            0.0
+          ],
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": [
+            6.063530173332898,
+            0.0
+          ]
+        },
+        "factory": {
+          "banked": "profile.cold_seed_portfolio",
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": "profile.cold_seed_portfolio"
+        },
+        "plasma_current_a": {
+          "banked": 16314773.311828371,
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": 16314773.311828371
+        },
+        "requested_class": {
+          "banked": "limited",
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": "limited"
+        },
+        "seed_radius_m": {
+          "banked": 1.564079053601776,
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": 1.564079053601776
+        },
+        "stored_flux_samples_used": {
+          "banked": false,
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": false
+        },
+        "supported_cell_count": {
+          "banked": 36,
+          "identical": true,
+          "max_relative_difference": 0.0,
+          "regenerated": 36
+        }
+      },
+      "fields_compared": [
+        "construction",
+        "plasma_current_a",
+        "current_centroid_m",
+        "seed_radius_m",
+        "supported_cell_count",
+        "anchor_available",
+        "declared_axis_m",
+        "stored_flux_samples_used",
+        "requested_class",
+        "factory"
+      ],
+      "worst_max_relative_difference": 0.0
+    }
+  }
+}

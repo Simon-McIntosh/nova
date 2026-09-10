@@ -304,52 +304,152 @@ def _polygon_z_intervals(
     ]
 
 
-def _region_moment_integrals(
-    region_vertices: np.ndarray,
-    centre: np.ndarray,
-    case: Any,
-    *,
-    relative_tolerance: float,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Integrate the exact density moments over one region polygon.
+def _plasma_half_height(case: Any, radius: float) -> float:
+    """Return the static-family plasma vertical half-extent at one radius.
 
-    Nested adaptive quadrature: inner vertical integral of the exact density
-    times the moment monomial, outer radial integral split at every region
-    vertex.  Returns (six density moments about ``centre``, error bounds).
+    The reference boundary is the flux surface ``flux(R, Z) = 0``, so
+    ``|Z| = sqrt((axis_flux - G(u)) / field_coefficient)`` exactly.
+    """
+    remaining = float(
+        case.axis_flux - case._flux_offset(case._flux_label(radius))
+    )
+    if remaining <= 0.0:
+        return 0.0
+    return float(np.sqrt(remaining / float(case.field_coefficient)))
+
+
+def _vertical_bounds(vertices: np.ndarray, radius: float) -> tuple[float, float] | None:
+    """Return a convex cell polygon's vertical interval at one radius."""
+    intervals = _polygon_z_intervals(vertices, radius)
+    if not intervals:
+        return None
+    return intervals[0][0], intervals[0][1]
+
+
+def _plasma_z_interval(
+    case: Any, radius: float, boundary_level: float, lobe_loop: np.ndarray
+) -> tuple[float, float] | None:
+    """Return the analytic plasma vertical interval at one radius.
+
+    The static family uses the closed-form half-height exactly.  The diverted
+    family refines the core-lobe polygon crossings by Newton on the exact
+    flux, so the boundary level is honoured to machine precision rather than
+    to the lobe-polyline chord scale.
+    """
+    if not _is_diverted(case):
+        half = _plasma_half_height(case, radius)
+        if half <= 0.0:
+            return None
+        return -half, half
+    intervals = _polygon_z_intervals(lobe_loop, radius)
+    if not intervals:
+        return None
+    lower, upper = intervals[0]
+    flux = _flux_at(case, np.asarray([[radius, lower]]))[0]
+    gradient = np.asarray(
+        case.gradient(np.asarray([[radius, lower]])), dtype=np.float64
+    )[0, 1]
+    for _ in range(12):
+        if gradient == 0.0 or not np.isfinite(gradient):
+            break
+        step = (flux - boundary_level) / gradient
+        if not np.isfinite(step) or abs(step) > 0.1 * max(abs(lower), 1.0):
+            break
+        lower = lower - step
+        flux = _flux_at(case, np.asarray([[radius, lower]]))[0]
+        gradient = np.asarray(
+            case.gradient(np.asarray([[radius, lower]])), dtype=np.float64
+        )[0, 1]
+    flux = _flux_at(case, np.asarray([[radius, upper]]))[0]
+    gradient = np.asarray(
+        case.gradient(np.asarray([[radius, upper]])), dtype=np.float64
+    )[0, 1]
+    for _ in range(12):
+        if gradient == 0.0 or not np.isfinite(gradient):
+            break
+        step = (flux - boundary_level) / gradient
+        if not np.isfinite(step) or abs(step) > 0.1 * max(abs(upper), 1.0):
+            break
+        upper = upper - step
+        flux = _flux_at(case, np.asarray([[radius, upper]]))[0]
+        gradient = np.asarray(
+            case.gradient(np.asarray([[radius, upper]])), dtype=np.float64
+        )[0, 1]
+    if upper <= lower:
+        return None
+    return lower, upper
+
+
+def _analytic_region_integrals(
+    case: Any,
+    cell_vertices: np.ndarray,
+    centre: np.ndarray,
+    *,
+    boundary_level: float,
+    lobe_loop: np.ndarray,
+    region_vertices: np.ndarray,
+    relative_tolerance: float,
+) -> tuple[float, np.ndarray, np.ndarray]:
+    """Integrate the exact density moments and area over the plasma in a cell.
+
+    Nested adaptive quadrature along the radial axis, split at every cell and
+    region vertex.  At each radius the cell's vertical extent is clipped to the
+    analytic plasma interval (:func:`_plasma_z_interval`), so the region is the
+    exact analytic plasma intersection, not a sampled-polyline approximation.
+    Returns (region area, six density moments about ``centre``, error bounds).
     """
     region_vertices = np.asarray(region_vertices, dtype=np.float64)
     lower = float(np.min(region_vertices[:, 0]))
     upper = float(np.max(region_vertices[:, 0]))
     if upper <= lower:
-        return np.zeros(6), np.zeros(6)
+        return 0.0, np.zeros(6), np.zeros(6)
     breaks = sorted(
         {lower, upper}
-        | {float(value) for value in region_vertices[:, 0] if lower < value < upper}
+        | {
+            float(value)
+            for value in np.concatenate((cell_vertices[:, 0], region_vertices[:, 0]))
+            if lower < value < upper
+        }
     )
     moment_values = np.zeros(6)
     moment_errors = np.zeros(6)
+    area = 0.0
     powers = ((0, 0), (1, 0), (0, 1), (2, 0), (1, 1), (0, 2))
 
     def inner(radius: float, radial_power: int, vertical_power: int) -> float:
-        total = 0.0
-        for z_lower, z_upper in _polygon_z_intervals(region_vertices, radius):
-            if z_upper <= z_lower:
-                continue
+        cell_bounds = _vertical_bounds(cell_vertices, radius)
+        if cell_bounds is None:
+            return 0.0
+        plasma = _plasma_z_interval(case, radius, boundary_level, lobe_loop)
+        if plasma is None:
+            return 0.0
+        z_lower = max(cell_bounds[0], plasma[0])
+        z_upper = min(cell_bounds[1], plasma[1])
+        if z_upper <= z_lower:
+            return 0.0
 
-            def vertical_integrand(z: float) -> float:
-                density = _exact_density(case, np.asarray([[radius, z]]))[0]
-                return density * (z - centre[1]) ** vertical_power
+        def vertical_integrand(z: float) -> float:
+            density = _exact_density(case, np.asarray([[radius, z]]))[0]
+            return density * (z - centre[1]) ** vertical_power
 
-            value, _error = quad(
-                vertical_integrand,
-                z_lower,
-                z_upper,
-                epsabs=ADAPTIVE_ABS_ERROR,
-                epsrel=relative_tolerance,
-                limit=200,
-            )
-            total += value
-        return total * (radius - centre[0]) ** radial_power
+        value, _error = quad(
+            vertical_integrand,
+            z_lower,
+            z_upper,
+            epsabs=ADAPTIVE_ABS_ERROR,
+            epsrel=relative_tolerance,
+            limit=200,
+        )
+        return value * (radius - centre[0]) ** radial_power
+
+    def vertical_length(radius: float) -> float:
+        cell_bounds = _vertical_bounds(cell_vertices, radius)
+        if cell_bounds is None:
+            return 0.0
+        plasma = _plasma_z_interval(case, radius, boundary_level, lobe_loop)
+        if plasma is None:
+            return 0.0
+        return max(0.0, min(cell_bounds[1], plasma[1]) - max(cell_bounds[0], plasma[0]))
 
     for first, second in zip(breaks, breaks[1:]):
         if second <= first:
@@ -365,7 +465,16 @@ def _region_moment_integrals(
             )
             moment_values[index] += value
             moment_errors[index] += error
-    return moment_values, moment_errors
+        area_value, _area_error = quad(
+            vertical_length,
+            first,
+            second,
+            epsabs=ADAPTIVE_ABS_ERROR,
+            epsrel=relative_tolerance,
+            limit=300,
+        )
+        area += area_value
+    return area, moment_values, moment_errors
 
 
 def _duffy_rule(
@@ -435,8 +544,16 @@ def _exact_cell_integrals(
     centre: np.ndarray,
     plasma_polygon: Polygon,
     cell_area: float,
+    *,
+    boundary_level: float,
+    lobe_loop: np.ndarray,
 ) -> tuple[int, float, np.ndarray, np.ndarray | None]:
     """Classify a cell and return its exact core-side moments.
+
+    The shapely plasma intersection decides exterior/interior/cut and supplies
+    the region loop for drawing; the density moments themselves are integrated
+    against the analytic plasma boundary (:func:`_analytic_region_integrals`)
+    so the reference is not limited by the sampled-boundary chord scale.
 
     Returns ``(kind, region_area, moments, region_loop)`` where ``kind`` is
     0 exterior, 1 interior (full cell), 2 boundary-cut.
@@ -453,13 +570,16 @@ def _exact_cell_integrals(
     if loop is None:
         return 0, 0.0, np.zeros(6), None
     region_vertices = np.asarray(loop, dtype=np.float64)
-    moments, _errors = _region_moment_integrals(
-        region_vertices,
-        centre,
+    area, moments, _errors = _analytic_region_integrals(
         case,
+        np.asarray(polygon, dtype=np.float64),
+        centre,
+        boundary_level=boundary_level,
+        lobe_loop=lobe_loop,
+        region_vertices=region_vertices,
         relative_tolerance=ADAPTIVE_RELATIVE_TOLERANCE,
     )
-    return 2, float(region.area), moments, loop
+    return 2, area, moments, loop
 
 
 # ---------------------------------------------------------------------------
@@ -721,14 +841,21 @@ def _analytic_self_test() -> dict[str, Any]:
             np.asarray(polygon, dtype=np.float64) for polygon in machine.cell_polygons
         )
         centres = np.asarray(machine.moment_geometry.atomic_mesh.centroids)
-        plasma = Polygon(certificate._boundary("weak-rotation-reactor-static", static))
+        boundary_loop = certificate._boundary("weak-rotation-reactor-static", static)
+        plasma = Polygon(boundary_loop)
         for cell in (2, 3, 4):
             banked_cell = next(
                 item for item in row["cut_cells"] if item["cell"] == cell
             )
             exact_value = float(banked_cell["moments"]["zeroth"]["exact"][0])
             _kind, _region_area, moments, _loop = _exact_cell_integrals(
-                static, polygons[cell], centres[cell], plasma, float(machine.area[cell])
+                static,
+                polygons[cell],
+                centres[cell],
+                plasma,
+                float(machine.area[cell]),
+                boundary_level=0.0,
+                lobe_loop=boundary_loop,
             )
             denominator = max(abs(exact_value), 1.0)
             relative = abs(float(moments[0]) - exact_value) / denominator
@@ -904,6 +1031,8 @@ def measure_row(case_name: str, requested_cells: int) -> dict[str, Any]:
                 centres[cell],
                 plasma_polygon,
                 float(cell_areas[cell]),
+                boundary_level=boundary_level,
+                lobe_loop=core_lobe,
             )
             cell_kind[cell] = kind
             exact_region_area[cell] = region_area

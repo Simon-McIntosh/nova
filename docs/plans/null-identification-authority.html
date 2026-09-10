@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-10">
-<meta name="plan-version" content="173">
+<meta name="plan-version" content="174">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html,docs/figures/null-identification-authority/bank-integrated/bank-integrated.json,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json,docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087,7b0311d2,e76bc389">
 <meta name="plan-impl" content="0.97">
@@ -147,6 +147,11 @@ for the lead before merge.</p>
     <h4 class="r-fu-title">The twelve-row MAST topology bank is stale against main and its arms read crossed</h4>
     <div class="r-fu-body">Measured 2026-09-09 by the paired identity node on multi-unit-limiter-wall (receipt ~/.config/reckon/crew/reports/nova/s19-review/mulw-bit-identity/receipt.json, H200 job 1268087): at main 4ab98002, with no unmerged change, the corroboration producer docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py returns for 21978/35 pure a terminal residual of 2.4506e-3 (banked 3.857e-16) and for 21978/35 mixed exactly 3.857e-16 (banked 3.100e-16), so the banked receipt docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json does not describe main and its pure and mixed rows appear crossed. That bank is the reference the section 1 banking, the section 3 corrected-read re-solve and the section 5 bit-identity gate all compare against, and the bank-drift adjudication on batched-operator-boundary (f-20260908T134328904629) rests on it too. Regenerate the twelve rows at a named main revision under a declared configuration through the one-job launcher pattern, confirm which arm is which by the requested class on each row, and re-baseline the receipt; the corroboration route costs about thirty minutes per row on the H200, so the regeneration is a multi-allocation job with per-row persistence or is moved onto the batched exit-incidence route whose width-12 program solves all twelve in one compile.</div>
     <pre class="r-fu-prompt">/reckon-ship null-identification-authority §1</pre>
+    </article>
+<article class="r-fu" data-id="f-20260910T042059385629" data-status="open" data-capability-version="1.0" data-capability-class="routine" data-capability-verification="standard" data-written-by="s19-review coordinator" data-written-at="2026-09-10" data-recommends-skill="/reckon-ship null-identification-authority §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Certificate renderer draws only the solved null set; draw the analytic nulls beside them</h4>
+    <div class="r-fu-body">The plotting rules require every panel that shows a solved field beside an analytic one to draw BOTH null sets in their own styles and say in the caption which is which. The certificate renderer in benchmarks/solovev_certificate.py draws the solved axis and admitted X-point (ochre triangle and cross) and no analytic marker, so on the single-null rows at 110 and 300 cells, where no X-point is admitted, the panel shows no X-point at all and a reader cannot see where the analytic saddle is or how far the nearest candidate sits from it. Draw the analytic axis and X-point from the closed-form reference with draw_nulls in the analytic style, re-render the sixteen panels from persisted parts on one all_debug process, update the receipt digests and the pin, and force-add the PNGs. No solve.</div>
+    <pre class="r-fu-prompt">/reckon-ship null-identification-authority §4</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

@@ -1,0 +1,38 @@
+{
+  "all_passed": true,
+  "banked_cells": [
+    {
+      "banked_exact_zeroth": 23242.041893558366,
+      "cell": 2,
+      "measured_exact_zeroth": 23242.041873062153,
+      "passed": true,
+      "relative_disagreement": 8.818593745744781e-10
+    },
+    {
+      "banked_exact_zeroth": 78230.32171836322,
+      "cell": 3,
+      "measured_exact_zeroth": 78230.32170879294,
+      "passed": true,
+      "relative_disagreement": 1.2233473055521674e-10
+    },
+    {
+      "banked_exact_zeroth": 68570.46682096357,
+      "cell": 4,
+      "measured_exact_zeroth": 68570.4668193487,
+      "passed": true,
+      "relative_disagreement": 2.3550513267671844e-11
+    }
+  ],
+  "density_checks": [
+    {
+      "family": "static",
+      "max_relative_density_disagreement": 1.3203261939059042e-10,
+      "passed": true
+    },
+    {
+      "family": "diverted",
+      "max_relative_density_disagreement": 1.320331132256331e-10,
+      "passed": true
+    }
+  ]
+}

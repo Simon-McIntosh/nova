@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T07:29:58",
+  "updated": "2026-09-10T07:32:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4813,6 +4813,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-ucc-mergeprep",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-10"
       },
       {
         "id": "s19i-ucc-offaxis",
@@ -149052,6 +149061,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2404
+    "_version": 2405
   }
 }

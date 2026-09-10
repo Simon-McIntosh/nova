@@ -89,13 +89,19 @@ _SUPPORT_CLIP_MODE = "chord"
 """Plasma-support clip mode for solver construction.
 
 ``chord`` (the committed production default) clips every atomic cell
-against the signed flux of the current iterate, a cell participating when
-any of its vertices lies on the confined side of the boundary level so a
-cut cell's current carries its clipped polygon rather than its whole
-centroid; ``exact`` traces the curved boundary support with every cut cell
+against the signed flux of the trip's frozen state, a cell participating
+when any of its vertices lies on the confined side of the boundary level
+so a cut cell's current carries its clipped polygon rather than its whole
+centroid.  Inside one Newton trip the geometry is read once at the frozen
+state and held constant for every evaluation, including the Jacobian-vector
+products and the amplitude normalisation, and it is refreshed at the trip
+boundary when the partition is.  ``chord_live`` re-evaluates that geometry
+against the live iterate on every moment call instead, which is the
+discriminator's opt-in and the behaviour the per-trip freeze replaced.
+``exact`` traces the curved boundary support with every cut cell
 participating; ``chord_cells`` keeps the exact support everywhere except a
 named pair of cells whose entries revert to their chord-moment values.
-``exact`` and ``chord_cells`` are opt-in through
+``exact``, ``chord_live`` and ``chord_cells`` are opt-in through
 :func:`set_support_clip_mode`; production never changes the mode.
 """
 
@@ -103,7 +109,7 @@ named pair of cells whose entries revert to their chord-moment values.
 def set_support_clip_mode(mode: str) -> str:
     """Select the plasma-support clip mode for subsequent solves."""
     global _SUPPORT_CLIP_MODE
-    if mode not in ("exact", "chord", "chord_cells"):
+    if mode not in ("exact", "chord", "chord_cells", "chord_live"):
         raise ValueError(f"unknown support clip mode {mode!r}")
     _SUPPORT_CLIP_MODE = mode
     return _SUPPORT_CLIP_MODE
@@ -2192,12 +2198,14 @@ class ForwardFluxOperator:
         """Return the plasma-side support for the active clip mode.
 
         The committed chord clip clips every atomic cell against the signed
-        flux of the current iterate, a cell participating when any of its
-        vertices lies on the confined side of the boundary level rather than
-        when its centroid does.  The opt-in exact mode traces the curved
-        boundary with every cut cell participating, and its chord-cells
-        variant replaces only the two named cells' geometry with that chord
-        result.
+        flux of the supplied ``physical`` state, a cell participating when
+        any of its vertices lies on the confined side of the boundary level
+        rather than when its centroid does.  Inside a Newton trip that state
+        is the trip's frozen partition read, so the geometry is constant for
+        the trip; single-state measurements and the opt-in live mode supply
+        a live iterate.  The exact mode traces the curved boundary with
+        every cut cell participating, and its chord-cells variant replaces
+        only the two named cells' geometry with that chord result.
         """
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
@@ -2205,7 +2213,7 @@ class ForwardFluxOperator:
         chord_support = None
         shared_flux = self.shared_node_flux(physical)
         inside_boundary = self.polarity * (shared_flux - topology.boundary_flux)
-        if _SUPPORT_CLIP_MODE in ("chord", "chord_cells"):
+        if _SUPPORT_CLIP_MODE in ("chord", "chord_cells", "chord_live"):
             participation = (
                 masks.profile_participation
                 | self._chord_vertex_participation(atomic_mesh, inside_boundary)
@@ -2213,7 +2221,7 @@ class ForwardFluxOperator:
             chord_support = atomic_mesh.traced_clip(inside_boundary).qualify(
                 participation
             )
-            if _SUPPORT_CLIP_MODE == "chord":
+            if _SUPPORT_CLIP_MODE in ("chord", "chord_live"):
                 return chord_support
         flux_coefficient = self.support_flux_coefficients(
             masks.psi_norm, sample_psi_norm
@@ -2711,9 +2719,21 @@ class ForwardFluxOperator:
                 psi, image, requested_class, shadow=shadow
             )
 
-        if target_current is None and (
+        # The discrete partition, clipped support included, is read once at
+        # the trip's frozen state and held constant for every evaluation
+        # inside the trip (map, Jacobian-vector products and amplitude
+        # normalisation alike), then refreshed at the trip boundary when the
+        # partition is.  The live clip mode opts back into re-reading the
+        # support against the live iterate on every call for the
+        # discriminator; it disables the frozen partition here.
+        live_clip = (
+            self.use_linear_moments
+            and self.moment_geometry is not None
+            and _SUPPORT_CLIP_MODE == "chord_live"
+        )
+        if (
             not self.use_linear_moments or self.moment_geometry is not None
-        ):
+        ) and not live_clip:
 
             def read_partition(psi, previous_shadow=None):
                 return self._frozen_topology_partition(

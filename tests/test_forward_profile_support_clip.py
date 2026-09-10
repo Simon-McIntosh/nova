@@ -91,3 +91,83 @@ def test_moment_support_promotes_the_clipped_cell_to_the_confined_label():
     promoted = ForwardFluxOperator._moment_support_masks(masks, support)
     assert bool(promoted.core[1])
     assert bool(promoted.profile_participation[1])
+
+
+def _support_matches(first, second) -> bool:
+    """Return whether two supports carry byte-identical booked geometry."""
+    for name in ("included", "area", "vertex_count"):
+        if not np.array_equal(
+            np.asarray(getattr(first, name)), np.asarray(getattr(second, name))
+        ):
+            return False
+    return np.array_equal(
+        np.asarray(first.support_vertices), np.asarray(second.support_vertices)
+    )
+
+
+def test_support_is_frozen_within_a_trip_and_refreshed_at_its_boundary():
+    """One trip's clip geometry is the frozen record, not the live iterate.
+
+    Two live flux states whose signed-flux clips genuinely differ (so the
+    geometry would move if it were re-read per evaluation) must yield the
+    identical support through ``_partition_for_state`` on one frozen
+    partition -- that is what holds the Jacobian-vector products and the
+    amplitude normalisation on the trip's geometry -- while a fresh partition
+    read at the second state refreshes the clip to that state's live result.
+    """
+    configure_dtypes()
+    from scripts.analytic_oracle_fixtures import measure as oracle_fixture
+    from tests.rotating_equilibrium_references import reference_cases
+
+    case = reference_cases()["weak-rotation-reactor"].static_limit()
+    machine = oracle_fixture.cached_machine(
+        case, -110, wall_nodes=oracle_fixture.WALL_POINT_COUNT
+    )
+    operator = oracle_fixture.forward_operator(case, machine)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    terminal = np.asarray(
+        oracle_fixture.exact_state(case, coordinates), dtype=np.float64
+    )
+    physical_count = int(operator.grid.node_number)
+    physical = terminal[:physical_count]
+    span = float(np.ptp(physical))
+    boundary_band = np.abs(physical - float(np.median(physical))) < 0.5 * span
+    perturbed = terminal.copy()
+    perturbed[:physical_count] = physical + np.where(boundary_band, 1.0e-3 * span, 0.0)
+
+    live_first = operator._profile_support(
+        *_support_inputs(operator, jnp.asarray(terminal))
+    )
+    live_second = operator._profile_support(
+        *_support_inputs(operator, jnp.asarray(perturbed))
+    )
+    # The two states genuinely move the boundary, so a live re-read would
+    # change the geometry inside a trip.
+    assert not _support_matches(live_first, live_second)
+
+    frozen = operator._frozen_topology_partition(jnp.asarray(terminal), None)
+    inside_first = operator._partition_for_state(jnp.asarray(terminal), frozen)
+    inside_second = operator._partition_for_state(jnp.asarray(perturbed), frozen)
+    # Within one trip two different live flux states yield the identical
+    # support, and it is the frozen record rather than either live re-read.
+    assert _support_matches(inside_first[3], inside_second[3])
+    assert _support_matches(inside_first[3], frozen.profile_support)
+    assert _support_matches(inside_second[3], frozen.profile_support)
+
+    # A trip boundary re-reads the partition at the new state and refreshes
+    # the clip to that state's own geometry.
+    refreshed = operator._frozen_topology_partition(
+        jnp.asarray(perturbed), None, frozen.residual_shadow
+    )
+    assert _support_matches(refreshed.profile_support, live_second)
+
+
+def _support_inputs(operator, psi):
+    """Return the profile-support arguments one state's live read needs."""
+    physical = jnp.asarray(psi)[: operator.physical_node_number]
+    masks, topology, _connected, _admitted = operator._fixed_design_read(physical, None)
+    sample_flux = operator.sample_node_flux(psi)
+    sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+    return masks, topology, physical, sample_psi_norm

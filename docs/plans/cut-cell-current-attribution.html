@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-10">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 </head>
 <body>
 <main class="plan-doc">
@@ -153,6 +153,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260910T113535191293-cca-rung-a-test-gate" data-who="s19i-cca-rung-a2" data-when="2026-09-10T13:27:59.271Z">
     <div class="r-comment-body"><p>Rung A test gate passed with an empty added-failure set: the three test_forward_operator_domain failures are pre-existing and identical at both revisions. The amplitude receipt and three booked-minus-analytic panels are committed at ef0f38b6 on top of the implementation 91172471 (signed-flux chord clip with geometric candidacy, ledger booking by clipped side). Not merged: the one-percent amplitude acceptance holds on strong only (0.9974) and not on weak (0.9671) or moderate (0.9813), and the read-representation discriminator decides how much of that is state error before the default changes on main; the certificate re-solve runs at this tip.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260910T145408130049" data-who="s19-review coordinator" data-when="">
+    <div class="r-comment-body">Rung A re-solve, interim 2026-09-10 16:50 (run r-20260910T133059074855, H200 job 1269040, three of sixteen rows landed): with the signed-flux clip evaluated on the live iterate, the certificate solves diverge instead of improving. Weak -110: terminal residual 0.142 against the committed 0.00745, axis error 1.61 m against 1.8 mm, amplitude 2.05 at the seed and 9.28 at the terminal, 7 trips. Moderate -110: residual 0.0366 against 0.0125, axis error 0.573 m, amplitude 2.08 to 11.86. Strong -110: residual 0.0392 against 0.0128, axis error 0.124 m, amplitude 1.91 to 11.45. The mechanism reads off the amplitudes: the cold disc seed's own flux puts half the cells outside the clip, so the clip books half the target current at the seed (amplitude 2), the normalisation doubles the profile, the next iterate's flux and hence its clip geometry move with it, and the geometry-to-current-to-flux feedback runs the fixed point away from the reference; the terminal state on the weak row is a displaced, up-down asymmetric plasma. Whole-cell booking by the frozen partition label was stable precisely because its geometry was piecewise constant within a trip. Design consequence for rung A, now rung A2: the clipped support is part of the frozen partition, evaluated once per Newton trip on the trip's frozen state (as the labels already are, acfefa64) and held fixed inside the trip, with the current amplitude normalised on that frozen support; the live-flux clip stays available behind the flag for the discriminator. The read-representation discriminator (run r-20260910T114647655089) is unaffected and continues.</div>
 </div>
 </section>
 

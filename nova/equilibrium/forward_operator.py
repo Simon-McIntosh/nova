@@ -2132,9 +2132,10 @@ class ForwardFluxOperator:
             vertical_value = moments.vertical_moment
         else:
             second = geometry.second_moment
-            shift = np.asarray(self.moment_geometry.atomic_mesh.centroids) - np.asarray(
-                geometry.moment_centre
-            )
+            dtype = moments.cell_current.dtype
+            shift = jnp.asarray(
+                self.moment_geometry.atomic_mesh.centroids, dtype=dtype
+            ) - jnp.asarray(geometry.moment_centre, dtype=dtype)
             radial_value = moments.radial_moment + shift[:, 0] * moments.cell_current
             vertical_value = (
                 moments.vertical_moment + shift[:, 1] * moments.cell_current
@@ -2179,10 +2180,18 @@ class ForwardFluxOperator:
         moment reference move to the clipped polygon's centroid and the
         effective kernel blocks become the polygon-analytic integrals over
         the clipped polygon about that centroid; interior cells keep the
-        precomputed atomic blocks.  The return is ``None`` when the support
-        carries no cut cell or when it is traced (the blocks are rebuilt once
-        per trip where the frozen partition is refreshed, never inside a
-        Jacobian-vector product).
+        precomputed atomic blocks.  The geometry is rebuilt once per trip
+        where the frozen partition is refreshed, never inside a Jacobian-vector
+        product.
+
+        A concrete support is built directly here; a traced support (the
+        reconcile re-reads the partition inside the trip loop) is built
+        through a host callback so the partition carries a real geometry
+        node with values computed once at runtime, never a numpy conversion
+        of a tracer.  A support without cut cells still returns a geometry
+        with zero block deltas, so the carried node's leaf structure is the
+        same for every frozen state of one operator and the reconcile can
+        select between any two of them.
         """
         if self.moment_geometry is None or not self.use_linear_moments:
             return None
@@ -2191,19 +2200,22 @@ class ForwardFluxOperator:
             count = np.asarray(profile_support.vertex_count)
             boundary = np.asarray(profile_support.boundary, dtype=bool)
         except Exception:
-            return None
+            return self._callback_clipped_coupling_geometry(profile_support)
+        return self._coupling_geometry_from_support(vertices, count, boundary)
+
+    def _coupling_geometry_from_support(
+        self, vertices, count, boundary
+    ) -> ClippedCouplingGeometry:
+        """Build the geometry arrays from one concrete support's polygon data."""
         atomic = self.moment_geometry.atomic_mesh
         atomic_centre = np.asarray(atomic.centroids, dtype=np.float64)
-        cut = np.flatnonzero(boundary)
-        if cut.size == 0:
-            return None
         second = np.array(
             self.moment_geometry.second_moment, dtype=np.float64, copy=True
         )
         centre = atomic_centre.copy()
         cut_cell = np.zeros(len(atomic_centre), dtype=bool)
         entries = []
-        for cell in cut:
+        for cell in np.flatnonzero(boundary):
             polygon = np.asarray(vertices[cell][: count[cell]])
             if len(polygon) < 3:
                 continue
@@ -2211,8 +2223,6 @@ class ForwardFluxOperator:
             cut_cell[cell] = True
             centre[cell] = section_centroid(polygon)
             second[cell] = second_moments(polygon)
-        if len(entries) == 0:
-            return None
         grid_delta = self._clipped_block_deltas(self.grid, entries, centre)
         wall_delta = self._clipped_block_deltas(self.wall, entries, centre)
         sample_delta = (
@@ -2229,28 +2239,101 @@ class ForwardFluxOperator:
             sample_delta=sample_delta,
         )
 
+    def _callback_clipped_coupling_geometry(
+        self, profile_support
+    ) -> ClippedCouplingGeometry:
+        """Build a traced support's geometry once at runtime on host.
+
+        The clipped-polygon integrals are host numpy work with a data-dependent
+        per-cell loop, so they cannot trace; the callback runs that body on the
+        concrete support values every time the partition is read inside the
+        trip loop and returns the shape-stable block deltas.
+        """
+        cell_count = len(jnp.asarray(profile_support.boundary))
+        vertices = jnp.asarray(profile_support.support_vertices)
+        count = jnp.asarray(profile_support.vertex_count)
+        boundary = jnp.asarray(profile_support.boundary, dtype=bool)
+        shapes = self._coupling_geometry_shapes(cell_count)
+        values = jax.pure_callback(
+            self._host_coupling_geometry_values,
+            shapes,
+            vertices,
+            count,
+            boundary,
+        )
+        if self.sample is None:
+            cut_cell, second, centre, grid_delta, wall_delta = values
+            return ClippedCouplingGeometry(
+                cut_cell=cut_cell,
+                second_moment=second,
+                moment_centre=centre,
+                grid_delta=grid_delta,
+                wall_delta=wall_delta,
+                sample_delta=None,
+            )
+        return ClippedCouplingGeometry(*values)
+
+    def _coupling_geometry_shapes(self, cell_count: int) -> tuple | list:
+        """Return the callback result shapes for one operator geometry."""
+        grid_nodes = self.grid.node_number
+        wall_nodes = self.wall.node_number
+        common = (
+            jax.ShapeDtypeStruct((cell_count,), jnp.bool_),
+            jax.ShapeDtypeStruct((cell_count, 3), jnp.float64),
+            jax.ShapeDtypeStruct((cell_count, 2), jnp.float64),
+            jax.ShapeDtypeStruct((cell_count, 3, grid_nodes), jnp.float64),
+            jax.ShapeDtypeStruct((cell_count, 3, wall_nodes), jnp.float64),
+        )
+        if self.sample is None:
+            return common
+        sample_nodes = self.sample.node_number
+        return common + (
+            jax.ShapeDtypeStruct((cell_count, 3, sample_nodes), jnp.float64),
+        )
+
+    def _host_coupling_geometry_values(
+        self, vertices, count, boundary
+    ) -> tuple[np.ndarray, ...]:
+        """Run the host geometry build inside a callback (numpy only)."""
+        geometry = self._coupling_geometry_from_support(vertices, count, boundary)
+        values = (
+            np.asarray(geometry.cut_cell),
+            np.asarray(geometry.second_moment),
+            np.asarray(geometry.moment_centre),
+            np.asarray(geometry.grid_delta),
+            np.asarray(geometry.wall_delta),
+        )
+        if self.sample is None:
+            return values
+        return values + (np.asarray(geometry.sample_delta),)
+
     @staticmethod
     def _clipped_block_deltas(target, entries, centre):
         """Return the atomic-to-clipped block delta triple for one target set.
 
-        Each row is ``(clipped_column - atomic_column)`` for one cut source
-        cell, shaped ``(cut_count, 3, target_count)`` so the per-trip
-        clipped image is the atomic image plus the einsum
-        ``"cmt,mc->t"`` over the cut columns' moment stack.
+        Each row is ``(clipped_column - atomic_column)`` for one source cell,
+        shaped ``(cell_count, 3, target_count)`` and exactly zero for every
+        cell the support does not cut, so the ``cell_count`` leading axis is
+        the fixed atomic cell count rather than the state-dependent cut
+        count.  The per-trip clipped image is then the atomic image plus the
+        einsum ``"cmt,mc->t"`` over the full cell stack, and two partitions
+        read at different states carry identical leaf shapes, which is what
+        lets the frozen-partition reconcile's leaf-wise ``jnp.where``
+        broadcast between them.
         """
         atomic_uniform = np.asarray(target.plasma_target)
         atomic_radial = np.asarray(target.plasma_target_r)
         atomic_vertical = np.asarray(target.plasma_target_z)
         target_r = np.asarray(target.coordinate[:, 0], dtype=np.float64)
         target_z = np.asarray(target.coordinate[:, 1], dtype=np.float64)
-        delta = np.zeros((len(entries), 3, len(target_r)), dtype=np.float64)
-        for row, (cell, polygon) in enumerate(entries):
+        delta = np.zeros((centre.shape[0], 3, len(target_r)), dtype=np.float64)
+        for cell, polygon in entries:
             clipped = polygon_analytic_flux_moments(
                 target_r, target_z, polygon, expansion_point=centre[cell]
             )
-            delta[row, 0] = clipped[0] - atomic_uniform[:, cell]
-            delta[row, 1] = clipped[1] - atomic_radial[:, cell]
-            delta[row, 2] = clipped[2] - atomic_vertical[:, cell]
+            delta[cell, 0] = clipped[0] - atomic_uniform[:, cell]
+            delta[cell, 1] = clipped[1] - atomic_radial[:, cell]
+            delta[cell, 2] = clipped[2] - atomic_vertical[:, cell]
         return delta
 
     @staticmethod
@@ -2783,16 +2866,14 @@ class ForwardFluxOperator:
         stack = jnp.stack(
             (moments.cell_current, moments.radial_moment, moments.vertical_moment)
         )
-        cut = np.asarray(geometry.cut_cell, dtype=bool)
-        cut_stack = stack[:, cut]
         dtype = moments.cell_current.dtype
         grid_nodes = self.grid.node_number
         wall_nodes = self.wall.node_number
         grid_add = jnp.einsum(
-            "cmt,mc->t", jnp.asarray(geometry.grid_delta, dtype=dtype), cut_stack
+            "cmt,mc->t", jnp.asarray(geometry.grid_delta, dtype=dtype), stack
         )
         wall_add = jnp.einsum(
-            "cmt,mc->t", jnp.asarray(geometry.wall_delta, dtype=dtype), cut_stack
+            "cmt,mc->t", jnp.asarray(geometry.wall_delta, dtype=dtype), stack
         )
         delta = jnp.zeros(self.physical_node_number, dtype=dtype)
         delta = delta.at[:grid_nodes].add(grid_add)
@@ -2800,7 +2881,7 @@ class ForwardFluxOperator:
         if self.sample is None:
             return delta
         sample_add = jnp.einsum(
-            "cmt,mc->t", jnp.asarray(geometry.sample_delta, dtype=dtype), cut_stack
+            "cmt,mc->t", jnp.asarray(geometry.sample_delta, dtype=dtype), stack
         )
         return jnp.concatenate((delta, sample_add))
 

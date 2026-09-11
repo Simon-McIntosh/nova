@@ -108,6 +108,7 @@ class CellCurrentMoments(NamedTuple):
     vertical_moment: jax.Array
 
 
+@jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class ClippedCouplingGeometry:
     """Per-trip coupling state for cut cells over their clipped polygons.
@@ -124,6 +125,11 @@ class ClippedCouplingGeometry:
     fixed by the capacity-padded support; the padded vertex slots are never
     passed to the kernel.  The geometry is rebuilt once per trip where the
     frozen partition is refreshed, never inside a Jacobian-vector product.
+
+    The class is a registered pytree node so the frozen-partition reconcile
+    can select it leaf-wise: an absent target-set delta is not a leaf, so
+    ``jax.tree.map`` of a ``jnp.where`` over two partitions sees only
+    arrays.
     """
 
     cut_cell: np.ndarray
@@ -132,6 +138,48 @@ class ClippedCouplingGeometry:
     grid_delta: np.ndarray
     wall_delta: np.ndarray | None
     sample_delta: np.ndarray | None
+
+    def tree_flatten(self):
+        """Carry the fixed arrays and the set target-set deltas as leaves.
+
+        ``wall_delta`` and ``sample_delta`` are absent when the operator
+        carries no wall or sample coupling; an absent delta must not appear
+        as a leaf, or the reconcile's leaf-wise ``jnp.where`` over two
+        partitions would be asked to promote ``None``.
+        """
+        has_wall = self.wall_delta is not None
+        has_sample = self.sample_delta is not None
+        children = (
+            self.cut_cell,
+            self.second_moment,
+            self.moment_centre,
+            self.grid_delta,
+        )
+        if has_wall:
+            children += (self.wall_delta,)
+        if has_sample:
+            children += (self.sample_delta,)
+        return children, (has_wall, has_sample)
+
+    @classmethod
+    def tree_unflatten(cls, aux_data, children):
+        """Rebuild the geometry from a leaf vector under one presence mask."""
+        has_wall, has_sample = aux_data
+        iterator = iter(children)
+        cut_cell = next(iterator)
+        second_moment = next(iterator)
+        moment_centre = next(iterator)
+        grid_delta = next(iterator)
+        wall_delta = next(iterator) if has_wall else None
+        sample_delta = next(iterator) if has_sample else None
+        return cls(
+            cut_cell,
+            second_moment,
+            moment_centre,
+            grid_delta,
+            wall_delta,
+            sample_delta,
+        )
 
 
 @dataclass(frozen=True)

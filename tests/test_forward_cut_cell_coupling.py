@@ -13,13 +13,16 @@ and the clipped path.
 
 from __future__ import annotations
 
+import jax
 import numpy as np
 import jax.numpy as jnp
 import pytest
 
 from benchmarks import solovev_certificate as certificate
 from nova.biot.greens import section_centroid, second_moments
-from nova.equilibrium.stencil_mesh import CellCurrentMoments
+from nova.equilibrium import ForwardProfile
+from nova.equilibrium.stencil_mesh import CellCurrentMoments, ClippedCouplingGeometry
+from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 
@@ -99,6 +102,7 @@ def _pytest_setup():
             operator=operator,
             support=support,
             geometry=geometry,
+            state=jnp.asarray(oracle_state),
             cell_polygons=tuple(
                 np.asarray(cell, dtype=np.float64) for cell in machine.cell_polygons
             ),
@@ -269,6 +273,73 @@ def _nodes_inside(node_count, targets_r, targets_z, polygon, grid_count):
         if shape.covers(Point(targets_r[index], targets_z[index])):
             mask[index] = True
     return mask
+
+
+def test_frozen_partition_geometry_is_a_pytree():
+    """The frozen partition's coupling geometry maps leaf-wise as arrays."""
+    environment = _pytest_setup()
+    operator = environment["operator"]
+    state = environment["state"]
+    first = operator._frozen_topology_partition(state)
+    second = operator._frozen_topology_partition(state)
+    assert first.coupling is not None, "the weak -110 support must carry geometry"
+
+    leaves = jax.tree_util.tree_leaves(first)
+    assert len(leaves) > 0
+    assert all(isinstance(leaf, jax.Array | np.ndarray) for leaf in leaves), (
+        "the frozen partition must carry only array leaves, never the geometry "
+        "object or a missing target-set delta"
+    )
+
+    # The reconcile merges incoming and observed partitions elementwise with
+    # jnp.where per leaf; a `True` condition must reproduce the incoming
+    # partition's values on exactly its leaf structure.
+    mapped = jax.tree_util.tree_map(
+        lambda incoming, observed: jnp.where(True, incoming, observed),
+        first,
+        second,
+    )
+    mapped_leaves = jax.tree_util.tree_leaves(mapped)
+    assert len(mapped_leaves) == len(leaves)
+    for incoming, merged in zip(leaves, mapped_leaves, strict=True):
+        np.testing.assert_allclose(
+            np.asarray(merged, dtype=np.float64),
+            np.asarray(incoming, dtype=np.float64),
+            rtol=0.0,
+            atol=0.0,
+        )
+    assert not any(
+        isinstance(leaf, ClippedCouplingGeometry) for leaf in mapped_leaves
+    ), "the reconcile must recurse into the geometry, not carry it as a leaf"
+
+
+@pytest.mark.slow
+def test_accelerated_newton_trip_smoke():
+    """One accelerated Newton trip on the weak -110 seed returns a finite state.
+
+    The certificate rows crash in the first accelerated trip when the frozen
+    partition's coupling geometry is not a pytree (the reconcile's leaf-wise
+    ``jnp.where`` rejects the geometry object); this smoke drives one trip with
+    the smallest evaluation budget and asserts the solve returns a finite flux
+    without raising.  It is a smoke, not a convergence claim: one Newton step
+    and one Krylov vector from the certificate state need not converge.
+    """
+    environment = _pytest_setup()
+    machine = environment["machine"]
+    operator = environment["operator"]
+    mesh = StencilMesh(machine.node, machine.stencil, machine.area)
+    profile = ForwardProfile(operator, mesh)
+    equilibrium = profile.solve(
+        environment["state"],
+        route="newton_krylov",
+        newton_steps=1,
+        gmres_iterations=1,
+        active_set_steps=1,
+        warmup=0,
+    )
+    jax.block_until_ready(equilibrium.flux)
+    flux = np.asarray(equilibrium.flux, dtype=np.float64)
+    assert np.all(np.isfinite(flux))
 
 
 if __name__ == "__main__":

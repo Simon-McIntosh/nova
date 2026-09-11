@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-11T06:50:33",
+  "updated": "2026-09-11T08:09:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -152344,6 +152344,192 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260911T044629802980-cca-gate-c-certificate-resolve-2",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-gate-c-certificate-resolve-2",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 444,
+                "cached_input_tokens": 917940,
+                "input_tokens": 918416,
+                "output_tokens": 2890,
+                "reasoning_output_tokens": 822,
+                "total_tokens": 921306,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file, and never open the aggregate certificate receipt in an editor (twelve megabytes; load it with json and pull only per-row scalars). This base carries the signed-flux clip with geometric candidacy, the per-trip frozen support, the clipped-polygon coupling for cut cells and the pytree registration of the coupling geometry (07cd60e0); gates A and B pass on it and the accelerated Newton trip smoke passes. ONE H200 job, never an array and never an srun child of your shell: sbatch to betelgeuse under reservation gpu_0003_grpA with --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:59:00, JAX_PLATFORMS=cuda,cpu and TMPDIR=/tmp exported in the submit environment and again in the payload, the root venv python directly with PYTHONPATH at your worktree, the persistent compilation cache enabled through the certificate driver's own call, --output in the run directory. Write benchmarks/gate_c_certificate_resolve.py as a thin wrapper around the committed benchmarks/rung_a_certificate_resolve.py (already on this base) that only redirects its output root to docs/figures/cut-cell-current-attribution/gate-c-resolve; rows in the order weak, moderate, strong and diverted at 110 cells, then the same at 300, 500 and 1000, one row per fresh process inside the allocation, each row's part receipt and contour panel persisted as it lands; if the allocation expires the manifest names the rows landed. The receipt tables every landed row beside its committed counterpart: terminal residual, converged flag, axis position error against the analytic axis, X-point position error where applicable, joint qualification verdict, plasma current amplitude at seed and terminal, trip count. The report states per row whether the fixed point moved toward the analytic equilibrium (axis error and residual both smaller than the committed row) and whether the terminal amplitude sits within one percent of unity; a diverging row is reported with its amplitude history and panel, never retried with a changed setting. Change nothing in production code. Manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 3.0,
+          "goal": "Re-solve the sixteen Solov'ev certificate rows on the H200 at the pytree-fixed tip with the corrected allocation and coupling in production and table each against its committed row and the analytic equilibrium",
+          "id": "cca-gate-c-certificate-resolve-2",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-11T04:46:31Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T044629802980-cca-gate-c-certificate-resolve-2/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/gate_c_certificate_resolve.py",
+            "docs/figures/cut-cell-current-attribution/gate-c-resolve",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/gate-c-resolve"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-gate-c2",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-11T04:46:46Z",
+        "completed_at": "2026-09-11T05:10:54.561Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1440,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1448,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "07cd60e095e6996f366b4a02afca509a9f8368fe",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "H200 job 1269164 (betelgeuse gpu_0003_grpA, one card, rows sequential, persistent cache, 56 minutes): fourteen of sixteen certificate rows re-solved at 07cd60e0 with the corrected allocation and coupling in production; diverted -110 and -300 died on CurrentNormalisationError (source amplitude nan) at 69 and 132 s",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T044629802980-cca-gate-c-certificate-resolve-2/sweep.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T044629802980-cca-gate-c-certificate-resolve-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "56bfdd72-e69c-4617-b567-e3bf2989d84e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2040642,
+            "input_tokens_cumulative": 2040642,
+            "output_tokens": 19022,
+            "output_tokens_cumulative": 19022,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-11T05:10:54.561Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 2040642,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1445.24,
+          "generated_tokens": 19022,
+          "generation_seconds": 1395.363,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 11.0,
+          "machine_seconds": 49.877,
+          "peak_input_tokens": 112309,
+          "tokens_per_second": 13.63,
+          "wall_tokens_per_second": 13.16
+        },
+        "follow_on_paths": [],
+        "predecessor_run": "r-20260911T031135184437-cca-coupling-geometry-pytree",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "wrapper commit b9ac9166 sits on the corrected line above 07cd60e0 and travels with it; the fourteen landed rows (scalars, parts, panels) were banked on main under docs/figures/cut-cell-current-attribution/gate-c-resolve",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-gate-c-certificate-resolve-2",
+          "session_id": "56bfdd72-e69c-4617-b567-e3bf2989d84e",
+          "session_source": "stream",
+          "retained_at": "2026-09-11T05:10:54.561Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 28.0,
+        "orientation_input_tokens": 1051074.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -152656,6 +152842,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2438
+    "_version": 2439
   }
 }

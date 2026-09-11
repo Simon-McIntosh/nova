@@ -102,9 +102,10 @@ excludes a cell.  Inside one Newton trip the geometry is read once at the
 frozen state and held constant for every evaluation, including the
 Jacobian-vector products and the amplitude normalisation, and it is
 refreshed at the trip boundary when the partition is.  ``chord_live``
-re-evaluates that geometry against the live iterate on every moment call
-instead, which is the discriminator's opt-in and the behaviour the per-trip
-freeze replaced.
+re-derives that geometry against the live iterate on every moment call
+instead, so through autodiff the clip enters the Newton residual and the
+Krylov products, while the clipped coupling blocks stay the trip's frozen
+record.
 ``exact`` traces the curved boundary support with every cut cell
 participating; ``chord_cells`` keeps the exact support everywhere except a
 named pair of cells whose entries revert to their chord-moment values.
@@ -125,6 +126,30 @@ def set_support_clip_mode(mode: str) -> str:
 def support_clip_mode() -> str:
     """Return the active plasma-support clip mode."""
     return _SUPPORT_CLIP_MODE
+
+
+#: Host sink for the per-trip cut-cell census.  A measurement driver that
+#: sets this to a list receives one census record per frozen-partition read
+#: (the initial read plus one per executed trip boundary) with the support's
+#: included, area and full-area arrays, from which the count of cells whose
+#: cut status changed between trips is derived.  ``None`` (the committed
+#: state) disables the instrumentation; nothing in production sets it.
+_CUT_CENSUS_SINK: list | None = None
+
+
+def _record_cut_census(included, area, full_area) -> None:
+    """Append one frozen-partition cut census to the module sink."""
+    if _CUT_CENSUS_SINK is None:
+        return
+    _CUT_CENSUS_SINK.append(
+        {
+            "included": np.asarray(included, dtype=bool).tolist(),
+            "area": [float(value) for value in np.asarray(area, dtype=np.float64)],
+            "full_area": [
+                float(value) for value in np.asarray(full_area, dtype=np.float64)
+            ],
+        }
+    )
 
 
 #: The two boundary cells whose contaminated moments the discriminator
@@ -2458,7 +2483,7 @@ class ForwardFluxOperator:
             chord_support = atomic_mesh.traced_clip(inside_boundary).qualify(
                 participation
             )
-            if _SUPPORT_CLIP_MODE == "chord":
+            if _SUPPORT_CLIP_MODE in ("chord", "chord_live"):
                 chord_support = self._complete_profile_atoms(
                     chord_support,
                     atomic_mesh,
@@ -2540,11 +2565,19 @@ class ForwardFluxOperator:
             return masks, topology, None, None, None
         sample_flux = self.sample_node_flux(psi)
         sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+        profile_support = frozen.profile_support
+        if _SUPPORT_CLIP_MODE == "chord_live":
+            # Re-derive the clip against the live iterate inside the trip so
+            # the geometry is a Newton-Krylov unknown, while the clipped
+            # coupling blocks stay the trip's frozen record.
+            profile_support = self._profile_support(
+                masks, topology, physical, sample_psi_norm
+            )
         return (
             masks,
             topology,
             sample_psi_norm,
-            frozen.profile_support,
+            profile_support,
             frozen.coupling,
         )
 
@@ -2862,6 +2895,13 @@ class ForwardFluxOperator:
         )
         if self.use_linear_moments:
             masks = self._moment_support_masks(masks, profile_support)
+            if _CUT_CENSUS_SINK is not None:
+                jax.debug.callback(
+                    _record_cut_census,
+                    jnp.asarray(profile_support.included),
+                    jnp.asarray(profile_support.area),
+                    jnp.asarray(profile_support.full_area),
+                )
         coupling = self._clipped_coupling_geometry(profile_support)
         return _FrozenTopologyPartition(
             label=masks.label,
@@ -3021,17 +3061,12 @@ class ForwardFluxOperator:
         # the trip's frozen state and held constant for every evaluation
         # inside the trip (map, Jacobian-vector products and amplitude
         # normalisation alike), then refreshed at the trip boundary when the
-        # partition is.  The live clip mode opts back into re-reading the
-        # support against the live iterate on every call for the
-        # discriminator; it disables the frozen partition here.
-        live_clip = (
-            self.use_linear_moments
-            and self.moment_geometry is not None
-            and _SUPPORT_CLIP_MODE == "chord_live"
-        )
-        if (
-            not self.use_linear_moments or self.moment_geometry is not None
-        ) and not live_clip:
+        # partition is.  The live clip mode shares that machinery so the
+        # clipped coupling blocks stay the trip's frozen record, while
+        # re-deriving the clip itself against the live iterate on every
+        # moment call so the geometry enters the Newton residual as an
+        # unknown.
+        if not self.use_linear_moments or self.moment_geometry is not None:
 
             def read_partition(psi, previous_shadow=None):
                 return self._frozen_topology_partition(

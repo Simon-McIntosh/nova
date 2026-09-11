@@ -171,3 +171,51 @@ def _support_inputs(operator, psi):
     sample_flux = operator.sample_node_flux(psi)
     sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
     return masks, topology, physical, sample_psi_norm
+
+
+def test_chord_live_derives_the_clip_live_and_keeps_the_coupling_frozen():
+    """In live mode the clip is a Newton unknown while the blocks stay frozen.
+
+    ``chord_live`` re-reads the clip against the live iterate on every
+    partition evaluation, so two live flux states yield different supports
+    through ``_partition_for_state`` on one trip's partition, while the
+    clipped coupling geometry returned alongside is the trip's frozen record.
+    The mode also books the compatible cold seed's label region at unit
+    amplitude (no labelled cell dropped to a zero polygon), which the live
+    mode shares with the committed chord clip.
+    """
+    configure_dtypes()
+    from nova.equilibrium.forward_operator import set_support_clip_mode
+    from benchmarks.cold_seed_amplitude_gate import build_row
+
+    _profile, operator, seed, target, requested_class, _machine, oracle = build_row(
+        "weak-rotation-reactor-static", -110
+    )
+    terminal = np.asarray(oracle, dtype=np.float64)
+    physical_count = int(operator.grid.node_number)
+    physical = terminal[:physical_count]
+    span = float(np.ptp(physical))
+    boundary_band = np.abs(physical - float(np.median(physical))) < 0.5 * span
+    perturbed = terminal.copy()
+    perturbed[:physical_count] = physical + np.where(boundary_band, 1.0e-3 * span, 0.0)
+
+    previous = set_support_clip_mode("chord_live")
+    try:
+        seed_moments = operator.cell_current_moments(jnp.asarray(seed), requested_class)
+        seed_amplitude = target / float(np.sum(seed_moments.cell_current))
+        frozen = operator._frozen_topology_partition(jnp.asarray(terminal), None)
+        inside_first = operator._partition_for_state(jnp.asarray(terminal), frozen)
+        inside_second = operator._partition_for_state(jnp.asarray(perturbed), frozen)
+    finally:
+        set_support_clip_mode(previous)
+
+    # The compatible cold seed books the label region at unit amplitude, not
+    # the doubled profile the clip alone produced before the seed repair.
+    assert seed_amplitude == pytest.approx(1.012, rel=0.02)
+    assert bool(np.sum(np.asarray(seed_moments.cell_current)) > 0.5 * target)
+
+    # Within one trip the clip is a live function of the iterate...
+    assert not _support_matches(inside_first[3], inside_second[3])
+    # ... while the clipped coupling blocks stay the trip's frozen record.
+    assert inside_first[4] is frozen.coupling
+    assert inside_second[4] is frozen.coupling

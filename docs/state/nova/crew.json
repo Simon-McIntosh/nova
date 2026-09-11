@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-11T08:12:10",
+  "updated": "2026-09-11T10:35:30",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -152539,6 +152539,204 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260911T061214771592-cca-cold-seed-clip-compatibility",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-cold-seed-clip-compatibility",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 390,
+                "cached_input_tokens": 939976,
+                "input_tokens": 940398,
+                "output_tokens": 2351,
+                "reasoning_output_tokens": 226,
+                "total_tokens": 942749,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. Facts: at this base gates A and B pass, and gate C (run r-20260911T044629802980, parts under docs/figures/cut-cell-current-attribution/gate-c-resolve) shows every static certificate row booking about half the plasma current at the cold seed (seed amplitude 2.05 weak, 2.08 moderate, 1.91 strong at 110 cells) because the cold disc seed's flux puts half the cells outside the clip while the partition labels cover the target region, so the normalisation doubles the profile before the first trip and no row converges (weak 110 residual 0.0752 against the committed 0.00745, axis error 0.173 m). First measure, then fix. Measure on the weak, moderate and strong 110 seeds in one all_debug CPU process per row (one sbatch, never an srun child of your shell; root venv python directly; PYTHONPATH at the worktree; JAX_PLATFORMS=cpu; TMPDIR=/tmp in submit environment and payload; logs under the run directory): the seed's read boundary level against the labelled region's edge flux, the count of labelled-confined cells the clip drops at the seed and their analytic current, and the unit-amplitude booked current of the seed under (a) the clip as built, (b) the seed rescaled or its boundary level chosen so the clipped region at the seed equals the labelled confined cells, (c) the first trip booked by the labels with the frozen clip from the second trip. Then implement the remedy the numbers support: (b) or (c), keeping the per-trip freeze, recording in the receipt which was used and the seed amplitude, with a new tests/test_cold_seed_clip_amplitude.py pinning that the cold seed of the weak 110 certificate row books the target current within one percent at unit amplitude, plus the six rung-A2 test files and tests/test_forward_cut_cell_coupling.py with zero added failures against this base (operator_domain keeps its three pre-existing ids). Then ONE H200 job (betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:59:00, JAX_PLATFORMS=cuda,cpu and TMPDIR=/tmp in submit environment and payload, persistent cache, root venv python, PYTHONPATH at the worktree) re-solving only the weak, moderate and strong 110 rows through the committed re-solve wrapper (benchmarks/gate_c_certificate_resolve.py is on this line's later commit b9ac9166; if absent, drive benchmarks/rung_a_certificate_resolve.py with the output root under docs/figures/cut-cell-current-attribution/cold-seed), one row per fresh process, parts and panels persisted per row, tabled against the committed rows: seed and terminal amplitude (acceptance: seed within one percent of unity), terminal residual, axis error, converged flag. Manifest with the job ids before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 4.0,
+          "goal": "Make the cold seed book the target plasma current at unit amplitude under the frozen clip, so the certificate iteration starts from a compatible support instead of a doubled profile",
+          "id": "cca-cold-seed-clip-compatibility",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-11T06:12:15Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T061214771592-cca-cold-seed-clip-compatibility/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/forward.py",
+            "nova/equilibrium/solve_request.py",
+            "tests/test_forward_profile_support_clip.py",
+            "tests/test_cold_seed_clip_amplitude.py",
+            "benchmarks/cold_seed_amplitude_gate.py",
+            "docs/figures/cut-cell-current-attribution/cold-seed",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/cold-seed"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-seed",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-11T06:12:24Z",
+        "completed_at": "2026-09-11T08:32:32.928Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 8391,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 8408,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "07cd60e095e6996f366b4a02afca509a9f8368fe",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "all_debug jobs 1269226 (seven test files, zero added failures) and 1269264 (tests/test_cold_seed_clip_amplitude.py 3 passed) at 1e79e056, then one H200 job re-solving weak, moderate and strong 110: seed amplitude 1.012, 1.024, 1.031 against the one-percent acceptance; terminal residual 0.015, 0.008, 0.010 against committed 0.007, 0.012, 0.014; axis error 69, 21, 6 mm against 2, 3, 3 mm; none converged",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T061214771592-cca-cold-seed-clip-compatibility/gate-test_forward_operator_domain.py.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T061214771592-cca-cold-seed-clip-compatibility/manifest.md",
+        "scope_changed": false,
+        "session_id": "672533da-0aae-4870-9762-300c1e836917",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 47028803,
+            "input_tokens_cumulative": 47028803,
+            "output_tokens": 189746,
+            "output_tokens_cumulative": 189746,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-11T08:32:32.928Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 47028803,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 8406.027,
+          "generated_tokens": 189746,
+          "generation_seconds": 7843.943,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 37.3,
+          "machine_seconds": 562.084,
+          "peak_input_tokens": 379557,
+          "tokens_per_second": 24.19,
+          "wall_tokens_per_second": 22.57
+        },
+        "follow_on_paths": [
+          "analytic/converged",
+          "0.987-0.992",
+          "0.93",
+          "1.0122",
+          "1.0243",
+          "boundary/psi-norm"
+        ],
+        "predecessor_run": "r-20260911T031135184437-cca-coupling-geometry-pytree",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "fix commit 1e79e056 (never drop a profile-owned cell at the cold seed, tests) stays on the corrected line above 07cd60e0 with the rest of the held work; receipts and panels banked on main under docs/figures/cut-cell-current-attribution/cold-seed",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-cold-seed-clip-compatibility",
+          "session_id": "672533da-0aae-4870-9762-300c1e836917",
+          "session_source": "stream",
+          "retained_at": "2026-09-11T08:32:32.928Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 198.0,
+        "orientation_input_tokens": 8118392.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -152851,6 +153049,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2440
+    "_version": 2441
   }
 }

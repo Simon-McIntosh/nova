@@ -1,0 +1,25 @@
+{
+  "amplitude_within_one_percent": false,
+  "case": "weak-rotation-reactor-static",
+  "converged": false,
+  "figure": {
+    "filesystem_path": "docs/figures/cut-cell-current-attribution/gate-c-resolve/weak-rotation-reactor-static-production-route-cells-1000.png",
+    "project_absolute_src": "/nova/figures/cut-cell-current-attribution/gate-c-resolve/weak-rotation-reactor-static-production-route-cells-1000.png",
+    "render_source": "fresh_production_solve",
+    "sha256": "158b19f5e59857f8c3339dd52a2f5caaa0c56f3fdb0a9fd1b486c080abce4c77"
+  },
+  "magnetic_axis_position_error_m": 0.22796510763216296,
+  "part": "docs/figures/cut-cell-current-attribution/gate-c-resolve/parts/weak-rotation-reactor-static-production-route-cells-1000.json",
+  "qualification": "unqualified",
+  "qualification_bound": 1e-12,
+  "qualification_reason": "fixed_point_residual_outside_qualification_bound",
+  "realised_cells": 1072,
+  "requested_cells": -1000,
+  "seed_amplitude": 1.8917604762516262,
+  "terminal_amplitude": 2.014837039008655,
+  "terminal_fixed_point_residual": 0.09093676944907109,
+  "terminal_fixed_point_residual_status": "finite",
+  "termination": "active_set_cycle_detected",
+  "trip_count": 3,
+  "x_point_position_error_m": null
+}

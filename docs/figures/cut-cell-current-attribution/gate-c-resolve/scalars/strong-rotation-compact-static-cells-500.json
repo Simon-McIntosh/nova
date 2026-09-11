@@ -1,0 +1,25 @@
+{
+  "amplitude_within_one_percent": false,
+  "case": "strong-rotation-compact-static",
+  "converged": false,
+  "figure": {
+    "filesystem_path": "docs/figures/cut-cell-current-attribution/gate-c-resolve/strong-rotation-compact-static-production-route-cells-500.png",
+    "project_absolute_src": "/nova/figures/cut-cell-current-attribution/gate-c-resolve/strong-rotation-compact-static-production-route-cells-500.png",
+    "render_source": "fresh_production_solve",
+    "sha256": "9b3a743c982b0b34266bc4f9412bfc73f60aa015ded1a1e6faaf5ae524752316"
+  },
+  "magnetic_axis_position_error_m": 0.012941095565113444,
+  "part": "docs/figures/cut-cell-current-attribution/gate-c-resolve/parts/strong-rotation-compact-static-production-route-cells-500.json",
+  "qualification": "unqualified",
+  "qualification_bound": 1e-12,
+  "qualification_reason": "fixed_point_residual_outside_qualification_bound",
+  "realised_cells": 551,
+  "requested_cells": -500,
+  "seed_amplitude": 1.792942975893011,
+  "terminal_amplitude": 1.724694007032065,
+  "terminal_fixed_point_residual": 0.04885471435549363,
+  "terminal_fixed_point_residual_status": "finite",
+  "termination": "active_set_settled",
+  "trip_count": 3,
+  "x_point_position_error_m": null
+}

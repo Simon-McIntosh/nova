@@ -1,0 +1,25 @@
+{
+  "amplitude_within_one_percent": false,
+  "case": "moderate-rotation-conventional-static",
+  "converged": false,
+  "figure": {
+    "filesystem_path": "docs/figures/cut-cell-current-attribution/gate-c-resolve/moderate-rotation-conventional-static-production-route-cells-500.png",
+    "project_absolute_src": "/nova/figures/cut-cell-current-attribution/gate-c-resolve/moderate-rotation-conventional-static-production-route-cells-500.png",
+    "render_source": "fresh_production_solve",
+    "sha256": "a9461a4db7ca4103eca08a22e0fa659ac463d64d88bcf0bcd2227c3dfb0b50a4"
+  },
+  "magnetic_axis_position_error_m": 0.1534001913375425,
+  "part": "docs/figures/cut-cell-current-attribution/gate-c-resolve/parts/moderate-rotation-conventional-static-production-route-cells-500.json",
+  "qualification": "unqualified",
+  "qualification_bound": 1e-12,
+  "qualification_reason": "fixed_point_residual_outside_qualification_bound",
+  "realised_cells": 548,
+  "requested_cells": -500,
+  "seed_amplitude": 1.9074230156512593,
+  "terminal_amplitude": 3.759329068367856,
+  "terminal_fixed_point_residual": 0.08041000128020119,
+  "terminal_fixed_point_residual_status": "finite",
+  "termination": "active_set_cycle_detected",
+  "trip_count": 12,
+  "x_point_position_error_m": null
+}

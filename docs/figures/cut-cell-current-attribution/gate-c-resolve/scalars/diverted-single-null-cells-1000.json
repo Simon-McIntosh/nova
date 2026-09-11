@@ -1,0 +1,25 @@
+{
+  "amplitude_within_one_percent": false,
+  "case": "diverted-single-null",
+  "converged": false,
+  "figure": {
+    "filesystem_path": "docs/figures/cut-cell-current-attribution/gate-c-resolve/diverted-single-null-production-route-cells-1000.png",
+    "project_absolute_src": "/nova/figures/cut-cell-current-attribution/gate-c-resolve/diverted-single-null-production-route-cells-1000.png",
+    "render_source": "fresh_production_solve",
+    "sha256": "f948076f1603ef08859772dcac6b028f6ba75c080a3387aeb3e62c0c8a24b0ea"
+  },
+  "magnetic_axis_position_error_m": 0.5805658721290708,
+  "part": "docs/figures/cut-cell-current-attribution/gate-c-resolve/parts/diverted-single-null-production-route-cells-1000.json",
+  "qualification": "unqualified",
+  "qualification_bound": 1e-12,
+  "qualification_reason": "fixed_point_residual_outside_qualification_bound",
+  "realised_cells": 1074,
+  "requested_cells": -1000,
+  "seed_amplitude": 0.9571959811806683,
+  "terminal_amplitude": 31.03830803514726,
+  "terminal_fixed_point_residual": 0.11186892126828313,
+  "terminal_fixed_point_residual_status": "finite",
+  "termination": "active_set_cycle_detected",
+  "trip_count": 5,
+  "x_point_position_error_m": null
+}

@@ -39,7 +39,9 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+from nova.biot.greens import second_moments, section_centroid
 from nova.biot.null import Null2D
+from nova.biot.polygonanalytic import polygon_analytic_flux_moments
 from nova.biot.target import FluxTarget
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.cell_partition import cell_partition_geometry
@@ -63,6 +65,7 @@ from nova.equilibrium.source import (
 )
 from nova.equilibrium.stencil_mesh import (
     CellCurrentMoments,
+    ClippedCouplingGeometry,
     MomentGeometry,
     StencilMesh,
 )
@@ -301,6 +304,7 @@ class _FrozenTopologyPartition(NamedTuple):
     topology: TopologyState
     profile_support: object
     residual_shadow: jax.Array
+    coupling: ClippedCouplingGeometry | None = None
 
 
 def _structured_grid_axes(coordinate) -> tuple[np.ndarray, np.ndarray]:
@@ -2096,9 +2100,20 @@ class ForwardFluxOperator:
         return values, radial, vertical
 
     def coupling_current_moments(
-        self, moments: CellCurrentMoments
+        self,
+        moments: CellCurrentMoments,
+        geometry: ClippedCouplingGeometry | None = None,
     ) -> CellCurrentMoments:
-        """Convert physical first moments to the fixed linear-basis vectors."""
+        """Convert physical first moments to the fixed linear-basis vectors.
+
+        With a per-trip ``geometry`` a cut cell's physical first moments are
+        first re-referenced from the atomic centroid to its clipped polygon's
+        centroid and inverted with the clipped polygon's area-normalised
+        second moments, so the linear-basis coefficients describe a density
+        over the region the current actually occupies.  Interior cells keep
+        the atomic reference; ``None`` reproduces the fixed atomic
+        conversion.
+        """
         if self.moment_geometry is None:
             radial = np.asarray(moments.radial_moment)
             vertical = np.asarray(moments.vertical_moment)
@@ -2111,20 +2126,29 @@ class ForwardFluxOperator:
                 jnp.zeros_like(moments.radial_moment),
                 jnp.zeros_like(moments.vertical_moment),
             )
-        second = jnp.asarray(
-            self.moment_geometry.second_moment, dtype=moments.cell_current.dtype
-        )
+        if geometry is None:
+            second = self.moment_geometry.second_moment
+            radial_value = moments.radial_moment
+            vertical_value = moments.vertical_moment
+        else:
+            second = geometry.second_moment
+            shift = np.asarray(self.moment_geometry.atomic_mesh.centroids) - np.asarray(
+                geometry.moment_centre
+            )
+            radial_value = moments.radial_moment + shift[:, 0] * moments.cell_current
+            vertical_value = (
+                moments.vertical_moment + shift[:, 1] * moments.cell_current
+            )
+        second = jnp.asarray(second, dtype=moments.cell_current.dtype)
         radial_second = second[:, 0]
         vertical_second = second[:, 1]
         cross_second = second[:, 2]
         determinant = radial_second * vertical_second - cross_second**2
         radial = (
-            vertical_second * moments.radial_moment
-            - cross_second * moments.vertical_moment
+            vertical_second * radial_value - cross_second * vertical_value
         ) / determinant
         vertical = (
-            radial_second * moments.vertical_moment
-            - cross_second * moments.radial_moment
+            radial_second * vertical_value - cross_second * radial_value
         ) / determinant
         return CellCurrentMoments(moments.cell_current, radial, vertical)
 
@@ -2145,6 +2169,89 @@ class ForwardFluxOperator:
         )
         masks = self._moment_support_masks(masks, profile_support)
         return masks, topology, sample_psi_norm, profile_support
+
+    def _clipped_coupling_geometry(
+        self, profile_support
+    ) -> ClippedCouplingGeometry | None:
+        """Build the per-trip clipped-polygon blocks for one frozen support.
+
+        For every cut cell of the support, the effective second moments and
+        moment reference move to the clipped polygon's centroid and the
+        effective kernel blocks become the polygon-analytic integrals over
+        the clipped polygon about that centroid; interior cells keep the
+        precomputed atomic blocks.  The return is ``None`` when the support
+        carries no cut cell or when it is traced (the blocks are rebuilt once
+        per trip where the frozen partition is refreshed, never inside a
+        Jacobian-vector product).
+        """
+        if self.moment_geometry is None or not self.use_linear_moments:
+            return None
+        try:
+            vertices = np.asarray(profile_support.support_vertices)
+            count = np.asarray(profile_support.vertex_count)
+            boundary = np.asarray(profile_support.boundary, dtype=bool)
+        except Exception:
+            return None
+        atomic = self.moment_geometry.atomic_mesh
+        atomic_centre = np.asarray(atomic.centroids, dtype=np.float64)
+        cut = np.flatnonzero(boundary)
+        if cut.size == 0:
+            return None
+        second = np.array(
+            self.moment_geometry.second_moment, dtype=np.float64, copy=True
+        )
+        centre = atomic_centre.copy()
+        cut_cell = np.zeros(len(atomic_centre), dtype=bool)
+        entries = []
+        for cell in cut:
+            polygon = np.asarray(vertices[cell][: count[cell]])
+            if len(polygon) < 3:
+                continue
+            entries.append((cell, polygon))
+            cut_cell[cell] = True
+            centre[cell] = section_centroid(polygon)
+            second[cell] = second_moments(polygon)
+        if len(entries) == 0:
+            return None
+        grid_delta = self._clipped_block_deltas(self.grid, entries, centre)
+        wall_delta = self._clipped_block_deltas(self.wall, entries, centre)
+        sample_delta = (
+            None
+            if self.sample is None
+            else self._clipped_block_deltas(self.sample, entries, centre)
+        )
+        return ClippedCouplingGeometry(
+            cut_cell=cut_cell,
+            second_moment=second,
+            moment_centre=centre,
+            grid_delta=grid_delta,
+            wall_delta=wall_delta,
+            sample_delta=sample_delta,
+        )
+
+    @staticmethod
+    def _clipped_block_deltas(target, entries, centre):
+        """Return the atomic-to-clipped block delta triple for one target set.
+
+        Each row is ``(clipped_column - atomic_column)`` for one cut source
+        cell, shaped ``(cut_count, 3, target_count)`` so the per-trip
+        clipped image is the atomic image plus the einsum
+        ``"cmt,mc->t"`` over the cut columns' moment stack.
+        """
+        atomic_uniform = np.asarray(target.plasma_target)
+        atomic_radial = np.asarray(target.plasma_target_r)
+        atomic_vertical = np.asarray(target.plasma_target_z)
+        target_r = np.asarray(target.coordinate[:, 0], dtype=np.float64)
+        target_z = np.asarray(target.coordinate[:, 1], dtype=np.float64)
+        delta = np.zeros((len(entries), 3, len(target_r)), dtype=np.float64)
+        for row, (cell, polygon) in enumerate(entries):
+            clipped = polygon_analytic_flux_moments(
+                target_r, target_z, polygon, expansion_point=centre[cell]
+            )
+            delta[row, 0] = clipped[0] - atomic_uniform[:, cell]
+            delta[row, 1] = clipped[1] - atomic_radial[:, cell]
+            delta[row, 2] = clipped[2] - atomic_vertical[:, cell]
+        return delta
 
     @staticmethod
     def _moment_support_masks(masks, profile_support):
@@ -2292,10 +2399,16 @@ class ForwardFluxOperator:
         )
         masks = DomainMasks(label=frozen.label, psi_norm=psi_norm)
         if not self.use_linear_moments:
-            return masks, topology, None, None
+            return masks, topology, None, None, None
         sample_flux = self.sample_node_flux(psi)
         sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
-        return masks, topology, sample_psi_norm, frozen.profile_support
+        return (
+            masks,
+            topology,
+            sample_psi_norm,
+            frozen.profile_support,
+            frozen.coupling,
+        )
 
     def _internal_on_partition(self, psi, frozen, target_current=None):
         """Return the plasma image while retaining one trip's partition."""
@@ -2306,7 +2419,8 @@ class ForwardFluxOperator:
                 target_current, jnp.sum(moments.cell_current)
             )
             moments = self.scaled_current_moments(moments, amplitude)
-        return self.current_moment_image(moments)
+        geometry = partition[4] if len(partition) > 4 else None
+        return self.current_moment_image(moments, geometry)
 
     def _current_moments_on_partition(self, psi, partition) -> CellCurrentMoments:
         """Return current moments from a topology partition and trial state."""
@@ -2314,7 +2428,7 @@ class ForwardFluxOperator:
         return self._partitioned_current_moments(partition)
 
     def _partitioned_current_moments(self, partition) -> CellCurrentMoments:
-        masks, _topology, sample_psi_norm, profile_support = partition
+        masks, _topology, sample_psi_norm, profile_support = partition[:4]
         if not self.use_linear_moments:
             return self._point_current_moments(masks)
         moment_masks = self._moment_support_masks(masks, profile_support)
@@ -2324,7 +2438,11 @@ class ForwardFluxOperator:
             profile_support,
             sample_flux=sample_psi_norm,
         )
-        return self.coupling_current_moments(moments)
+        if len(partition) > 4 and partition[4] is not None:
+            geometry = partition[4]
+        else:
+            geometry = self._clipped_coupling_geometry(profile_support)
+        return self.coupling_current_moments(moments, geometry)
 
     def _point_current_moments(self, masks) -> CellCurrentMoments:
         """Return point-current moments from an already-read domain mask."""
@@ -2341,7 +2459,7 @@ class ForwardFluxOperator:
 
     def _clipped_integral_measure(self, partition) -> ClippedIntegralMeasure:
         """Build the observation measure from one already-traced partition."""
-        masks, topology, sample_psi_norm, profile_support = partition
+        masks, topology, sample_psi_norm, profile_support = partition[:4]
         profile_moments = self.source.current_moments(
             masks,
             self.support_current_moments,
@@ -2606,6 +2724,7 @@ class ForwardFluxOperator:
         )
         if self.use_linear_moments:
             masks = self._moment_support_masks(masks, profile_support)
+        coupling = self._clipped_coupling_geometry(profile_support)
         return _FrozenTopologyPartition(
             label=masks.label,
             topology=topology,
@@ -2613,6 +2732,7 @@ class ForwardFluxOperator:
             residual_shadow=jnp.concatenate(
                 (flood_shadow, wall_shadow, direct_sample_shadow)
             ),
+            coupling=coupling,
         )
 
     def cell_current(self, psi, requested_class=None, target_current=None) -> jax.Array:
@@ -2635,12 +2755,54 @@ class ForwardFluxOperator:
             )
         return self.current_moment_image(moments)
 
-    def current_moment_image(self, moments: CellCurrentMoments) -> jax.Array:
-        """Return flux from an explicitly supplied cell-current moment image."""
+    def current_moment_image(
+        self,
+        moments: CellCurrentMoments,
+        geometry: ClippedCouplingGeometry | None = None,
+    ) -> jax.Array:
+        """Return flux from an explicitly supplied cell-current moment image.
+
+        With a per-trip ``geometry`` the atomic image is corrected by the
+        clipped-polygon block deltas of every cut cell, so the cut columns
+        image over the clipped plasma polygon while interior columns keep the
+        precomputed atomic blocks.
+        """
         physical = jnp.r_[self.grid.internal(moments), self.wall.internal(moments)]
         if self.sample is None:
-            return physical
-        return jnp.r_[physical, self.sample.internal(moments)]
+            image = physical
+        else:
+            image = jnp.r_[physical, self.sample.internal(moments)]
+        if geometry is None:
+            return image
+        return image + self._clipped_image_delta(moments, geometry)
+
+    def _clipped_image_delta(
+        self, moments: CellCurrentMoments, geometry: ClippedCouplingGeometry
+    ) -> jax.Array:
+        """Return the atomic-to-clipped block correction of one moment image."""
+        stack = jnp.stack(
+            (moments.cell_current, moments.radial_moment, moments.vertical_moment)
+        )
+        cut = np.asarray(geometry.cut_cell, dtype=bool)
+        cut_stack = stack[:, cut]
+        dtype = moments.cell_current.dtype
+        grid_nodes = self.grid.node_number
+        wall_nodes = self.wall.node_number
+        grid_add = jnp.einsum(
+            "cmt,mc->t", jnp.asarray(geometry.grid_delta, dtype=dtype), cut_stack
+        )
+        wall_add = jnp.einsum(
+            "cmt,mc->t", jnp.asarray(geometry.wall_delta, dtype=dtype), cut_stack
+        )
+        delta = jnp.zeros(self.physical_node_number, dtype=dtype)
+        delta = delta.at[:grid_nodes].add(grid_add)
+        delta = delta.at[grid_nodes : grid_nodes + wall_nodes].add(wall_add)
+        if self.sample is None:
+            return delta
+        sample_add = jnp.einsum(
+            "cmt,mc->t", jnp.asarray(geometry.sample_delta, dtype=dtype), cut_stack
+        )
+        return jnp.concatenate((delta, sample_add))
 
     def __call__(
         self,

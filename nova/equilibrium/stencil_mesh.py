@@ -109,6 +109,32 @@ class CellCurrentMoments(NamedTuple):
 
 
 @dataclass(frozen=True)
+class ClippedCouplingGeometry:
+    """Per-trip coupling state for cut cells over their clipped polygons.
+
+    A cut cell's current occupies only the clipped plasma polygon, so the
+    physical first moments, the second-moment inversion and the kernel
+    blocks must all be referenced to that polygon rather than to the atomic
+    cell.  ``second_moment`` carries the effective area-normalised second
+    central moments (the clipped polygon's for a cut cell, the atomic
+    cell's elsewhere), ``moment_centre`` the corresponding moment reference,
+    and the ``*_delta`` arrays the three per-cut-column block triples that
+    convert the precomputed atomic kernel blocks into the polygon-analytic
+    integrals over the clipped polygon about its centroid.  All shapes are
+    fixed by the capacity-padded support; the padded vertex slots are never
+    passed to the kernel.  The geometry is rebuilt once per trip where the
+    frozen partition is refreshed, never inside a Jacobian-vector product.
+    """
+
+    cut_cell: np.ndarray
+    second_moment: np.ndarray
+    moment_centre: np.ndarray
+    grid_delta: np.ndarray
+    wall_delta: np.ndarray | None
+    sample_delta: np.ndarray | None
+
+
+@dataclass(frozen=True)
 class InteriorCurrentMomentStencil:
     """Fixed own-node projection and exact-support moment geometry."""
 

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-11T01:33:51",
+  "updated": "2026-09-11T02:07:51",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -151533,6 +151533,202 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T225638998875-cca-first-order-coupling-discriminator",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-first-order-coupling-discriminator",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2413,
+                "cached_input_tokens": 854715,
+                "input_tokens": 857160,
+                "output_tokens": 1891,
+                "reasoning_output_tokens": 80,
+                "total_tokens": 859051,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. Facts: gate B (driver benchmarks/frozen_current_flux_image_gate.py, parts under docs/figures/cut-cell-current-attribution/gate-b/parts) shows with the oracle's exact per-cell currents frozen that the whole-domain rms flux error over span is 0.0057 with zeroth moments only and 0.0106 with first-order moments added on weak 110 (0.0055 to 0.0100 moderate, 0.0088 to 0.0136 strong, 0.0026 to 0.0045 weak 300), second-order moments change nothing to four digits, and the added error is a smooth field 97 to 99 percent explained by an affine fit in R and Z. One all_debug CPU sbatch (never an srun child of your shell; root venv python directly; PYTHONPATH at the worktree; JAX_PLATFORMS=cpu; TMPDIR=/tmp in submit environment and payload; logs under the run directory) runs benchmarks/first_order_coupling_discriminator.py with two parts. Part one, single cell: take one interior hex cell of the weak -110 mesh, prescribe a toroidal current density that is linear in R and Z across it with a known zeroth moment and a known first moment about the cell's own centroid, compute the exact poloidal flux it produces at every mesh node by adaptive numerical integration of the ring Green's function over the cell, and compare with the production coupling image of that cell formed from (i) zeroth moment only, (ii) zeroth plus first, (iii) zeroth plus first with the first-order term's sign flipped, (iv) zeroth plus first with the moments taken about the point the kernel expands about if that differs from the centroid (read coupling_current_moments and the polygon-analytic moment stack and name both points with path:line); report the rms and max error of each variant relative to the exact flux and state which variant is exact to second order in the cell size. Part two, the weak -110 frozen currents: rebuild gate B's frozen image with the same four variants and report the whole-domain rms and max over span for each beside gate B's 0.0106 and 0.0057. Also report the unit and scale of radial_moment and vertical_moment as passed to the kernel against the units the kernel's first-order term expects (path:line), so a missing factor of R or of the pitch is caught. One figure per part obeying the plotting rules (imas-ink through nova.media, no axes, line contours, nulls and wall on the domain panel): the single-cell exact flux beside the four variants' error on shared levels, and the weak -110 error field for variant (ii) and the best of (iii) and (iv). The report states the cause in one sentence with the numbers: sign, expansion point, unit factor, or none of these with the residual stated. Manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 3.0,
+          "goal": "Measure the coupling's first-order moment term against an exact Biot integral on a single cell and on the weak -110 frozen currents, with the sign, the expansion point and the unit scale each varied",
+          "id": "cca-first-order-coupling-discriminator",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T22:56:39Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T225638998875-cca-first-order-coupling-discriminator/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/first_order_coupling_discriminator.py",
+            "docs/figures/cut-cell-current-attribution/first-order-coupling",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/first-order-coupling"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-dipole",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T22:56:51Z",
+        "completed_at": "2026-09-11T00:04:19.201Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4039,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4048,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "48a5764b5fe40465da16c2b65ae0f5b5af0c9fb5",
+        "commits": [
+          "2751ae4d4c65305dfeb93c42b5db15d2233dc33c",
+          "6db0b4687920199ebf6cdc9610ff9932862c5ef0"
+        ],
+        "changed_lines": {
+          "added": 9453,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug sbatch 1269154: benchmarks/first_order_coupling_discriminator.py --run-all (single interior hex cell with a prescribed linear density against tensor-Duffy exact ring-inductance flux, then the weak -110 frozen image under four variants), DISCRIMINATOR_JOB_EXIT=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T225638998875-cca-first-order-coupling-discriminator/discriminator-job.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T225638998875-cca-first-order-coupling-discriminator/manifest.md",
+        "scope_changed": false,
+        "session_id": "485973ed-4176-460e-bfca-6cf7bc1b8961",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 33115118,
+            "input_tokens_cumulative": 33115118,
+            "output_tokens": 141202,
+            "output_tokens_cumulative": 141202,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-11T00:04:19.201Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 33115118,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 4043.816,
+          "generated_tokens": 141202,
+          "generation_seconds": 2873.834,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 31.4,
+          "machine_seconds": 1169.982,
+          "peak_input_tokens": 319529,
+          "tokens_per_second": 49.13,
+          "wall_tokens_per_second": 34.92
+        },
+        "follow_on_paths": [
+          "0.0057/0.0106",
+          "0.005708/0.010565"
+        ],
+        "predecessor_run": "r-20260910T204525520366-cca-gate-b-finish-and-attribute",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-first-order-coupling-discriminator",
+          "session_id": "485973ed-4176-460e-bfca-6cf7bc1b8961",
+          "session_source": "stream",
+          "retained_at": "2026-09-11T00:04:19.201Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 154.0,
+        "orientation_input_tokens": 12623983.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -151845,6 +152041,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2430
+    "_version": 2431
   }
 }

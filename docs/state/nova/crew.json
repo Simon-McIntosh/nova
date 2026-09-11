@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-11T13:45:25",
+  "updated": "2026-09-11T15:04:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -152746,6 +152746,197 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260911T114531295791-cca-newton-step-on-geometry",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-newton-step-on-geometry",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 926277,
+                "cached_input_tokens": 28231,
+                "input_tokens": 954510,
+                "output_tokens": 3390,
+                "reasoning_output_tokens": 973,
+                "total_tokens": 957900,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file, and never open the aggregate certificate receipt in an editor (load it with json and pull per-row scalars). Facts at this base: gates A and B pass; the cold seed books the target current within three percent (1e79e056); with the clip frozen per trip the static rows stall unconverged after six to seven trips at residuals 0.015, 0.008, 0.010 with axis errors 69, 21, 6 mm and terminal amplitudes 0.953 to 0.962 (docs/figures/cut-cell-current-attribution/cold-seed); the chord_live mode (set_support_clip_mode) re-evaluates the clip against the live iterate on every moment call, so through autodiff the geometry enters the Newton residual and the Krylov products, and it was last run only from the incompatible seed that booked half the current (amplitude 2), where it diverged. Level one, no code change beyond selecting the mode and keeping the clipped coupling blocks frozen per trip: ONE H200 job (betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:59:00, JAX_PLATFORMS=cuda,cpu and TMPDIR=/tmp in submit environment and payload, root venv python, PYTHONPATH at the worktree, persistent cache, never an srun child of your shell, --output in the run directory) re-solving weak, moderate and strong at 110 cells through the committed re-solve wrapper with chord_live selected and a trip budget of at least twelve, one row per fresh process, parts and panels persisted per row under docs/figures/cut-cell-current-attribution/newton-geometry, tabled against the frozen-clip rows and the committed rows: per-trip residual history, seed and terminal amplitude, axis error, converged flag, trip count, and the count of cells whose cut status changed between trips. Level two, only if level one converges on at least one row: make the clipped coupling blocks traced as well (the polygon-analytic integrals over the clipped polygon evaluated inside the traced residual so the Krylov products see the coupling's geometry dependence), guard shapes by capacity padding, and rerun the same three rows in a second H200 job; if level one diverges on every row, record the divergence with the amplitude history and do not attempt level two. The report states per row whether the fixed point reached the analytic equilibrium (residual below the committed row and axis error below the committed row, and ideally converged), and one sentence on whether Newton on geometry beats Picard on geometry here. Manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 4.0,
+          "goal": "Measure whether the certificate iteration converges to the reference when the clip geometry is a Newton-Krylov unknown rather than a frozen per-trip quantity, starting from the compatible cold seed",
+          "id": "cca-newton-step-on-geometry",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-11T11:45:32Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T114531295791-cca-newton-step-on-geometry/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/fixed_point.py",
+            "benchmarks/gate_c_certificate_resolve.py",
+            "tests/test_forward_profile_support_clip.py",
+            "docs/figures/cut-cell-current-attribution/newton-geometry",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/newton-geometry"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-newton-geom",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-11T11:45:39Z",
+        "completed_at": "2026-09-11T12:50:49.262Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3902,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3910,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "1e79e056536f8801178aabc1aab4996e47a7f782",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "H200 job 1269476 (12 minutes): weak, moderate, strong 110 re-solved with the live clip in the Newton residual and Krylov products from the compatible seed, coupling blocks frozen per trip; none converged, so level two was not attempted by the node",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T114531295791-cca-newton-step-on-geometry/newton-geometry-job.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T114531295791-cca-newton-step-on-geometry/manifest.md",
+        "scope_changed": false,
+        "session_id": "ec55938f-7459-49c5-8e21-12633e9404dd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 25782391,
+            "input_tokens_cumulative": 25782391,
+            "output_tokens": 105167,
+            "output_tokens_cumulative": 105167,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-11T12:50:49.262Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 25782391,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 3906.512,
+          "generated_tokens": 105167,
+          "generation_seconds": 2041.523,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 25.5,
+          "machine_seconds": 1864.989,
+          "peak_input_tokens": 259467,
+          "tokens_per_second": 51.51,
+          "wall_tokens_per_second": 26.92
+        },
+        "follow_on_paths": [
+          "tests/test_forward_support_clip_mode.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "commit d540db13 (carry the live clip through the Newton reconcile) stays on the corrected line above 1e79e056; receipts, parts, per-row logs and panels banked on main under docs/figures/cut-cell-current-attribution/newton-geometry",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-newton-step-on-geometry",
+          "session_id": "ec55938f-7459-49c5-8e21-12633e9404dd",
+          "session_source": "stream",
+          "retained_at": "2026-09-11T12:50:49.262Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 152.0,
+        "orientation_input_tokens": 6550225.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -153058,6 +153249,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2442
+    "_version": 2443
   }
 }

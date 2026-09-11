@@ -203,6 +203,23 @@
 </figure>
 <p>The reading: whole-cell booking by the frozen partition label was stable because its geometry was piecewise constant within a Newton trip. A clip that follows the live flux inside the trip couples geometry, amplitude and flux at every linearisation and the fixed-point iteration does not survive the cold seed. The correction becomes rung A2: the clipped support joins the frozen partition, evaluated once per trip on the trip's frozen state and held fixed inside it, with the amplitude normalised on that frozen support.</p>
 
+<h2 id="s7">§7 — Gate C: the iteration with gates A and B passed</h2>
+<p>With the signed-flux clip, the frozen per-trip support, the clipped-polygon coupling and the pytree geometry all in production (line tip 07cd60e0), the sixteen certificate rows were re-solved in one H200 job (run r-20260911T044629802980, receipts and panels under <code>docs/figures/cut-cell-current-attribution/gate-c-resolve</code>). Fourteen rows landed; the two coarse single-null rows died on a nan current amplitude.</p>
+<table>
+  <thead><tr><th>Row, 110 cells</th><th>Committed residual</th><th>Re-solved residual</th><th>Committed axis error</th><th>Re-solved axis error</th><th>Amplitude, seed to terminal</th><th>Trips</th></tr></thead>
+  <tbody>
+    <tr><td>weak</td><td>0.00745</td><td>0.0752</td><td>1.8 mm</td><td>173 mm</td><td>2.05 to 2.03</td><td>2</td></tr>
+    <tr><td>moderate</td><td>0.0125</td><td>0.0685</td><td>7 mm</td><td>73 mm</td><td>2.08 to 2.22</td><td>3</td></tr>
+    <tr><td>strong</td><td>0.0128</td><td>0.0379</td><td>see receipt</td><td>27 mm</td><td>1.91 to 1.95</td><td>6</td></tr>
+    <tr><td>single-null, 500 cells</td><td>5.3e-15</td><td>0.194</td><td>1.4 mm</td><td>558 mm</td><td>0.96 to 21.1</td><td>4</td></tr>
+  </tbody>
+</table>
+<p>No row improves on its committed counterpart, and the amplitude column says where the remaining defect is. On every static row the current amplitude at the cold seed is about two: the cold disc seed's own flux places half the cells outside the clip, while the partition labels that whole-cell booking used cover the whole target region, so the clip books half the plasma current and the normalisation doubles the profile before the first trip. The frozen support has removed yesterday's runaway (terminal amplitudes 1.7 to 3.8 against 9 to 18), but a doubled profile settles unconverged in the wrong place within a few trips. The single-null rows start near unity and run away to amplitudes above twenty, the four-crossing geometry of §3 acting inside the iteration. Gates A and B pass on this line, so the iteration's defect is the seed's compatibility with the clip: at the seed the clip and the labels disagree, and by the amplitude rule a seed amplitude of two means the seed support is booking the wrong current. The remedy belongs to the seeding step, a seed flux whose separatrix level reproduces the labelled region or a first trip booked by the labels with clipping from the second, both under the per-trip freeze.</p>
+<figure>
+  <img src="/nova/figures/cut-cell-current-attribution/gate-c-resolve/weak-rotation-reactor-static-production-route-reduced.png" alt="Weak-rotation case at 110 cells re-solved with the corrected allocation and coupling: the solved axis sits 0.17 m from the analytic one, terminal residual 0.075, amplitude 2 throughout">
+  <figcaption>Weak-rotation case, 110 cells, re-solved with the corrected line. The seed books half the current (amplitude 2.05) and the solve settles two trips later 0.17 m from the analytic axis at residual 0.075; the runaway of the live-flux clip is gone but the doubled profile stays.</figcaption>
+</figure>
+
 <h2 id="provenance">Provenance</h2>
 <table>
   <thead><tr><th>Measurement</th><th>Run</th><th>Head</th><th>Receipts</th></tr></thead>

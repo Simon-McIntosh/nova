@@ -95,12 +95,16 @@ _SUPPORT_CLIP_MODE = "chord"
 against the signed flux of the trip's frozen state, a cell participating
 when any of its vertices lies on the confined side of the boundary level
 so a cut cell's current carries its clipped polygon rather than its whole
-centroid.  Inside one Newton trip the geometry is read once at the frozen
-state and held constant for every evaluation, including the Jacobian-vector
-products and the amplitude normalisation, and it is refreshed at the trip
-boundary when the partition is.  ``chord_live`` re-evaluates that geometry
-against the live iterate on every moment call instead, which is the
-discriminator's opt-in and the behaviour the per-trip freeze replaced.
+centroid.  A profile-participating cell whose whole atom lies outside the
+level (a cold seed's own boundary encloses far less than the label region)
+is restored to its full atom rather than dropped, so the label never
+excludes a cell.  Inside one Newton trip the geometry is read once at the
+frozen state and held constant for every evaluation, including the
+Jacobian-vector products and the amplitude normalisation, and it is
+refreshed at the trip boundary when the partition is.  ``chord_live``
+re-evaluates that geometry against the live iterate on every moment call
+instead, which is the discriminator's opt-in and the behaviour the per-trip
+freeze replaced.
 ``exact`` traces the curved boundary support with every cut cell
 participating; ``chord_cells`` keeps the exact support everywhere except a
 named pair of cells whose entries revert to their chord-moment values.
@@ -2384,6 +2388,49 @@ class ForwardFluxOperator:
         )
         return jnp.any(valid & (vertex_flux >= -roundoff[:, None]), axis=1)
 
+    @staticmethod
+    def _complete_profile_atoms(
+        chord, atomic_mesh, inside_boundary, labels, participation
+    ):
+        """Restore a profile-owned cell the clip's level drops to its full atom.
+
+        The clip's confining level is read from the supplied state, and a cold
+        seed's own flux encloses far less than the label region, so the clip
+        alone drops labelled cells the profile owns.  A dropped label cell
+        keeps its full atom rather than a zero polygon; a straddling cell
+        keeps its clipped polygon.  The participation label therefore never
+        excludes a cell, and the support's region at every frozen state is the
+        labelled region enriched by the boundary cells the clip cuts.
+        """
+        keep = jnp.asarray(labels, dtype=bool) & ~jnp.asarray(
+            chord.included, dtype=bool
+        )
+        full = atomic_mesh.traced_clip(jnp.ones_like(inside_boundary)).qualify(
+            jnp.asarray(participation, dtype=bool)
+        )
+
+        def select(chord_field, full_field):
+            mask = keep
+            while mask.ndim < full_field.ndim:
+                mask = mask[..., None]
+            return jnp.where(mask, full_field, chord_field)
+
+        kept_area = select(chord.area, full.area)
+        return chord._replace(
+            support_vertices=select(chord.support_vertices, full.support_vertices),
+            vertex_count=select(chord.vertex_count, full.vertex_count),
+            centroids=select(chord.centroids, full.centroids),
+            included=jnp.where(keep, True, chord.included),
+            boundary=jnp.where(keep, False, chord.boundary),
+            area=kept_area,
+            full_area=select(chord.full_area, full.full_area),
+            first_area_moment=select(chord.first_area_moment, full.first_area_moment),
+            second_area_moment=select(
+                chord.second_area_moment, full.second_area_moment
+            ),
+            patch_area_sum=jnp.sum(kept_area),
+        )
+
     def _profile_support(self, masks, topology, physical, sample_psi_norm):
         """Return the plasma-side support for the active clip mode.
 
@@ -2411,6 +2458,14 @@ class ForwardFluxOperator:
             chord_support = atomic_mesh.traced_clip(inside_boundary).qualify(
                 participation
             )
+            if _SUPPORT_CLIP_MODE == "chord":
+                chord_support = self._complete_profile_atoms(
+                    chord_support,
+                    atomic_mesh,
+                    inside_boundary,
+                    masks.profile_participation,
+                    participation,
+                )
             if _SUPPORT_CLIP_MODE in ("chord", "chord_live"):
                 return chord_support
         flux_coefficient = self.support_flux_coefficients(

@@ -31,7 +31,7 @@
       ]
     }
   },
-  "measurement_driver_revision": "48a5764b5fe40465da16c2b65ae0f5b5af0c9fb5",
+  "measurement_driver_revision": "2751ae4d4c65305dfeb93c42b5db15d2233dc33c",
   "schema": "nova.first-order-coupling-discriminator.v1",
   "single_cell": {
     "case": "weak-rotation-reactor-static",
@@ -60,7 +60,7 @@
         "min": 654246.2228281606
       }
     },
-    "elapsed_seconds": 1.6960902400314808,
+    "elapsed_seconds": 2.0390582848340273,
     "expansion_points": {
       "consequence": "variant (iv) (moments taken about the kernel expansion point) is identical to (ii) because the points coincide",
       "expansion_same_as_moment_point": true,
@@ -154,14 +154,14 @@
       }
     },
     "lane": {
-      "execution": "local",
-      "hostname": "98dci4-srv-1006.iter.org",
+      "execution": "slurm",
+      "hostname": "98dci4-clu-3141.iter.org",
       "jax_enable_x64": true,
       "jax_platform": "cpu",
-      "job_id": null,
-      "node": null,
-      "partition": null,
-      "tmpdir": "/run/user/39486"
+      "job_id": "1269154",
+      "node": "98dci4-clu-3141",
+      "partition": "all_debug",
+      "tmpdir": "/tmp"
     },
     "metrics_total_flux_signal_wb": 2.782384020029035,
     "plot_data": {
@@ -1913,7 +1913,7 @@
       "zeroth_A": 145208.2582139232
     },
     "requested_cells": -110,
-    "source_revision": "48a5764b5fe40465da16c2b65ae0f5b5af0c9fb5",
+    "source_revision": "2751ae4d4c65305dfeb93c42b5db15d2233dc33c",
     "units_and_references": {
       "coupling_current_moments": "nova/equilibrium/forward_operator.py:2092-2123 -- converts physical A*m first moments to A/m coefficients by inverting the second-moment matrix; the output contracts the kernel's Wb*m/A area-mean blocks (polygonanalytic.py polygon_analytic_flux_moments, area-mean companions of (R - Rc) K and (Z - Zc) K), so the product is Wb",
       "kernel_expansion_point": "polygonanalytic.py polygon_analytic_flux_moments: requested_centre defaults to _section_centroid(vertices) (the polygon area centroid); build_machine passes expansion_points=centres, which are MomentGeometry.atomic_mesh.centroids = section_centroid of each full cell (stencil_mesh.py from_cells:321)",
@@ -1929,7 +1929,7 @@
       "exterior": 14,
       "interior": 78
     },
-    "elapsed_seconds": 61.978447975125164,
+    "elapsed_seconds": 98.72230259515345,
     "flux_span_wb": 58.09302686748424,
     "gate_b_reference": {
       "first_order_added_rms_over_span": 0.0106,
@@ -1981,14 +1981,14 @@
       "smoother_of_iii_iv": "sign_flipped_first"
     },
     "lane": {
-      "execution": "local",
-      "hostname": "98dci4-srv-1006.iter.org",
+      "execution": "slurm",
+      "hostname": "98dci4-clu-3141.iter.org",
       "jax_enable_x64": true,
       "jax_platform": "cpu",
-      "job_id": null,
-      "node": null,
-      "partition": null,
-      "tmpdir": "/run/user/39486"
+      "job_id": "1269154",
+      "node": "98dci4-clu-3141",
+      "partition": "all_debug",
+      "tmpdir": "/tmp"
     },
     "plot_data": {
       "error_fields_metrics": {
@@ -3645,7 +3645,7 @@
       ]
     },
     "requested_cells": -110,
-    "source_revision": "48a5764b5fe40465da16c2b65ae0f5b5af0c9fb5",
+    "source_revision": "2751ae4d4c65305dfeb93c42b5db15d2233dc33c",
     "units_and_references": {
       "coupling_current_moments": "nova/equilibrium/forward_operator.py:2092-2123 -- converts physical A*m first moments to A/m coefficients by inverting the second-moment matrix; the output contracts the kernel's Wb*m/A area-mean blocks (polygonanalytic.py polygon_analytic_flux_moments, area-mean companions of (R - Rc) K and (Z - Zc) K), so the product is Wb",
       "kernel_expansion_point": "polygonanalytic.py polygon_analytic_flux_moments: requested_centre defaults to _section_centroid(vertices) (the polygon area centroid); build_machine passes expansion_points=centres, which are MomentGeometry.atomic_mesh.centroids = section_centroid of each full cell (stencil_mesh.py from_cells:321)",

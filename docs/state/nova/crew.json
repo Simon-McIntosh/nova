@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-11T06:44:49",
+  "updated": "2026-09-11T06:50:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -152155,6 +152155,195 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260911T025644895210-cca-gate-c-certificate-resolve",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-gate-c-certificate-resolve",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1268,
+                "cached_input_tokens": 896402,
+                "input_tokens": 897702,
+                "output_tokens": 2082,
+                "reasoning_output_tokens": 125,
+                "total_tokens": 899784,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file, and never open the aggregate certificate receipt in an editor (twelve megabytes; load it with json in a script and pull only the per-row scalars). This base carries the signed-flux clip with geometric candidacy (91172471), the per-trip frozen support (1046dc4f) and the clipped-polygon coupling for cut cells (dbf3434f); gates A and B pass on it, and this node is gate C, the iteration. ONE H200 job, never an array and never an srun child of your shell: sbatch to betelgeuse under reservation gpu_0003_grpA with --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:59:00, JAX_PLATFORMS=cuda,cpu and TMPDIR=/tmp exported in the submit environment and again in the payload, the root venv python directly with PYTHONPATH at your worktree, the persistent compilation cache enabled through the certificate driver's own call, --output in the run directory. Reuse the committed re-solve driver benchmarks/rung_a_certificate_resolve.py from the earlier re-solve (commits e60d56ee and 3fb951a3 on the rung A line; if it is not on this base, port it: it drives benchmarks/solovev_certificate.py's per-row measure exactly as the committed rows were produced, one row per fresh process inside the allocation, and persists each row's part receipt and contour panel as it lands), pointing its output at docs/figures/cut-cell-current-attribution/gate-c-certificate, rows in the order weak, moderate, strong and diverted at 110 cells, then the same at 300, 500 and 1000; if the allocation expires the manifest names the rows landed and the coordinator resumes you for one further job on the remainder. The receipt tables every landed row beside its committed counterpart from the aggregate certificate receipt in the gs-absolute-accuracy figures directory: terminal residual, converged flag, axis position error against the analytic axis, X-point position error where applicable, joint qualification verdict, plasma current amplitude at seed and terminal, trip count. The report states per row whether the fixed point moved toward the analytic equilibrium (axis error and residual both smaller than the committed row) and whether the amplitude sits within one percent of unity at the terminal state, which is the acceptance rule of the plan; a row that diverges is reported with its amplitude history and panel, never retried with a changed setting. Change nothing in production code; this node measures. Manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 3.0,
+          "goal": "Re-solve the sixteen Solov'ev certificate rows on the H200 with the corrected allocation and coupling in production and table each against its committed row and the analytic equilibrium",
+          "id": "cca-gate-c-certificate-resolve",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-11T02:56:48Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T025644895210-cca-gate-c-certificate-resolve/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/rung_a_certificate_resolve.py",
+            "docs/figures/cut-cell-current-attribution/gate-c-certificate",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/gate-c-certificate"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-gate-c",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-11T02:57:10Z",
+        "completed_at": "2026-09-11T04:47:35.624Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6614,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6625,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "5854d1845edef2568078bee810da5006c380b0de",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "H200 job 1269161: weak and moderate -110 rows both died 99 s into the first accelerated Newton trip with TypeError: where requires ndarray or scalar arguments, got ClippedCouplingGeometry (fixed_point.py reconcile tree-map); zero rows landed",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T025644895210-cca-gate-c-certificate-resolve/row-weak-rotation-reactor-static-reduced.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T025644895210-cca-gate-c-certificate-resolve/manifest.md",
+        "scope_changed": false,
+        "session_id": "f6bc53f5-6e8d-4f39-b835-32d5381fe9ad",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 324243,
+            "input_tokens_cumulative": 324243,
+            "output_tokens": 658,
+            "output_tokens_cumulative": 658,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-11T04:47:35.624Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 324243,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 64.418,
+          "generated_tokens": 658,
+          "generation_seconds": 64.388,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 16.8,
+          "machine_seconds": 0.03,
+          "peak_input_tokens": 170549,
+          "tokens_per_second": 10.22,
+          "wall_tokens_per_second": 10.21
+        },
+        "follow_on_paths": [
+          "stencil_mesh.py",
+          "fixed_point.py"
+        ],
+        "predecessor_run": "r-20260911T001005914789-cca-cut-cell-clipped-coupling",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": "the driver commit 53bab4b8 is the base of the pytree fix 07cd60e0 and travels with that line; the re-solve is redispatched at the fixed tip as cca-gate-c-certificate-resolve-2",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-gate-c-certificate-resolve",
+          "session_id": "f6bc53f5-6e8d-4f39-b835-32d5381fe9ad",
+          "session_source": "stream",
+          "retained_at": "2026-09-11T04:47:35.624Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 58.0,
+        "orientation_input_tokens": 1010524.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -152467,6 +152656,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2437
+    "_version": 2438
   }
 }

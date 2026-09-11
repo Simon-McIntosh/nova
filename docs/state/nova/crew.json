@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-11T04:56:37",
+  "updated": "2026-09-11T04:58:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -151747,6 +151747,203 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260911T001005914789-cca-cut-cell-clipped-coupling",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-cut-cell-clipped-coupling",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 424,
+                "cached_input_tokens": 888654,
+                "input_tokens": 889110,
+                "output_tokens": 2404,
+                "reasoning_output_tokens": 168,
+                "total_tokens": 891514,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. Facts from the exact-Biot discriminator (docs/figures/cut-cell-current-attribution/first-order-coupling/report.md): the kernel is exact on interior cells (2.2e-13 Wb rms on a single cell with a linear density) and the whole added first-order error of the frozen image sits on the cut cells, whose physical first moment is converted with the full atomic cell's area-normalised second moments (coupling_current_moments in nova/equilibrium/forward_operator.py near lines 2092 to 2123 via greens.second_moments) and imaged with polygon-analytic kernel blocks integrated over the full cell about its section centroid, while the current occupies only the clipped plasma region. Change: for every cut cell of the frozen per-trip support (rung A2, this base), the conversion uses the clipped polygon's area-normalised second moments about the clipped polygon's centroid, and the zeroth, first and second kernel blocks for that cell are the polygon-analytic integrals over the clipped polygon about that centroid (nova/biot/polygonanalytic.py polygon_analytic_flux_moments with the clipped vertices, capacity-padded with exact-zero padding so shapes stay fixed); interior cells keep the precomputed atomic blocks; the clipped blocks are rebuilt once per trip where the frozen partition is refreshed and never inside a Jacobian-vector product. Gate one, all_debug CPU x64 (one sbatch, never an srun child of your shell; root venv python directly; PYTHONPATH at the worktree; JAX_PLATFORMS=cpu; TMPDIR=/tmp in submit environment and payload; logs under the run directory): benchmarks/frozen_current_flux_image_gate.py, extended so its coupling path exercises the new clipped blocks, on weak, moderate and strong 110 and weak 300 with frozen oracle currents; acceptance is the zeroth-plus-first image at or below the zeroth-only error on every row (weak 110 rms over span at or below 0.0057, with the interior-only figure 0.0061 recorded as the floor the cut cells must reach) and the single-cell control unchanged at 2e-13; a new tests/test_forward_cut_cell_coupling.py pins on a synthetic two-cell case that a cut cell's imaged flux from a linear density matches the exact ring-inductance integral over its clipped polygon to 1e-10 relative. Gate two in a second process: tests/test_forward_support_clip_mode.py, tests/test_forward_profile_support_clip.py, tests/test_equilibrium_separatrix_clip.py, tests/test_forward_moment_class.py, tests/test_equilibrium_density_moments.py, tests/test_forward_operator_domain.py with zero added failures against this base (the base's failure ids: operator_domain 3 failed, others 0). Do not launch the H200 re-solve. Manifest with the job ids before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 5.0,
+          "goal": "Make a cut cell's current moments convert and image over its clipped plasma polygon instead of the atomic hexagon, on the frozen per-trip support, so the first-order term stops adding error",
+          "id": "cca-cut-cell-clipped-coupling",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-11T00:10:06Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T001005914789-cca-cut-cell-clipped-coupling/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/stencil_mesh.py",
+            "nova/biot/polygonanalytic.py",
+            "tests/test_forward_cut_cell_coupling.py",
+            "benchmarks/frozen_current_flux_image_gate.py",
+            "docs/figures/cut-cell-current-attribution/cut-cell-coupling",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/cut-cell-coupling"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-cutblocks",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-11T00:10:19Z",
+        "completed_at": "2026-09-11T02:54:11.924Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 9825,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 9832,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "1046dc4fa2418957362f90ea81c5a23368be0cd0",
+        "commits": [
+          "dbf3434f2a2fbf61580051d0332b8e148506e2dc",
+          "5854d1845edef2568078bee810da5006c380b0de"
+        ],
+        "changed_lines": {
+          "added": 10023,
+          "removed": 19,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug sbatch 1269160: benchmarks/frozen_current_flux_image_gate.py with the clipped coupling on weak, moderate, strong 110 and weak 300 (adjudication passed, weak 110 rms over span 0.000266 against the 0.0057 floor and 0.00603 zeroth-only); second process: seven test files, 44 passed 3 failed with the three pre-existing operator_domain ids, zero added; new test_forward_cut_cell_coupling.py 2 passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T001005914789-cca-cut-cell-clipped-coupling/gate1.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T001005914789-cca-cut-cell-clipped-coupling/manifest.md",
+        "scope_changed": false,
+        "session_id": "6e67f8dd-3bd0-48cb-b63f-4005704e8c5c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 64741711,
+            "input_tokens_cumulative": 64741711,
+            "output_tokens": 245709,
+            "output_tokens_cumulative": 245709,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-11T02:54:11.924Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 64741711,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 9829.455,
+          "generated_tokens": 245709,
+          "generation_seconds": 5755.501,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 42.1,
+          "machine_seconds": 4073.954,
+          "peak_input_tokens": 427847,
+          "tokens_per_second": 42.69,
+          "wall_tokens_per_second": 25.0
+        },
+        "follow_on_paths": [],
+        "predecessor_run": "r-20260910T145511513273-cca-rung-a2-frozen-support",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-cut-cell-clipped-coupling",
+          "session_id": "6e67f8dd-3bd0-48cb-b63f-4005704e8c5c",
+          "session_source": "stream",
+          "retained_at": "2026-09-11T02:54:11.924Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 267.0,
+        "orientation_input_tokens": 25629717.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -152059,6 +152256,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2433
+    "_version": 2434
   }
 }

@@ -1,0 +1,24 @@
+{
+  "job_id": "1269476",
+  "rows": {
+    "moderate-rotation-conventional-static:-110": {
+      "elapsed_seconds": 243.1,
+      "exit": 0,
+      "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-newton-step-on-geometry/docs/figures/cut-cell-current-attribution/newton-geometry/row-moderate-rotation-conventional-static-reduced.log",
+      "status": "landed"
+    },
+    "strong-rotation-compact-static:-110": {
+      "elapsed_seconds": 238.3,
+      "exit": 0,
+      "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-newton-step-on-geometry/docs/figures/cut-cell-current-attribution/newton-geometry/row-strong-rotation-compact-static-reduced.log",
+      "status": "landed"
+    },
+    "weak-rotation-reactor-static:-110": {
+      "elapsed_seconds": 229.0,
+      "exit": 0,
+      "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-newton-step-on-geometry/docs/figures/cut-cell-current-attribution/newton-geometry/row-weak-rotation-reactor-static-reduced.log",
+      "status": "landed"
+    }
+  },
+  "started": "2026-09-11T12:49:42.787413+00:00"
+}

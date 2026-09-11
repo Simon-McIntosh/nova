@@ -1,0 +1,78 @@
+{
+  "amplitude_within_one_percent": false,
+  "case": "strong-rotation-compact-static",
+  "clip_mode": "chord_live",
+  "converged": false,
+  "cut_support_telemetry": {
+    "between_trip_cut_status_changes": [
+      60,
+      12,
+      6,
+      4,
+      2,
+      0,
+      0
+    ],
+    "boundary_reads": 8,
+    "per_boundary_census": [
+      {
+        "cells_absent": 0,
+        "cells_cut": 31,
+        "cells_whole": 104
+      },
+      {
+        "cells_absent": 0,
+        "cells_cut": 43,
+        "cells_whole": 92
+      },
+      {
+        "cells_absent": 0,
+        "cells_cut": 35,
+        "cells_whole": 100
+      },
+      {
+        "cells_absent": 0,
+        "cells_cut": 31,
+        "cells_whole": 104
+      },
+      {
+        "cells_absent": 0,
+        "cells_cut": 33,
+        "cells_whole": 102
+      },
+      {
+        "cells_absent": 0,
+        "cells_cut": 33,
+        "cells_whole": 102
+      },
+      {
+        "cells_absent": 0,
+        "cells_cut": 33,
+        "cells_whole": 102
+      },
+      {
+        "cells_absent": 0,
+        "cells_cut": 33,
+        "cells_whole": 102
+      }
+    ],
+    "terminal_cut_cell_count": 33
+  },
+  "figure": {
+    "filesystem_path": "docs/figures/cut-cell-current-attribution/newton-geometry/strong-rotation-compact-static-production-route-reduced.png",
+    "project_absolute_src": "/nova/figures/cut-cell-current-attribution/newton-geometry/strong-rotation-compact-static-chord_live-reduced.png",
+    "render_source": "fresh_production_solve",
+    "sha256": "f22b5a74327b46bae042340b6432f028caee7d904f606c65e63152a168b3b7c4"
+  },
+  "inner_newton_steps": 12,
+  "magnetic_axis_position_error_m": 0.008376614930242283,
+  "part": "docs/figures/cut-cell-current-attribution/newton-geometry/parts/strong-rotation-compact-static-chord_live-reduced.json",
+  "qualification": "unqualified",
+  "realised_cells": 135,
+  "requested_cells": -110,
+  "seed_amplitude": 1.0308995369273237,
+  "terminal_amplitude": 0.9552285845053572,
+  "terminal_fixed_point_residual": 0.010958032839046339,
+  "termination": "active_set_settled",
+  "trip_count": 7
+}

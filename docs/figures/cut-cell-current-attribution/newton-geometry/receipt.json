@@ -1,0 +1,60 @@
+{
+  "clip_mode": "chord_live",
+  "committed_aggregate": "docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json",
+  "driver": "gate_c_certificate_resolve.py",
+  "frozen_clip_receipt": "docs/figures/cut-cell-current-attribution/cold-seed/receipt.json",
+  "inner_newton_steps": 12,
+  "report_markdown": "# Newton geometry step: live clip against the frozen per-trip clip\n\nThe three limited 110-cell certificate rows re-solved with the profile support clip as a live Newton-Krylov unknown (chord_live, inner Newton budget 12) and tabled against the frozen-clip rows and the committed whole-cell rows.\n\n## Verdict\n\nNewton on geometry does not beat Picard on geometry here: with the clip a live Newton-Krylov unknown, no row reaches the analytic equilibrium that the frozen per-trip geometry already fails to reach.\n\n## Per-row table\n\n| case | res (comm) | res (live) | axis (comm) | axis (live) | conv (live) | trips (live) | seed amp | term amp | cut churn | toward |\n|---|---|---|---|---|---|---|---|---|---|---|\nskipped-row\nskipped-row\nskipped-row\n\ncut churn = count of cells whose cut status changed between successive trip-boundary reads of the live clip support.\n",
+  "revision": "1e79e056536f8801178aabc1aab4996e47a7f782",
+  "rows": [
+    {
+      "case": "weak-rotation-reactor-static",
+      "committed": {
+        "axis_error_m": 0.0018460312639213298,
+        "converged": false,
+        "qualification": "unqualified",
+        "residual": 0.007447526861632619,
+        "seed_amplitude": 0.9297775241954396,
+        "terminal_amplitude": 1.0497961485612264,
+        "termination": "active_set_settled",
+        "trip_count": 4
+      },
+      "frozen_clip": null,
+      "live": null,
+      "requested_cells": -110
+    },
+    {
+      "case": "moderate-rotation-conventional-static",
+      "committed": {
+        "axis_error_m": 0.0027041742542355655,
+        "converged": false,
+        "qualification": "unqualified",
+        "residual": 0.012457640060526081,
+        "seed_amplitude": 0.9133271697963968,
+        "terminal_amplitude": 1.020108400532015,
+        "termination": "active_set_settled",
+        "trip_count": 3
+      },
+      "frozen_clip": null,
+      "live": null,
+      "requested_cells": -110
+    },
+    {
+      "case": "strong-rotation-compact-static",
+      "committed": {
+        "axis_error_m": 0.0025629548500197214,
+        "converged": false,
+        "qualification": "unqualified",
+        "residual": 0.013545021492433489,
+        "seed_amplitude": 0.9189410960224258,
+        "terminal_amplitude": 0.9957096469108309,
+        "termination": "active_set_settled",
+        "trip_count": 3
+      },
+      "frozen_clip": null,
+      "live": null,
+      "requested_cells": -110
+    }
+  ],
+  "sentence": "Newton on geometry does not beat Picard on geometry here: with the clip a live Newton-Krylov unknown, no row reaches the analytic equilibrium that the frozen per-trip geometry already fails to reach."
+}

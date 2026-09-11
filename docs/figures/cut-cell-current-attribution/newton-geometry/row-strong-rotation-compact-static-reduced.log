@@ -1,0 +1,84 @@
+E0911 14:57:45.047282 3839510 cuda_executor.cc:1176] [0] Failed to allocate device memory of 104.85GiB (112585605120 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E0911 14:57:45.047868 3839510 cuda_executor.cc:1176] [0] Failed to allocate device memory of 94.37GiB (101327044608 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E0911 14:57:45.048214 3839510 cuda_executor.cc:1176] [0] Failed to allocate device memory of 84.93GiB (91194335232 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E0911 14:57:45.048563 3839510 cuda_executor.cc:1176] [0] Failed to allocate device memory of 76.44GiB (82074902528 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E0911 14:57:45.048877 3839510 cuda_executor.cc:1176] [0] Failed to allocate device memory of 68.79GiB (73867411456 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E0911 14:57:45.049182 3839510 cuda_executor.cc:1176] [0] Failed to allocate device memory of 61.91GiB (66480668672 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E0911 14:57:45.049483 3839510 cuda_executor.cc:1176] [0] Failed to allocate device memory of 55.72GiB (59832598528 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E0911 14:57:45.049785 3839510 cuda_executor.cc:1176] [0] Failed to allocate device memory of 50.15GiB (53849337856 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E0911 14:57:45.050062 3839510 cuda_executor.cc:1176] [0] Failed to allocate device memory of 45.14GiB (48464404480 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E0911 14:57:45.050359 3839510 cuda_executor.cc:1176] [0] Failed to allocate device memory of 40.62GiB (43617964032 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+E0911 14:57:45.051596 3839510 cuda_executor.cc:1176] [0] Failed to allocate device memory of 36.56GiB (39256166400 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:226
+external/xla/xla/stream_executor/cuda/cuda_device_allocator.cc:403
+
+SOLOVEV_COMPILATION_CACHE directory=/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054 version=runtime-0745ecebea4cb264e054
+SOLOVEV_STAGE_BEGIN case=strong-rotation-compact-static requested_cells=-110 stage=case_and_machine
+SOLOVEV_STAGE_END case=strong-rotation-compact-static requested_cells=-110 stage=case_and_machine elapsed_seconds=0.199412
+SOLOVEV_STAGE_BEGIN case=strong-rotation-compact-static requested_cells=-110 stage=operator_and_seed
+SOLOVEV_STAGE_END case=strong-rotation-compact-static requested_cells=-110 stage=operator_and_seed elapsed_seconds=25.340011
+SOLOVEV_STAGE_BEGIN case=strong-rotation-compact-static requested_cells=-110 stage=production_solve
+SOLOVEV_STAGE_HEARTBEAT case=strong-rotation-compact-static requested_cells=-110 stage=production_solve elapsed_seconds=30.000
+SOLOVEV_STAGE_HEARTBEAT case=strong-rotation-compact-static requested_cells=-110 stage=production_solve elapsed_seconds=60.231
+SOLOVEV_STAGE_HEARTBEAT case=strong-rotation-compact-static requested_cells=-110 stage=production_solve elapsed_seconds=90.231
+SOLOVEV_STAGE_HEARTBEAT case=strong-rotation-compact-static requested_cells=-110 stage=production_solve elapsed_seconds=120.232
+SOLOVEV_STAGE_HEARTBEAT case=strong-rotation-compact-static requested_cells=-110 stage=production_solve elapsed_seconds=150.232
+SOLOVEV_STAGE_HEARTBEAT case=strong-rotation-compact-static requested_cells=-110 stage=production_solve elapsed_seconds=180.238
+SOLOVEV_STAGE_END case=strong-rotation-compact-static requested_cells=-110 stage=production_solve elapsed_seconds=195.965412
+SOLOVEV_STAGE_BEGIN case=strong-rotation-compact-static requested_cells=-110 stage=accuracy_scoring
+SOLOVEV_STAGE_END case=strong-rotation-compact-static requested_cells=-110 stage=accuracy_scoring elapsed_seconds=0.580623
+SOLOVEV_STAGE_BEGIN case=strong-rotation-compact-static requested_cells=-110 stage=figure_render
+SOLOVEV_STAGE_END case=strong-rotation-compact-static requested_cells=-110 stage=figure_render elapsed_seconds=0.310291
+NEWTON_GEOMETRY_ROW case=strong-rotation-compact-static requested_cells=-110 qualification=unqualified terminal_residual=0.010958032839046339 converged=False trips=7 between_trip_changes=[60, 12, 6, 4, 2, 0, 0] part=docs/figures/cut-cell-current-attribution/newton-geometry/strong-rotation-compact-static-production-route-reduced.png

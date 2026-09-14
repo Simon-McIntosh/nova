@@ -690,6 +690,165 @@ def _shift_control(
     }
 
 
+def _periodic_ring_modes(
+    machine: Any,
+    operator: Any,
+    state: np.ndarray,
+    cell: int,
+    pitch: float,
+) -> dict[str, Any]:
+    """Express one six-sample quadratic fit in periodic ring modes."""
+
+    stencil = _support_stencil(operator)
+    physical = state[: operator.physical_node_number]
+    centroid_flux, _wall = operator._fixed_design_topology.split_flux_map(
+        jnp.asarray(physical)
+    )
+    pool = np.concatenate(
+        (np.asarray(centroid_flux), state[operator.physical_node_number :])
+    )
+    values = pool[np.asarray(stencil.ring_gather_index)[cell]]
+    centroid_value = float(values[0])
+    vertex_value = np.asarray(values[1:], dtype=np.float64)
+    centre = np.asarray(machine.node[cell], dtype=np.float64)
+    vertices = np.asarray(machine.sampling_vertices[cell], dtype=np.float64)
+    offset = vertices - centre
+    radius = np.linalg.norm(offset, axis=1)
+    angle = np.arctan2(offset[:, 1], offset[:, 0])
+    design = np.column_stack(
+        (
+            np.ones(6),
+            np.cos(angle),
+            np.sin(angle),
+            np.cos(2.0 * angle),
+            np.sin(2.0 * angle),
+            np.cos(3.0 * angle),
+        )
+    )
+    mean, first_cos, first_sin, second_cos, second_sin, third_cos = np.linalg.solve(
+        design, vertex_value
+    )
+    ring_radius = float(np.mean(radius))
+    first_amplitude = float(np.hypot(first_cos, first_sin))
+    second_amplitude = float(np.hypot(second_cos, second_sin))
+    isotropic = float(mean - centroid_value)
+    gradient = np.asarray((first_cos, first_sin)) / ring_radius
+    isotropic_hessian = 2.0 * isotropic / ring_radius**2
+    hessian = np.asarray(
+        (
+            (
+                isotropic_hessian + 2.0 * second_cos / ring_radius**2,
+                2.0 * second_sin / ring_radius**2,
+            ),
+            (
+                2.0 * second_sin / ring_radius**2,
+                isotropic_hessian - 2.0 * second_cos / ring_radius**2,
+            ),
+        )
+    )
+    stationary_step = -np.linalg.solve(hessian, gradient)
+    ratio_distance = (
+        ring_radius * first_amplitude / (2.0 * second_amplitude)
+        if second_amplitude > 0.0
+        else math.inf
+    )
+    stationary_value = (
+        centroid_value
+        + float(gradient @ stationary_step)
+        + 0.5 * float(stationary_step @ hessian @ stationary_step)
+    )
+    stationary_sign = vertex_value - stationary_value
+    stationary_bits = stationary_sign > 0.0
+    stationary_crossing = int(np.sum(stationary_bits != np.roll(stationary_bits, -1)))
+    determinant = float(np.linalg.det(hessian))
+    return {
+        "cell_index": cell,
+        "ring_radius_m": ring_radius,
+        "ring_radius_spread_m": float(np.ptp(radius)),
+        "mean_wb": float(mean),
+        "m1_cos_wb": float(first_cos),
+        "m1_sin_wb": float(first_sin),
+        "m1_amplitude_wb": first_amplitude,
+        "m2_cos_wb": float(second_cos),
+        "m2_sin_wb": float(second_sin),
+        "m2_amplitude_wb": second_amplitude,
+        "m2_phase_rad": float(0.5 * np.arctan2(second_sin, second_cos)),
+        "isotropic_mean_minus_centroid_wb": isotropic,
+        "isotropic_hessian_per_m2": isotropic_hessian,
+        "m3_cos_wb": float(third_cos),
+        "m3_amplitude_wb": abs(float(third_cos)),
+        "hessian_determinant_per_m4": determinant,
+        "hessian_class": "saddle" if determinant < 0.0 else "extremum",
+        "stationary_distance_from_modes_m": float(np.linalg.norm(stationary_step)),
+        "stationary_distance_from_modes_in_pitch": float(
+            np.linalg.norm(stationary_step) / pitch
+        ),
+        "m1_to_m2_ratio_distance_m": ratio_distance,
+        "m1_to_m2_ratio_distance_in_pitch": ratio_distance / pitch,
+        "stationary_value_wb": stationary_value,
+        "stationary_level_cyclic_sign_change_count": stationary_crossing,
+    }
+
+
+def _add_periodic_presentation(
+    row: dict[str, Any], report_directory: Path
+) -> dict[str, Any]:
+    """Add mode and local sampling evidence without rerunning admission."""
+
+    case_name = row["case"]
+    requested_cells = int(row["requested_cells"])
+    machine, operator, state, exact = _machine_and_field(case_name, requested_cells)
+    pitch = float(row["characteristic_pitch_m"])
+    axis_reference = np.asarray(exact.magnetic_axis, dtype=np.float64)
+    centroid_flux = np.asarray(state[: len(machine.node)], dtype=np.float64)
+    axis_cell = int(np.argmax(float(operator.polarity) * centroid_flux))
+    sample_count = np.asarray(machine.moment_geometry.sample_vertex_count)
+
+    def nearby_four(point: np.ndarray) -> int:
+        distance = np.linalg.norm(np.asarray(machine.node) - point, axis=1)
+        return int(np.count_nonzero((sample_count == 4) & (distance <= 2.0 * pitch)))
+
+    axis_modes = _periodic_ring_modes(machine, operator, state, axis_cell, pitch)
+    axis_kind = operator._fixed_design_topology.grid.extremum_polarity
+    axis_modes["declared_extremum_kind"] = int(axis_kind)
+    axis_modes["definite_extremum"] = bool(
+        axis_modes["hessian_determinant_per_m4"] > 0.0
+    )
+    axis_modes["extremal_centroid_seed_matches_analytic_axis_cell"] = bool(
+        _true_cell_mask(machine, axis_reference, pitch)[axis_cell]
+    )
+    axis_modes["nearby_four_sample_cells_within_two_pitches"] = nearby_four(
+        axis_reference
+    )
+    saddle_modes = None
+    if certificate._is_diverted_case(case_name):
+        saddle_reference = np.asarray(exact.x_point, dtype=np.float64)
+        saddle_cell = int(
+            np.flatnonzero(_true_cell_mask(machine, saddle_reference, pitch))[0]
+        )
+        saddle_modes = _periodic_ring_modes(
+            machine, operator, state, saddle_cell, pitch
+        )
+        saddle_modes["nearby_four_sample_cells_within_two_pitches"] = nearby_four(
+            saddle_reference
+        )
+    row["periodic_ring_presentation"] = {
+        "basis": (
+            "mean; m=1 cosine and sine gradient; m=2 cosine and sine traceless "
+            "Hessian; m=3 cosine; isotropic Hessian from ring mean minus centroid"
+        ),
+        "axis_cell": axis_modes,
+        "saddle_cell": saddle_modes,
+        "axis_seed_and_mode_criterion_agree": bool(
+            row["vertex_read"]["axis"]["admitted"]
+            and axis_modes["definite_extremum"]
+            and axis_modes["extremal_centroid_seed_matches_analytic_axis_cell"]
+        ),
+    }
+    _write_json(_part_path(report_directory, case_name, requested_cells), row)
+    return row
+
+
 def _measure_row(
     case_name: str, requested_cells: int, report_directory: Path
 ) -> dict[str, Any]:
@@ -1143,9 +1302,10 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
         "## Analytic single-null ladder",
         "",
         (
-            "| requested | realised | centroid-sign X | quadratic X | "
-            "quadratic error / pitch | quadratic level / span | production X | "
-            "production error / pitch | "
+            "| requested | realised | centroid_sign_census_admitted | "
+            "vertex_census_admitted | vertex_census_position_error_in_pitch | "
+            "vertex_census_level_error_in_span | production_admitted | "
+            "production_position_error_in_pitch | "
             "false X raw→final | "
             "false O raw→final | noise X |"
         ),
@@ -1180,9 +1340,10 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
         )
     lines.extend(["", "## Static axis controls", ""])
     lines.append(
-        "| case | requested | realised | centroid-sign axis | quadratic axis | "
-        "error (m) | error / pitch | level / span | false X raw→final | "
-        "false O raw→final |"
+        "| case | requested | realised | centroid_sign_census_axis_admitted | "
+        "vertex_census_axis_admitted | vertex_census_position_error_m | "
+        "vertex_census_position_error_in_pitch | vertex_census_level_error_in_span | "
+        "false X raw→final | false O raw→final |"
     )
     lines.append("|:---|---:|---:|:---:|:---:|---:|---:|---:|---:|---:|")
     for row in receipt["static_rows"]:
@@ -1201,6 +1362,58 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
             f"{false['after_hessian_containment_and_dedupe']['saddle']} | "
             f"{false['before_hessian_and_containment']['extremum']}→"
             f"{false['after_hessian_containment_and_dedupe']['extremum']} |"
+        )
+    presentation_rows = [
+        row
+        for row in receipt["single_null_rows"] + receipt["static_rows"]
+        if row.get("periodic_ring_presentation") is not None
+    ]
+    if presentation_rows:
+        lines.extend(["", "## Periodic six-vertex mode decomposition", ""])
+        lines.append(
+            "The six samples are represented by one periodic trigonometric "
+            "polynomial: the mean; the cosine and sine m=1 gradient pair; the "
+            "cosine and sine m=2 traceless-Hessian pair; the single Nyquist m=3 "
+            "cosine; and the isotropic Hessian from ring mean minus centroid."
+        )
+        lines.extend(
+            [
+                "",
+                "| case | requested | null | m1 amplitude (Wb) | m2 amplitude "
+                "(Wb) | m2 phase (rad) | isotropic (Wb) | m3 amplitude (Wb) | "
+                "m1:m2 distance / pitch | closed-form distance / pitch | "
+                "stationary-level changes | four-sample cells within 2 pitch |",
+                "|:---|---:|:---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+            ]
+        )
+        for row in presentation_rows:
+            presentation = row["periodic_ring_presentation"]
+            for null_name in ("axis", "saddle"):
+                modes = presentation.get(f"{null_name}_cell")
+                if modes is None:
+                    continue
+                lines.append(
+                    f"| {row['case']} | {row['requested_cells']} | {null_name} | "
+                    f"{modes['m1_amplitude_wb']:.8g} | "
+                    f"{modes['m2_amplitude_wb']:.8g} | "
+                    f"{modes['m2_phase_rad']:.8g} | "
+                    f"{modes['isotropic_mean_minus_centroid_wb']:.8g} | "
+                    f"{modes['m3_amplitude_wb']:.8g} | "
+                    f"{modes['m1_to_m2_ratio_distance_in_pitch']:.8g} | "
+                    f"{modes['stationary_distance_from_modes_in_pitch']:.8g} | "
+                    f"{modes['stationary_level_cyclic_sign_change_count']} | "
+                    f"{modes['nearby_four_sample_cells_within_two_pitches']} |"
+                )
+        agreement = sum(
+            row["periodic_ring_presentation"]["axis_seed_and_mode_criterion_agree"]
+            for row in presentation_rows
+        )
+        lines.extend(
+            [
+                "",
+                "The extremal-centroid seed and definite-Hessian mode criterion "
+                f"agree on **{agreement} of {len(presentation_rows)} rows**.",
+            ]
         )
     lines.extend(["", "## H200 batch cost", ""])
     timed = [row for row in rows if row.get("device_timing")]
@@ -1284,6 +1497,14 @@ def aggregate(
             raise RuntimeError(
                 "the local production read disagrees with the banked ladder"
             )
+    presentation_complete = all(
+        row.get("periodic_ring_presentation") is not None for row in rows
+    )
+    if presentation_complete and not all(
+        row["periodic_ring_presentation"]["axis_seed_and_mode_criterion_agree"]
+        for row in rows
+    ):
+        raise RuntimeError("the extremal-centroid and axis-mode control disagrees")
     if render_figures:
         figures = [_render_error_ladder(single, figure_directory)]
         figures.extend(
@@ -1304,11 +1525,22 @@ def aggregate(
         "analytic_flux_supplied_directly": True,
         "production_ladder_source": str(PRODUCTION_RECEIPT),
         "headline": {
-            "vertex_saddle_admitted_rungs": sum(
+            "vertex_census_saddle_admitted_rungs": sum(
                 bool(row["vertex_read"]["saddle"]["admitted"]) for row in single
             ),
+            "centroid_sign_census_saddle_admitted_rungs": sum(
+                bool(
+                    row["vertex_read"]["criteria"]["centroid_value_sign_change"][
+                        "saddle_reference_cell_admitted"
+                    ]
+                )
+                for row in single
+            ),
+            "production_saddle_admitted_rungs": sum(
+                bool(row["production_read"]["saddle_admitted"]) for row in single
+            ),
             "single_null_rung_count": len(single),
-            "vertex_axis_admitted_rows": sum(
+            "vertex_census_axis_admitted_rows": sum(
                 bool(row["vertex_read"]["axis"]["admitted"]) for row in rows
             ),
             "total_rows": len(rows),
@@ -1333,6 +1565,9 @@ def aggregate(
             "analytic_grid_flux_nonuniform_every_row": True,
             "manufactured_saddle_detected_every_row": True,
             "manufactured_extremum_detected_every_row": True,
+            "extremal_centroid_and_axis_mode_agree_every_row": (
+                True if presentation_complete else None
+            ),
         },
         "figures": figures,
         "single_null_rows": single,
@@ -1342,8 +1577,10 @@ def aggregate(
     _write_report(receipt, report_directory / "report.md")
     print(
         "VERTEX_CENSUS_AGGREGATE "
-        f"saddle_admitted={receipt['headline']['vertex_saddle_admitted_rungs']}/9 "
-        f"axis_admitted={receipt['headline']['vertex_axis_admitted_rows']}/{len(rows)} "
+        f"saddle_admitted="
+        f"{receipt['headline']['vertex_census_saddle_admitted_rungs']}/9 "
+        f"axis_admitted="
+        f"{receipt['headline']['vertex_census_axis_admitted_rows']}/{len(rows)} "
         f"timing_complete={receipt['headline']['timing_complete']}",
         flush=True,
     )
@@ -1400,6 +1637,20 @@ def run_cpu(report_directory: Path, figure_directory: Path, workers: int) -> Non
     if failures:
         raise RuntimeError(f"CPU worker shards failed: {failures}")
     aggregate(report_directory, figure_directory, render_figures=True)
+
+
+def run_presentation(report_directory: Path, figure_directory: Path) -> None:
+    """Enrich completed rows with periodic modes without rerunning admission."""
+
+    _allocation("cpu")
+    for identity in CPU_ROWS:
+        row = _load_part(_part_path(report_directory, *identity))
+        _add_periodic_presentation(row, report_directory)
+        print(
+            f"VERTEX_CENSUS_PRESENTATION case={identity[0]} requested={identity[1]}",
+            flush=True,
+        )
+    aggregate(report_directory, figure_directory, render_figures=False)
 
 
 def _timed_samples(function: Any, operand: jax.Array) -> list[float]:
@@ -1483,6 +1734,13 @@ def _parser() -> argparse.ArgumentParser:
     cpu.add_argument("--report-directory", type=Path, default=DEFAULT_REPORT_DIRECTORY)
     cpu.add_argument("--figure-directory", type=Path, default=DEFAULT_FIGURE_DIRECTORY)
     cpu.add_argument("--workers", type=int, default=3)
+    presentation = commands.add_parser("presentation-run")
+    presentation.add_argument(
+        "--report-directory", type=Path, default=DEFAULT_REPORT_DIRECTORY
+    )
+    presentation.add_argument(
+        "--figure-directory", type=Path, default=DEFAULT_FIGURE_DIRECTORY
+    )
     worker = commands.add_parser("cpu-worker")
     worker.add_argument(
         "--report-directory", type=Path, default=DEFAULT_REPORT_DIRECTORY
@@ -1512,6 +1770,8 @@ def main() -> None:
         run_cpu(
             arguments.report_directory, arguments.figure_directory, arguments.workers
         )
+    elif arguments.command == "presentation-run":
+        run_presentation(arguments.report_directory, arguments.figure_directory)
     elif arguments.command == "cpu-worker":
         _run_worker(
             arguments.report_directory, arguments.shard_index, arguments.shard_count

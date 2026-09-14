@@ -94,21 +94,30 @@ def _dense_integrals(operator, support, field, flux_span):
 
 
 def _assert_cellwise_close(name, observed, expected, mask, *, rtol):
+    """Compare reductions without mistaking scan-order roundoff for signal.
+
+    A scan may change floating-point summation order. Entries at or below
+    ``1e-12`` of the dense row's largest magnitude therefore use that quantity
+    as an absolute floor; resolved entries retain the declared relative test.
+    """
     cells = np.flatnonzero(mask)
     observed_values = np.asarray(observed)[cells]
-    expected_values = np.asarray(expected)[cells]
+    dense_values = np.asarray(expected)
+    expected_values = dense_values[cells]
     difference = np.abs(observed_values - expected_values)
-    maximum = int(np.argmax(difference))
-    np.testing.assert_allclose(
-        observed_values,
-        expected_values,
-        rtol=rtol,
-        atol=1.0e-12,
-        err_msg=(
-            f"{name}: maximum absolute difference {difference[maximum]:.17g} "
-            f"at cell {int(cells[maximum])}"
-        ),
-    )
+    row_magnitude = float(np.max(np.abs(dense_values)))
+    absolute_floor = 1.0e-12 * row_magnitude
+    resolved = np.abs(expected_values) > absolute_floor
+    allowed = np.where(resolved, rtol * np.abs(expected_values), absolute_floor)
+    violation = difference > allowed
+    if np.any(violation):
+        normalized = difference / np.maximum(allowed, np.finfo(np.float64).tiny)
+        maximum = int(np.argmax(normalized))
+        raise AssertionError(
+            f"{name}: difference {difference[maximum]:.17g} at cell "
+            f"{int(cells[maximum])}, allowed {allowed[maximum]:.17g}, "
+            f"row magnitude {row_magnitude:.17g}"
+        )
 
 
 @pytest.mark.parametrize(

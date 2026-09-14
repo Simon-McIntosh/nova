@@ -255,6 +255,34 @@
   <figcaption>Weak-rotation case, 110 cells, clip live inside the Newton residual from the compatible seed. Solved contours beside the analytic ones on shared levels, both axes drawn, wall shown; terminal residual 0.0016, axis 53 mm from the analytic one, not converged, terminal amplitude 0.954. Compare the frozen-clip panel of the previous paragraph (residual 0.015, 69 mm) and the §7 opening panel from the incompatible seed (0.075, 173 mm).</figcaption>
 </figure>
 
+<h2 id="s8">§8 — The reference and the read, measured on the oracle with no solver in the path</h2>
+<p>On 2026-09-14 the lead reframed the work as a ladder gated on the analytic oracle, and four nodes measured the map, the fixture and the topology read at the analytic flux. Receipts: <code>docs/figures/cut-cell-current-attribution/{oracle-start, reposed-fixture, limiter-read, moment-order}</code>.</p>
+<h3 id="s8-fixture">The certificate fixture, not the map, set the floor</h3>
+<p>One application of the certificate map at the analytic flux, rms of span, 1000 cells: weak 0.136 and moderate 0.127 in exact-clip mode, 0.233 and 0.225 with whole-cell booking, and the figures do not fall from 300 to 1000 cells. On the single-null row where the read admits the X-point, whole-cell booking is a fixed point to 4.9e-15 and the exact clip misses by 2.06. The decomposition closes exactly in binary64: the fixture's external array was built as the analytic flux minus the image of the analytic density integrated over the fixture's whole-cell partition, where the Solov&#8217;ev density does not vanish outside the separatrix, so only whole-cell booking on a row whose partition matches could ever be its fixed point. The production density itself is exact: on 823 whole cells the production current over the analytic integral of the same polygon is 1.0 to 7e-16 with no radial trend. With the exterior re-posed from the analytic density integrated over each cell&#8217;s clipped region inside the analytic separatrix (the locked decision), the exact-clip floor at 1000 cells is 3.6e-5 on weak and 3.4e-5 on moderate with booked current 0.99999, and whole-cell booking over-books by 8.6 percent, the boundary layer it always carried. Single-null under the re-posed exterior reads 0.109 at 500 cells and 0.045 at 1000 in exact mode, roughly first order in pitch: the exact clip&#8217;s X-point cell, now isolated.</p>
+<h3 id="s8-iteration">The iteration contracts where the fixed point is the reference</h3>
+<p>Single-null 500, whole-cell booking, fixture exterior: from the analytic flux plus perturbations of 1e-4, 1e-3, 1e-2 and 1e-1 of span the production Newton-Krylov returned in every arm to residual 6.2e-15 and distance 1.4e-14. Gate C was never the iteration.</p>
+<h3 id="s8-limiter">The limiter contact is read at wall-panel resolution</h3>
+<table>
+  <thead><tr><th>Wall nodes</th><th>Weak contact error</th><th>Moderate contact error</th><th>Level error, span</th><th>Panel over pitch at 1000 cells</th></tr></thead>
+  <tbody>
+    <tr><td>121</td><td>102 mm</td><td>28 mm</td><td>8.0e-4</td><td>1.39</td></tr>
+    <tr><td>241</td><td>51 mm</td><td>14 mm</td><td>2.0e-4</td><td>0.70</td></tr>
+    <tr><td>481</td><td>26 mm</td><td>7.2 mm</td><td>5.1e-5</td><td>0.35</td></tr>
+    <tr><td>961</td><td>13 mm</td><td>3.6 mm</td><td>1.3e-5</td><td>0.17</td></tr>
+  </tbody>
+</table>
+<p>Identical at 300 and 1000 cells; fitted order 1.000 in position and 2.000 in level. The hex certificate rows read topology through the fixed-design path, whose limiter contact is the extremal wall node with a three-node quadratic fit: sub-node interpolated but panel-limited, without the tensor-spline segment restriction and derivative-root polish the connectivity limiter already has. The 121-node wall is coarser than the cells above about 1000; one panel per pitch needs 169 nodes at 1000 cells and 263 at 2500. The 2.7e-9 Wb contact level the decomposition read at 121 nodes was a coincidence: the limiter contour places a node exactly at the outboard tangency for every odd count. All eight private-shadow positive controls passed (every private wall node below the X-point shadowed, the injected private node rejected); the exclusion is a qualified-saddle height band intersected with the connectivity-private mask. The single-null saddle position moves with the wall count (8.0, 1.3, 1.9, 0.5 mm) because the machine build inserts the wall into the plasma carrier and its null-fit stencils, not through shadow, containment or dedupe: the raw saddle candidate error is 1.20 mm at every count. Wall resolution carries none of the limited-row floor (0.1361 at 121 nodes against 0.1372 at 481).</p>
+<figure>
+  <img src="/nova/figures/cut-cell-current-attribution/limiter-read/contact-error-vs-wall-resolution.svg" alt="Limiter contact position error against wall panel length over cell pitch for all cases and wall counts">
+  <figcaption>Limiter contact position error against wall panel length over cell pitch, all rows and wall counts. The error follows the panel, not the pitch.</figcaption>
+</figure>
+<figure>
+  <img src="/nova/figures/cut-cell-current-attribution/limiter-read/single-null-contact-shadow.png" alt="Analytic single-null field at 1000 cells with wall, analytic nulls, the selected wall contact and the excluded private wall nodes">
+  <figcaption>Single-null analytic field, 1000 cells: wall units, analytic axis and X-point, the selected contact, and the private wall nodes below the X-point that the shadow excludes.</figcaption>
+</figure>
+<h3 id="s8-memory">The exact-clip solve does not fit a card above 300 cells</h3>
+<p>Compile-only memory analysis of the exact-clip production solve: temporaries 96.8 GiB at 342 realised cells, 130.8 GiB at 555, 279 GiB measured at about 1400; the failing op is a bitwise and on a boolean array. Whole-cell mode compiles at 500. Every exact-clip solve of the sprint ran only because the card was empty, and the 300-cell arm failed even with 144 GB free. The array is being named from the optimised HLO; no exact-clip solve above 300 cells runs until it is removed.</p>
+
 <h2 id="provenance">Provenance</h2>
 <table>
   <thead><tr><th>Measurement</th><th>Run</th><th>Head</th><th>Receipts</th></tr></thead>

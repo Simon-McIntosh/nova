@@ -1,0 +1,76 @@
+{
+  "analytic_wall_extremum": {
+    "coordinate_rz_m": [
+      7.801377490618119,
+      -0.012846182296839108
+    ],
+    "flux_wb": 0.0006359305022849373,
+    "instrument_positive_control": {
+      "sampled_finite_count": 31713,
+      "sampled_signed_span_wb": 9.725641705527325,
+      "sampled_total_count": 31713
+    },
+    "optimizer_success": true,
+    "segment_fraction": 0.4747092925569685,
+    "segment_index": 480
+  },
+  "cache": {
+    "build_seconds": 146.63188450224698,
+    "hit": false,
+    "load_seconds": 0.07549890503287315,
+    "lock_wait_seconds": 2.7898699045181274e-05,
+    "semantic_key": "9ab2272dc6c90fd2",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_300.zarr",
+    "store_seconds": 0.3954592626541853
+  },
+  "case": "weak-rotation-reactor-static",
+  "characteristic_cell_pitch_m": 0.28227725786926355,
+  "completed": true,
+  "connectivity_contact": {
+    "reason": "the public class comparator takes the moment-geometry branch when the fixed-design topology has no tensor axes",
+    "status": "not_applicable_to_unstructured_hex_carrier"
+  },
+  "map_floor": null,
+  "production_contact": {
+    "coordinate_rz_m": [
+      7.801395788956369,
+      -1.7031487716257053e-07
+    ],
+    "flux_wb": 1.7507113863082393e-14,
+    "level_error_in_span": 1.2730197089566572e-05,
+    "level_error_wb": 0.0006359305022674302,
+    "nearest_wall_node_distance_m": 2.4642572469858673e-07,
+    "position_error_m": 0.012846025014372835,
+    "representation": "three-node quadratic sub-panel interpolation",
+    "selected_equals_wall_node": false
+  },
+  "read_timing": {
+    "compile_and_first_read_seconds": 6.598457461223006,
+    "warm_read_seconds_max": 0.17814217880368233,
+    "warm_read_seconds_median": 0.1766215991228819,
+    "warm_read_seconds_min": 0.1757951993495226
+  },
+  "realised_cells": 342,
+  "requested_cells": -300,
+  "resolution_guidance": {
+    "recommended_wall_nodes_for_realised_pitch": 93,
+    "wall_121_consistent_with_realised_pitch": true
+  },
+  "schema": "nova.limiter-read-resolution-part",
+  "shadow": null,
+  "source_revision": "baddc372c6b0023f00468006ef770dd2ccbe66ac",
+  "state_dimension": 2369,
+  "topology_class": "limited",
+  "version": 1,
+  "wall": {
+    "maximum_panel_length_m": 0.02706134394568627,
+    "maximum_panel_over_cell_pitch": 0.09586795673854713,
+    "median_panel_length_m": 0.020044548656527834,
+    "node_count": 961,
+    "perimeter_m": 18.65465676697447,
+    "selected_panel_length_m": 0.02706134394568627,
+    "selected_panel_over_cell_pitch": 0.09586795673854713
+  },
+  "wall_nodes": 961,
+  "wall_seconds": 155.39442446269095
+}

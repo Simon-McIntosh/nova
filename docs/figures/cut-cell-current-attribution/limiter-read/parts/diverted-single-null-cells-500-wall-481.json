@@ -1,0 +1,148 @@
+{
+  "analytic_wall_extremum": {
+    "coordinate_rz_m": [
+      1.491754068322554,
+      -1.207350564093112
+    ],
+    "flux_wb": 0.0010023710297160661,
+    "instrument_positive_control": {
+      "sampled_finite_count": 15873,
+      "sampled_signed_span_wb": 0.008169898772206441,
+      "sampled_total_count": 15873
+    },
+    "optimizer_success": true,
+    "segment_fraction": 0.9733893329982103,
+    "segment_index": 465
+  },
+  "cache": {
+    "build_seconds": 149.45466002821922,
+    "hit": false,
+    "load_seconds": 0.002390775829553604,
+    "lock_wait_seconds": 7.441267371177673e-06,
+    "semantic_key": "4743746dd807f0df",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_500.zarr",
+    "store_seconds": 0.6902244444936514
+  },
+  "case": "diverted-single-null",
+  "characteristic_cell_pitch_m": 0.07105483792464948,
+  "completed": true,
+  "connectivity_contact": {
+    "reason": "the public class comparator takes the moment-geometry branch when the fixed-design topology has no tensor axes",
+    "status": "not_applicable_to_unstructured_hex_carrier"
+  },
+  "map_floor": null,
+  "production_contact": {
+    "coordinate_rz_m": [
+      1.4936615352660763,
+      -1.2074003822647286
+    ],
+    "flux_wb": 0.0010028348482254855,
+    "level_error_in_span": 9.8560145370424e-05,
+    "level_error_wb": 4.6381850941933957e-07,
+    "nearest_wall_node_distance_m": 0.0022377882010108535,
+    "position_error_m": 0.0019081173944107967,
+    "representation": "three-node quadratic sub-panel interpolation",
+    "selected_equals_wall_node": false
+  },
+  "read_timing": {
+    "compile_and_first_read_seconds": 10.399383835494518,
+    "warm_read_seconds_max": 0.8609274942427874,
+    "warm_read_seconds_median": 0.7149139791727066,
+    "warm_read_seconds_min": 0.6347004678100348
+  },
+  "realised_cells": 550,
+  "requested_cells": -500,
+  "residual_stage": {
+    "job_id": 1270357,
+    "map_floor_remeasured": false,
+    "private_wall_shadow_remeasured": true
+  },
+  "resolution_guidance": {
+    "recommended_wall_nodes_for_realised_pitch": 85,
+    "wall_121_consistent_with_realised_pitch": true
+  },
+  "saddle_wall_coupling": {
+    "axis_admitted": true,
+    "carrier_node_count": 550,
+    "carrier_node_sha256_binary64": "56ea9c22d35779c7371c911e7efc0da5bad5e7b7cbfad6862fbb9c69ac5d5074",
+    "contained_x_candidate_count": 1,
+    "coupling_read": "the public read supplies no shadow mask; containment admits the sole candidate and deduplication has no alternative to choose. The wall enters earlier because cached_machine rebuilds the plasma carrier after inserting that sampled wall.",
+    "deduplication_representative_count": 1,
+    "deduplication_retained_count": 1,
+    "finite_x_candidate_count": 1,
+    "selected_candidate_contained": true,
+    "selected_x_point_error_m": 0.0012022201724145758,
+    "selected_x_point_rz_m": [
+      1.5013775639732958,
+      -1.0176290419622651
+    ],
+    "shadow_mask_supplied_to_analytic_read": false,
+    "wall_content_sha256_binary64": "3a8e9c35e245681c704e239caea820beda24eaa5829ace735488206f09f6515c"
+  },
+  "schema": "nova.limiter-read-resolution-part",
+  "shadow": {
+    "connectivity_private_wall_node_count": 17,
+    "lower_exclusion_branch": "qualified_height_band",
+    "mask_composition": "wall_height_shadow_mask applies a qualified-saddle height gate and intersects it with the connectivity-private wall mask",
+    "positive_control": {
+      "injected_coordinate_rz_m": [
+        1.4914245098961827,
+        -1.2073419568675459
+      ],
+      "injected_flux_wb": 0.0024294985365228773,
+      "injected_wall_node_index": 466,
+      "masked_rejected_injected_panel": true,
+      "masked_selected_contact_rz_m": [
+        1.3937620732599343,
+        -1.1734201347001127
+      ],
+      "masked_selected_flux_wb": 0.0002072011043857696,
+      "passed": true,
+      "unmasked_bracket_node_indices": [
+        465,
+        466,
+        467
+      ],
+      "unmasked_selected_contact_rz_m": [
+        1.4914462203945074,
+        -1.20734252389039
+      ],
+      "unmasked_selected_flux_wb": 0.002429502966174414,
+      "unmasked_selected_injected_panel": true,
+      "x_point_flux_wb": -2.2251655101699867e-07
+    },
+    "private_wall_node_count": 17,
+    "private_wall_nodes_below_x_point": 17,
+    "report": {
+      "lower_branch": 1,
+      "lower_candidate_removed_wall_cells": 0,
+      "lower_eligible": true,
+      "lower_reference_valid": true,
+      "masked_wall_node_count": 17,
+      "qualified_saddle_count": 1,
+      "upper_branch": 0,
+      "upper_candidate_removed_wall_cells": 0,
+      "upper_eligible": false,
+      "upper_reference_valid": false,
+      "wall_node_count": 481
+    },
+    "shadowed_private_nodes_below_x_point": 17,
+    "shadowed_wall_node_count": 17,
+    "upper_exclusion_branch": "retain_previous"
+  },
+  "source_revision": "baddc372c6b0023f00468006ef770dd2ccbe66ac",
+  "state_dimension": 2586,
+  "topology_class": "diverted",
+  "version": 1,
+  "wall": {
+    "maximum_panel_length_m": 0.012391399776000782,
+    "maximum_panel_over_cell_pitch": 0.17439206305897587,
+    "median_panel_length_m": 0.012391344338107752,
+    "node_count": 481,
+    "perimeter_m": 5.96015280661422,
+    "selected_panel_length_m": 0.012388671301543194,
+    "selected_panel_over_cell_pitch": 0.17435366349974415
+  },
+  "wall_nodes": 481,
+  "wall_seconds": 231.75083685293794
+}

@@ -1,0 +1,108 @@
+{
+  "analytic_wall_extremum": {
+    "coordinate_rz_m": [
+      7.801322746922845,
+      -0.02566508829049795
+    ],
+    "flux_wb": 0.0025384149722628394,
+    "instrument_positive_control": {
+      "sampled_finite_count": 15873,
+      "sampled_signed_span_wb": 9.727564117349738,
+      "sampled_total_count": 15873
+    },
+    "optimizer_success": true,
+    "segment_fraction": 0.47471061649092683,
+    "segment_index": 240
+  },
+  "cache": {
+    "build_seconds": 293.48159295134246,
+    "hit": false,
+    "load_seconds": 0.00205191969871521,
+    "lock_wait_seconds": 5.999580025672913e-06,
+    "semantic_key": "047e8541d290a90f",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
+    "store_seconds": 1.2888464350253344
+  },
+  "case": "weak-rotation-reactor-static",
+  "characteristic_cell_pitch_m": 0.1546079890264522,
+  "completed": true,
+  "connectivity_contact": {
+    "reason": "the public class comparator takes the moment-geometry branch when the fixed-design topology has no tensor axes",
+    "status": "not_applicable_to_unstructured_hex_carrier"
+  },
+  "map_floor": {
+    "absolute_rms_wb": 6.850062881984729,
+    "absolute_sup_wb": 9.543750485710117,
+    "analytic_flux_span_wb": 49.94084764810949,
+    "booked_current_a": 16314769.466198456,
+    "booked_over_target": 0.9999997642854215,
+    "definition": "one target-normalised production-map application at the analytic flux, divided by the analytic axis-to-boundary span",
+    "fixture_exterior": "analytic total flux minus the image of analytically integrated moments under the committed whole-cell fixture posing",
+    "mode": "exact",
+    "relative_rms_of_span": 0.13716352854583633,
+    "relative_sup_of_span": 0.1911010912941802,
+    "requested_class": "limited",
+    "target_current_a": 16314773.311828371,
+    "target_receipt": {
+      "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+      "current_centroid_m": [
+        6.063530173332898,
+        0.0
+      ],
+      "declared_current_a": 16314773.311828371,
+      "quadrature_current_a": 16314773.311828367,
+      "quadrature_nodes": 512,
+      "quadrature_relative_closure": 2.2833846522164315e-16
+    }
+  },
+  "production_contact": {
+    "coordinate_rz_m": [
+      7.801395785238812,
+      -1.3534791875244892e-06
+    ],
+    "flux_wb": 7.594615422689934e-13,
+    "level_error_in_span": 5.083101551661946e-05,
+    "level_error_wb": 0.002538414971503378,
+    "nearest_wall_node_distance_m": 1.4295955745755372e-06,
+    "position_error_m": 0.025663838743665488,
+    "representation": "three-node quadratic sub-panel interpolation",
+    "selected_equals_wall_node": false
+  },
+  "read_timing": {
+    "compile_and_first_read_seconds": 10.487772896885872,
+    "warm_read_seconds_max": 2.84249422326684,
+    "warm_read_seconds_median": 2.7105798795819283,
+    "warm_read_seconds_min": 2.6985931769013405
+  },
+  "realised_cells": 1072,
+  "requested_cells": -1000,
+  "residual_stage": {
+    "job_id": 1270357,
+    "map_floor_remeasured": true,
+    "private_wall_shadow_remeasured": false
+  },
+  "resolution_guidance": {
+    "estimated_cell_pitch_at_2500_m": 0.10124167452250368,
+    "recommended_wall_nodes_for_estimated_2500_pitch": 257,
+    "recommended_wall_nodes_for_realised_pitch": 169,
+    "wall_121_consistent_with_estimated_2500_pitch": true,
+    "wall_121_consistent_with_realised_pitch": true
+  },
+  "schema": "nova.limiter-read-resolution-part",
+  "shadow": null,
+  "source_revision": "baddc372c6b0023f00468006ef770dd2ccbe66ac",
+  "state_dimension": 4381,
+  "topology_class": "limited",
+  "version": 1,
+  "wall": {
+    "maximum_panel_length_m": 0.05406508185757123,
+    "maximum_panel_over_cell_pitch": 0.349691385277129,
+    "median_panel_length_m": 0.04007402967290738,
+    "node_count": 481,
+    "perimeter_m": 18.65455521361561,
+    "selected_panel_length_m": 0.05406508185757123,
+    "selected_panel_over_cell_pitch": 0.349691385277129
+  },
+  "wall_nodes": 481,
+  "wall_seconds": 634.3348558321595
+}

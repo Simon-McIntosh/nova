@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T11:54:53",
+  "updated": "2026-09-14T12:40:28",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -153207,6 +153207,200 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T084551837947-cca-limiter-read-resolution-audit",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-limiter-read-resolution-audit",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2625,
+                "cached_input_tokens": 400858,
+                "input_tokens": 403515,
+                "output_tokens": 2237,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 405752,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Critical evaluation, no production code change; never open any receipt larger than one megabyte in an editor (load it with json); commit the benchmark before submitting any job. Facts at this base (main): scripts/analytic_oracle_fixtures/measure.py builds every oracle mesh with WALL_POINT_COUNT = 121 wall nodes through limiter_contour(case, points=wall_nodes) regardless of requested cells; the 110, 300, 342, 500, 750 and 1000 cell meshes are cached under the nova data store with names of the form analytic_oracle_hex_machine_1000.zarr, and a different wall node count is a different geometry identity that builds a new machine, so budget for that; nova/equilibrium/connectivity_boundary.py refines LIMITED wall tangency sub-grid on a tensor spline with wall segments split at every crossed spline knot and derivative bins per polynomial piece (module docstring lines 24-61, wall geometry from line 215) and carries wall_height_shadow_mask (line 410), a hysteretic height-based private-wall exclusion from qualified saddles; nova/equilibrium/forward_operator.py has both _fixed_design_read (line 1863) and _connectivity_read (line 1935), and which one the hex certificate rows use must be established from the code and stated with the line; the oracle-start decomposition (docs/figures/cut-cell-current-attribution/oracle-start and the report map-jacobian-report.md under the reports directory) found the production read at the analytic flux on weak 110 and 300 returns class limited with boundary flux 2.67e-9 Wb against the analytic zero at wall contact (7.8014, -7.9e-5) m, and on single-null 300 returns limited with no X-point and boundary flux 0.0010 Wb at (1.4935, -1.2065) m, while at 500 and 1000 the X-point is admitted at -2.27e-7 Wb. Build one benchmark that, for the weak and moderate rows at 300 and 1000 cells and the single-null row at 500 and 1000 cells, evaluates the analytic flux at the carriers and runs the production topology read for wall node counts 121, 241, 481 and 961, recording per case: the contact position error against the analytic tangency point (the point of the limiter contour where the analytic flux is extremal), the contact level error in span units, the class, the wall panel length over the cell pitch, whether the selected contact is a wall node value or a sub-panel interpolated position (from the code path taken, cited), and the read wall time; on the single-null rows record the number of wall nodes lying in the private flux region below the X-point, which mask excludes them and whether it is height-based or connectivity-based, and a positive control: inject a wall node in the private region whose analytic flux is above the X-point level and show the read does not select it as the boundary, reporting what it selects instead. Then re-measure the one-application map floor at the analytic flux in exact-clip mode for weak 1000 with 121 and 481 wall nodes and report whether the floor moves; that answers whether wall resolution carries any of the 0.136. Run on the CPU debug partition (all_debug, --time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu, TMPDIR=/tmp in submit environment and payload, root venv python with PYTHONPATH at the worktree, sbatch detached, --output in the run directory, cases sharded inside one allocation with parts persisted as each lands, the new-wall machine builds last); if a 1000-cell machine build with a new wall count exceeds the allocation, persist what landed and say so. One SVG of contact position error against wall panel length over cell pitch, all cases, under docs/figures/cut-cell-current-attribution/limiter-read, and one poloidal panel of the single-null 1000 contact region with the committed nova.media painters (line contours, wall units, analytic nulls, the selected contact and the excluded private wall nodes marked). The report states whether the limiter read is sub-panel or node-resolution on these rows, whether wall resolution is consistent with cell resolution at 1000 and 2500 cells and what count would make it so, whether the shadow mask is connectivity-based or height-based and whether the positive control passed, and whether any part of the limited-row floor moves with wall resolution. Manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 4.0,
+          "goal": "Measure the limiter contact read of the analytic Solov'ev flux against wall node count and plasma cell count, with the private-flux shadow mask tested on the single-null rows",
+          "id": "cca-limiter-read-resolution-audit",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T08:45:52Z",
+            "read_at": "2026-09-14T08:45:53Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 3.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T084551837947-cca-limiter-read-resolution-audit/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/limiter_read_resolution_audit.py",
+            "docs/figures/cut-cell-current-attribution/limiter-read",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/limiter-read"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19e-cca-limiter-read",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T08:46:05Z",
+        "completed_at": "2026-09-14T10:38:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 6745,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "0f31e9bb42b4dd07fb6b418374fb61aa50c99b3b",
+        "commits": [
+          "d1162a22cd3712ef43ea761ca4a53af6b1abdb4d",
+          "baddc372c6b0023f00468006ef770dd2ccbe66ac",
+          "88a364bf257cbf35f4a611d7a71103ca3c8bb2a1",
+          "f3de1b8142521417ecc349dc0b21e0b93c8f6e93",
+          "4a4221393e8fc983826139cb3e6651c52a76f6a9"
+        ],
+        "changed_lines": {
+          "added": 3195,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug jobs 1270274 (24 read rows, exit 1 on a report-writer bug after every row landed) and 1270357 (shadow census, eight positive controls, weak 1000 floor at 121 and 481 wall nodes, exit 0:0 in 9m50s)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T084551837947-cca-limiter-read-resolution-audit/slurm-1270357.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T084551837947-cca-limiter-read-resolution-audit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a09f18-51cd-7870-ae8c-638d1bc23d0a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2969984,
+            "cached_input_tokens_cumulative": 2969984,
+            "input_tokens": 3043867,
+            "input_tokens_cumulative": 3043867,
+            "output_tokens": 23777,
+            "output_tokens_cumulative": 23777,
+            "reasoning_output_tokens": 6823,
+            "reasoning_output_tokens_cumulative": 6823
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T10:38:30Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 8.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T10:38:30Z"
+            }
+          ],
+          "notional_cost_usd": 191.8189,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 2969984,
+          "cumulative_input_tokens": 6013851,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 30600
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-limiter-read-resolution-audit",
+          "session_id": "01a09f18-51cd-7870-ae8c-638d1bc23d0a",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T10:38:30Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 139.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -153519,6 +153713,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2453
+    "_version": 2454
   }
 }

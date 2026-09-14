@@ -144,6 +144,7 @@ def _integrate_points(
     )
 
 
+@jax.named_scope("compact_clipped_field_integrals")
 def clipped_support_field_integrals(
     support,
     selection,
@@ -259,6 +260,7 @@ def _integrate_current_points(
     )
 
 
+@jax.named_scope("compact_clipped_current_moments")
 def clipped_support_current_moments(
     support,
     selection,

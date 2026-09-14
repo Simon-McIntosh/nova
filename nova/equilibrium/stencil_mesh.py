@@ -181,6 +181,7 @@ class InteriorCurrentMomentStencil:
                     self, name, np.ascontiguousarray(value, dtype=np.intp)
                 )
 
+    @jax.named_scope("support_flux_moment_quadrature")
     def support_flux_moments(
         self,
         profile,
@@ -240,6 +241,7 @@ class InteriorCurrentMomentStencil:
             .set(coefficient)
         )
 
+    @jax.named_scope("stencil_sample_flux_field")
     def sample_flux_field(self, centroid_flux, sample_flux, points):
         """Evaluate the own-node quadratic and its gradient at fixed points."""
         if self.ring_centre is None or len(self.ring_centre) == 0:
@@ -498,6 +500,7 @@ def fixed_profile_current_moments(
     )
 
 
+@jax.named_scope("direct_profile_current_moment_quadrature")
 def _direct_profile_current_moments(
     profile,
     support_vertices,

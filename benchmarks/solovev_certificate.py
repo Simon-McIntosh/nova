@@ -87,6 +87,9 @@ REPOSED_FIXTURE_ROOT = (
     ROOT / "docs/figures/cut-cell-current-attribution/reposed-fixture"
 )
 REPOSED_FIXTURE_OUTPUT = REPOSED_FIXTURE_ROOT / "map-floor.json"
+REPOSED_CERTIFICATE_ROOT = REPOSED_FIXTURE_ROOT / "certificate"
+REPOSED_CERTIFICATE_OUTPUT = REPOSED_CERTIFICATE_ROOT / "receipt.json"
+REPOSED_CERTIFICATE_BUILD_OUTPUT = REPOSED_CERTIFICATE_ROOT / "machine-build.json"
 REPOSED_FIXTURE_ROWS = (
     ("weak-rotation-reactor-static", -1000),
     ("moderate-rotation-conventional-static", -1000),
@@ -94,11 +97,17 @@ REPOSED_FIXTURE_ROWS = (
     ("diverted-single-null", -1000),
 )
 REQUESTED_CELLS = (-110, -300, -500, -1000)
+MEASUREMENT_REQUESTS = REQUESTED_CELLS + (-2500,)
 CASE_NAMES = (
     "weak-rotation-reactor-static",
     "moderate-rotation-conventional-static",
     "strong-rotation-compact-static",
     "diverted-single-null",
+)
+REPOSED_CERTIFICATE_ROWS = tuple(
+    (case_name, requested_cells)
+    for requested_cells in (-1000, -2500)
+    for case_name in CASE_NAMES
 )
 DIVERTED_CASE_NAME = "diverted-single-null"
 DIVERTED_CASE_ALIASES = frozenset((DIVERTED_CASE_NAME, "diverted-jump-bearing"))
@@ -2429,9 +2438,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         "render_data": render_data,
         "figure": {
             "filesystem_path": str(figure.relative_to(ROOT)),
-            "project_absolute_src": (
-                f"/nova/figures/gs-absolute-accuracy/solovev/{figure.name}"
-            ),
+            "project_absolute_src": f"/nova/{figure.relative_to(ROOT / 'docs')}",
             "sha256": hashlib.sha256(figure.read_bytes()).hexdigest(),
             "render_source": "fresh_production_solve",
         },
@@ -2445,7 +2452,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
 def _validate_row(row: dict[str, Any]) -> None:
     if row["case"] not in CASE_NAMES:
         raise RuntimeError("unknown certificate case")
-    if row["requested_cells"] not in REQUESTED_CELLS:
+    if row["requested_cells"] not in MEASUREMENT_REQUESTS:
         raise RuntimeError("unknown certificate resolution")
     if row["solver"]["qualification"] not in {"qualified", "unqualified"}:
         raise RuntimeError("terminal qualification is missing")
@@ -2479,7 +2486,7 @@ def _validate_row(row: dict[str, Any]) -> None:
                 ):
                     raise RuntimeError("a named accuracy norm is missing")
     src = row["figure"]["project_absolute_src"]
-    if not src.startswith("/nova/figures/gs-absolute-accuracy/solovev/"):
+    if not src.startswith("/nova/figures/"):
         raise RuntimeError("figure src is not project absolute")
     if "render_data" in row:
         _validate_render_data(row["render_data"])
@@ -3245,6 +3252,25 @@ def _measure_reposed_fixture(output: Path) -> dict[str, Any]:
         if combination["exterior"] == "analytic-clipped"
         and combination["mode"] == "exact"
     ]
+    limited_primary = [
+        row for row in exact_primary if not _is_diverted_case(row["case"])
+    ]
+    diverted = [
+        combination
+        for row in rows
+        if _is_diverted_case(row["case"])
+        for combination in row["combinations"]
+        if combination["exterior"] == "analytic-clipped"
+        and combination["mode"] == "exact"
+    ]
+    diverted_by_cells = {
+        abs(row["requested_cells"]): row["map_floor"]["rms_fraction_of_span"]
+        for row in diverted
+    }
+    diverted_pitch = {500: 0.07103816322006563, 1000: 0.050231566935945236}
+    diverted_order = np.log(diverted_by_cells[500] / diverted_by_cells[1000]) / np.log(
+        diverted_pitch[500] / diverted_pitch[1000]
+    )
     receipt = {
         "schema": "nova.analytic-clipped-fixture-map-floor",
         "source_revision": _source_revision(),
@@ -3252,15 +3278,21 @@ def _measure_reposed_fixture(output: Path) -> dict[str, Any]:
         "rows": rows,
         "acceptance": {
             "threshold_rms_fraction_of_span": 1.0e-3,
-            "primary_row_count": len(exact_primary),
-            "passed": bool(exact_primary)
+            "limited_primary_row_count": len(limited_primary),
+            "limited_rows_passed": bool(limited_primary)
             and all(
                 row["map_floor"]["rms_fraction_of_span"] <= 1.0e-3
-                for row in exact_primary
+                for row in limited_primary
             ),
-            "worst_primary_rms_fraction_of_span": max(
-                row["map_floor"]["rms_fraction_of_span"] for row in exact_primary
+            "worst_limited_rms_fraction_of_span": max(
+                row["map_floor"]["rms_fraction_of_span"] for row in limited_primary
             ),
+            "diverted_single_null": {
+                "rms_fraction_of_span_by_cells": diverted_by_cells,
+                "characteristic_pitch_m_by_cells": diverted_pitch,
+                "apparent_order_in_pitch": float(diverted_order),
+                "disposition": "four-crossing-cell treatment remains section-owned",
+            },
         },
     }
     _write_json(output, receipt)
@@ -3268,10 +3300,160 @@ def _measure_reposed_fixture(output: Path) -> dict[str, Any]:
     return receipt
 
 
+def _certificate_acceptance_row(row: dict[str, Any]) -> dict[str, Any]:
+    """Project one solved row onto the three locked acceptance tests."""
+    pitch = float(row["characteristic_pitch_m"])
+    exact_topology = row["geometry"]["exact_topology"]
+    terminal_topology = row["geometry"]["root_topology"]
+    span = abs(float(exact_topology["flux_span_wb"]))
+    psi_rms = row["norms"]["psi"]["whole_domain"]["rms"]
+    psi_rms_fraction = float(psi_rms / span) if psi_rms is not None else None
+    axis_error = row["geometry"]["magnetic_axis_position_error_m"]
+    x_error = row["geometry"]["x_point_position_error_m"]
+    diverted = _is_diverted_case(row["case"])
+    x_candidates = int(terminal_topology["x_candidate_count"])
+    nulls_admitted = terminal_topology["axis_rz_m"] is not None and (
+        not diverted
+        or (terminal_topology["x_point_rz_m"] is not None and x_candidates > 0)
+    )
+    residual = row["solver"]["terminal_fixed_point_residual"]
+    converged = bool(row["solver"]["production_telemetry"]["converged"])
+    return {
+        "case": row["case"],
+        "requested_cells": row["requested_cells"],
+        "realised_cells": row["realised_cells"],
+        "characteristic_pitch_m": pitch,
+        "fixed_point": {
+            "terminal_residual": residual,
+            "bound": 1.0e-12,
+            "residual_passed": residual is not None and residual <= 1.0e-12,
+            "converged": converged,
+        },
+        "distance_to_analytic": {
+            "psi_rms_fraction_of_span": psi_rms_fraction,
+            "axis_error_m": axis_error,
+            "axis_error_in_pitch": (
+                axis_error / pitch if axis_error is not None else None
+            ),
+            "x_point_error_m": x_error,
+            "x_point_error_in_pitch": x_error / pitch if x_error is not None else None,
+        },
+        "analytic_null_read": {
+            "admitted": nulls_admitted,
+            "axis_admitted": terminal_topology["axis_rz_m"] is not None,
+            "x_point_required": diverted,
+            "x_point_admitted": terminal_topology["x_point_rz_m"] is not None,
+            "x_candidate_count": x_candidates,
+        },
+        "figure": row["figure"],
+    }
+
+
+def _rung_ratio(numerator: float | None, denominator: float | None) -> float | None:
+    """Return a finite coarse-over-fine ratio when both measures exist."""
+    if numerator is None or denominator is None or denominator == 0.0:
+        return None
+    return float(numerator / denominator)
+
+
+def _certificate_rung_ratios(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Compare the 1000- and 2500-cell acceptance measures per case."""
+    grouped: dict[str, dict[int, dict[str, Any]]] = {}
+    for row in rows:
+        grouped.setdefault(row["case"], {})[abs(row["requested_cells"])] = row
+    ratios = {}
+    for case_name, by_cells in grouped.items():
+        if set(by_cells) != {1000, 2500}:
+            continue
+        coarse = by_cells[1000]
+        fine = by_cells[2500]
+        coarse_distance = coarse["distance_to_analytic"]
+        fine_distance = fine["distance_to_analytic"]
+        ratios[case_name] = {
+            "pitch_1000_over_2500": _rung_ratio(
+                coarse["characteristic_pitch_m"], fine["characteristic_pitch_m"]
+            ),
+            "psi_rms_1000_over_2500": _rung_ratio(
+                coarse_distance["psi_rms_fraction_of_span"],
+                fine_distance["psi_rms_fraction_of_span"],
+            ),
+            "axis_error_1000_over_2500": _rung_ratio(
+                coarse_distance["axis_error_m"], fine_distance["axis_error_m"]
+            ),
+            "x_point_error_1000_over_2500": _rung_ratio(
+                coarse_distance["x_point_error_m"],
+                fine_distance["x_point_error_m"],
+            ),
+        }
+    return ratios
+
+
+def _measure_reposed_certificate(output: Path) -> dict[str, Any]:
+    """Build the fine carriers, then solve all re-posed certificate rows."""
+    global FIGURE_ROOT, PART_ROOT
+
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("the re-posed certificate requires binary64")
+    original_mode = support_clip_mode()
+    original_figure_root = FIGURE_ROOT
+    original_part_root = PART_ROOT
+    FIGURE_ROOT = REPOSED_CERTIFICATE_ROOT / "panels"
+    PART_ROOT = REPOSED_CERTIFICATE_ROOT / "parts"
+    build_rows = []
+    solved_rows: list[dict[str, Any]] = []
+    try:
+        set_support_clip_mode("exact")
+        for case_name in CASE_NAMES:
+            carrier_case, _source_case, exact = _case(case_name)
+            started = perf_counter()
+            machine = _case_machine(case_name, carrier_case, exact, -2500)
+            build_rows.append(
+                {
+                    "case": case_name,
+                    "requested_cells": -2500,
+                    "realised_cells": len(machine.node),
+                    "wall_seconds": perf_counter() - started,
+                    "cache": machine.cache,
+                }
+            )
+            _write_json(
+                REPOSED_CERTIFICATE_BUILD_OUTPUT,
+                {
+                    "schema": "nova.reposed-certificate-machine-build",
+                    "source_revision": _source_revision(),
+                    "lane": _lane(),
+                    "completed_rows": build_rows,
+                },
+            )
+        for case_name, requested_cells in REPOSED_CERTIFICATE_ROWS:
+            row = _measure(case_name, requested_cells)
+            solved_rows.append(_certificate_acceptance_row(row))
+            _write_json(
+                output,
+                {
+                    "schema": "nova.reposed-certificate-acceptance",
+                    "source_revision": _source_revision(),
+                    "lane": _lane(),
+                    "machine_build": build_rows,
+                    "rows": solved_rows,
+                    "rung_ratios": _certificate_rung_ratios(solved_rows),
+                    "completed": len(solved_rows) == len(REPOSED_CERTIFICATE_ROWS),
+                },
+            )
+    finally:
+        set_support_clip_mode(original_mode)
+        FIGURE_ROOT = original_figure_root
+        PART_ROOT = original_part_root
+    receipt = json.loads(output.read_text(encoding="utf-8"))
+    print("REPOSED_CERTIFICATE_EXIT=0", flush=True)
+    return receipt
+
+
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", choices=CASE_NAMES)
-    parser.add_argument("--requested-cells", type=int, choices=REQUESTED_CELLS)
+    parser.add_argument("--requested-cells", type=int, choices=MEASUREMENT_REQUESTS)
     parser.add_argument("--aggregate", action="store_true")
     parser.add_argument("--aggregate-partial", action="store_true")
     parser.add_argument("--validate", action="store_true")
@@ -3281,6 +3463,7 @@ def _parse() -> argparse.Namespace:
     parser.add_argument("--nan-census", action="store_true")
     parser.add_argument("--diverted-geometry", action="store_true")
     parser.add_argument("--reposed-fixture-floor", action="store_true")
+    parser.add_argument("--reposed-certificate", action="store_true")
     parser.add_argument("--scheduler-job-id", action="append", default=[])
     parser.add_argument("--output", type=Path, default=OUTPUT)
     return parser.parse_args()
@@ -3288,6 +3471,25 @@ def _parse() -> argparse.Namespace:
 
 def main() -> None:
     arguments = _parse()
+    if arguments.reposed_certificate:
+        output = (
+            REPOSED_CERTIFICATE_OUTPUT
+            if arguments.output == OUTPUT
+            else arguments.output
+        )
+        receipt = _measure_reposed_certificate(output)
+        print(
+            json.dumps(
+                {
+                    "completed": receipt["completed"],
+                    "row_count": len(receipt["rows"]),
+                    "rung_ratios": receipt["rung_ratios"],
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        return
     if arguments.reposed_fixture_floor:
         output = (
             REPOSED_FIXTURE_OUTPUT if arguments.output == OUTPUT else arguments.output

@@ -1,0 +1,21 @@
+{
+  "affine_rms_energy_share": 0.9303928398962441,
+  "analytic_current_a": 1624991.1778605897,
+  "booked_current_a": 1624967.8191492907,
+  "booked_over_analytic": 0.9999856253303911,
+  "case": "moderate-rotation-conventional-static",
+  "cut_cell_count": 135,
+  "cut_cell_image_energy_share": 0.005798512935858612,
+  "difference_image_closure_sup_wb": 5.598319911028916e-05,
+  "exterior": "analytic-clipped",
+  "map_floor": {
+    "rms_fraction_of_span": 3.423767978609019e-05,
+    "rms_wb": 4.7289586454457934e-05,
+    "sup_fraction_of_span": 4.461827301652277e-05,
+    "sup_wb": 6.162741437054642e-05
+  },
+  "mode": "exact",
+  "normalisation_amplitude": 1.000014374876243,
+  "realised_cells": 1070,
+  "requested_cells": -1000
+}

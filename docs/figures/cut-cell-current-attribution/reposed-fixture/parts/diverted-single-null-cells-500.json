@@ -1,0 +1,108 @@
+{
+  "analytic_current_target": {
+    "closed_form_flux_samples_used_for_current_support_only": true,
+    "construction": "closed-form polynomial current density integrated over the exact traced separatrix supports, including first cell moments",
+    "current_centroid_m": [
+      1.7129729329076127,
+      0.034493158263529396
+    ],
+    "declared_current_a": 37170.642147815015
+  },
+  "case": "diverted-single-null",
+  "combinations": [
+    {
+      "affine_rms_energy_share": 0.746256311224646,
+      "analytic_current_a": 37170.642147815015,
+      "booked_current_a": 37562.400269717014,
+      "booked_over_analytic": 1.0105394499332057,
+      "case": "diverted-single-null",
+      "cut_cell_count": 82,
+      "cut_cell_image_energy_share": 0.4229709112262639,
+      "difference_image_closure_sup_wb": 0.0018522163360700675,
+      "exterior": "analytic-clipped",
+      "map_floor": {
+        "rms_fraction_of_span": 0.10866887521882897,
+        "rms_wb": 0.00062045321067924,
+        "sup_fraction_of_span": 0.35638281613902034,
+        "sup_wb": 0.002034794802643281
+      },
+      "mode": "exact",
+      "normalisation_amplitude": 0.9895704715596187,
+      "realised_cells": 550,
+      "requested_cells": -500
+    },
+    {
+      "affine_rms_energy_share": 0.29744083889244716,
+      "analytic_current_a": 37170.642147815015,
+      "booked_current_a": 61700.15021203845,
+      "booked_over_analytic": 1.6599161770377253,
+      "case": "diverted-single-null",
+      "cut_cell_count": 0,
+      "cut_cell_image_energy_share": 0.0,
+      "difference_image_closure_sup_wb": 0.004162328105148535,
+      "exterior": "analytic-clipped",
+      "map_floor": {
+        "rms_fraction_of_span": 1.2981023961991087,
+        "rms_wb": 0.007411614391795958,
+        "sup_fraction_of_span": 2.7398640311118294,
+        "sup_wb": 0.01564346213674023
+      },
+      "mode": "chord",
+      "normalisation_amplitude": 0.6024400592231066,
+      "realised_cells": 550,
+      "requested_cells": -500
+    },
+    {
+      "affine_rms_energy_share": 0.9946373046156666,
+      "analytic_current_a": 37170.642147815015,
+      "booked_current_a": 37562.400269717014,
+      "booked_over_analytic": 1.0105394499332057,
+      "case": "diverted-single-null",
+      "cut_cell_count": 82,
+      "cut_cell_image_energy_share": 0.4229709112262639,
+      "difference_image_closure_sup_wb": null,
+      "exterior": "whole-cell",
+      "map_floor": {
+        "rms_fraction_of_span": 9.731617353138308,
+        "rms_wb": 0.05556340966718931,
+        "sup_fraction_of_span": 15.810223692394683,
+        "sup_wb": 0.09026967502653957
+      },
+      "mode": "exact",
+      "normalisation_amplitude": 0.9895704715596187,
+      "realised_cells": 550,
+      "requested_cells": -500
+    },
+    {
+      "affine_rms_energy_share": 0.9823270934990748,
+      "analytic_current_a": 37170.642147815015,
+      "booked_current_a": 61700.15021203845,
+      "booked_over_analytic": 1.6599161770377253,
+      "case": "diverted-single-null",
+      "cut_cell_count": 0,
+      "cut_cell_image_energy_share": 0.0,
+      "difference_image_closure_sup_wb": null,
+      "exterior": "whole-cell",
+      "map_floor": {
+        "rms_fraction_of_span": 10.177635014389615,
+        "rms_wb": 0.05810998143749388,
+        "sup_fraction_of_span": 14.778904634812209,
+        "sup_wb": 0.08438128040367095
+      },
+      "mode": "chord",
+      "normalisation_amplitude": 0.6024400592231066,
+      "realised_cells": 550,
+      "requested_cells": -500
+    }
+  ],
+  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-repose-fixture-exterior/docs/figures/cut-cell-current-attribution/reposed-fixture/diverted-single-null-cells-500.svg",
+  "fixture_exterior_cache": {
+    "build_seconds": 32.91095416806638,
+    "hit": false,
+    "lock_wait_seconds": 7.014721632003784e-06,
+    "semantic_key": "e57b046871491e17",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
+  },
+  "realised_cells": 550,
+  "requested_cells": -500
+}

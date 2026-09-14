@@ -1,0 +1,21 @@
+{
+  "affine_rms_energy_share": 0.9614152756371208,
+  "analytic_current_a": 16314773.311828371,
+  "booked_current_a": 16314567.38181122,
+  "booked_over_analytic": 0.9999873776966915,
+  "case": "weak-rotation-reactor-static",
+  "cut_cell_count": 130,
+  "cut_cell_image_energy_share": 0.004105574993524361,
+  "difference_image_closure_sup_wb": null,
+  "exterior": "whole-cell",
+  "map_floor": {
+    "rms_fraction_of_span": 0.13608812061153522,
+    "rms_wb": 6.796338971034393,
+    "sup_fraction_of_span": 0.1900959546452895,
+    "sup_wb": 9.493529185252466
+  },
+  "mode": "exact",
+  "normalisation_amplitude": 1.0000126224626331,
+  "realised_cells": 1072,
+  "requested_cells": -1000
+}

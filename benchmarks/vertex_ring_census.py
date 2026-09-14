@@ -454,7 +454,10 @@ def _instrument_controls(
     target = np.asarray(machine.node[cell], dtype=np.float64)
     local = (coordinates - target) / pitch
     saddle_state = local[:, 0] ** 2 - local[:, 1] ** 2
-    extremum_state = local[:, 0] ** 2 + local[:, 1] ** 2
+    axis_kind = operator._fixed_design_topology.grid.extremum_polarity
+    if axis_kind is None:
+        raise RuntimeError("the manufactured extremum needs a declared polarity")
+    extremum_state = -float(axis_kind) * (local[:, 0] ** 2 + local[:, 1] ** 2)
     saddle = jax.block_until_ready(read(jnp.asarray(saddle_state)))
     extremum = jax.block_until_ready(read(jnp.asarray(extremum_state)))
     saddle_position = np.asarray(saddle["raw_position"])[cell]

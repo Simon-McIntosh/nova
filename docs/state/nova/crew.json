@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T21:19:21",
+  "updated": "2026-09-14T22:13:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4720,6 +4720,15 @@
       },
       {
         "id": "s19i-cca-dual-stencil",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
+      },
+      {
+        "id": "s19i-cca-dual-stencil-2",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -155628,6 +155637,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2478
+    "_version": 2479
   }
 }

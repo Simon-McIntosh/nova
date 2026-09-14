@@ -1,10 +1,10 @@
-"""Measure analytic map floors and booked-moment decomposition without solving.
+"""Measure production Newton contraction from perturbed analytic flux.
 
-Each row constructs the certificate's analytic exterior completion once, then
-reuses that operator for the exact allocation and whole-cell control.  The
-measurement applies each map once at the analytic flux, separates its residual
-into exterior and booked-moment terms, and attributes the weak exact-booking
-image by support-cell class.  It never enters a nonlinear or linear solve.
+The committed fixture exterior controls the admitted whole-cell single-null
+rows.  A probe-only exterior posed from the exact booking at the analytic state
+isolates the same iteration on the high-resolution limited and diverted rows.
+Each row compiles one fixed-shape Newton program and reuses it for all four
+perturbation magnitudes while persisting every completed arm.
 """
 
 from __future__ import annotations
@@ -22,6 +22,10 @@ from typing import Any, Callable
 
 import jax
 import jax.numpy as jnp
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 from matplotlib.path import Path as PolygonPath
 import numpy as np
 
@@ -36,11 +40,15 @@ from nova.equilibrium.forward_operator import (
 from nova.equilibrium.source import CurrentNormalisationError
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.jax.config import (
+    Precision,
     configure_dtypes,
     configure_persistent_compilation_cache,
     default_persistent_compilation_cache_root,
 )
+from nova.media import poloidal
+from nova.media.ink import DEFAULT_INK, poloidal_axes
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
+from scripts.oracle_rebaseline import measure as recovery
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -50,7 +58,13 @@ DEFAULT_OUTPUT = (
     / "map-floor-jacobian.json"
 )
 DEFAULT_REPORT_DIRECTORY = DEFAULT_OUTPUT.parent
+DEFAULT_NEWTON_OUTPUT = DEFAULT_OUTPUT.parent / "newton-contraction.json"
 PART_DIRECTORY_NAME = "parts"
+NEWTON_PART_DIRECTORY_NAME = "newton-parts"
+PERTURBATION_FRACTIONS = (1.0e-4, 1.0e-3, 1.0e-2, 1.0e-1)
+NEWTON_STEPS = 12
+ACTIVE_SET_STEPS = 12
+FIXED_POINT_TOLERANCE = 1.0e-12
 FINITE_DIFFERENCE_STEPS = (1.0e-5, 1.0e-7)
 RANDOM_DIRECTION_COUNT = 4
 RANDOM_SEED = 271828
@@ -1488,9 +1502,683 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
     return receipt
 
 
+NEWTON_ROWS = (
+    ("fixture_exterior_control", certificate.DIVERTED_CASE_NAME, -500, "chord"),
+    ("fixture_exterior_control", certificate.DIVERTED_CASE_NAME, -1000, "chord"),
+    (
+        "reposed_exact_booking_iteration_probe",
+        "weak-rotation-reactor-static",
+        -1000,
+        "exact",
+    ),
+    (
+        "reposed_exact_booking_iteration_probe",
+        "moderate-rotation-conventional-static",
+        -1000,
+        "exact",
+    ),
+    (
+        "reposed_exact_booking_iteration_probe",
+        certificate.DIVERTED_CASE_NAME,
+        -1000,
+        "exact",
+    ),
+)
+
+
+def _gpu_allocation() -> dict[str, Any]:
+    """Return the guarded accelerator allocation used by the Newton probe."""
+    if not os.environ.get("SLURM_JOB_ID"):
+        raise RuntimeError("the Newton measurement requires one scheduler allocation")
+    partition = os.environ.get("SLURM_JOB_PARTITION", "")
+    reservation = os.environ.get("SLURM_JOB_RESERVATION", "")
+    platforms = os.environ.get("JAX_PLATFORMS", "")
+    cpus = int(os.environ.get("SLURM_CPUS_PER_TASK", "0"))
+    preallocate = os.environ.get("XLA_PYTHON_CLIENT_PREALLOCATE", "").lower()
+    if partition != "betelgeuse":
+        raise RuntimeError(f"expected betelgeuse, received {partition!r}")
+    if reservation != "gpu_0003_grpA":
+        raise RuntimeError(f"unexpected reservation {reservation!r}")
+    if platforms != "cuda,cpu":
+        raise RuntimeError(f"expected JAX_PLATFORMS=cuda,cpu, received {platforms!r}")
+    if cpus != 8:
+        raise RuntimeError(f"expected eight CPUs, received {cpus}")
+    if preallocate != "false":
+        raise RuntimeError("XLA_PYTHON_CLIENT_PREALLOCATE must be false")
+    return {
+        "job_id": int(os.environ["SLURM_JOB_ID"]),
+        "job_name": os.environ.get("SLURM_JOB_NAME"),
+        "node": os.environ.get("SLURMD_NODENAME", socket.gethostname()),
+        "partition": partition,
+        "reservation": reservation,
+        "allocated_cpus": cpus,
+        "allocated_gpus": int(os.environ.get("SLURM_GPUS_ON_NODE", "1")),
+        "memory_mb": int(os.environ.get("SLURM_MEM_PER_NODE", "0")),
+        "tmpdir": os.environ.get("TMPDIR"),
+        "jax_platforms": platforms.split(","),
+        "xla_python_client_preallocate": preallocate,
+        "visible_gpu_memory_used_mib": int(
+            os.environ.get("NOVA_VISIBLE_GPU_MEMORY_USED_MIB", "-1")
+        ),
+        "visible_gpu_memory_total_mib": int(
+            os.environ.get("NOVA_VISIBLE_GPU_MEMORY_TOTAL_MIB", "-1")
+        ),
+        "visible_gpu_memory_free_mib": int(
+            os.environ.get("NOVA_VISIBLE_GPU_MEMORY_FREE_MIB", "-1")
+        ),
+        "jax_cuda_devices": [str(device) for device in jax.devices("gpu")],
+        "jax_cpu_devices": [str(device) for device in jax.devices("cpu")],
+    }
+
+
+def _newton_part_path(
+    output: Path,
+    exterior_kind: str,
+    case_name: str,
+    requested_cells: int,
+) -> Path:
+    return (
+        output.parent
+        / NEWTON_PART_DIRECTORY_NAME
+        / f"{_row_slug(case_name, requested_cells)}-{exterior_kind}.json"
+    )
+
+
+def _newton_arm_path(
+    output: Path,
+    exterior_kind: str,
+    case_name: str,
+    requested_cells: int,
+    fraction: float,
+) -> Path:
+    exponent = int(round(-np.log10(fraction)))
+    return (
+        output.parent
+        / NEWTON_PART_DIRECTORY_NAME
+        / (
+            f"{_row_slug(case_name, requested_cells)}-{exterior_kind}"
+            f"-perturb-1e-{exponent}.json"
+        )
+    )
+
+
+def _solver_functions(operator: Any, requested_class: int, target_current: float):
+    mapped = operator.flux_map(
+        requested_class=requested_class, target_current=target_current
+    )
+    shadowed = operator.flux_map_with_shadow(
+        requested_class=requested_class, target_current=target_current
+    )
+
+    def shadow_mask(state):
+        return operator.residual_shadow_mask(state, requested_class)
+
+    def promoted_shadow_mask(state, previous):
+        return operator.residual_shadow_mask(
+            state, requested_class, previous_shadow=previous
+        )
+
+    return mapped, shadowed, shadow_mask, promoted_shadow_mask
+
+
+def _device_value(value: Any) -> Any:
+    array = np.asarray(jax.device_get(value))
+    if array.shape == ():
+        return array.item()
+    return array
+
+
+def _fixed_point_telemetry(history: fixed_point.FixedPointResult) -> dict[str, Any]:
+    """Persist the production result fields without adding an observer."""
+    telemetry = {
+        name: _device_value(getattr(history, name))
+        for name in history._fields
+        if name not in {"state", "trajectory_state"}
+    }
+    state = np.asarray(history.state, dtype=np.float64)
+    trajectory = np.asarray(history.trajectory_state)
+    telemetry["state"] = {
+        "shape": list(state.shape),
+        "sha256_binary64": _array_digest(state),
+    }
+    telemetry["trajectory_state"] = {
+        "shape": list(trajectory.shape),
+        "sha256_binary64": _array_digest(trajectory),
+    }
+    telemetry["termination_name"] = fixed_point.FixedPointTerminationReason(
+        int(history.termination_reason)
+    ).name.lower()
+    telemetry["krylov_action_qualification_name"] = (
+        fixed_point.KrylovActionQualification(
+            int(history.krylov_action_qualification)
+        ).name.lower()
+    )
+    return telemetry
+
+
+def _point_error(point: Any, reference: Any) -> float | None:
+    if point is None or reference is None:
+        return None
+    value = np.asarray(point, dtype=np.float64)
+    target = np.asarray(reference, dtype=np.float64)
+    if value.shape != (2,) or target.shape != (2,):
+        return None
+    return float(np.linalg.norm(value - target))
+
+
+def _terminal_measurement(
+    operator: Any,
+    state: np.ndarray,
+    analytic: np.ndarray,
+    analytic_read: dict[str, Any],
+    closed_form_axis: np.ndarray,
+    closed_form_x_point: np.ndarray | None,
+    span: float,
+    grid_count: int,
+    pitch: float,
+    requested_class: int,
+    target_current: float,
+) -> dict[str, Any]:
+    topology = _topology(operator, state)
+    axis_read_error = _point_error(
+        topology.get("axis_rz_m"), analytic_read.get("axis_rz_m")
+    )
+    x_read_error = _point_error(
+        topology.get("x_point_rz_m"), analytic_read.get("x_point_rz_m")
+    )
+    axis_closed_error = _point_error(topology.get("axis_rz_m"), closed_form_axis)
+    x_closed_error = _point_error(topology.get("x_point_rz_m"), closed_form_x_point)
+    topology_matches = topology.get("class") == analytic_read.get("class")
+    positions_within_pitch = (
+        axis_closed_error is not None
+        and axis_closed_error <= pitch
+        and (
+            closed_form_x_point is None
+            or (x_closed_error is not None and x_closed_error <= pitch)
+        )
+    )
+    try:
+        booked_current = _current_booking(
+            operator, state, requested_class, target_current
+        )[0]
+    except Exception as error:
+        booked_current = {
+            "status": "unavailable",
+            "exception_type": type(error).__name__,
+            "exception_text": str(error),
+        }
+    return {
+        "distance_to_analytic": _norms(state - analytic, span, grid_count),
+        "topology": topology,
+        "axis_error_to_analytic_read_m": axis_read_error,
+        "x_point_error_to_analytic_read_m": x_read_error,
+        "axis_error_to_closed_form_m": axis_closed_error,
+        "x_point_error_to_closed_form_m": x_closed_error,
+        "topology_class_matches_analytic_read": topology_matches,
+        "analytic_nulls_within_one_pitch": positions_within_pitch,
+        "booked_current": booked_current,
+    }
+
+
+def _render_newton_terminal(
+    path: Path,
+    case_name: str,
+    exterior_kind: str,
+    coordinates: np.ndarray,
+    analytic: np.ndarray,
+    terminal: np.ndarray,
+    wall: np.ndarray,
+    boundary: np.ndarray,
+    analytic_read: dict[str, Any],
+    terminal_measurement: dict[str, Any],
+    terminal_residual: float,
+    converged: bool,
+) -> None:
+    figure, axis = plt.subplots(1, 1, figsize=(5.5, 5.2), constrained_layout=True)
+    analytic_r, analytic_z, analytic_field = certificate._raster_field(
+        coordinates, analytic, wall
+    )
+    terminal_r, terminal_z, terminal_field = certificate._raster_field(
+        coordinates, terminal, wall
+    )
+    levels = poloidal.contour_levels(
+        np.concatenate((analytic_field.ravel(), terminal_field.ravel())), count=12
+    )
+    wall_units = (wall,)
+    poloidal.draw_flux_contours(
+        axis, analytic_r, analytic_z, analytic_field, levels, color="#3366cc"
+    )
+    poloidal.draw_flux_contours(
+        axis, terminal_r, terminal_z, terminal_field, levels, color="#cc7722"
+    )
+    poloidal.draw_boundary(axis, boundary[:, 0], boundary[:, 1], color="#3366cc")
+    poloidal.draw_wall(axis, units=wall_units)
+    poloidal.draw_nulls(
+        axis,
+        magnetic_axis=analytic_read["axis_rz_m"],
+        x_points=analytic_read["x_point_rz_m"],
+        style=DEFAULT_INK.variant(
+            axis_marker="^", axis_color="#3366cc", xpoint_color="#3366cc"
+        ),
+        contain=wall_units,
+    )
+    terminal_topology = terminal_measurement["topology"]
+    poloidal.draw_nulls(
+        axis,
+        magnetic_axis=terminal_topology["axis_rz_m"],
+        x_points=terminal_topology["x_point_rz_m"],
+        style=DEFAULT_INK.variant(
+            axis_marker="^", axis_color="#cc7722", xpoint_color="#cc7722"
+        ),
+        contain=wall_units,
+    )
+    poloidal_axes(axis)
+    axis.set_title(
+        "analytic blue / terminal ochre; shared Wb levels\n"
+        f"residual={terminal_residual:.3e}; converged={converged}",
+        fontsize=8,
+    )
+    figure.suptitle(f"{case_name} · {exterior_kind} · 1e-2 perturbation", fontsize=10)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
+def _build_newton_operator(
+    exterior_kind: str,
+    case_name: str,
+    requested_cells: int,
+    mode: str,
+) -> dict[str, Any]:
+    carrier_case, source_case, exact = certificate._case(case_name)
+    machine = certificate._case_machine(case_name, carrier_case, exact, requested_cells)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic = certificate._exact_state(case_name, exact, coordinates)
+
+    set_support_clip_mode("chord")
+    empty_operator = oracle_fixture.forward_operator(source_case, machine)
+    fixture_physical = oracle_fixture.exact_current_moments(
+        source_case, empty_operator, analytic
+    )
+    fixture_coefficients = empty_operator.coupling_current_moments(fixture_physical)
+    fixture_internal = np.asarray(
+        empty_operator.current_moment_image(fixture_coefficients), dtype=np.float64
+    )
+    fixture_external = analytic - fixture_internal
+    fixture_operator = oracle_fixture.forward_operator(
+        source_case, machine, fixture_external
+    )
+    target_current, _centroid, target_receipt = certificate._closed_form_current_target(
+        case_name, source_case, fixture_operator, fixture_physical
+    )
+    requested_class = int(
+        TopologyClass.DIVERTED
+        if certificate._is_diverted_case(case_name)
+        else TopologyClass.LIMITED
+    )
+
+    if exterior_kind == "fixture_exterior_control":
+        external = fixture_external
+        closure_internal = fixture_internal
+        operator = fixture_operator
+        exterior_receipt = {
+            "kind": exterior_kind,
+            "certificate_changed": False,
+            "definition": (
+                "committed fixture exterior: analytic total flux minus fixture "
+                "whole-cell analytic moment image"
+            ),
+            "analytic_booking_amplitude": 1.0,
+        }
+    else:
+        set_support_clip_mode("exact")
+        allocation_topology = _topology(fixture_operator, analytic)
+        booked = fixture_operator.cell_current_moments(
+            jnp.asarray(analytic), requested_class
+        )
+        booked_total = float(jnp.sum(booked.cell_current))
+        amplitude = float(
+            fixture_operator.current_normalisation_amplitude(
+                target_current, booked_total
+            )
+        )
+        normalised = fixture_operator.scaled_current_moments(booked, amplitude)
+        exact_booking_internal = np.asarray(
+            fixture_operator.current_moment_image(normalised), dtype=np.float64
+        )
+        external = analytic - exact_booking_internal
+        closure_internal = exact_booking_internal
+        operator = oracle_fixture.forward_operator(source_case, machine, external)
+        exterior_receipt = {
+            "kind": exterior_kind,
+            "certificate_changed": False,
+            "probe_only": True,
+            "definition": (
+                "analytic total flux minus the target-normalised exact-clip "
+                "internal image evaluated once at the analytic state"
+            ),
+            "analytic_booking_topology": allocation_topology,
+            "analytic_booking_current_a": booked_total,
+            "analytic_booking_amplitude": amplitude,
+        }
+
+    set_support_clip_mode(mode)
+    analytic_read = _topology(operator, analytic)
+    span = abs(
+        float(analytic_read["axis_flux_wb"]) - float(analytic_read["boundary_flux_wb"])
+    )
+    construction_floor = _norms(
+        external + closure_internal - analytic, span, len(machine.node)
+    )
+    if construction_floor["relative_sup_of_span"] > FIXED_POINT_TOLERANCE:
+        raise RuntimeError(
+            f"{exterior_kind} {case_name} does not provide the required analytic "
+            f"closure: {construction_floor['relative_sup_of_span']:.17g}"
+        )
+    return {
+        "carrier_case": carrier_case,
+        "source_case": source_case,
+        "exact": exact,
+        "machine": machine,
+        "coordinates": coordinates,
+        "analytic": analytic,
+        "operator": operator,
+        "target_current": target_current,
+        "target_receipt": target_receipt,
+        "requested_class": requested_class,
+        "analytic_read": analytic_read,
+        "span": span,
+        "construction_floor": construction_floor,
+        "exterior": exterior_receipt,
+        "external_sha256_binary64": _array_digest(external),
+    }
+
+
+def _measure_newton_row(
+    output: Path,
+    exterior_kind: str,
+    case_name: str,
+    requested_cells: int,
+    mode: str,
+) -> dict[str, Any]:
+    started = perf_counter()
+    built = _build_newton_operator(exterior_kind, case_name, requested_cells, mode)
+    machine = built["machine"]
+    analytic = built["analytic"]
+    operator = built["operator"]
+    coordinates = built["coordinates"]
+    grid_count = len(machine.node)
+    pitch = float(np.sqrt(np.median(np.asarray(machine.area))))
+    closed_form_axis = np.asarray(built["exact"].magnetic_axis, dtype=np.float64)
+    closed_form_x_point = (
+        np.asarray(certificate.X_POINT_M, dtype=np.float64)
+        if certificate._is_diverted_case(case_name)
+        else None
+    )
+    direction = _smooth_directions(coordinates, 1, RANDOM_SEED)[0]
+    direction /= float(np.max(np.abs(direction[:grid_count])))
+    initials = [
+        analytic + fraction * built["span"] * direction
+        for fraction in PERTURBATION_FRACTIONS
+    ]
+    mapped, shadowed, shadow_mask, promoted_shadow_mask = _solver_functions(
+        operator, built["requested_class"], built["target_current"]
+    )
+
+    def solve(initial):
+        return fixed_point.newton_krylov(
+            mapped,
+            initial,
+            newton_steps=NEWTON_STEPS,
+            gmres_iterations=recovery.KRYLOV_ITERATIONS,
+            warmup=0,
+            convergence_tolerance=FIXED_POINT_TOLERANCE,
+            active_set_steps=ACTIVE_SET_STEPS,
+            shadow_mask_fn=shadow_mask,
+            promoted_shadow_mask_fn=promoted_shadow_mask,
+            shadowed_map_fn=shadowed,
+            precision=Precision.DOUBLE,
+        )
+
+    row = {
+        "schema": "nova.oracle-start-newton-row",
+        "version": 1,
+        "source_revision": _source_revision(),
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "realised_cells": grid_count,
+        "mode": mode,
+        "exterior": built["exterior"],
+        "external_sha256_binary64": built["external_sha256_binary64"],
+        "analytic_fixed_point_construction_floor": built["construction_floor"],
+        "analytic_topology_read": built["analytic_read"],
+        "analytic_flux_span_wb": built["span"],
+        "characteristic_pitch_m": pitch,
+        "analytic_current_target_a": built["target_current"],
+        "analytic_current_target_receipt": built["target_receipt"],
+        "smooth_direction_sha256_binary64": _array_digest(direction),
+        "compiled_program_count": 1,
+        "perturbations": [],
+        "completed": False,
+        "wall_seconds": None,
+    }
+    part = _newton_part_path(output, exterior_kind, case_name, requested_cells)
+    _write_json(part, row)
+
+    compile_started = perf_counter()
+    compiled_solve = jax.jit(solve).lower(jnp.asarray(initials[0])).compile()
+    row["compile_wall_seconds"] = perf_counter() - compile_started
+    _write_json(part, row)
+
+    figure_state = None
+    figure_terminal = None
+    for fraction, initial in zip(PERTURBATION_FRACTIONS, initials, strict=True):
+        arm_started = perf_counter()
+        history = compiled_solve(jnp.asarray(initial))
+        jax.block_until_ready(history.state)
+        terminal = np.asarray(history.state, dtype=np.float64)
+        terminal_measurement = _terminal_measurement(
+            operator,
+            terminal,
+            analytic,
+            built["analytic_read"],
+            closed_form_axis,
+            closed_form_x_point,
+            built["span"],
+            grid_count,
+            pitch,
+            built["requested_class"],
+            built["target_current"],
+        )
+        initial_distance = _norms(initial - analytic, built["span"], grid_count)
+        terminal_distance = terminal_measurement["distance_to_analytic"]
+        residual = float(history.residual)
+        contracted = (
+            terminal_distance["relative_sup_of_span"]
+            < initial_distance["relative_sup_of_span"]
+        )
+        returned = (
+            residual <= FIXED_POINT_TOLERANCE
+            and terminal_distance["relative_sup_of_span"] <= FIXED_POINT_TOLERANCE
+            and terminal_measurement["topology_class_matches_analytic_read"]
+            and terminal_measurement["analytic_nulls_within_one_pitch"]
+        )
+        trace = np.asarray(history.trace, dtype=np.float64)
+        finite_trace = trace[np.isfinite(trace)]
+        arm = {
+            "requested_relative_perturbation": fraction,
+            "initial_distance_to_analytic": initial_distance,
+            "initial_relative_fixed_point_residual_from_result_trace": (
+                float(finite_trace[0]) if len(finite_trace) else None
+            ),
+            "terminal": terminal_measurement,
+            "contracted_toward_analytic": contracted,
+            "left_analytic_neighbourhood": not contracted,
+            "residual_at_or_below_1e_12": residual <= FIXED_POINT_TOLERANCE,
+            "state_distance_at_or_below_1e_12": (
+                terminal_distance["relative_sup_of_span"] <= FIXED_POINT_TOLERANCE
+            ),
+            "returned_to_analytic_fixed_point": returned,
+            "fixed_point_result": _fixed_point_telemetry(history),
+            "solve_wall_seconds": perf_counter() - arm_started,
+        }
+        row["perturbations"].append(arm)
+        if fraction == 1.0e-2:
+            figure_state = terminal
+            figure_terminal = arm
+        _write_json(
+            _newton_arm_path(
+                output, exterior_kind, case_name, requested_cells, fraction
+            ),
+            arm,
+        )
+        _write_json(part, row)
+        print(
+            f"NEWTON_ARM_DONE case={case_name} cells={abs(requested_cells)} "
+            f"exterior={exterior_kind} mode={mode} perturbation={fraction:.0e} "
+            f"residual={residual:.8e} "
+            f"distance={terminal_distance['relative_sup_of_span']:.8e} "
+            f"returned={returned}",
+            flush=True,
+        )
+
+    if figure_state is None or figure_terminal is None:
+        raise RuntimeError("the 1e-2 terminal state was not retained")
+    figure = (
+        output.parent / f"{_row_slug(case_name, requested_cells)}-{exterior_kind}.png"
+    )
+    _render_newton_terminal(
+        figure,
+        case_name,
+        exterior_kind,
+        coordinates,
+        analytic,
+        figure_state,
+        np.asarray(machine.wall_node, dtype=np.float64),
+        certificate._boundary(case_name, built["exact"]),
+        built["analytic_read"],
+        figure_terminal["terminal"],
+        float(figure_terminal["fixed_point_result"]["residual"]),
+        bool(figure_terminal["fixed_point_result"]["converged"]),
+    )
+    row["figure"] = {
+        "filesystem_path": str(figure.relative_to(ROOT)),
+        "project_absolute_src": f"/nova/{figure.relative_to(ROOT / 'docs')}",
+        "sha256": hashlib.sha256(figure.read_bytes()).hexdigest(),
+        "caption": (
+            "Terminal 1e-2 iterate in ochre against analytic blue on shared "
+            "levels, both topology reads, and the authored wall."
+        ),
+    }
+    row["returned_for_every_perturbation"] = all(
+        arm["returned_to_analytic_fixed_point"] for arm in row["perturbations"]
+    )
+    row["wall_seconds"] = perf_counter() - started
+    row["completed"] = True
+    _write_json(part, row)
+    return row
+
+
+def _write_newton_report(path: Path, receipt: dict[str, Any]) -> None:
+    lines = [
+        "# Analytic-start Newton contraction",
+        "",
+        (
+            "Variant `fixture_exterior_control` is the committed certificate "
+            "fixture. Variant `reposed_exact_booking_iteration_probe` changes no "
+            "certificate: it poses the exterior once so the analytic exact booking "
+            "is a fixed point, solely to isolate the production iteration."
+        ),
+        "",
+        (
+            "| Exterior | Row | Mode | Perturbation | Residual | Distance / span "
+            "| Axis error (m) | X error (m) | Returned |"
+        ),
+        "|---|---|---|---:|---:|---:|---:|---:|---|",
+    ]
+    for row in receipt["rows"]:
+        for arm in row["perturbations"]:
+            terminal = arm["terminal"]
+            x_error = terminal["x_point_error_to_closed_form_m"]
+            lines.append(
+                f"| {row['exterior']['kind']} | {row['case']} "
+                f"{abs(row['requested_cells'])} | "
+                f"{row['mode']} | {arm['requested_relative_perturbation']:.0e} | "
+                f"{arm['fixed_point_result']['residual']:.3e} | "
+                f"{terminal['distance_to_analytic']['relative_sup_of_span']:.3e} | "
+                f"{terminal['axis_error_to_closed_form_m']:.3e} | "
+                f"{'n/a' if x_error is None else f'{x_error:.3e}'} | "
+                f"{arm['returned_to_analytic_fixed_point']} |"
+            )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def run_newton_probe(output: Path, report_directory: Path) -> dict[str, Any]:
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("the measurement requires JAX double precision")
+    lane = _gpu_allocation()
+    started = perf_counter()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    original_mode = support_clip_mode()
+    rows = []
+    try:
+        for exterior_kind, case_name, requested_cells, mode in NEWTON_ROWS:
+            row = _measure_newton_row(
+                output, exterior_kind, case_name, requested_cells, mode
+            )
+            rows.append(row)
+            _write_json(
+                output,
+                {
+                    "schema": "nova.oracle-start-newton-contraction",
+                    "version": 1,
+                    "source_revision": _source_revision(),
+                    "production_code_modified": False,
+                    "rows": rows,
+                    "completed": False,
+                },
+            )
+    finally:
+        set_support_clip_mode(original_mode)
+    receipt = {
+        "schema": "nova.oracle-start-newton-contraction",
+        "version": 1,
+        "source_revision": _source_revision(),
+        "production_code_modified": False,
+        "lane": {
+            **lane,
+            "persistent_compilation_cache": cache.receipt(),
+            "wall_seconds": perf_counter() - started,
+            "exit_marker": "ORACLE_START_NEWTON_CONTRACTION_EXIT=0",
+        },
+        "design": {
+            "perturbation_relative_sup_fractions": PERTURBATION_FRACTIONS,
+            "smooth_random_seed": RANDOM_SEED,
+            "compiled_programs_per_row": 1,
+            "newton_steps": NEWTON_STEPS,
+            "active_set_steps": ACTIVE_SET_STEPS,
+            "gmres_iterations": recovery.KRYLOV_ITERATIONS,
+            "warmup": 0,
+            "fixed_point_tolerance": FIXED_POINT_TOLERANCE,
+            "telemetry_source": "FixedPointResult without per-step observers",
+        },
+        "rows": rows,
+        "completed": True,
+    }
+    _write_json(output, receipt)
+    _write_newton_report(report_directory / "newton-report.md", receipt)
+    return receipt
+
+
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--output", type=Path, default=DEFAULT_NEWTON_OUTPUT)
     parser.add_argument(
         "--report-directory", type=Path, default=DEFAULT_REPORT_DIRECTORY
     )
@@ -1499,19 +2187,18 @@ def _parse() -> argparse.Namespace:
 
 def main() -> None:
     arguments = _parse()
-    receipt = run(arguments.output, arguments.report_directory)
+    receipt = run_newton_probe(arguments.output, arguments.report_directory)
     print(
         json.dumps(
             {
                 "completed_rows": len(receipt["rows"]),
-                "nonlinear_solve_entered": receipt["nonlinear_solve_entered"],
-                "linear_solve_entered": receipt["linear_solve_entered"],
+                "completed": receipt["completed"],
             },
             sort_keys=True,
         ),
         flush=True,
     )
-    print("ORACLE_START_MAP_DECOMPOSITION_EXIT=0", flush=True)
+    print("ORACLE_START_NEWTON_CONTRACTION_EXIT=0", flush=True)
 
 
 if __name__ == "__main__":

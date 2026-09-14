@@ -3519,7 +3519,6 @@ def _array_signature_summary(records: list[dict[str, Any]]) -> list[dict[str, An
             record["dtype"],
             tuple(record["shape"]),
             record["opcode"],
-            record["operation_name"],
             record["source_hint"],
         )
         if key not in grouped:
@@ -3531,7 +3530,6 @@ def _array_signature_summary(records: list[dict[str, Any]]) -> list[dict[str, An
                     "element_count",
                     "logical_size_in_bytes",
                     "opcode",
-                    "operation_name",
                     "source_hint",
                 )
             }
@@ -3881,6 +3879,22 @@ def _write_memory_identification_report(
     signature_rows = [
         item for item in exact["qualifying_array_signatures"] if item["dtype"] != "pred"
     ]
+    exact_predicate = max(
+        (
+            item
+            for item in exact["qualifying_array_signatures"]
+            if item["dtype"] == "pred"
+        ),
+        key=lambda item: item["logical_size_in_bytes"],
+    )
+    whole_predicate = max(
+        (
+            item
+            for item in whole["qualifying_array_signatures"]
+            if item["dtype"] == "pred"
+        ),
+        key=lambda item: item["logical_size_in_bytes"],
+    )
     lines = [
         "<!-- exact-solve-memory-headline:start -->",
         "# Exact-clip solve memory is dominated by padded support quadrature",
@@ -3961,6 +3975,16 @@ def _write_memory_identification_report(
         f"`{exact['compiler_artifacts']['qualifying_array_census_gzip']}`; the "
         "complete optimized HLO is adjacent. The equivalent whole-cell census is "
         f"`{whole['compiler_artifacts']['qualifying_array_census_gzip']}`.",
+        "",
+        f"The largest exact predicate is `pred{exact_predicate['shape']}` "
+        f"({exact_predicate['logical_size_in_bytes'] / 2**20:.6g} MiB), produced "
+        f"by HLO `{exact_predicate['opcode']}` on the same 196480-point middle "
+        f"dimension. The whole-cell counterpart is "
+        f"`pred{whole_predicate['shape']}` "
+        f"({whole_predicate['logical_size_in_bytes'] / 2**20:.6g} MiB). Thus the "
+        "`jit_bitwise_and` executable name correctly exposes the expanded predicate "
+        "family, but the total is dominated by many repeated 3.0039 GiB binary64 "
+        "design and JVP values rather than one 279 GiB boolean allocation.",
         "",
         "| dtype and shape | GiB each | HLO opcode | instruction count | "
         "authored source |",

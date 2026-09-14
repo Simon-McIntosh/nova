@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T08:25:07",
+  "updated": "2026-09-14T08:34:29",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -152991,6 +152991,195 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T055710370604-cca-coupling-moment-order-evaluation",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-coupling-moment-order-evaluation",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 837,
+                "cached_input_tokens": 226859,
+                "input_tokens": 227728,
+                "output_tokens": 2531,
+                "reasoning_output_tokens": 487,
+                "total_tokens": 230259,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Critical evaluation, no production code change: the design under test is the lead's, that the interaction matrix stays frozen and the clip enters only through the current moments as a matmul. Never open any receipt larger than one megabyte in an editor (load it with json). Facts at this base: nova/equilibrium/forward_operator.py carries frozen linear-basis kernel blocks per target set (plasma_target, plasma_target_r, plasma_target_z: the kernel integrated against a uniform, an r-linear and a z-linear basis over each full atomic hexagon), and coupling_current_moments converts a cell's physical first moments into linear-basis coefficients by inverting the full cell's second-moment matrix; benchmarks/frozen_current_flux_image_gate.py freezes the oracle's per-cell currents from the analytic Solov'ev field and images them, and it measured at weak 110 cells a smooth one to two percent of span error with the first-order route roughly doubling the rms error of the zeroth-order route, while the per-trip clipped-polygon blocks of _clipped_coupling_geometry (polygon_analytic_flux_moments over each clipped polygon, the route the lead has now ruled out because it changes the Biot geometry per trip) reached 0.000266 of span against a 0.00603 zeroth-order floor (docs/figures/cut-cell-current-attribution/gate-b and first-order-coupling, receipt.json and report.md). Build one evaluation benchmark that, for the weak and moderate static rows at 110 and 300 cells, takes the oracle's exact clipped polygons and current density, and computes at every plasma target and at the wall and grid targets the flux image by four routes: exact Biot of the clipped polygon (the reference, polygon_analytic_flux_moments over the clipped polygon or the exact kernel quadrature, whichever the existing single-cell test proved to 2e-13); order zero, the clipped current at the atomic centroid through the uniform block; order one, the committed coupling_current_moments conversion through the three linear blocks; order two, a quadratic basis over the atomic hexagon (uniform, r, z, rr, rz, zz) with coefficients chosen so the basis density reproduces the clipped current's moments up to second order about the atomic centroid, imaged through blocks you compute in the benchmark for the quadratic terms by the same kernel integration the linear blocks use (state how). Report per route the rms and sup error as a fraction of the flux span, split four ways: cut cells against whole cells as sources, and self plus first-ring neighbours against far targets, so a near-field truncation reads differently from a moment defect. Then explain, with the numbers, why order one measured worse than order zero on the discriminator, testing at least these candidates: the projection of a density confined to a sub-polygon onto a linear basis over the whole hexagon; the moment reference point; a sign or axis convention in the first-order blocks. Run the computation in ONE SLURM job (H200: betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:59:00, JAX_PLATFORMS=cuda,cpu and TMPDIR=/tmp exported in the submit environment and in the payload, root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python with PYTHONPATH at the worktree, sbatch detached from your shell, --output in the run directory, the four rows sharded inside the allocation with receipts persisted as each lands). One figure per row of error against target distance in pitch units for the four routes, SVG, under docs/figures/cut-cell-current-attribution/moment-order. The verdict states in one sentence which order, if any, reaches 0.000266 of span with frozen blocks, with the figure, or that no fixed order over the atomic cell does and what the near-field error floor is. Write the manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 4.0,
+          "goal": "Measure, on the frozen-current oracle, the flux-image error of the frozen kernel blocks times the clipped cell current expanded to order zero, one and two about the atomic centroid, against the exact Biot image of the clipped polygons",
+          "id": "cca-coupling-moment-order-evaluation",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T05:57:11Z",
+            "read_at": "2026-09-14T05:57:12Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 0.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T055710370604-cca-coupling-moment-order-evaluation/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/coupling_moment_order_evaluation.py",
+            "docs/figures/cut-cell-current-attribution/moment-order",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/moment-order"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19e-cca-moment-order",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T05:57:20Z",
+        "completed_at": "2026-09-14T06:32:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2097,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2097,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "d540db1394c6e00ecff5542fc4fea8ec8c02602e",
+        "commits": [
+          "c2612255e2c3dc0a49034e00401eda818c9a9d79",
+          "9f9c5b9b6738471b8e1555cfd6552f3dc9b1cae3"
+        ],
+        "changed_lines": {
+          "added": 41390,
+          "removed": 0,
+          "files": 10
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1270011: benchmarks/coupling_moment_order_evaluation.py over weak and moderate at 110 and 300 cells in one allocation, exit 0:0 in 3m53s; jq asserted four rows with complete four-way splits, order two under 0.000266 of span and order one above it",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T055710370604-cca-coupling-moment-order-evaluation/measurement-1270011.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T055710370604-cca-coupling-moment-order-evaluation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a09e7d-d1aa-7022-96fb-7f7f34b90bd9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9673344,
+            "cached_input_tokens_cumulative": 9673344,
+            "input_tokens": 9931435,
+            "input_tokens_cumulative": 9931435,
+            "output_tokens": 27455,
+            "output_tokens_cumulative": 27455,
+            "reasoning_output_tokens": 8945,
+            "reasoning_output_tokens_cumulative": 8945
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T06:32:17Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 1.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T06:32:17Z"
+            }
+          ],
+          "notional_cost_usd": 91.2746,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 9673344,
+          "cumulative_input_tokens": 19604779,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 36400
+        },
+        "follow_on_paths": [
+          "state/support"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-coupling-moment-order-evaluation",
+          "session_id": "01a09e7d-d1aa-7022-96fb-7f7f34b90bd9",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T06:32:17Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 66.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -153303,6 +153492,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2449
+    "_version": 2450
   }
 }

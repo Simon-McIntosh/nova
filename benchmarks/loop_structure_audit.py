@@ -370,6 +370,13 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--skip-node-count", action="store_true")
+    parser.add_argument(
+        "--budgets",
+        default="",
+        help="comma-separated budget names to measure (default: all); lets one "
+        "job run each budget in a fresh process so LLVM section memory never "
+        "accumulates across compiles",
+    )
     parser.add_argument("--deadline-s", type=float, default=2800.0)
     parser.add_argument(
         "--finalize-only",
@@ -377,6 +384,11 @@ def main(argv=None) -> int:
         help="assemble the report and figure from already-persisted parts",
     )
     args = parser.parse_args(argv)
+    selected = set(args.budgets.split(",")) if args.budgets else None
+
+    def want(name: str) -> bool:
+        return selected is None or name in selected
+
     run_dir = args.out
     parts_dir = run_dir / "parts"
     parts_dir.mkdir(parents=True, exist_ok=True)
@@ -447,6 +459,8 @@ def main(argv=None) -> int:
         if _wall() > args.deadline_s:
             print(f"DEADLINE before {name}", flush=True)
             break
+        if not want(name):
+            continue
         if (parts_dir / f"{name}.json").exists():
             continue
         dbl = {**base_options, name: doubled}
@@ -469,6 +483,8 @@ def main(argv=None) -> int:
     # warmup: the certificate pins it to zero, so doubling is degenerate.
     if _wall() > args.deadline_s:
         print("DEADLINE before warmup", flush=True)
+    elif not want("warmup"):
+        pass
     elif not (parts_dir / "warmup.json").exists():
         part = {
             "budget": "warmup",
@@ -492,6 +508,8 @@ def main(argv=None) -> int:
         if _wall() > args.deadline_s:
             print(f"DEADLINE before {name}", flush=True)
             break
+        if not want(name):
+            continue
         if (parts_dir / f"{name}.json").exists():
             continue
         attr = (
@@ -513,15 +531,18 @@ def main(argv=None) -> int:
         }
         try:
             with _patched(attr, value):
-                measure_pair(
-                    part,
-                    profile,
-                    request,
-                    initial_flux,
-                    external,
-                    base_options,
-                    base_options,
+                count_doubled, wall_doubled = _compile_and_count(
+                    profile, request, initial_flux, external, base_options
                 )
+            part.update(
+                {
+                    "base_instructions": base_count,
+                    "doubled_instructions": count_doubled,
+                    "ratio": count_doubled / base_count if base_count else None,
+                    "base_compile_wall_s": parts["baseline"]["base_compile_wall_s"],
+                    "doubled_compile_wall_s": wall_doubled,
+                }
+            )
             part["verdict"] = "unrolled" if part["ratio"] >= 1.5 else "scanned_or_fixed"
         except Exception as exc:
             part["error"] = f"{type(exc).__name__}: {exc}"
@@ -530,7 +551,10 @@ def main(argv=None) -> int:
     # --- topology candidate table capacity: same mesh, larger locator
     if _wall() > args.deadline_s:
         print("DEADLINE before topology_table_capacity", flush=True)
-    elif not (parts_dir / "topology_table_capacity.json").exists():
+    elif (
+        want("topology_table_capacity")
+        and not (parts_dir / "topology_table_capacity.json").exists()
+    ):
         part = {
             "budget": "topology_table_capacity",
             "baseline_value": 30,
@@ -569,7 +593,8 @@ def main(argv=None) -> int:
     ):
         print("DEADLINE before profile_node_count", flush=True)
     elif (
-        not args.skip_node_count
+        want("profile_node_count")
+        and not args.skip_node_count
         and not (parts_dir / "profile_node_count.json").exists()
     ):
         part = {

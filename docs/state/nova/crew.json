@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T07:56:13",
+  "updated": "2026-09-14T08:11:36",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4538,6 +4538,15 @@
       },
       {
         "id": "s19e-cca-moment-order",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
+      },
+      {
+        "id": "s19e-cca-oracle-start",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -153276,6 +153285,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2446
+    "_version": 2447
   }
 }

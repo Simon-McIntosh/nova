@@ -191,15 +191,19 @@ def clipped_support_field_integrals(
     cut_count = jnp.sum(boundary, dtype=jnp.int32)
     cut_index = jnp.nonzero(boundary, size=capacity, fill_value=0)[0]
     active = jnp.arange(capacity, dtype=jnp.int32) < cut_count
+    cut_vertices = vertices[cut_index]
+    cut_vertex_count = count[cut_index]
+    cut_centroids = centroids[cut_index]
 
     def one_cut(entry):
-        cell, live = entry
+        cell, polygon, polygon_count, centroid, live = entry
 
-        def integrate(index):
+        def integrate(operand):
+            index, carried_vertices, carried_count, carried_centroid = operand
             point, weight = _quadrature_from_arrays(
-                vertices[index][None, ...],
-                count[index][None],
-                centroids[index][None, ...],
+                carried_vertices[None, ...],
+                carried_count[None],
+                carried_centroid[None, ...],
                 jnp.ones(1, dtype=bool),
             )
             value = _integrate_points(
@@ -216,14 +220,17 @@ def clipped_support_field_integrals(
         return jax.lax.cond(
             live,
             jax.checkpoint(integrate),
-            lambda _index: (
+            lambda _operand: (
                 jnp.asarray(0.0, dtype=vertices.dtype),
                 jnp.asarray(0.0, dtype=vertices.dtype),
             ),
-            cell,
+            (cell, polygon, polygon_count, centroid),
         )
 
-    cut_pressure, cut_field = jax.lax.map(one_cut, (cut_index, active))
+    cut_pressure, cut_field = jax.lax.map(
+        one_cut,
+        (cut_index, cut_vertices, cut_vertex_count, cut_centroids, active),
+    )
     pressure_volume = whole_integrals.pressure_volume.at[cut_index].add(
         jnp.where(active, cut_pressure, 0.0)
     )
@@ -242,15 +249,14 @@ def _integrate_current_points(
     weights,
     field: FluxFieldPolynomial,
     cell_index,
-    moment_centre,
+    moment_centres,
     profile,
 ) -> ClippedCurrentMoments:
     psi_norm, _radial_gradient, _vertical_gradient = field.sample(points, cell_index)
     density = profile.current_density(points[..., 0], psi_norm)
     weighted = density * weights
     first = jnp.sum(
-        weighted[..., None]
-        * (points - jnp.asarray(moment_centre)[cell_index, None, :]),
+        weighted[..., None] * (points - jnp.asarray(moment_centres)[:, None, :]),
         axis=1,
     )
     return ClippedCurrentMoments(
@@ -298,15 +304,19 @@ def clipped_support_current_moments(
     cut_count = jnp.sum(boundary, dtype=jnp.int32)
     cut_index = jnp.nonzero(boundary, size=capacity, fill_value=0)[0]
     active = jnp.arange(capacity, dtype=jnp.int32) < cut_count
+    cut_vertices = vertices[cut_index]
+    cut_vertex_count = count[cut_index]
+    cut_centroids = centroids[cut_index]
 
     def one_cut(entry):
-        cell, live = entry
+        cell, polygon, polygon_count, centroid, live = entry
 
-        def integrate(index):
+        def integrate(operand):
+            index, carried_vertices, carried_count, carried_centroid = operand
             point, weight = _quadrature_from_arrays(
-                vertices[index][None, ...],
-                count[index][None],
-                centroids[index][None, ...],
+                carried_vertices[None, ...],
+                carried_count[None],
+                carried_centroid[None, ...],
                 jnp.ones(1, dtype=bool),
             )
             value = _integrate_current_points(
@@ -314,7 +324,7 @@ def clipped_support_current_moments(
                 weight,
                 field,
                 jnp.asarray([index], dtype=jnp.int32),
-                centroids,
+                carried_centroid[None, ...],
                 profile,
             )
             return (
@@ -327,11 +337,14 @@ def clipped_support_current_moments(
         return jax.lax.cond(
             live,
             jax.checkpoint(integrate),
-            lambda _index: (zero, zero, zero),
-            cell,
+            lambda _operand: (zero, zero, zero),
+            (cell, polygon, polygon_count, centroid),
         )
 
-    cut_current, cut_radial, cut_vertical = jax.lax.map(one_cut, (cut_index, active))
+    cut_current, cut_radial, cut_vertical = jax.lax.map(
+        one_cut,
+        (cut_index, cut_vertices, cut_vertex_count, cut_centroids, active),
+    )
 
     def scatter(whole_value, cut_value):
         return whole_value.at[cut_index].add(jnp.where(active, cut_value, 0.0))

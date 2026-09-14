@@ -1,0 +1,49 @@
+{
+  "analytic_null_read": {
+    "admitted": true,
+    "axis_admitted": true,
+    "x_candidate_count": 0,
+    "x_point_admitted": false,
+    "x_point_required": false
+  },
+  "case": "weak-rotation-reactor-static",
+  "characteristic_pitch_m": 0.09776228571840812,
+  "distance_to_analytic": {
+    "axis_error_in_pitch": 1.0660946530342195,
+    "axis_error_m": 0.10422385007279852,
+    "psi_rms_fraction_of_span": 0.11920137657117974,
+    "x_point_error_in_pitch": null,
+    "x_point_error_m": null
+  },
+  "figure": {
+    "filesystem_path": "docs/figures/cut-cell-current-attribution/wholecell-rows/panels/weak-rotation-reactor-static-production-route-cells-2500.png",
+    "project_absolute_src": "/nova/figures/cut-cell-current-attribution/wholecell-rows/panels/weak-rotation-reactor-static-production-route-cells-2500.png",
+    "render_source": "wholecell_reposed_row_with_caption",
+    "sha256": "e0f22f5defd8b381f888c74cbd24ee2a0fece3e712fa6c3249fb4692530a8f1c"
+  },
+  "fixed_point": {
+    "bound": 1e-12,
+    "converged": true,
+    "residual_passed": true,
+    "terminal_residual": 0.0
+  },
+  "realised_cells": 2608,
+  "requested_cells": -2500,
+  "solver": {
+    "booked_amplitude": {
+      "seed": 0.8995298180619892,
+      "terminal": 0.9106661414216727
+    },
+    "clip_mode": "chord",
+    "converged": true,
+    "peak_device_memory_bytes": 2310233088,
+    "peak_live_bytes_observed": 2310233088,
+    "qualification": "unqualified",
+    "requested_seed_class": "limited",
+    "running_peak_bytes": 2310233088,
+    "terminal_class": "limited",
+    "termination": "converged",
+    "trip_count": 2,
+    "wall_seconds": 706.3259240454063
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T12:44:51",
+  "updated": "2026-09-14T13:10:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4565,6 +4565,15 @@
       },
       {
         "id": "s19e-cca-repose-fixture",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
+      },
+      {
+        "id": "s19e-cca-spline-read",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -153918,6 +153927,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2455
+    "_version": 2456
   }
 }

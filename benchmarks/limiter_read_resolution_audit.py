@@ -1,0 +1,1211 @@
+#!/usr/bin/env python3
+"""Measure analytic limiter reads across plasma and wall resolutions.
+
+The measurement keeps the analytic field fixed and varies only the carrier
+geometry.  Each row records both landmarks published by the public forward
+operator and the tensor-spline connectivity diagnostic used by its lazy class
+comparator.  Diverted rows additionally exercise the private-wall exclusion by
+making a known excluded wall node the unmasked extremum, then requiring the
+masked limited read to choose a different contact.
+
+Parts are written after every row.  Aggregation is a separate command so two
+processes can shard each wall-count group inside one scheduler allocation
+without sharing a mutable receipt.
+"""
+
+from __future__ import annotations
+
+import argparse
+from contextlib import contextmanager
+import inspect
+import json
+import math
+import os
+from pathlib import Path
+import socket
+import subprocess
+from time import perf_counter
+from typing import Any, Callable, Iterator
+import uuid
+
+import jax
+import jax.numpy as jnp
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.optimize import minimize_scalar
+
+from benchmarks import solovev_certificate as certificate
+from nova.equilibrium.connectivity_boundary import wall_height_shadow_mask
+from nova.equilibrium.forward_operator import (
+    ForwardFluxOperator,
+    set_support_clip_mode,
+    support_clip_mode,
+)
+from nova.equilibrium.topology import Topology, TopologyClass
+from nova.jax.config import (
+    configure_dtypes,
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
+)
+from nova.media import poloidal
+from nova.media.ink import DEFAULT_INK, poloidal_axes, trace_axes
+from scripts.analytic_oracle_fixtures import measure as oracle_fixture
+
+
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_REPORT_DIRECTORY = Path(
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/limiter-read"
+)
+DEFAULT_FIGURE_DIRECTORY = (
+    ROOT / "docs/figures/cut-cell-current-attribution/limiter-read"
+)
+WALL_NODE_COUNTS = (121, 241, 481, 961)
+ROWS = (
+    ("weak-rotation-reactor-static", -300),
+    ("moderate-rotation-conventional-static", -300),
+    (certificate.DIVERTED_CASE_NAME, -500),
+    ("weak-rotation-reactor-static", -1000),
+    ("moderate-rotation-conventional-static", -1000),
+    (certificate.DIVERTED_CASE_NAME, -1000),
+)
+BRANCH_NAMES = {
+    0: "retain_previous",
+    1: "qualified_height_band",
+    2: "connectivity_private_fallback",
+}
+
+
+def _strict(value: Any) -> Any:
+    """Return nested JSON-native data with non-finite values made explicit."""
+
+    if isinstance(value, dict):
+        return {str(key): _strict(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_strict(item) for item in value]
+    if isinstance(value, np.ndarray):
+        return _strict(value.tolist())
+    if isinstance(value, np.generic):
+        return _strict(value.item())
+    if isinstance(value, float) and not np.isfinite(value):
+        return None
+    return value
+
+
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    """Atomically persist strict JSON."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
+    temporary.write_text(
+        json.dumps(_strict(payload), indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    os.replace(temporary, path)
+
+
+def _source_revision() -> str:
+    """Return the revision supplying this measurement."""
+
+    return subprocess.run(
+        ["git", "-C", str(ROOT), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
+def _pointer(
+    function: Callable[..., Any], markers: tuple[str, ...] = ()
+) -> dict[str, Any]:
+    """Return a source interval and verified marker lines for one callable."""
+
+    lines, start = inspect.getsourcelines(function)
+    path = Path(inspect.getsourcefile(function) or "")
+    try:
+        rendered = str(path.relative_to(ROOT))
+    except ValueError:
+        rendered = str(path)
+    located = []
+    for marker in markers:
+        matches = [offset for offset, line in enumerate(lines) if marker in line]
+        if not matches:
+            raise RuntimeError(f"source marker {marker!r} is absent from {rendered}")
+        located.append({"text": marker, "line": start + matches[0]})
+    return {
+        "path": rendered,
+        "line_start": start,
+        "line_end": start + len(lines) - 1,
+        "markers": located,
+    }
+
+
+def _allocation() -> dict[str, Any]:
+    """Return and validate the scheduler lane carrying the measurement."""
+
+    job_id = os.environ.get("SLURM_JOB_ID")
+    partition = os.environ.get("SLURM_JOB_PARTITION")
+    cpus = int(os.environ.get("SLURM_CPUS_PER_TASK", "0"))
+    platforms = os.environ.get("JAX_PLATFORMS")
+    memory = int(os.environ.get("SLURM_MEM_PER_NODE", "0"))
+    if not job_id:
+        raise RuntimeError("the measurement must run in a scheduler allocation")
+    if partition != "all_debug":
+        raise RuntimeError(f"expected all_debug, received {partition!r}")
+    if cpus != 8:
+        raise RuntimeError(f"expected eight CPUs, received {cpus}")
+    if platforms != "cpu":
+        raise RuntimeError(f"expected JAX_PLATFORMS=cpu, received {platforms!r}")
+    if os.environ.get("TMPDIR") != "/tmp":
+        raise RuntimeError("TMPDIR must be /tmp in the allocation payload")
+    return {
+        "job_id": int(job_id),
+        "job_name": os.environ.get("SLURM_JOB_NAME"),
+        "partition": partition,
+        "node": os.environ.get("SLURMD_NODENAME", socket.gethostname()),
+        "allocated_cpus": cpus,
+        "memory_mb": memory,
+        "jax_platforms": platforms.split(","),
+        "jax_default_backend": jax.default_backend(),
+        "tmpdir": os.environ.get("TMPDIR"),
+    }
+
+
+@contextmanager
+def _support_mode(mode: str) -> Iterator[None]:
+    """Select one benchmark-only support mode and restore the process default."""
+
+    previous = support_clip_mode()
+    set_support_clip_mode(mode)
+    try:
+        yield
+    finally:
+        set_support_clip_mode(previous)
+
+
+def _row_slug(case_name: str, requested_cells: int, wall_nodes: int) -> str:
+    """Return the stable filesystem identity of one row."""
+
+    return f"{case_name}-cells-{abs(requested_cells)}-wall-{wall_nodes}"
+
+
+def _part_path(
+    report_directory: Path,
+    case_name: str,
+    requested_cells: int,
+    wall_nodes: int,
+) -> Path:
+    """Return the durable part path for one row."""
+
+    return (
+        report_directory
+        / "parts"
+        / f"{_row_slug(case_name, requested_cells, wall_nodes)}.json"
+    )
+
+
+def _diverted_wall(exact: Any, wall_nodes: int) -> np.ndarray:
+    """Return the certificate's diverted wall with a requested node count."""
+
+    return oracle_fixture.offset_wall(
+        exact.separatrix(1441),
+        clearance=certificate.DIVERTED_WALL_CLEARANCE_FRACTION * exact.minor_radius,
+        points=wall_nodes,
+    )
+
+
+def _machine(
+    case_name: str,
+    carrier_case: Any,
+    exact: Any,
+    requested_cells: int,
+    wall_nodes: int,
+) -> Any:
+    """Load or build one semantic carrier for the requested wall identity."""
+
+    wall = (
+        _diverted_wall(exact, wall_nodes)
+        if certificate._is_diverted_case(case_name)
+        else None
+    )
+    return oracle_fixture.cached_machine(
+        carrier_case,
+        requested_cells,
+        wall_nodes=wall_nodes,
+        wall=wall,
+    )
+
+
+def _exact_flux(case_name: str, exact: Any, points: np.ndarray) -> np.ndarray:
+    """Evaluate exact total flux in webers on arbitrary points."""
+
+    return certificate._exact_state(
+        case_name, exact, np.asarray(points, dtype=np.float64)
+    )
+
+
+def _analytic_wall_extremum(
+    case_name: str,
+    exact: Any,
+    wall: np.ndarray,
+    polarity: float,
+) -> dict[str, Any]:
+    """Resolve the exact-flux extremum continuously over the wall polyline."""
+
+    wall = np.asarray(wall, dtype=np.float64)
+    following = np.roll(wall, -1, axis=0)
+    fraction = np.linspace(0.0, 1.0, 33)
+    sampled = (
+        wall[:, None, :] + fraction[None, :, None] * (following - wall)[:, None, :]
+    )
+    sampled_flux = _exact_flux(case_name, exact, sampled.reshape(-1, 2)).reshape(
+        len(wall), len(fraction)
+    )
+    flat = int(np.argmax(polarity * sampled_flux))
+    segment, bin_index = np.unravel_index(flat, sampled_flux.shape)
+    lower = fraction[max(0, bin_index - 1)]
+    upper = fraction[min(len(fraction) - 1, bin_index + 1)]
+    start = wall[segment]
+    delta = following[segment] - start
+
+    def objective(parameter: float) -> float:
+        point = start + parameter * delta
+        value = float(_exact_flux(case_name, exact, point[None, :])[0])
+        return -polarity * value
+
+    refined = minimize_scalar(
+        objective,
+        bounds=(float(lower), float(upper)),
+        method="bounded",
+        options={"xatol": 1.0e-14},
+    )
+    candidates = [float(lower), float(upper), float(refined.x)]
+    scores = [-objective(parameter) for parameter in candidates]
+    chosen = candidates[int(np.argmax(scores))]
+    point = start + chosen * delta
+    value = float(_exact_flux(case_name, exact, point[None, :])[0])
+    return {
+        "coordinate_rz_m": point.tolist(),
+        "flux_wb": value,
+        "segment_index": int(segment),
+        "segment_fraction": chosen,
+        "optimizer_success": bool(refined.success),
+        "instrument_positive_control": {
+            "sampled_finite_count": int(np.count_nonzero(np.isfinite(sampled_flux))),
+            "sampled_total_count": int(sampled_flux.size),
+            "sampled_signed_span_wb": float(np.ptp(polarity * sampled_flux)),
+        },
+    }
+
+
+def _nearest_segment(point: np.ndarray, wall: np.ndarray) -> dict[str, Any]:
+    """Return the closest wall panel and its metric length."""
+
+    point = np.asarray(point, dtype=np.float64)
+    start = np.asarray(wall, dtype=np.float64)
+    end = np.roll(start, -1, axis=0)
+    edge = end - start
+    length_squared = np.einsum("ij,ij->i", edge, edge)
+    parameter = np.clip(
+        np.einsum("ij,ij->i", point - start, edge)
+        / np.where(length_squared > 0.0, length_squared, 1.0),
+        0.0,
+        1.0,
+    )
+    nearest = start + parameter[:, None] * edge
+    distance_squared = np.einsum("ij,ij->i", nearest - point, nearest - point)
+    index = int(np.argmin(distance_squared))
+    return {
+        "index": index,
+        "length_m": float(math.sqrt(length_squared[index])),
+        "projection_fraction": float(parameter[index]),
+        "distance_m": float(math.sqrt(distance_squared[index])),
+    }
+
+
+def _recommended_wall_nodes(
+    case_name: str,
+    exact: Any,
+    pitch: float,
+) -> int:
+    """Return the smallest odd wall count whose longest panel fits one pitch."""
+
+    for count in range(9, 4002, 2):
+        wall = (
+            _diverted_wall(exact, count)
+            if certificate._is_diverted_case(case_name)
+            else oracle_fixture.limiter_contour(exact, points=count)
+        )
+        panel = np.linalg.norm(np.roll(wall, -1, axis=0) - wall, axis=1)
+        if float(np.max(panel)) <= pitch:
+            return count
+    raise RuntimeError("no supported odd wall count reaches the requested pitch")
+
+
+def _block_tree(value: Any) -> Any:
+    """Block until every device leaf in a nested result is ready."""
+
+    return jax.block_until_ready(value)
+
+
+def _read_measurement(
+    operator: ForwardFluxOperator,
+    analytic: np.ndarray,
+) -> tuple[Any, Any, dict[str, Any], dict[str, float]]:
+    """Run the public read path and retain both underlying read products."""
+
+    physical = jnp.asarray(analytic)[: operator.physical_node_number]
+
+    def execute() -> tuple[Any, Any, dict[str, Any]]:
+        masks, topology, _connected, admitted = operator._fixed_design_read(physical)
+        connectivity = operator._connectivity_read(physical, topology, classify=True)
+        return _block_tree((masks, topology, admitted, connectivity))
+
+    compiled_started = perf_counter()
+    masks, topology, admitted, connectivity = execute()
+    compile_seconds = perf_counter() - compiled_started
+    warm = []
+    for _ in range(3):
+        started = perf_counter()
+        masks, topology, admitted, connectivity = execute()
+        warm.append(perf_counter() - started)
+
+    public_masks, public_topology = operator.read(jnp.asarray(analytic))
+    public_class = bool(_block_tree(public_topology.diverted))
+    public_boundary = np.asarray(public_topology.boundary, dtype=np.float64)
+    if not np.array_equal(np.asarray(public_masks.label), np.asarray(masks.label)):
+        raise RuntimeError("public and fixed-design reads returned different masks")
+    if not np.array_equal(public_boundary, np.asarray(topology.boundary)):
+        raise RuntimeError("public read did not publish the fixed-design boundary")
+    connectivity_class = bool(float(connectivity["class_margin"]) >= 0.0)
+    if public_class != connectivity_class:
+        raise RuntimeError("public class disagrees with the connectivity comparator")
+    if not bool(admitted):
+        raise RuntimeError("the analytic field did not admit a magnetic axis")
+    return (
+        masks,
+        topology,
+        connectivity,
+        {
+            "compile_and_first_read_seconds": compile_seconds,
+            "warm_read_seconds_median": float(np.median(warm)),
+            "warm_read_seconds_min": float(np.min(warm)),
+            "warm_read_seconds_max": float(np.max(warm)),
+        },
+    )
+
+
+def _shadow_measurement(
+    operator: ForwardFluxOperator,
+    analytic: np.ndarray,
+    masks: Any,
+    topology: Any,
+    connectivity: dict[str, Any],
+) -> tuple[dict[str, Any], np.ndarray]:
+    """Measure the private-wall shadow and make its exclusion observable."""
+
+    physical = jnp.asarray(analytic)[: operator.physical_node_number]
+    carrier = operator._carrier_shadow_read(physical, masks)
+    private = np.asarray(carrier["private_wall_node_mask"], dtype=bool)
+    wall = np.asarray(operator.wall.coordinate, dtype=np.float64)
+    x_point = np.asarray(topology.x_point, dtype=np.float64)
+    if not np.all(np.isfinite(x_point)):
+        raise RuntimeError("the diverted shadow control requires a finite X-point")
+    shadow, report = wall_height_shadow_mask(
+        operator.wall.coordinate[:, 1],
+        topology.axis[1],
+        topology.x_point,
+        carrier["xset"],
+        carrier["private_wall_node_mask"],
+        jnp.zeros(operator.wall.node_number, dtype=bool),
+        operator._wall_height_hysteresis,
+        operator._x_qualification_distance,
+        return_report=True,
+    )
+    shadow, report = _block_tree((shadow, report))
+    shadow = np.asarray(shadow, dtype=bool)
+    below = wall[:, 1] < x_point[1]
+    private_below = private & below
+    shadow_below = shadow & below
+    if not np.any(private_below):
+        raise RuntimeError(
+            "the private-region census saw no wall node below the X-point"
+        )
+    if not np.any(shadow_below):
+        raise RuntimeError(
+            "the height shadow excluded no private wall node below the X-point"
+        )
+
+    wall_start = operator.grid.node_number
+    wall_flux = np.asarray(
+        physical[wall_start : operator.physical_node_number], dtype=np.float64
+    )
+    candidates = np.flatnonzero(shadow_below)
+    injected_index = int(candidates[np.argmax(wall_flux[candidates])])
+    span = abs(float(topology.axis_flux) - float(topology.x_point_flux))
+    injected_flux = max(float(np.max(wall_flux)), float(topology.x_point_flux)) + max(
+        0.25 * span, 1.0e-6
+    )
+    injected = np.asarray(physical, dtype=np.float64).copy()
+    injected[wall_start + injected_index] = injected_flux
+    injected_wall_flux = jnp.asarray(
+        injected[wall_start : operator.physical_node_number]
+    )
+    unmasked_bracket = np.asarray(
+        operator._fixed_design_topology.wall_anchor_bracket(
+            injected_wall_flux, operator.polarity
+        ),
+        dtype=int,
+    )
+    if injected_index not in unmasked_bracket:
+        raise RuntimeError(
+            "the injected private node did not enter the unmasked bracket"
+        )
+
+    _unmasked_masks, unmasked, _connected, _admitted = _block_tree(
+        operator._fixed_design_read(jnp.asarray(injected), int(TopologyClass.LIMITED))
+    )
+    _masked_masks, masked, _connected, _admitted = _block_tree(
+        operator._fixed_design_read(
+            jnp.asarray(injected),
+            int(TopologyClass.LIMITED),
+            private_wall_node_mask=jnp.asarray(shadow),
+        )
+    )
+    unmasked_contact = np.asarray(unmasked.wall_point, dtype=np.float64)
+    masked_contact = np.asarray(masked.wall_point, dtype=np.float64)
+    injected_coordinate = wall[injected_index]
+    adjacent = np.max(
+        np.linalg.norm(
+            wall[[injected_index - 1, (injected_index + 1) % len(wall)]]
+            - injected_coordinate,
+            axis=1,
+        )
+    )
+    unmasked_selected_injected_panel = bool(
+        np.linalg.norm(unmasked_contact - injected_coordinate) <= adjacent
+    )
+    masked_rejected_injected_panel = bool(
+        np.linalg.norm(masked_contact - injected_coordinate) > adjacent
+    )
+    if not unmasked_selected_injected_panel:
+        raise RuntimeError("the unmasked positive control did not select the injection")
+    if not masked_rejected_injected_panel:
+        raise RuntimeError("the private-wall shadow did not reject the injection")
+
+    lower_branch = int(report["lower_branch"])
+    upper_branch = int(report["upper_branch"])
+    return (
+        {
+            "private_wall_node_count": int(np.count_nonzero(private)),
+            "private_wall_nodes_below_x_point": int(np.count_nonzero(private_below)),
+            "shadowed_wall_node_count": int(np.count_nonzero(shadow)),
+            "shadowed_private_nodes_below_x_point": int(np.count_nonzero(shadow_below)),
+            "lower_exclusion_branch": BRANCH_NAMES[lower_branch],
+            "upper_exclusion_branch": BRANCH_NAMES[upper_branch],
+            "mask_composition": (
+                "wall_height_shadow_mask applies a qualified-saddle height gate "
+                "and intersects it with the connectivity-private wall mask"
+            ),
+            "report": {key: np.asarray(value).item() for key, value in report.items()},
+            "positive_control": {
+                "injected_wall_node_index": injected_index,
+                "injected_coordinate_rz_m": injected_coordinate.tolist(),
+                "injected_flux_wb": injected_flux,
+                "x_point_flux_wb": float(topology.x_point_flux),
+                "unmasked_bracket_node_indices": unmasked_bracket.tolist(),
+                "unmasked_selected_injected_panel": unmasked_selected_injected_panel,
+                "unmasked_selected_contact_rz_m": unmasked_contact.tolist(),
+                "unmasked_selected_flux_wb": float(unmasked.wall_point_flux),
+                "masked_rejected_injected_panel": masked_rejected_injected_panel,
+                "masked_selected_contact_rz_m": masked_contact.tolist(),
+                "masked_selected_flux_wb": float(masked.wall_point_flux),
+                "passed": bool(
+                    unmasked_selected_injected_panel and masked_rejected_injected_panel
+                ),
+            },
+            "connectivity_read_private_wall_node_count": int(
+                np.count_nonzero(
+                    np.asarray(connectivity["private_wall_node_mask"], dtype=bool)
+                )
+            ),
+        },
+        shadow,
+    )
+
+
+def _map_floor(
+    case_name: str,
+    source_case: Any,
+    machine: Any,
+    analytic: np.ndarray,
+) -> dict[str, Any]:
+    """Measure one target-normalised exact-clip map application."""
+
+    empty_operator = oracle_fixture.forward_operator(source_case, machine)
+    with _support_mode("chord"):
+        exact_physical = oracle_fixture.exact_current_moments(
+            source_case, empty_operator, analytic
+        )
+    exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
+    exact_internal = np.asarray(
+        oracle_fixture._internal_flux_image(empty_operator, exact_coefficients),
+        dtype=np.float64,
+    )
+    operator = oracle_fixture.forward_operator(
+        source_case, machine, analytic - exact_internal
+    )
+    target_current, _centroid, target_receipt = certificate._closed_form_current_target(
+        case_name, source_case, empty_operator, exact_physical
+    )
+    _masks, topology = operator.read(jnp.asarray(analytic))
+    span = abs(float(topology.axis_flux) - float(topology.boundary_flux))
+    requested = int(TopologyClass.LIMITED)
+    with _support_mode("exact"):
+        mapped = np.asarray(
+            _block_tree(
+                operator.flux_map(
+                    requested_class=requested,
+                    target_current=target_current,
+                )(jnp.asarray(analytic))
+            ),
+            dtype=np.float64,
+        )
+        moments = operator.cell_current_moments(jnp.asarray(analytic), requested)
+    grid_delta = mapped[: len(machine.node)] - analytic[: len(machine.node)]
+    return {
+        "mode": "exact",
+        "requested_class": "limited",
+        "definition": (
+            "one target-normalised production-map application at the analytic "
+            "flux, divided by the analytic axis-to-boundary span"
+        ),
+        "relative_rms_of_span": float(np.sqrt(np.mean(grid_delta**2)) / span),
+        "relative_sup_of_span": float(np.max(np.abs(grid_delta)) / span),
+        "absolute_rms_wb": float(np.sqrt(np.mean(grid_delta**2))),
+        "absolute_sup_wb": float(np.max(np.abs(grid_delta))),
+        "analytic_flux_span_wb": span,
+        "booked_current_a": float(jnp.sum(moments.cell_current)),
+        "target_current_a": target_current,
+        "booked_over_target": float(jnp.sum(moments.cell_current)) / target_current,
+        "target_receipt": target_receipt,
+        "fixture_exterior": (
+            "analytic total flux minus the image of analytically integrated "
+            "moments under the committed whole-cell fixture posing"
+        ),
+    }
+
+
+def _measure_row(
+    case_name: str,
+    requested_cells: int,
+    wall_nodes: int,
+    report_directory: Path,
+) -> dict[str, Any]:
+    """Measure and persist one analytic topology row."""
+
+    started = perf_counter()
+    part_path = _part_path(report_directory, case_name, requested_cells, wall_nodes)
+    progress = {
+        "schema": "nova.limiter-read-resolution-part",
+        "version": 1,
+        "source_revision": _source_revision(),
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "wall_nodes": wall_nodes,
+        "completed": False,
+    }
+    _write_json(part_path, progress)
+    carrier_case, source_case, exact = certificate._case(case_name)
+    machine = _machine(case_name, carrier_case, exact, requested_cells, wall_nodes)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic = _exact_flux(case_name, exact, coordinates)
+    operator = oracle_fixture.forward_operator(source_case, machine)
+    masks, topology, connectivity, read_timing = _read_measurement(operator, analytic)
+    production_diverted = bool(float(connectivity["class_margin"]) >= 0.0)
+    topology_class = "diverted" if production_diverted else "limited"
+    analytic_contact = _analytic_wall_extremum(
+        case_name, exact, machine.wall_node, float(operator.polarity)
+    )
+    contact = np.asarray(topology.wall_point, dtype=np.float64)
+    contact_flux = float(topology.wall_point_flux)
+    exact_contact = np.asarray(analytic_contact["coordinate_rz_m"], dtype=np.float64)
+    span = abs(float(topology.axis_flux) - analytic_contact["flux_wb"])
+    contact_panel = _nearest_segment(contact, machine.wall_node)
+    pitch = float(np.sqrt(np.median(np.asarray(machine.area, dtype=np.float64))))
+    panel_lengths = np.linalg.norm(
+        np.roll(machine.wall_node, -1, axis=0) - machine.wall_node,
+        axis=1,
+    )
+    fixed_node_distance = float(
+        np.min(np.linalg.norm(machine.wall_node - contact, axis=1))
+    )
+    connectivity_contact = np.asarray(
+        [connectivity["limiter_r"], connectivity["limiter_z"]], dtype=np.float64
+    )
+    row: dict[str, Any] = {
+        **progress,
+        "realised_cells": len(machine.node),
+        "state_dimension": len(analytic),
+        "topology_class": topology_class,
+        "cache": machine.cache,
+        "characteristic_cell_pitch_m": pitch,
+        "wall": {
+            "node_count": wall_nodes,
+            "perimeter_m": float(np.sum(panel_lengths)),
+            "median_panel_length_m": float(np.median(panel_lengths)),
+            "maximum_panel_length_m": float(np.max(panel_lengths)),
+            "selected_panel_length_m": contact_panel["length_m"],
+            "selected_panel_over_cell_pitch": contact_panel["length_m"] / pitch,
+            "maximum_panel_over_cell_pitch": float(np.max(panel_lengths)) / pitch,
+        },
+        "analytic_wall_extremum": analytic_contact,
+        "production_contact": {
+            "coordinate_rz_m": contact.tolist(),
+            "flux_wb": contact_flux,
+            "position_error_m": float(np.linalg.norm(contact - exact_contact)),
+            "level_error_wb": abs(contact_flux - analytic_contact["flux_wb"]),
+            "level_error_in_span": abs(contact_flux - analytic_contact["flux_wb"])
+            / span,
+            "nearest_wall_node_distance_m": fixed_node_distance,
+            "selected_equals_wall_node": bool(fixed_node_distance <= 1.0e-12),
+            "representation": "three-node quadratic sub-panel interpolation",
+        },
+        "connectivity_contact": {
+            "coordinate_rz_m": connectivity_contact.tolist(),
+            "flux_wb": float(connectivity["limiter_psi"]),
+            "position_error_m": float(
+                np.linalg.norm(connectivity_contact - exact_contact)
+            ),
+            "level_error_in_span": abs(
+                float(connectivity["limiter_psi"]) - analytic_contact["flux_wb"]
+            )
+            / span,
+            "selected_from_exact_nodes": bool(
+                connectivity["limiter_selected_from_exact_nodes"]
+            ),
+            "flux_from_global_surface": bool(
+                connectivity["limiter_flux_from_global_surface"]
+            ),
+            "minimum_bracket_count": int(connectivity["limiter_minimum_bracket_count"]),
+            "refinement_shift_m": float(connectivity["limiter_refinement_shift"]),
+        },
+        "read_timing": read_timing,
+        "resolution_guidance": {
+            "wall_121_consistent_with_realised_pitch": bool(
+                wall_nodes != 121 or float(np.max(panel_lengths)) <= pitch
+            ),
+            "recommended_wall_nodes_for_realised_pitch": _recommended_wall_nodes(
+                case_name, exact, pitch
+            ),
+        },
+        "shadow": None,
+        "map_floor": None,
+        "completed": False,
+        "wall_seconds": None,
+    }
+    if requested_cells == -1000:
+        pitch_2500 = pitch * math.sqrt(len(machine.node) / 2500.0)
+        row["resolution_guidance"].update(
+            {
+                "estimated_cell_pitch_at_2500_m": pitch_2500,
+                "wall_121_consistent_with_estimated_2500_pitch": bool(
+                    wall_nodes != 121 or float(np.max(panel_lengths)) <= pitch_2500
+                ),
+                "recommended_wall_nodes_for_estimated_2500_pitch": (
+                    _recommended_wall_nodes(case_name, exact, pitch_2500)
+                ),
+            }
+        )
+    if certificate._is_diverted_case(case_name):
+        shadow, shadow_mask = _shadow_measurement(
+            operator, analytic, masks, topology, connectivity
+        )
+        row["shadow"] = shadow
+        if requested_cells == -1000 and wall_nodes == 481:
+            row["render"] = {
+                "radius": np.asarray(operator.connectivity_grid_axes()[0]),
+                "height": np.asarray(operator.connectivity_grid_axes()[1]),
+                "flux": analytic[: len(machine.node)]
+                .reshape(operator.connectivity_grid_axes()[2])
+                .T,
+                "wall": np.asarray(machine.wall_node),
+                "axis": np.asarray(certificate.AXIS_M),
+                "x_point": np.asarray(certificate.X_POINT_M),
+                "selected_contact": contact,
+                "excluded_wall_nodes": np.asarray(machine.wall_node)[shadow_mask],
+                "boundary_flux_wb": float(topology.boundary_flux),
+                "axis_flux_wb": float(topology.axis_flux),
+            }
+    if (
+        case_name == "weak-rotation-reactor-static"
+        and requested_cells == -1000
+        and wall_nodes in (121, 481)
+    ):
+        row["map_floor"] = _map_floor(case_name, source_case, machine, analytic)
+    row["wall_seconds"] = perf_counter() - started
+    row["completed"] = True
+    _write_json(part_path, row)
+    print(
+        "LIMITER_READ_ROW "
+        f"case={case_name} cells={abs(requested_cells)} wall={wall_nodes} "
+        f"class={topology_class} "
+        f"position_error_m={row['production_contact']['position_error_m']:.8e} "
+        f"level_error_span={row['production_contact']['level_error_in_span']:.8e} "
+        f"read_seconds={read_timing['warm_read_seconds_median']:.8e}",
+        flush=True,
+    )
+    return row
+
+
+def _source_contract() -> dict[str, Any]:
+    """Return the verified code-path evidence for the two read products."""
+
+    return {
+        "certificate_topology_adapter": _pointer(
+            certificate._topology, ("operator.read(jnp.asarray(state))",)
+        ),
+        "public_forward_read": _pointer(
+            ForwardFluxOperator.read,
+            ("self._fixed_design_read", "_class_margin_read=lambda"),
+        ),
+        "fixed_design_read": _pointer(ForwardFluxOperator._fixed_design_read),
+        "connectivity_class_read": _pointer(
+            ForwardFluxOperator._connectivity_read, ("traced_boundary_read",)
+        ),
+        "fixed_design_wall_contact": _pointer(
+            Topology._wall_anchor_selection,
+            ("traced_quadratic_wall", "wall_coordinate"),
+        ),
+        "connectivity_wall_contact": _pointer(
+            __import__(
+                "nova.equilibrium.connectivity_boundary",
+                fromlist=["_select_reachable_wall_limiter"],
+            )._select_reachable_wall_limiter,
+            ("global_surface.evaluate", "refine_root"),
+        ),
+        "private_wall_shadow": _pointer(
+            wall_height_shadow_mask,
+            ("mask = proposed & private_wall",),
+        ),
+    }
+
+
+def _load_parts(report_directory: Path) -> list[dict[str, Any]]:
+    """Load the complete required part census and refuse stale omissions."""
+
+    rows = []
+    for wall_nodes in WALL_NODE_COUNTS:
+        for case_name, requested_cells in ROWS:
+            path = _part_path(report_directory, case_name, requested_cells, wall_nodes)
+            if not path.exists():
+                raise FileNotFoundError(f"required part is absent: {path}")
+            with path.open(encoding="utf-8") as stream:
+                row = json.load(stream)
+            if not row.get("completed"):
+                raise RuntimeError(f"required part is incomplete: {path}")
+            rows.append(row)
+    return rows
+
+
+def _render_error_figure(rows: list[dict[str, Any]], path: Path) -> None:
+    """Plot contact position error against local wall-to-cell resolution."""
+
+    figure, axes = plt.subplots(figsize=(7.2, 4.7), constrained_layout=True)
+    trace_axes(axes)
+    colors = {
+        "weak-rotation-reactor-static": DEFAULT_INK.flux_color,
+        "moderate-rotation-conventional-static": "#cc7722",
+        certificate.DIVERTED_CASE_NAME: "#6a3d9a",
+    }
+    markers = {-300: "o", -500: "s", -1000: "^"}
+    for case_name, requested_cells in ROWS:
+        selected = sorted(
+            (
+                row
+                for row in rows
+                if row["case"] == case_name
+                and row["requested_cells"] == requested_cells
+            ),
+            key=lambda row: row["wall"]["selected_panel_over_cell_pitch"],
+        )
+        axes.plot(
+            [row["wall"]["selected_panel_over_cell_pitch"] for row in selected],
+            [row["production_contact"]["position_error_m"] for row in selected],
+            color=colors[case_name],
+            marker=markers[requested_cells],
+            markersize=4.0,
+            linewidth=1.0,
+            label=f"{case_name.replace('-', ' ')} · {abs(requested_cells)} cells",
+        )
+    axes.set_xscale("log")
+    axes.set_yscale("log")
+    axes.set_xlabel("selected wall panel length / characteristic cell pitch")
+    axes.set_ylabel("analytic contact position error [m]")
+    axes.legend(frameon=False, fontsize=6, ncol=2)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, format="svg", facecolor=DEFAULT_INK.figure_facecolor)
+    plt.close(figure)
+
+
+def _render_poloidal_figure(row: dict[str, Any], path: Path) -> None:
+    """Render the analytic single-null contact and private-wall exclusions."""
+
+    render = row.get("render")
+    if render is None:
+        raise RuntimeError("the single-null render row carries no operands")
+    radius = np.asarray(render["radius"], dtype=np.float64)
+    height = np.asarray(render["height"], dtype=np.float64)
+    flux = np.asarray(render["flux"], dtype=np.float64)
+    wall = np.asarray(render["wall"], dtype=np.float64)
+    axis = np.asarray(render["axis"], dtype=np.float64)
+    x_point = np.asarray(render["x_point"], dtype=np.float64)
+    contact = np.asarray(render["selected_contact"], dtype=np.float64)
+    excluded = np.asarray(render["excluded_wall_nodes"], dtype=np.float64)
+    levels = poloidal.contour_levels(
+        flux,
+        15,
+        boundary=float(render["boundary_flux_wb"]),
+        axis=float(render["axis_flux_wb"]),
+    )
+    figure, axes = plt.subplots(figsize=(5.4, 6.2), constrained_layout=True)
+    poloidal_axes(axes)
+    poloidal.draw_flux_contours(axes, radius, height, flux, levels)
+    poloidal.draw_wall(axes, wall[:, 0], wall[:, 1])
+    poloidal.draw_nulls(
+        axes,
+        magnetic_axis=axis,
+        x_points=x_point[None, :],
+        contain=wall,
+    )
+    axes.plot(
+        contact[0],
+        contact[1],
+        marker="D",
+        markersize=5.0,
+        markerfacecolor=DEFAULT_INK.flux_color,
+        markeredgecolor="white",
+        linestyle="none",
+        zorder=DEFAULT_INK.zorder_markers + 1,
+    )
+    if excluded.size:
+        axes.plot(
+            excluded[:, 0],
+            excluded[:, 1],
+            marker="s",
+            markersize=2.5,
+            markerfacecolor="none",
+            markeredgecolor="#6a3d9a",
+            linestyle="none",
+            zorder=DEFAULT_INK.zorder_markers,
+        )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, format="svg", facecolor=DEFAULT_INK.figure_facecolor)
+    plt.close(figure)
+
+
+def _resolution_summary(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return one wall-count recommendation per thousand-cell case."""
+
+    summary = []
+    for case_name in (
+        "weak-rotation-reactor-static",
+        "moderate-rotation-conventional-static",
+        certificate.DIVERTED_CASE_NAME,
+    ):
+        row = next(
+            row
+            for row in rows
+            if row["case"] == case_name
+            and row["requested_cells"] == -1000
+            and row["wall_nodes"] == 121
+        )
+        guidance = row["resolution_guidance"]
+        summary.append(
+            {
+                "case": case_name,
+                "realised_cells": row["realised_cells"],
+                "cell_pitch_1000_m": row["characteristic_cell_pitch_m"],
+                "estimated_cell_pitch_2500_m": guidance[
+                    "estimated_cell_pitch_at_2500_m"
+                ],
+                "wall_121_max_panel_over_pitch_1000": row["wall"][
+                    "maximum_panel_over_cell_pitch"
+                ],
+                "wall_121_consistent_at_1000": guidance[
+                    "wall_121_consistent_with_realised_pitch"
+                ],
+                "wall_121_consistent_at_2500": guidance[
+                    "wall_121_consistent_with_estimated_2500_pitch"
+                ],
+                "recommended_wall_nodes_1000": guidance[
+                    "recommended_wall_nodes_for_realised_pitch"
+                ],
+                "recommended_wall_nodes_2500": guidance[
+                    "recommended_wall_nodes_for_estimated_2500_pitch"
+                ],
+            }
+        )
+    return summary
+
+
+def _write_report(path: Path, receipt: dict[str, Any]) -> None:
+    """Write the compact human-readable measurement report."""
+
+    rows = receipt["rows"]
+    lines = [
+        "# Analytic limiter read resolution",
+        "",
+        (
+            "The certificate adapter calls the public forward-operator read. That "
+            "publishes the fixed-design read's three-node quadratic wall contact; "
+            "its lazy class property separately calls the tensor-spline connectivity "
+            "read. Both are sub-panel, but only the fixed-design contact is the "
+            "boundary landmark stored by the certificate."
+        ),
+        "",
+        "| Case | Cells | Wall nodes | Class | Panel / pitch | "
+        "Contact error [m] | Level error / span | Warm read [s] |",
+        "|---|---:|---:|---|---:|---:|---:|---:|",
+    ]
+    for row in rows:
+        lines.append(
+            f"| {row['case']} | {row['realised_cells']} | {row['wall_nodes']} | "
+            f"{row['topology_class']} | "
+            f"{row['wall']['selected_panel_over_cell_pitch']:.6g} | "
+            f"{row['production_contact']['position_error_m']:.6g} | "
+            f"{row['production_contact']['level_error_in_span']:.6g} | "
+            f"{row['read_timing']['warm_read_seconds_median']:.6g} |"
+        )
+    lines.extend(["", "## Wall resolution", ""])
+    for item in receipt["resolution_summary"]:
+        lines.append(
+            f"- {item['case']}: 121 nodes are "
+            f"{'consistent' if item['wall_121_consistent_at_1000'] else 'coarser'} "
+            f"at 1000 cells and "
+            f"{'consistent' if item['wall_121_consistent_at_2500'] else 'coarser'} "
+            f"at 2500 cells. The first odd counts whose longest panel is no longer "
+            f"than one characteristic pitch are "
+            f"{item['recommended_wall_nodes_1000']} and "
+            f"{item['recommended_wall_nodes_2500']}, respectively."
+        )
+    shadow_rows = [row for row in rows if row["shadow"] is not None]
+    lines.extend(["", "## Private-flux wall shadow", ""])
+    lines.append(
+        (
+            f"All {len(shadow_rows)} single-null controls passed: the injected "
+            "private-region node won the unmasked limited read and was rejected by "
+            "the masked read. `wall_height_shadow_mask` uses the qualified-saddle "
+            "height band and intersects it with the connectivity-private wall mask; "
+            "each row records whether either side fell back to connectivity alone."
+        )
+    )
+    lines.extend(
+        [
+            "",
+            "| Cells | Wall nodes | Private below X | Shadowed below X | "
+            "Lower branch | Selected instead [R, Z] m |",
+            "|---:|---:|---:|---:|---|---|",
+        ]
+    )
+    for row in shadow_rows:
+        shadow = row["shadow"]
+        replacement = shadow["positive_control"]["masked_selected_contact_rz_m"]
+        lines.append(
+            f"| {row['realised_cells']} | {row['wall_nodes']} | "
+            f"{shadow['private_wall_nodes_below_x_point']} | "
+            f"{shadow['shadowed_private_nodes_below_x_point']} | "
+            f"{shadow['lower_exclusion_branch']} | "
+            f"[{replacement[0]:.6f}, {replacement[1]:.6f}] |"
+        )
+    floor = receipt["map_floor_comparison"]
+    lines.extend(
+        [
+            "",
+            "## Limited-row map floor",
+            "",
+            (
+                f"Weak 1000 exact-clip RMS floor: {floor['wall_121_rms']:.9g} "
+                f"of span at 121 wall nodes and {floor['wall_481_rms']:.9g} at "
+                f"481, an absolute movement of {floor['absolute_movement']:.3g}. "
+                f"The floor therefore {floor['verdict']}."
+            ),
+            "",
+            "## Figures",
+            "",
+            "- `/nova/figures/cut-cell-current-attribution/limiter-read/"
+            "contact-error-vs-wall-resolution.svg` — all contact errors against "
+            "local wall-panel-to-cell-pitch ratio.",
+            "- `/nova/figures/cut-cell-current-attribution/limiter-read/"
+            "single-null-contact-shadow.svg` — analytic single-null 1000 field, "
+            "wall, analytic nulls, selected wall contact and excluded "
+            "private-wall nodes.",
+            "",
+        ]
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines), encoding="utf-8")
+
+
+def aggregate(report_directory: Path, figure_directory: Path) -> dict[str, Any]:
+    """Aggregate all parts, render both figures, and write the final receipt."""
+
+    rows = _load_parts(report_directory)
+    floor_rows = {
+        row["wall_nodes"]: row["map_floor"]
+        for row in rows
+        if row["case"] == "weak-rotation-reactor-static"
+        and row["requested_cells"] == -1000
+        and row["wall_nodes"] in (121, 481)
+    }
+    if set(floor_rows) != {121, 481} or any(
+        value is None for value in floor_rows.values()
+    ):
+        raise RuntimeError("the required weak-1000 map-floor pair is incomplete")
+    floor_121 = floor_rows[121]["relative_rms_of_span"]
+    floor_481 = floor_rows[481]["relative_rms_of_span"]
+    movement = abs(floor_481 - floor_121)
+    floor_scale = max(abs(floor_121), abs(floor_481), np.finfo(float).tiny)
+    map_floor_comparison = {
+        "wall_121_rms": floor_121,
+        "wall_481_rms": floor_481,
+        "absolute_movement": movement,
+        "relative_movement": movement / floor_scale,
+        "verdict": (
+            "does not move materially with wall resolution"
+            if movement / floor_scale <= 0.01
+            else "moves by more than one percent with wall resolution"
+        ),
+    }
+    contact_figure = figure_directory / "contact-error-vs-wall-resolution.svg"
+    poloidal_figure = figure_directory / "single-null-contact-shadow.svg"
+    _render_error_figure(rows, contact_figure)
+    render_row = next(
+        row
+        for row in rows
+        if row["case"] == certificate.DIVERTED_CASE_NAME
+        and row["requested_cells"] == -1000
+        and row["wall_nodes"] == 481
+    )
+    _render_poloidal_figure(render_row, poloidal_figure)
+    receipt = {
+        "schema": "nova.limiter-read-resolution-audit",
+        "version": 1,
+        "source_revision": _source_revision(),
+        "production_code_modified": False,
+        "nonlinear_solve_entered": False,
+        "rows": rows,
+        "source_contract": _source_contract(),
+        "resolution_summary": _resolution_summary(rows),
+        "shadow_positive_control_passed": all(
+            row["shadow"] is None or row["shadow"]["positive_control"]["passed"]
+            for row in rows
+        ),
+        "map_floor_comparison": map_floor_comparison,
+        "figures": [str(contact_figure), str(poloidal_figure)],
+        "completed": True,
+        "exit_marker": "LIMITER_READ_RESOLUTION_EXIT=0",
+    }
+    _write_json(report_directory / "receipt.json", receipt)
+    _write_report(report_directory / "report.md", receipt)
+    print(receipt["exit_marker"], flush=True)
+    return receipt
+
+
+def measure(
+    report_directory: Path,
+    wall_nodes: int,
+    shard_index: int,
+    shard_count: int,
+) -> list[dict[str, Any]]:
+    """Measure one deterministic shard of one wall-count group."""
+
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("the measurement requires JAX double precision")
+    allocation = _allocation()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    if wall_nodes not in WALL_NODE_COUNTS:
+        raise ValueError(f"unsupported wall node count {wall_nodes}")
+    if shard_count < 1 or not 0 <= shard_index < shard_count:
+        raise ValueError("shard index must lie inside the positive shard count")
+    selected = list(ROWS)[shard_index::shard_count]
+    _write_json(
+        report_directory / "shards" / f"wall-{wall_nodes}-shard-{shard_index}.json",
+        {
+            "source_revision": _source_revision(),
+            "allocation": allocation,
+            "persistent_compilation_cache": cache.receipt(),
+            "wall_nodes": wall_nodes,
+            "shard_index": shard_index,
+            "shard_count": shard_count,
+            "rows": [
+                {"case": case_name, "requested_cells": requested_cells}
+                for case_name, requested_cells in selected
+            ],
+            "completed": False,
+        },
+    )
+    rows = [
+        _measure_row(case_name, requested_cells, wall_nodes, report_directory)
+        for case_name, requested_cells in selected
+    ]
+    _write_json(
+        report_directory / "shards" / f"wall-{wall_nodes}-shard-{shard_index}.json",
+        {
+            "source_revision": _source_revision(),
+            "allocation": allocation,
+            "persistent_compilation_cache": cache.receipt(),
+            "wall_nodes": wall_nodes,
+            "shard_index": shard_index,
+            "shard_count": shard_count,
+            "rows": [
+                {"case": row["case"], "requested_cells": row["requested_cells"]}
+                for row in rows
+            ],
+            "completed": True,
+            "exit_marker": "LIMITER_READ_SHARD_EXIT=0",
+        },
+    )
+    print("LIMITER_READ_SHARD_EXIT=0", flush=True)
+    return rows
+
+
+def _parse() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("action", choices=("measure", "aggregate"))
+    parser.add_argument(
+        "--report-directory", type=Path, default=DEFAULT_REPORT_DIRECTORY
+    )
+    parser.add_argument(
+        "--figure-directory", type=Path, default=DEFAULT_FIGURE_DIRECTORY
+    )
+    parser.add_argument("--wall-nodes", type=int, choices=WALL_NODE_COUNTS)
+    parser.add_argument("--shard-index", type=int, default=0)
+    parser.add_argument("--shard-count", type=int, default=1)
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = _parse()
+    if args.action == "measure":
+        if args.wall_nodes is None:
+            raise SystemExit("measure requires --wall-nodes")
+        measure(
+            args.report_directory,
+            args.wall_nodes,
+            args.shard_index,
+            args.shard_count,
+        )
+    else:
+        aggregate(args.report_directory, args.figure_directory)
+
+
+if __name__ == "__main__":
+    main()

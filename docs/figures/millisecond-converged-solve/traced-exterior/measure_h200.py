@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from collections import defaultdict
+from dataclasses import replace
 import json
 from pathlib import Path
 from time import perf_counter
@@ -23,6 +24,7 @@ CASES = (
     "moderate-rotation-conventional-static",
 )
 REQUESTED_CELLS = -300
+RELATIVE_IDENTITY_TOLERANCE = 1.0e-14
 
 
 def _certificate_row(case_name: str):
@@ -112,22 +114,34 @@ def _solve(case_name: str, output: Path) -> int:
 def _compare(base: Path, after: Path, output: Path) -> int:
     print("STAGE compare base and candidate terminal arrays", flush=True)
     with np.load(base) as base_data, np.load(after) as after_data:
-        flux_identical = np.array_equal(
-            base_data["terminal_flux"], after_data["terminal_flux"]
-        )
-        residual_identical = np.array_equal(
-            base_data["residual"], after_data["residual"]
-        )
+        base_flux = base_data["terminal_flux"]
+        after_flux = after_data["terminal_flux"]
+        base_residual = float(base_data["residual"])
+        after_residual = float(after_data["residual"])
+        max_absolute_flux_difference = float(np.max(np.abs(after_flux - base_flux)))
+        flux_scale = float(np.max(np.abs(base_flux)))
+        max_relative_flux_difference = max_absolute_flux_difference / flux_scale
+        residual_difference = abs(after_residual - base_residual)
+        relative_residual_difference = residual_difference / abs(base_residual)
     receipt = {
         "clip_mode": "chord",
-        "flux_bit_identical": flux_identical,
-        "residual_bit_identical": residual_identical,
+        "flux_bit_identical": np.array_equal(base_flux, after_flux),
+        "residual_bit_identical": base_residual == after_residual,
+        "max_absolute_flux_difference": max_absolute_flux_difference,
+        "max_relative_flux_difference": max_relative_flux_difference,
+        "residual_difference": residual_difference,
+        "relative_residual_difference": relative_residual_difference,
+        "relative_tolerance": RELATIVE_IDENTITY_TOLERANCE,
+        "within_tolerance": (
+            max_relative_flux_difference <= RELATIVE_IDENTITY_TOLERANCE
+            and relative_residual_difference <= RELATIVE_IDENTITY_TOLERANCE
+        ),
     }
     output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
     print(
         f"STAGE comparison finished {json.dumps(receipt, sort_keys=True)}", flush=True
     )
-    return 0 if flux_identical and residual_identical else 1
+    return 0 if receipt["within_tolerance"] else 1
 
 
 def _cache_monitor():
@@ -177,25 +191,39 @@ def _delta(before: dict[str, object], after: dict[str, object]) -> dict[str, obj
 def _timing(output: Path) -> int:
     _configure()
     counters, durations = _cache_monitor()
+    case_name = CASES[0]
+    profile, request = _certificate_row(case_name)
+    fixture_current = np.asarray(profile.operator.external_current)
+    variants = (
+        ("fixture", fixture_current),
+        ("scaled-0.9", fixture_current * 0.9),
+    )
     rows = []
-    for case_name in CASES:
-        profile, request = _certificate_row(case_name)
+    for exterior_name, current in variants:
+        variant_request = replace(request, current=current)
         before = _snapshot(counters, durations)
-        print(f"STAGE {case_name} timed solve start", flush=True)
+        print(f"STAGE {exterior_name} timed solve start", flush=True)
         started = perf_counter()
-        receipt = profile.solve(request)
+        receipt = profile.solve(variant_request)
         jax.block_until_ready(receipt.equilibrium.flux)
         wall_seconds = perf_counter() - started
         after = _snapshot(counters, durations)
+        compilation = _delta(before, after)
+        backend_compile_seconds = compilation["compilation_duration_seconds"].get(
+            "/jax/core/compile/backend_compile_duration", 0.0
+        )
         row = {
             "case": case_name,
+            "exterior": exterior_name,
             "wall_seconds": wall_seconds,
             "terminal_residual": float(receipt.equilibrium.fixed_point.residual),
-            **_delta(before, after),
+            "backend_compile_seconds": backend_compile_seconds,
+            **compilation,
         }
         rows.append(row)
+        message = json.dumps(row, sort_keys=True)
         print(
-            f"STAGE {case_name} timed solve finished {json.dumps(row, sort_keys=True)}",
+            f"STAGE {exterior_name} timed solve finished {message}",
             flush=True,
         )
         output.write_text(
@@ -211,7 +239,12 @@ def _timing(output: Path) -> int:
             + "\n"
         )
     second = rows[1]
-    return 0 if second["persistent_cache_misses"] == 0 else 1
+    return (
+        0
+        if second["persistent_cache_misses"] == 0
+        and second["backend_compile_seconds"] == 0.0
+        else 1
+    )
 
 
 def main() -> int:

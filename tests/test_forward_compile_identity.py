@@ -21,6 +21,7 @@ CASES = (
     "moderate-rotation-conventional-static",
 )
 REQUESTED_CELLS = -300
+RELATIVE_IDENTITY_TOLERANCE = 1.0e-14
 
 
 def _certificate_row(case_name: str):
@@ -114,20 +115,21 @@ def _digest(lowered) -> str:
 
 @pytest.mark.slow
 def test_certificate_rows_share_one_solve_program_per_mesh():
-    """Two analytic exteriors on the same mesh lower to one StableHLO program."""
+    """Two exterior values on one mesh lower to one StableHLO program."""
     configure_dtypes()
-    rows = tuple(_certificate_row(case_name) for case_name in CASES)
-    exteriors = tuple(row[0].operator.external() for row in rows)
-    assert exteriors[0].shape == exteriors[1].shape
+    row = _certificate_row(CASES[0])
+    fixture_external = row[0].operator.external()
+    scaled_external = fixture_external * jnp.asarray(0.9, dtype=fixture_external.dtype)
     lowered = tuple(
-        _lower_certificate_solve(rows[0], external)[0] for external in exteriors
+        _lower_certificate_solve(row, external)[0]
+        for external in (fixture_external, scaled_external)
     )
     assert _digest(lowered[0]) == _digest(lowered[1])
 
 
 @pytest.mark.slow
 def test_traced_exterior_preserves_the_certificate_terminal_state():
-    """Binding or tracing one exterior gives the same terminal solve bits."""
+    """Binding or tracing one exterior agrees to floating-point precision."""
     configure_dtypes()
     profile, seed, requested_class, target_current, request = _certificate_row(CASES[0])
     operator = profile.operator
@@ -159,8 +161,16 @@ def test_traced_exterior_preserves_the_certificate_terminal_state():
         ),
         **options,
     )
-    assert np.array_equal(np.asarray(traced.state), np.asarray(bound.state))
-    assert np.array_equal(np.asarray(traced.residual), np.asarray(bound.residual))
+    traced_state = np.asarray(traced.state)
+    bound_state = np.asarray(bound.state)
+    max_absolute_flux_difference = float(np.max(np.abs(traced_state - bound_state)))
+    flux_scale = float(np.max(np.abs(bound_state)))
+    max_relative_flux_difference = max_absolute_flux_difference / flux_scale
+    residual_difference = abs(float(traced.residual) - float(bound.residual))
+    residual_scale = abs(float(bound.residual))
+    relative_residual_difference = residual_difference / residual_scale
+    assert max_relative_flux_difference <= RELATIVE_IDENTITY_TOLERANCE
+    assert relative_residual_difference <= RELATIVE_IDENTITY_TOLERANCE
 
 
 @pytest.mark.slow

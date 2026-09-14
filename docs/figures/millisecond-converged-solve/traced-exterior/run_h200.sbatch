@@ -51,13 +51,13 @@ echo "STAGE bit identity comparison"
 PYTHONPATH="$worktree" "$python" -u "$script" compare \
   --base "$report/base-weak-$SLURM_JOB_ID.npz" \
   --after "$report/after-weak-$SLURM_JOB_ID.npz" \
-  --output "$artifact/bit-identity.json"
+  --output "$artifact/same-mesh-bit-difference.json"
 identity_status=$?
 echo "STAGE bit identity status=$identity_status"
 
-echo "STAGE weak then moderate timing"
+echo "STAGE weak mesh fixture then scaled exterior timing"
 PYTHONPATH="$worktree" "$python" -u "$script" timing \
-  --output "$artifact/timing.json"
+  --output "$artifact/same-mesh-timing.json"
 timing_status=$?
 echo "STAGE timing status=$timing_status"
 

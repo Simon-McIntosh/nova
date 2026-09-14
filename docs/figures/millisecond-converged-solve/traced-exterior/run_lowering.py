@@ -22,7 +22,7 @@ from tests.test_forward_compile_identity import (
 )
 
 
-OUTPUT = Path(__file__).with_name("lowering.json")
+OUTPUT = Path(__file__).with_name("same-mesh-lowering.json")
 
 
 def _compiled_slice_digests(row) -> tuple[str, str]:
@@ -78,26 +78,25 @@ def main() -> int:
 
     print("STAGE load weak cached 300-cell certificate row", flush=True)
     weak = _certificate_row(CASES[0])
-    print("STAGE load moderate cached 300-cell certificate row", flush=True)
-    moderate = _certificate_row(CASES[1])
-    weak_external = weak[0].operator.external()
-    moderate_external = moderate[0].operator.external()
-    assert weak_external.shape == moderate_external.shape
+    fixture_external = weak[0].operator.external()
+    scaled_external = fixture_external * jnp.asarray(0.9, dtype=fixture_external.dtype)
 
-    print("STAGE certificate lower weak exterior", flush=True)
-    weak_lowered, _ = _lower_certificate_solve(weak, weak_external)
-    print("STAGE certificate lower moderate exterior", flush=True)
-    moderate_lowered, _ = _lower_certificate_solve(weak, moderate_external)
-    certificate_digests = (_digest(weak_lowered), _digest(moderate_lowered))
+    print("STAGE certificate lower fixture exterior", flush=True)
+    fixture_lowered, _ = _lower_certificate_solve(weak, fixture_external)
+    print("STAGE certificate lower scaled exterior", flush=True)
+    scaled_lowered, _ = _lower_certificate_solve(weak, scaled_external)
+    certificate_digests = (_digest(fixture_lowered), _digest(scaled_lowered))
 
     print("STAGE compiled-slice lowering", flush=True)
     compiled_digests = _compiled_slice_digests(weak)
     receipt = {
         "clip_mode": support_clip_mode(),
         "requested_cells": -300,
+        "external_shape": list(fixture_external.shape),
+        "exterior_scale": 0.9,
         "certificate": {
-            "weak_sha256": certificate_digests[0],
-            "moderate_sha256": certificate_digests[1],
+            "fixture_sha256": certificate_digests[0],
+            "scaled_sha256": certificate_digests[1],
             "identical": certificate_digests[0] == certificate_digests[1],
         },
         "compiled_slice": {

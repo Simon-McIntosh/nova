@@ -14,6 +14,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import socket
 import subprocess
 import threading
@@ -90,6 +91,10 @@ REPOSED_FIXTURE_OUTPUT = REPOSED_FIXTURE_ROOT / "map-floor.json"
 REPOSED_CERTIFICATE_ROOT = REPOSED_FIXTURE_ROOT / "certificate"
 REPOSED_CERTIFICATE_OUTPUT = REPOSED_CERTIFICATE_ROOT / "receipt.json"
 REPOSED_CERTIFICATE_BUILD_OUTPUT = REPOSED_CERTIFICATE_ROOT / "machine-build.json"
+REPOSED_CERTIFICATE_SCALING_OUTPUT = (
+    REPOSED_CERTIFICATE_ROOT / "solve-memory-scaling.json"
+)
+REPOSED_CERTIFICATE_500_OUTPUT = REPOSED_CERTIFICATE_ROOT / "cells-500-receipt.json"
 REPOSED_FIXTURE_ROWS = (
     ("weak-rotation-reactor-static", -1000),
     ("moderate-rotation-conventional-static", -1000),
@@ -109,6 +114,7 @@ REPOSED_CERTIFICATE_ROWS = tuple(
     for requested_cells in (-1000, -2500)
     for case_name in CASE_NAMES
 )
+REPOSED_CERTIFICATE_500_ROWS = tuple((case_name, -500) for case_name in CASE_NAMES)
 DIVERTED_CASE_NAME = "diverted-single-null"
 DIVERTED_CASE_ALIASES = frozenset((DIVERTED_CASE_NAME, "diverted-jump-bearing"))
 DIVERTED_REFERENCE = cerfon_freidberg_single_null()
@@ -3388,6 +3394,436 @@ def _certificate_rung_ratios(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return ratios
 
 
+def _compiled_memory_fields(analysis: Any) -> dict[str, int]:
+    """Return the stable integer fields exposed by XLA memory analysis."""
+
+    names = (
+        "argument_size_in_bytes",
+        "output_size_in_bytes",
+        "alias_size_in_bytes",
+        "temp_size_in_bytes",
+        "host_argument_size_in_bytes",
+        "host_output_size_in_bytes",
+        "host_alias_size_in_bytes",
+        "host_temp_size_in_bytes",
+        "generated_code_size_in_bytes",
+    )
+    return {
+        name: int(getattr(analysis, name))
+        for name in names
+        if getattr(analysis, name, None) is not None
+    }
+
+
+def _hlo_producer_group(source_file: str | None, source_line: int | None) -> str:
+    """Classify an HLO instruction by the Nova path that authored it."""
+
+    path = source_file or ""
+    if path.endswith("fixed_point.py"):
+        return "fixed-point active-set reconciliation and globalization"
+    if path.endswith("forward_operator.py") and source_line is not None:
+        if source_line < 1000:
+            return "production topology read and tensor-spline null census"
+        if 2150 <= source_line <= 2260:
+            return "exact support clip spline-chain"
+        return "forward current-moment map"
+    if "split_spline" in path or "polygon" in path or "mesh" in path:
+        return "exact support clip spline-chain"
+    return "unclassified compiled support operation"
+
+
+def _largest_hlo_arrays(hlo: str, *, limit: int = 16) -> list[dict[str, Any]]:
+    """Extract the largest typed instruction results and their source metadata."""
+
+    result_pattern = re.compile(
+        r"=\s*(?P<dtype>pred|f64|f32|s64|s32|u64|u32|s16|u16|s8|u8)"
+        r"\[(?P<shape>[0-9,]+)\]"
+    )
+    source_pattern = re.compile(r'source_file="(?P<file>[^"]+)"')
+    line_pattern = re.compile(r"source_line=(?P<line>[0-9]+)")
+    operation_pattern = re.compile(r'op_name="(?P<name>[^"]+)"')
+    byte_width = {
+        "pred": 1,
+        "f64": 8,
+        "f32": 4,
+        "s64": 8,
+        "s32": 4,
+        "u64": 8,
+        "u32": 4,
+        "s16": 2,
+        "u16": 2,
+        "s8": 1,
+        "u8": 1,
+    }
+    records: dict[tuple[Any, ...], dict[str, Any]] = {}
+    for text in hlo.splitlines():
+        result = result_pattern.search(text)
+        if result is None:
+            continue
+        shape = tuple(int(value) for value in result.group("shape").split(","))
+        elements = int(np.prod(shape, dtype=np.int64))
+        source = source_pattern.search(text)
+        line = line_pattern.search(text)
+        operation = operation_pattern.search(text)
+        source_file = source.group("file") if source is not None else None
+        source_line = int(line.group("line")) if line is not None else None
+        operation_name = operation.group("name") if operation is not None else None
+        key = (result.group("dtype"), shape, source_file, source_line, operation_name)
+        records[key] = {
+            "dtype": result.group("dtype"),
+            "shape": list(shape),
+            "element_count": elements,
+            "logical_size_in_bytes": elements * byte_width[result.group("dtype")],
+            "source_file": source_file,
+            "source_line": source_line,
+            "operation_name": operation_name,
+            "producer_group": _hlo_producer_group(source_file, source_line),
+            "instruction": text.strip()[:600],
+        }
+    return sorted(
+        records.values(),
+        key=lambda record: record["logical_size_in_bytes"],
+        reverse=True,
+    )[:limit]
+
+
+def _certificate_compile_problem(
+    case_name: str, requested_cells: int
+) -> tuple[Any, np.ndarray, ForwardSolveRequest, int]:
+    """Construct the public certificate problem without executing its solve."""
+
+    carrier_case, source_case, exact = _case(case_name)
+    machine = _case_machine(case_name, carrier_case, exact, requested_cells)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic = _exact_state(case_name, exact, coordinates)
+    empty_operator = oracle_fixture.forward_operator(source_case, machine)
+    exact_physical, fixture_exterior, _cache = oracle_fixture.cached_fixture_exterior(
+        source_case, exact, machine, empty_operator, analytic
+    )
+    operator = oracle_fixture.forward_operator(source_case, machine, fixture_exterior)
+    profile = ForwardProfile(
+        operator,
+        StencilMesh(machine.node, machine.stencil, machine.area),
+        newton_steps=recovery.NEWTON_STEPS,
+    )
+    target_current, centroid, current_receipt = _closed_form_current_target(
+        case_name, source_case, operator, exact_physical
+    )
+    seed, _requested_class, _seed_receipt = _production_seed(
+        profile, case_name, target_current, centroid, current_receipt
+    )
+    request = _certificate_solve_request(
+        profile,
+        seed,
+        target_current,
+        carrier_identity=f"solovev-memory:{case_name}:{requested_cells}",
+    )
+    return profile, seed, request, len(machine.node)
+
+
+def _compile_solve_memory(case_name: str, requested_cells: int) -> dict[str, Any]:
+    """Compile, but never execute, one production-equivalent solve graph."""
+
+    started = perf_counter()
+    profile, seed, request, realised_cells = _certificate_compile_problem(
+        case_name, requested_cells
+    )
+    mapped = profile.flux_map(
+        request.current,
+        target_current=request.target_current,
+        prescribed_current=request.prescribed_current,
+    )
+    shadowed_map = profile.operator.flux_map_with_shadow(
+        request.current,
+        target_current=request.target_current,
+        prescribed_current=request.prescribed_current,
+    )
+
+    def shadow_mask(state):
+        return profile.operator.residual_shadow_mask(state)
+
+    def promoted_shadow_mask(state, previous):
+        return profile.operator.residual_shadow_mask(state, previous_shadow=previous)
+
+    def solve_program(initial):
+        result = recovery.fixed_point.newton_krylov(
+            mapped,
+            initial,
+            shadow_mask_fn=shadow_mask,
+            promoted_shadow_mask_fn=promoted_shadow_mask,
+            shadowed_map_fn=shadowed_map,
+            **request.policy.kernel_options(),
+        )
+        return result.state, result.residual, result.converged
+
+    lowered = jax.jit(solve_program).lower(jnp.asarray(seed, dtype=jnp.float64))
+    compiled = lowered.compile()
+    analysis = _compiled_memory_fields(compiled.memory_analysis())
+    arrays = _largest_hlo_arrays(compiled.as_text())
+    record = {
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "realised_cells": realised_cells,
+        "compile_wall_seconds": perf_counter() - started,
+        "memory_analysis": analysis,
+        "largest_array_intermediates": arrays,
+        "largest_predicate_intermediates": [
+            item for item in arrays if item["dtype"] == "pred"
+        ],
+        "executed": False,
+        "method": "jax.jit(solve_program).lower(seed).compile().memory_analysis()",
+    }
+    print(
+        f"SOLVE_MEMORY cells={abs(requested_cells)} realised={realised_cells} "
+        f"temp_gib={analysis['temp_size_in_bytes'] / 2**30:.6f}",
+        flush=True,
+    )
+    return record
+
+
+def _measure_solve_memory_scaling(output: Path) -> dict[str, Any]:
+    """Compile two exact-clip solve graphs and extrapolate their memory law."""
+
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("solve memory analysis requires binary64")
+    rows = []
+    for requested_cells in (-300, -500):
+        rows.append(
+            _compile_solve_memory("weak-rotation-reactor-static", requested_cells)
+        )
+        _write_json(
+            output,
+            {
+                "schema": "nova.forward-solve-memory-scaling",
+                "source_revision": _source_revision(),
+                "lane": _lane(),
+                "rows": rows,
+                "completed": False,
+            },
+        )
+    coarse, fine = rows
+    coarse_bytes = coarse["memory_analysis"]["temp_size_in_bytes"]
+    fine_bytes = fine["memory_analysis"]["temp_size_in_bytes"]
+    exponent = float(
+        np.log(fine_bytes / coarse_bytes)
+        / np.log(fine["realised_cells"] / coarse["realised_cells"])
+    )
+    carrier_case, _source_case, exact = _case("weak-rotation-reactor-static")
+    predicted = {}
+    for requested_cells in (-1000, -2500):
+        machine = _case_machine(
+            "weak-rotation-reactor-static", carrier_case, exact, requested_cells
+        )
+        realised = len(machine.node)
+        predicted[str(abs(requested_cells))] = {
+            "realised_cells": realised,
+            "temp_size_in_bytes": float(
+                fine_bytes * (realised / fine["realised_cells"]) ** exponent
+            ),
+        }
+    receipt = {
+        "schema": "nova.forward-solve-memory-scaling",
+        "source_revision": _source_revision(),
+        "lane": _lane(),
+        "rows": rows,
+        "fit": {
+            "independent_variable": "realised atomic cell count",
+            "exponent": exponent,
+            "prediction": predicted,
+            "linear_target_exponent": 1.0,
+            "scaling_defect": exponent > 1.25,
+        },
+        "failed_execution": {
+            "slurm_job_id": "1270272",
+            "requested_cells": 1000,
+            "requested_allocation_gib": 279.45,
+            "executable": "jit_bitwise_and",
+            "production_entry": "nova/equilibrium/forward.py:2489",
+            "active_set_reconcile": "nova/equilibrium/fixed_point.py:3459",
+        },
+        "completed": True,
+    }
+    _write_json(output, receipt)
+    return receipt
+
+
+def _report_value(value: float | None, precision: int = 6) -> str:
+    """Format a nullable measurement for the Markdown evidence table."""
+
+    return "n/a" if value is None else f"{value:.{precision}g}"
+
+
+def _write_recovery_report(
+    path: Path,
+    scaling: dict[str, Any],
+    certificate: dict[str, Any] | None = None,
+) -> None:
+    """Replace the solve-scaling finding and partial 500-cell table in-place."""
+
+    largest = max(
+        (
+            item
+            for row in scaling["rows"]
+            for item in row["largest_predicate_intermediates"]
+        ),
+        key=lambda item: item["logical_size_in_bytes"],
+    )
+    rows = scaling["rows"]
+    predicted = scaling["fit"]["prediction"]
+    lines = [
+        "<!-- production-solve-scaling:start -->",
+        "## Production exact-clip solve scaling finding",
+        "",
+        "Job `1270272` built and cached all four 2500-cell machines, then the "
+        "weak 1000-cell production solve failed after 493 s when "
+        "`jit_bitwise_and` requested 279.45 GiB. The same one-step map executes "
+        "at 1000 cells, so this is a compiled solve-trajectory allocation, not "
+        "a fixture-builder or standalone-map allocation.",
+        "",
+        "The compile-only probe did not execute either solve. XLA reported "
+        f"{rows[0]['memory_analysis']['temp_size_in_bytes'] / 2**30:.6g} GiB "
+        f"at {rows[0]['realised_cells']} realised cells and "
+        f"{rows[1]['memory_analysis']['temp_size_in_bytes'] / 2**30:.6g} GiB "
+        f"at {rows[1]['realised_cells']} cells, giving exponent "
+        f"`{scaling['fit']['exponent']:.6g}` in realised cell count. The fitted "
+        f"predictions are {predicted['1000']['temp_size_in_bytes'] / 2**30:.6g} "
+        f"GiB at {predicted['1000']['realised_cells']} cells and "
+        f"{predicted['2500']['temp_size_in_bytes'] / 2**30:.6g} GiB at "
+        f"{predicted['2500']['realised_cells']} cells; an exponent materially "
+        "above one is a production scaling defect against the linear-in-cells target.",
+        "",
+        "The largest compiled predicate intermediate has shape "
+        f"`{largest['shape']}` ({largest['element_count']:,} logical booleans) "
+        f"and is attributed to `{largest['source_file']}:{largest['source_line']}` "
+        f"in the {largest['producer_group']}. The production call enters at "
+        "`nova/equilibrium/forward.py:2489`; the active-set live-map replay is "
+        "at `nova/equilibrium/fixed_point.py:3459`. The complete ranked shapes, "
+        "operation names, source locations, and XLA totals are in "
+        "`docs/figures/cut-cell-current-attribution/reposed-fixture/certificate/solve-memory-scaling.json`.",
+        "",
+        "### 500-cell certificate acceptance",
+        "",
+        "The 1000- and 2500-cell certificate solves are blocked on this "
+        "production scaling defect; their machines remain cached, but no further "
+        "solve at either rung is admissible until the super-linear predicate is "
+        "removed.",
+        "",
+        "| Case | Residual / 1e-12 | Converged | Psi RMS/span | Axis error m / "
+        "pitch | X error m / pitch | Nulls admitted | X candidates |",
+        "|---|---:|:---:|---:|---:|---:|:---:|---:|",
+    ]
+    acceptance_rows = [] if certificate is None else certificate.get("rows", [])
+    for row in acceptance_rows:
+        fixed = row["fixed_point"]
+        distance = row["distance_to_analytic"]
+        nulls = row["analytic_null_read"]
+        residual = fixed["terminal_residual"]
+        residual_cell = (
+            "n/a"
+            if residual is None
+            else f"{residual:.3e} / {'pass' if fixed['residual_passed'] else 'fail'}"
+        )
+        axis = (
+            f"{_report_value(distance['axis_error_m'])} / "
+            f"{_report_value(distance['axis_error_in_pitch'])}"
+        )
+        x_point = (
+            f"{_report_value(distance['x_point_error_m'])} / "
+            f"{_report_value(distance['x_point_error_in_pitch'])}"
+        )
+        lines.append(
+            f"| {row['case']} | {residual_cell} | {fixed['converged']} | "
+            f"{_report_value(distance['psi_rms_fraction_of_span'])} | {axis} | "
+            f"{x_point} | {nulls['admitted']} | {nulls['x_candidate_count']} |"
+        )
+    if not acceptance_rows:
+        lines.append(
+            "| pending | pending | pending | pending | pending | pending | "
+            "pending | pending |"
+        )
+    lines.extend(
+        [
+            "",
+            "Each completed row persists its receipt before the next solve; its "
+            "poloidal panel overlays solved and analytic contours on shared levels, "
+            "marks both null sets and the wall, and captions the residual and "
+            "convergence flag.",
+            "<!-- production-solve-scaling:end -->",
+        ]
+    )
+    replacement = "\n".join(lines) + "\n"
+    original = path.read_text(encoding="utf-8") if path.exists() else ""
+    start = original.find("<!-- production-solve-scaling:start -->")
+    end_marker = "<!-- production-solve-scaling:end -->"
+    end = original.find(end_marker)
+    if start >= 0 and end >= start:
+        content = original[:start] + replacement + original[end + len(end_marker) :]
+    else:
+        content = original.rstrip() + "\n\n" + replacement
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+
+
+def _measure_reposed_certificate_500(
+    output: Path, scaling: dict[str, Any], report: Path
+) -> dict[str, Any]:
+    """Run the bounded certificate table after the compile-only diagnosis."""
+
+    global FIGURE_ROOT, PART_ROOT
+
+    original_mode = support_clip_mode()
+    original_figure_root = FIGURE_ROOT
+    original_part_root = PART_ROOT
+    FIGURE_ROOT = REPOSED_CERTIFICATE_ROOT / "cells-500" / "panels"
+    PART_ROOT = REPOSED_CERTIFICATE_ROOT / "cells-500" / "parts"
+    solved_rows: list[dict[str, Any]] = []
+    receipt: dict[str, Any] = {
+        "schema": "nova.reposed-certificate-500-acceptance",
+        "source_revision": _source_revision(),
+        "lane": _lane(),
+        "rows": solved_rows,
+        "blocked_rungs": {
+            "requested_cells": [1000, 2500],
+            "reason": "production exact-clip solve has super-linear predicate memory",
+            "scaling_receipt": str(REPOSED_CERTIFICATE_SCALING_OUTPUT),
+        },
+        "completed": False,
+    }
+    try:
+        set_support_clip_mode("exact")
+        for case_name, requested_cells in REPOSED_CERTIFICATE_500_ROWS:
+            row = _measure(case_name, requested_cells)
+            solved_rows.append(_certificate_acceptance_row(row))
+            receipt["completed"] = len(solved_rows) == len(REPOSED_CERTIFICATE_500_ROWS)
+            _write_json(output, receipt)
+            _write_recovery_report(report, scaling, receipt)
+    finally:
+        set_support_clip_mode(original_mode)
+        FIGURE_ROOT = original_figure_root
+        PART_ROOT = original_part_root
+    print("REPOSED_CERTIFICATE_500_EXIT=0", flush=True)
+    return receipt
+
+
+def _measure_reposed_certificate_recovery(output: Path, report: Path) -> dict[str, Any]:
+    """Diagnose solve memory, then run the safe 500-cell certificate rows."""
+
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("the re-posed certificate requires binary64")
+    original_mode = support_clip_mode()
+    try:
+        set_support_clip_mode("exact")
+        scaling = _measure_solve_memory_scaling(REPOSED_CERTIFICATE_SCALING_OUTPUT)
+        _write_recovery_report(report, scaling)
+        return _measure_reposed_certificate_500(output, scaling, report)
+    finally:
+        set_support_clip_mode(original_mode)
+
+
 def _measure_reposed_certificate(output: Path) -> dict[str, Any]:
     """Build the fine carriers, then solve all re-posed certificate rows."""
     global FIGURE_ROOT, PART_ROOT
@@ -3464,6 +3900,8 @@ def _parse() -> argparse.Namespace:
     parser.add_argument("--diverted-geometry", action="store_true")
     parser.add_argument("--reposed-fixture-floor", action="store_true")
     parser.add_argument("--reposed-certificate", action="store_true")
+    parser.add_argument("--reposed-certificate-recovery", action="store_true")
+    parser.add_argument("--finding-report", type=Path)
     parser.add_argument("--scheduler-job-id", action="append", default=[])
     parser.add_argument("--output", type=Path, default=OUTPUT)
     return parser.parse_args()
@@ -3471,6 +3909,29 @@ def _parse() -> argparse.Namespace:
 
 def main() -> None:
     arguments = _parse()
+    if arguments.reposed_certificate_recovery:
+        if arguments.finding_report is None:
+            raise SystemExit("--reposed-certificate-recovery requires --finding-report")
+        output = (
+            REPOSED_CERTIFICATE_500_OUTPUT
+            if arguments.output == OUTPUT
+            else arguments.output
+        )
+        receipt = _measure_reposed_certificate_recovery(
+            output, arguments.finding_report
+        )
+        print(
+            json.dumps(
+                {
+                    "completed": receipt["completed"],
+                    "row_count": len(receipt["rows"]),
+                    "blocked_rungs": receipt["blocked_rungs"],
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        return
     if arguments.reposed_certificate:
         output = (
             REPOSED_CERTIFICATE_OUTPUT

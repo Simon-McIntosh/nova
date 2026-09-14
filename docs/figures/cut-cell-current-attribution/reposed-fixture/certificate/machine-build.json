@@ -1,0 +1,77 @@
+{
+  "completed_rows": [
+    {
+      "cache": {
+        "build_seconds": 424.72913146112114,
+        "hit": false,
+        "load_seconds": 0.024325023405253887,
+        "lock_wait_seconds": 2.145860344171524e-05,
+        "semantic_key": "78af4c9e26323151",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_2500.zarr",
+        "store_seconds": 1.08745454903692
+      },
+      "case": "weak-rotation-reactor-static",
+      "realised_cells": 2608,
+      "requested_cells": -2500,
+      "wall_seconds": 426.27792687062174
+    },
+    {
+      "cache": {
+        "build_seconds": 428.5300365937874,
+        "hit": false,
+        "load_seconds": 0.0017141038551926613,
+        "lock_wait_seconds": 8.100643754005432e-06,
+        "semantic_key": "89cbacdfc568073c",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_2500.zarr",
+        "store_seconds": 1.0586883584037423
+      },
+      "case": "moderate-rotation-conventional-static",
+      "realised_cells": 2621,
+      "requested_cells": -2500,
+      "wall_seconds": 430.01072471775115
+    },
+    {
+      "cache": {
+        "build_seconds": 437.8722652923316,
+        "hit": false,
+        "load_seconds": 0.001620253548026085,
+        "lock_wait_seconds": 5.165114998817444e-06,
+        "semantic_key": "4a7f2d0fbfad56ba",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_2500.zarr",
+        "store_seconds": 1.1345005547627807
+      },
+      "case": "strong-rotation-compact-static",
+      "realised_cells": 2623,
+      "requested_cells": -2500,
+      "wall_seconds": 439.4580433089286
+    },
+    {
+      "cache": {
+        "build_seconds": 450.04026839789003,
+        "hit": false,
+        "load_seconds": 0.0022010905668139458,
+        "lock_wait_seconds": 1.046154648065567e-05,
+        "semantic_key": "1172913775658e53",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_2500.zarr",
+        "store_seconds": 1.0506305024027824
+      },
+      "case": "diverted-single-null",
+      "realised_cells": 2616,
+      "requested_cells": -2500,
+      "wall_seconds": 451.95386822428554
+    }
+  ],
+  "lane": {
+    "execution": "slurm",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_default_backend": "gpu",
+    "jax_platforms": "cuda,cpu",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "precision": "float64",
+    "reservation": "gpu_0003_grpA",
+    "slurm_job_id": "1270272"
+  },
+  "schema": "nova.reposed-certificate-machine-build",
+  "source_revision": "e099a59153bc094b3a1a77d42e4459192b6fa260"
+}

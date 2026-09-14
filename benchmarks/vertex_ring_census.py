@@ -441,6 +441,90 @@ def _smooth_perturbation(coordinates: np.ndarray, span: float) -> np.ndarray:
     return 1.0e-4 * span * signal
 
 
+def _instrument_controls(
+    machine: Any, operator: Any, read: Any, pitch: float
+) -> dict[str, Any]:
+    """Make the census observe manufactured nulls at one cell centroid."""
+
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    domain_centre = np.mean(machine.node, axis=0)
+    cell = int(np.argmin(np.linalg.norm(machine.node - domain_centre, axis=1)))
+    target = np.asarray(machine.node[cell], dtype=np.float64)
+    local = (coordinates - target) / pitch
+    saddle_state = local[:, 0] ** 2 - local[:, 1] ** 2
+    extremum_state = local[:, 0] ** 2 + local[:, 1] ** 2
+    saddle = jax.block_until_ready(read(jnp.asarray(saddle_state)))
+    extremum = jax.block_until_ready(read(jnp.asarray(extremum_state)))
+    saddle_position = np.asarray(saddle["raw_position"])[cell]
+    extremum_position = np.asarray(extremum["raw_position"])[cell]
+    saddle_detected = bool(
+        np.asarray(saddle["raw_saddle"])[cell]
+        and np.asarray(saddle["typed_saddle"])[cell]
+        and np.linalg.norm(saddle_position - target) <= 1.0e-10
+    )
+    extremum_detected = bool(
+        np.asarray(extremum["raw_extremum"])[cell]
+        and np.asarray(extremum["typed_extremum"])[cell]
+        and np.linalg.norm(extremum_position - target) <= 1.0e-10
+    )
+    return {
+        "cell_index": cell,
+        "target_rz_m": target.tolist(),
+        "saddle_crossing_count": int(np.asarray(saddle["crossing_count"])[cell]),
+        "saddle_detected_and_polished": saddle_detected,
+        "saddle_position_error_m": float(np.linalg.norm(saddle_position - target)),
+        "extremum_crossing_count": int(np.asarray(extremum["crossing_count"])[cell]),
+        "extremum_detected_and_polished": extremum_detected,
+        "extremum_position_error_m": float(np.linalg.norm(extremum_position - target)),
+    }
+
+
+def _reference_cell_probe(
+    machine: Any,
+    operator: Any,
+    state: np.ndarray,
+    measured: dict[str, Any],
+    reference_mask: np.ndarray,
+) -> dict[str, Any] | None:
+    """Describe the own-cell signs and unconstrained polish at one true null."""
+
+    indices = np.flatnonzero(reference_mask)
+    if not len(indices):
+        return None
+    cell = int(indices[0])
+    stencil = _support_stencil(operator)
+    physical = state[: operator.physical_node_number]
+    centroid, _wall = operator._fixed_design_topology.split_flux_map(
+        jnp.asarray(physical)
+    )
+    pool = np.concatenate(
+        (np.asarray(centroid), state[operator.physical_node_number :])
+    )
+    values = pool[np.asarray(stencil.ring_gather_index)[cell]]
+    delta = values[1:] - values[0]
+    position = np.asarray(measured["raw_position"])[cell]
+    determinant = float(np.asarray(measured["hessian_determinant_local"])[cell])
+    return {
+        "cell_index": cell,
+        "cell_centroid_rz_m": np.asarray(machine.node[cell]).tolist(),
+        "vertex_minus_centroid_wb": delta.tolist(),
+        "above_centroid_bits": "".join(str(int(value > 0.0)) for value in delta),
+        "cyclic_sign_change_count": int(np.asarray(measured["crossing_count"])[cell]),
+        "polished_position_rz_m": position.tolist(),
+        "requested_step_m": float(np.asarray(measured["requested_step_m"])[cell]),
+        "hessian_determinant_local": determinant,
+        "hessian_class": (
+            "saddle"
+            if determinant < 0.0
+            else "extremum"
+            if determinant > 0.0
+            else "singular"
+        ),
+    }
+
+
 def _production_read(operator: Any, state: np.ndarray) -> dict[str, Any]:
     """Run the production neighbour-centroid read on the identical state."""
 
@@ -557,6 +641,12 @@ def _measure_row(
         measured["representative_extremum"], dtype=bool
     )
     representative_saddle = np.asarray(measured["representative_saddle"], dtype=bool)
+    instrument = _instrument_controls(machine, operator, read, pitch)
+    if not (
+        instrument["saddle_detected_and_polished"]
+        and instrument["extremum_detected_and_polished"]
+    ):
+        raise RuntimeError("manufactured stationary-point controls failed")
     production = _production_read(operator, state)
     production["axis_position_error_m"] = float(
         np.linalg.norm(np.asarray(production["axis_rz_m"]) - axis_reference)
@@ -677,8 +767,17 @@ def _measure_row(
                 "axis-component flood; candidate saddles use production wall "
                 "containment"
             ),
+            "analytic_axis_cell_probe": _reference_cell_probe(
+                machine, operator, state, measured, raw_axis_true
+            ),
+            "analytic_saddle_cell_probe": (
+                _reference_cell_probe(machine, operator, state, measured, raw_x_true)
+                if diverted
+                else None
+            ),
         },
         "production_read": production,
+        "instrument_controls": instrument,
         "smooth_noise_control": noise_control,
         "shift_control": (
             _shift_control(measured, state, operator)
@@ -844,8 +943,9 @@ def _render_saddle_panel(row: dict[str, Any], figure_directory: Path) -> dict[st
             vertex[0], vertex[1], f" {index}:{'+' if sign > 0 else '-'}", fontsize=7
         )
     saddle = row["vertex_read"]["saddle"]
-    if saddle["position_rz_m"] is not None:
-        position = saddle["position_rz_m"]
+    probe = row["vertex_read"]["analytic_saddle_cell_probe"]
+    if probe is not None:
+        position = probe["polished_position_rz_m"]
         axis.plot(
             position[0],
             position[1],
@@ -859,9 +959,11 @@ def _render_saddle_panel(row: dict[str, Any], figure_directory: Path) -> dict[st
     axis.set_xlim(ANALYTIC_X[0] - extent, ANALYTIC_X[0] + extent)
     axis.set_ylim(ANALYTIC_X[1] - extent, ANALYTIC_X[1] + extent)
     poloidal_axes(axis)
+    admission = "admitted" if saddle["admitted"] else "unadmitted"
+    sign_changes = probe["cyclic_sign_change_count"] if probe is not None else None
     axis.set_title(
-        f"{row['realised_cells']} cells: own ring signs about centroid; "
-        f"polished error {saddle['position_error_in_pitch']:.4g} pitch",
+        f"{row['realised_cells']} cells: {sign_changes} own-ring sign changes; "
+        f"{admission}",
         fontsize=9,
     )
     figure_directory.mkdir(parents=True, exist_ok=True)
@@ -1000,8 +1102,12 @@ def aggregate(
         raise RuntimeError("the 300-requested production miss did not reproduce")
     if not by_requested[500]["production_read"]["saddle_admitted"]:
         raise RuntimeError("the 500-requested production positive control failed")
-    if not all(row["vertex_read"]["axis"]["admitted"] for row in rows):
-        raise RuntimeError("the own-vertex read failed to admit an analytic axis")
+    if not all(
+        row["instrument_controls"]["saddle_detected_and_polished"]
+        and row["instrument_controls"]["extremum_detected_and_polished"]
+        for row in rows
+    ):
+        raise RuntimeError("a manufactured stationary-point control failed")
     banked = _load_production_ladder()
     for row in single:
         prior = banked[row["requested_cells"]]["production_read"]
@@ -1056,6 +1162,8 @@ def aggregate(
             "production_admission_reproduced_at_requested_500": True,
             "banked_production_admission_matches_every_rung": True,
             "analytic_grid_flux_nonuniform_every_row": True,
+            "manufactured_saddle_detected_every_row": True,
+            "manufactured_extremum_detected_every_row": True,
         },
         "figures": figures,
         "single_null_rows": single,

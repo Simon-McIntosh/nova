@@ -545,7 +545,9 @@ def _dual_read_function(
         )
         extremal_centroid = jnp.argmax(operator.polarity * centroid)
         extremal_vertices = cell_vertices[extremal_centroid]
-        axis_seed = jnp.isin(gather[:, 0] - len(operator.grid.node), extremal_vertices)
+        axis_seed = jnp.isin(
+            gather[:, 0] - operator.grid.node_number, extremal_vertices
+        )
         stationary_saddle = finite & saddle_type
         stationary_extremum = finite & axis_seed & extremum_type
         typed_saddle = stationary_saddle & near_triangle

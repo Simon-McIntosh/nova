@@ -1,0 +1,205 @@
+{
+  "census": {
+    "comparison": {
+      "cache_runtime": "runtime-0745ecebea4cb264e054",
+      "executable_artifact_bytes_delta": -21328,
+      "executable_artifact_source": "persistent compilation cache serialised executable file",
+      "hlo_bytes_delta": -905442,
+      "instruction_count_delta": 12,
+      "instruction_count_ratio": 1.0000267645058045,
+      "serialized_executable_mib": {
+        "production": null,
+        "scanned": null
+      },
+      "temporaries_temp_bytes_delta": 512,
+      "temporaries_temp_bytes_ratio": 1.0000025569082889
+    },
+    "production": {
+      "arm": "production",
+      "compile_wall_seconds": 551.539570376277,
+      "dimensions": {
+        "active_set_steps": 16,
+        "atomic_support_capacity": 24,
+        "cell_polynomial_terms": 6,
+        "exact_quadrature_points_per_cell": 196480,
+        "exact_support_capacity": 3072,
+        "gmres_iterations": 30,
+        "grid_nodes": 342,
+        "newton_steps": 10,
+        "quadrature_nodes_per_axis": 8,
+        "quadrature_nodes_per_triangle": 64,
+        "realised_cells": 342,
+        "sample_nodes": 1066,
+        "solve_state_size": 1529,
+        "spline_chain_samples_per_chord": 128,
+        "wall_nodes": 121,
+        "whole_cell_quadrature_points_per_cell": 1408
+      },
+      "executable_artifact_bytes": 392621954,
+      "executable_artifact_mib": 374.43347358703613,
+      "instruction_count": 448355,
+      "lane": {
+        "clip_mode": "chord",
+        "execution": "slurm",
+        "hostname": "98dci4-gpu-0003.iter.org",
+        "jax_default_backend": "gpu",
+        "jax_platforms": "cuda,cpu",
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "requested_cells": 300,
+        "slurm_job_id": "1270961"
+      },
+      "loop_driver": "fori_loop",
+      "memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 12232,
+        "generated_code_size_in_bytes": 468900904,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 29106,
+        "temp_size_in_bytes": 200241832
+      },
+      "method": "jax.jit(program).lower(seed).compile().as_text()",
+      "optimised_hlo_bytes": 138541933,
+      "requested_cells": 300,
+      "schema": "nova.scanned-trip-loop-compile-census",
+      "serialisation": {
+        "serialisation_error": "TypeError: int() argument must be a string, a bytes-like object or a real number, not 'nanobind.nb_bound_method'",
+        "serialized_executable_bytes": null,
+        "serialized_executable_mib": null,
+        "size_of_generated_code_bytes": null
+      },
+      "source_revision": "ac4c66a770d330ff111d82f0183d8a0ccf2f6388",
+      "total_hlo_lines": 588400
+    },
+    "scanned": {
+      "arm": "scanned",
+      "compile_wall_seconds": 1139.99054457061,
+      "dimensions": {
+        "active_set_steps": 16,
+        "atomic_support_capacity": 24,
+        "cell_polynomial_terms": 6,
+        "exact_quadrature_points_per_cell": 196480,
+        "exact_support_capacity": 3072,
+        "gmres_iterations": 30,
+        "grid_nodes": 342,
+        "newton_steps": 10,
+        "quadrature_nodes_per_axis": 8,
+        "quadrature_nodes_per_triangle": 64,
+        "realised_cells": 342,
+        "sample_nodes": 1066,
+        "solve_state_size": 1529,
+        "spline_chain_samples_per_chord": 128,
+        "wall_nodes": 121,
+        "whole_cell_quadrature_points_per_cell": 1408
+      },
+      "executable_artifact_bytes": 392600626,
+      "executable_artifact_mib": 374.4131336212158,
+      "instruction_count": 448367,
+      "lane": {
+        "clip_mode": "chord",
+        "execution": "slurm",
+        "hostname": "98dci4-gpu-0003.iter.org",
+        "jax_default_backend": "gpu",
+        "jax_platforms": "cuda,cpu",
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "requested_cells": 300,
+        "slurm_job_id": "1270961"
+      },
+      "loop_driver": "scan",
+      "memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 12232,
+        "generated_code_size_in_bytes": 468900648,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 29106,
+        "temp_size_in_bytes": 200242344
+      },
+      "method": "jax.jit(program).lower(seed).compile().as_text()",
+      "optimised_hlo_bytes": 137636491,
+      "requested_cells": 300,
+      "schema": "nova.scanned-trip-loop-compile-census",
+      "serialisation": {
+        "serialisation_error": "TypeError: int() argument must be a string, a bytes-like object or a real number, not 'nanobind.nb_bound_method'",
+        "serialized_executable_bytes": null,
+        "serialized_executable_mib": null,
+        "size_of_generated_code_bytes": null
+      },
+      "source_revision": "ac4c66a770d330ff111d82f0183d8a0ccf2f6388",
+      "total_hlo_lines": 588338
+    }
+  },
+  "dimensions": {
+    "active_set_steps": 16,
+    "atomic_support_capacity": 24,
+    "cell_polynomial_terms": 6,
+    "exact_quadrature_points_per_cell": 196480,
+    "exact_support_capacity": 3072,
+    "gmres_iterations": 30,
+    "grid_nodes": 342,
+    "newton_steps": 10,
+    "quadrature_nodes_per_axis": 8,
+    "quadrature_nodes_per_triangle": 64,
+    "realised_cells": 342,
+    "sample_nodes": 1066,
+    "solve_state_size": 1529,
+    "spline_chain_samples_per_chord": 128,
+    "wall_nodes": 121,
+    "whole_cell_quadrature_points_per_cell": 1408
+  },
+  "lane_from_production": {
+    "clip_mode": "chord",
+    "execution": "slurm",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_default_backend": "gpu",
+    "jax_platforms": "cuda,cpu",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "requested_cells": 300,
+    "slurm_job_id": "1270961"
+  },
+  "lane_from_scanned": {
+    "clip_mode": "chord",
+    "execution": "slurm",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_default_backend": "gpu",
+    "jax_platforms": "cuda,cpu",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "requested_cells": 300,
+    "slurm_job_id": "1270961"
+  },
+  "requested_cells": 300,
+  "schema": "nova.scanned-trip-loop-comparison",
+  "source_revision": "ac4c66a770d330ff111d82f0183d8a0ccf2f6388",
+  "terminal": {
+    "comparison": {
+      "cycle_damping_activations_identical": true,
+      "mask_differences_identical": true,
+      "per_trip_residual_sup_difference": 0.0,
+      "terminal_residual_difference": 0.0,
+      "terminal_state_bits_identical": true,
+      "terminal_state_sup_difference": 0.0
+    },
+    "production": {
+      "axis_error": 0.11602748777929749,
+      "converged": false,
+      "iterations": 3,
+      "residual": 0.006195329180403669,
+      "termination_reason": "active_set_settled"
+    },
+    "scanned": {
+      "axis_error": 0.11602748777929749,
+      "converged": false,
+      "iterations": 3,
+      "residual": 0.006195329180403669,
+      "termination_reason": "active_set_settled"
+    }
+  }
+}

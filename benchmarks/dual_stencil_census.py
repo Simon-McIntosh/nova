@@ -524,9 +524,9 @@ def _dual_read_function(
         local_vertical = (
             h01 * coefficient[:, 1] - h00 * coefficient[:, 2]
         ) / safe_determinant
-        step = jnp.stack((local_radial, local_vertical), axis=1) * scale
+        step = jnp.stack((local_radial, local_vertical), axis=1) * scale[:, None]
         position = centre + step
-        local = step / scale
+        local = step / scale[:, None]
         value = (
             coefficient[:, 0]
             + coefficient[:, 1] * local[:, 0]

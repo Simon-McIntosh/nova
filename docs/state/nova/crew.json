@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T22:59:59",
+  "updated": "2026-09-15T01:07:47",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -156411,6 +156411,301 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T192055660824-msc-program-scope-census",
+        "plan": "millisecond-converged-solve",
+        "section": "",
+        "node": "msc-program-scope-census",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 905,
+                "cached_input_tokens": 736413,
+                "input_tokens": 737320,
+                "output_tokens": 5447,
+                "reasoning_output_tokens": 1154,
+                "total_tokens": 742767,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. Never open any receipt larger than one megabyte in an editor (load it with json). No production code change: this node measures the program on main. Commit the benchmark before submitting any job; every SLURM job is sbatch detached from your shell with --output in the run directory, TMPDIR=/tmp exported in the submit environment and the payload, the root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python with PYTHONPATH at the worktree, never uv on a compute node; CPU work on all_debug (--time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu) in ONE job with cases sharded inside and parts persisted as each lands; any H200 job short and single (betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8, --time=00:30:00, nvidia-smi prologue exiting 3 below 40 GiB free, XLA_PYTHON_CLIENT_PREALLOCATE=false, JAX_PLATFORMS=cuda,cpu). Write the manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync. Shared facts at this base (main): the certificate driver benchmarks/solovev_certificate.py solves rows through profile.solve(ForwardSolveRequest) from nova/equilibrium/forward.py into nova/equilibrium/fixed_point.py (the outer trip loop, active-set reconcile and inner Newton-Krylov) with the whole-cell clip as production default; the exterior is a traced argument and one program compiles per mesh (merged a37c5c00); the oracle machines are cached at 110, 200, 300, 342, 400, 500, 750, 1000 and 2500 requested cells (scripts/analytic_oracle_fixtures/measure.py cached_machine and forward_operator); a compiled solve executable is 903 MB on disk, the 1000-cell exact-clip HLO exceeded the 2 GiB serialisation limit, the 2500-cell whole-cell rows exceeded 128 GB of host memory during compile, and the lead's expectation is a program of megabytes with trips and Newton steps as scans. Lowering without compiling is jax.jit(f).lower(*args); the optimised HLO is .compile().as_text(); the instruction count is the line count of that text filtered to instructions; named scopes appear in metadata op_name. Build one benchmark that compiles the whole-cell certificate solve for the weak row at 300 and 1000 cells (H200 backend for the 1000-cell program if the CPU compile exceeds the allocation; state which), writes the optimised HLO text to the run directory, and censuses it: for every instruction take the op_name metadata (the jax named-scope path, which carries the Python function names) and attribute the instruction and its output buffer bytes to the innermost nova function in the path; table the top thirty functions by instruction count and by bytes, with the file and line of each from the metadata's source location; report how many instructions carry no nova scope; and report the count of while and conditional ops and their body sizes, which are the scanned regions. Do the same for one application of the flux map alone (operator.flux_map at the analytic flux) so the solve's overhead over the map is a table. One SVG treemap-like bar chart of instruction share by function at 1000 cells. The report states the ten functions that carry most of the program, the share of the program in scanned bodies against unrolled straight-line code, and the ratio of solve instructions to one map application.",
+          "estimated_hours": 3.0,
+          "goal": "Measure which nova functions contribute how many instructions and how many bytes of temporaries to the compiled whole-cell solve program at 300 and 1000 cells",
+          "id": "msc-program-scope-census",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-14T19:20:56Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T192055660824-msc-program-scope-census/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/program_scope_census.py",
+            "docs/figures/millisecond-converged-solve/scope-census",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/scope-census"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-msc-scope-census",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-14T19:21:12Z",
+        "completed_at": "2026-09-14T23:05:24.270Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 13431,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 13452,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "0fe9e4961fb167b1c6a6bc94d8514024823149c1",
+        "commits": [
+          "0fcca94a919f7ad9bf980694e61596a0a0526c02",
+          "6eab3fe592a464914e253be25466e9940682a532",
+          "7917ed26b34f1f122cbc90afde13f627e8fed12f"
+        ],
+        "changed_lines": {
+          "added": 1,
+          "removed": 3,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1270964: compiled the whole-cell certificate solve and one map application for the weak row at 300 and 1000 cells, censused every optimised HLO instruction and output buffer by innermost nova scope, EXIT 0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T192055660824-msc-program-scope-census/scope-census-1270964.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T192055660824-msc-program-scope-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "d7986e3f-569a-42f8-a068-02ccccbfd7b7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 1858559,
+            "input_tokens_cumulative": 1858559,
+            "output_tokens": 16872,
+            "output_tokens_cumulative": 16872,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-14T23:05:24.270Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: job 1270906 is queued or running; manifest prepared before waiting on its scale-aware focused guard and 300-cell compile-only measurement",
+              "elapsed_seconds": 269,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 651,
+              "log_fresh": true,
+              "manifest_commits": [
+                "3212db17",
+                "92b7c281",
+                "c6f8490d",
+                "31da4cd4",
+                "04270151",
+                "38ca111f",
+                "bceb7852",
+                "582de9ae",
+                "60a5236d",
+                "7e199bae",
+                "ab5fabc1",
+                "1d3aeb6c",
+                "716afa99",
+                "8fee4abe",
+                "23b1c49a",
+                "0a3ce191",
+                "8ba777a4\"]; changed_paths: [\"nova/equilibrium/observation.py",
+                "nova/equilibrium/stencil_mesh.py",
+                "nova/equilibrium/clip_quadrature.py",
+                "nova/equilibrium/forward_operator.py",
+                "tests/test_clipped_support_quadrature.py",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/chain-capacity.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/single-null-chain-cell.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-identification-300.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-producers-300.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-large-buffers-300.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300-gathered.json",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-quadrature/needs-help.md",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-quadrature/compile_memory.py",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-quadrature/run_compile_memory_300.sh"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "1453b68c0aec345afabf931fc83199474dc0d479f02b457ff9beac3e175bb009",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T112013796921-cca-clip-quadrature-linear-in-cut-cells/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T112013796921-cca-clip-quadrature-linear-in-cut-cells/manifest.md; resolve the blocker before resuming the run",
+              "node": "cca-clip-quadrature-linear-in-cut-cells",
+              "phase": "working",
+              "plan": "cut-cell-current-attribution",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260914T112013796921-cca-clip-quadrature-linear-in-cut-cells",
+              "session": "s19-review",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260914T112013796921-cca-clip-quadrature-linear-in-cut-cells",
+                "session_id": "01a09fa5-b09e-7be2-95cb-47ce2c322f5c",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 681,
+              "terminal_at": "2026-09-14T19:09:44Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 1858559,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1092.965,
+          "generated_tokens": 16872,
+          "generation_seconds": 1089.114,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 62.8,
+          "machine_seconds": 3.851,
+          "peak_input_tokens": 125615,
+          "tokens_per_second": 15.49,
+          "wall_tokens_per_second": 15.44
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/msc-program-scope-census",
+          "session_id": "d7986e3f-569a-42f8-a068-02ccccbfd7b7",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T23:05:24.270Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 104.0,
+        "orientation_input_tokens": 6445329.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -156723,6 +157018,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2484
+    "_version": 2485
   }
 }

@@ -22,8 +22,8 @@
 <title>Millisecond converged solve | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-14">
-<meta name="plan-version" content="54">
+<meta name="plan-modified" content="2026-09-15">
+<meta name="plan-version" content="55">
 <meta name="plan-impl" content="0.78">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -249,6 +249,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260914T095453924389-msc-traced-exterior-one-compile-per-mesh" data-who="s19e-msc-traced-exterior" data-when="2026-09-14T13:12:57Z">
     <div class="r-comment-body"><p>The exterior flux stack is an explicit traced argument through the forward map, the fixed-point iterations and the compiled slice, and the certificate wrapper no longer builds fresh solve, frozen_map and acceptance_map callables per request (their identities were the varying static input to the jit cache); one accelerated callable is retained per profile and static configuration. One StableHLO per mesh and static policy: identical digests across exteriors on both routes. Runtime reuse: on the weak 300 mesh the fixture-exterior solve took 118.6 s (98.2 s backend compile), the scaled-exterior solve 6.9 s with 0.0 s compile and no cache activity. Base and candidate terminal states differ by 0.0. Two costs surfaced: persistent-cache retrieval of three entries took 84.5 s because the solve executable is 903 MB on disk, and both weak 300 whole-cell solves are unconverged at 0.00556 as committed. Merged to main at a37c5c00.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260914T192055660824-msc-program-scope-census" data-who="s19i-msc-scope-census" data-when="2026-09-14T23:05:24.270Z">
+    <div class="r-comment-body"><p>The whole-cell solve program is 618,431 instructions at 300 cells and 625,512 at 1000 against 9,706 and 9,816 for one map application: 64 times the map by instructions and 105 times by output bytes, independent of cell count. Ten functions carry a third of the instructions and over half the bytes. By instructions the topology read dominates: _FixedDesignNull2D._compatibility_census 6.5 percent (forward_operator.py 780), Topology.boundary 4.8 (topology.py 610), Topology.read_qualification 2.5, Topology.axis_component 1.7, read_census 1.6, x_point_data 1.6, o_point_qualification 0.9, with _active_set_newton_krylov at 2.6 (fixed_point.py 3837) and the current-moment stencils at 2.3 and 0.9. By bytes _direct_profile_current_moments carries 31.5 percent (25 GiB of the 79 GiB total buffer output at 300 cells, stencil_mesh.py 488), then the Newton-Krylov at 4.3 and the quadratic flux design at 4.1. About a quarter of instructions carry no nova scope. So the program is the topology read and the current-moment evaluation inlined around a small map: the per-cell census kernel (0.05 ms) and a compact moment path replace the two largest shares directly.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

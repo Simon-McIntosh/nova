@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-14">
-<meta name="plan-version" content="52">
+<meta name="plan-version" content="53">
 </head>
 <body>
 <main class="plan-doc">
@@ -356,6 +356,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-spline-read-first-reading-2026-09-14" data-who="s19-review" data-when="2026-09-14">
     <div class="r-comment-body"><p>Global spline on hex, first reading (run r-20260914T111007034561, CPU job 1270378, sixteen rows). The ring-quadratic saddle is invariant to wall node count to 3 to 6 micrometres at 500, 1000 and 2500 cells and the ring cells around the X-point do not move, so the limiter audit's saddle-moves-with-wall finding was the wall-contact position error reported under the boundary label (8.049 mm at 121 nodes in both records); the mechanism question closes as an instrument mislabel. The ring saddle error itself does not fall with cells: 1.20 mm at 550 cells and 1.52 mm at 1074, 0.017 to 0.030 pitch, a floor to explain. The spline fits as run are not credible: centroids plus vertices at knot pitch one cell leaves 2.5e-3 of span rms and 2.6e-2 maximum residual at the data points for a field that is a global quartic, and the centroid-only half-pitch fit is underdetermined (2706 knots against 550 points) with a meaningless zero residual; two controls (the fitter on a clean regular grid, and the vertex values against the analytic flux at the vertex coordinates) are running to separate a fitter defect from a data misalignment. With vertices in the support the wall nodes sit inside the knot lattice (hull vertices lie on the wall polygon), yet the spline at the wall is off by 0.4 to 5 percent of span rms, so the lead's proposal to add the wall nodes themselves to the support is being fitted and measured at the wall.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260914T111007034561-cca-global-spline-read-on-hex" data-who="s19e-cca-spline-read" data-when="2026-09-14T12:46:01Z">
+    <div class="r-comment-body"><p>The hex production read is the centroid ring quadratic (no global spline, spline_shape zero) and its saddle is invariant to wall node count to 3 to 6 micrometres; the limiter audit&#x27;s saddle-moves-with-wall finding was the wall-contact error mislabelled, closed by a positive control that moved a ring value and the saddle with it. The ring saddle error is 1.20 mm at 550 cells, 1.52 mm at 1074 and 0.40 mm at 2600 (0.017, 0.030, 0.013 pitch): not monotone in cells. The global spline by the coefficient-carrier scattered projection is not credible on hex data: one-pitch fits leave 4e-4 to 1.8e-3 of span rms residual at the data points, adding vertices made the residual 4.6 times worse, half-pitch lattices are underdetermined; both controls pass (regular-grid fit residual 7e-15, vertex ordering exact to 1.7e-14 pitch) so the defect is the ill-conditioned iteration-limited LSQR projection itself. Wall nodes in the support are averaged against plasma data unless their rows are weighted by 1e3 to 1e6; the largest spline wall error is 3.8 spans. Fit 0.22 s, batched read of sixteen states 0.44 ms on CPU.</p></div>
 </div>
 </section>
 

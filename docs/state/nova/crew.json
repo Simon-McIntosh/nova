@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T13:20:12",
+  "updated": "2026-09-14T15:45:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -153827,6 +153827,583 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T095453924389-msc-traced-exterior-one-compile-per-mesh",
+        "plan": "millisecond-converged-solve",
+        "section": "",
+        "node": "msc-traced-exterior-one-compile-per-mesh",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1173,
+                "cached_input_tokens": 390198,
+                "input_tokens": 391403,
+                "output_tokens": 2414,
+                "reasoning_output_tokens": 489,
+                "total_tokens": 393817,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Lead directive 2026-09-14: fix the compile cache first by passing the exterior as an argument. Facts at this base (main): ForwardFluxOperator.flux_map (nova/equilibrium/forward_operator.py line 2637) evaluates self.external(current, prescribed_current) once and captures the resulting array in the closure the solve traces, so it is baked into the StableHLO as a constant; flux_map_with_shadow (line 2658) does the same; the certificate driver (benchmarks/solovev_certificate.py) builds a new operator per row with prescribed_exterior baked in, so weak, moderate, strong and single-null on one mesh are four different executables and every job today paid three to eleven minutes of XLA compile per row with the persistent cache (configure_persistent_compilation_cache, nova/jax/config.py line 142, wired at forward.py line 2040) never hitting across rows; the millisecond plan's followup f-20260908T055400-compiled-slice-traced-current recorded the same defect on the compiled slice route where reduced_newton._bind_dynamic_arguments bakes the edited prescribed current (StableHLO digests d7e66d9d, e6ce36d1, 979c005d across three currents, 30 s median recompile per edit). Deliver: the external flux array (grid, wall and sample stacked as the map already forms it) becomes an explicit traced argument of the map the fixed point iterates and of the compiled slice's kernels, threaded through fixed_point.py and reduced_newton.py so no route captures it as a constant; ForwardFluxOperator keeps a convenience that binds a concrete exterior for callers that want the old signature but the traced form is what the solve routes compile; requested_class and target_current stay as they are (static or traced, whichever they are now, unchanged). Prove it three ways on the CPU debug partition (all_debug, --time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu, TMPDIR=/tmp in submit environment and payload, root venv python with PYTHONPATH at the worktree, sbatch detached, one job): (1) a new test that lowers the certificate route's solve program for the weak and moderate rows on the cached 300-cell mesh and asserts the StableHLO text digests are identical, and that the compiled slice route's digest is identical across two prescribed currents; (2) the weak 300 certificate row solved before and after the change gives bit-identical terminal flux and residual (the change is a signature change, not a numerical one); (3) a two-row timing in one process on the 300-cell mesh, weak then moderate, showing the second row compiles nothing (jax compilation cache log or the compile-time counter) and reporting both wall times. Zero added failures on tests/test_equilibrium_forward_solve.py, tests/test_forward_support_clip_mode.py and any test importing flux_map or solve_reduced_newton_compiled, judged by delta against the base. Report the per-row compile time before and after and the digest table. Commit before submitting the job, manifest with the job id, end the turn. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 5.0,
+          "goal": "Make the external flux array a traced argument of the compiled forward map and solve so that every row of one mesh reuses one compiled program and the persistent compilation cache hits",
+          "id": "msc-traced-exterior-one-compile-per-mesh",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T09:54:54Z",
+            "read_at": "2026-09-14T09:54:55Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 6.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T095453924389-msc-traced-exterior-one-compile-per-mesh/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/forward.py",
+            "nova/equilibrium/fixed_point.py",
+            "nova/equilibrium/reduced_newton.py",
+            "tests/test_forward_compile_identity.py",
+            "docs/figures/millisecond-converged-solve/traced-exterior",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/traced-exterior"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19e-msc-traced-exterior",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T09:55:09Z",
+        "completed_at": "2026-09-14T13:12:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 11868,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "52997ef38428a8a0964d5e029ac4b3938b6ec0b3",
+        "commits": [
+          "57bf0562e46e3bbd91c141caa70f8b6c5672324d",
+          "a6bd20115b5607c5b77cb4fc39c765ad7fc74b30",
+          "ae7a4fdfde52b728c021e17712f297c0c5c4fbe0",
+          "c352825b26195bea75c0743dcd0c0562bcca82ef",
+          "3619dc8f1f1002eadba62e0441d1393a1ea34dec",
+          "7c6c984cf2a984b7c9da3549b1b5fecf0c60056b",
+          "c9d30c14f441895dd64af4da2fc43825603964a3",
+          "224ff46d8ae503024af52154f9508d919e7a5a54",
+          "e121937c9f142fc8edbe5ed4e15b9889dd064c7e"
+        ],
+        "changed_lines": {
+          "added": 58,
+          "removed": 885,
+          "files": 11
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1270462: same-mesh StableHLO lowering, certificate fixture against 0.9-scaled exterior digests identical (4af3be21) and compiled-slice two-current digests identical (194c2fa7), EXIT 0; H200 job 1270467: second same-mesh exterior solve 0.0 s backend compile against 98.2 s for the first, base and candidate terminal flux and residual differ by 0.0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/traced-exterior/lowering-1270462.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T095453924389-msc-traced-exterior-one-compile-per-mesh/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a09f57-8c27-7942-80b1-158e526161fe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5935616,
+            "cached_input_tokens_cumulative": 5935616,
+            "input_tokens": 6056923,
+            "input_tokens_cumulative": 6056923,
+            "output_tokens": 31127,
+            "output_tokens_cumulative": 31127,
+            "reasoning_output_tokens": 11533,
+            "reasoning_output_tokens_cumulative": 11533
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T13:12:57Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 14.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T13:12:57Z"
+            }
+          ],
+          "notional_cost_usd": 356.1665,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"Job 1270326 must complete before corrected contraction outcomes; contour figures; and the allocation-versus-Jacobian-versus-globalisation verdict can be written.\"",
+              "elapsed_seconds": 720,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 379,
+              "log_fresh": true,
+              "manifest_commits": [
+                "5698d1da49b8ecd30f45eabdca90760d620e8260",
+                "3c02e7b794bd5fd7754e4da6068be23180d1b5f8",
+                "f3f9a361ba34238d32487c9482ad06465a158802",
+                "6dcf028bcee0796746079ad597cea8fa271c54a9",
+                "3e265579e12edfc9d8dff98d1ffe89c6fbb6d846",
+                "fa017b3c8900cab64e8f5efbcc396923d6f26fc5",
+                "62d2266378e485336226dfbef667e5983cb63b8d",
+                "b9b52bec31d34ef6d1afc85dc7ac5058e3709225",
+                "a8274bd9ad22abf3760f45b892529375b7492b8a",
+                "41922965d26e03a10fe5ad47cb29b3dadde61618]; changed_paths: [\"benchmarks/oracle_start_newton_probe.py",
+                "docs/figures/cut-cell-current-attribution/oracle-start/map-floor-jacobian.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/map-floor-jacobian-high-resolution.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/weak-rotation-reactor-static-cells-110-map-jacobian-chord.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/weak-rotation-reactor-static-cells-110-map-jacobian-exact.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/weak-rotation-reactor-static-cells-110.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/weak-rotation-reactor-static-cells-300-map-jacobian-chord.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/weak-rotation-reactor-static-cells-300-map-jacobian-exact.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/weak-rotation-reactor-static-cells-300.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/weak-rotation-reactor-static-cells-1000-map-jacobian-chord.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/weak-rotation-reactor-static-cells-1000-map-jacobian-exact.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/weak-rotation-reactor-static-cells-1000.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/moderate-rotation-conventional-static-cells-110-map-jacobian-chord.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/moderate-rotation-conventional-static-cells-110-map-jacobian-exact.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/moderate-rotation-conventional-static-cells-110.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/moderate-rotation-conventional-static-cells-300-map-jacobian-chord.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/moderate-rotation-conventional-static-cells-300-map-jacobian-exact.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/moderate-rotation-conventional-static-cells-300.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/moderate-rotation-conventional-static-cells-1000-map-jacobian-chord.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/moderate-rotation-conventional-static-cells-1000-map-jacobian-exact.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/moderate-rotation-conventional-static-cells-1000.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/diverted-single-null-cells-300-map-jacobian-chord.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/diverted-single-null-cells-300-map-jacobian-exact.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/diverted-single-null-cells-300.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/diverted-single-null-cells-500-map-jacobian-chord.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/diverted-single-null-cells-500-map-jacobian-exact.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/diverted-single-null-cells-500.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/diverted-single-null-cells-1000-map-jacobian-chord.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/diverted-single-null-cells-1000-map-jacobian-exact.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/parts/diverted-single-null-cells-1000.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/newton-contraction.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/diverted-single-null-cells-500-fixture_exterior_control.png",
+                "docs/figures/cut-cell-current-attribution/oracle-start/diverted-single-null-cells-1000-fixture_exterior_control.png",
+                "docs/figures/cut-cell-current-attribution/oracle-start/newton-parts/diverted-single-null-cells-500-fixture_exterior_control.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/newton-parts/diverted-single-null-cells-500-fixture_exterior_control-perturb-1e-4.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/newton-parts/diverted-single-null-cells-500-fixture_exterior_control-perturb-1e-3.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/newton-parts/diverted-single-null-cells-500-fixture_exterior_control-perturb-1e-2.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/newton-parts/diverted-single-null-cells-500-fixture_exterior_control-perturb-1e-1.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/newton-parts/diverted-single-null-cells-1000-fixture_exterior_control.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/newton-parts/diverted-single-null-cells-1000-fixture_exterior_control-perturb-1e-4.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/newton-parts/diverted-single-null-cells-1000-fixture_exterior_control-perturb-1e-3.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/newton-parts/diverted-single-null-cells-1000-fixture_exterior_control-perturb-1e-2.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/newton-parts/diverted-single-null-cells-1000-fixture_exterior_control-perturb-1e-1.json",
+                "docs/figures/cut-cell-current-attribution/oracle-start/newton-parts/weak-rotation-reactor-static-cells-1000-reposed_exact_booking_iteration_probe.json",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/oracle-start/map-jacobian-report.md",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/oracle-start/newton-instrument-report.md",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/oracle-start/run.sh"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "5f207491ab264837d7d48d4dc8e0f4ef8aab290741fb5e9f809ea4330f2b4b31",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T061257489152-cca-oracle-start-newton-probe/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T061257489152-cca-oracle-start-newton-probe/manifest.md; resolve the blocker before resuming the run",
+              "node": "cca-oracle-start-newton-probe",
+              "phase": "working",
+              "plan": "cut-cell-current-attribution",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260914T061257489152-cca-oracle-start-newton-probe",
+              "session": "s19-review",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260914T061257489152-cca-oracle-start-newton-probe",
+                "session_id": "01a09e8c-4e0e-7803-843a-14714573a827",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 407,
+              "terminal_at": "2026-09-14T09:48:13Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-oracle-start-newton-probe"
+            }
+          ]
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 5935616,
+          "cumulative_input_tokens": 11992539,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 42660
+        },
+        "follow_on_paths": [
+          "nova/equilibrium/constraint.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 8,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/msc-traced-exterior-one-compile-per-mesh",
+          "session_id": "01a09f57-8c27-7942-80b1-158e526161fe",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T13:12:57Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 119.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
+      },
+      {
+        "run_id": "r-20260914T111007034561-cca-global-spline-read-on-hex",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a74",
+        "node": "cca-global-spline-read-on-hex",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2116,
+                "cached_input_tokens": 460777,
+                "input_tokens": 462925,
+                "output_tokens": 2481,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 465406,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Critical evaluation, no production code change; never open any receipt larger than one megabyte in an editor (load it with json); commit the benchmark before submitting any job. Facts at this base (main): on the hex certificate carriers the fixed-design null read builds no global spline (_FixedDesignNull2D.from_locator, nova/equilibrium/forward_operator.py lines 340-372, spline_shape (0, 0) for a non-tensor carrier) and reads axis and saddle from a six-coefficient quadratic fitted by least squares on each cell's hexagonal ring of centroid neighbours (nova/equilibrium/stencil_mesh.py docstring), centroid values only; the vertex sample values (operator.sample_node_flux, sample coordinates in the OracleMachine of scripts/analytic_oracle_fixtures/measure.py) feed only the clip; nova/equilibrium/coefficient_carrier.py CoefficientCarrier.from_coordinates builds a least-squares projection of scattered coordinate values onto a rectangular cubic tensor-spline knot lattice (fit_tensor_spline, nova/linalg/tensor_spline.py, whose evaluate extrapolates the edge cell's cubic beyond the last knot); the limiter audit (docs/figures/cut-cell-current-attribution/limiter-read/report.md) found the single-null saddle position moving with wall node count (8.0, 1.3, 1.9, 0.5 mm at 121, 241, 481, 961 nodes) while the raw census candidate stays at 1.20 mm, and a hypothesis that a different wall polygon re-clips the hull cells whose centroids sit in the rings the polish uses. Build one benchmark on the analytic flux, no solver, that for the single-null row at 500, 1000 and 2500 cells (all meshes cached; 2500 realises about 2600) and the weak row at 1000, for wall counts 121, 241, 481 and 961: (1) reproduces the production read's saddle and limiter contact and records, for the saddle, the ring cells the polish used with their centroid coordinates, so the difference between wall counts is shown cell by cell and the mechanism is measured, not inferred, with one positive control that perturbs one ring centroid value by 1e-4 of span at fixed wall count and reports the published saddle displacement; (2) fits a global cubic tensor spline by the coefficient-carrier least squares on centroid values alone, and again on centroid plus vertex values, with knot counts chosen so the lattice pitch is about one cell pitch and again about half a cell pitch, reporting the fit residual at the data points and the condition of the projection; (3) reads the saddle from each spline by Newton on the spline gradient seeded at the census candidate and at the analytic X-point, and the axis likewise, reporting position and level error against the analytic nulls in metres and pitch units, per cell count and wall count, beside the ring-quadratic figures; (4) evaluates each spline at the wall nodes and reports the difference from the exact Biot wall flux (the operator's wall targets) as a fraction of span, with the distance of each wall node beyond the last knot in pitch units, so the extrapolation error at the wall is a number; (5) times one spline fit and one batched read of 16 states on the CPU as the shape figure. Run on the CPU debug partition (all_debug, --time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu, TMPDIR=/tmp in submit environment and payload, root venv python with PYTHONPATH at the worktree, sbatch detached, --output in the run directory, cases sharded inside one allocation with parts persisted as each lands, 2500 last). Two SVGs under docs/figures/cut-cell-current-attribution/spline-read: saddle position error against cell pitch for ring quadratic, centroid spline and centroid-plus-vertex spline; and spline-minus-Biot wall error against distance beyond the last knot. The report states which ring cells moved with the wall and by how much, whether the global spline's saddle is invariant to wall count, what the vertex values buy over centroids alone, and whether the spline is usable at the wall. Manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 5.0,
+          "goal": "Measure the saddle and limiter positions read from a global tensor spline fitted on the hex carrier's centroid and vertex values of the analytic flux, against the production ring-quadratic read, across cell counts and wall counts",
+          "id": "cca-global-spline-read-on-hex",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T11:10:07Z",
+            "read_at": "2026-09-14T11:10:08Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 9.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T111007034561-cca-global-spline-read-on-hex/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/global_spline_read_on_hex.py",
+            "docs/figures/cut-cell-current-attribution/spline-read",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/spline-read"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19e-cca-spline-read",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T11:10:21Z",
+        "completed_at": "2026-09-14T12:46:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5740,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5740,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "7b2009004c8960af168c2691ad68af34e40365fc",
+        "commits": [
+          "aa2d7a02ba70f613b1db3b44d3947a1daf591802",
+          "ae32451b3b8a9a920613755b1f15e79f788c0bfd",
+          "6330ec2e83e08261df0322a3fcb2d15094d315a6",
+          "fffd486602bf5444189ea630140ab5c0c207c848",
+          "18cf78b7bf5808172d2e49ca9486908b66d71572"
+        ],
+        "changed_lines": {
+          "added": 14,
+          "removed": 789,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug jobs 1270378 (sixteen rows: ring quadratic and spline fits across 500, 1000, 2500 cells and four wall counts, EXIT 0) and 1270450 (fit controls and wall-supported fits, EXIT 0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/spline-read/measurement-1270378.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T111007034561-cca-global-spline-read-on-hex/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a09f9c-65f6-7340-8586-8e74fbfd484c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11624192,
+            "cached_input_tokens_cumulative": 11624192,
+            "input_tokens": 11756389,
+            "input_tokens_cumulative": 11756389,
+            "output_tokens": 25115,
+            "output_tokens_cumulative": 25115,
+            "reasoning_output_tokens": 6892,
+            "reasoning_output_tokens_cumulative": 6892
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T12:46:01Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 13.0,
+              "resets_at": 1789970252,
+              "observed_at": "2026-09-14T12:46:01Z"
+            }
+          ],
+          "notional_cost_usd": 205.7593,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: all_debug job 1270353 is pending or running; it must complete before StableHLO identities; certificate bit identity; focused head/base delta; and gate-status.json can be reported",
+              "elapsed_seconds": 1213,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 3291,
+              "log_fresh": false,
+              "manifest_commits": [
+                "e121937c]; changed_paths: [\"nova/equilibrium/forward_operator.py",
+                "nova/equilibrium/forward.py",
+                "nova/equilibrium/fixed_point.py",
+                "nova/equilibrium/reduced_newton.py",
+                "tests/test_forward_compile_identity.py"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "8cabde5eb6a97969f20b777dd38faf93882dba7c53c21eb8acfd594f6b2da80e",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T095453924389-msc-traced-exterior-one-compile-per-mesh/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T095453924389-msc-traced-exterior-one-compile-per-mesh/manifest.md; resolve the blocker before resuming the run",
+              "node": "msc-traced-exterior-one-compile-per-mesh",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260914T095453924389-msc-traced-exterior-one-compile-per-mesh",
+              "session": "s19-review",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260914T095453924389-msc-traced-exterior-one-compile-per-mesh",
+                "session_id": "01a09f57-8c27-7942-80b1-158e526161fe",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 3312,
+              "terminal_at": "2026-09-14T10:15:01Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/msc-traced-exterior-one-compile-per-mesh"
+            }
+          ]
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 11624192,
+          "cumulative_input_tokens": 23380581,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 32007
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-global-spline-read-on-hex",
+          "session_id": "01a09f9c-65f6-7340-8586-8e74fbfd484c",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T12:46:01Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 69.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -154139,6 +154716,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2458
+    "_version": 2460
   }
 }

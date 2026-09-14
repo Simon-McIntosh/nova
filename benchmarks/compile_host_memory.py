@@ -327,7 +327,11 @@ def _spawn(
 def _run_rung(work: Path, python: str, cells: int) -> None:
     rung_dir = work / f"rung-{cells}"
     rung_dir.mkdir(parents=True, exist_ok=True)
-    cache_root = work / "persistent-cache" / f"cells-{cells}"
+    # jax's cache copy helper resolves the file's group name, so the writes must
+    # land under a group this cluster can name, not the setgid stats' tree
+    cache_root = (
+        Path.home() / ".cache" / "nova" / "compile-host-memory" / f"cells-{cells}"
+    )
     part_path = work / f"part-{cells}.json"
     _write_json(
         part_path,

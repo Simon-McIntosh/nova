@@ -308,14 +308,11 @@ def _measure_row(requested_cells: int, report_directory: Path) -> dict[str, Any]
     machine, operator, analytic = _machine_and_field(requested_cells)
     physical = jnp.asarray(analytic[: operator.physical_node_number], dtype=jnp.float64)
     grid_flux, _wall_flux = operator._fixed_design_topology.split_flux_map(physical)
-    (_axis_rows, saddle_rows), census = jax.block_until_ready(
-        operator._fixed_design_topology.grid.read_census(grid_flux)
-    )
-    status = jax.block_until_ready(
-        operator._fixed_design_topology.grid.candidate_table_status(grid_flux)
-    )
     _masks, topology, _connected, axis_admitted = jax.block_until_ready(
         operator._fixed_design_read(physical)
+    )
+    (_axis_rows, saddle_rows), census = jax.block_until_ready(
+        operator._fixed_design_topology.grid.read_census(grid_flux)
     )
     pitch = math.sqrt(float(np.median(np.asarray(machine.area, dtype=np.float64))))
     exact_axis_flux = float(
@@ -331,7 +328,7 @@ def _measure_row(requested_cells: int, report_directory: Path) -> dict[str, Any]
     axis = np.asarray(topology.axis, dtype=np.float64)
     final_class = "diverted" if bool(topology.diverted) else "limited"
     saddle_admitted = bool(final_class == "diverted" and np.all(np.isfinite(saddle)))
-    x_candidate_count = int(np.asarray(status["candidate_count"])[1])
+    x_candidate_count = int(np.asarray(census["same_root_count"])[1])
     finite_saddles = _finite_candidate_rows(np.asarray(saddle_rows))
     contained = np.asarray(
         operator._fixed_design_topology.contained_x_candidates(saddle_rows),

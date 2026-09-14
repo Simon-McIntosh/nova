@@ -226,19 +226,31 @@ def _support_stencil(operator: Any) -> Any:
     return stencil
 
 
-def _deduplicate(position: jax.Array, valid: jax.Array, distance: float) -> jax.Array:
-    """Keep the first valid representative within the declared distance."""
+def _deduplicate(
+    position: jax.Array,
+    valid: jax.Array,
+    distance: float,
+    priority: jax.Array,
+) -> jax.Array:
+    """Keep the candidate most securely belonging to its cell in each cluster."""
 
-    slot = jnp.arange(position.shape[0])
+    order = jnp.argsort(jnp.where(valid, priority, jnp.inf), stable=True)
+    ordered_position = position[order]
+    ordered_valid = valid[order]
+    slot = jnp.arange(ordered_position.shape[0])
 
     def retain(index, representative):
-        separation = jnp.linalg.norm(position - position[index], axis=1)
+        separation = jnp.linalg.norm(ordered_position - ordered_position[index], axis=1)
         has_parent = jnp.any(representative & (slot < index) & (separation < distance))
-        return representative.at[index].set(valid[index] & ~has_parent)
+        return representative.at[index].set(ordered_valid[index] & ~has_parent)
 
-    return jax.lax.fori_loop(
-        0, position.shape[0], retain, jnp.zeros(position.shape[0], dtype=bool)
+    ordered_representative = jax.lax.fori_loop(
+        0,
+        ordered_position.shape[0],
+        retain,
+        jnp.zeros(ordered_position.shape[0], dtype=bool),
     )
+    return jnp.zeros_like(ordered_representative).at[order].set(ordered_representative)
 
 
 def _cell_edges(operator: Any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -375,9 +387,11 @@ def _vertex_read_function(operator: Any, pitch: float):
         contained_extremum = typed_extremum & contained
         contained_saddle = typed_saddle & contained
         representative_extremum = _deduplicate(
-            position, contained_extremum, 0.5 * pitch
+            position, contained_extremum, 0.5 * pitch, cell_distance
         )
-        representative_saddle = _deduplicate(position, contained_saddle, 0.5 * pitch)
+        representative_saddle = _deduplicate(
+            position, contained_saddle, 0.5 * pitch, cell_distance
+        )
         extremum_count = jnp.sum(representative_extremum, dtype=jnp.int32)
         saddle_count = jnp.sum(representative_saddle, dtype=jnp.int32)
         extremum_index = jnp.where(

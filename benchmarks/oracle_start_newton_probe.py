@@ -22,6 +22,7 @@ from typing import Any, Callable
 
 import jax
 import jax.numpy as jnp
+from matplotlib.path import Path as PolygonPath
 import numpy as np
 
 from benchmarks import analytic_operator_ladder
@@ -55,10 +56,9 @@ RANDOM_DIRECTION_COUNT = 4
 RANDOM_SEED = 271828
 MODES = ("exact", "chord")
 ROWS = (
-    ("weak-rotation-reactor-static", -110),
-    ("weak-rotation-reactor-static", -300),
-    ("moderate-rotation-conventional-static", -110),
-    ("moderate-rotation-conventional-static", -300),
+    ("weak-rotation-reactor-static", -1000),
+    ("moderate-rotation-conventional-static", -1000),
+    (certificate.DIVERTED_CASE_NAME, -1000),
     (certificate.DIVERTED_CASE_NAME, -300),
     (certificate.DIVERTED_CASE_NAME, -500),
 )
@@ -205,32 +205,112 @@ def _topology(operator: Any, state: np.ndarray) -> dict[str, Any]:
             "boundary_flux_wb": None,
             "x_point_rz_m": None,
             "x_point_flux_wb": None,
+            "o_candidate_count": None,
+            "x_candidate_count": None,
+            "o_second_best_flux_margin_wb": None,
+            "x_second_best_flux_margin_wb": None,
             "exception_text": str(error),
         }
     axis = np.asarray(topology.axis, dtype=np.float64)
     boundary = np.asarray(topology.boundary, dtype=np.float64)
     x_point = np.asarray(topology.x_point, dtype=np.float64)
     determinate = bool(topology.class_determinate)
+    axis_flux = float(topology.axis_flux)
+    boundary_flux = float(topology.boundary_flux)
+    polarity = 1.0 if boundary_flux <= axis_flux else -1.0
+    candidates = certificate.candidate_flux_margins(
+        operator, jnp.asarray(state), polarity=polarity
+    )
+    topology_class = (
+        "indeterminate"
+        if not determinate
+        else "diverted"
+        if bool(topology.diverted)
+        else "limited"
+    )
     return {
         "read_status": "qualified_axis",
-        "class": (
-            "indeterminate"
-            if not determinate
-            else "diverted"
-            if bool(topology.diverted)
-            else "limited"
-        ),
+        "class": topology_class,
         "axis_rz_m": axis.tolist() if np.all(np.isfinite(axis)) else None,
         "boundary_rz_m": (boundary.tolist() if np.all(np.isfinite(boundary)) else None),
-        "axis_flux_wb": float(topology.axis_flux),
-        "boundary_flux_wb": float(topology.boundary_flux),
+        "wall_contact_rz_m": (
+            boundary.tolist()
+            if topology_class == "limited" and np.all(np.isfinite(boundary))
+            else None
+        ),
+        "axis_flux_wb": axis_flux,
+        "boundary_flux_wb": boundary_flux,
+        "analytic_authored_boundary_flux_wb": 0.0,
+        "boundary_flux_offset_from_analytic_zero_wb": boundary_flux,
         "x_point_rz_m": (x_point.tolist() if np.all(np.isfinite(x_point)) else None),
         "x_point_flux_wb": (
             float(topology.x_point_flux)
             if np.isfinite(float(topology.x_point_flux))
             else None
         ),
+        **candidates,
         "exception_text": None,
+    }
+
+
+def _point_cell_booking(
+    cell_polygons: tuple[np.ndarray, ...],
+    point: np.ndarray | None,
+    booked_moments: Any,
+    analytic_moments: Any,
+    amplitude: float | None,
+) -> dict[str, Any] | None:
+    """Describe the allocation in the atomic cell containing one point."""
+    if point is None:
+        return None
+    location = np.asarray(point, dtype=np.float64)
+    booked = np.asarray(booked_moments.cell_current, dtype=np.float64)
+    analytic = np.asarray(analytic_moments.cell_current, dtype=np.float64)
+    if len(booked) != len(cell_polygons) or len(analytic) != len(cell_polygons):
+        raise RuntimeError("cell polygons and current-moment vectors differ in length")
+    containing = [
+        index
+        for index, polygon in enumerate(cell_polygons)
+        if PolygonPath(
+            np.vstack((np.asarray(polygon), np.asarray(polygon)[0]))
+        ).contains_point(location, radius=1.0e-12)
+    ]
+    if containing:
+        centres = np.asarray(
+            [np.mean(np.asarray(cell_polygons[index]), axis=0) for index in containing]
+        )
+        selected = containing[
+            int(np.argmin(np.linalg.norm(centres - location, axis=1)))
+        ]
+        selection = "containing polygon, nearest cell centre breaks an edge tie"
+    else:
+        centres = np.asarray(
+            [np.mean(np.asarray(polygon), axis=0) for polygon in cell_polygons]
+        )
+        selected = int(np.argmin(np.linalg.norm(centres - location, axis=1)))
+        selection = "nearest cell centre because no polygon contained the point"
+    booked_cell = float(booked[selected])
+    analytic_cell = float(analytic[selected])
+    normalized_cell = booked_cell * amplitude if amplitude is not None else None
+    return {
+        "point_rz_m": location.tolist(),
+        "containing_cell_indices": containing,
+        "selected_cell_index": selected,
+        "selection_rule": selection,
+        "selected_cell_centre_rz_m": centres[
+            containing.index(selected) if containing else selected
+        ].tolist(),
+        "booked_before_target_normalisation_a": booked_cell,
+        "booked_after_target_normalisation_a": normalized_cell,
+        "analytic_integrated_a": analytic_cell,
+        "booked_before_over_analytic": (
+            booked_cell / analytic_cell if analytic_cell != 0.0 else None
+        ),
+        "booked_after_over_analytic": (
+            normalized_cell / analytic_cell
+            if normalized_cell is not None and analytic_cell != 0.0
+            else None
+        ),
     }
 
 
@@ -705,6 +785,9 @@ def _mode_measure_decomposed(
     requested_class: int,
     target_current: float,
     exact_internal: np.ndarray,
+    exact_physical: Any,
+    cell_polygons: tuple[np.ndarray, ...],
+    analytic_x_point: np.ndarray | None,
 ) -> dict[str, Any]:
     """Measure and persist one mode, retaining normalisation refusals."""
     started = perf_counter()
@@ -718,6 +801,13 @@ def _mode_measure_decomposed(
     analytic_moment_map = external + exact_internal
     booking, booked_moments, amplitude = _current_booking(
         operator, analytic, requested_class, target_current
+    )
+    point_cell_booking = _point_cell_booking(
+        cell_polygons,
+        analytic_x_point,
+        booked_moments,
+        exact_physical,
+        amplitude,
     )
     unscaled_internal = np.asarray(
         operator.current_moment_image(booked_moments), dtype=np.float64
@@ -810,7 +900,7 @@ def _mode_measure_decomposed(
     part = _part_path(output, case_name, requested_cells, mode)
     measured = {
         "schema": "nova.oracle-start-map-jacobian-part",
-        "version": 2,
+        "version": 3,
         "source_revision": _source_revision(),
         "case": case_name,
         "requested_cells": requested_cells,
@@ -826,6 +916,11 @@ def _mode_measure_decomposed(
                 "analytic total flux minus the analytically integrated exact "
                 "plasma-current moment image; constructed before mode selection"
             ),
+            "boundary_basis": (
+                "the authored analytic total field with its zero-level boundary; "
+                "the production topology read and wall-contact level are not inputs"
+            ),
+            "analytic_authored_boundary_flux_wb": 0.0,
             "sha256_binary64": _array_digest(external),
             "source_pointers": {
                 "construction": _pointer(
@@ -885,6 +980,7 @@ def _mode_measure_decomposed(
             "decomposition": decomposition,
         },
         "production_topology_state_at_analytic_flux": topology,
+        "analytic_x_point_cell_booking": point_cell_booking,
         "finding": normalisation_finding,
         "jacobian": None,
         "completed": False,
@@ -1188,6 +1284,13 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
                     requested_class,
                     target_current,
                     exact_internal,
+                    exact_physical,
+                    machine.cell_polygons,
+                    (
+                        np.asarray(certificate.X_POINT_M, dtype=np.float64)
+                        if certificate._is_diverted_case(case_name)
+                        else None
+                    ),
                 )
             row = {
                 "case": case_name,

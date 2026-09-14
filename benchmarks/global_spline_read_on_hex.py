@@ -1542,8 +1542,9 @@ def _report(
         "",
         (
             f"Measurement revision: `{rows[0]['source_revision']}`; control and "
-            f"report revision: `{rows[0]['control_source_revision']}`. Full "
-            f"machine-readable receipt: `{receipt_path}`."
+            f"fit revision: `{rows[0]['control_source_revision']}`; report revision: "
+            f"`{_source_revision()}`. Full machine-readable receipt: "
+            f"`{receipt_path}`."
         ),
         "",
         (
@@ -1830,6 +1831,11 @@ def _report(
         for row in control_rows
         for control in row["controls"]["regular_grid"].values()
     )
+    regular_scattered_rms = max(
+        control["error_on_original_scattered_points"]["rms_fraction_of_span"]
+        for row in control_rows
+        for control in row["controls"]["regular_grid"].values()
+    )
     vertex_fit_maximum = max(
         control["vertex_error"]["maximum_fraction_of_span"]
         for row in control_rows
@@ -1840,19 +1846,19 @@ def _report(
             "The direct alignment control fails: sample coordinates or values are "
             "misordered before the fit."
         )
-    elif regular_scattered_maximum > 1.0e-5:
+    elif regular_scattered_rms > 1.0e-5:
         fit_cause = (
             "The sample ordering is exact, while the clean regular-grid spline "
-            "also misses the scattered analytic points above `1e-5`; the spline "
-            "representation or its matrix-free projection explains the large "
-            "residual, not vertex misalignment."
+            "also has an rms error above `1e-5` on the scattered analytic "
+            "points; the spline representation or its matrix-free projection "
+            "explains the large residual, not vertex misalignment."
         )
     else:
         fit_cause = (
             "The sample ordering is exact and the clean regular-grid spline "
-            "reaches the expected interpolation floor. The `1e-3` residual is "
-            "therefore specific to the ill-conditioned scattered least-squares "
-            "projection and its finite LSQR convergence, not to a vertex-value "
+            "reaches the expected interpolation floor. Neither control explains "
+            "the `1e-3` residual: it is specific to the ill-conditioned, "
+            "iteration-limited scattered LSQR projection, not to a vertex-value "
             "misalignment or to the cubic interpolant itself."
         )
     lines.extend(
@@ -1865,7 +1871,9 @@ def _report(
                 "grid over the same bounding box at each requested knot pitch. "
                 f"Its worst data-point residual is **{regular_fit_maximum:.3e}** "
                 "of span, and its worst error when evaluated back on the original "
-                f"scattered coordinates is **{regular_scattered_maximum:.3e}**."
+                "scattered coordinates is "
+                f"**{regular_scattered_rms:.3e} rms**, "
+                f"**{regular_scattered_maximum:.3e} maximum**."
             ),
             "",
             (
@@ -2022,6 +2030,7 @@ def aggregate(report_directory: Path, figure_directory: Path) -> dict[str, Any]:
         "version": 1,
         "source_revision": rows[0]["source_revision"],
         "control_source_revision": rows[0]["control_source_revision"],
+        "report_source_revision": _source_revision(),
         "allocation": rows[0]["allocation"],
         "control_allocation": rows[0]["control_allocation"],
         "row_count": len(rows),

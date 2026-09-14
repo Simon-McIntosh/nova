@@ -216,38 +216,30 @@ def _finite_candidate_rows(rows: np.ndarray) -> list[dict[str, Any]]:
 def _ring_holding_analytic_saddle(
     machine: Any, operator: Any, grid_flux: np.ndarray, pitch: float
 ) -> dict[str, Any]:
-    """Describe the centroid ring whose central hex contains the analytic saddle."""
+    """Describe the eligible centroid ring nearest the analytic saddle."""
 
     locator = operator._fixed_design_topology.grid.locator
     stencil = np.asarray(locator.stencil, dtype=np.intp)
     centres = np.asarray(machine.node, dtype=np.float64)
-    containing = [
-        index
-        for index, polygon in enumerate(machine.cell_polygons)
-        if PolygonPath(np.asarray(polygon, dtype=np.float64)).contains_point(
+    origin_cells = stencil[:, 0]
+    origin_distance = np.linalg.norm(centres[origin_cells] - ANALYTIC_X, axis=1)
+    ring_index = int(np.argmin(origin_distance))
+    central_cell = int(origin_cells[ring_index])
+    central_polygon = PolygonPath(
+        np.asarray(machine.cell_polygons[central_cell], dtype=np.float64)
+    )
+    contains_analytic_x = bool(
+        central_polygon.contains_point(
             ANALYTIC_X, radius=64.0 * np.finfo(np.float64).eps
         )
-    ]
-    if containing:
-        central_cell = min(
-            containing, key=lambda index: np.linalg.norm(centres[index] - ANALYTIC_X)
-        )
-        containment = "polygon_contains_analytic_x"
-    else:
-        central_cell = int(np.argmin(np.linalg.norm(centres - ANALYTIC_X, axis=1)))
-        containment = "nearest_centroid_fallback"
-    matching = np.flatnonzero(stencil[:, 0] == central_cell)
-    if len(matching) != 1:
-        raise RuntimeError(
-            "the analytic X-point central cell does not identify one centroid ring"
-        )
-    ring_index = int(matching[0])
+    )
     cell_indices = stencil[ring_index]
     values = np.asarray(grid_flux, dtype=np.float64)[cell_indices]
     bits = values[1:] > values[0]
     sign_count = int(np.sum(bits != np.roll(bits, -1)))
     return {
-        "selection": containment,
+        "selection": "nearest_eligible_centroid_ring_origin",
+        "central_cell_contains_analytic_x": contains_analytic_x,
         "ring_index": ring_index,
         "central_cell_index": int(central_cell),
         "cell_indices": cell_indices.tolist(),

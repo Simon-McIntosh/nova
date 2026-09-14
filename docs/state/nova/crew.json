@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T15:48:22",
+  "updated": "2026-09-14T15:54:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4583,6 +4583,15 @@
       },
       {
         "id": "s19e-cca-spline-read",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
+      },
+      {
+        "id": "s19e-cca-topology-ladder",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -154725,6 +154734,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2461
+    "_version": 2462
   }
 }

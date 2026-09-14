@@ -252,14 +252,17 @@ def _integrate_current_points(
     weights,
     field: FluxFieldPolynomial,
     cell_index,
-    moment_centres,
+    moment_centre,
     profile,
+    moment_centre_index=None,
 ) -> ClippedCurrentMoments:
     psi_norm, _radial_gradient, _vertical_gradient = field.sample(points, cell_index)
     density = profile.current_density(points[..., 0], psi_norm)
     weighted = density * weights
+    centre_index = cell_index if moment_centre_index is None else moment_centre_index
     first = jnp.sum(
-        weighted[..., None] * (points - jnp.asarray(moment_centres)[:, None, :]),
+        weighted[..., None]
+        * (points - jnp.asarray(moment_centre)[centre_index, None, :]),
         axis=1,
     )
     return ClippedCurrentMoments(
@@ -329,6 +332,7 @@ def clipped_support_current_moments(
                 jnp.asarray([index], dtype=jnp.int32),
                 carried_centroid[None, ...],
                 profile,
+                moment_centre_index=jnp.zeros(1, dtype=jnp.int32),
             )
             return (
                 value.cell_current[0],

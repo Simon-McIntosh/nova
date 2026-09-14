@@ -93,6 +93,24 @@ def _dense_integrals(operator, support, field, flux_span):
     )
 
 
+def _assert_cellwise_close(name, observed, expected, mask, *, rtol):
+    cells = np.flatnonzero(mask)
+    observed_values = np.asarray(observed)[cells]
+    expected_values = np.asarray(expected)[cells]
+    difference = np.abs(observed_values - expected_values)
+    maximum = int(np.argmax(difference))
+    np.testing.assert_allclose(
+        observed_values,
+        expected_values,
+        rtol=rtol,
+        atol=1.0e-12,
+        err_msg=(
+            f"{name}: maximum absolute difference {difference[maximum]:.17g} "
+            f"at cell {int(cells[maximum])}"
+        ),
+    )
+
+
 @pytest.mark.parametrize(
     "case_name", ("weak-rotation-reactor-static", "diverted-single-null")
 )
@@ -144,50 +162,76 @@ def test_compact_reduction_matches_dense_quadrature(case_name: str):
     whole = np.asarray(support.included) & ~np.asarray(support.boundary)
     cut = np.asarray(support.included) & np.asarray(support.boundary)
     assert np.all(np.isfinite(np.asarray(actual.pressure_volume)))
-    np.testing.assert_allclose(
-        np.asarray(actual.pressure_volume)[whole],
-        np.asarray(expected_pressure)[whole],
+    _assert_cellwise_close(
+        "pressure volume",
+        actual.pressure_volume,
+        expected_pressure,
+        whole,
         rtol=1.0e-12,
-        atol=1.0e-12,
     )
-    np.testing.assert_allclose(
-        np.asarray(actual.field_volume)[whole],
-        np.asarray(expected_field)[whole],
-        rtol=1.0e-12,
-        atol=1.0e-12,
+    _assert_cellwise_close(
+        "field volume", actual.field_volume, expected_field, whole, rtol=1.0e-12
     )
-    np.testing.assert_allclose(
-        np.asarray(actual.pressure_volume)[cut],
-        np.asarray(expected_pressure)[cut],
+    _assert_cellwise_close(
+        "cut pressure volume",
+        actual.pressure_volume,
+        expected_pressure,
+        cut,
         rtol=MEASURED_CHAIN_RELATIVE_TOLERANCE,
-        atol=1.0e-12,
     )
-    np.testing.assert_allclose(
-        np.asarray(actual.field_volume)[cut],
-        np.asarray(expected_field)[cut],
+    _assert_cellwise_close(
+        "cut field volume",
+        actual.field_volume,
+        expected_field,
+        cut,
         rtol=MEASURED_CHAIN_RELATIVE_TOLERANCE,
-        atol=1.0e-12,
     )
     active = np.asarray(field.active)
-    for observed, expected, carried in (
-        (actual_current.cell_current, expected_current, np.ones_like(active)),
-        (actual_current.radial_moment, expected_first[:, 0], np.ones_like(active)),
-        (actual_current.vertical_moment, expected_first[:, 1], np.ones_like(active)),
-        (production_current.cell_current, expected_current, active),
-        (production_current.radial_moment, expected_first[:, 0], active),
-        (production_current.vertical_moment, expected_first[:, 1], active),
+    for name, observed, expected, carried in (
+        (
+            "compact current",
+            actual_current.cell_current,
+            expected_current,
+            np.ones_like(active),
+        ),
+        (
+            "compact radial moment",
+            actual_current.radial_moment,
+            expected_first[:, 0],
+            np.ones_like(active),
+        ),
+        (
+            "compact vertical moment",
+            actual_current.vertical_moment,
+            expected_first[:, 1],
+            np.ones_like(active),
+        ),
+        (
+            "production current",
+            production_current.cell_current,
+            expected_current,
+            active,
+        ),
+        (
+            "production radial moment",
+            production_current.radial_moment,
+            expected_first[:, 0],
+            active,
+        ),
+        (
+            "production vertical moment",
+            production_current.vertical_moment,
+            expected_first[:, 1],
+            active,
+        ),
     ):
-        np.testing.assert_allclose(
-            np.asarray(observed)[whole & carried],
-            np.asarray(expected)[whole & carried],
-            rtol=1.0e-12,
-            atol=1.0e-12,
-        )
-        np.testing.assert_allclose(
-            np.asarray(observed)[cut & carried],
-            np.asarray(expected)[cut & carried],
+        _assert_cellwise_close(name, observed, expected, whole & carried, rtol=1.0e-12)
+        _assert_cellwise_close(
+            f"cut {name}",
+            observed,
+            expected,
+            cut & carried,
             rtol=MEASURED_CHAIN_RELATIVE_TOLERANCE,
-            atol=1.0e-12,
         )
     for observed in production_current:
         np.testing.assert_array_equal(np.asarray(observed)[~active], 0.0)

@@ -1274,6 +1274,8 @@ def _ring_movement(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             distance = np.linalg.norm(
                 coordinates - baseline_coordinates[nearest], axis=1
             )
+            pitch = row["characteristic_cell_pitch_m"]
+            membership_changed = distance > 0.25 * pitch
             comparisons.append(
                 {
                     "requested_cells": cells,
@@ -1290,12 +1292,19 @@ def _ring_movement(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                                 int(match)
                             ].tolist(),
                             "centroid_displacement_m": float(distance[index]),
+                            "centroid_displacement_in_pitch": float(
+                                distance[index] / pitch
+                            ),
                         }
                         for index, (target, match) in enumerate(
                             zip(ring["cell_indices"], nearest, strict=True)
                         )
                     ],
-                    "moved_cell_count": int(np.count_nonzero(distance > 1.0e-12)),
+                    "membership_change_threshold_in_pitch": 0.25,
+                    "changed_ring_member_count": int(
+                        np.count_nonzero(membership_changed)
+                    ),
+                    "shifted_centroid_count": int(np.count_nonzero(distance > 1.0e-12)),
                     "maximum_centroid_displacement_m": float(np.max(distance)),
                     "published_saddle_displacement_from_baseline_m": float(
                         np.linalg.norm(
@@ -1585,8 +1594,8 @@ def _report(
             ),
             "",
             (
-                "| requested cells | wall nodes | moved ring cells | maximum "
-                "centroid move [mm] | published saddle move [mm] |"
+                "| requested cells | wall nodes | replaced ring cells | maximum "
+                "centroid shift [mm] | published saddle move [mm] |"
             ),
             "|---:|---:|---:|---:|---:|",
         ]
@@ -1594,14 +1603,15 @@ def _report(
     for item in movement:
         lines.append(
             f"| {item['requested_cells']} | {item['wall_nodes']} | "
-            f"{item['moved_cell_count']} | "
+            f"{item['changed_ring_member_count']} | "
             f"{1e3 * item['maximum_centroid_displacement_m']:.6f} | "
             f"{1e3 * item['published_saddle_displacement_from_baseline_m']:.6f} |"
         )
         moved = [
             cell
             for cell in item["cell_matches"]
-            if cell["centroid_displacement_m"] > 1.0e-12
+            if cell["centroid_displacement_in_pitch"]
+            > item["membership_change_threshold_in_pitch"]
         ]
         if moved:
             detail = ", ".join(
@@ -1630,8 +1640,10 @@ def _report(
             "### Mechanism question closed: the earlier saddle motion was mislabeled",
             "",
             (
-                "No selected saddle-ring centroid moved at all across the four wall "
-                "samplings. The published ring-quadratic saddle spread is only "
+                "No selected saddle-ring member was replaced across the four wall "
+                "samplings: all seven cells match one-to-one at every count, with "
+                "only sub-0.002-pitch coordinate shifts and no wall-clipped member. "
+                "The published ring-quadratic saddle spread is only "
                 f"**{1e6 * ring_spread[500]:.3f} µm** at 500 cells, "
                 f"**{1e6 * ring_spread[1000]:.3f} µm** at 1000, and "
                 f"**{1e6 * ring_spread[2500]:.3f} µm** at 2500. There is therefore "
@@ -1916,7 +1928,15 @@ def _report(
             fit = row["spline_fits"][f"centroids_vertices_wall__{pitch_key}"]
             weighting = row["controls"]["wall_row_weighting"][pitch_key]
             passing = weighting["smallest_passing_tested_multiplier"]
-            passing_text = f"{passing:.0f}" if passing is not None else "none tested"
+            largest_tested = max(
+                attempt["wall_equation_row_multiplier"]
+                for attempt in weighting["attempts"]
+            )
+            passing_text = (
+                f"{passing:.0f}"
+                if passing is not None
+                else f"no pass through {largest_tested:.0f}"
+            )
             lines.append(
                 f"| `{row['case']}` | {row['requested_cells']} | "
                 f"{pitch_factor:.1f} | "
@@ -1925,6 +1945,28 @@ def _report(
                 f"{fit['wall_evaluation']['maximum_error_fraction_of_span']:.3e} | "
                 f"{passing_text} |"
             )
+    wall_supported_maxima = [
+        row["spline_fits"][key]["wall_evaluation"]["maximum_error_fraction_of_span"]
+        for row in rows
+        for key in (
+            "centroids_vertices_wall__pitch_1",
+            "centroids_vertices_wall__pitch_0.5",
+        )
+    ]
+    lines.extend(
+        [
+            "",
+            (
+                "Unweighted wall-supported fits **average the wall rows against "
+                "the plasma data rather than honoring them**: maximum wall error "
+                f"ranges from **{min(wall_supported_maxima):.3e}** to "
+                f"**{max(wall_supported_maxima):.3e}** of span despite every wall "
+                "node being inside the knot rectangle. Successful tested equation-"
+                "row multipliers range from `1e3` to `1e6`; the diverted 500-cell "
+                "one-pitch fit still misses the target at `1e6`."
+            ),
+        ]
+    )
     centroid_error = []
     vertex_error = []
     wall_maximum = []

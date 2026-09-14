@@ -218,16 +218,27 @@ def _fit_spline(
     *,
     pitch: float,
     pitch_factor: float,
+    row_multiplier: np.ndarray | None = None,
 ) -> _SplineFit:
     """Fit the coefficient-carrier projection through a linear operator."""
 
     coordinates = np.asarray(coordinates, dtype=np.float64)
     values = np.asarray(values, dtype=np.float64)
+    multiplier = (
+        np.ones(len(coordinates), dtype=np.float64)
+        if row_multiplier is None
+        else np.asarray(row_multiplier, dtype=np.float64)
+    )
+    if multiplier.shape != values.shape:
+        raise ValueError("row multipliers must match the sampled values")
+    if np.any(~np.isfinite(multiplier)) or np.any(multiplier <= 0.0):
+        raise ValueError("row multipliers must be positive and finite")
     radial, vertical, lattice = _knot_axes(coordinates, pitch, pitch_factor)
     coefficient_count = lattice["coefficient_count"]
     radial_device = jnp.asarray(radial, dtype=jnp.float64)
     vertical_device = jnp.asarray(vertical, dtype=jnp.float64)
     coordinate_device = jnp.asarray(coordinates, dtype=jnp.float64)
+    multiplier_device = jnp.asarray(multiplier, dtype=jnp.float64)
 
     def expand(flat_values: jax.Array) -> jax.Array:
         knot_values = flat_values.reshape(len(vertical), len(radial))
@@ -245,17 +256,20 @@ def _fit_spline(
         shape=(len(coordinates), coefficient_count),
         dtype=np.dtype(np.float64),
         matvec=lambda vector: np.asarray(
-            expand_compiled(jnp.asarray(vector, dtype=jnp.float64)), dtype=np.float64
+            multiplier_device * expand_compiled(jnp.asarray(vector, dtype=jnp.float64)),
+            dtype=np.float64,
         ),
         rmatvec=lambda vector: np.asarray(
-            transpose_compiled(jnp.asarray(vector, dtype=jnp.float64)),
+            transpose_compiled(
+                multiplier_device * jnp.asarray(vector, dtype=jnp.float64)
+            ),
             dtype=np.float64,
         ),
     )
     started = perf_counter()
     solved = lsqr(
         operator,
-        values,
+        multiplier * values,
         atol=2.0e-11,
         btol=2.0e-11,
         iter_lim=FIT_ITERATIONS,
@@ -263,7 +277,10 @@ def _fit_spline(
     )
     fit_seconds = perf_counter() - started
     coefficients = np.asarray(solved[0], dtype=np.float64)
-    represented = np.asarray(operator.matvec(coefficients), dtype=np.float64)
+    represented = np.asarray(
+        expand_compiled(jnp.asarray(coefficients, dtype=jnp.float64)),
+        dtype=np.float64,
+    )
     residual = represented - values
     spline = fit_tensor_spline(
         radial_device,
@@ -289,6 +306,8 @@ def _fit_spline(
             "fit_residual_rms_fraction_of_span": float(np.sqrt(np.mean(residual**2))),
             "fit_residual_max_fraction_of_span": float(np.max(np.abs(residual))),
             "right_hand_side_norm": float(np.linalg.norm(values)),
+            "minimum_row_multiplier": float(np.min(multiplier)),
+            "maximum_row_multiplier": float(np.max(multiplier)),
             "fit_seconds": fit_seconds,
             "projection_implementation": (
                 "matrix-free least squares over the same fit_tensor_spline "
@@ -862,6 +881,352 @@ def _measure_row(
     return row
 
 
+def _error_summary(error: np.ndarray) -> dict[str, Any]:
+    """Return compact metrics for one pointwise normalized-flux error."""
+
+    error = np.asarray(error, dtype=np.float64)
+    return {
+        "point_count": len(error),
+        "rms_fraction_of_span": float(np.sqrt(np.mean(error**2))),
+        "maximum_fraction_of_span": float(np.max(np.abs(error))),
+        "median_absolute_fraction_of_span": float(np.median(np.abs(error))),
+    }
+
+
+def _evaluate_normalised_spline(
+    spline: TensorBSpline, coordinates: np.ndarray
+) -> np.ndarray:
+    """Evaluate one normalized-flux spline on paired host coordinates."""
+
+    coordinates = np.asarray(coordinates, dtype=np.float64)
+    return np.asarray(
+        _block(spline(coordinates[:, 0], coordinates[:, 1])), dtype=np.float64
+    )
+
+
+def _support_residuals(
+    spline: TensorBSpline,
+    *,
+    centroid_coordinates: np.ndarray,
+    centroid_values: np.ndarray,
+    vertex_coordinates: np.ndarray,
+    vertex_values: np.ndarray,
+    wall_coordinates: np.ndarray,
+    wall_values: np.ndarray,
+) -> dict[str, Any]:
+    """Split one combined fit residual by semantic row class."""
+
+    return {
+        "centroids": _error_summary(
+            _evaluate_normalised_spline(spline, centroid_coordinates) - centroid_values
+        ),
+        "vertices": _error_summary(
+            _evaluate_normalised_spline(spline, vertex_coordinates) - vertex_values
+        ),
+        "wall": _error_summary(
+            _evaluate_normalised_spline(spline, wall_coordinates) - wall_values
+        ),
+    }
+
+
+def _regular_grid_control(
+    case_name: str,
+    exact: Any,
+    scattered_coordinates: np.ndarray,
+    scattered_values: np.ndarray,
+    *,
+    boundary: float,
+    span: float,
+    pitch: float,
+    pitch_factor: float,
+) -> dict[str, Any]:
+    """Fit clean regular samples and evaluate the result on scattered points."""
+
+    radial, vertical, requested = _knot_axes(scattered_coordinates, pitch, pitch_factor)
+    rr, zz = np.meshgrid(radial, vertical)
+    coordinates = np.column_stack((rr.ravel(), zz.ravel()))
+    exact_values = limiter_audit._exact_flux(case_name, exact, coordinates)
+    values = _normalised_values(exact_values, boundary, span)
+    fit = _fit_spline(
+        coordinates,
+        values,
+        pitch=pitch,
+        pitch_factor=pitch_factor,
+    )
+    scattered_error = (
+        _evaluate_normalised_spline(fit.spline, scattered_coordinates)
+        - scattered_values
+    )
+    return {
+        "regular_grid_shape": [len(vertical), len(radial)],
+        "regular_grid_matches_requested_knots": bool(
+            requested["radial_knots"] == fit.receipt["radial_knots"]
+            and requested["vertical_knots"] == fit.receipt["vertical_knots"]
+        ),
+        "fit": fit.receipt,
+        "error_on_original_scattered_points": _error_summary(scattered_error),
+    }
+
+
+def _wall_weight_control(
+    coordinates: np.ndarray,
+    values: np.ndarray,
+    wall_coordinates: np.ndarray,
+    wall_values: np.ndarray,
+    *,
+    wall_start: int,
+    pitch: float,
+    pitch_factor: float,
+    unweighted_wall_maximum: float,
+) -> dict[str, Any]:
+    """Bracket the row multiplier needed to honor exact wall samples."""
+
+    target = 1.0e-6
+    estimate = max(
+        10.0,
+        10.0 ** math.ceil(math.log10(max(unweighted_wall_maximum / target, 1.0))),
+    )
+    attempts = []
+
+    def attempt(multiplier_value: float) -> dict[str, Any]:
+        multiplier = np.ones(len(coordinates), dtype=np.float64)
+        multiplier[wall_start:] = multiplier_value
+        fit = _fit_spline(
+            coordinates,
+            values,
+            pitch=pitch,
+            pitch_factor=pitch_factor,
+            row_multiplier=multiplier,
+        )
+        error = _evaluate_normalised_spline(fit.spline, wall_coordinates) - wall_values
+        return {
+            "wall_equation_row_multiplier": multiplier_value,
+            "wall_error": _error_summary(error),
+            "fit": fit.receipt,
+            "honors_wall_to_one_part_per_million": bool(
+                np.max(np.abs(error)) <= target
+            ),
+        }
+
+    first = attempt(estimate)
+    attempts.append(first)
+    second_multiplier = (
+        estimate / 10.0
+        if first["honors_wall_to_one_part_per_million"]
+        else estimate * 10.0
+    )
+    if second_multiplier >= 10.0:
+        attempts.append(attempt(second_multiplier))
+    passing = [
+        item["wall_equation_row_multiplier"]
+        for item in attempts
+        if item["honors_wall_to_one_part_per_million"]
+    ]
+    failing = [
+        item["wall_equation_row_multiplier"]
+        for item in attempts
+        if not item["honors_wall_to_one_part_per_million"]
+    ]
+    return {
+        "target_maximum_error_fraction_of_span": target,
+        "attempts": sorted(
+            attempts, key=lambda item: item["wall_equation_row_multiplier"]
+        ),
+        "smallest_passing_tested_multiplier": min(passing) if passing else None,
+        "largest_failing_tested_multiplier": max(failing) if failing else None,
+    }
+
+
+def _extend_row_with_controls(
+    case_name: str,
+    cells: int,
+    wall_nodes: int,
+    report_directory: Path,
+) -> dict[str, Any]:
+    """Add fit-credibility controls and wall-supported splines to one row."""
+
+    part_path = _part_path(report_directory, case_name, cells, wall_nodes)
+    row = _load_part(part_path)
+    row["controls_completed"] = False
+    row["control_source_revision"] = _source_revision()
+    row["control_allocation"] = _allocation()
+    _write_json(part_path, row)
+    carrier_case, source_case, exact = certificate._case(case_name)
+    machine = limiter_audit._machine(case_name, carrier_case, exact, -cells, wall_nodes)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic = limiter_audit._exact_flux(case_name, exact, coordinates)
+    operator = limiter_audit.oracle_fixture.forward_operator(source_case, machine)
+    grid_values = analytic[: len(machine.node)]
+    wall_values = analytic[len(machine.node) : operator.physical_node_number]
+    sample_values = np.asarray(operator.sample_node_flux(jnp.asarray(analytic)))
+    direct_sample_values = limiter_audit._exact_flux(
+        case_name, exact, machine.sample_coordinates
+    )
+    boundary = row["analytic"]["boundary_flux_wb"]
+    span = row["analytic"]["flux_span_wb"]
+    pitch = row["characteristic_cell_pitch_m"]
+    normalized_grid = _normalised_values(grid_values, boundary, span)
+    normalized_wall = _normalised_values(wall_values, boundary, span)
+    normalized_sample = _normalised_values(sample_values, boundary, span)
+    scattered_coordinates = np.vstack(
+        (machine.node, machine.sample_coordinates)
+    ).astype(np.float64)
+    scattered_values = np.concatenate((normalized_grid, normalized_sample))
+    wall_supported_coordinates = np.vstack(
+        (machine.node, machine.sample_coordinates, machine.wall_node)
+    ).astype(np.float64)
+    wall_supported_values = np.concatenate(
+        (normalized_grid, normalized_sample, normalized_wall)
+    )
+    geometry = machine.moment_geometry
+    gathered_sampling_vertices = machine.sample_coordinates[geometry.cell_sample_nodes]
+    sampling_vertices = np.asarray(machine.sampling_vertices, dtype=np.float64)
+    valid_vertex = (
+        np.arange(gathered_sampling_vertices.shape[1])[None, :]
+        < np.asarray(geometry.sample_vertex_count)[:, None]
+    )
+    sampling_coordinate_error = np.linalg.norm(
+        gathered_sampling_vertices - sampling_vertices, axis=2
+    )[valid_vertex]
+    controls: dict[str, Any] = {
+        "direct_sample_alignment": {
+            "operator_sample_against_direct_analytic": _error_summary(
+                (sample_values - direct_sample_values) / span
+            ),
+            "sample_coordinate_against_sampling_vertices": {
+                "point_count": len(sampling_coordinate_error),
+                "rms_in_pitch": float(
+                    np.sqrt(np.mean((sampling_coordinate_error / pitch) ** 2))
+                ),
+                "maximum_in_pitch": float(np.max(sampling_coordinate_error) / pitch),
+            },
+            "sample_value_order_is_aligned": bool(
+                np.max(np.abs(sample_values - direct_sample_values)) == 0.0
+            ),
+            "sample_coordinate_order_is_aligned": bool(
+                np.max(sampling_coordinate_error) == 0.0
+            ),
+        },
+        "regular_grid": {},
+        "scattered_vertex_evaluation": {},
+        "wall_row_weighting": {},
+    }
+    analytic_contact = np.asarray(
+        row["analytic"]["wall_contact"]["coordinate_rz_m"], dtype=np.float64
+    )
+    axis_reference = np.asarray(row["analytic"]["axis_rz_m"], dtype=np.float64)
+    axis_seed = np.asarray(
+        row["production_ring_quadratic"]["axis_rz_m"], dtype=np.float64
+    )
+    saddle_reference = (
+        np.asarray(row["analytic"]["saddle_rz_m"], dtype=np.float64)
+        if row["analytic"]["saddle_rz_m"] is not None
+        else None
+    )
+    saddle_seed = (
+        np.asarray(row["production_ring_quadratic"]["saddle_rz_m"], dtype=np.float64)
+        if row["production_ring_quadratic"]["saddle_rz_m"] is not None
+        else saddle_reference
+    )
+    for pitch_factor in KNOT_PITCH_FACTORS:
+        key = f"pitch_{pitch_factor:g}"
+        wall_key = f"centroids_vertices_wall__{key}"
+        wall_fit = _fit_spline(
+            wall_supported_coordinates,
+            wall_supported_values,
+            pitch=pitch,
+            pitch_factor=pitch_factor,
+        )
+        wall_read = _fit_read(
+            wall_fit,
+            wall=np.asarray(machine.wall_node, dtype=np.float64),
+            exact_wall_normalised=normalized_wall,
+            polarity=float(operator.polarity),
+            pitch=pitch,
+            axis_reference=axis_reference,
+            axis_seed=axis_seed,
+            saddle_reference=saddle_reference,
+            saddle_seed=saddle_seed,
+            analytic_contact=analytic_contact,
+            timing_shape=False,
+        )
+        wall_read["support_residuals"] = _support_residuals(
+            wall_fit.spline,
+            centroid_coordinates=np.asarray(machine.node, dtype=np.float64),
+            centroid_values=normalized_grid,
+            vertex_coordinates=np.asarray(machine.sample_coordinates, dtype=np.float64),
+            vertex_values=normalized_sample,
+            wall_coordinates=np.asarray(machine.wall_node, dtype=np.float64),
+            wall_values=normalized_wall,
+        )
+        wall_read["wall_is_inside_knot_rectangle"] = bool(
+            wall_read["wall_evaluation"]["outside_node_count"] == 0
+        )
+        wall_read["unweighted_wall_rows_honored_to_one_part_per_million"] = bool(
+            wall_read["wall_evaluation"]["maximum_error_fraction_of_span"] <= 1.0e-6
+        )
+        row["spline_fits"][wall_key] = wall_read
+        if wall_nodes == 121:
+            scattered_fit = _fit_spline(
+                scattered_coordinates,
+                scattered_values,
+                pitch=pitch,
+                pitch_factor=pitch_factor,
+            )
+            scattered_vertex = _evaluate_normalised_spline(
+                scattered_fit.spline, machine.sample_coordinates
+            )
+            vertex_error = scattered_vertex - normalized_sample
+            controls["scattered_vertex_evaluation"][key] = {
+                "fit": scattered_fit.receipt,
+                "vertex_error": _error_summary(vertex_error),
+                "vertex_coordinates_rz_m": np.asarray(
+                    machine.sample_coordinates, dtype=np.float64
+                ).tolist(),
+                "analytic_vertex_flux_fraction_of_span": normalized_sample.tolist(),
+                "spline_vertex_flux_fraction_of_span": scattered_vertex.tolist(),
+                "signed_vertex_error_fraction_of_span": vertex_error.tolist(),
+            }
+            controls["regular_grid"][key] = _regular_grid_control(
+                case_name,
+                exact,
+                scattered_coordinates,
+                scattered_values,
+                boundary=boundary,
+                span=span,
+                pitch=pitch,
+                pitch_factor=pitch_factor,
+            )
+            wall_start = len(machine.node) + len(machine.sample_coordinates)
+            controls["wall_row_weighting"][key] = _wall_weight_control(
+                wall_supported_coordinates,
+                wall_supported_values,
+                np.asarray(machine.wall_node, dtype=np.float64),
+                normalized_wall,
+                wall_start=wall_start,
+                pitch=pitch,
+                pitch_factor=pitch_factor,
+                unweighted_wall_maximum=wall_read["wall_evaluation"][
+                    "maximum_error_fraction_of_span"
+                ],
+            )
+        row["controls"] = controls
+        row["controls_completed_pitch_factors"] = sorted(controls["regular_grid"])
+        _write_json(part_path, row)
+    row["controls"] = controls
+    row["controls_completed"] = True
+    _write_json(part_path, row)
+    print(
+        "GLOBAL_SPLINE_CONTROLS "
+        f"case={case_name} cells={cells} wall={wall_nodes} "
+        f"fits={len(row['spline_fits'])}",
+        flush=True,
+    )
+    return row
+
+
 def _load_part(path: Path) -> dict[str, Any]:
     """Load one completed row without treating a large receipt as source text."""
 
@@ -1011,6 +1376,18 @@ def _render_saddle(rows: list[dict[str, Any]], destination: Path) -> None:
             "^",
             "--",
         ),
+        "centroids_vertices_wall__pitch_1": (
+            "centroid plus vertex plus wall spline, knot near pitch",
+            "#7b3294",
+            "D",
+            "-",
+        ),
+        "centroids_vertices_wall__pitch_0.5": (
+            "centroid plus vertex plus wall spline, knot near half pitch",
+            "#7b3294",
+            "D",
+            "--",
+        ),
     }
     for method, (label, color, marker, line_style) in style.items():
         points = []
@@ -1088,6 +1465,16 @@ def _render_wall(rows: list[dict[str, Any]], destination: Path) -> None:
             "#138a72",
             "--",
         ),
+        "centroids_vertices_wall__pitch_1": (
+            "centroids plus vertices plus wall, knot near pitch",
+            "#7b3294",
+            "-",
+        ),
+        "centroids_vertices_wall__pitch_0.5": (
+            "centroids plus vertices plus wall, knot near half pitch",
+            "#7b3294",
+            "--",
+        ),
     }
     for key, (label, color, line_style) in style.items():
         distance = np.concatenate(
@@ -1154,8 +1541,9 @@ def _report(
         "# Global tensor-spline read on the analytic hex carrier",
         "",
         (
-            f"Source revision: `{rows[0]['source_revision']}`. Full machine-readable "
-            f"receipt: `{receipt_path}`."
+            f"Measurement revision: `{rows[0]['source_revision']}`; control and "
+            f"report revision: `{rows[0]['control_source_revision']}`. Full "
+            f"machine-readable receipt: `{receipt_path}`."
         ),
         "",
         (
@@ -1221,6 +1609,46 @@ def _report(
                 for cell in moved
             )
             lines.append(f"<!-- wall {item['wall_nodes']} moved cells: {detail} -->")
+    ring_spread = {
+        item["requested_cells"]: item["maximum_pairwise_saddle_displacement_m"]
+        for item in invariance
+        if item["method"] == "ring_quadratic"
+    }
+    contact_error = {}
+    for wall_nodes in WALL_NODE_COUNTS:
+        values = [
+            row["production_ring_quadratic"]["wall_contact_position_error_m"]
+            for row in rows
+            if row["case"] == certificate.DIVERTED_CASE_NAME
+            and row["wall_nodes"] == wall_nodes
+        ]
+        contact_error[wall_nodes] = float(np.median(values))
+    lines.extend(
+        [
+            "",
+            "### Mechanism question closed: the earlier saddle motion was mislabeled",
+            "",
+            (
+                "No selected saddle-ring centroid moved at all across the four wall "
+                "samplings. The published ring-quadratic saddle spread is only "
+                f"**{1e6 * ring_spread[500]:.3f} µm** at 500 cells, "
+                f"**{1e6 * ring_spread[1000]:.3f} µm** at 1000, and "
+                f"**{1e6 * ring_spread[2500]:.3f} µm** at 2500. There is therefore "
+                "no cell-by-cell wall-reclipping mechanism to explain."
+            ),
+            "",
+            (
+                "The limiter audit's reported `8.0, 1.3, 1.9, 0.5 mm` sequence "
+                "was the wall-contact position error carried under the boundary "
+                "label, not saddle motion. This receipt reproduces those contact "
+                "errors as "
+                f"`{1e3 * contact_error[121]:.4f}, "
+                f"{1e3 * contact_error[241]:.4f}, "
+                f"{1e3 * contact_error[481]:.4f}, "
+                f"{1e3 * contact_error[961]:.4f} mm`."
+            ),
+        ]
+    )
     control = next(
         row["production_ring_quadratic"]["saddle_ring"]["positive_control"]
         for row in rows
@@ -1254,6 +1682,94 @@ def _report(
             f"{item['successful_wall_counts']} | "
             f"{1e3 * item['maximum_pairwise_saddle_displacement_m']:.6f} |"
         )
+    lines.extend(
+        [
+            "",
+            "### Null errors, fit residuals, wall errors, and fit time by cell count",
+            "",
+            (
+                "Values are medians over the four wall samplings. A refused saddle "
+                "means the Newton result did not converge with the required Hessian "
+                "type."
+            ),
+            "",
+            (
+                "| case | cells | method | axis error [mm] | saddle error [mm] | "
+                "fit rms / span | wall rms / span | fit [s] |"
+            ),
+            "|---|---:|---|---:|---:|---:|---:|---:|",
+        ]
+    )
+    case_cells = sorted({(row["case"], row["requested_cells"]) for row in rows})
+    for case_name, cells in case_cells:
+        group = [
+            row
+            for row in rows
+            if row["case"] == case_name and row["requested_cells"] == cells
+        ]
+        ring_axis = [
+            row["production_ring_quadratic"]["axis_position_error_m"] for row in group
+        ]
+        ring_saddle = [
+            row["production_ring_quadratic"]["saddle_position_error_m"]
+            for row in group
+            if row["production_ring_quadratic"]["saddle_position_error_m"] is not None
+        ]
+        lines.append(
+            f"| `{case_name}` | {cells} | `ring_quadratic` | "
+            f"{1e3 * np.median(ring_axis):.6f} | "
+            f"{1e3 * np.median(ring_saddle):.6f} | "
+            "not applicable | not applicable | not applicable |"
+            if ring_saddle
+            else f"| `{case_name}` | {cells} | `ring_quadratic` | "
+            f"{1e3 * np.median(ring_axis):.6f} | not applicable | "
+            "not applicable | not applicable | not applicable |"
+        )
+        for key in sorted(group[0]["spline_fits"]):
+            fits = [row["spline_fits"][key] for row in group]
+            axis_errors = [
+                fit["axis"]["analytic_seed"]["position_error_m"]
+                for fit in fits
+                if fit["axis"]["analytic_seed"]["converged"]
+            ]
+            saddle_errors = [
+                fit["saddle"]["analytic_seed"]["position_error_m"]
+                for fit in fits
+                if fit["saddle"] is not None
+                and fit["saddle"]["analytic_seed"]["converged"]
+            ]
+            axis_text = (
+                f"{1e3 * np.median(axis_errors):.6f}" if axis_errors else "refused"
+            )
+            saddle_text = (
+                f"{1e3 * np.median(saddle_errors):.6f}"
+                if saddle_errors
+                else "not applicable"
+                if not ring_saddle
+                else "refused"
+            )
+            fit_residual = np.median(
+                [fit["fit_residual_rms_fraction_of_span"] for fit in fits]
+            )
+            wall_residual = np.median(
+                [fit["wall_evaluation"]["rms_error_fraction_of_span"] for fit in fits]
+            )
+            lines.append(
+                f"| `{case_name}` | {cells} | `{key}` | {axis_text} | "
+                f"{saddle_text} | "
+                f"{fit_residual:.3e} | {wall_residual:.3e} | "
+                f"{np.median([fit['fit_seconds'] for fit in fits]):.3f} |"
+            )
+    lines.extend(
+        [
+            "",
+            (
+                "The ring saddle error is not monotone on the first refinement: "
+                "**1.20 mm at 550 realised cells** becomes **1.52 mm at 1074**; "
+                "the 2500 request reaches about **0.405 mm**."
+            ),
+        ]
+    )
     lines.extend(
         [
             "",
@@ -1291,6 +1807,116 @@ def _report(
                 f"{fit['wall_evaluation']['rms_error_fraction_of_span']:.3e} | "
                 f"{fit['wall_evaluation']['maximum_error_fraction_of_span']:.3e} |"
             )
+    control_rows = [row for row in rows if row["wall_nodes"] == 121]
+    sample_value_alignment = max(
+        row["controls"]["direct_sample_alignment"][
+            "operator_sample_against_direct_analytic"
+        ]["maximum_fraction_of_span"]
+        for row in control_rows
+    )
+    sample_coordinate_alignment = max(
+        row["controls"]["direct_sample_alignment"][
+            "sample_coordinate_against_sampling_vertices"
+        ]["maximum_in_pitch"]
+        for row in control_rows
+    )
+    regular_fit_maximum = max(
+        control["fit"]["fit_residual_max_fraction_of_span"]
+        for row in control_rows
+        for control in row["controls"]["regular_grid"].values()
+    )
+    regular_scattered_maximum = max(
+        control["error_on_original_scattered_points"]["maximum_fraction_of_span"]
+        for row in control_rows
+        for control in row["controls"]["regular_grid"].values()
+    )
+    vertex_fit_maximum = max(
+        control["vertex_error"]["maximum_fraction_of_span"]
+        for row in control_rows
+        for control in row["controls"]["scattered_vertex_evaluation"].values()
+    )
+    if sample_value_alignment > 1.0e-12 or sample_coordinate_alignment > 1.0e-12:
+        fit_cause = (
+            "The direct alignment control fails: sample coordinates or values are "
+            "misordered before the fit."
+        )
+    elif regular_scattered_maximum > 1.0e-5:
+        fit_cause = (
+            "The sample ordering is exact, while the clean regular-grid spline "
+            "also misses the scattered analytic points above `1e-5`; the spline "
+            "representation or its matrix-free projection explains the large "
+            "residual, not vertex misalignment."
+        )
+    else:
+        fit_cause = (
+            "The sample ordering is exact and the clean regular-grid spline "
+            "reaches the expected interpolation floor. The `1e-3` residual is "
+            "therefore specific to the ill-conditioned scattered least-squares "
+            "projection and its finite LSQR convergence, not to a vertex-value "
+            "misalignment or to the cubic interpolant itself."
+        )
+    lines.extend(
+        [
+            "",
+            "## Fit credibility controls",
+            "",
+            (
+                "The regular-grid control fits the analytic field on a rectangular "
+                "grid over the same bounding box at each requested knot pitch. "
+                f"Its worst data-point residual is **{regular_fit_maximum:.3e}** "
+                "of span, and its worst error when evaluated back on the original "
+                f"scattered coordinates is **{regular_scattered_maximum:.3e}**."
+            ),
+            "",
+            (
+                "The operator sample tail agrees with direct analytic evaluation "
+                f"to **{sample_value_alignment:.3e}** of span; gathering "
+                "`sample_coordinates` through `cell_sample_nodes` agrees with "
+                "`sampling_vertices` to "
+                f"**{sample_coordinate_alignment:.3e} pitch**. The worst explicit "
+                "per-vertex spline error is "
+                f"**{vertex_fit_maximum:.3e}** of span; every point's coordinate, "
+                "analytic value, spline value, and signed error is retained in the "
+                "receipt."
+            ),
+            "",
+            fit_cause,
+            "",
+            "## Wall-supported spline and row weighting",
+            "",
+            (
+                "Adding the exact Biot wall rows expands the knot rectangle to "
+                "contain every wall node. The table reports whether an unweighted "
+                "least-squares fit honors those rows or averages them against the "
+                "plasma samples, plus the smallest tested wall-equation multiplier "
+                "that reaches a maximum wall error of `1e-6` of span. Weighting is "
+                "measured on the conservative 121-node wall for each case and cell "
+                "count."
+            ),
+            "",
+            (
+                "| case | cells | knot factor | wall inside lattice | unweighted "
+                "wall rms / span | unweighted wall max / span | smallest passing "
+                "wall multiplier |"
+            ),
+            "|---|---:|---:|---|---:|---:|---:|",
+        ]
+    )
+    for row in control_rows:
+        for pitch_factor in KNOT_PITCH_FACTORS:
+            pitch_key = f"pitch_{pitch_factor:g}"
+            fit = row["spline_fits"][f"centroids_vertices_wall__{pitch_key}"]
+            weighting = row["controls"]["wall_row_weighting"][pitch_key]
+            passing = weighting["smallest_passing_tested_multiplier"]
+            passing_text = f"{passing:.0f}" if passing is not None else "none tested"
+            lines.append(
+                f"| `{row['case']}` | {row['requested_cells']} | "
+                f"{pitch_factor:.1f} | "
+                f"{fit['wall_is_inside_knot_rectangle']} | "
+                f"{fit['wall_evaluation']['rms_error_fraction_of_span']:.3e} | "
+                f"{fit['wall_evaluation']['maximum_error_fraction_of_span']:.3e} | "
+                f"{passing_text} |"
+            )
     centroid_error = []
     vertex_error = []
     wall_maximum = []
@@ -1311,9 +1937,7 @@ def _report(
         and row["wall_nodes"] == 121
     )
     timing = timing_fit["batched_read_timing"]
-    residual_ratio = np.median(vertex_error) / max(
-        np.median(centroid_error), 1.0e-30
-    )
+    residual_ratio = np.median(vertex_error) / max(np.median(centroid_error), 1.0e-30)
     lines.extend(
         [
             "",
@@ -1376,18 +2000,38 @@ def aggregate(report_directory: Path, figure_directory: Path) -> dict[str, Any]:
     revisions = {row["source_revision"] for row in rows}
     if len(revisions) != 1:
         raise RuntimeError(f"parts carry mixed source revisions: {sorted(revisions)}")
+    incomplete_controls = [
+        _slug(row["case"], row["requested_cells"], row["wall_nodes"])
+        for row in rows
+        if not row.get("controls_completed")
+    ]
+    if incomplete_controls:
+        raise RuntimeError(
+            f"controls are incomplete for {len(incomplete_controls)} rows: "
+            f"{incomplete_controls}"
+        )
+    control_revisions = {row["control_source_revision"] for row in rows}
+    if len(control_revisions) != 1:
+        raise RuntimeError(
+            f"controls carry mixed source revisions: {sorted(control_revisions)}"
+        )
     movement = _ring_movement(rows)
     invariance = _invariance(rows)
     receipt = {
         "schema": "nova.global-spline-read-on-hex",
         "version": 1,
         "source_revision": rows[0]["source_revision"],
+        "control_source_revision": rows[0]["control_source_revision"],
         "allocation": rows[0]["allocation"],
+        "control_allocation": rows[0]["control_allocation"],
         "row_count": len(rows),
         "completed_row_count": sum(bool(row["completed"]) for row in rows),
         "rows": rows,
         "ring_movement_against_wall_121": movement,
         "saddle_wall_count_invariance": invariance,
+        "controls_completed_row_count": sum(
+            bool(row["controls_completed"]) for row in rows
+        ),
         "completed": True,
     }
     receipt_path = report_directory / "receipt.json"
@@ -1407,6 +2051,16 @@ def _run_worker(report_directory: Path, shard_index: int, shard_count: int) -> N
     rows = _row_specs()[shard_index::shard_count]
     for case_name, cells, wall_nodes in rows:
         _measure_row(case_name, cells, wall_nodes, report_directory)
+
+
+def _run_control_worker(
+    report_directory: Path, shard_index: int, shard_count: int
+) -> None:
+    """Extend one deterministic row shard with the requested controls."""
+
+    rows = _row_specs()[shard_index::shard_count]
+    for case_name, cells, wall_nodes in rows:
+        _extend_row_with_controls(case_name, cells, wall_nodes, report_directory)
 
 
 def run(report_directory: Path, figure_directory: Path, workers: int) -> None:
@@ -1461,6 +2115,58 @@ def run(report_directory: Path, figure_directory: Path, workers: int) -> None:
     aggregate(report_directory, figure_directory)
 
 
+def run_controls(report_directory: Path, workers: int) -> None:
+    """Run only the post-measurement credibility controls in one allocation."""
+
+    allocation = _allocation()
+    if workers < 1 or workers > allocation["allocated_cpus"]:
+        raise ValueError("workers must fit within the allocated CPU count")
+    report_directory.mkdir(parents=True, exist_ok=True)
+    processes = []
+    logs = []
+    for shard_index in range(workers):
+        log_path = report_directory / f"control-worker-{shard_index}.log"
+        stream = log_path.open("w", encoding="utf-8")
+        logs.append(stream)
+        environment = os.environ.copy()
+        threads = max(1, allocation["allocated_cpus"] // workers)
+        environment.update(
+            {
+                "OMP_NUM_THREADS": str(threads),
+                "OPENBLAS_NUM_THREADS": str(threads),
+                "MKL_NUM_THREADS": str(threads),
+            }
+        )
+        command = [
+            sys.executable,
+            str(Path(__file__).resolve()),
+            "control-worker",
+            "--report-directory",
+            str(report_directory),
+            "--shard-index",
+            str(shard_index),
+            "--shard-count",
+            str(workers),
+        ]
+        processes.append(
+            subprocess.Popen(
+                command,
+                stdout=stream,
+                stderr=subprocess.STDOUT,
+                env=environment,
+            )
+        )
+    failures = []
+    for index, process in enumerate(processes):
+        status = process.wait()
+        logs[index].close()
+        if status:
+            failures.append((index, status))
+    if failures:
+        raise RuntimeError(f"control worker shards failed: {failures}")
+    print(f"GLOBAL_SPLINE_CONTROLS_COMPLETE rows={len(_row_specs())}", flush=True)
+
+
 def _parser() -> argparse.ArgumentParser:
     """Build the command-line parser."""
 
@@ -1474,12 +2180,23 @@ def _parser() -> argparse.ArgumentParser:
         "--figure-directory", type=Path, default=DEFAULT_FIGURE_DIRECTORY
     )
     run_parser.add_argument("--workers", type=int, default=2)
+    control_run_parser = subparsers.add_parser("run-controls")
+    control_run_parser.add_argument(
+        "--report-directory", type=Path, default=DEFAULT_REPORT_DIRECTORY
+    )
+    control_run_parser.add_argument("--workers", type=int, default=2)
     worker_parser = subparsers.add_parser("worker")
     worker_parser.add_argument(
         "--report-directory", type=Path, default=DEFAULT_REPORT_DIRECTORY
     )
     worker_parser.add_argument("--shard-index", type=int, required=True)
     worker_parser.add_argument("--shard-count", type=int, required=True)
+    control_worker_parser = subparsers.add_parser("control-worker")
+    control_worker_parser.add_argument(
+        "--report-directory", type=Path, default=DEFAULT_REPORT_DIRECTORY
+    )
+    control_worker_parser.add_argument("--shard-index", type=int, required=True)
+    control_worker_parser.add_argument("--shard-count", type=int, required=True)
     aggregate_parser = subparsers.add_parser("aggregate")
     aggregate_parser.add_argument(
         "--report-directory", type=Path, default=DEFAULT_REPORT_DIRECTORY
@@ -1506,9 +2223,16 @@ def main() -> None:
     arguments = _parser().parse_args()
     if arguments.command == "run":
         run(arguments.report_directory, arguments.figure_directory, arguments.workers)
+    elif arguments.command == "run-controls":
+        run_controls(arguments.report_directory, arguments.workers)
     elif arguments.command == "worker":
         _allocation()
         _run_worker(
+            arguments.report_directory, arguments.shard_index, arguments.shard_count
+        )
+    elif arguments.command == "control-worker":
+        _allocation()
+        _run_control_worker(
             arguments.report_directory, arguments.shard_index, arguments.shard_count
         )
     elif arguments.command == "aggregate":

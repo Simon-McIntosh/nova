@@ -10,6 +10,7 @@ set -uo pipefail
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cpu
 export PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/msc-traced-exterior-one-compile-per-mesh
+export HLO_RUN_DIRECTORY=/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/traced-exterior
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
 
 echo "STAGE allocation started job=$SLURM_JOB_ID host=$(hostname)"

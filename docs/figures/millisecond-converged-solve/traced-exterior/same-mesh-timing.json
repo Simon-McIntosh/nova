@@ -1,0 +1,38 @@
+{
+  "clip_mode": "chord",
+  "requested_cells": -300,
+  "rows": [
+    {
+      "backend_compile_seconds": 99.5228922367096,
+      "case": "weak-rotation-reactor-static",
+      "compilation_duration_seconds": {
+        "/jax/compilation_cache/cache_retrieval_time_sec": 82.87169632874429,
+        "/jax/compilation_cache/compile_time_saved_sec": 360.1283036712557,
+        "/jax/core/compile/backend_compile_duration": 99.5228922367096,
+        "/jax/core/compile/jaxpr_to_mlir_module_duration": 5.659411907196045,
+        "/jax/core/compile/jaxpr_trace_duration": 0.09776520729064941
+      },
+      "exterior": "fixture",
+      "persistent_cache_hits": 4,
+      "persistent_cache_misses": 0,
+      "terminal_residual": 0.005558930033419142,
+      "wall_seconds": 121.81922133173794
+    },
+    {
+      "backend_compile_seconds": 253.25945043563843,
+      "case": "weak-rotation-reactor-static",
+      "compilation_duration_seconds": {
+        "/jax/compilation_cache/cache_retrieval_time_sec": 49.11215334292501,
+        "/jax/compilation_cache/compile_time_saved_sec": 191.887846657075,
+        "/jax/core/compile/backend_compile_duration": 253.25945043563843,
+        "/jax/core/compile/jaxpr_to_mlir_module_duration": 4.502744674682617,
+        "/jax/core/compile/jaxpr_trace_duration": 0.004038095474243164
+      },
+      "exterior": "scaled-0.9",
+      "persistent_cache_hits": 1,
+      "persistent_cache_misses": 1,
+      "terminal_residual": 0.003509766270759898,
+      "wall_seconds": 271.59463399648666
+    }
+  ]
+}

@@ -83,7 +83,7 @@ def _maps(profile, requested_class, target_current):
     return mapped, shadowed, shadow_mask, promoted_shadow_mask
 
 
-def _lower_certificate_solve(row):
+def _lower_certificate_solve(row, external=None):
     """Lower the production fixed-point program with exterior flux as input."""
     profile, seed, requested_class, target_current, request = row
     mapped, shadowed, shadow_mask, promoted_shadow_mask = _maps(
@@ -101,7 +101,8 @@ def _lower_certificate_solve(row):
             **request.policy.kernel_options(),
         )
 
-    external = profile.operator.external()
+    if external is None:
+        external = profile.operator.external()
     return jax.jit(solve).lower(external), external
 
 
@@ -116,7 +117,11 @@ def test_certificate_rows_share_one_solve_program_per_mesh():
     """Two analytic exteriors on the same mesh lower to one StableHLO program."""
     configure_dtypes()
     rows = tuple(_certificate_row(case_name) for case_name in CASES)
-    lowered = tuple(_lower_certificate_solve(row)[0] for row in rows)
+    exteriors = tuple(row[0].operator.external() for row in rows)
+    assert exteriors[0].shape == exteriors[1].shape
+    lowered = tuple(
+        _lower_certificate_solve(rows[0], external)[0] for external in exteriors
+    )
     assert _digest(lowered[0]) == _digest(lowered[1])
 
 

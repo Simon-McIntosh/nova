@@ -385,16 +385,12 @@ def _seed_control(output: Path = SEED_CONTROL_OUTPUT) -> dict[str, Any]:
     )
     oracle_state = _exact_state(case_name, exact, coordinates)
     empty_operator = oracle_fixture.forward_operator(source_case, machine)
-    exact_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, oracle_state
+    exact_physical, fixture_exterior, _fixture_cache = (
+        oracle_fixture.cached_fixture_exterior(
+            source_case, exact, machine, empty_operator, oracle_state
+        )
     )
-    exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
-    exact_internal = oracle_fixture._internal_flux_image(
-        empty_operator, exact_coefficients
-    )
-    operator = oracle_fixture.forward_operator(
-        source_case, machine, oracle_state - exact_internal
-    )
+    operator = oracle_fixture.forward_operator(source_case, machine, fixture_exterior)
     production_seed, _moment_image, production_receipt = recovery._moment_seed(
         source_case, machine, operator
     )
@@ -1028,15 +1024,13 @@ def _nan_census(case_name: str) -> dict[str, Any]:
         )
         oracle_state = _exact_state(case_name, exact, coordinates)
         empty_operator = oracle_fixture.forward_operator(source_case, machine)
-        exact_physical = oracle_fixture.exact_current_moments(
-            source_case, empty_operator, oracle_state
-        )
-        exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
-        exact_internal = oracle_fixture._internal_flux_image(
-            empty_operator, exact_coefficients
+        exact_physical, fixture_exterior, _fixture_cache = (
+            oracle_fixture.cached_fixture_exterior(
+                source_case, exact, machine, empty_operator, oracle_state
+            )
         )
         operator = oracle_fixture.forward_operator(
-            source_case, machine, oracle_state - exact_internal
+            source_case, machine, fixture_exterior
         )
         profile = ForwardProfile(
             operator,
@@ -2127,15 +2121,13 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         )
         oracle_state = _exact_state(case_name, exact, coordinates)
         empty_operator = oracle_fixture.forward_operator(source_case, machine)
-        exact_physical = oracle_fixture.exact_current_moments(
-            source_case, empty_operator, oracle_state
-        )
-        exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
-        exact_internal = oracle_fixture._internal_flux_image(
-            empty_operator, exact_coefficients
+        exact_physical, fixture_exterior, fixture_cache = (
+            oracle_fixture.cached_fixture_exterior(
+                source_case, exact, machine, empty_operator, oracle_state
+            )
         )
         operator = oracle_fixture.forward_operator(
-            source_case, machine, oracle_state - exact_internal
+            source_case, machine, fixture_exterior
         )
         mesh = StencilMesh(machine.node, machine.stencil, machine.area)
         profile = ForwardProfile(
@@ -2328,6 +2320,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         "derivative_support_cells": len(derivative_coordinates),
         "cache": machine.cache,
         "persistent_compilation_cache": compilation_cache.receipt(),
+        "fixture_exterior_cache": fixture_cache,
         "stage_wall_seconds": stage_timings,
         "lane": {
             **_lane(),

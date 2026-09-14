@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T08:11:36",
+  "updated": "2026-09-14T08:18:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4618,6 +4618,15 @@
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a0852d-addc-7313-ae06-87167f7f463b"
         },
         "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-cca-boundary-sensitivity",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
       },
       {
         "id": "s19i-cca-cutblocks",
@@ -153285,6 +153294,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2447
+    "_version": 2448
   }
 }

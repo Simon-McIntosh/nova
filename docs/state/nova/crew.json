@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T17:30:10",
+  "updated": "2026-09-14T18:02:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4892,6 +4892,15 @@
         "created": "2026-09-14"
       },
       {
+        "id": "s19i-cca-wholecell-rows",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
+      },
+      {
         "id": "s19i-dvf-s4",
         "harness": "codex-luna",
         "role": "implement",
@@ -4998,6 +5007,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-09"
+      },
+      {
+        "id": "s19i-msc-solve-profile",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
       },
       {
         "id": "s19i-mulw-atlas",
@@ -155175,6 +155193,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2469
+    "_version": 2471
   }
 }

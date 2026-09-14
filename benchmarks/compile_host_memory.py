@@ -155,9 +155,11 @@ def _child(stage: str, cells: int, rung_dir: Path, cache_root: Path) -> int:
             },
         )
 
+    # a negative count requests a cell number (~-int) while a positive one is a
+    # filament linear dimension, so the count must carry the driver's negative sign
     began = perf_counter()
     profile, seed, request, dimensions = _certificate_compile_problem(
-        CASE_NAME, int(cells)
+        CASE_NAME, -int(cells)
     )
     program = _solve_program(profile, request)
     external = profile.operator.external(request.current, request.prescribed_current)
@@ -402,7 +404,7 @@ def _smoke(cells: int) -> int:
     """Construct one rung's problem and program without lowering or compiling."""
     configure_dtypes()
     profile, seed, request, dimensions = _certificate_compile_problem(
-        CASE_NAME, int(cells)
+        CASE_NAME, -int(cells)
     )
     program = _solve_program(profile, request)
     external = profile.operator.external(request.current, request.prescribed_current)

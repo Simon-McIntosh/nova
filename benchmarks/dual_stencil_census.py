@@ -389,7 +389,7 @@ def _primary_read_function(operator: Any, machine: Any, pitch: float):
     edge_start = jnp.asarray(edge_start)
     edge_end = jnp.asarray(edge_end)
     edge_valid = jnp.asarray(edge_valid)
-    axis_kind = operator._fixed_design_topology.extremum_polarity
+    axis_kind = operator.polarity
     if axis_kind is None:
         raise RuntimeError("the production read has no declared axis polarity")
 
@@ -492,7 +492,7 @@ def _dual_read_function(
     tri_start = jnp.asarray(triangle)
     tri_end = jnp.roll(tri_start, -1, axis=1)
     tri_valid = jnp.ones((len(triangle), 3), dtype=bool)
-    axis_kind = operator._fixed_design_topology.extremum_polarity
+    axis_kind = operator.polarity
     if axis_kind is None:
         raise RuntimeError("the production read has no declared axis polarity")
 
@@ -722,7 +722,7 @@ def _manufactured_controls(
     )
     if target_vertex is None:
         raise RuntimeError("the control cell has no interior dual vertex")
-    axis_kind = operator._fixed_design_topology.extremum_polarity
+    axis_kind = operator.polarity
 
     def manufactured(target: np.ndarray, saddle_state: bool) -> np.ndarray:
         local = (coordinates - target) / pitch

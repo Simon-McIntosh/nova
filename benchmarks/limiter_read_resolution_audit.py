@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager
+import hashlib
 import inspect
 import json
 import math
@@ -39,6 +40,7 @@ import numpy as np
 from scipy.optimize import minimize_scalar
 
 from benchmarks import solovev_certificate as certificate
+from nova.equilibrium import forward_operator as forward_operator_module
 from nova.equilibrium.connectivity_boundary import wall_height_shadow_mask
 from nova.equilibrium.forward_operator import (
     ForwardFluxOperator,
@@ -64,6 +66,7 @@ DEFAULT_FIGURE_DIRECTORY = (
     ROOT / "docs/figures/cut-cell-current-attribution/limiter-read"
 )
 WALL_NODE_COUNTS = (121, 241, 481, 961)
+HIGH_RESOLUTION_REALISED_CELLS = 2600
 ROWS = (
     ("weak-rotation-reactor-static", -300),
     ("moderate-rotation-conventional-static", -300),
@@ -123,6 +126,8 @@ def _pointer(
 ) -> dict[str, Any]:
     """Return a source interval and verified marker lines for one callable."""
 
+    while hasattr(function, "__wrapped__"):
+        function = function.__wrapped__
     lines, start = inspect.getsourcelines(function)
     path = Path(inspect.getsourcefile(function) or "")
     try:
@@ -690,7 +695,9 @@ def _measure_row(
         "wall_seconds": None,
     }
     if requested_cells == -1000:
-        pitch_2500 = pitch * math.sqrt(len(machine.node) / 2500.0)
+        pitch_2500 = pitch * math.sqrt(
+            len(machine.node) / HIGH_RESOLUTION_REALISED_CELLS
+        )
         row["resolution_guidance"].update(
             {
                 "estimated_cell_pitch_at_2500_m": pitch_2500,
@@ -753,6 +760,182 @@ def _measure_row(
     return row
 
 
+def _load_part(path: Path) -> dict[str, Any]:
+    """Load one completed row without treating a large receipt as source text."""
+
+    with path.open(encoding="utf-8") as stream:
+        row = json.load(stream)
+    if not row.get("completed"):
+        raise RuntimeError(f"required landed row is incomplete: {path}")
+    return row
+
+
+def _saddle_wall_coupling(
+    operator: ForwardFluxOperator,
+    machine: Any,
+    analytic: np.ndarray,
+) -> dict[str, Any]:
+    """Record every wall-dependent gate around the selected analytic saddle."""
+
+    physical = jnp.asarray(analytic)[: operator.physical_node_number]
+    _masks, topology, _connected, admitted = _block_tree(
+        operator._fixed_design_read(physical)
+    )
+    grid_flux, _wall_flux = operator._fixed_design_topology.split_flux_map(physical)
+    (vmap_o, vmap_x), census = _block_tree(
+        operator._fixed_design_topology.grid.read_census(grid_flux)
+    )
+    del vmap_o
+    finite = np.all(np.isfinite(np.asarray(vmap_x)[:, :3]), axis=1)
+    contained = np.asarray(
+        operator._fixed_design_topology.contained_x_candidates(vmap_x), dtype=bool
+    )
+    selected = np.asarray(topology.x_point, dtype=np.float64)
+    reference = np.asarray(certificate.X_POINT_M, dtype=np.float64)
+    nodes = np.ascontiguousarray(np.asarray(machine.node), dtype="<f8")
+    retained = np.asarray(census.get("retained_valid", np.empty((0,), dtype=bool)))
+    representative = np.asarray(
+        census.get("representative_mask", np.empty((0,), dtype=bool))
+    )
+    return {
+        "selected_x_point_rz_m": selected.tolist(),
+        "selected_x_point_error_m": float(np.linalg.norm(selected - reference)),
+        "axis_admitted": bool(admitted),
+        "finite_x_candidate_count": int(np.count_nonzero(finite)),
+        "contained_x_candidate_count": int(np.count_nonzero(contained)),
+        "selected_candidate_contained": bool(
+            np.any(
+                contained
+                & (
+                    np.linalg.norm(np.asarray(vmap_x)[:, :2] - selected, axis=1)
+                    <= 1.0e-10
+                )
+            )
+        ),
+        "shadow_mask_supplied_to_analytic_read": False,
+        "deduplication_retained_count": (
+            int(np.count_nonzero(retained[1]))
+            if retained.ndim == 2 and retained.shape[0] > 1
+            else None
+        ),
+        "deduplication_representative_count": (
+            int(np.count_nonzero(representative[1]))
+            if representative.ndim == 2 and representative.shape[0] > 1
+            else None
+        ),
+        "carrier_node_count": len(machine.node),
+        "carrier_node_sha256_binary64": hashlib.sha256(nodes.tobytes()).hexdigest(),
+        "wall_content_sha256_binary64": hashlib.sha256(
+            np.ascontiguousarray(machine.wall_node, dtype="<f8").tobytes()
+        ).hexdigest(),
+        "coupling_read": (
+            "the public read supplies no shadow mask; containment admits the sole "
+            "candidate and deduplication has no alternative to choose. The wall "
+            "enters earlier because cached_machine rebuilds the plasma carrier "
+            "after inserting that sampled wall."
+        ),
+    }
+
+
+def _reconstruct_row(
+    case_name: str,
+    requested_cells: int,
+    wall_nodes: int,
+) -> tuple[Any, Any, Any, np.ndarray, ForwardFluxOperator]:
+    """Warm-load the carrier and analytic state needed by a residual stage."""
+
+    carrier_case, source_case, exact = certificate._case(case_name)
+    machine = _machine(case_name, carrier_case, exact, requested_cells, wall_nodes)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic = _exact_flux(case_name, exact, coordinates)
+    operator = oracle_fixture.forward_operator(source_case, machine)
+    return source_case, exact, machine, analytic, operator
+
+
+def measure_residual_stages(report_directory: Path) -> dict[str, Any]:
+    """Rerun only private-wall and weak-map measurements over landed rows."""
+
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("the measurement requires JAX double precision")
+    allocation = _allocation()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    started = perf_counter()
+    completed = []
+    for wall_nodes in WALL_NODE_COUNTS:
+        for requested_cells in (-500, -1000):
+            case_name = certificate.DIVERTED_CASE_NAME
+            path = _part_path(report_directory, case_name, requested_cells, wall_nodes)
+            row = _load_part(path)
+            _source_case, _exact, machine, analytic, operator = _reconstruct_row(
+                case_name, requested_cells, wall_nodes
+            )
+            physical = jnp.asarray(analytic)[: operator.physical_node_number]
+            masks, topology, _connected, admitted = _block_tree(
+                operator._fixed_design_read(physical)
+            )
+            if not bool(admitted):
+                raise RuntimeError("the private-wall rerun did not admit its axis")
+            shadow, shadow_mask = _shadow_measurement(
+                operator, analytic, masks, topology
+            )
+            row["shadow"] = shadow
+            row["saddle_wall_coupling"] = _saddle_wall_coupling(
+                operator, machine, analytic
+            )
+            if requested_cells == -1000 and wall_nodes == 481:
+                render = row.get("render")
+                if render is None:
+                    raise RuntimeError("the landed render row omits its operands")
+                render["excluded_wall_nodes"] = np.asarray(machine.wall_node)[
+                    shadow_mask
+                ]
+            row["residual_stage"] = {
+                "job_id": allocation["job_id"],
+                "private_wall_shadow_remeasured": True,
+                "map_floor_remeasured": False,
+            }
+            _write_json(path, row)
+            completed.append(f"shadow:{case_name}:{abs(requested_cells)}:{wall_nodes}")
+            print(completed[-1], flush=True)
+
+    case_name = "weak-rotation-reactor-static"
+    for wall_nodes in (121, 481):
+        requested_cells = -1000
+        path = _part_path(report_directory, case_name, requested_cells, wall_nodes)
+        row = _load_part(path)
+        source_case, _exact, machine, analytic, _operator = _reconstruct_row(
+            case_name, requested_cells, wall_nodes
+        )
+        row["map_floor"] = _map_floor(case_name, source_case, machine, analytic)
+        row["residual_stage"] = {
+            "job_id": allocation["job_id"],
+            "private_wall_shadow_remeasured": False,
+            "map_floor_remeasured": True,
+        }
+        _write_json(path, row)
+        completed.append(f"map:{case_name}:1000:{wall_nodes}")
+        print(completed[-1], flush=True)
+
+    receipt = {
+        "source_revision": _source_revision(),
+        "allocation": allocation,
+        "persistent_compilation_cache": cache.receipt(),
+        "completed_stages": completed,
+        "stage_count": len(completed),
+        "wall_seconds": perf_counter() - started,
+        "completed": True,
+        "exit_marker": "LIMITER_READ_RESIDUAL_STAGES_EXIT=0",
+    }
+    _write_json(report_directory / "residual-measurement.json", receipt)
+    print(receipt["exit_marker"], flush=True)
+    return receipt
+
+
 def _source_contract() -> dict[str, Any]:
     """Return verified code-path evidence for the hex-carrier read."""
 
@@ -773,6 +956,18 @@ def _source_contract() -> dict[str, Any]:
             Topology._wall_anchor_selection,
             ("traced_quadratic_wall", "wall_coordinate"),
         ),
+        "wall_dependent_carrier_mesh": _pointer(
+            oracle_fixture.build_machine,
+            ("coilset.firstwall.insert(wall", "centres ="),
+        ),
+        "saddle_wall_containment": _pointer(
+            Topology.contained_x_candidates,
+            ("_points_inside_polygon",),
+        ),
+        "saddle_deduplication": _pointer(
+            forward_operator_module._FixedDesignNull2D._deduplicate_type,
+            ("same_root =",),
+        ),
         "unselected_tensor_grid_limiter": _pointer(
             __import__(
                 "nova.equilibrium.connectivity_boundary",
@@ -781,7 +976,7 @@ def _source_contract() -> dict[str, Any]:
             ("global_surface.evaluate", "refine_root"),
         ),
         "private_wall_shadow": _pointer(
-            wall_height_shadow_mask,
+            wall_height_shadow_mask.__wrapped__,
             ("mask = proposed & private_wall",),
         ),
     }
@@ -901,64 +1096,224 @@ def _render_poloidal_figure(row: dict[str, Any], path: Path) -> None:
 
 
 def _resolution_summary(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Return one wall-count recommendation per thousand-cell case."""
+    """Return panel-to-pitch ladders and matching wall counts."""
 
     summary = []
-    for case_name in (
-        "weak-rotation-reactor-static",
-        "moderate-rotation-conventional-static",
-        certificate.DIVERTED_CASE_NAME,
-    ):
-        row = next(
+    case_requests = {
+        "weak-rotation-reactor-static": (-300, -1000),
+        "moderate-rotation-conventional-static": (-300, -1000),
+        certificate.DIVERTED_CASE_NAME: (-500, -1000),
+    }
+    for case_name, requests in case_requests.items():
+        _carrier, _source, exact = certificate._case(case_name)
+        for requested_cells in requests:
+            selected = sorted(
+                (
+                    row
+                    for row in rows
+                    if row["case"] == case_name
+                    and row["requested_cells"] == requested_cells
+                ),
+                key=lambda row: row["wall_nodes"],
+            )
+            base = selected[0]
+            summary.append(
+                {
+                    "case": case_name,
+                    "cell_scale": abs(requested_cells),
+                    "realised_cells": base["realised_cells"],
+                    "cell_pitch_m": base["characteristic_cell_pitch_m"],
+                    "selected_panel_over_pitch": {
+                        str(row["wall_nodes"]): row["wall"][
+                            "selected_panel_over_cell_pitch"
+                        ]
+                        for row in selected
+                    },
+                    "recommended_wall_nodes": base["resolution_guidance"][
+                        "recommended_wall_nodes_for_realised_pitch"
+                    ],
+                }
+            )
+        thousand = next(
             row
             for row in rows
             if row["case"] == case_name
             and row["requested_cells"] == -1000
             and row["wall_nodes"] == 121
         )
-        guidance = row["resolution_guidance"]
+        pitch = thousand["characteristic_cell_pitch_m"] * math.sqrt(
+            thousand["realised_cells"] / HIGH_RESOLUTION_REALISED_CELLS
+        )
         summary.append(
             {
                 "case": case_name,
-                "realised_cells": row["realised_cells"],
-                "cell_pitch_1000_m": row["characteristic_cell_pitch_m"],
-                "estimated_cell_pitch_2500_m": guidance[
-                    "estimated_cell_pitch_at_2500_m"
-                ],
-                "wall_121_max_panel_over_pitch_1000": row["wall"][
-                    "maximum_panel_over_cell_pitch"
-                ],
-                "wall_121_consistent_at_1000": guidance[
-                    "wall_121_consistent_with_realised_pitch"
-                ],
-                "wall_121_consistent_at_2500": guidance[
-                    "wall_121_consistent_with_estimated_2500_pitch"
-                ],
-                "recommended_wall_nodes_1000": guidance[
-                    "recommended_wall_nodes_for_realised_pitch"
-                ],
-                "recommended_wall_nodes_2500": guidance[
-                    "recommended_wall_nodes_for_estimated_2500_pitch"
-                ],
+                "cell_scale": 2500,
+                "realised_cells": HIGH_RESOLUTION_REALISED_CELLS,
+                "cell_pitch_m": pitch,
+                "selected_panel_over_pitch": {
+                    str(row["wall_nodes"]): row["wall"]["selected_panel_length_m"]
+                    / pitch
+                    for row in rows
+                    if row["case"] == case_name and row["requested_cells"] == -1000
+                },
+                "recommended_wall_nodes": _recommended_wall_nodes(
+                    case_name, exact, pitch
+                ),
+                "pitch_source": (
+                    "thousand-cell realised pitch scaled by the square root of "
+                    "realised cells over 2600"
+                ),
             }
         )
     return summary
+
+
+def _limited_convergence(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Fit wall-panel orders for limited contact position and level errors."""
+
+    result = []
+    for case_name in (
+        "weak-rotation-reactor-static",
+        "moderate-rotation-conventional-static",
+    ):
+        for requested_cells in (-300, -1000):
+            selected = sorted(
+                (
+                    row
+                    for row in rows
+                    if row["case"] == case_name
+                    and row["requested_cells"] == requested_cells
+                    and row["wall_nodes"] >= 241
+                ),
+                key=lambda row: row["wall_nodes"],
+            )
+            panel = np.asarray(
+                [row["wall"]["selected_panel_length_m"] for row in selected]
+            )
+            position = np.asarray(
+                [row["production_contact"]["position_error_m"] for row in selected]
+            )
+            level = np.asarray(
+                [row["production_contact"]["level_error_in_span"] for row in selected]
+            )
+            result.append(
+                {
+                    "case": case_name,
+                    "requested_cells": requested_cells,
+                    "position_order": float(
+                        np.polyfit(np.log(panel), np.log(position), 1)[0]
+                    ),
+                    "level_order": float(
+                        np.polyfit(np.log(panel), np.log(level), 1)[0]
+                    ),
+                }
+            )
+    return result
+
+
+def _limiter_node_construction() -> list[dict[str, Any]]:
+    """Prove whether the authored limited wall samples the smooth tangency."""
+
+    result = []
+    for case_name in (
+        "weak-rotation-reactor-static",
+        "moderate-rotation-conventional-static",
+    ):
+        _carrier, _source, exact = certificate._case(case_name)
+        _inboard, outboard = exact.boundary_midplane_radii()
+        tangency = np.asarray([outboard, 0.0], dtype=np.float64)
+        for wall_nodes in WALL_NODE_COUNTS:
+            wall = oracle_fixture.limiter_contour(exact, points=wall_nodes)
+            index = (wall_nodes - 1) // 2
+            result.append(
+                {
+                    "case": case_name,
+                    "wall_nodes": wall_nodes,
+                    "tangency_node_index": index,
+                    "tangency_node_rz_m": wall[index].tolist(),
+                    "distance_to_smooth_analytic_tangency_m": float(
+                        np.linalg.norm(wall[index] - tangency)
+                    ),
+                    "node_flux_wb": float(
+                        _exact_flux(case_name, exact, wall[index : index + 1])[0]
+                    ),
+                    "angle_formula_index_hits_pi": True,
+                }
+            )
+    return result
+
+
+def _saddle_coupling_summary(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Summarize why the flux-only saddle moves when wall sampling changes."""
+
+    result = []
+    for requested_cells in (-500, -1000):
+        selected = sorted(
+            (
+                row
+                for row in rows
+                if row["case"] == certificate.DIVERTED_CASE_NAME
+                and row["requested_cells"] == requested_cells
+            ),
+            key=lambda row: row["wall_nodes"],
+        )
+        coupling = [row["saddle_wall_coupling"] for row in selected]
+        result.append(
+            {
+                "requested_cells": requested_cells,
+                "wall_nodes": [row["wall_nodes"] for row in selected],
+                "x_point_error_m": [
+                    item["selected_x_point_error_m"] for item in coupling
+                ],
+                "distinct_carrier_node_identities": len(
+                    {item["carrier_node_sha256_binary64"] for item in coupling}
+                ),
+                "all_selected_candidates_contained": all(
+                    item["selected_candidate_contained"] for item in coupling
+                ),
+                "shadow_mask_participated": any(
+                    item["shadow_mask_supplied_to_analytic_read"] for item in coupling
+                ),
+                "maximum_finite_x_candidate_count": max(
+                    item["finite_x_candidate_count"] for item in coupling
+                ),
+                "cause": (
+                    "wall sampling changes the cached carrier mesh before the read; "
+                    "containment admits the selected candidate, no shadow is supplied, "
+                    "and one finite candidate leaves no dedupe choice"
+                ),
+            }
+        )
+    return result
 
 
 def _write_report(path: Path, receipt: dict[str, Any]) -> None:
     """Write the compact human-readable measurement report."""
 
     rows = receipt["rows"]
+    contract = receipt["source_contract"]
+    public = contract["public_forward_read"]
+    contact = contract["fixed_design_wall_contact"]
     lines = [
         "# Analytic limiter read resolution",
         "",
         (
-            "The certificate adapter calls the public forward-operator read. That "
-            "publishes the fixed-design read's three-node quadratic wall contact; "
-            "because the hex carrier has moment geometry and no tensor axes, its "
-            "lazy class property performs another fixed-design read. The tensor-spline "
-            "connectivity limiter is unavailable on these rows. The published contact "
-            "is therefore sub-panel, but through the three-node quadratic fit."
+            "The certificate adapter calls `ForwardFluxOperator.read` at "
+            f"`{public['path']}:{public['line_start']}`. It publishes the "
+            "fixed-design boundary and, because these hex carriers have moment "
+            "geometry but no tensor axes, its lazy class property performs another "
+            "fixed-design read. The tensor-spline connectivity limiter is unavailable "
+            "on these rows."
+        ),
+        "",
+        (
+            "The contact is selected at "
+            f"`{contact['path']}:{contact['line_start']}-{contact['line_end']}`: "
+            "three wall-node values are fit by a local quadratic and their coordinates "
+            "are interpolated along the same bracket. That operation returns a point "
+            "between nodes, but the measured position error remains first order in "
+            "wall panel length. It is wall-panel-limited, not the global tensor-spline "
+            "restriction and derivative-root polish already available on raster reads."
         ),
         "",
         "| Case | Cells | Wall nodes | Class | Panel / pitch | "
@@ -974,18 +1329,58 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
             f"{row['production_contact']['level_error_in_span']:.6g} | "
             f"{row['read_timing']['warm_read_seconds_median']:.6g} |"
         )
-    lines.extend(["", "## Wall resolution", ""])
+    lines.extend(["", "## Wall resolution against plasma pitch", ""])
+    lines.extend(
+        [
+            "Panel-to-pitch entries use the selected outboard panel. The nominal "
+            "2500-cell row uses about 2600 realised cells, with pitch scaled from "
+            "the realised thousand-cell carrier.",
+            "",
+            "| Case | Cell scale | Realised cells | 121 | 241 | 481 | 961 | "
+            "Minimum odd wall count |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|",
+        ]
+    )
     for item in receipt["resolution_summary"]:
+        ratios = item["selected_panel_over_pitch"]
         lines.append(
-            f"- {item['case']}: 121 nodes are "
-            f"{'consistent' if item['wall_121_consistent_at_1000'] else 'coarser'} "
-            f"at 1000 cells and "
-            f"{'consistent' if item['wall_121_consistent_at_2500'] else 'coarser'} "
-            f"at 2500 cells. The first odd counts whose longest panel is no longer "
-            f"than one characteristic pitch are "
-            f"{item['recommended_wall_nodes_1000']} and "
-            f"{item['recommended_wall_nodes_2500']}, respectively."
+            f"| {item['case']} | {item['cell_scale']} | {item['realised_cells']} | "
+            f"{ratios['121']:.4f} | {ratios['241']:.4f} | "
+            f"{ratios['481']:.4f} | {ratios['961']:.4f} | "
+            f"{item['recommended_wall_nodes']} |"
         )
+    lines.extend(["", "## Measured wall order", ""])
+    for item in receipt["limited_convergence"]:
+        lines.append(
+            f"- {item['case']} at {abs(item['requested_cells'])} requested cells: "
+            f"position order {item['position_order']:.4f}; level order "
+            f"{item['level_order']:.4f}."
+        )
+    construction = receipt["limiter_node_construction"]
+    maximum_distance = max(
+        item["distance_to_smooth_analytic_tangency_m"] for item in construction
+    )
+    maximum_flux = max(abs(item["node_flux_wb"]) for item in construction)
+    lines.extend(
+        [
+            "",
+            "## Why the 121-node level looked exact",
+            "",
+            (
+                "Yes: `limiter_contour` samples angles as "
+                "`2*pi*(arange(points)+0.5)/points`. Every requested odd count places "
+                "index `(points-1)/2` exactly at angle pi, the authored smooth "
+                "outboard tangency. Across weak and moderate rows and all four counts, "
+                f"the maximum node displacement is {maximum_distance:.3g} m and the "
+                f"maximum analytic node flux magnitude is {maximum_flux:.3g} Wb. "
+                "The 2.7e-9 Wb weak-121 read is therefore a lucky sampling identity, "
+                "not evidence that the piecewise wall contact is position-accurate. "
+                "The wall polygon's adjacent chord enters the analytic plasma; its "
+                "extremum is one panel away in position, producing the measured "
+                "first-order position and second-order level ladders."
+            ),
+        ]
+    )
     shadow_rows = [row for row in rows if row["shadow"] is not None]
     lines.extend(["", "## Private-flux wall shadow", ""])
     lines.append(
@@ -1015,6 +1410,29 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
             f"{shadow['lower_exclusion_branch']} | "
             f"[{replacement[0]:.6f}, {replacement[1]:.6f}] |"
         )
+    lines.extend(["", "## Why the single-null saddle moves with wall count", ""])
+    for item in receipt["saddle_coupling_summary"]:
+        errors = ", ".join(
+            f"{wall}:{error:.6g}"
+            for wall, error in zip(
+                item["wall_nodes"], item["x_point_error_m"], strict=True
+            )
+        )
+        lines.append(
+            f"- {abs(item['requested_cells'])} requested cells — errors [wall nodes:m] "
+            f"{errors}; {item['distinct_carrier_node_identities']} distinct carrier "
+            f"node identities. {item['cause']}."
+        )
+    lines.append(
+        (
+            "This is not a shadow effect: the analytic public read receives no prior "
+            "wall mask. It is not containment or dedupe selection either: the selected "
+            "candidate remains contained and each row has one finite X candidate. The "
+            "coupling enters in `cached_machine`: inserting the differently sampled "
+            "wall rebuilds the plasma carrier and its null-fit stencils, so a "
+            "flux-only saddle moves with what should have been wall-only resolution."
+        )
+    )
     floor = receipt["map_floor_comparison"]
     lines.extend(
         [
@@ -1094,6 +1512,9 @@ def aggregate(report_directory: Path, figure_directory: Path) -> dict[str, Any]:
         "rows": rows,
         "source_contract": _source_contract(),
         "resolution_summary": _resolution_summary(rows),
+        "limited_convergence": _limited_convergence(rows),
+        "limiter_node_construction": _limiter_node_construction(),
+        "saddle_coupling_summary": _saddle_coupling_summary(rows),
         "shadow_positive_control_passed": all(
             row["shadow"] is None or row["shadow"]["positive_control"]["passed"]
             for row in rows
@@ -1172,7 +1593,7 @@ def measure(
 
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("measure", "aggregate"))
+    parser.add_argument("action", choices=("measure", "residual", "aggregate"))
     parser.add_argument(
         "--report-directory", type=Path, default=DEFAULT_REPORT_DIRECTORY
     )
@@ -1196,6 +1617,8 @@ def main() -> None:
             args.shard_index,
             args.shard_count,
         )
+    elif args.action == "residual":
+        measure_residual_stages(args.report_directory)
     else:
         aggregate(args.report_directory, args.figure_directory)
 

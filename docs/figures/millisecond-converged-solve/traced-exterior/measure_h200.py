@@ -25,6 +25,7 @@ CASES = (
 )
 REQUESTED_CELLS = -300
 RELATIVE_IDENTITY_TOLERANCE = 1.0e-14
+ABSOLUTE_RESIDUAL_TOLERANCE = 1.0e-14
 
 
 def _certificate_row(case_name: str):
@@ -116,26 +117,65 @@ def _compare(base: Path, after: Path, output: Path) -> int:
     with np.load(base) as base_data, np.load(after) as after_data:
         base_flux = base_data["terminal_flux"]
         after_flux = after_data["terminal_flux"]
-        base_residual = float(base_data["residual"])
-        after_residual = float(after_data["residual"])
+        base_residual_array = base_data["residual"]
+        after_residual_array = after_data["residual"]
+        base_residual = float(base_residual_array)
+        after_residual = float(after_residual_array)
         max_absolute_flux_difference = float(np.max(np.abs(after_flux - base_flux)))
         flux_scale = float(np.max(np.abs(base_flux)))
         max_relative_flux_difference = max_absolute_flux_difference / flux_scale
         residual_difference = abs(after_residual - base_residual)
         relative_residual_difference = residual_difference / abs(base_residual)
+        flux_bit_identical = (
+            base_flux.dtype == after_flux.dtype
+            and base_flux.shape == after_flux.shape
+            and np.array_equal(base_flux.view(np.uint64), after_flux.view(np.uint64))
+        )
+        residual_bit_identical = (
+            base_residual_array.dtype == after_residual_array.dtype
+            and base_residual_array.shape == after_residual_array.shape
+            and np.array_equal(
+                base_residual_array.view(np.uint64),
+                after_residual_array.view(np.uint64),
+            )
+        )
+        flux_differing_bit_patterns = int(
+            np.count_nonzero(base_flux.view(np.uint64) != after_flux.view(np.uint64))
+        )
+        residual_differing_bit_patterns = int(
+            np.count_nonzero(
+                base_residual_array.view(np.uint64)
+                != after_residual_array.view(np.uint64)
+            )
+        )
+        flux_equal_with_nan = np.array_equal(base_flux, after_flux, equal_nan=True)
+        residual_equal_with_nan = np.array_equal(
+            base_residual_array, after_residual_array, equal_nan=True
+        )
+        within_tolerance = (
+            max_relative_flux_difference <= RELATIVE_IDENTITY_TOLERANCE
+            and residual_difference <= ABSOLUTE_RESIDUAL_TOLERANCE
+        )
     receipt = {
         "clip_mode": "chord",
-        "flux_bit_identical": np.array_equal(base_flux, after_flux),
-        "residual_bit_identical": base_residual == after_residual,
+        "flux_bit_identical": flux_bit_identical,
+        "residual_bit_identical": residual_bit_identical,
+        "flux_differing_bit_patterns": flux_differing_bit_patterns,
+        "residual_differing_bit_patterns": residual_differing_bit_patterns,
+        "flux_equal_with_nan": flux_equal_with_nan,
+        "residual_equal_with_nan": residual_equal_with_nan,
+        "flux_dtype": str(base_flux.dtype),
+        "residual_dtype": str(base_residual_array.dtype),
+        "flux_nan_count": int(np.isnan(base_flux).sum()),
+        "residual_nan_count": int(np.isnan(base_residual_array).sum()),
         "max_absolute_flux_difference": max_absolute_flux_difference,
         "max_relative_flux_difference": max_relative_flux_difference,
         "residual_difference": residual_difference,
         "relative_residual_difference": relative_residual_difference,
         "relative_tolerance": RELATIVE_IDENTITY_TOLERANCE,
-        "within_tolerance": (
-            max_relative_flux_difference <= RELATIVE_IDENTITY_TOLERANCE
-            and relative_residual_difference <= RELATIVE_IDENTITY_TOLERANCE
-        ),
+        "absolute_residual_tolerance": ABSOLUTE_RESIDUAL_TOLERANCE,
+        "numerically_equivalent": within_tolerance,
+        "within_tolerance": within_tolerance,
     }
     output.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
     print(

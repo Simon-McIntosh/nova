@@ -117,7 +117,10 @@ def _try_serialized_executable_size(compiled: Any) -> dict[str, Any]:
     try:
         executable = compiled.runtime_executable()
         serialized = executable.serialize()
-        generated = int(executable.size_of_generated_code_in_bytes)
+        generated_size = executable.size_of_generated_code_in_bytes
+        if callable(generated_size):
+            generated_size = generated_size()
+        generated = int(generated_size)
         return {
             "serialized_executable_bytes": len(serialized),
             "serialized_executable_mib": len(serialized) / 2**20,
@@ -928,7 +931,11 @@ def combine(
         production_terminal["active_set_residuals"]
     )
     scanned_residuals = _residuals_or_nan(scanned_terminal["active_set_residuals"])
-    residual_sup = float(np.max(np.abs(production_residuals - scanned_residuals)))
+    residual_diff = np.abs(production_residuals - scanned_residuals)
+    active_slots = np.isfinite(production_residuals) & np.isfinite(scanned_residuals)
+    residual_sup = (
+        float(np.max(residual_diff[active_slots])) if np.any(active_slots) else None
+    )
     production_temp = production_census["memory_analysis"].get("temp_size_in_bytes", 0)
     scanned_temp = scanned_census["memory_analysis"].get("temp_size_in_bytes", 0)
     return {

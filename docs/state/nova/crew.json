@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T22:58:36",
+  "updated": "2026-09-14T22:59:59",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -156135,6 +156135,282 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T152335508652-cca-limiter-contact-sub-panel",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-limiter-contact-sub-panel",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3406,
+                "cached_input_tokens": 650516,
+                "input_tokens": 653924,
+                "output_tokens": 5018,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 658942,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. Never open any receipt larger than one megabyte in an editor (load it with json). Commit the benchmark before submitting any job; every SLURM job is sbatch detached from your shell with --output in the run directory, TMPDIR=/tmp exported in the submit environment and the payload, the root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python with PYTHONPATH at the worktree, never uv on a compute node; CPU work on all_debug (--time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu) in ONE job with cases sharded inside and parts persisted as each lands; any H200 timing in one short job (betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8 --mem=64G --time=00:20:00, nvidia-smi prologue exiting 3 below 40 GiB free, XLA_PYTHON_CLIENT_PREALLOCATE=false, JAX_PLATFORMS=cuda,cpu). Write the manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync. Shared facts: the analytic oracle machines are cached (110, 200, 300, 342, 400, 500, 750, 1000, 2500 requested cells) and benchmarks/vertex_ring_census.py on the worktree of run r-20260914T143456809994 (path /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-vertex-ring-census-evaluation, read only, copy what you need) and benchmarks/topology_read_resolution_ladder.py on main load the machines, evaluate the analytic flux at the carriers (centroids and the six sample vertices per cell) and run the production read; the own-node quadratic on centroid plus six vertices is what StencilMesh.sample_flux_field evaluates (nova/equilibrium/stencil_mesh.py, ring_gather_index and ring_flux_weight); its closed-form stationary point with an indefinite Hessian inside or within a quarter pitch of the cell admitted 9 of 9 analytic saddles and 15 of 15 axes across the rungs where the production neighbour-centroid census admitted 7 of 9; the six vertex values form a periodic ring whose trigonometric fit carries the mean, two m=1 gradient terms, two m=2 traceless-Hessian terms and one m=3 cosine, with the isotropic Hessian from the centroid against the ring mean. Facts at this base (main): the fixed-design limiter contact is selected in nova/equilibrium/topology.py at _wall_anchor_selection (the extremal wall node, line 496 region), a three-node quadratic is fitted by traced_quadratic_wall (line 519) and the position interpolated by wall_coordinate (line 524); measured on the analytic flux (docs/figures/cut-cell-current-attribution/limiter-read/report.md) the contact position error is first order in wall panel length (51, 26, 13 mm at 241, 481, 961 nodes on the weak row; fitted order 0.9999) and the level error second order, identical at 300 and 1000 cells, where a correct extremum of a three-node quadratic in the arc-length parameter should be second order in position; the connectivity limiter (nova/equilibrium/connectivity_boundary.py) already restricts the tensor spline to wall segments and finds derivative roots, but the hex carriers have no tensor spline, so this read works from the exact Biot wall flux values alone. Deliver: the contact position from the extremum of the quadratic through the extremal node and its two neighbours parametrised by cumulative arc length along the wall polyline (not by node index), the level as the quadratic's extremum value, the position mapped back onto the polyline segment, fixed shapes under jit and differentiable; the private-wall shadow mask applied unchanged before selection; a test on the analytic weak and single-null fluxes at 300 cells asserting the contact position error against the analytic tangency falls at least second order between 241 and 481 wall nodes and the level error stays second order, and that whole-cell certificate rows at 121 nodes (where a node coincides with the tangency) read bit-identical positions. Gate: zero added failures by delta against the base on tests touching topology.py; the analytic contact position error at 241, 481 and 961 nodes on weak, moderate and single-null at 1000 cells tabled beside the audit's first-order figures, CPU only, no solver. The report states the fitted order before and after.",
+          "estimated_hours": 4.0,
+          "goal": "Read the limiter contact sub-panel from the exact Biot wall flux values so its position error is second order in the wall panel and invariant to the wall node count",
+          "id": "cca-limiter-contact-sub-panel",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-14T15:23:35Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T152335508652-cca-limiter-contact-sub-panel/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "tests/test_topology_limiter_contact.py",
+            "docs/figures/cut-cell-current-attribution/limiter-subpanel",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/limiter-subpanel"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-limiter-subpanel",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-14T15:23:48Z",
+        "completed_at": "2026-09-14T20:54:34.345Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 19822,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 19846,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "5bda67315b32d71f0e7ff1b6c5ef00663e807f4b",
+        "commits": [
+          "f8404c66f9cee2aee84ae449d3931750246f06a2",
+          "797ab08957e9466b9681a208af17be8db3c39195"
+        ],
+        "changed_lines": {
+          "added": 0,
+          "removed": 0,
+          "files": 0
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "all_debug delta gate over 76 shared topology-adjacent tests plus 9 new: one added failure (test_plasma_cell_topology_read raster oracle by 1 ULP) and a pre-existing abort (exit 134) on test_solve_receipt_topology on both arms; the new test file passes 9 of 9 run separately",
+          "exit_status": 134,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/limiter-subpanel/new_tests_on_current.shell.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T152335508652-cca-limiter-contact-sub-panel/manifest.md",
+        "scope_changed": false,
+        "session_id": "fc0e7b6a-e624-4a48-a0d9-ebd0df35af92",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 36901055,
+            "input_tokens_cumulative": 36901055,
+            "output_tokens": 276381,
+            "output_tokens_cumulative": 276381,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-14T20:54:34.345Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: HLO large-buffer identification job 1270750 is in flight; no authority blocker",
+              "elapsed_seconds": 869,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 220,
+              "log_fresh": true,
+              "manifest_commits": [
+                "3212db17",
+                "92b7c281",
+                "c6f8490d",
+                "31da4cd4",
+                "04270151",
+                "38ca111f",
+                "bceb7852",
+                "582de9ae",
+                "60a5236d",
+                "7e199bae\"]; changed_paths: [\"nova/equilibrium/observation.py",
+                "nova/equilibrium/stencil_mesh.py",
+                "nova/equilibrium/clip_quadrature.py",
+                "nova/equilibrium/forward_operator.py",
+                "tests/test_clipped_support_quadrature.py",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/chain-capacity.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/single-null-chain-cell.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-identification-300.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-producers-300.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300.json",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-quadrature/needs-help.md"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "34df67742d05818508ff3e3c77741b970a1eeb8896876d5bcdb23bddba053ae3",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T112013796921-cca-clip-quadrature-linear-in-cut-cells/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T112013796921-cca-clip-quadrature-linear-in-cut-cells/manifest.md; resolve the blocker before resuming the run",
+              "node": "cca-clip-quadrature-linear-in-cut-cells",
+              "phase": "working",
+              "plan": "cut-cell-current-attribution",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260914T112013796921-cca-clip-quadrature-linear-in-cut-cells",
+              "session": "s19-review",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260914T112013796921-cca-clip-quadrature-linear-in-cut-cells",
+                "session_id": "01a09fa5-b09e-7be2-95cb-47ce2c322f5c",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 302,
+              "terminal_at": "2026-09-14T15:18:39Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 37883246,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 19842.8,
+          "generated_tokens": 321655,
+          "generation_seconds": 17223.058,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 83.2,
+          "machine_seconds": 2619.742,
+          "peak_input_tokens": 166477,
+          "tokens_per_second": 18.68,
+          "wall_tokens_per_second": 16.21
+        },
+        "follow_on_paths": [
+          "tests/test_plasma_cell_topology_read.py:"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-limiter-contact-sub-panel",
+          "session_id": "fc0e7b6a-e624-4a48-a0d9-ebd0df35af92",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T20:54:34.345Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 291.0,
+        "orientation_input_tokens": 10590490.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -156447,6 +156723,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2483
+    "_version": 2484
   }
 }

@@ -347,10 +347,15 @@ def assemble_report(parts: dict) -> str:
             rows.append(f"| {name} | -- | -- | -- | **not run** | -- | -- |")
             continue
         ratio = part.get("ratio")
-        ratio_txt = (
-            f"{ratio:.3f}" if isinstance(ratio, (int, float)) else part.get("ratio")
-        )
+        if isinstance(ratio, (int, float)):
+            ratio_txt = f"{ratio:.3f}"
+        elif part.get("error"):
+            ratio_txt = "--"
+        else:
+            ratio_txt = part.get("ratio")
         verdict = part.get("verdict", "")
+        if not verdict and part.get("error"):
+            verdict = f"not measurable: {part['error']}"
         base = part.get("base_instructions")
         doubled = part.get("doubled_instructions")
         rows.append(
@@ -614,6 +619,7 @@ def main(argv=None) -> int:
             part["baseline_value"] = f"300 ({base_node_count} nodes)"
             candidates = (400, 500, 1000, 2500)
             built: list[tuple[int, int]] = []  # (requested_cells, node_count)
+            build_errors: dict[int, str] = {}
             for cells in candidates:
                 if _wall() > args.deadline_s:
                     print(f"DEADLINE building {cells} cells", flush=True)
@@ -622,12 +628,18 @@ def main(argv=None) -> int:
                     _src, _ex, machine = build_machine(cells)
                     built.append((cells, int(len(machine.node))))
                 except Exception as exc:
+                    build_errors[cells] = f"{type(exc).__name__}: {exc}"
                     print(
-                        f"CELLS {cells} unbuildable: {type(exc).__name__}: {exc}",
+                        f"CELLS {cells} unbuildable: {build_errors[cells]}",
                         flush=True,
                     )
+            part["build_errors"] = build_errors
             if not built:
-                part["error"] = "no doubled cell count was buildable"
+                part["error"] = (
+                    "the oracle fixture builds no mesh other than the 300-cell "
+                    "baseline for this case (no complete hexagon generator at "
+                    "any doubled count)"
+                )
             else:
                 chosen, n_doubled = min(
                     built, key=lambda row: abs(row[1] - 2 * base_node_count)

@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-14">
-<meta name="plan-version" content="66">
+<meta name="plan-version" content="67">
 </head>
 <body>
 <main class="plan-doc">
@@ -408,6 +408,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-census-kernel-timing-2026-09-14" data-who="s19-review" data-when="2026-09-14">
     <div class="r-comment-body"><p>Census kernel timing (run r-20260914T152226686743, H200 job 1270856, evidence under docs/figures/cut-cell-current-attribution/census-kernel). The vertex-ring census as one jitted per-cell kernel, vmapped over 16 states: 0.049, 0.052 and 0.054 ms per state at 550, 1074 and 2616 realised cells, flat in cells and 29 to 558 times faster than the production read (1.4, 4.9, 30 ms), with census counts and analytic-null admission matching the banked census at every rung. The reference implementation's 2 to 33 ms was 70 to 92 percent private-region exclusion, so the production read's cost is that one stage. With the two-ring cubic polish at 1e-3 pitch and this kernel at 0.05 ms per state, the null read meets both the accuracy and the millisecond budget; the production replacement on null-identification-authority has its numbers.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260914T201408570872-cca-dual-stencil-census-2" data-who="s19i-cca-dual-stencil-2" data-when="2026-09-14T20:36:06.179Z">
+    <div class="r-comment-body"><p>The vertex-centred dual stencil (vertex value, three surrounding centroids, three adjacent vertices) admits the analytic saddle at every rung from 233 realised cells and misses only at 132; where both admit, its saddle position error is 0.012, 0.0066, 0.0066, 0.0061, 0.014, 0.011, 0.0034 and 0.0022 pitch at 233 to 2616 cells against the cell-centred own-node quadratic&#x27;s 0.049, 0.031, 0.034, 0.031, 0.010, 0.012, 0.027 and 0.016, three to eight times better on seven of eight rungs. The analytic X-point sits 0.016 to 0.30 pitch from the nearest cell edge on these meshes, so the saddle is a near-boundary case at most rungs, which is where the vertex-centred fit is centred and the cell-centred one extrapolates. On the axis the two are comparable (0.004 to 0.011 pitch). Neither reaches the two-ring cubic&#x27;s 1e-3 pitch, so the dual stencil is the second candidate and the consistency check, not the polish.</p></div>
 </div>
 </section>
 

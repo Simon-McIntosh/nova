@@ -62,6 +62,8 @@ WALL_NODE_COUNT = 121
 TIMING_BATCH_SIZE = 16
 TIMING_REPEATS = 7
 WHOLE_SOLVE_TARGET_MS = 1.0
+# Previously banked per-state production timing at the same realised rungs.
+PRODUCTION_TIMING_MS = {500: 1.4, 1000: 4.9, 2500: 30.0}
 STAGE_NAMES = ("census", "polish", "containment", "dedupe", "private_exclusion")
 ANALYTIC = certificate.DIVERTED_REFERENCE
 ANALYTIC_AXIS = np.asarray(ANALYTIC.magnetic_axis, dtype=np.float64)
@@ -69,6 +71,7 @@ ANALYTIC_X = np.asarray(ANALYTIC.x_point, dtype=np.float64)
 COLOURS = {
     "kernel": "#3366cc",
     "reference": "#d1495b",
+    "production": "#8aa04a",
     "target": "#777777",
 }
 
@@ -1029,16 +1032,26 @@ def _render_figure(
     reference_per_state = [
         row["reference"]["batch_seconds_per_state_ms"] for row in rows
     ]
+    production_per_state = [
+        PRODUCTION_TIMING_MS[row["requested_cells"]] for row in rows
+    ]
     figure, axes = plt.subplots(1, 2, figsize=(10.5, 4.4))
     axes[0].loglog(
         cells, kernel_per_state, "o-", color=COLOURS["kernel"], label="kernel"
     )
     axes[0].loglog(
         cells,
+        production_per_state,
+        "^-.",
+        color=COLOURS["production"],
+        label="production read (banked)",
+    )
+    axes[0].loglog(
+        cells,
         reference_per_state,
         "s--",
         color=COLOURS["reference"],
-        label="reference read",
+        label="reference read (direct)",
     )
     axes[0].axhline(
         WHOLE_SOLVE_TARGET_MS, color=COLOURS["target"], linestyle=":", linewidth=1.2
@@ -1050,8 +1063,8 @@ def _render_figure(
         color=COLOURS["target"],
         fontsize=8,
     )
-    for cell, kernel_ms, reference_ms in zip(
-        cells, kernel_per_state, reference_per_state
+    for cell, kernel_ms, reference_ms, production_ms in zip(
+        cells, kernel_per_state, reference_per_state, production_per_state
     ):
         axes[0].annotate(
             f"{kernel_ms:.3g} ms",
@@ -1061,8 +1074,8 @@ def _render_figure(
             fontsize=8,
         )
         axes[0].annotate(
-            f"{reference_ms:.3g} ms",
-            (cell, reference_ms),
+            f"{production_ms:.3g} ms",
+            (cell, production_ms),
             textcoords="offset points",
             xytext=(4, 4),
             fontsize=8,

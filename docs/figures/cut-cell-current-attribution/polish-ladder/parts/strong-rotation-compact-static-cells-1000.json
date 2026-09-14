@@ -1,0 +1,226 @@
+{
+  "allocation": {
+    "allocated_cpus": 8,
+    "jax_platforms": [
+      "cpu"
+    ],
+    "job_id": 1270850,
+    "job_name": "bash",
+    "memory_mb": 65536,
+    "node": "98dci4-clu-3141",
+    "partition": "all_debug",
+    "tmpdir": "/tmp"
+  },
+  "cache": {
+    "build_seconds": 0.0,
+    "hit": true,
+    "load_seconds": 0.1874372437596321,
+    "lock_wait_seconds": 7.59027898311615e-06,
+    "semantic_key": "0bf3ef24267cd3ec",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
+    "store_seconds": 0.0
+  },
+  "case": "strong-rotation-compact-static",
+  "characteristic_pitch_m": 0.01745505367010842,
+  "completed": true,
+  "placement": {
+    "field": {
+      "axis": {
+        "fixed_point_refinement": {
+          "admitted": true,
+          "cells_visited": [
+            311
+          ],
+          "converged": true,
+          "fit_cells": 1,
+          "fit_points": 7,
+          "fit_residual_in_span": 6.175780114831051e-06,
+          "fit_residual_wb": 8.59016523189713e-07,
+          "level_error_in_span": 4.765312223962522e-06,
+          "level_error_wb": 6.628283168164106e-07,
+          "position_error_in_pitch": 0.0027364450533955424,
+          "position_error_m": 4.776479527232189e-05,
+          "position_rz_m": [
+            0.9000477645495,
+            1.5322686948513603e-07
+          ]
+        },
+        "own_node_quadratic": {
+          "admitted": true,
+          "cells_visited": null,
+          "converged": true,
+          "fit_cells": 1,
+          "fit_points": 7,
+          "fit_residual_in_span": 6.175780114831051e-06,
+          "fit_residual_wb": 8.59016523189713e-07,
+          "level_error_in_span": 4.765312223962522e-06,
+          "level_error_wb": 6.628283168164106e-07,
+          "position_error_in_pitch": 0.0027364450533955424,
+          "position_error_m": 4.776479527232189e-05,
+          "position_rz_m": [
+            0.9000477645495,
+            1.5322686948513603e-07
+          ]
+        },
+        "ring_quadratic": {
+          "admitted": true,
+          "cells_visited": null,
+          "converged": true,
+          "fit_cells": 7,
+          "fit_points": 7,
+          "fit_residual_in_span": 1.1313130184677386e-16,
+          "fit_residual_wb": 1.573593226594341e-17,
+          "level_error_in_span": 3.297171079190226e-05,
+          "level_error_wb": 4.586180829213582e-06,
+          "position_error_in_pitch": 0.0027492945953778436,
+          "position_error_m": 4.798908471725927e-05,
+          "position_rz_m": [
+            0.8999520109152828,
+            7.91033905045424e-16
+          ]
+        },
+        "two_ring_cubic": {
+          "admitted": true,
+          "cells_visited": null,
+          "converged": true,
+          "fit_cells": 7,
+          "fit_points": 49,
+          "fit_residual_in_span": 2.4847625846103293e-07,
+          "fit_residual_wb": 3.4561659850194355e-08,
+          "level_error_in_span": 6.676733285761247e-08,
+          "level_error_wb": 9.286963115195945e-09,
+          "position_error_in_pitch": 7.500573209343963e-05,
+          "position_error_m": 1.3092290792567622e-06,
+          "position_rz_m": [
+            0.9000013077974832,
+            -6.120886305357315e-08
+          ]
+        }
+      },
+      "axis_seed_cell": 311,
+      "control": {
+        "all_admitted_within_1e6_pitch": true,
+        "errors_in_pitch": {
+          "fixed_point_refinement": 3.975292219118183e-16,
+          "own_node_quadratic": 3.975292219118183e-16,
+          "ring_quadratic": 9.938230547795458e-17,
+          "two_ring_cubic": 7.453672910846594e-17
+        },
+        "manufactured_quadratic_null_rz_m": [
+          0.912987352577998,
+          -0.001721809834147661
+        ],
+        "span_wb": 0.13909441515360896
+      },
+      "pitch_m": 0.01745505367010842,
+      "reference_span_wb": 0.13909441515360896,
+      "saddle": null,
+      "saddle_seed_cell": null,
+      "translation_m": null
+    },
+    "shifted": {
+      "axis": {
+        "fixed_point_refinement": {
+          "admitted": true,
+          "cells_visited": [
+            304
+          ],
+          "converged": true,
+          "fit_cells": 1,
+          "fit_points": 7,
+          "fit_residual_in_span": 6.269701023131815e-06,
+          "fit_residual_wb": 8.486540902905643e-07,
+          "level_error_in_span": 5.407638036259709e-06,
+          "level_error_wb": 7.319669823729891e-07,
+          "position_error_in_pitch": 0.001776311378478992,
+          "position_error_m": 3.100561044617507e-05,
+          "position_rz_m": [
+            0.899968995265633,
+            -2.3307932327243375e-07
+          ]
+        },
+        "own_node_quadratic": {
+          "admitted": true,
+          "cells_visited": null,
+          "converged": true,
+          "fit_cells": 1,
+          "fit_points": 7,
+          "fit_residual_in_span": 6.269701023131815e-06,
+          "fit_residual_wb": 8.486540902905643e-07,
+          "level_error_in_span": 5.407638036259709e-06,
+          "level_error_wb": 7.319669823729891e-07,
+          "position_error_in_pitch": 0.001776311378478992,
+          "position_error_m": 3.100561044617507e-05,
+          "position_rz_m": [
+            0.899968995265633,
+            -2.3307932327243375e-07
+          ]
+        },
+        "ring_quadratic": {
+          "admitted": true,
+          "cells_visited": null,
+          "converged": true,
+          "fit_cells": 7,
+          "fit_points": 7,
+          "fit_residual_in_span": 2.873880399257637e-16,
+          "fit_residual_wb": 3.890026568790978e-17,
+          "level_error_in_span": 1.7517323424933196e-05,
+          "level_error_wb": 2.371109582524622e-06,
+          "position_error_in_pitch": 0.007424518480531731,
+          "position_error_m": 0.00012959536855239318,
+          "position_rz_m": [
+            0.8998704046314476,
+            -5.0306980803327406e-17
+          ]
+        },
+        "two_ring_cubic": {
+          "admitted": true,
+          "cells_visited": null,
+          "converged": true,
+          "fit_cells": 7,
+          "fit_points": 49,
+          "fit_residual_in_span": 2.5533521447386296e-07,
+          "fit_residual_wb": 3.4561659855707374e-08,
+          "level_error_in_span": 2.367543692055866e-07,
+          "level_error_wb": 3.204659410060984e-08,
+          "position_error_in_pitch": 3.828955180877643e-05,
+          "position_error_m": 6.683461818265895e-07,
+          "position_rz_m": [
+            0.8999993381709638,
+            9.310717238690536e-08
+          ]
+        }
+      },
+      "axis_seed_cell": 304,
+      "control": {
+        "all_admitted_within_1e6_pitch": true,
+        "errors_in_pitch": {
+          "fixed_point_refinement": 1.9876461095590916e-16,
+          "own_node_quadratic": 1.9876461095590916e-16,
+          "ring_quadratic": 9.938230547795458e-17,
+          "two_ring_cubic": 8.944407493015913e-16
+        },
+        "manufactured_quadratic_null_rz_m": [
+          0.9020382944299734,
+          0.010100235595799867
+        ],
+        "span_wb": 0.1353579839229157
+      },
+      "pitch_m": 0.01745505367010842,
+      "reference_span_wb": 0.1353579839229157,
+      "saddle": null,
+      "saddle_seed_cell": null,
+      "translation_m": [
+        0.00529469961326622,
+        0.002443707513815178
+      ]
+    }
+  },
+  "realised_cells": 1069,
+  "requested_cells": 1000,
+  "schema": "nova.polish-accuracy-ladder-part",
+  "shift_fraction_of_pitch": 0.3333333333333333,
+  "source_revision": "eaa0de73ac92071fb2cc59b9eb176119650319ba",
+  "version": 1,
+  "wall_seconds": 0.23549491353332996
+}

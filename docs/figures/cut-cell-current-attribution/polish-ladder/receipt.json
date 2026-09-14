@@ -1,0 +1,535 @@
+{
+  "completed": true,
+  "figure": {
+    "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-polish-accuracy-ladder/docs/figures/cut-cell-current-attribution/polish-ladder/polish-error-ladder.svg",
+    "project_absolute_src": "/nova/figures/cut-cell-current-attribution/polish-ladder/polish-error-ladder.svg"
+  },
+  "fitted_orders": {
+    "fixed_point_refinement": {
+      "axis": {
+        "overall_residual_log": 0.8056417994349836,
+        "overall_slope": 0.8410337630151712,
+        "pairs": [
+          {
+            "error_ratio": 0.10049055461786628,
+            "from_cells": 550,
+            "order": 11.33360920017138,
+            "pitch_ratio": 0.8164965809277253,
+            "to_cells": 814
+          },
+          {
+            "error_ratio": 4.987733179981958,
+            "from_cells": 814,
+            "order": -11.171926844840549,
+            "pitch_ratio": 0.8660254037844402,
+            "to_cells": 1074
+          },
+          {
+            "error_ratio": 0.5495410870290367,
+            "from_cells": 1074,
+            "order": 1.3067287825684282,
+            "pitch_ratio": 0.6324555320336753,
+            "to_cells": 2616
+          }
+        ],
+        "successive": [
+          11.33360920017138,
+          -11.171926844840549,
+          1.3067287825684282
+        ]
+      },
+      "saddle": {
+        "overall_residual_log": 0.38145270967105643,
+        "overall_slope": -0.5449405458710423,
+        "pairs": [
+          {
+            "error_ratio": 1.1651078996513053,
+            "from_cells": 550,
+            "order": -0.7537699170631629,
+            "pitch_ratio": 0.8164965809277253,
+            "to_cells": 814
+          },
+          {
+            "error_ratio": 2.532153735735203,
+            "from_cells": 814,
+            "order": -6.459006719714621,
+            "pitch_ratio": 0.8660254037844402,
+            "to_cells": 1074
+          },
+          {
+            "error_ratio": 0.5238849431472526,
+            "from_cells": 1074,
+            "order": 1.4110874865997869,
+            "pitch_ratio": 0.6324555320336753,
+            "to_cells": 2616
+          }
+        ],
+        "successive": [
+          -0.7537699170631629,
+          -6.459006719714621,
+          1.4110874865997869
+        ]
+      }
+    },
+    "own_node_quadratic": {
+      "axis": {
+        "overall_residual_log": 0.8056417994349836,
+        "overall_slope": 0.8410337630151712,
+        "pairs": [
+          {
+            "error_ratio": 0.10049055461786628,
+            "from_cells": 550,
+            "order": 11.33360920017138,
+            "pitch_ratio": 0.8164965809277253,
+            "to_cells": 814
+          },
+          {
+            "error_ratio": 4.987733179981958,
+            "from_cells": 814,
+            "order": -11.171926844840549,
+            "pitch_ratio": 0.8660254037844402,
+            "to_cells": 1074
+          },
+          {
+            "error_ratio": 0.5495410870290367,
+            "from_cells": 1074,
+            "order": 1.3067287825684282,
+            "pitch_ratio": 0.6324555320336753,
+            "to_cells": 2616
+          }
+        ],
+        "successive": [
+          11.33360920017138,
+          -11.171926844840549,
+          1.3067287825684282
+        ]
+      },
+      "saddle": {
+        "overall_residual_log": 0.3347827728787583,
+        "overall_slope": -0.5424563097149894,
+        "pairs": [
+          {
+            "error_ratio": 1.1651078996513053,
+            "from_cells": 550,
+            "order": -0.7537699170631629,
+            "pitch_ratio": 0.8164965809277253,
+            "to_cells": 814
+          },
+          {
+            "error_ratio": 2.2731264577296098,
+            "from_cells": 814,
+            "order": -5.70877546208834,
+            "pitch_ratio": 0.8660254037844402,
+            "to_cells": 1074
+          },
+          {
+            "error_ratio": 0.5835826737112992,
+            "from_cells": 1074,
+            "order": 1.175542069076483,
+            "pitch_ratio": 0.6324555320336753,
+            "to_cells": 2616
+          }
+        ],
+        "successive": [
+          -0.7537699170631629,
+          -5.70877546208834,
+          1.175542069076483
+        ]
+      }
+    },
+    "ring_quadratic": {
+      "axis": {
+        "overall_residual_log": 0.11108945654295294,
+        "overall_slope": 0.7806764755069294,
+        "pairs": [
+          {
+            "error_ratio": 0.6627685342754396,
+            "from_cells": 550,
+            "order": 2.0289265846401214,
+            "pitch_ratio": 0.8164965809277253,
+            "to_cells": 814
+          },
+          {
+            "error_ratio": 1.191867803029269,
+            "from_cells": 814,
+            "order": -1.2202474592739638,
+            "pitch_ratio": 0.8660254037844402,
+            "to_cells": 1074
+          },
+          {
+            "error_ratio": 0.6270575806923352,
+            "from_cells": 1074,
+            "order": 1.0187092177091406,
+            "pitch_ratio": 0.6324555320336753,
+            "to_cells": 2616
+          }
+        ],
+        "successive": [
+          2.0289265846401214,
+          -1.2202474592739638,
+          1.0187092177091406
+        ]
+      },
+      "saddle": {
+        "overall_residual_log": 0.3600646327338828,
+        "overall_slope": 0.22466209458357855,
+        "pairs": [
+          {
+            "error_ratio": 0.6953441529159005,
+            "from_cells": 550,
+            "order": 1.7922546954739302,
+            "pitch_ratio": 0.8164965809277253,
+            "to_cells": 814
+          },
+          {
+            "error_ratio": 2.5427930367701093,
+            "from_cells": 814,
+            "order": -6.4881561072766125,
+            "pitch_ratio": 0.8660254037844402,
+            "to_cells": 1074
+          },
+          {
+            "error_ratio": 0.4255102688418315,
+            "from_cells": 1074,
+            "order": 1.8650547647118352,
+            "pitch_ratio": 0.6324555320336753,
+            "to_cells": 2616
+          }
+        ],
+        "successive": [
+          1.7922546954739302,
+          -6.4881561072766125,
+          1.8650547647118352
+        ]
+      }
+    },
+    "two_ring_cubic": {
+      "axis": {
+        "overall_residual_log": 0.5016983640070455,
+        "overall_slope": 2.3230701676622787,
+        "pairs": [
+          {
+            "error_ratio": 0.8062959589052343,
+            "from_cells": 550,
+            "order": 1.0620120197668401,
+            "pitch_ratio": 0.8164965809277253,
+            "to_cells": 814
+          },
+          {
+            "error_ratio": 0.19928121676483687,
+            "from_cells": 814,
+            "order": 11.21403421836204,
+            "pitch_ratio": 0.8660254037844402,
+            "to_cells": 1074
+          },
+          {
+            "error_ratio": 1.0524116729509672,
+            "from_cells": 1074,
+            "order": -0.1115025178997576,
+            "pitch_ratio": 0.6324555320336753,
+            "to_cells": 2616
+          }
+        ],
+        "successive": [
+          1.0620120197668401,
+          11.21403421836204,
+          -0.1115025178997576
+        ]
+      },
+      "saddle": {
+        "overall_residual_log": 0.587762872983562,
+        "overall_slope": 2.5037014355105884,
+        "pairs": [
+          {
+            "error_ratio": 1.3095465628635432,
+            "from_cells": 550,
+            "order": -1.330230082356808,
+            "pitch_ratio": 0.8164965809277253,
+            "to_cells": 814
+          },
+          {
+            "error_ratio": 1.4551040010104042,
+            "from_cells": 814,
+            "order": -2.6075825527121643,
+            "pitch_ratio": 0.8660254037844402,
+            "to_cells": 1074
+          },
+          {
+            "error_ratio": 0.0854908261185084,
+            "from_cells": 1074,
+            "order": 5.368047760617227,
+            "pitch_ratio": 0.6324555320336753,
+            "to_cells": 2616
+          }
+        ],
+        "successive": [
+          -1.330230082356808,
+          -2.6075825527121643,
+          5.368047760617227
+        ]
+      }
+    }
+  },
+  "gates_at_1000_cells": {
+    "fixed_point_refinement": {
+      "axis:field": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.004932126153449624,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 1074
+      },
+      "axis:shifted": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.00320115674802238,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 1074
+      },
+      "saddle:field": {
+        "fit_cells": 2,
+        "fit_points": 14,
+        "position_error_in_pitch": 0.030117511866501984,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 1074
+      },
+      "saddle:shifted": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.018954845004460086,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 1074
+      }
+    },
+    "own_node_quadratic": {
+      "axis:field": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.004932126153449624,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 1074
+      },
+      "axis:shifted": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.00320115674802238,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 1074
+      },
+      "saddle:field": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.02703663371562775,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 1074
+      },
+      "saddle:shifted": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.018954845004460086,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 1074
+      }
+    },
+    "ring_quadratic": {
+      "axis:field": {
+        "fit_cells": 7,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.015934314181626778,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 1074
+      },
+      "axis:shifted": {
+        "fit_cells": 7,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.009434892596330366,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 1074
+      },
+      "saddle:field": {
+        "fit_cells": 7,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.029849911653061483,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 1074
+      },
+      "saddle:shifted": {
+        "fit_cells": 7,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.015861923023153028,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 1074
+      }
+    },
+    "two_ring_cubic": {
+      "axis:field": {
+        "fit_cells": 7,
+        "fit_points": 49,
+        "position_error_in_pitch": 5.568509419613773e-05,
+        "reaches_pitch_threshold": true,
+        "realised_cells": 1074
+      },
+      "axis:shifted": {
+        "fit_cells": 7,
+        "fit_points": 49,
+        "position_error_in_pitch": 0.00023938526084599416,
+        "reaches_pitch_threshold": true,
+        "realised_cells": 1074
+      },
+      "saddle:field": {
+        "fit_cells": 7,
+        "fit_points": 49,
+        "position_error_in_pitch": 0.0009103762390611169,
+        "reaches_pitch_threshold": true,
+        "realised_cells": 1074
+      },
+      "saddle:shifted": {
+        "fit_cells": 7,
+        "fit_points": 49,
+        "position_error_in_pitch": 0.0005265866509909282,
+        "reaches_pitch_threshold": true,
+        "realised_cells": 1074
+      }
+    }
+  },
+  "gates_at_2500_cells": {
+    "fixed_point_refinement": {
+      "axis:field": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.0027104059677310476,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 2616
+      },
+      "axis:shifted": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.007173679010135918,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 2616
+      },
+      "saddle:field": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.0157781109919191,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 2616
+      },
+      "saddle:shifted": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.014114992420337329,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 2616
+      }
+    },
+    "own_node_quadratic": {
+      "axis:field": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.0027104059677310476,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 2616
+      },
+      "axis:shifted": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.007173679010135918,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 2616
+      },
+      "saddle:field": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.0157781109919191,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 2616
+      },
+      "saddle:shifted": {
+        "fit_cells": 1,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.014114992420337329,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 2616
+      }
+    },
+    "ring_quadratic": {
+      "axis:field": {
+        "fit_cells": 7,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.009991732500722455,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 2616
+      },
+      "axis:shifted": {
+        "fit_cells": 7,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.008900195775471091,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 2616
+      },
+      "saddle:field": {
+        "fit_cells": 7,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.01270144393239911,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 2616
+      },
+      "saddle:shifted": {
+        "fit_cells": 7,
+        "fit_points": 7,
+        "position_error_in_pitch": 0.01601122452553419,
+        "reaches_pitch_threshold": false,
+        "realised_cells": 2616
+      }
+    },
+    "two_ring_cubic": {
+      "axis:field": {
+        "fit_cells": 7,
+        "fit_points": 49,
+        "position_error_in_pitch": 5.8603643141389504e-05,
+        "reaches_pitch_threshold": true,
+        "realised_cells": 2616
+      },
+      "axis:shifted": {
+        "fit_cells": 7,
+        "fit_points": 49,
+        "position_error_in_pitch": 0.00014152667110159197,
+        "reaches_pitch_threshold": true,
+        "realised_cells": 2616
+      },
+      "saddle:field": {
+        "fit_cells": 7,
+        "fit_points": 49,
+        "position_error_in_pitch": 7.782881675599559e-05,
+        "reaches_pitch_threshold": true,
+        "realised_cells": 2616
+      },
+      "saddle:shifted": {
+        "fit_cells": 7,
+        "fit_points": 49,
+        "position_error_in_pitch": 0.0001906511770229443,
+        "reaches_pitch_threshold": true,
+        "realised_cells": 2616
+      }
+    }
+  },
+  "pitch_threshold": 0.001,
+  "report": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-polish-accuracy-ladder/docs/figures/cut-cell-current-attribution/polish-ladder/polish-accuracy-ladder.md",
+  "rows": [
+    "diverted-single-null-cells-500",
+    "diverted-single-null-cells-750",
+    "diverted-single-null-cells-1000",
+    "diverted-single-null-cells-2500",
+    "weak-rotation-reactor-static-cells-300",
+    "weak-rotation-reactor-static-cells-1000",
+    "moderate-rotation-conventional-static-cells-300",
+    "moderate-rotation-conventional-static-cells-1000",
+    "strong-rotation-compact-static-cells-300",
+    "strong-rotation-compact-static-cells-1000"
+  ],
+  "schema": "nova.polish-accuracy-ladder",
+  "shift_fraction_of_pitch": 0.3333333333333333,
+  "source_revision": "eaa0de73ac92071fb2cc59b9eb176119650319ba",
+  "version": 1
+}

@@ -1,0 +1,49 @@
+{
+  "analytic_null_read": {
+    "admitted": true,
+    "axis_admitted": true,
+    "x_candidate_count": 0,
+    "x_point_admitted": false,
+    "x_point_required": false
+  },
+  "case": "moderate-rotation-conventional-static",
+  "characteristic_pitch_m": 0.04359093245793756,
+  "distance_to_analytic": {
+    "axis_error_in_pitch": 0.7181026180329936,
+    "axis_error_m": 0.03130276272054436,
+    "psi_rms_fraction_of_span": 0.11359939984356236,
+    "x_point_error_in_pitch": null,
+    "x_point_error_m": null
+  },
+  "figure": {
+    "filesystem_path": "docs/figures/cut-cell-current-attribution/wholecell-rows/panels/moderate-rotation-conventional-static-production-route-cells-1000.png",
+    "project_absolute_src": "/nova/figures/cut-cell-current-attribution/wholecell-rows/panels/moderate-rotation-conventional-static-production-route-cells-1000.png",
+    "render_source": "wholecell_reposed_row_with_caption",
+    "sha256": "7ff7795c7f636e180425d1dfff2451b0e02ff061d9f0c0a00a9bcc72940785b9"
+  },
+  "fixed_point": {
+    "bound": 1e-12,
+    "converged": false,
+    "residual_passed": false,
+    "terminal_residual": 0.004378054224121926
+  },
+  "realised_cells": 1070,
+  "requested_cells": -1000,
+  "solver": {
+    "booked_amplitude": {
+      "seed": 0.9020092519572147,
+      "terminal": 0.9442757657171484
+    },
+    "clip_mode": "chord",
+    "converged": false,
+    "peak_device_memory_bytes": 901451520,
+    "peak_live_bytes_observed": 895187200,
+    "qualification": "unqualified",
+    "requested_seed_class": "limited",
+    "running_peak_bytes": 901451520,
+    "terminal_class": "limited",
+    "termination": "active_set_settled",
+    "trip_count": 3,
+    "wall_seconds": 597.6229239925742
+  }
+}

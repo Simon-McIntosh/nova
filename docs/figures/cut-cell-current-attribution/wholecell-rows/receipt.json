@@ -1,0 +1,65 @@
+{
+  "clip_mode": "chord",
+  "completed": true,
+  "device": {
+    "host": "98dci4-gpu-0003.iter.org",
+    "kind": "NVIDIA H200 NVL",
+    "memory_bytes_limit": 112585605120,
+    "platform": "gpu"
+  },
+  "driver_sha256": "9f25d58e0c88bbfe77d7d1b3b8ea86b3381d94d693ab2e248800543d1e825801",
+  "rows": [
+    {
+      "analytic_null_read": {
+        "admitted": true,
+        "axis_admitted": true,
+        "x_candidate_count": 3,
+        "x_point_admitted": true,
+        "x_point_required": true
+      },
+      "case": "diverted-single-null",
+      "characteristic_pitch_m": 0.03176923239135842,
+      "distance_to_analytic": {
+        "axis_error_in_pitch": 18.218996100671852,
+        "axis_error_m": 0.578803521059497,
+        "psi_rms_fraction_of_span": 1.30960163657576,
+        "x_point_error_in_pitch": 3.8967943668925824,
+        "x_point_error_m": 0.12379816582314686
+      },
+      "figure": {
+        "filesystem_path": "docs/figures/cut-cell-current-attribution/wholecell-rows/panels/diverted-single-null-production-route-cells-2500.png",
+        "project_absolute_src": "/nova/figures/cut-cell-current-attribution/wholecell-rows/panels/diverted-single-null-production-route-cells-2500.png",
+        "render_source": "wholecell_reposed_row_with_caption",
+        "sha256": "3ef45f4400f4f4726c612c71932dda9a38899b75a4ca846678fdad4099913821"
+      },
+      "fixed_point": {
+        "bound": 1e-12,
+        "converged": false,
+        "residual_passed": false,
+        "terminal_residual": 0.031223951903299515
+      },
+      "realised_cells": 2616,
+      "requested_cells": -2500,
+      "solver": {
+        "booked_amplitude": {
+          "seed": 0.6080134069631813,
+          "terminal": 0.6034730675047242
+        },
+        "clip_mode": "chord",
+        "converged": false,
+        "peak_device_memory_bytes": 3602063104,
+        "peak_live_bytes_observed": 3227242496,
+        "qualification": "unqualified",
+        "requested_seed_class": "diverted",
+        "running_peak_bytes": 3602063104,
+        "terminal_class": "diverted",
+        "termination": "active_set_settled",
+        "trip_count": 5,
+        "wall_seconds": 760.1784791667014
+      }
+    }
+  ],
+  "rung_ratios": {},
+  "schema": "nova.wholecell-reposed-rows-acceptance",
+  "source_revision": "3d211a4902417bb7c02d73f9485348728d6f55a7"
+}

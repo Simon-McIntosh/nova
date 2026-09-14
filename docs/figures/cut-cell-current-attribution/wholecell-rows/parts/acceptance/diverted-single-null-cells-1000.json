@@ -1,0 +1,49 @@
+{
+  "analytic_null_read": {
+    "admitted": true,
+    "axis_admitted": true,
+    "x_candidate_count": 3,
+    "x_point_admitted": true,
+    "x_point_required": true
+  },
+  "case": "diverted-single-null",
+  "characteristic_pitch_m": 0.050231566935945236,
+  "distance_to_analytic": {
+    "axis_error_in_pitch": 10.977054132034024,
+    "axis_error_m": 0.5513946293927613,
+    "psi_rms_fraction_of_span": 1.2703801819976597,
+    "x_point_error_in_pitch": 0.17350729455106834,
+    "x_point_error_m": 0.008715543280116755
+  },
+  "figure": {
+    "filesystem_path": "docs/figures/cut-cell-current-attribution/wholecell-rows/panels/diverted-single-null-production-route-cells-1000.png",
+    "project_absolute_src": "/nova/figures/cut-cell-current-attribution/wholecell-rows/panels/diverted-single-null-production-route-cells-1000.png",
+    "render_source": "wholecell_reposed_row_with_caption",
+    "sha256": "af5d628a907f3463f8cd967df890f0dbf2ded0993a3930682b1052e4755cc1b2"
+  },
+  "fixed_point": {
+    "bound": 1e-12,
+    "converged": false,
+    "residual_passed": false,
+    "terminal_residual": 0.11976525853591725
+  },
+  "realised_cells": 1074,
+  "requested_cells": -1000,
+  "solver": {
+    "booked_amplitude": {
+      "seed": 0.6100934337024748,
+      "terminal": 0.6181213851241453
+    },
+    "clip_mode": "chord",
+    "converged": false,
+    "peak_device_memory_bytes": 1597571840,
+    "peak_live_bytes_observed": 910955264,
+    "qualification": "unqualified",
+    "requested_seed_class": "diverted",
+    "running_peak_bytes": 1597571840,
+    "terminal_class": "diverted",
+    "termination": "active_set_settled",
+    "trip_count": 3,
+    "wall_seconds": 595.5936462683603
+  }
+}

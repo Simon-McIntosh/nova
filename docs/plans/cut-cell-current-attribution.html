@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-14">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 </head>
 <body>
 <main class="plan-doc">
@@ -380,6 +380,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260914T111007034561-cca-global-spline-read-on-hex" data-who="s19e-cca-spline-read" data-when="2026-09-14T12:46:01Z">
     <div class="r-comment-body"><p>The hex production read is the centroid ring quadratic (no global spline, spline_shape zero) and its saddle is invariant to wall node count to 3 to 6 micrometres; the limiter audit's saddle-moves-with-wall finding was the wall-contact error mislabelled, closed by a positive control that moved a ring value and the saddle with it. The ring saddle error is 1.20 mm at 550 cells, 1.52 mm at 1074 and 0.40 mm at 2600 (0.017, 0.030, 0.013 pitch): not monotone in cells. The global spline by the coefficient-carrier scattered projection is not credible on hex data: one-pitch fits leave 4e-4 to 1.8e-3 of span rms residual at the data points, adding vertices made the residual 4.6 times worse, half-pitch lattices are underdetermined; both controls pass (regular-grid fit residual 7e-15, vertex ordering exact to 1.7e-14 pitch) so the defect is the ill-conditioned iteration-limited LSQR projection itself. Wall nodes in the support are averaged against plasma data unless their rows are weighted by 1e3 to 1e6; the largest spline wall error is 3.8 spans. Fit 0.22 s, batched read of sixteen states 0.44 ms on CPU.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-vertex-census-first-readings-2026-09-14" data-who="s19-review" data-when="2026-09-14">
+    <div class="r-comment-body"><p>Vertex-ring census on the analytic flux (run r-20260914T143456809994, CPU jobs 1270626 and 1270642). The raw rule, cyclic sign changes of the six vertex values about the centroid value, admitted 0 of 9 saddles: the X-point cell shows two changes at every rung because the level through the centroid value is one hyperbola branch pair and only one branch crosses the hexagon unless the centroid sits on the saddle. The design survives with the discriminator taken from the fit through the ring rather than a count about the centroid: the own-node quadratic on centroid plus six vertices has a closed-form stationary point and Hessian, and admitting an indefinite stationary point inside or within a quarter pitch of the cell gives 9 of 9 saddles and 15 of 15 axes across the single-null rungs (132 to 2616 realised cells) and the limited rows, against the production census's 7 of 9. The lead's framing is recorded: the six vertex values are a periodic ring, the fit is a trigonometric polynomial (mean, two m=1 gradient terms, two m=2 traceless-Hessian terms, one m=3 cosine, with the isotropic Hessian from the centroid against the ring mean); the m=1 to m=2 amplitude ratio is the stationary-point distance in pitch, the Hessian signature separates saddle from O-point, and the m=3 amplitude is the fit's own error indicator. Four-vertex cells are under-sampled for the fit and need the neighbouring ring for the missing modes. Batched device timing and the report follow.</p></div>
 </div>
 </section>
 

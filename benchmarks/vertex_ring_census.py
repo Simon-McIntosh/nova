@@ -1347,14 +1347,16 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
         "",
         (
             "| requested | realised | centroid_sign_census_admitted | "
-            "vertex_census_admitted | vertex_census_position_error_in_pitch | "
+            "vertex_census_admitted | vertex_census_position_error_m | "
+            "vertex_census_position_error_in_pitch | vertex_census_level_error_wb | "
             "vertex_census_level_error_in_span | production_admitted | "
-            "production_position_error_in_pitch | "
+            "production_position_error_m | production_position_error_in_pitch | "
+            "production_level_error_wb | production_level_error_in_span | "
             "centroid_sign_false_saddle_before→vertex_census_false_saddle_after | "
             "centroid_sign_false_extremum_before→vertex_census_false_extremum_after | "
             "noise X |"
         ),
-        "|---:|---:|:---:|:---:|---:|---:|:---:|---:|---:|---:|:---:|",
+        "|---:|---:|:---:|:---:|---:|---:|---:|---:|:---:|---:|---:|---:|---:|---:|---:|:---:|",
     ]
     for row in rows:
         vertex = row["vertex_read"]
@@ -1373,15 +1375,48 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
             f"| {row['requested_cells']} | {row['realised_cells']} | "
             f"{'yes' if raw_admitted else 'no'} | "
             f"{'yes' if saddle['admitted'] else 'no'} | "
+            f"{saddle['position_error_m']} | "
             f"{saddle_pitch_error if saddle_pitch_error is not None else '—'} | "
+            f"{saddle['level_error_wb']} | "
             f"{saddle_level_error if saddle_level_error is not None else '—'} | "
             f"{'yes' if production['saddle_admitted'] else 'no'} | "
+            f"{production.get('saddle_position_error_m') or '—'} | "
             f"{production.get('saddle_position_error_in_pitch') or '—'} | "
+            f"{production.get('saddle_level_error_wb') or '—'} | "
+            f"{production.get('saddle_level_error_in_span') or '—'} | "
             f"{false['before_hessian_and_containment']['saddle']}→"
             f"{false['after_hessian_containment_and_dedupe']['saddle']} | "
             f"{false['before_hessian_and_containment']['extremum']}→"
             f"{false['after_hessian_containment_and_dedupe']['extremum']} | "
             f"{'yes' if noise_admitted else 'no'} |"
+        )
+    lines.extend(["", "## O-point positive control", ""])
+    lines.append(
+        "| case | requested | realised | vertex_census_axis_admitted | "
+        "vertex_census_axis_position_error_m | "
+        "vertex_census_axis_position_error_in_pitch | production_axis_admitted | "
+        "production_axis_position_error_m | production_axis_position_error_in_pitch | "
+        "extremal_centroid_and_mode_agree |"
+    )
+    lines.append("|:---|---:|---:|:---:|---:|---:|:---:|---:|---:|:---:|")
+    for row in receipt["single_null_rows"] + receipt["static_rows"]:
+        vertex_axis = row["vertex_read"]["axis"]
+        production_axis = row["production_read"]
+        presentation = row.get("periodic_ring_presentation")
+        agreement = (
+            presentation["axis_seed_and_mode_criterion_agree"]
+            if presentation is not None
+            else None
+        )
+        lines.append(
+            f"| {row['case']} | {row['requested_cells']} | {row['realised_cells']} | "
+            f"{'yes' if vertex_axis['admitted'] else 'no'} | "
+            f"{vertex_axis['position_error_m']} | "
+            f"{vertex_axis['position_error_in_pitch']} | "
+            f"{'yes' if production_axis['axis_admitted'] else 'no'} | "
+            f"{production_axis['axis_position_error_m']} | "
+            f"{production_axis['axis_position_error_in_pitch']} | "
+            f"{'yes' if agreement else 'no' if agreement is not None else '—'} |"
         )
     lines.extend(["", "## Static axis controls", ""])
     lines.append(

@@ -704,6 +704,9 @@ def make_programs(profile: Any, request: Any):
     def scanned_solve(initial):
         return scanned_active_set_newton_krylov(
             initial,
+            shadow_mask_fn=shadow_mask,
+            promoted_shadow_mask_fn=promoted_shadow_mask,
+            shadowed_map_fn=shadowed_map,
             **options,
             krylov_condition_limit=_PROJECTED_KRYLOV_CONDITION_RATIO_LIMIT,
             stream_active_set=False,
@@ -804,14 +807,12 @@ def execute_arm(
     jitted = jax.jit(program)
     host_seed = jnp.asarray(seed, dtype=jnp.float64)
     warm_started = perf_counter()
-    warm = jitted(host_seed)
-    warm.block_until_ready()
+    jax.block_until_ready(jitted(host_seed))
     warm_seconds = perf_counter() - warm_started
     timed = []
     for _ in range(repeats):
         run_started = perf_counter()
-        result = jitted(host_seed)
-        result.block_until_ready()
+        result = jax.block_until_ready(jitted(host_seed))
         timed.append(perf_counter() - run_started)
     timed_seconds = np.asarray(timed, dtype=np.float64)
     return {
@@ -1016,7 +1017,16 @@ def main() -> None:
         help="compare a platform's executed pair and render the SVG",
     )
     parser.add_argument("--repeats", type=int, default=3)
+    parser.add_argument(
+        "--cells",
+        type=int,
+        default=-300,
+        help="requested cells, negative for whole-cell (lower for smoke)",
+    )
     arguments = parser.parse_args()
+
+    global REQUESTED_CELLS
+    REQUESTED_CELLS = arguments.cells
 
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True

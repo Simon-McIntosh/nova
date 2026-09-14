@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T13:10:06",
+  "updated": "2026-09-14T13:18:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -153615,6 +153615,209 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T082732961777-cca-repose-fixture-exterior",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-repose-fixture-exterior",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2346,
+                "cached_input_tokens": 381507,
+                "input_tokens": 383885,
+                "output_tokens": 3162,
+                "reasoning_output_tokens": 995,
+                "total_tokens": 387047,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never open any receipt larger than one megabyte in an editor (load it with json); commit before every job submission. Facts at this base (main): scripts/analytic_oracle_fixtures/measure.py exact_current_moments (lines 776-796) integrates case.toroidal_current_density over the polygons returned by operator._support_partition(state) with a polygon rule, and measure_fixture (lines 887-906) builds prescribed_exterior = exact - image of those moments through coupling_current_moments and _internal_flux_image; benchmarks/solovev_certificate.py builds exact_coefficients the same way at lines 391, 1034 and 2133. In the default clip mode (chord, whole-cell booking since c9a89e58) those supports are whole atomic cells, so the fixture exterior closes analytically integrated WHOLE-cell moments; the oracle-start decomposition (docs/figures/cut-cell-current-attribution/oracle-start and the report map-jacobian-report.md under the reports directory) proved this: whole-cell booking on single-null 500 is a fixed point to 4.9e-15 of span while the exact clip on the same flux misses by 2.06, and the limited rows miss by 0.05 to 0.28 in both modes. The locked decision: the fixture exterior must be built from the analytic density integrated over each cell's region INSIDE THE ANALYTIC SEPARATRIX, using the analytic nulls (axis and X-point or the analytic zero level) for the clip, never the production read at fixture-build time (at 300 cells the read admits no X-point on the single-null row and would give an empty plasma), imaged through the same frozen blocks, and cached with the machine by geometry identity so it costs nothing at run time. Implement that in measure.py (a fixture-build clip that takes the analytic topology, with the polygon integration already present) and route the certificate driver's exact_coefficients through the same construction, so the two agree by construction; keep the old whole-cell construction available only as a named comparison arm in the gate, not as a default. Gate, ONE H200 job (betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:59:00, JAX_PLATFORMS=cuda,cpu, TMPDIR=/tmp in submit environment and payload, root venv python with PYTHONPATH at the worktree, sbatch detached, --output in the run directory, prologue prints nvidia-smi --query-gpu=memory.used,memory.total --format=csv for the visible card and exits 3 if less than 40 GiB is free, XLA_PYTHON_CLIENT_PREALLOCATE=false): for weak, moderate and single-null at 1000 cells (meshes are cached; add 500 for single-null as the reference row) evaluate one application of the production map at the analytic flux with the re-posed exterior in exact-clip mode and in whole-cell mode, report rms and sup of span, the booked over analytic current, and the affine share, and beside them the same rows under the old whole-cell-integrated exterior; the pass is the exact-clip floor at 1000 cells at or below 1e-3 of span with the residual concentrated on cut cells (the Gate A plus Gate B floor), and the whole-cell floor now reading the boundary-layer current it omits. Persist parts per row-mode as they land. Add one test that the fixture exterior built from analytic clipped moments makes the analytic flux a fixed point of the map with analytically integrated clipped moments to 1e-12 on the 110-cell weak row (cheap, CPU, JAX_PLATFORMS=cpu, run on all_debug or inline if under ten seconds). Zero added failures on tests touching the fixture and certificate against base 3b4b85f7. One SVG per row of floor against target distance in pitch for the two exteriors and two modes. Manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 5.0,
+          "goal": "Re-pose the certificate fixture exterior as the analytic flux minus the image of the analytic current density integrated exactly over each cell's clipped region inside the analytic separatrix, so the exact-clip booking of the analytic flux is the fixed point of the certificate map",
+          "id": "cca-repose-fixture-exterior",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T08:27:33Z",
+            "read_at": "2026-09-14T08:27:35Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 2.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T082732961777-cca-repose-fixture-exterior/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "scripts/analytic_oracle_fixtures/measure.py",
+            "benchmarks/solovev_certificate.py",
+            "tests/test_analytic_oracle_fixture_exterior.py",
+            "docs/figures/cut-cell-current-attribution/reposed-fixture",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/reposed-fixture"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19e-cca-repose-fixture",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T08:27:47Z",
+        "completed_at": "2026-09-14T11:16:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 10101,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "3b4b85f77a7c756da6bc2f1612ebe0cfb6755b60",
+        "commits": [
+          "b4d52c95697e18695291b19e8df92dd612992a96",
+          "a7b2a78ae368d51e04fc1da2b25f88f1f01b5df4",
+          "b6350adc4a00c8e276fbc53d1c49b03af5bbf084",
+          "e88c6c2196bf67b4f9516c8fb45fe123047147e4",
+          "4f0352767b6b19dfca9173f41e0d08aea848f3e9",
+          "e099a59153bc094b3a1a77d42e4459192b6fa260",
+          "a9d69a7ae88282e5a1267bc59d7b37f529009dc5",
+          "318adc81d7f4b4d8dee53dff1a7ac8d8e8b71b00"
+        ],
+        "changed_lines": {
+          "added": 6,
+          "removed": 44011,
+          "files": 29
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1270256: one application of the production map at the analytic flux, 1000 cells, exterior from analytic clipped moments against the whole-cell-integrated exterior, exact-clip and whole-cell modes, EXIT=0; all_debug job 1270229: tests/test_analytic_oracle_fixture_exterior.py 1 passed; H200 job 1270367: compile-only identification of the exact-clip solve memory array",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T082732961777-cca-repose-fixture-exterior/h200-1270256.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T082732961777-cca-repose-fixture-exterior/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a09f07-8f95-7cf3-9a88-8c7f7c2bf8ae",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19005824,
+            "cached_input_tokens_cumulative": 19005824,
+            "input_tokens": 19189286,
+            "input_tokens_cumulative": 19189286,
+            "output_tokens": 43228,
+            "output_tokens_cumulative": 43228,
+            "reasoning_output_tokens": 11796,
+            "reasoning_output_tokens_cumulative": 11796
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T11:16:08Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 9.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T11:16:08Z"
+            }
+          ],
+          "notional_cost_usd": 254.2896,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 19005824,
+          "cumulative_input_tokens": 38195110,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 55024
+        },
+        "follow_on_paths": [
+          "forward_operator.py",
+          "observation.py",
+          "stencil_mesh.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-repose-fixture-exterior",
+          "session_id": "01a09f07-8f95-7cf3-9a88-8c7f7c2bf8ae",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T11:16:08Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 78.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -153927,6 +154130,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2456
+    "_version": 2457
   }
 }

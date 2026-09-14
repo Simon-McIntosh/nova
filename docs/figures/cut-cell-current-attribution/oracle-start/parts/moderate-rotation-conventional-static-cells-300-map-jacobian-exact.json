@@ -1,0 +1,365 @@
+{
+  "case": "moderate-rotation-conventional-static",
+  "completed": true,
+  "exterior_term": {
+    "definition": "analytic total flux minus the analytically integrated exact plasma-current moment image; constructed before mode selection",
+    "sha256_binary64": "8680edaec8ce74f3512cb5b8c05992b571d58c1b612582341c5226abec859a79",
+    "source_pointers": {
+      "construction": {
+        "line_end": 1265,
+        "line_start": 1118,
+        "markers": [
+          {
+            "line": 1151,
+            "text": "analytic - fixture_exact_internal"
+          },
+          {
+            "line": 1148,
+            "text": "            operator = oracle_fixture.forward_operator("
+          }
+        ],
+        "path": "benchmarks/oracle_start_newton_probe.py"
+      },
+      "fixture_image": {
+        "line_end": 809,
+        "line_start": 799,
+        "markers": [
+          {
+            "line": 803,
+            "text": "return np.asarray("
+          }
+        ],
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      }
+    }
+  },
+  "finding": null,
+  "jacobian": {
+    "directions": [
+      {
+        "direction": "smooth_random_1",
+        "exact_jvp_detected_nonzero_action": true,
+        "relative_steps": [
+          {
+            "absolute_step_wb": 1.3815436905161075e-05,
+            "exact_jvp_rms": 0.23957943232435103,
+            "finite_difference_detected_nonzero_action": true,
+            "finite_difference_rms": 0.24208450758892522,
+            "relative_jvp_discrepancy": 0.01524904623566744,
+            "relative_step_of_flux_span": 1e-05
+          },
+          {
+            "absolute_step_wb": 1.3815436905161072e-07,
+            "exact_jvp_rms": 0.23957943232435103,
+            "finite_difference_detected_nonzero_action": true,
+            "finite_difference_rms": 0.24208489191434146,
+            "relative_jvp_discrepancy": 0.015250550812307133,
+            "relative_step_of_flux_span": 1e-07
+          }
+        ],
+        "unit_sup_direction_sha256": "091152ecfdf5fc93fa8a1f1d52bfb4139e0667b7adda825c951149a6e799a894"
+      },
+      {
+        "direction": "smooth_random_2",
+        "exact_jvp_detected_nonzero_action": true,
+        "relative_steps": [
+          {
+            "absolute_step_wb": 1.3815436905161075e-05,
+            "exact_jvp_rms": 0.5483362139194686,
+            "finite_difference_detected_nonzero_action": true,
+            "finite_difference_rms": 0.549878428445254,
+            "relative_jvp_discrepancy": 0.004358673288842361,
+            "relative_step_of_flux_span": 1e-05
+          },
+          {
+            "absolute_step_wb": 1.3815436905161072e-07,
+            "exact_jvp_rms": 0.5483362139194686,
+            "finite_difference_detected_nonzero_action": true,
+            "finite_difference_rms": 0.549877977155447,
+            "relative_jvp_discrepancy": 0.004357845332846483,
+            "relative_step_of_flux_span": 1e-07
+          }
+        ],
+        "unit_sup_direction_sha256": "b2ded6bf076a7de94c332afb80c93039ee9f1e83332b964ed4a75cd8a1ac44f3"
+      },
+      {
+        "direction": "smooth_random_3",
+        "exact_jvp_detected_nonzero_action": true,
+        "relative_steps": [
+          {
+            "absolute_step_wb": 1.3815436905161075e-05,
+            "exact_jvp_rms": 0.3634339980291513,
+            "finite_difference_detected_nonzero_action": true,
+            "finite_difference_rms": 0.3655940463200583,
+            "relative_jvp_discrepancy": 0.011777613507617626,
+            "relative_step_of_flux_span": 1e-05
+          },
+          {
+            "absolute_step_wb": 1.3815436905161072e-07,
+            "exact_jvp_rms": 0.3634339980291513,
+            "finite_difference_detected_nonzero_action": true,
+            "finite_difference_rms": 0.36559381111624334,
+            "relative_jvp_discrepancy": 0.011776428114298534,
+            "relative_step_of_flux_span": 1e-07
+          }
+        ],
+        "unit_sup_direction_sha256": "903a944382f66a5deac8b9dd693f07ecb504fa98e83e719f9064418411a15e1c"
+      },
+      {
+        "direction": "smooth_random_4",
+        "exact_jvp_detected_nonzero_action": true,
+        "relative_steps": [
+          {
+            "absolute_step_wb": 1.3815436905161075e-05,
+            "exact_jvp_rms": 0.6621147272238872,
+            "finite_difference_detected_nonzero_action": true,
+            "finite_difference_rms": 0.666617195605864,
+            "relative_jvp_discrepancy": 0.009549363722372665,
+            "relative_step_of_flux_span": 1e-05
+          },
+          {
+            "absolute_step_wb": 1.3815436905161072e-07,
+            "exact_jvp_rms": 0.6621147272238872,
+            "finite_difference_detected_nonzero_action": true,
+            "finite_difference_rms": 0.6666176178347683,
+            "relative_jvp_discrepancy": 0.009549915101359656,
+            "relative_step_of_flux_span": 1e-07
+          }
+        ],
+        "unit_sup_direction_sha256": "3d471e6ca8568a8a9147234f015cdadb5226b20f545f1d882c28ea76e1630a40"
+      }
+    ],
+    "linear_solve_entered": false,
+    "nonlinear_solve_entered": false,
+    "random_seed": 271828,
+    "residual_at_analytic_rms_wb": 0.12309928338462575,
+    "residual_definition": "state minus the certificate's shadow-frozen target-normalised map; fixed_point.newton_krylov forms the same I-minus-J linear action after linearizing its frozen map",
+    "source_pointers": {
+      "benchmark_residual": {
+        "line_end": 308,
+        "line_start": 306,
+        "markers": [
+          {
+            "line": 308,
+            "text": "return candidate - shadowed_map(candidate, frozen_shadow)"
+          }
+        ],
+        "path": "benchmarks/oracle_start_newton_probe.py"
+      },
+      "production_inner_newton": {
+        "line_end": 3327,
+        "line_start": 2483,
+        "markers": [
+          {
+            "line": 2763,
+            "text": "mapped, tangent = jax.linearize(frozen_map, state)"
+          },
+          {
+            "line": 2764,
+            "text": "residual_vector = mapped - state"
+          },
+          {
+            "line": 2813,
+            "text": "return vector - tangent(vector)"
+          }
+        ],
+        "path": "nova/equilibrium/fixed_point.py"
+      }
+    }
+  },
+  "mode": "exact",
+  "mode_semantics": "signed-flux spline-chain exact clip",
+  "one_application": {
+    "analytic_moments_anchor": {
+      "absolute_rms_wb": 1.5947817652010993e-16,
+      "absolute_sup_wb": 4.440892098500626e-16,
+      "definition": "external plus analytically integrated exact moments",
+      "relative_rms_of_span": 1.154347688132347e-16,
+      "relative_sup_of_span": 3.214442025240352e-16
+    },
+    "booked_current": {
+      "analytic_plasma_current_a": 1624991.1778605897,
+      "booked_over_analytic": 0.9999871158332206,
+      "booked_plasma_current_a": 1624970.2412032392,
+      "cell_current_sha256_binary64": "060ef1bcf04dd20a9a1dc60e04bc1ecda141b6b9ace6ec07f5c228dff5001e65",
+      "normalisation_amplitude": 1.0000128843327831,
+      "normalisation_error": null,
+      "status": "finite"
+    },
+    "certificate_target_normalised_map": {
+      "absolute_rms_wb": 0.10507401668971592,
+      "absolute_sup_wb": 0.1906147412379871,
+      "definition": "the production certificate map with requested topology class and analytic total-current target",
+      "error": null,
+      "relative_rms_of_span": 0.07605551486429148,
+      "relative_sup_of_span": 0.13797228603518039,
+      "status": "finite"
+    },
+    "decomposition": {
+      "a_affine_residual": {
+        "affine_part": {
+          "absolute_rms_wb": 0.09483801009479322,
+          "absolute_sup_wb": 0.20577427525264536,
+          "relative_rms_of_span": 0.06864640673026004,
+          "relative_sup_of_span": 0.1489451811515086
+        },
+        "basis": "constant plus raw R and Z in metres",
+        "coefficient_constant_wb": -0.4668659220498561,
+        "coefficient_r_wb_per_m": 0.26287006009822017,
+        "coefficient_z_wb_per_m": 0.026746308617951093,
+        "rank": 3,
+        "remainder": {
+          "absolute_rms_wb": 0.04523605668679145,
+          "absolute_sup_wb": 0.10646699111944173,
+          "relative_rms_of_span": 0.03274312422931227,
+          "relative_sup_of_span": 0.07706378875333905
+        },
+        "rms_energy_fraction_explained": 0.8146558810015813,
+        "singular_values": [
+          35.162491993790994,
+          10.048134250220365,
+          2.998078640562239
+        ]
+      },
+      "actual_map_residual": {
+        "absolute_rms_wb": 0.10507401668971592,
+        "absolute_sup_wb": 0.1906147412379871,
+        "relative_rms_of_span": 0.07605551486429148,
+        "relative_sup_of_span": 0.13797228603518039
+      },
+      "analytic_moment_anchor": {
+        "absolute_rms_wb": 1.5947817652010993e-16,
+        "absolute_sup_wb": 4.440892098500626e-16,
+        "relative_rms_of_span": 1.154347688132347e-16,
+        "relative_sup_of_span": 3.214442025240352e-16
+      },
+      "b_external_term": {
+        "certificate_external_constructed_for_evaluated_booking": false,
+        "certificate_external_definition": "the external array captured by ForwardFluxOperator.flux_map",
+        "certificate_minus_implied_exterior": {
+          "absolute_rms_wb": 0.11484233004180942,
+          "absolute_sup_wb": 0.22352102305976196,
+          "relative_rms_of_span": 0.08312609353592533,
+          "relative_sup_of_span": 0.1617907740407837
+        },
+        "certificate_minus_implied_exterior_on_residual_carriers": {
+          "absolute_rms_wb": 0.10507401668971592,
+          "absolute_sup_wb": 0.1906147412379875,
+          "relative_rms_of_span": 0.07605551486429148,
+          "relative_sup_of_span": 0.13797228603518066
+        },
+        "implied_exterior_definition": "analytic total flux minus the evaluated booked internal image",
+        "source_pointers": {
+          "certificate_external_capture": {
+            "line_end": 2656,
+            "line_start": 2637,
+            "markers": [
+              {
+                "line": 2649,
+                "text": "external = self.external"
+              }
+            ],
+            "path": "nova/equilibrium/forward_operator.py"
+          },
+          "implied_exterior": {
+            "line_end": 426,
+            "line_start": 354,
+            "markers": [
+              {
+                "line": 367,
+                "text": "implied_exterior = analytic - internal_image"
+              }
+            ],
+            "path": "benchmarks/oracle_start_newton_probe.py"
+          }
+        }
+      },
+      "c_internal_image": {
+        "booked_minus_analytic_moments": {
+          "absolute_rms_wb": 0.11484233004180942,
+          "absolute_sup_wb": 0.22352102305976196,
+          "relative_rms_of_span": 0.08312609353592533,
+          "relative_sup_of_span": 0.1617907740407837
+        },
+        "booked_minus_analytic_moments_on_residual_carriers": {
+          "absolute_rms_wb": 0.10507401668971592,
+          "absolute_sup_wb": 0.1906147412379875,
+          "relative_rms_of_span": 0.07605551486429148,
+          "relative_sup_of_span": 0.13797228603518066
+        },
+        "definition": "evaluated booked internal image minus analytically integrated moments imaged through the same frozen blocks"
+      },
+      "carrier_count": 341,
+      "decomposition_closure": {
+        "absolute_rms_wb": 0.0,
+        "absolute_sup_wb": 0.0,
+        "relative_rms_of_span": 0.0,
+        "relative_sup_of_span": 0.0
+      },
+      "residual_carrier_count": 314
+    },
+    "unscaled_production_map": {
+      "absolute_rms_wb": 0.10508567218386883,
+      "absolute_sup_wb": 0.19055020198608702,
+      "definition": "production allocation and moment conversion without target-current normalisation, requested topology class fixed",
+      "relative_rms_of_span": 0.07606395143725904,
+      "relative_sup_of_span": 0.1379255707178559
+    }
+  },
+  "production_topology_state_at_analytic_flux": {
+    "axis_flux_wb": 1.3815436905840808,
+    "axis_rz_m": [
+      1.6987989856778025,
+      1.0859368959614812e-15
+    ],
+    "boundary_flux_wb": 6.797341186628906e-11,
+    "boundary_rz_m": [
+      2.1549862647298306,
+      -2.1117883053276844e-05
+    ],
+    "class": "limited",
+    "exception_text": null,
+    "read_status": "qualified_axis",
+    "x_point_flux_wb": null,
+    "x_point_rz_m": null
+  },
+  "realised_cells": 341,
+  "requested_cells": -300,
+  "residual_definitions": {
+    "certificate_relative_residual": "max(abs(mapped-state)) / max(abs(mapped)); recorded as a source pointer but not substituted for the span-normalized map floor",
+    "jacobian": "state minus the target-normalised map on the residual shadow frozen at the analytic state",
+    "map_floor": "mapped analytic flux minus analytic flux, normalized only by the analytic grid-flux span",
+    "source_pointers": {
+      "production_map": {
+        "line_end": 2656,
+        "line_start": 2637,
+        "markers": [
+          {
+            "line": 2649,
+            "text": "external = self.external"
+          },
+          {
+            "line": 2654,
+            "text": "return self._exclude_shadow_residual"
+          }
+        ],
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "production_relative_residual": {
+        "line_end": 859,
+        "line_start": 855,
+        "markers": [
+          {
+            "line": 857,
+            "text": "return jnp.max(jnp.abs(mapped - state))"
+          }
+        ],
+        "path": "nova/equilibrium/fixed_point.py"
+      }
+    }
+  },
+  "schema": "nova.oracle-start-map-jacobian-part",
+  "source_revision": "f3f9a361ba34238d32487c9482ad06465a158802",
+  "version": 2,
+  "wall_seconds": 57.1462160134688
+}

@@ -66,6 +66,7 @@ import jax.numpy as jnp
 import numpy as np
 from scipy.constants import mu_0
 
+from nova.equilibrium.clip_quadrature import clipped_support_quadrature
 from nova.equilibrium.domain import DomainMasks
 
 __all__ = [
@@ -104,13 +105,6 @@ MOMENT_NAMES: tuple[str, ...] = (
 
 #: Nodes the flux-function gradients are integrated on to recover primitives.
 PROFILE_NODES = 257
-
-# Eight Gauss nodes in each Duffy coordinate integrate polynomial content
-# through degree fifteen in either coordinate and leave ample headroom for the
-# smooth pressure closure and the 1/R field factor.
-_GAUSS_NODE, _GAUSS_WEIGHT = np.polynomial.legendre.leggauss(8)
-_UNIT_NODE = 0.5 * (_GAUSS_NODE + 1.0)
-_UNIT_WEIGHT = 0.5 * _GAUSS_WEIGHT
 
 
 def layout_invariant_sum(values, axis: int = -1) -> jax.Array:
@@ -396,55 +390,6 @@ class ClippedIntegralMeasure(NamedTuple):
     def with_current_amplitude(self, amplitude: jax.Array) -> ClippedIntegralMeasure:
         """Return this measure with its exact cell-current integral rescaled."""
         return self._replace(cell_current=amplitude * self.cell_current)
-
-
-def clipped_support_quadrature(support, selection):
-    """Return fixed-shape degree-fifteen Duffy quadrature on each support.
-
-    Convex clipped cells are fanned from their first vertex.  Padding and
-    topology qualification enter only through zero weights; points on dead
-    triangles are moved to the authored cell centroid so discarded closure
-    evaluations remain finite under differentiation.
-    """
-    vertices = jnp.asarray(support.support_vertices)
-    count = jnp.asarray(support.vertex_count)
-    selected = jnp.asarray(selection, dtype=bool)
-    capacity = vertices.shape[1]
-    triangle_slot = jnp.arange(1, capacity - 1)
-    first = jnp.broadcast_to(vertices[:, :1], (len(vertices), capacity - 2, 2))
-    second = vertices[:, triangle_slot]
-    third = vertices[:, triangle_slot + 1]
-    radial = jnp.asarray(_UNIT_NODE, dtype=vertices.dtype)
-    vertical = jnp.asarray(_UNIT_NODE, dtype=vertices.dtype)
-    radial_weight = jnp.asarray(_UNIT_WEIGHT, dtype=vertices.dtype)
-    vertical_weight = jnp.asarray(_UNIT_WEIGHT, dtype=vertices.dtype)
-    u, v = jnp.meshgrid(radial, vertical, indexing="ij")
-    wu, wv = jnp.meshgrid(radial_weight, vertical_weight, indexing="ij")
-    u = u.reshape(-1)
-    v = v.reshape(-1)
-    rule_weight = (wu * wv).reshape(-1)
-    edge_first = second - first
-    edge_second = third - first
-    points = (
-        first[:, :, None, :]
-        + u[None, None, :, None] * edge_first[:, :, None, :]
-        + (1.0 - u)[None, None, :, None]
-        * v[None, None, :, None]
-        * edge_second[:, :, None, :]
-    )
-    cross = jnp.abs(
-        edge_first[..., 0] * edge_second[..., 1]
-        - edge_first[..., 1] * edge_second[..., 0]
-    )
-    live = (triangle_slot[None, :] + 1 < count[:, None]) & selected[:, None]
-    weights = cross[:, :, None] * (1.0 - u)[None, None, :] * rule_weight[None, None, :]
-    weights = jnp.where(live[:, :, None], weights, 0.0)
-    points = points.reshape(len(vertices), -1, 2)
-    weights = weights.reshape(len(vertices), -1)
-    points = jnp.where(
-        (weights > 0.0)[..., None], points, jnp.asarray(support.centroids)[:, None, :]
-    )
-    return points, weights
 
 
 def gradient_tail(gradient, psi_norm: jax.Array, nodes: int = PROFILE_NODES):

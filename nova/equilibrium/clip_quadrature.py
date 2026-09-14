@@ -204,7 +204,7 @@ def clipped_support_field_integrals(
 
         return jax.lax.cond(
             live,
-            integrate,
+            jax.checkpoint(integrate),
             lambda _index: (
                 jnp.asarray(0.0, dtype=vertices.dtype),
                 jnp.asarray(0.0, dtype=vertices.dtype),

@@ -4003,6 +4003,9 @@ def _identify_solve_memory(
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("solve memory identification requires binary64")
+    compilation_cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
     scaling = json.loads(REPOSED_CERTIFICATE_SCALING_OUTPUT.read_text(encoding="utf-8"))
     original_mode = support_clip_mode()
     arms = []
@@ -4022,6 +4025,7 @@ def _identify_solve_memory(
                     "schema": "nova.forward-solve-memory-identification",
                     "source_revision": _source_revision(),
                     "lane": _lane(),
+                    "persistent_compilation_cache": compilation_cache.receipt(),
                     "arms": arms,
                     "completed": False,
                     "certificate_disposition": {

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T16:34:56",
+  "updated": "2026-09-14T17:21:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4692,6 +4692,15 @@
         "created": "2026-09-14"
       },
       {
+        "id": "s19i-cca-census-kernel",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
+      },
+      {
         "id": "s19i-cca-cutblocks",
         "harness": "clive",
         "role": "implement",
@@ -4708,6 +4717,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-10"
+      },
+      {
+        "id": "s19i-cca-dual-stencil",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
       },
       {
         "id": "s19i-cca-gate-b",
@@ -4757,6 +4775,15 @@
         "created": "2026-09-14"
       },
       {
+        "id": "s19i-cca-limiter-subpanel",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
+      },
+      {
         "id": "s19i-cca-newton-geom",
         "harness": "clive",
         "role": "implement",
@@ -4764,6 +4791,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-11"
+      },
+      {
+        "id": "s19i-cca-polish-ladder",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
       },
       {
         "id": "s19i-cca-pytree",
@@ -154938,6 +154974,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2464
+    "_version": 2468
   }
 }

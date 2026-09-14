@@ -1,0 +1,170 @@
+{
+  "allocation": {
+    "allocated_cpus": 8,
+    "devices": [
+      "cuda:0"
+    ],
+    "jax_default_backend": "gpu",
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "job_id": 1270856,
+    "job_name": "census-kernel-gpu",
+    "memory_mb": 65536,
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "tmpdir": "/tmp"
+  },
+  "case": "diverted-single-null",
+  "characteristic_pitch_m": 0.07103816322006563,
+  "completed": true,
+  "kernel": {
+    "batch_seconds_median": 0.0007818145677447319,
+    "batch_seconds_per_state_median": 4.8863410484045744e-05,
+    "batch_seconds_per_state_ms": 0.048863410484045744,
+    "compile_seconds": 1.6151527324691415,
+    "hlo_instruction_count": 863,
+    "per_cell_per_state_us": 0.0888425645164468,
+    "per_state_ms_over_target": 0.048863410484045744,
+    "repeat_count": 7,
+    "state_count": 16,
+    "steady_batch_samples": [
+      0.0007760860025882721,
+      0.0008174329996109009,
+      0.0008316002786159515,
+      0.0007818145677447319,
+      0.0008947104215621948,
+      0.0006662104278802872,
+      0.0005895867943763733
+    ],
+    "whole_solve_target_ms": 1.0
+  },
+  "kernel_instrument_controls": {
+    "cell_index": 314,
+    "extremum_crossing_count": 0,
+    "extremum_detected_and_polished": true,
+    "extremum_position_error_m": 5.204170427930421e-18,
+    "saddle_crossing_count": 4,
+    "saddle_detected_and_polished": true,
+    "saddle_position_error_m": 1.734723475976807e-18,
+    "target_rz_m": [
+      1.6337911893083723,
+      -0.008323630660566073
+    ]
+  },
+  "private_region_mask_cell_count": 242,
+  "realised_cells": 550,
+  "reference": {
+    "batch_seconds_median": 0.03125620726495981,
+    "batch_seconds_per_state_ms": 1.9535129540599883,
+    "compile_seconds": 1.921036284416914,
+    "dominant_stage": "private_exclusion",
+    "dominant_stage_share": 0.6966417694868555,
+    "hlo_instruction_count": 3412,
+    "repeat_count": 7,
+    "stage_accumulated_seconds": {
+      "census": {
+        "median_seconds": 0.0002004699781537056,
+        "samples_seconds": [
+          0.0002778545022010803,
+          0.0002004699781537056,
+          0.00019877217710018158,
+          0.0003113262355327606,
+          0.00022410787642002106,
+          7.977988570928574e-05,
+          7.936451584100723e-05
+        ]
+      },
+      "containment": {
+        "median_seconds": 0.0006751352921128273,
+        "samples_seconds": [
+          0.0008122529834508896,
+          0.0006538275629281998,
+          0.0006751352921128273,
+          0.0007386412471532822,
+          0.0007963469251990318,
+          0.0006115660071372986,
+          0.0005232095718383789
+        ]
+      },
+      "dedupe": {
+        "median_seconds": 0.009481827728450298,
+        "samples_seconds": [
+          0.009455343708395958,
+          0.0094401640817523,
+          0.009481827728450298,
+          0.009542690590023994,
+          0.009502028115093708,
+          0.009567277505993843,
+          0.00941749382764101
+        ]
+      },
+      "polish": {
+        "median_seconds": 0.0004359651356935501,
+        "samples_seconds": [
+          0.0006360085681080818,
+          0.0006975987926125526,
+          0.00015705451369285583,
+          0.0004359651356935501,
+          0.00016012322157621384,
+          0.00035698432475328445,
+          0.0005317525938153267
+        ]
+      },
+      "private_exclusion": {
+        "median_seconds": 0.03125620726495981,
+        "samples_seconds": [
+          0.0312723470851779,
+          0.031231623142957687,
+          0.03143046237528324,
+          0.03125620726495981,
+          0.03123441059142351,
+          0.031109835021197796,
+          0.031273381784558296
+        ]
+      }
+    },
+    "stage_marginal_seconds": {
+      "census": 0.0002004699781537056,
+      "containment": 0.0002391701564192772,
+      "dedupe": 0.008806692436337471,
+      "polish": 0.0002354951575398445,
+      "private_exclusion": 0.021774379536509514
+    },
+    "state_count": 16
+  },
+  "requested_cells": 500,
+  "schema": "nova.census-kernel-gpu-part",
+  "source_revision": "2b1e01927be73dfe47f4ddbb6c816e9c176032fa",
+  "verification": {
+    "axis_admitted": true,
+    "axis_position_error_in_pitch": 0.009840240672169044,
+    "counts_match_reference": true,
+    "flag_arrays_equal": true,
+    "hessian_equal_atol_1e12": true,
+    "kernel_counts": {
+      "contained_extremum": 1,
+      "contained_saddle": 2,
+      "raw_extremum": 0,
+      "raw_saddle": 0,
+      "typed_extremum": 1,
+      "typed_saddle": 2
+    },
+    "kernel_qualified_extremum_count": 1,
+    "kernel_representative_extremum_count": 1,
+    "kernel_representative_saddle_count": 2,
+    "positions_equal_atol_1e12": true,
+    "reference_counts": {
+      "contained_extremum": 1,
+      "contained_saddle": 2,
+      "raw_extremum": 0,
+      "raw_saddle": 0,
+      "typed_extremum": 1,
+      "typed_saddle": 2
+    },
+    "saddle_admitted": true,
+    "saddle_position_error_in_pitch": 0.010208522107157827
+  },
+  "version": 1
+}

@@ -1,0 +1,140 @@
+{
+  "figure_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-census-kernel-timing/docs/figures/cut-cell-current-attribution/census-kernel/census-kernel-timing.png",
+  "kernel_scaling_exponent_in_cells": 0.05972999309207142,
+  "reference_scaling_exponent_in_cells": 1.8244859590850748,
+  "rows": [
+    {
+      "characteristic_pitch_m": 0.07103816322006563,
+      "dominant_stage": "private_exclusion",
+      "dominant_stage_share": 0.6966417694868555,
+      "kernel_compile_seconds": 1.6151527324691415,
+      "kernel_hlo_instruction_count": 863,
+      "kernel_per_cell_per_state_us": 0.0888425645164468,
+      "kernel_per_state_ms": 0.048863410484045744,
+      "kernel_state_ms_over_target": 0.048863410484045744,
+      "realised_cells": 550,
+      "reference_hlo_instruction_count": 3412,
+      "reference_per_state_ms": 1.9535129540599883,
+      "requested_cells": 500,
+      "verification": {
+        "axis_admitted": true,
+        "axis_position_error_in_pitch": 0.009840240672169044,
+        "counts_match_reference": true,
+        "flag_arrays_equal": true,
+        "hessian_equal_atol_1e12": true,
+        "kernel_counts": {
+          "contained_extremum": 1,
+          "contained_saddle": 2,
+          "raw_extremum": 0,
+          "raw_saddle": 0,
+          "typed_extremum": 1,
+          "typed_saddle": 2
+        },
+        "kernel_qualified_extremum_count": 1,
+        "kernel_representative_extremum_count": 1,
+        "kernel_representative_saddle_count": 2,
+        "positions_equal_atol_1e12": true,
+        "reference_counts": {
+          "contained_extremum": 1,
+          "contained_saddle": 2,
+          "raw_extremum": 0,
+          "raw_saddle": 0,
+          "typed_extremum": 1,
+          "typed_saddle": 2
+        },
+        "saddle_admitted": true,
+        "saddle_position_error_in_pitch": 0.010208522107157827
+      }
+    },
+    {
+      "characteristic_pitch_m": 0.050231566935945236,
+      "dominant_stage": "private_exclusion",
+      "dominant_stage_share": 0.8146696241232674,
+      "kernel_compile_seconds": 1.288600561209023,
+      "kernel_hlo_instruction_count": 863,
+      "kernel_per_cell_per_state_us": 0.048496140846965255,
+      "kernel_per_state_ms": 0.052084855269640684,
+      "kernel_state_ms_over_target": 0.052084855269640684,
+      "realised_cells": 1074,
+      "reference_hlo_instruction_count": 3412,
+      "reference_per_state_ms": 6.250003585591912,
+      "requested_cells": 1000,
+      "verification": {
+        "axis_admitted": true,
+        "axis_position_error_in_pitch": 0.00493212615333088,
+        "counts_match_reference": true,
+        "flag_arrays_equal": true,
+        "hessian_equal_atol_1e12": true,
+        "kernel_counts": {
+          "contained_extremum": 1,
+          "contained_saddle": 3,
+          "raw_extremum": 1,
+          "raw_saddle": 0,
+          "typed_extremum": 1,
+          "typed_saddle": 3
+        },
+        "kernel_qualified_extremum_count": 1,
+        "kernel_representative_extremum_count": 1,
+        "kernel_representative_saddle_count": 3,
+        "positions_equal_atol_1e12": true,
+        "reference_counts": {
+          "contained_extremum": 1,
+          "contained_saddle": 3,
+          "raw_extremum": 1,
+          "raw_saddle": 0,
+          "typed_extremum": 1,
+          "typed_saddle": 3
+        },
+        "saddle_admitted": true,
+        "saddle_position_error_in_pitch": 0.027036633715538137
+      }
+    },
+    {
+      "characteristic_pitch_m": 0.03176923239135842,
+      "dominant_stage": "private_exclusion",
+      "dominant_stage_share": 0.9166706063375746,
+      "kernel_compile_seconds": 0.9424582831561565,
+      "kernel_hlo_instruction_count": 863,
+      "kernel_per_cell_per_state_us": 0.020546369775787953,
+      "kernel_per_state_ms": 0.053749303333461285,
+      "kernel_state_ms_over_target": 0.053749303333461285,
+      "realised_cells": 2616,
+      "reference_hlo_instruction_count": 3412,
+      "reference_per_state_ms": 33.43649517046288,
+      "requested_cells": 2500,
+      "verification": {
+        "axis_admitted": true,
+        "axis_position_error_in_pitch": 0.0027104059677788414,
+        "counts_match_reference": true,
+        "flag_arrays_equal": true,
+        "hessian_equal_atol_1e12": true,
+        "kernel_counts": {
+          "contained_extremum": 1,
+          "contained_saddle": 3,
+          "raw_extremum": 1,
+          "raw_saddle": 0,
+          "typed_extremum": 1,
+          "typed_saddle": 3
+        },
+        "kernel_qualified_extremum_count": 1,
+        "kernel_representative_extremum_count": 1,
+        "kernel_representative_saddle_count": 3,
+        "positions_equal_atol_1e12": true,
+        "reference_counts": {
+          "contained_extremum": 1,
+          "contained_saddle": 3,
+          "raw_extremum": 1,
+          "raw_saddle": 0,
+          "typed_extremum": 1,
+          "typed_saddle": 3
+        },
+        "saddle_admitted": true,
+        "saddle_position_error_in_pitch": 0.01577811099102676
+      }
+    }
+  ],
+  "schema": "nova.census-kernel-timing-receipt",
+  "source_revision": "2b1e01927be73dfe47f4ddbb6c816e9c176032fa",
+  "version": 1,
+  "whole_solve_target_ms": 1.0
+}

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T20:47:22",
+  "updated": "2026-09-14T20:52:29",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -155076,6 +155076,201 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T152226686743-cca-census-kernel-timing",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a74",
+        "node": "cca-census-kernel-timing",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3406,
+                "cached_input_tokens": 650516,
+                "input_tokens": 653924,
+                "output_tokens": 5018,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 658942,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. Never open any receipt larger than one megabyte in an editor (load it with json). Commit the benchmark before submitting any job; every SLURM job is sbatch detached from your shell with --output in the run directory, TMPDIR=/tmp exported in the submit environment and the payload, the root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python with PYTHONPATH at the worktree, never uv on a compute node; CPU work on all_debug (--time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu) in ONE job with cases sharded inside and parts persisted as each lands; any H200 timing in one short job (betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8 --mem=64G --time=00:20:00, nvidia-smi prologue exiting 3 below 40 GiB free, XLA_PYTHON_CLIENT_PREALLOCATE=false, JAX_PLATFORMS=cuda,cpu). Write the manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync. Shared facts: the analytic oracle machines are cached (110, 200, 300, 342, 400, 500, 750, 1000, 2500 requested cells) and benchmarks/vertex_ring_census.py on the worktree of run r-20260914T143456809994 (path /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-vertex-ring-census-evaluation, read only, copy what you need) and benchmarks/topology_read_resolution_ladder.py on main load the machines, evaluate the analytic flux at the carriers (centroids and the six sample vertices per cell) and run the production read; the own-node quadratic on centroid plus six vertices is what StencilMesh.sample_flux_field evaluates (nova/equilibrium/stencil_mesh.py, ring_gather_index and ring_flux_weight); its closed-form stationary point with an indefinite Hessian inside or within a quarter pitch of the cell admitted 9 of 9 analytic saddles and 15 of 15 axes across the rungs where the production neighbour-centroid census admitted 7 of 9; the six vertex values form a periodic ring whose trigonometric fit carries the mean, two m=1 gradient terms, two m=2 traceless-Hessian terms and one m=3 cosine, with the isotropic Hessian from the centroid against the ring mean. Fact: the reference vertex census in benchmarks/vertex_ring_census.py (the run r-20260914T143456809994 worktree) timed at 2.0, 6.1 and 32 ms per state for a batch of 16 at 550, 1074 and 2616 realised cells, as slow as the production read (1.4, 4.9, 30 ms), while a fit and closed-form stationary point over seven values per cell is microseconds of work for a few thousand cells and must scale linearly. Build one benchmark with two parts. Part one: the census as a single jitted function with no Python loop over cells or candidates: gather (cells, 7) values, apply the precomputed per-cell fit weights as one einsum to six coefficients, the stationary point and Hessian in closed form, the class and admission flags as arrays, dedupe by a fixed-capacity top-k on a score, containment by a vectorised point-in-polygon against the wall, and the private-region exclusion as a mask; vmapped over 16 states; time it on the H200 at 550, 1074 and 2616 cells, reporting per-state cost, compile time and the HLO instruction count. Part two: profile the reference implementation stage by stage on the same rungs (census, polish loop, containment, dedupe, private exclusion) with wall time per stage, so the report names what carried the 2 to 32 ms. The report states the per-cell kernel cost per state at each rung against the 1 ms whole-solve target, the scaling exponent in cells, and the reference's dominant stage.",
+          "estimated_hours": 2.0,
+          "goal": "Measure the device cost of the vertex-ring census written as one per-cell kernel against the reference implementation profiled by stage",
+          "id": "cca-census-kernel-timing",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-14T15:22:26Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T152226686743-cca-census-kernel-timing/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/census_kernel_timing.py",
+            "docs/figures/cut-cell-current-attribution/census-kernel",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/census-kernel"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-census-kernel",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-14T15:22:38Z",
+        "completed_at": "2026-09-14T18:49:41.418Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 12408,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 12423,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "5bda67315b32d71f0e7ff1b6c5ef00663e807f4b",
+        "commits": [
+          "b7d8fc8525386f6888a471a84ce748635ff1889a",
+          "2b1e01927be73dfe47f4ddbb6c816e9c176032fa"
+        ],
+        "changed_lines": {
+          "added": 0,
+          "removed": 0,
+          "files": 0
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1270855 (kernel verified against the production census counts and analytic-null admission at 550, 1074 and 2616 cells, exit 0) and H200 job 1270856 (vmapped batch-of-16 kernel timing and reference stage profile, exit 0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T152226686743-cca-census-kernel-timing/census-kernel-gpu-1270856.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T152226686743-cca-census-kernel-timing/manifest.md",
+        "scope_changed": false,
+        "session_id": "4aeaaf54-5d13-4020-a45f-7bb2d6420f4d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2405160,
+            "input_tokens_cumulative": 2405160,
+            "output_tokens": 13229,
+            "output_tokens_cumulative": 13229,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-14T18:49:41.418Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 2405160,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 213.84,
+          "generated_tokens": 13229,
+          "generation_seconds": 179.812,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 79.4,
+          "machine_seconds": 34.028,
+          "peak_input_tokens": 158822,
+          "tokens_per_second": 73.57,
+          "wall_tokens_per_second": 61.86
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-census-kernel-timing",
+          "session_id": "4aeaaf54-5d13-4020-a45f-7bb2d6420f4d",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T18:49:41.418Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 108.0,
+        "orientation_input_tokens": 7093120.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -155388,6 +155583,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2472
+    "_version": 2473
   }
 }

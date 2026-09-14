@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-14">
-<meta name="plan-version" content="63">
+<meta name="plan-version" content="64">
 </head>
 <body>
 <main class="plan-doc">
@@ -399,6 +399,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-polish-ladder-verdict-2026-09-14" data-who="s19-review" data-when="2026-09-14">
     <div class="r-comment-body"><p>Polish ladder verdict: the two-ring cubic is the polish. Twenty to a hundred times better than either quadratic on the saddle, at the pitch-over-a-thousand target at 2616 cells, within 1e-3 at every count, and stable under the shifted-mesh control. The fixed-point refinement of the single-cell quadratic across boundaries buys nothing, which settles the earlier question of whether iterating a local quadratic would converge on the null: it converges to the quadratic's own bias. The production read therefore becomes: vertex-ring census on every cell (admission), two-ring cubic polish seeded at the admitted cell (position), Hessian classification, dedupe, containment and private exclusion; batched per cell on device. Cost per state follows from the kernel-timing node.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260914T152226686743-cca-census-kernel-timing" data-who="s19i-cca-census-kernel" data-when="2026-09-14T18:49:41.418Z">
+    <div class="r-comment-body"><p>The vertex-ring census written as one jitted per-cell kernel (gather, einsum fit, closed-form stationary point and Hessian, vectorised containment, fixed-capacity top-k dedupe, private mask) costs 0.049, 0.052 and 0.054 ms per state for a batch of 16 at 550, 1074 and 2616 realised cells: flat in cells, 0.09 to 0.02 microseconds per cell-state, 29 to 558 times faster than the production read (1.4, 4.9, 30 ms) and well inside the 1 ms whole-solve budget. Census counts and analytic-null admission match the banked census at every rung. The reference implementation&#x27;s 2 to 33 ms was 70 to 92 percent private-region exclusion, so the production read&#x27;s cost is that stage, not the census.</p></div>
 </div>
 </section>
 

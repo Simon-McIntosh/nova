@@ -1,0 +1,170 @@
+{
+  "allocation": {
+    "allocated_cpus": 8,
+    "devices": [
+      "cuda:0"
+    ],
+    "jax_default_backend": "gpu",
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "job_id": 1270856,
+    "job_name": "census-kernel-gpu",
+    "memory_mb": 65536,
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "tmpdir": "/tmp"
+  },
+  "case": "diverted-single-null",
+  "characteristic_pitch_m": 0.03176923239135842,
+  "completed": true,
+  "kernel": {
+    "batch_seconds_median": 0.0008599888533353806,
+    "batch_seconds_per_state_median": 5.3749303333461285e-05,
+    "batch_seconds_per_state_ms": 0.053749303333461285,
+    "compile_seconds": 0.9424582831561565,
+    "hlo_instruction_count": 863,
+    "per_cell_per_state_us": 0.020546369775787953,
+    "per_state_ms_over_target": 0.053749303333461285,
+    "repeat_count": 7,
+    "state_count": 16,
+    "steady_batch_samples": [
+      0.0008748043328523636,
+      0.000817449763417244,
+      0.0008599888533353806,
+      0.0009001409634947777,
+      0.00110650435090065,
+      0.0007950402796268463,
+      0.0005861744284629822
+    ],
+    "whole_solve_target_ms": 1.0
+  },
+  "kernel_instrument_controls": {
+    "cell_index": 1914,
+    "extremum_crossing_count": 0,
+    "extremum_detected_and_polished": true,
+    "extremum_position_error_m": 0.0,
+    "saddle_crossing_count": 4,
+    "saddle_detected_and_polished": true,
+    "saddle_position_error_m": 8.673617379884035e-19,
+    "target_rz_m": [
+      1.6407704451159693,
+      0.0047160250626083755
+    ]
+  },
+  "private_region_mask_cell_count": 1093,
+  "realised_cells": 2616,
+  "reference": {
+    "batch_seconds_median": 0.534983922727406,
+    "batch_seconds_per_state_ms": 33.43649517046288,
+    "compile_seconds": 3.1212865859270096,
+    "dominant_stage": "private_exclusion",
+    "dominant_stage_share": 0.9166706063375746,
+    "hlo_instruction_count": 3412,
+    "repeat_count": 7,
+    "stage_accumulated_seconds": {
+      "census": {
+        "median_seconds": 0.00040900707244873047,
+        "samples_seconds": [
+          0.0006475253030657768,
+          0.0005094902589917183,
+          0.0006980979815125465,
+          0.00040900707244873047,
+          0.0003265291452407837,
+          0.0002000844106078148,
+          9.385030716657639e-05
+        ]
+      },
+      "containment": {
+        "median_seconds": 0.0004828479140996933,
+        "samples_seconds": [
+          0.0006683384999632835,
+          0.0005436260253190994,
+          0.0002622343599796295,
+          0.000662987120449543,
+          0.0004828479140996933,
+          0.00038884300738573074,
+          0.00034245382994413376
+        ]
+      },
+      "dedupe": {
+        "median_seconds": 0.0445798859000206,
+        "samples_seconds": [
+          0.044603013433516026,
+          0.044666402973234653,
+          0.0445798859000206,
+          0.044489107094705105,
+          0.04450588021427393,
+          0.04464221466332674,
+          0.04456536192446947
+        ]
+      },
+      "polish": {
+        "median_seconds": 0.00040522031486034393,
+        "samples_seconds": [
+          0.0007682712748646736,
+          0.0003918800503015518,
+          0.0005312077701091766,
+          0.0003648633137345314,
+          0.00043333228677511215,
+          0.00040522031486034393,
+          0.0002629430964589119
+        ]
+      },
+      "private_exclusion": {
+        "median_seconds": 0.534983922727406,
+        "samples_seconds": [
+          0.5349935041740537,
+          0.5349798360839486,
+          0.5350348986685276,
+          0.5350797930732369,
+          0.5349387126043439,
+          0.534983922727406,
+          0.534972638823092
+        ]
+      }
+    },
+    "stage_marginal_seconds": {
+      "census": 0.00040900707244873047,
+      "containment": 7.762759923934937e-05,
+      "dedupe": 0.044097037985920906,
+      "polish": 0.0,
+      "private_exclusion": 0.4904040368273854
+    },
+    "state_count": 16
+  },
+  "requested_cells": 2500,
+  "schema": "nova.census-kernel-gpu-part",
+  "source_revision": "2b1e01927be73dfe47f4ddbb6c816e9c176032fa",
+  "verification": {
+    "axis_admitted": true,
+    "axis_position_error_in_pitch": 0.0027104059677788414,
+    "counts_match_reference": true,
+    "flag_arrays_equal": true,
+    "hessian_equal_atol_1e12": true,
+    "kernel_counts": {
+      "contained_extremum": 1,
+      "contained_saddle": 3,
+      "raw_extremum": 1,
+      "raw_saddle": 0,
+      "typed_extremum": 1,
+      "typed_saddle": 3
+    },
+    "kernel_qualified_extremum_count": 1,
+    "kernel_representative_extremum_count": 1,
+    "kernel_representative_saddle_count": 3,
+    "positions_equal_atol_1e12": true,
+    "reference_counts": {
+      "contained_extremum": 1,
+      "contained_saddle": 3,
+      "raw_extremum": 1,
+      "raw_saddle": 0,
+      "typed_extremum": 1,
+      "typed_saddle": 3
+    },
+    "saddle_admitted": true,
+    "saddle_position_error_in_pitch": 0.01577811099102676
+  },
+  "version": 1
+}

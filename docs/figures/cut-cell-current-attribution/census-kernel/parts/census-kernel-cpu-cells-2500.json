@@ -1,0 +1,69 @@
+{
+  "allocation": {
+    "allocated_cpus": 8,
+    "devices": [
+      "cpu:0"
+    ],
+    "jax_default_backend": "cpu",
+    "jax_platforms": [
+      "cpu"
+    ],
+    "job_id": 1270855,
+    "job_name": "census-kernel-cpu",
+    "memory_mb": 98304,
+    "node": "98dci4-clu-3141",
+    "partition": "all_debug",
+    "tmpdir": "/tmp"
+  },
+  "case": "diverted-single-null",
+  "characteristic_pitch_m": 0.03176923239135842,
+  "completed": true,
+  "kernel_instrument_controls": {
+    "cell_index": 1914,
+    "extremum_crossing_count": 0,
+    "extremum_detected_and_polished": true,
+    "extremum_position_error_m": 0.0,
+    "saddle_crossing_count": 4,
+    "saddle_detected_and_polished": true,
+    "saddle_position_error_m": 8.673617379884035e-19,
+    "target_rz_m": [
+      1.6407704451159693,
+      0.0047160250626083755
+    ]
+  },
+  "private_region_mask_cell_count": 1093,
+  "realised_cells": 2616,
+  "requested_cells": 2500,
+  "schema": "nova.census-kernel-cpu-part",
+  "source_revision": "2b1e01927be73dfe47f4ddbb6c816e9c176032fa",
+  "verification": {
+    "axis_admitted": true,
+    "axis_position_error_in_pitch": 0.0027104059677998706,
+    "counts_match_reference": true,
+    "flag_arrays_equal": true,
+    "hessian_equal_atol_1e12": true,
+    "kernel_counts": {
+      "contained_extremum": 1,
+      "contained_saddle": 3,
+      "raw_extremum": 1,
+      "raw_saddle": 0,
+      "typed_extremum": 1,
+      "typed_saddle": 3
+    },
+    "kernel_qualified_extremum_count": 1,
+    "kernel_representative_extremum_count": 1,
+    "kernel_representative_saddle_count": 3,
+    "positions_equal_atol_1e12": true,
+    "reference_counts": {
+      "contained_extremum": 1,
+      "contained_saddle": 3,
+      "raw_extremum": 1,
+      "raw_saddle": 0,
+      "typed_extremum": 1,
+      "typed_saddle": 3
+    },
+    "saddle_admitted": true,
+    "saddle_position_error_in_pitch": 0.01577811099102676
+  },
+  "version": 1
+}

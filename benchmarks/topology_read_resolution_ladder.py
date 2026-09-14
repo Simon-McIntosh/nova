@@ -273,7 +273,7 @@ def _miss_stage(
         return {
             "step": "sign_change_census",
             "reason": (
-                "the centroid ring containing the analytic X-point produced "
+                "the eligible centroid ring nearest the analytic X-point produced "
                 f"{ring['cyclic_sign_change_count']} cyclic sign changes rather "
                 "than the four required to seed a saddle"
             ),

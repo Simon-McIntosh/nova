@@ -1,0 +1,406 @@
+{
+  "baseline_temporary_gib": {
+    "1000": 279.0,
+    "300": 97.0,
+    "500": 131.0
+  },
+  "completed": true,
+  "executed": false,
+  "lane": {
+    "jax_enable_x64": true,
+    "platform": "gpu",
+    "slurm_job_id": "1270773",
+    "wall_seconds": 1078.5252845678478
+  },
+  "limits": {
+    "largest_array_bytes": 1073741824,
+    "temporary_bytes": 21474836480
+  },
+  "passing": false,
+  "persistent_compilation_cache": {
+    "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ff159320363a74a93b07",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 1.0,
+    "root": "/home/ITER/mcintos/.cache",
+    "runtime_identity": {
+      "backend": "gpu",
+      "backend_version": "PJRT C API\ncuda 12090",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": true,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "NVIDIA H200 NVL",
+          "platform": "gpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-ff159320363a74a93b07"
+  },
+  "rows": [
+    {
+      "acceptance": {
+        "largest_array_below_1_gib": true,
+        "temporaries_below_20_gib": false
+      },
+      "arm": null,
+      "case": "weak-rotation-reactor-static",
+      "compile_wall_seconds": 1078.418109195307,
+      "dimensions": {
+        "active_set_steps": 16,
+        "atomic_support_capacity": 24,
+        "cell_polynomial_terms": 6,
+        "exact_quadrature_points_per_cell": 196480,
+        "exact_support_capacity": 3072,
+        "gmres_iterations": 30,
+        "grid_nodes": 342,
+        "newton_steps": 10,
+        "quadrature_nodes_per_axis": 8,
+        "quadrature_nodes_per_triangle": 64,
+        "realised_cells": 342,
+        "sample_nodes": 1066,
+        "solve_state_size": 1529,
+        "spline_chain_samples_per_chord": 128,
+        "wall_nodes": 121,
+        "whole_cell_quadrature_points_per_cell": 1408
+      },
+      "executed": false,
+      "largest_array": {
+        "dtype": "f64",
+        "element_count": 88941888,
+        "instruction": "%copy.29562 = f64[24,12,342,129,7]{3,2,1,0,4} copy(%loop_broadcast_fusion.1691), metadata={scheduling_name=\"copy.29562\"}",
+        "logical_size_in_bytes": 711535104,
+        "operation_name": null,
+        "producer_group": "unclassified compiled support operation",
+        "shape": [
+          24,
+          12,
+          342,
+          129,
+          7
+        ],
+        "source_file": null,
+        "source_line": null
+      },
+      "largest_array_intermediates": [
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%copy.29562 = f64[24,12,342,129,7]{3,2,1,0,4} copy(%loop_broadcast_fusion.1691), metadata={scheduling_name=\"copy.29562\"}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": null,
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            24,
+            12,
+            342,
+            129,
+            7
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%copy.29561 = f64[24,12,7,342,129]{4,3,2,1,0} copy(%loop_broadcast_fusion.1692), metadata={scheduling_name=\"copy.29561\"}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": null,
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            24,
+            12,
+            7,
+            342,
+            129
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%copy.29559 = f64[24,12,7,44118]{3,2,1,0} copy(%loop_broadcast_fusion.1690), metadata={scheduling_name=\"copy.29559\"}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": null,
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            24,
+            12,
+            7,
+            44118
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%bitcast.90997.1 = f64[7,24,12,342,129]{4,3,2,1,0} bitcast(%param_2.235620), metadata={scheduling_name=\"bitcast.90997.1\"}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": null,
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            7,
+            24,
+            12,
+            342,
+            129
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%loop_dynamic_update_slice_fusion.2954 = f64[7,24,12,342,129]{4,3,2,1,0} fusion(%get-tuple-element.966349, %closed_call.53592.0, %get-tuple-element.966398), kind=kLoop, calls=%fused_dynamic_update_slice.2954, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/while/body/jit(dynamic_update_index_in_dim)/dynamic_update_slice\" deduplicated_name=\"loop_dynamic_update_slice_fusion.2247\" scheduling_name=\"loop_dynamic_update_slice_fusion.2954\" stack_frame_id=44983}, backend_config={\"device_type\":\"DEVICE_TYPE_INVALID\",\"force_earliest_schedule\":f",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/while/body/jit(dynamic_update_index_in_dim)/dynamic_update_slice",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            7,
+            24,
+            12,
+            342,
+            129
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%fusion-done.2315 = f64[24,12,7,342,129]{4,3,2,1,0} fusion-done(%fusion-start.2315), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/while/body/jit(dynamic_update_index_in_dim)/dynamic_update_slice\" deduplicated_name=\"loop_dynamic_update_slice_fusion.2272\" scheduling_name=\"fusion-done.2315\" stack_frame_id=44983}, backend_config={\"device_type\":\"DEVICE_TYPE_INVALID\",\"force_earliest_schedule\":false,\"native_emitter_backend_config\":{\"type\":\"NATIVE_EMITTER_TYPE_INVALID\",\"unroll_factor\":0},\"operation_queue_id\":\"0\",\"reification_cost\":[]}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/while/body/jit(dynamic_update_index_in_dim)/dynamic_update_slice",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            24,
+            12,
+            7,
+            342,
+            129
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%fusion-done.2316 = f64[24,12,7,44118]{3,2,1,0} fusion-done(%fusion-start.2316), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/while/body/jit(dynamic_update_index_in_dim)/dynamic_update_slice\" deduplicated_name=\"loop_dynamic_update_slice_fusion.2273\" scheduling_name=\"fusion-done.2316\" stack_frame_id=44983}, backend_config={\"device_type\":\"DEVICE_TYPE_INVALID\",\"force_earliest_schedule\":false,\"native_emitter_backend_config\":{\"type\":\"NATIVE_EMITTER_TYPE_INVALID\",\"unroll_factor\":0},\"operation_queue_id\":\"0\",\"reification_cost\":[]}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/while/body/jit(dynamic_update_index_in_dim)/dynamic_update_slice",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            24,
+            12,
+            7,
+            44118
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%get-tuple-element.916773.0 = f64[24,12,342,129,7]{3,2,1,0,4} get-tuple-element(%while.567960), index=11, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/while\" scheduling_name=\"get-tuple-element.916773.0\" stack_frame_id=5830}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/while",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            24,
+            12,
+            342,
+            129,
+            7
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%get-tuple-element.966753 = f64[24,12,7,44118]{3,2,1,0} get-tuple-element(%while.567960), index=46, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/while\" scheduling_name=\"get-tuple-element.966753\" stack_frame_id=5830}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/while",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            24,
+            12,
+            7,
+            44118
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%get-tuple-element.966755 = f64[24,12,7,342,129]{4,3,2,1,0} get-tuple-element(%while.567960), index=48, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/while\" scheduling_name=\"get-tuple-element.966755\" stack_frame_id=5830}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/while",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            24,
+            12,
+            7,
+            342,
+            129
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%loop_dynamic_update_slice_fusion.2393 = f64[7,24,12,342,129]{4,3,2,1,0} fusion(%get-tuple-element.1000676, %closed_call.53229.0, %get-tuple-element.1000739), kind=kLoop, calls=%fused_dynamic_update_slice.2393, metadata={op_name=\"jit(solve_program)/while/body/jvp()/while/body/jit(dynamic_update_index_in_dim)/dynamic_update_slice\" deduplicated_name=\"loop_dynamic_update_slice_fusion.2247\" scheduling_name=\"loop_dynamic_update_slice_fusion.2393\" stack_frame_id=44410}, backend_config={\"device_type\":\"DEVICE_TYPE_INVALID\",\"force_earliest_schedule\":false,\"native_emitter_backend_config\":{\"type\":\"NATIVE",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": "jit(solve_program)/while/body/jvp()/while/body/jit(dynamic_update_index_in_dim)/dynamic_update_slice",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            7,
+            24,
+            12,
+            342,
+            129
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%fusion-done.145 = f64[24,12,7,342,129]{4,3,2,1,0} fusion-done(%fusion-start.145), metadata={op_name=\"jit(solve_program)/while/body/jvp()/while/body/jit(dynamic_update_index_in_dim)/dynamic_update_slice\" deduplicated_name=\"loop_dynamic_update_slice_fusion.2272\" scheduling_name=\"fusion-done.145\" stack_frame_id=44410}, backend_config={\"device_type\":\"DEVICE_TYPE_INVALID\",\"force_earliest_schedule\":false,\"native_emitter_backend_config\":{\"type\":\"NATIVE_EMITTER_TYPE_INVALID\",\"unroll_factor\":0},\"operation_queue_id\":\"0\",\"reification_cost\":[]}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": "jit(solve_program)/while/body/jvp()/while/body/jit(dynamic_update_index_in_dim)/dynamic_update_slice",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            24,
+            12,
+            7,
+            342,
+            129
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%fusion-done.146 = f64[24,12,7,44118]{3,2,1,0} fusion-done(%fusion-start.146), metadata={op_name=\"jit(solve_program)/while/body/jvp()/while/body/jit(dynamic_update_index_in_dim)/dynamic_update_slice\" deduplicated_name=\"loop_dynamic_update_slice_fusion.2273\" scheduling_name=\"fusion-done.146\" stack_frame_id=44410}, backend_config={\"device_type\":\"DEVICE_TYPE_INVALID\",\"force_earliest_schedule\":false,\"native_emitter_backend_config\":{\"type\":\"NATIVE_EMITTER_TYPE_INVALID\",\"unroll_factor\":0},\"operation_queue_id\":\"0\",\"reification_cost\":[]}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": "jit(solve_program)/while/body/jvp()/while/body/jit(dynamic_update_index_in_dim)/dynamic_update_slice",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            24,
+            12,
+            7,
+            44118
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%get-tuple-element.887642.0 = f64[24,12,7,44118]{3,2,1,0} get-tuple-element(%while.566349), index=60, metadata={op_name=\"jit(solve_program)/while/body/jvp()/while\" scheduling_name=\"get-tuple-element.887642.0\" stack_frame_id=5653}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": "jit(solve_program)/while/body/jvp()/while",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            24,
+            12,
+            7,
+            44118
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%get-tuple-element.887645.0 = f64[24,12,342,129,7]{3,2,1,0,4} get-tuple-element(%while.566349), index=63, metadata={op_name=\"jit(solve_program)/while/body/jvp()/while\" scheduling_name=\"get-tuple-element.887645.0\" stack_frame_id=5653}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": "jit(solve_program)/while/body/jvp()/while",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            24,
+            12,
+            342,
+            129,
+            7
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 88941888,
+          "instruction": "%get-tuple-element.887644.0 = f64[24,12,7,342,129]{4,3,2,1,0} get-tuple-element(%while.566349), index=62, metadata={op_name=\"jit(solve_program)/while/body/jvp()/while\" scheduling_name=\"get-tuple-element.887644.0\" stack_frame_id=5653}",
+          "logical_size_in_bytes": 711535104,
+          "operation_name": "jit(solve_program)/while/body/jvp()/while",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            24,
+            12,
+            7,
+            342,
+            129
+          ],
+          "source_file": null,
+          "source_line": null
+        }
+      ],
+      "largest_predicate_intermediates": [],
+      "memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 12232,
+        "generated_code_size_in_bytes": 475664076,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 12265,
+        "temp_size_in_bytes": 59388478816
+      },
+      "method": "jax.jit(solve_program).lower(seed).compile().memory_analysis()",
+      "realised_cells": 342,
+      "requested_cells": -300
+    }
+  ],
+  "schema": "nova.compact-clip-solve-memory",
+  "source_revision": "1d3aeb6c93ca4ef9447fb870928e1f5d747fee14"
+}

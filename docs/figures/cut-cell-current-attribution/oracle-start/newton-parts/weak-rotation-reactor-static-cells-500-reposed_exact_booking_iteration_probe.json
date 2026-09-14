@@ -1,0 +1,99 @@
+{
+  "analytic_current_target_a": 16314773.311828371,
+  "analytic_current_target_receipt": {
+    "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+    "current_centroid_m": [
+      6.063530173332898,
+      0.0
+    ],
+    "declared_current_a": 16314773.311828371,
+    "quadrature_current_a": 16314773.311828367,
+    "quadrature_nodes": 512,
+    "quadrature_relative_closure": 2.2833846522164315e-16
+  },
+  "analytic_fixed_point_construction_floor": {
+    "absolute_rms_wb": 6.037210987667719e-15,
+    "absolute_sup_wb": 1.4210854715202004e-14,
+    "relative_rms_of_span": 1.2089269188582469e-16,
+    "relative_sup_of_span": 2.8456657950641277e-16
+  },
+  "analytic_flux_span_wb": 49.93859342109342,
+  "analytic_residual_carrier_count": 2243,
+  "analytic_residual_shadow_count": 27,
+  "analytic_topology_read": {
+    "analytic_authored_boundary_flux_wb": 0.0,
+    "axis_flux_wb": 49.93859342376568,
+    "axis_rz_m": [
+      6.196759081088112,
+      5.778349791031964e-15
+    ],
+    "boundary_flux_offset_from_analytic_zero_wb": 2.672258221531947e-09,
+    "boundary_flux_wb": 2.672258221531947e-09,
+    "boundary_rz_m": [
+      7.801394894212586,
+      -7.901128806469293e-05
+    ],
+    "class": "limited",
+    "exception_text": null,
+    "o_candidate_count": 1,
+    "o_second_best_flux_margin_wb": null,
+    "read_status": "qualified_axis",
+    "wall_contact_rz_m": [
+      7.801394894212586,
+      -7.901128806469293e-05
+    ],
+    "x_candidate_count": 0,
+    "x_point_flux_wb": null,
+    "x_point_rz_m": null,
+    "x_second_best_flux_margin_wb": null
+  },
+  "case": "weak-rotation-reactor-static",
+  "characteristic_pitch_m": 0.21860311650211722,
+  "completed": false,
+  "exterior": {
+    "analytic_booking_amplitude": 1.0000126559682179,
+    "analytic_booking_current_a": 16314566.835189018,
+    "analytic_booking_topology": {
+      "analytic_authored_boundary_flux_wb": 0.0,
+      "axis_flux_wb": 49.93859342376568,
+      "axis_rz_m": [
+        6.196759081088112,
+        5.778349791031964e-15
+      ],
+      "boundary_flux_offset_from_analytic_zero_wb": 2.672258221531947e-09,
+      "boundary_flux_wb": 2.672258221531947e-09,
+      "boundary_rz_m": [
+        7.801394894212586,
+        -7.901128806469293e-05
+      ],
+      "class": "limited",
+      "exception_text": null,
+      "o_candidate_count": 1,
+      "o_second_best_flux_margin_wb": null,
+      "read_status": "qualified_axis",
+      "wall_contact_rz_m": [
+        7.801394894212586,
+        -7.901128806469293e-05
+      ],
+      "x_candidate_count": 0,
+      "x_point_flux_wb": null,
+      "x_point_rz_m": null,
+      "x_second_best_flux_margin_wb": null
+    },
+    "certificate_changed": false,
+    "definition": "analytic total flux minus the target-normalised exact-clip internal image evaluated once at the analytic state",
+    "kind": "reposed_exact_booking_iteration_probe",
+    "probe_only": true
+  },
+  "external_sha256_binary64": "8fbf8a44a952e36aa04bfe281efef30005d00c98cb6f720a385c8974af51c8dc",
+  "mode": "exact",
+  "perturbations": [],
+  "program_reuse": "one ForwardProfile and one public request policy per row; the first receipt compiles and the remaining same-shape requests reuse it",
+  "realised_cells": 555,
+  "requested_cells": -500,
+  "schema": "nova.oracle-start-newton-row",
+  "smooth_direction_sha256_binary64": "6d34f4d92b1aa93f28c0070c1a4d3887e6cfa97ca76e9bcec607073e7c0e2803",
+  "source_revision": "419229654eb705d0f159b8948dd8b00964a8d9f5",
+  "version": 1,
+  "wall_seconds": null
+}

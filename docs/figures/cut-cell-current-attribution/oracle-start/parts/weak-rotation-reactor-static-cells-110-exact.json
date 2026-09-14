@@ -1,0 +1,25 @@
+{
+  "analytic_map_floor": {
+    "absolute_rms_wb": 14.231290732979653,
+    "absolute_sup_wb": 30.136967669504486,
+    "booked_current": {
+      "analytic_plasma_current_a": 16314773.311828371,
+      "booked_over_analytic": 0.9881975483073449,
+      "booked_plasma_current_a": 16122218.987938898,
+      "exception_text": null,
+      "normalisation_amplitude": 1.0119434132505907,
+      "status": "finite"
+    },
+    "relative_rms_of_span": 0.2849328842482588,
+    "relative_sup_of_span": 0.603389620919546
+  },
+  "case": "weak-rotation-reactor-static",
+  "completed": false,
+  "jacobian": null,
+  "mode": "exact",
+  "mode_semantics": "signed-flux spline-chain exact clip",
+  "perturbations": [],
+  "realised_cells": 135,
+  "requested_cells": -110,
+  "wall_seconds": null
+}

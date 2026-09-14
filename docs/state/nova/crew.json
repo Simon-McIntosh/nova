@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T12:40:28",
+  "updated": "2026-09-14T12:44:51",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -153401,6 +153401,211 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T061257489152-cca-oracle-start-newton-probe",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-oracle-start-newton-probe",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 466,
+                "cached_input_tokens": 245243,
+                "input_tokens": 245741,
+                "output_tokens": 2278,
+                "reasoning_output_tokens": 327,
+                "total_tokens": 248019,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Critical evaluation of the iteration alone, no production code change. Never open any receipt larger than one megabyte in an editor (load it with json). Facts at this base (main): the interaction matrix is built once per mesh and cached by geometry identity; benchmarks/analytic_operator_ladder.py showed that one application of the production map at the analytic flux with analytically integrated moments reproduces the analytic flux to 3e-15 relative sup at 300 to 1000 cells (docs/figures/discrete-operator-analytic-error/operator-refinement-ladder.json, verdict: the operator admits the analytic fixed point, the solve selects another state); the allocation modes are selected by set_support_clip_mode in nova/equilibrium/forward_operator.py (chord is whole-cell booking, exact is the signed-flux spline-chain clip, chord_cells a straight-chord clip), none of them through host callbacks; the Solov'ev rows and their analytic fields come from scripts/analytic_oracle_fixtures/measure.py (cached_machine, forward_operator) as the certificate driver uses them. Build one probe benchmark for the weak and moderate static rows at 110 and 300 cells and the single-null row at 300 and 500 cells, in the exact clip mode with the chord mode as the control, run as ONE SLURM job on the H200 (betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:59:00, JAX_PLATFORMS=cuda,cpu and TMPDIR=/tmp exported in the submit environment and in the payload, root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python with PYTHONPATH at the worktree, persistent compilation cache, sbatch detached from your shell, --output in the run directory, rows sharded inside the allocation with receipts persisted as each lands). Per row and mode measure: first, the fixed-point residual of the production map evaluated once at the analytic flux with the allocation computed from that flux (the map floor with this allocation, reported as relative rms and sup of span, and beside it the booked plasma current against the analytic current); second, the Newton-Krylov iteration the certificate uses, started from the analytic flux plus a perturbation of relative size 1e-4, 1e-3, 1e-2 and 1e-1 of the span in a smooth random direction with a fixed seed, recording per step the residual, the distance to the analytic flux, the axis position error and the booked amplitude, and at the end whether the iterate contracted toward the analytic flux (terminal distance below the starting perturbation) or left it, with the trip count; third, at the analytic flux, the Jacobian-vector product by jax.linearize of the residual the inner Newton differentiates (read the code in nova/equilibrium/fixed_point.py to take the actual function, no re-implementation) against a central finite difference of the same residual along the Newton direction and along four random directions at relative steps 1e-5 and 1e-7, reported as a relative discrepancy. Render for each row one poloidal panel with the committed nova.media painters of the terminal iterate from the 1e-2 start beside the analytic contours on shared levels, both null sets, the wall, residual and converged flag in the caption, PNG under docs/figures/cut-cell-current-attribution/oracle-start. The report states per row whether the analytic flux is a stable fixed point of the production iteration under each allocation mode, quotes the map floor, the contraction outcome per perturbation size and the Jacobian discrepancy, and closes with one sentence on whether the defect is in the allocation floor, the Jacobian, or the globalisation. Write the manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 4.0,
+          "goal": "Measure whether the production Newton-Krylov iteration, started at the analytic Solov'ev flux plus a small perturbation, contracts back to that flux with the exact-clip allocation on the frozen interaction matrix",
+          "id": "cca-oracle-start-newton-probe",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T06:12:58Z",
+            "read_at": "2026-09-14T06:12:59Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 0.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T061257489152-cca-oracle-start-newton-probe/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/oracle_start_newton_probe.py",
+            "docs/figures/cut-cell-current-attribution/oracle-start",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/oracle-start"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19e-cca-oracle-start",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T06:13:09Z",
+        "completed_at": "2026-09-14T10:43:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 16199,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "9062b6f121e4355ffd091280c4e5df3905943130",
+        "commits": [
+          "f647f1112aa2a2e359b658b6a8505d1b002a7dc0",
+          "d81d68f759d8fbc80b9a95c2d4368222e5be4548",
+          "876641020c4814047916ff7cd310b92e409618b3",
+          "419229654eb705d0f159b8948dd8b00964a8d9f5",
+          "a8274bd965f553ecf2e9e72b9d0c1e8cfd116e7a",
+          "b9b52bec31d34ef6d1afc85dc7ac5058e3709225",
+          "62d2266378e485336226dfbef667e5983cb63b8d",
+          "fa017b3c8900cab64e8f5efbcc396923d6f26fc5",
+          "3e265579e12edfc9d8dff98d1ffe89c6fbb6d846",
+          "6dcf028bcee0796746079ad597cea8fa271c54a9",
+          "f3f9a361ba34238d32487c9482ad06465a158802",
+          "3c02e7b794bd5fd7754e4da6068be23180d1b5f8",
+          "5698d1da49b8ecd30f45eabdca90760d620e8260"
+        ],
+        "changed_lines": {
+          "added": 609,
+          "removed": 90201,
+          "files": 45
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "CPU job 1270204 (map-floor decomposition at 300, 500 and 1000 cells, EXIT=0) with H200 jobs 1270176, 1270187 and 1270326 (Jacobian at the analytic flux; single-null 500 whole-cell contraction control passed in all four arms); exact-clip arms blocked by the solve memory defect at 97 to 279 GiB",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/oracle-start/map-cpu-1270204.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T061257489152-cca-oracle-start-newton-probe/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a09e8c-4e0e-7803-843a-14714573a827",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6438656,
+            "cached_input_tokens_cumulative": 6438656,
+            "input_tokens": 6504121,
+            "input_tokens_cumulative": 6504121,
+            "output_tokens": 21866,
+            "output_tokens_cumulative": 21866,
+            "reasoning_output_tokens": 4783,
+            "reasoning_output_tokens_cumulative": 4783
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T10:43:08Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 9.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T10:43:08Z"
+            }
+          ],
+          "notional_cost_usd": 402.8507,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 6438656,
+          "cumulative_input_tokens": 12942777,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 26649
+        },
+        "follow_on_paths": [
+          "97.31",
+          "131.47"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 9,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-oracle-start-newton-probe",
+          "session_id": "01a09e8c-4e0e-7803-843a-14714573a827",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T10:43:08Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 60.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -153713,6 +153918,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2454
+    "_version": 2455
   }
 }

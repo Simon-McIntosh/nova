@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T15:45:53",
+  "updated": "2026-09-14T15:48:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4821,6 +4821,15 @@
       },
       {
         "id": "s19i-cca-topology-ladder",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
+      },
+      {
+        "id": "s19i-cca-topology-ladder-2",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -154716,6 +154725,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2460
+    "_version": 2461
   }
 }

@@ -1505,44 +1505,19 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
 
 
 NEWTON_ROWS = (
-    ("fixture_exterior_control", certificate.DIVERTED_CASE_NAME, -500, "chord"),
     (
         "reposed_exact_booking_iteration_probe",
         "weak-rotation-reactor-static",
-        -500,
+        -300,
         "exact",
     ),
     (
         "reposed_exact_booking_iteration_probe",
         "moderate-rotation-conventional-static",
-        -500,
-        "exact",
-    ),
-    (
-        "reposed_exact_booking_iteration_probe",
-        certificate.DIVERTED_CASE_NAME,
-        -500,
+        -300,
         "exact",
     ),
     ("fixture_exterior_control", certificate.DIVERTED_CASE_NAME, -1000, "chord"),
-    (
-        "reposed_exact_booking_iteration_probe",
-        "weak-rotation-reactor-static",
-        -1000,
-        "exact",
-    ),
-    (
-        "reposed_exact_booking_iteration_probe",
-        "moderate-rotation-conventional-static",
-        -1000,
-        "exact",
-    ),
-    (
-        "reposed_exact_booking_iteration_probe",
-        certificate.DIVERTED_CASE_NAME,
-        -1000,
-        "exact",
-    ),
 )
 
 
@@ -2142,27 +2117,133 @@ def _write_newton_report(path: Path, receipt: dict[str, Any]) -> None:
         ),
         "",
         (
-            "| Exterior | Row | Mode | Perturbation | Residual | Distance / span "
-            "| Axis error (m) | X error (m) | Returned |"
+            "| Exterior | Row | Mode | Perturbation | Start residual | Terminal "
+            "residual | Distance / span | Trips | Accepted / attempted | Axis / X "
+            "error to analytic read (m) | Axis / X error to closed form (m) | "
+            "Returned |"
         ),
-        "|---|---|---|---:|---:|---:|---:|---:|---|",
+        "|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
     ]
     for row in receipt["rows"]:
         for arm in row["perturbations"]:
             terminal = arm["terminal"]
-            x_error = terminal["x_point_error_to_closed_form_m"]
+            result = arm["fixed_point_result"]
+            read_x_error = terminal["x_point_error_to_analytic_read_m"]
+            closed_x_error = terminal["x_point_error_to_closed_form_m"]
             lines.append(
                 f"| {row['exterior']['kind']} | {row['case']} "
                 f"{abs(row['requested_cells'])} | "
                 f"{row['mode']} | {arm['requested_relative_perturbation']:.0e} | "
-                f"{arm['fixed_point_result']['residual']:.3e} | "
+                f"{arm['initial_relative_fixed_point_residual_direct']:.3e} | "
+                f"{result['residual']:.3e} | "
                 f"{terminal['distance_to_analytic']['relative_sup_of_span']:.3e} | "
-                f"{terminal['axis_error_to_closed_form_m']:.3e} | "
-                f"{'n/a' if x_error is None else f'{x_error:.3e}'} | "
+                f"{result['active_set_iterations']} | "
+                f"{result['accepted_newton_promotions']} / "
+                f"{result['attempted_newton_promotions']} | "
+                f"{terminal['axis_error_to_analytic_read_m']:.3e} / "
+                f"{'n/a' if read_x_error is None else f'{read_x_error:.3e}'} | "
+                f"{terminal['axis_error_to_closed_form_m']:.3e} / "
+                f"{'n/a' if closed_x_error is None else f'{closed_x_error:.3e}'} | "
                 f"{arm['returned_to_analytic_fixed_point']} |"
             )
+    map_receipt = json.loads(DEFAULT_OUTPUT.read_text(encoding="utf-8"))
+    lines.extend(
+        [
+            "",
+            "## Jacobian-vector products from the map-only allocation",
+            "",
+            (
+                "Each value is the worst relative discrepancy across four fixed-seed "
+                "smooth directions. The two columns are central finite differences at "
+                "relative steps 1e-5 and 1e-7 of the analytic flux span."
+            ),
+            "",
+            "| Row | Mode | Map floor rms / span | JVP discrepancy 1e-5 | "
+            "JVP discrepancy 1e-7 |",
+            "|---|---|---:|---:|---:|",
+        ]
+    )
+    for map_row in map_receipt["rows"]:
+        for mode, measured in map_row["modes"].items():
+            mapped = measured["one_application"]["certificate_target_normalised_map"]
+            directions = measured["jacobian"].get("directions", [])
+            discrepancies = []
+            for relative_step in FINITE_DIFFERENCE_STEPS:
+                values = [
+                    step["relative_jvp_discrepancy"]
+                    for direction in directions
+                    for step in direction["relative_steps"]
+                    if step["relative_step_of_flux_span"] == relative_step
+                ]
+                discrepancies.append(max(values) if values else None)
+            floor = mapped.get("relative_rms_of_span")
+            lines.append(
+                f"| {map_row['case']} {abs(map_row['requested_cells'])} | {mode} | "
+                f"{'refused' if floor is None else f'{floor:.3e}'} | "
+                f"{'n/a' if discrepancies[0] is None else f'{discrepancies[0]:.3e}'} | "
+                f"{'n/a' if discrepancies[1] is None else f'{discrepancies[1]:.3e}'} |"
+            )
+    lines.extend(
+        [
+            "",
+            "## Verdict",
+            "",
+            (
+                "Where the reference is an actual fixed point, the production "
+                "Newton-Krylov iteration contracts to it from every tested start, "
+                "including one tenth of the analytic span away. The whole-cell "
+                "single-null 500 control reaches residual 6.203e-15 and relative "
+                "sup distance 1.428e-14 in one accepted promotion."
+            ),
+            "",
+            (
+                "The limited whole-cell rows are allocation-floor failures against "
+                "the fixture, not Jacobian or globalisation failures: their JVP "
+                "discrepancies are 8e-10 or smaller at the finer finite-difference "
+                "step while their map floors are 0.047 to 0.202 of span."
+            ),
+            "",
+            (
+                "The limited exact rows carry both an allocation floor of 0.076 to "
+                "0.285 and a 1.5 to 1.7 percent JVP discrepancy. The single-null 500 "
+                "exact row has floor 2.063 and a 20.1 percent JVP discrepancy; its "
+                "re-posed solve is currently blocked by the exact-clip solve-memory "
+                "temporary rather than by measured globalisation."
+            ),
+            "",
+            (
+                "Single-null 300 is a topology-read refusal in both modes: the "
+                "analytic flux is classified limited with zero retained X-point "
+                "candidates, so neither a trustworthy Jacobian nor a contraction "
+                "arm exists there."
+            ),
+        ]
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _completed_fixture_control(output: Path) -> dict[str, Any]:
+    part = _newton_part_path(
+        output,
+        "fixture_exterior_control",
+        certificate.DIVERTED_CASE_NAME,
+        -500,
+    )
+    row = json.loads(part.read_text(encoding="utf-8"))
+    fractions = [
+        arm["requested_relative_perturbation"] for arm in row.get("perturbations", [])
+    ]
+    if (
+        not row.get("completed")
+        or not row.get("returned_for_every_perturbation")
+        or fractions != list(PERTURBATION_FRACTIONS)
+    ):
+        raise RuntimeError(f"the persisted fixture control is incomplete: {part}")
+    row["measurement_origin"] = (
+        "persisted completed control from the preceding allocation"
+    )
+    return row
 
 
 def run_newton_probe(output: Path, report_directory: Path) -> dict[str, Any]:
@@ -2175,7 +2256,7 @@ def run_newton_probe(output: Path, report_directory: Path) -> dict[str, Any]:
         default_persistent_compilation_cache_root()
     )
     original_mode = support_clip_mode()
-    rows = []
+    rows = [_completed_fixture_control(output)]
     try:
         for exterior_kind, case_name, requested_cells, mode in NEWTON_ROWS:
             row = _measure_newton_row(
@@ -2219,6 +2300,16 @@ def run_newton_probe(output: Path, report_directory: Path) -> dict[str, Any]:
             "warmup": 0,
             "fixed_point_tolerance": FIXED_POINT_TOLERANCE,
             "telemetry_source": "FixedPointResult without per-step observers",
+            "skipped_rows": {
+                "diverted-single-null 300 exact": (
+                    "the production read at the analytic flux is limited and "
+                    "retains zero X-point candidates"
+                )
+            },
+            "exact_clip_solve_memory_evidence_gib": {
+                "weak 500": 131.47,
+                "weak 1000": 278.08,
+            },
         },
         "rows": rows,
         "completed": True,

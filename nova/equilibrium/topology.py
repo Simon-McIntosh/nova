@@ -492,9 +492,34 @@ class Topology(Pytree):
     def _wall_anchor_selection(self, wall_flux, polarity):
         """Return a unit-confined wall extremum, its unit and bracket nodes."""
         if self.wall_unit_offsets is None or self.wall_unit_offsets.shape[0] == 2:
-            data = self.wall(wall_flux, polarity)
-            node = jnp.argmax(jnp.asarray(polarity, dtype=wall_flux.dtype) * wall_flux)
+            signed = jnp.asarray(polarity, dtype=wall_flux.dtype) * wall_flux
+            node = jnp.argmax(signed)
             bracket = jnp.mod(node + jnp.asarray([-1, 0, 1]), wall_flux.size)
+            coordinate = self.wall.coordinate[bracket]
+            values = wall_flux[bracket]
+            length = select.length_2d(
+                coordinate[:, 0], coordinate[:, 1], array_namespace=jnp
+            )
+            coefficients = select.traced_quadratic_wall(length, values)
+            position = select.wall_length(coefficients, array_namespace=jnp)
+            interpolated_flux = (
+                coefficients[0] * position**2
+                + coefficients[1] * position
+                + coefficients[2]
+            )
+            radius, height = select.wall_coordinate(
+                position,
+                coordinate[:, 0],
+                coordinate[:, 1],
+                length,
+                array_namespace=jnp,
+            )
+            kind = jnp.where(
+                coefficients[0] > 0,
+                -1.0,
+                jnp.where(coefficients[0] < 0, 1.0, jnp.nan),
+            )
+            data = jnp.stack((radius, height, interpolated_flux, kind))
             return data, jnp.asarray(0, dtype=jnp.int32), bracket
         signed = jnp.asarray(polarity, dtype=wall_flux.dtype) * wall_flux
         node = jnp.argmax(signed)

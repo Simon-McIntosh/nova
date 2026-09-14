@@ -47,6 +47,7 @@ from nova.equilibrium import (
     SaddleSeedGeometry,
 )
 from nova.equilibrium.forward import RasterFluxReceiptStatus
+from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.equilibrium.analytic_single_null import (
     CerfonFreidbergSingleNull,
     cerfon_freidberg_single_null,
@@ -82,6 +83,16 @@ DIVERTED_GEOMETRY_ROOT = (
     ROOT / "docs/figures/gs-absolute-accuracy/solovev-diverted-case"
 )
 DIVERTED_GEOMETRY_OUTPUT = DIVERTED_GEOMETRY_ROOT / "diverted-case-geometry.json"
+REPOSED_FIXTURE_ROOT = (
+    ROOT / "docs/figures/cut-cell-current-attribution/reposed-fixture"
+)
+REPOSED_FIXTURE_OUTPUT = REPOSED_FIXTURE_ROOT / "map-floor.json"
+REPOSED_FIXTURE_ROWS = (
+    ("weak-rotation-reactor-static", -1000),
+    ("moderate-rotation-conventional-static", -1000),
+    ("diverted-single-null", -500),
+    ("diverted-single-null", -1000),
+)
 REQUESTED_CELLS = (-110, -300, -500, -1000)
 CASE_NAMES = (
     "weak-rotation-reactor-static",
@@ -2998,6 +3009,265 @@ def _validate(receipt: dict[str, Any]) -> None:
         raise RuntimeError("the locked recovery registry was not reproduced")
 
 
+def _fixture_floor_norms(values: np.ndarray, span: float) -> dict[str, float]:
+    """Return absolute and span-relative norms for one grid residual."""
+    absolute = np.abs(np.asarray(values, dtype=np.float64))
+    return {
+        "rms_wb": float(np.sqrt(np.mean(absolute**2))),
+        "sup_wb": float(np.max(absolute)),
+        "rms_fraction_of_span": float(np.sqrt(np.mean(absolute**2)) / span),
+        "sup_fraction_of_span": float(np.max(absolute) / span),
+    }
+
+
+def _fixture_floor_affine_share(residual: np.ndarray, coordinates: np.ndarray) -> float:
+    """Return the share of squared residual carried by an affine field."""
+    design = np.column_stack(
+        (np.ones(len(coordinates)), coordinates[:, 0], coordinates[:, 1])
+    )
+    coefficients, *_ = np.linalg.lstsq(design, residual, rcond=None)
+    fitted = design @ coefficients
+    energy = float(np.sum(np.asarray(residual) ** 2))
+    return float(np.sum(fitted**2) / energy) if energy > 0.0 else 1.0
+
+
+def _fixture_floor_mode(
+    *,
+    case_name: str,
+    requested_cells: int,
+    exterior_name: str,
+    mode: str,
+    operator: Any,
+    analytic: np.ndarray,
+    clipped_coefficients: Any,
+    target_current: float,
+    requested_class: int,
+    boundary: np.ndarray,
+    machine: Any,
+) -> tuple[dict[str, Any], np.ndarray, np.ndarray]:
+    """Measure one exterior and booking pair at the analytic state."""
+    set_support_clip_mode(mode)
+    moments = operator.cell_current_moments(jnp.asarray(analytic), requested_class)
+    booked = float(np.sum(np.asarray(moments.cell_current)))
+    amplitude = float(operator.current_normalisation_amplitude(target_current, booked))
+    scaled = operator.scaled_current_moments(moments, amplitude)
+    mapped = np.asarray(
+        jax.block_until_ready(
+            operator.flux_map(
+                requested_class=requested_class,
+                target_current=target_current,
+            )(jnp.asarray(analytic))
+        ),
+        dtype=np.float64,
+    )
+    grid_count = len(machine.node)
+    grid_residual = mapped[:grid_count] - analytic[:grid_count]
+    span = abs(
+        oracle_fixture._analytic_axis_flux(
+            DIVERTED_REFERENCE if _is_diverted_case(case_name) else _case(case_name)[2]
+        )
+    )
+    support = operator._support_partition(jnp.asarray(analytic), requested_class)[3]
+    area = np.asarray(support.area)
+    full_area = np.asarray(support.full_area)
+    tolerance = 4096.0 * np.finfo(np.float64).eps * max(float(np.max(full_area)), 1.0)
+    cut = (area > tolerance) & (np.abs(area - full_area) > tolerance)
+    difference = type(scaled)(
+        *(
+            np.asarray(booked_value) - np.asarray(analytic_value)
+            for booked_value, analytic_value in zip(
+                scaled, clipped_coefficients, strict=True
+            )
+        )
+    )
+    cut_difference = type(scaled)(*(np.asarray(value) * cut for value in difference))
+    difference_image = np.asarray(operator.current_moment_image(difference))[
+        :grid_count
+    ]
+    cut_image = np.asarray(operator.current_moment_image(cut_difference))[:grid_count]
+    total_energy = float(np.sum(difference_image**2))
+    cut_energy_share = (
+        float(np.sum(cut_image**2) / total_energy) if total_energy > 0.0 else 1.0
+    )
+    pitch = float(np.sqrt(np.median(np.asarray(machine.area))))
+    distance_pitch = _distance_to_boundary(machine.node, boundary) / pitch
+    record = {
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "realised_cells": grid_count,
+        "exterior": exterior_name,
+        "mode": mode,
+        "map_floor": _fixture_floor_norms(grid_residual, span),
+        "booked_current_a": booked,
+        "analytic_current_a": target_current,
+        "booked_over_analytic": booked / target_current,
+        "normalisation_amplitude": amplitude,
+        "affine_rms_energy_share": _fixture_floor_affine_share(
+            grid_residual, machine.node
+        ),
+        "cut_cell_count": int(np.count_nonzero(cut)),
+        "cut_cell_image_energy_share": cut_energy_share,
+        "difference_image_closure_sup_wb": float(
+            np.max(np.abs(difference_image - grid_residual))
+        )
+        if exterior_name == "analytic-clipped"
+        else None,
+    }
+    part = (
+        REPOSED_FIXTURE_ROOT
+        / "parts"
+        / f"{case_name}-cells-{abs(requested_cells)}-{exterior_name}-{mode}.json"
+    )
+    _write_json(part, record)
+    print(
+        f"FIXTURE_FLOOR case={case_name} cells={abs(requested_cells)} "
+        f"exterior={exterior_name} mode={mode} "
+        f"rms={record['map_floor']['rms_fraction_of_span']:.8e} "
+        f"sup={record['map_floor']['sup_fraction_of_span']:.8e} "
+        f"booked={record['booked_over_analytic']:.8f}",
+        flush=True,
+    )
+    return record, distance_pitch, np.abs(grid_residual) / span
+
+
+def _render_fixture_floor(
+    case_name: str,
+    requested_cells: int,
+    traces: list[tuple[str, np.ndarray, np.ndarray]],
+) -> Path:
+    """Plot map error against distance from the analytic separatrix."""
+    figure, axis = plt.subplots(figsize=(7.2, 4.4), constrained_layout=True)
+    for label, distance, floor in traces:
+        order = np.argsort(distance)
+        axis.plot(distance[order], floor[order], linewidth=1.0, label=label)
+    axis.axhline(1.0e-3, color="black", linestyle="--", linewidth=0.9)
+    axis.set_yscale("log")
+    axis.set_xlabel("target distance from analytic separatrix [cell pitches]")
+    axis.set_ylabel("absolute one-map error / analytic flux span")
+    axis.legend(frameon=False, fontsize=8)
+    axis.set_title(f"{case_name}, {abs(requested_cells)} requested cells")
+    path = REPOSED_FIXTURE_ROOT / f"{case_name}-cells-{abs(requested_cells)}.svg"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path)
+    plt.close(figure)
+    return path
+
+
+def _measure_reposed_fixture(output: Path) -> dict[str, Any]:
+    """Measure analytic and whole-cell fixture exteriors without solving."""
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("the fixture-floor measurement requires binary64")
+    original_mode = support_clip_mode()
+    rows = []
+    try:
+        for case_name, requested_cells in REPOSED_FIXTURE_ROWS:
+            carrier_case, source_case, exact = _case(case_name)
+            machine = _case_machine(case_name, carrier_case, exact, requested_cells)
+            coordinates = np.vstack(
+                (machine.node, machine.wall_node, machine.sample_coordinates)
+            )
+            analytic = _exact_state(case_name, exact, coordinates)
+            empty_operator = oracle_fixture.forward_operator(source_case, machine)
+            clipped_physical, clipped_exterior, cache = (
+                oracle_fixture.cached_fixture_exterior(
+                    source_case, exact, machine, empty_operator, analytic
+                )
+            )
+            whole_physical = oracle_fixture.whole_cell_current_moments(
+                source_case, empty_operator, analytic
+            )
+            clipped_coefficients = empty_operator.coupling_current_moments(
+                clipped_physical
+            )
+            whole_coefficients = empty_operator.coupling_current_moments(whole_physical)
+            whole_exterior = analytic - oracle_fixture._internal_flux_image(
+                empty_operator, whole_coefficients
+            )
+            target_current, _centroid, target_receipt = _closed_form_current_target(
+                case_name, source_case, empty_operator, clipped_physical
+            )
+            requested_class = int(
+                TopologyClass.DIVERTED
+                if _is_diverted_case(case_name)
+                else TopologyClass.LIMITED
+            )
+            boundary = _boundary(case_name, exact)
+            combinations = []
+            traces = []
+            for exterior_name, exterior in (
+                ("analytic-clipped", clipped_exterior),
+                ("whole-cell", whole_exterior),
+            ):
+                operator = oracle_fixture.forward_operator(
+                    source_case, machine, exterior
+                )
+                for mode in ("exact", "chord"):
+                    record, distance, floor = _fixture_floor_mode(
+                        case_name=case_name,
+                        requested_cells=requested_cells,
+                        exterior_name=exterior_name,
+                        mode=mode,
+                        operator=operator,
+                        analytic=analytic,
+                        clipped_coefficients=clipped_coefficients,
+                        target_current=target_current,
+                        requested_class=requested_class,
+                        boundary=boundary,
+                        machine=machine,
+                    )
+                    combinations.append(record)
+                    traces.append((f"{exterior_name} / {mode}", distance, floor))
+            figure = _render_fixture_floor(case_name, requested_cells, traces)
+            row = {
+                "case": case_name,
+                "requested_cells": requested_cells,
+                "realised_cells": len(machine.node),
+                "fixture_exterior_cache": cache,
+                "analytic_current_target": target_receipt,
+                "combinations": combinations,
+                "figure": str(figure),
+            }
+            rows.append(row)
+            _write_json(
+                REPOSED_FIXTURE_ROOT
+                / "parts"
+                / f"{case_name}-cells-{abs(requested_cells)}.json",
+                row,
+            )
+    finally:
+        set_support_clip_mode(original_mode)
+    exact_primary = [
+        combination
+        for row in rows
+        if abs(row["requested_cells"]) == 1000
+        for combination in row["combinations"]
+        if combination["exterior"] == "analytic-clipped"
+        and combination["mode"] == "exact"
+    ]
+    receipt = {
+        "schema": "nova.analytic-clipped-fixture-map-floor",
+        "source_revision": _source_revision(),
+        "lane": _lane(),
+        "rows": rows,
+        "acceptance": {
+            "threshold_rms_fraction_of_span": 1.0e-3,
+            "primary_row_count": len(exact_primary),
+            "passed": bool(exact_primary)
+            and all(
+                row["map_floor"]["rms_fraction_of_span"] <= 1.0e-3
+                for row in exact_primary
+            ),
+            "worst_primary_rms_fraction_of_span": max(
+                row["map_floor"]["rms_fraction_of_span"] for row in exact_primary
+            ),
+        },
+    }
+    _write_json(output, receipt)
+    print("REPOSED_FIXTURE_FLOOR_EXIT=0", flush=True)
+    return receipt
+
+
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", choices=CASE_NAMES)
@@ -3010,6 +3280,7 @@ def _parse() -> argparse.Namespace:
     parser.add_argument("--validate-seed-control", action="store_true")
     parser.add_argument("--nan-census", action="store_true")
     parser.add_argument("--diverted-geometry", action="store_true")
+    parser.add_argument("--reposed-fixture-floor", action="store_true")
     parser.add_argument("--scheduler-job-id", action="append", default=[])
     parser.add_argument("--output", type=Path, default=OUTPUT)
     return parser.parse_args()
@@ -3017,6 +3288,13 @@ def _parse() -> argparse.Namespace:
 
 def main() -> None:
     arguments = _parse()
+    if arguments.reposed_fixture_floor:
+        output = (
+            REPOSED_FIXTURE_OUTPUT if arguments.output == OUTPUT else arguments.output
+        )
+        receipt = _measure_reposed_fixture(output)
+        print(json.dumps(receipt["acceptance"], sort_keys=True), flush=True)
+        return
     if arguments.diverted_geometry:
         output = (
             DIVERTED_GEOMETRY_OUTPUT if arguments.output == OUTPUT else arguments.output

@@ -1,20 +1,42 @@
 {
+  "analytic_x_point_cell_booking": {
+    "analytic_integrated_a": 109.88430808261131,
+    "booked_after_over_analytic": 0.5503102819834346,
+    "booked_after_target_normalisation_a": 60.470464566496425,
+    "booked_before_over_analytic": 0.3350230917326007,
+    "booked_before_target_normalisation_a": 36.813780626734044,
+    "containing_cell_indices": [
+      8
+    ],
+    "point_rz_m": [
+      1.5025279999999999,
+      -1.01728
+    ],
+    "selected_cell_centre_rz_m": [
+      1.50157426955981,
+      -1.000684795367888
+    ],
+    "selected_cell_index": 8,
+    "selection_rule": "containing polygon, nearest cell centre breaks an edge tie"
+  },
   "case": "diverted-single-null",
   "completed": true,
   "exterior_term": {
+    "analytic_authored_boundary_flux_wb": 0.0,
+    "boundary_basis": "the authored analytic total field with its zero-level boundary; the production topology read and wall-contact level are not inputs",
     "definition": "analytic total flux minus the analytically integrated exact plasma-current moment image; constructed before mode selection",
-    "sha256_binary64": "62ef09c4356f44ddfefb90320eaed82aab201e4f5ee571c6ac1f9595286f481d",
+    "sha256_binary64": "55943cbba7bc0c36ec8c53ccebb8815940a2b08f1f25180335ff7b4f61a0bac8",
     "source_pointers": {
       "construction": {
-        "line_end": 1265,
-        "line_start": 1118,
+        "line_end": 1488,
+        "line_start": 1334,
         "markers": [
           {
-            "line": 1151,
+            "line": 1367,
             "text": "analytic - fixture_exact_internal"
           },
           {
-            "line": 1148,
+            "line": 1364,
             "text": "            operator = oracle_fixture.forward_operator("
           }
         ],
@@ -35,186 +57,60 @@
   },
   "finding": null,
   "jacobian": {
-    "directions": [
-      {
-        "direction": "smooth_random_1",
-        "exact_jvp_detected_nonzero_action": true,
-        "relative_steps": [
-          {
-            "absolute_step_wb": 5.708532083004966e-08,
-            "exact_jvp_rms": 2.6802078289009543,
-            "finite_difference_detected_nonzero_action": true,
-            "finite_difference_rms": 2.829910804891045,
-            "relative_jvp_discrepancy": 0.15659525971879082,
-            "relative_step_of_flux_span": 1e-05
-          },
-          {
-            "absolute_step_wb": 5.708532083004965e-10,
-            "exact_jvp_rms": 2.6802078289009543,
-            "finite_difference_detected_nonzero_action": true,
-            "finite_difference_rms": 2.829911189238589,
-            "relative_jvp_discrepancy": 0.1565955280834507,
-            "relative_step_of_flux_span": 1e-07
-          }
-        ],
-        "unit_sup_direction_sha256": "28679e35d00f04f325ded2335bc31f66dc5fa268da97f44a2459029946dd5161"
-      },
-      {
-        "direction": "smooth_random_2",
-        "exact_jvp_detected_nonzero_action": true,
-        "relative_steps": [
-          {
-            "absolute_step_wb": 5.708532083004966e-08,
-            "exact_jvp_rms": 1.7048254402482355,
-            "finite_difference_detected_nonzero_action": true,
-            "finite_difference_rms": 1.7856124924363312,
-            "relative_jvp_discrepancy": 0.2011696520062116,
-            "relative_step_of_flux_span": 1e-05
-          },
-          {
-            "absolute_step_wb": 5.708532083004965e-10,
-            "exact_jvp_rms": 1.7048254402482355,
-            "finite_difference_detected_nonzero_action": true,
-            "finite_difference_rms": 1.7856127469185736,
-            "relative_jvp_discrepancy": 0.20116972535454794,
-            "relative_step_of_flux_span": 1e-07
-          }
-        ],
-        "unit_sup_direction_sha256": "6b86997a175aaecbb133db5794aabc5a7513fe2dcb8ad74622eeb5c1918f20a6"
-      },
-      {
-        "direction": "smooth_random_3",
-        "exact_jvp_detected_nonzero_action": true,
-        "relative_steps": [
-          {
-            "absolute_step_wb": 5.708532083004966e-08,
-            "exact_jvp_rms": 3.4639938919869904,
-            "finite_difference_detected_nonzero_action": true,
-            "finite_difference_rms": 3.3611422651809675,
-            "relative_jvp_discrepancy": 0.16003923993486635,
-            "relative_step_of_flux_span": 1e-05
-          },
-          {
-            "absolute_step_wb": 5.708532083004965e-10,
-            "exact_jvp_rms": 3.4639938919869904,
-            "finite_difference_detected_nonzero_action": true,
-            "finite_difference_rms": 3.3611424734422837,
-            "relative_jvp_discrepancy": 0.160039014988903,
-            "relative_step_of_flux_span": 1e-07
-          }
-        ],
-        "unit_sup_direction_sha256": "73129b2e7d1f891ed05bcefc1701e22f91badf726a2659a3162187042ec518be"
-      },
-      {
-        "direction": "smooth_random_4",
-        "exact_jvp_detected_nonzero_action": true,
-        "relative_steps": [
-          {
-            "absolute_step_wb": 5.708532083004966e-08,
-            "exact_jvp_rms": 3.6435339737730907,
-            "finite_difference_detected_nonzero_action": true,
-            "finite_difference_rms": 3.5746493389918212,
-            "relative_jvp_discrepancy": 0.05490541380687293,
-            "relative_step_of_flux_span": 1e-05
-          },
-          {
-            "absolute_step_wb": 5.708532083004965e-10,
-            "exact_jvp_rms": 3.6435339737730907,
-            "finite_difference_detected_nonzero_action": true,
-            "finite_difference_rms": 3.574649051225265,
-            "relative_jvp_discrepancy": 0.054905475235402366,
-            "relative_step_of_flux_span": 1e-07
-          }
-        ],
-        "unit_sup_direction_sha256": "5aa91493f0bdef025592a2373ca604ee4f7d23358bc0549cb41774d4452b0ca9"
-      }
-    ],
+    "directions": [],
     "linear_solve_entered": false,
     "nonlinear_solve_entered": false,
-    "random_seed": 271828,
-    "residual_at_analytic_rms_wb": 0.010986139428076157,
-    "residual_definition": "state minus the certificate's shadow-frozen target-normalised map; fixed_point.newton_krylov forms the same I-minus-J linear action after linearizing its frozen map",
-    "source_pointers": {
-      "benchmark_residual": {
-        "line_end": 308,
-        "line_start": 306,
-        "markers": [
-          {
-            "line": 308,
-            "text": "return candidate - shadowed_map(candidate, frozen_shadow)"
-          }
-        ],
-        "path": "benchmarks/oracle_start_newton_probe.py"
-      },
-      "production_inner_newton": {
-        "line_end": 3327,
-        "line_start": 2483,
-        "markers": [
-          {
-            "line": 2763,
-            "text": "mapped, tangent = jax.linearize(frozen_map, state)"
-          },
-          {
-            "line": 2764,
-            "text": "residual_vector = mapped - state"
-          },
-          {
-            "line": 2813,
-            "text": "return vector - tangent(vector)"
-          }
-        ],
-        "path": "nova/equilibrium/fixed_point.py"
-      }
-    }
+    "reason": null,
+    "status": "not_requested_for_one_application_decomposition"
   },
   "mode": "exact",
   "mode_semantics": "signed-flux spline-chain exact clip",
   "one_application": {
     "analytic_moments_anchor": {
-      "absolute_rms_wb": 6.712541116347942e-18,
+      "absolute_rms_wb": 6.70927992437057e-18,
       "absolute_sup_wb": 1.3877787807814457e-17,
       "definition": "external plus analytically integrated exact moments",
-      "relative_rms_of_span": 1.1758786705135705e-15,
-      "relative_sup_of_span": 2.431060666038896e-15
+      "relative_rms_of_span": 1.1753073867001586e-15,
+      "relative_sup_of_span": 2.431060666038899e-15
     },
     "booked_current": {
       "analytic_plasma_current_a": 61700.15021203842,
-      "booked_over_analytic": 0.6087894460650387,
-      "booked_plasma_current_a": 37562.40026971655,
-      "cell_current_sha256_binary64": "5d643a31ad6c6a6abd06d3591920bf74524d04fc37ca852a535a8f05a2d23eea",
-      "normalisation_amplitude": 1.6426040340606811,
+      "booked_over_analytic": 0.6087894460650575,
+      "booked_plasma_current_a": 37562.400269717706,
+      "cell_current_sha256_binary64": "e9aecdc209f8bc60511179ec9f71b68a071be7706f9c099bce73991bf897b45d",
+      "normalisation_amplitude": 1.6426040340606305,
       "normalisation_error": null,
       "status": "finite"
     },
     "certificate_target_normalised_map": {
-      "absolute_rms_wb": 0.011778023124910535,
-      "absolute_sup_wb": 0.024641245983234344,
+      "absolute_rms_wb": 0.011778023124907909,
+      "absolute_sup_wb": 0.024641245983227793,
       "definition": "the production certificate map with requested topology class and analytic total-current target",
       "error": null,
-      "relative_rms_of_span": 2.0632314846710287,
-      "relative_sup_of_span": 4.316564332991051,
+      "relative_rms_of_span": 2.0632314846705717,
+      "relative_sup_of_span": 4.316564332989909,
       "status": "finite"
     },
     "decomposition": {
       "a_affine_residual": {
         "affine_part": {
-          "absolute_rms_wb": 0.006320153745474118,
-          "absolute_sup_wb": 0.011661597786046718,
-          "relative_rms_of_span": 1.1071416703236248,
-          "relative_sup_of_span": 2.0428365149711247
+          "absolute_rms_wb": 0.006320153745472625,
+          "absolute_sup_wb": 0.01166159778604372,
+          "relative_rms_of_span": 1.1071416703233647,
+          "relative_sup_of_span": 2.0428365149706025
         },
         "basis": "constant plus raw R and Z in metres",
-        "coefficient_constant_wb": 0.02128317499434846,
-        "coefficient_r_wb_per_m": -0.00985963711146767,
-        "coefficient_z_wb_per_m": 0.00048190601797575754,
+        "coefficient_constant_wb": 0.021283174994353803,
+        "coefficient_r_wb_per_m": -0.009859637111472676,
+        "coefficient_z_wb_per_m": 0.00048190601796670667,
         "rank": 3,
         "remainder": {
-          "absolute_rms_wb": 0.00993868629973282,
-          "absolute_sup_wb": 0.020503436599871732,
-          "relative_rms_of_span": 1.7410231133361882,
-          "relative_sup_of_span": 3.591717853511431
+          "absolute_rms_wb": 0.009938686299730654,
+          "absolute_sup_wb": 0.02050343659986885,
+          "relative_rms_of_span": 1.7410231133358112,
+          "relative_sup_of_span": 3.591717853510931
         },
-        "rms_energy_fraction_explained": 0.2879456227751206,
+        "rms_energy_fraction_explained": 0.28794562277511326,
         "singular_values": [
           45.81639251722202,
           13.547268208619402,
@@ -222,31 +118,31 @@
         ]
       },
       "actual_map_residual": {
-        "absolute_rms_wb": 0.011778023124910535,
-        "absolute_sup_wb": 0.024641245983234344,
-        "relative_rms_of_span": 2.0632314846710287,
-        "relative_sup_of_span": 4.316564332991051
+        "absolute_rms_wb": 0.011778023124907909,
+        "absolute_sup_wb": 0.024641245983227793,
+        "relative_rms_of_span": 2.0632314846705717,
+        "relative_sup_of_span": 4.316564332989909
       },
       "analytic_moment_anchor": {
-        "absolute_rms_wb": 6.712541116347942e-18,
+        "absolute_rms_wb": 6.70927992437057e-18,
         "absolute_sup_wb": 1.3877787807814457e-17,
-        "relative_rms_of_span": 1.1758786705135705e-15,
-        "relative_sup_of_span": 2.431060666038896e-15
+        "relative_rms_of_span": 1.1753073867001586e-15,
+        "relative_sup_of_span": 2.431060666038899e-15
       },
       "b_external_term": {
         "certificate_external_constructed_for_evaluated_booking": false,
         "certificate_external_definition": "the external array captured by ForwardFluxOperator.flux_map",
         "certificate_minus_implied_exterior": {
-          "absolute_rms_wb": 0.011780752408724183,
-          "absolute_sup_wb": 0.024641245983234333,
-          "relative_rms_of_span": 2.0637095907364698,
-          "relative_sup_of_span": 4.3165643329910495
+          "absolute_rms_wb": 0.011780752408721524,
+          "absolute_sup_wb": 0.024641245983227783,
+          "relative_rms_of_span": 2.0637095907360066,
+          "relative_sup_of_span": 4.316564332989907
         },
         "certificate_minus_implied_exterior_on_residual_carriers": {
-          "absolute_rms_wb": 0.011778023124910535,
-          "absolute_sup_wb": 0.024641245983234333,
-          "relative_rms_of_span": 2.0632314846710287,
-          "relative_sup_of_span": 4.3165643329910495
+          "absolute_rms_wb": 0.011778023124907907,
+          "absolute_sup_wb": 0.024641245983227783,
+          "relative_rms_of_span": 2.0632314846705713,
+          "relative_sup_of_span": 4.316564332989907
         },
         "implied_exterior_definition": "analytic total flux minus the evaluated booked internal image",
         "source_pointers": {
@@ -262,11 +158,11 @@
             "path": "nova/equilibrium/forward_operator.py"
           },
           "implied_exterior": {
-            "line_end": 426,
-            "line_start": 354,
+            "line_end": 604,
+            "line_start": 532,
             "markers": [
               {
-                "line": 367,
+                "line": 545,
                 "text": "implied_exterior = analytic - internal_image"
               }
             ],
@@ -276,16 +172,16 @@
       },
       "c_internal_image": {
         "booked_minus_analytic_moments": {
-          "absolute_rms_wb": 0.011780752408724183,
-          "absolute_sup_wb": 0.024641245983234333,
-          "relative_rms_of_span": 2.0637095907364698,
-          "relative_sup_of_span": 4.3165643329910495
+          "absolute_rms_wb": 0.011780752408721524,
+          "absolute_sup_wb": 0.024641245983227783,
+          "relative_rms_of_span": 2.0637095907360066,
+          "relative_sup_of_span": 4.316564332989907
         },
         "booked_minus_analytic_moments_on_residual_carriers": {
-          "absolute_rms_wb": 0.011778023124910535,
-          "absolute_sup_wb": 0.024641245983234333,
-          "relative_rms_of_span": 2.0632314846710287,
-          "relative_sup_of_span": 4.3165643329910495
+          "absolute_rms_wb": 0.011778023124907909,
+          "absolute_sup_wb": 0.024641245983227783,
+          "relative_rms_of_span": 2.0632314846705717,
+          "relative_sup_of_span": 4.316564332989907
         },
         "definition": "evaluated booked internal image minus analytically integrated moments imaged through the same frozen blocks"
       },
@@ -299,32 +195,40 @@
       "residual_carrier_count": 547
     },
     "unscaled_production_map": {
-      "absolute_rms_wb": 0.05461925974392906,
-      "absolute_sup_wb": 0.08905545394333685,
+      "absolute_rms_wb": 0.05461925974392852,
+      "absolute_sup_wb": 0.08905545394333624,
       "definition": "production allocation and moment conversion without target-current normalisation, requested topology class fixed",
-      "relative_rms_of_span": 9.568004339773726,
-      "relative_sup_of_span": 15.600412268587645
+      "relative_rms_of_span": 9.568004339773644,
+      "relative_sup_of_span": 15.60041226858756
     }
   },
+  "per_cell_moment_attribution": null,
   "production_topology_state_at_analytic_flux": {
-    "axis_flux_wb": 0.005708305487550931,
+    "analytic_authored_boundary_flux_wb": 0.0,
+    "axis_flux_wb": 0.0057083054875509244,
     "axis_rz_m": [
-      1.7857915995381681,
-      0.046115907009466425
+      1.7857915995381688,
+      0.04611590700946726
     ],
-    "boundary_flux_wb": -2.2659545403360974e-07,
+    "boundary_flux_offset_from_analytic_zero_wb": -2.2659545403346575e-07,
+    "boundary_flux_wb": -2.2659545403346575e-07,
     "boundary_rz_m": [
       1.5013803017894352,
       -1.0176279706952234
     ],
     "class": "diverted",
     "exception_text": null,
+    "o_candidate_count": 1,
+    "o_second_best_flux_margin_wb": null,
     "read_status": "qualified_axis",
-    "x_point_flux_wb": -2.2659545403360974e-07,
+    "wall_contact_rz_m": null,
+    "x_candidate_count": 1,
+    "x_point_flux_wb": -2.2659545403346575e-07,
     "x_point_rz_m": [
       1.5013803017894352,
       -1.0176279706952234
-    ]
+    ],
+    "x_second_best_flux_margin_wb": null
   },
   "realised_cells": 550,
   "requested_cells": -500,
@@ -362,7 +266,7 @@
     }
   },
   "schema": "nova.oracle-start-map-jacobian-part",
-  "source_revision": "f3f9a361ba34238d32487c9482ad06465a158802",
-  "version": 2,
-  "wall_seconds": 90.0188258336857
+  "source_revision": "fa017b3c8900cab64e8f5efbcc396923d6f26fc5",
+  "version": 3,
+  "wall_seconds": 93.31932902894914
 }

@@ -94,5 +94,19 @@
     "higher_cell_measurements_run": false,
     "reason": "The 300-cell progression bar was not met, so 500 through 2500 cells were intentionally not compiled."
   },
+  "delta_gate": {
+    "job": "1270925",
+    "baseline_revision": "e2825a0d3cc13573a1d890c4f2eddf6b9d7eb96a",
+    "worker_revision": "532b941952f3caadc8e5f3067586d55811ce9b8c",
+    "baseline_failure_ids": [],
+    "worker_failure_ids": [],
+    "added_failure_ids": [],
+    "added_failure_count": 0,
+    "verdict_by_failure_id_delta": "pass",
+    "baseline_exit_status": 134,
+    "worker_exit_status": 134,
+    "suites_completed": false,
+    "qualification": "Both pytest processes aborted before terminal summaries, so the zero is a failure-identifier delta, not an absolute-green suite."
+  },
   "interpretation": "The reconcile's frozen-partition map reaches the compact scanned bank. All 83 distinct scan-body copies occur inside HLO while bodies, proving that bank entries are represented by scan loops rather than Python-loop unrolling. The 84 distinct outer compact-current while-body copies arise from repeated solver map evaluations outside the quadrature path. The remaining 55.309831 GiB of temporaries is therefore outside this node's quadrature ownership and is assigned to the program-size follow-up."
 }

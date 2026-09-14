@@ -586,7 +586,7 @@ def main(argv=None) -> int:
             part["error"] = f"{type(exc).__name__}: {exc}"
         write_part("topology_table_capacity", part)
 
-    # --- profile node count: a fresh 600-cell machine, doubled mesh
+    # --- profile node count: a fresh, larger machine doubles the mesh
     if (
         _wall() > args.deadline_s
         and not (parts_dir / "profile_node_count.json").exists()
@@ -600,31 +600,61 @@ def main(argv=None) -> int:
         part = {
             "budget": "profile_node_count",
             "baseline_value": 300,
-            "doubled_value": 600,
+            "doubled_value": None,
             "read_lines": BUDGETS["profile_node_count"]["read_lines"],
         }
+        # The oracle fixture only admits a discrete set of cell counts (its
+        # grid has no complete hexagon generator at arbitrary radii).  Discover
+        # the doubled mesh: build the candidate machines, keep the ones that
+        # build, and measure the one whose node count is closest to 2x the
+        # 300-cell baseline, so the ratio answers "does the program carry the
+        # profile node count".
         try:
-            cells = 600
-            src600, ex600, machine600 = build_machine(cells)
-            p600, r600, flux600, ext600, n600 = build_operator_and_profile(
-                src600, ex600, machine600, maxsize=MAXSIZE
-            )
-            count600, wall600 = _compile_and_count(
-                p600, r600, flux600, ext600, dict(r600.policy.kernel_options())
-            )
-            part.update(
-                {
-                    "base_instructions": base_count,
-                    "doubled_instructions": count600,
-                    "ratio": count600 / base_count if base_count else None,
-                    "doubled_compile_wall_s": wall600,
-                    "base_compile_wall_s": parts["baseline"]["base_compile_wall_s"],
-                    "doubled_node_count": n600,
-                }
-            )
-            part["verdict"] = (
-                "data_size_carried" if part["ratio"] >= 1.5 else "scanned_or_fixed"
-            )
+            base_node_count = int(parts["baseline"]["node_count"])
+            part["baseline_value"] = f"300 ({base_node_count} nodes)"
+            candidates = (400, 500, 1000, 2500)
+            built: list[tuple[int, int]] = []  # (requested_cells, node_count)
+            for cells in candidates:
+                if _wall() > args.deadline_s:
+                    print(f"DEADLINE building {cells} cells", flush=True)
+                    break
+                try:
+                    _src, _ex, machine = build_machine(cells)
+                    built.append((cells, int(len(machine.node))))
+                except Exception as exc:
+                    print(
+                        f"CELLS {cells} unbuildable: {type(exc).__name__}: {exc}",
+                        flush=True,
+                    )
+            if not built:
+                part["error"] = "no doubled cell count was buildable"
+            else:
+                chosen, n_doubled = min(
+                    built, key=lambda row: abs(row[1] - 2 * base_node_count)
+                )
+                part["doubled_value"] = f"{chosen} ({n_doubled} nodes)"
+                part["doubled_node_count"] = n_doubled
+                part["base_node_count"] = base_node_count
+                part["buildable_cells"] = built
+                src_c, ex_c, machine_c = build_machine(chosen)
+                p_c, r_c, flux_c, ext_c, _n_c = build_operator_and_profile(
+                    src_c, ex_c, machine_c, maxsize=MAXSIZE
+                )
+                count_c, wall_c = _compile_and_count(
+                    p_c, r_c, flux_c, ext_c, dict(r_c.policy.kernel_options())
+                )
+                part.update(
+                    {
+                        "base_instructions": base_count,
+                        "doubled_instructions": count_c,
+                        "ratio": count_c / base_count if base_count else None,
+                        "doubled_compile_wall_s": wall_c,
+                        "base_compile_wall_s": parts["baseline"]["base_compile_wall_s"],
+                    }
+                )
+                part["verdict"] = (
+                    "data_size_carried" if part["ratio"] >= 1.5 else "scanned_or_fixed"
+                )
         except Exception as exc:
             part["error"] = f"{type(exc).__name__}: {exc}"
         write_part("profile_node_count", part)

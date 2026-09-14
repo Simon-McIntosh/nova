@@ -1,61 +1,53 @@
-"""Probe the production fixed-point iteration from an analytic near-root state.
+"""Measure analytic map floors and residual tangents without solving.
 
-The analytic flux, exterior completion, current target, mesh interaction
-matrices, clip modes, and Newton controls all come from the production
-Solov'ev certificate stack.  The benchmark changes no production behavior.
-It persists each row and allocation mode before advancing, so a scheduler
-expiry preserves every completed measurement.
+Each row constructs the certificate's analytic exterior completion once, then
+reuses that operator for the exact allocation and whole-cell control.  The
+measurement applies each map at the analytic flux, linearizes the same frozen-
+shadow residual used by the Newton inner iteration, and compares its tangent
+with central finite differences.  It never enters a nonlinear or linear solve.
 """
 
 from __future__ import annotations
 
 import argparse
 import hashlib
+import inspect
 import json
-import math
 import os
 from pathlib import Path
 import socket
 import subprocess
 from time import perf_counter
-from typing import Any
+from typing import Any, Callable
 
 import jax
 import jax.numpy as jnp
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import numpy as np
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import fixed_point
 from nova.equilibrium.forward_operator import (
+    ForwardFluxOperator,
     set_support_clip_mode,
     support_clip_mode,
 )
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.jax.config import (
-    Precision,
     configure_dtypes,
     configure_persistent_compilation_cache,
     default_persistent_compilation_cache_root,
 )
-from nova.media import poloidal
-from nova.media.ink import DEFAULT_INK, poloidal_axes
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
-from scripts.oracle_rebaseline import measure as recovery
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = (
     ROOT
     / "docs/figures/cut-cell-current-attribution/oracle-start"
-    / "oracle-start-newton-probe.json"
+    / "map-floor-jacobian.json"
 )
 DEFAULT_REPORT_DIRECTORY = DEFAULT_OUTPUT.parent
-PART_DIRECTORY_NAME = "parts"
-PERTURBATION_FRACTIONS = (1.0e-4, 1.0e-3, 1.0e-2, 1.0e-1)
+PART_DIRECTORY_NAME = "map-jacobian-parts"
 FINITE_DIFFERENCE_STEPS = (1.0e-5, 1.0e-7)
 RANDOM_DIRECTION_COUNT = 4
 RANDOM_SEED = 271828
@@ -79,6 +71,8 @@ def _strict(value: Any) -> Any:
         return _strict(value.tolist())
     if isinstance(value, np.generic):
         return _strict(value.item())
+    if isinstance(value, Path):
+        return str(value)
     if isinstance(value, float) and not np.isfinite(value):
         return None
     return value
@@ -144,6 +138,84 @@ def _part_path(output: Path, case_name: str, requested_cells: int, mode: str) ->
     return output.parent / PART_DIRECTORY_NAME / name
 
 
+def _array_digest(value: Any) -> str:
+    array = np.ascontiguousarray(np.asarray(value), dtype="<f8")
+    return hashlib.sha256(array.tobytes()).hexdigest()
+
+
+def _pointer(
+    function: Callable[..., Any], markers: tuple[str, ...] = ()
+) -> dict[str, Any]:
+    lines, start = inspect.getsourcelines(function)
+    path = Path(inspect.getsourcefile(function) or "")
+    try:
+        rendered_path = str(path.relative_to(ROOT))
+    except ValueError:
+        rendered_path = str(path)
+    located = []
+    for marker in markers:
+        matches = [index for index, line in enumerate(lines) if marker in line]
+        if not matches:
+            raise RuntimeError(
+                f"source marker {marker!r} is absent from {rendered_path}"
+            )
+        located.append({"text": marker, "line": start + matches[0]})
+    return {
+        "path": rendered_path,
+        "line_start": start,
+        "line_end": start + len(lines) - 1,
+        "markers": located,
+    }
+
+
+def _norms(delta: np.ndarray, span: float, grid_count: int) -> dict[str, float]:
+    grid = np.asarray(delta, dtype=np.float64)[:grid_count]
+    absolute_rms = float(np.sqrt(np.mean(grid**2)))
+    absolute_sup = float(np.max(np.abs(grid)))
+    return {
+        "absolute_rms_wb": absolute_rms,
+        "absolute_sup_wb": absolute_sup,
+        "relative_rms_of_span": absolute_rms / span,
+        "relative_sup_of_span": absolute_sup / span,
+    }
+
+
+def _topology(operator: Any, state: np.ndarray) -> dict[str, Any]:
+    try:
+        _masks, topology = operator.read(jnp.asarray(state))
+    except NoQualifiedAxisError as error:
+        return {
+            "read_status": "no_qualified_axis",
+            "axis_flux_wb": None,
+            "boundary_flux_wb": None,
+            "exception_text": str(error),
+        }
+    return {
+        "read_status": "qualified_axis",
+        "axis_flux_wb": float(topology.axis_flux),
+        "boundary_flux_wb": float(topology.boundary_flux),
+        "exception_text": None,
+    }
+
+
+def _booked_current(
+    operator: Any,
+    analytic: np.ndarray,
+    requested_class: int,
+    target_current: float,
+) -> dict[str, Any]:
+    moments = operator.cell_current_moments(jnp.asarray(analytic), requested_class)
+    booked = float(jnp.sum(moments.cell_current))
+    amplitude = float(operator.current_normalisation_amplitude(target_current, booked))
+    return {
+        "booked_plasma_current_a": booked,
+        "analytic_plasma_current_a": target_current,
+        "booked_over_analytic": booked / target_current,
+        "normalisation_amplitude": amplitude,
+        "cell_current_sha256_binary64": _array_digest(moments.cell_current),
+    }
+
+
 def _smooth_directions(
     coordinates: np.ndarray, count: int, seed: int
 ) -> list[np.ndarray]:
@@ -179,240 +251,9 @@ def _smooth_directions(
     return directions
 
 
-def _norms(delta: np.ndarray, span: float, grid_count: int) -> dict[str, float]:
-    grid = np.asarray(delta, dtype=np.float64)[:grid_count]
-    return {
-        "absolute_rms_wb": float(np.sqrt(np.mean(grid**2))),
-        "absolute_sup_wb": float(np.max(np.abs(grid))),
-        "relative_rms_of_span": float(np.sqrt(np.mean(grid**2)) / span),
-        "relative_sup_of_span": float(np.max(np.abs(grid)) / span),
-    }
-
-
-def _topology(operator: Any, state: np.ndarray) -> dict[str, Any]:
-    try:
-        _masks, topology = operator.read(jnp.asarray(state))
-    except NoQualifiedAxisError as error:
-        return {
-            "read_status": "no_qualified_axis",
-            "axis_rz_m": None,
-            "x_point_rz_m": None,
-            "boundary_flux_wb": None,
-            "axis_flux_wb": None,
-            "exception_text": str(error),
-        }
-    axis = np.asarray(topology.axis, dtype=np.float64)
-    x_point = np.asarray(topology.x_point, dtype=np.float64)
-    return {
-        "read_status": "qualified_axis",
-        "axis_rz_m": axis.tolist() if np.all(np.isfinite(axis)) else None,
-        "x_point_rz_m": x_point.tolist() if np.all(np.isfinite(x_point)) else None,
-        "boundary_flux_wb": float(topology.boundary_flux),
-        "axis_flux_wb": float(topology.axis_flux),
-        "exception_text": None,
-    }
-
-
-def _booked_current(
-    operator: Any,
-    state: np.ndarray,
-    requested_class: int,
-    target: float,
-) -> dict[str, Any]:
-    try:
-        moments = operator.cell_current_moments(jnp.asarray(state), requested_class)
-        booked = float(jnp.sum(moments.cell_current))
-        amplitude = float(operator.current_normalisation_amplitude(target, booked))
-    except Exception as error:
-        return {
-            "booked_plasma_current_a": None,
-            "analytic_plasma_current_a": target,
-            "booked_over_analytic": None,
-            "normalisation_amplitude": None,
-            "status": "unavailable",
-            "exception_text": f"{type(error).__name__}: {error}",
-        }
-    return {
-        "booked_plasma_current_a": booked,
-        "analytic_plasma_current_a": target,
-        "booked_over_analytic": booked / target,
-        "normalisation_amplitude": amplitude,
-        "status": "finite" if np.isfinite(amplitude) else "nonfinite",
-        "exception_text": None,
-    }
-
-
-def _solver_functions(operator: Any, requested_class: int, target_current: float):
-    mapped = operator.flux_map(
-        requested_class=requested_class, target_current=target_current
-    )
-    shadowed = operator.flux_map_with_shadow(
-        requested_class=requested_class, target_current=target_current
-    )
-
-    def shadow_mask(state):
-        return operator.residual_shadow_mask(state, requested_class)
-
-    def promoted_shadow_mask(state, previous):
-        return operator.residual_shadow_mask(
-            state, requested_class, previous_shadow=previous
-        )
-
-    return mapped, shadowed, shadow_mask, promoted_shadow_mask
-
-
-def _solve_prefix(
-    mapped: Any,
-    shadowed: Any,
-    shadow_mask: Any,
-    promoted_shadow_mask: Any,
-    initial: np.ndarray,
-    newton_steps: int,
-):
-    history = fixed_point.newton_krylov(
-        mapped,
-        jnp.asarray(initial),
-        newton_steps=newton_steps,
-        gmres_iterations=recovery.KRYLOV_ITERATIONS,
-        warmup=0,
-        shadow_mask_fn=shadow_mask,
-        promoted_shadow_mask_fn=promoted_shadow_mask,
-        shadowed_map_fn=shadowed,
-        precision=Precision.DOUBLE,
-    )
-    jax.block_until_ready(history.state)
-    return history
-
-
-def _state_record(
-    operator: Any,
-    state: np.ndarray,
-    analytic: np.ndarray,
-    span: float,
-    grid_count: int,
-    requested_class: int,
-    target_current: float,
-    axis_reference: np.ndarray,
-) -> dict[str, Any]:
-    topology = _topology(operator, state)
-    axis = topology["axis_rz_m"]
-    return {
-        "distance_to_analytic": _norms(state - analytic, span, grid_count),
-        "axis_position_error_m": (
-            None
-            if axis is None
-            else float(np.linalg.norm(np.asarray(axis) - axis_reference))
-        ),
-        "topology": topology,
-        "current": _booked_current(operator, state, requested_class, target_current),
-    }
-
-
-def _iteration(
-    operator: Any,
-    analytic: np.ndarray,
-    direction: np.ndarray,
-    fraction: float,
-    span: float,
-    grid_count: int,
-    requested_class: int,
-    target_current: float,
-    axis_reference: np.ndarray,
-) -> tuple[dict[str, Any], np.ndarray]:
-    initial = analytic + fraction * span * direction
-    mapped, shadowed, shadow_mask, promoted_shadow_mask = _solver_functions(
-        operator, requested_class, target_current
-    )
-    initial_mapped = np.asarray(jax.block_until_ready(mapped(jnp.asarray(initial))))
-    initial_relative_residual = float(
-        fixed_point._relative_residual(
-            jnp.asarray(initial_mapped), jnp.asarray(initial)
-        )
-    )
-    prefixes = [
-        {
-            "newton_step": 0,
-            "relative_fixed_point_residual": initial_relative_residual,
-            "active_set_trip_count": 0,
-            "accepted_newton_promotions": 0,
-            **_state_record(
-                operator,
-                initial,
-                analytic,
-                span,
-                grid_count,
-                requested_class,
-                target_current,
-                axis_reference,
-            ),
-        }
-    ]
-    terminal_state = initial
-    terminal_history = None
-    for step in range(1, recovery.NEWTON_STEPS + 1):
-        history = _solve_prefix(
-            mapped,
-            shadowed,
-            shadow_mask,
-            promoted_shadow_mask,
-            initial,
-            step,
-        )
-        terminal_history = history
-        terminal_state = np.asarray(history.state, dtype=np.float64)
-        prefixes.append(
-            {
-                "newton_step": step,
-                "relative_fixed_point_residual": float(history.residual),
-                "active_set_trip_count": int(history.active_set_iterations),
-                "accepted_newton_promotions": int(history.accepted_newton_promotions),
-                **_state_record(
-                    operator,
-                    terminal_state,
-                    analytic,
-                    span,
-                    grid_count,
-                    requested_class,
-                    target_current,
-                    axis_reference,
-                ),
-            }
-        )
-    assert terminal_history is not None
-    initial_distance = prefixes[0]["distance_to_analytic"]["relative_sup_of_span"]
-    terminal_distance = prefixes[-1]["distance_to_analytic"]["relative_sup_of_span"]
-    return (
-        {
-            "requested_relative_perturbation": fraction,
-            "realised_relative_sup_perturbation": initial_distance,
-            "smooth_direction_sha256": hashlib.sha256(
-                np.ascontiguousarray(direction, dtype="<f8").tobytes()
-            ).hexdigest(),
-            "steps": prefixes,
-            "terminal": {
-                "contracted_toward_analytic": bool(
-                    terminal_distance < initial_distance
-                ),
-                "left_analytic_neighbourhood": bool(
-                    terminal_distance >= initial_distance
-                ),
-                "trip_count": int(terminal_history.active_set_iterations),
-                "attempted_newton_promotions": int(
-                    terminal_history.attempted_newton_promotions
-                ),
-                "accepted_newton_promotions": int(
-                    terminal_history.accepted_newton_promotions
-                ),
-                "converged": bool(terminal_history.converged),
-                "termination": fixed_point.FixedPointTerminationReason(
-                    int(terminal_history.termination_reason)
-                ).name.lower(),
-                "relative_fixed_point_residual": float(terminal_history.residual),
-                "relative_sup_distance_to_analytic": terminal_distance,
-            },
-        },
-        terminal_state,
-    )
+def _certificate_residual(candidate, shadowed_map, frozen_shadow):
+    """Return the I-minus-J residual action used by the Newton inner solve."""
+    return candidate - shadowed_map(candidate, frozen_shadow)
 
 
 def _relative_discrepancy(reference: np.ndarray, candidate: np.ndarray) -> float:
@@ -428,67 +269,35 @@ def _relative_discrepancy(reference: np.ndarray, candidate: np.ndarray) -> float
 def _jacobian_probe(
     operator: Any,
     analytic: np.ndarray,
+    coordinates: np.ndarray,
     span: float,
     requested_class: int,
     target_current: float,
-    random_directions: list[np.ndarray],
 ) -> dict[str, Any]:
-    mapped, shadowed, shadow_mask, _promoted_shadow_mask = _solver_functions(
-        operator, requested_class, target_current
+    shadowed_map = operator.flux_map_with_shadow(
+        requested_class=requested_class,
+        target_current=target_current,
     )
     state = jnp.asarray(analytic)
-    frozen_shadow = shadow_mask(state)
+    frozen_shadow = operator.residual_shadow_mask(state, requested_class)
 
-    def fixed_residual(candidate):
-        return candidate - shadowed(candidate, frozen_shadow)
+    def residual(candidate):
+        return _certificate_residual(candidate, shadowed_map, frozen_shadow)
 
-    residual, tangent = jax.linearize(fixed_residual, state)
-    mapped_state = mapped(state)
-    nonlinear_residual = fixed_point._relative_residual(mapped_state, state)
-
-    def linear_action(vector):
-        return tangent(vector)
-
-    qualified = fixed_point._qualified_krylov_step(
-        linear_action,
-        mapped_state - state,
-        nonlinear_residual,
-        gmres_iterations=recovery.KRYLOV_ITERATIONS,
-        condition_ratio_limit=math.e,
-        preceding_condition_baseline=jnp.asarray(jnp.nan, dtype=state.dtype),
-    )
-    jax.block_until_ready(qualified.step)
-    newton_direction = np.asarray(qualified.step, dtype=np.float64)
-    directions = [
-        ("newton", newton_direction),
-        *[
-            (f"random_{index + 1}", direction)
-            for index, direction in enumerate(random_directions)
-        ],
-    ]
+    residual_at_analytic, tangent = jax.linearize(residual, state)
+    directions = _smooth_directions(coordinates, RANDOM_DIRECTION_COUNT, RANDOM_SEED)
     records = []
-    for name, unscaled in directions:
-        norm = float(np.max(np.abs(unscaled)))
-        if not np.isfinite(norm) or norm == 0.0:
-            records.append(
-                {
-                    "direction": name,
-                    "status": "zero_or_nonfinite_direction",
-                    "relative_steps": [],
-                }
-            )
-            continue
-        direction = np.asarray(unscaled / norm, dtype=np.float64)
+    for index, direction in enumerate(directions):
         exact_jvp = np.asarray(tangent(jnp.asarray(direction)), dtype=np.float64)
         step_records = []
         for relative_step in FINITE_DIFFERENCE_STEPS:
             absolute_step = relative_step * span
             plus = np.asarray(
-                fixed_residual(state + absolute_step * jnp.asarray(direction)),
+                residual(state + absolute_step * jnp.asarray(direction)),
                 dtype=np.float64,
             )
             minus = np.asarray(
-                fixed_residual(state - absolute_step * jnp.asarray(direction)),
+                residual(state - absolute_step * jnp.asarray(direction)),
                 dtype=np.float64,
             )
             finite_difference = (plus - minus) / (2.0 * absolute_step)
@@ -503,121 +312,52 @@ def _jacobian_probe(
                     "finite_difference_rms": float(
                         np.sqrt(np.mean(finite_difference**2))
                     ),
+                    "finite_difference_detected_nonzero_action": bool(
+                        np.any(finite_difference != 0.0)
+                    ),
                 }
             )
         records.append(
             {
-                "direction": name,
-                "status": "measured",
-                "unit_sup_direction_sha256": hashlib.sha256(
-                    np.ascontiguousarray(direction, dtype="<f8").tobytes()
-                ).hexdigest(),
+                "direction": f"smooth_random_{index + 1}",
+                "unit_sup_direction_sha256": _array_digest(direction),
+                "exact_jvp_detected_nonzero_action": bool(np.any(exact_jvp != 0.0)),
                 "relative_steps": step_records,
             }
         )
+    jax.block_until_ready(residual_at_analytic)
     return {
         "residual_definition": (
-            "state minus the production shadow-frozen fixed-point map; this is "
-            "the I-minus-J linear action used by fixed_point.newton_krylov"
+            "state minus the certificate's shadow-frozen target-normalised map; "
+            "fixed_point.newton_krylov forms the same I-minus-J linear action "
+            "after linearizing its frozen map"
         ),
-        "analytic_residual_rms": float(
-            np.sqrt(np.mean(np.asarray(residual, dtype=np.float64) ** 2))
+        "nonlinear_solve_entered": False,
+        "linear_solve_entered": False,
+        "random_seed": RANDOM_SEED,
+        "residual_at_analytic_rms_wb": float(
+            np.sqrt(np.mean(np.asarray(residual_at_analytic, dtype=np.float64) ** 2))
         ),
-        "newton_direction_qualification": fixed_point.KrylovActionQualification(
-            int(qualified.qualification)
-        ).name.lower(),
-        "projected_krylov_condition": float(qualified.projected_condition),
         "directions": records,
-    }
-
-
-def _analytic_topology(case_name: str, exact: Any) -> dict[str, Any]:
-    if certificate._is_diverted_case(case_name):
-        return certificate._analytic_diverted_topology(exact)
-    return {
-        "axis_rz_m": np.asarray(exact.magnetic_axis, dtype=np.float64).tolist(),
-        "x_point_rz_m": None,
-    }
-
-
-def _render_row(
-    path: Path,
-    case_name: str,
-    requested_cells: int,
-    coordinates: np.ndarray,
-    analytic: np.ndarray,
-    wall: np.ndarray,
-    boundary: np.ndarray,
-    analytic_topology: dict[str, Any],
-    terminals: dict[str, tuple[np.ndarray, dict[str, Any]]],
-) -> None:
-    figure, axes = plt.subplots(
-        1, len(MODES), figsize=(10.8, 5.1), constrained_layout=True
-    )
-    analytic_radial, analytic_height, analytic_raster = certificate._raster_field(
-        coordinates, analytic, wall
-    )
-    terminal_rasters = {
-        mode: certificate._raster_field(coordinates, terminals[mode][0], wall)
-        for mode in MODES
-    }
-    all_values = [analytic_raster.ravel()]
-    all_values.extend(raster[2].ravel() for raster in terminal_rasters.values())
-    levels = poloidal.contour_levels(np.concatenate(all_values), count=12)
-    wall_units = (wall,)
-    for axis, mode in zip(np.atleast_1d(axes), MODES, strict=True):
-        terminal, summary = terminals[mode]
-        radial, height, terminal_raster = terminal_rasters[mode]
-        poloidal.draw_flux_contours(
-            axis,
-            analytic_radial,
-            analytic_height,
-            analytic_raster,
-            levels,
-            color="#3366cc",
-        )
-        poloidal.draw_flux_contours(
-            axis, radial, height, terminal_raster, levels, color="#cc7722"
-        )
-        poloidal.draw_boundary(axis, boundary[:, 0], boundary[:, 1], color="#3366cc")
-        poloidal.draw_wall(axis, units=wall_units)
-        poloidal.draw_nulls(
-            axis,
-            magnetic_axis=analytic_topology["axis_rz_m"],
-            x_points=analytic_topology["x_point_rz_m"],
-            style=DEFAULT_INK.variant(
-                axis_marker="^", axis_color="#3366cc", xpoint_color="#3366cc"
+        "source_pointers": {
+            "benchmark_residual": _pointer(
+                _certificate_residual,
+                ("return candidate - shadowed_map(candidate, frozen_shadow)",),
             ),
-            contain=wall_units,
-        )
-        terminal_topology = summary["steps"][-1]["topology"]
-        poloidal.draw_nulls(
-            axis,
-            magnetic_axis=terminal_topology["axis_rz_m"],
-            x_points=terminal_topology["x_point_rz_m"],
-            style=DEFAULT_INK.variant(
-                axis_marker="^", axis_color="#cc7722", xpoint_color="#cc7722"
+            "production_inner_newton": _pointer(
+                fixed_point._newton_krylov_inner,
+                (
+                    "mapped, tangent = jax.linearize(frozen_map, state)",
+                    "residual_vector = mapped - state",
+                    "return vector - tangent(vector)",
+                ),
             ),
-            contain=wall_units,
-        )
-        poloidal_axes(axis)
-        terminal_record = summary["terminal"]
-        axis.set_title(
-            f"{mode}: analytic blue / terminal ochre\n"
-            f"residual={terminal_record['relative_fixed_point_residual']:.3e}; "
-            f"converged={terminal_record['converged']}; "
-            f"trips={terminal_record['trip_count']}",
-            fontsize=8,
-        )
-    figure.suptitle(
-        f"{case_name} · {abs(requested_cells)} cells · 1e-2 analytic perturbation"
-    )
-    path.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(path, dpi=180)
-    plt.close(figure)
+        },
+    }
 
 
-def _measure_mode(
+def _mode_measure(
+    output: Path,
     case_name: str,
     requested_cells: int,
     mode: str,
@@ -628,28 +368,32 @@ def _measure_mode(
     span: float,
     requested_class: int,
     target_current: float,
-    axis_reference: np.ndarray,
-    output: Path,
-) -> tuple[dict[str, Any], np.ndarray, dict[str, Any]]:
+    exact_internal: np.ndarray,
+) -> dict[str, Any]:
     started = perf_counter()
     set_support_clip_mode(mode)
     if support_clip_mode() != mode:
         raise RuntimeError(f"clip-mode setter did not select {mode}")
-    booked = _booked_current(operator, analytic, requested_class, target_current)
-    mapped, _shadowed, _shadow_mask, _promoted_shadow_mask = _solver_functions(
-        operator, requested_class, target_current
+
+    external = np.asarray(operator.external(), dtype=np.float64)
+    analytic_moment_map = external + exact_internal
+    unscaled_map = operator.flux_map(requested_class=requested_class)
+    certificate_map = operator.flux_map(
+        requested_class=requested_class,
+        target_current=target_current,
     )
-    mapped_analytic = np.asarray(
-        jax.block_until_ready(mapped(jnp.asarray(analytic))), dtype=np.float64
+    unscaled_mapped = np.asarray(
+        jax.block_until_ready(unscaled_map(jnp.asarray(analytic))), dtype=np.float64
     )
-    map_floor = _norms(mapped_analytic - analytic, span, grid_count)
-    directions = _smooth_directions(
-        coordinates, RANDOM_DIRECTION_COUNT + 1, RANDOM_SEED
+    certificate_mapped = np.asarray(
+        jax.block_until_ready(certificate_map(jnp.asarray(analytic))),
+        dtype=np.float64,
     )
-    iterations: list[dict[str, Any]] = []
-    terminal_for_figure: np.ndarray | None = None
-    figure_summary: dict[str, Any] | None = None
-    row = {
+    part = _part_path(output, case_name, requested_cells, mode)
+    measured = {
+        "schema": "nova.oracle-start-map-jacobian-part",
+        "version": 1,
+        "source_revision": _source_revision(),
         "case": case_name,
         "requested_cells": requested_cells,
         "realised_cells": grid_count,
@@ -659,183 +403,189 @@ def _measure_mode(
             if mode == "exact"
             else "production whole-cell booking control"
         ),
-        "analytic_map_floor": {
-            **map_floor,
-            "booked_current": booked,
+        "exterior_term": {
+            "definition": (
+                "analytic total flux minus the analytically integrated exact "
+                "plasma-current moment image; it is constructed before selecting "
+                "a clip mode and is identical for exact and control"
+            ),
+            "sha256_binary64": _array_digest(external),
+            "source_pointers": {
+                "construction": _pointer(
+                    run,
+                    (
+                        "analytic - exact_internal",
+                        "operator = oracle_fixture.forward_operator",
+                    ),
+                ),
+                "fixture_image": _pointer(
+                    oracle_fixture._internal_flux_image,
+                    ("return np.asarray(",),
+                ),
+            },
         },
-        "perturbations": iterations,
+        "residual_definitions": {
+            "map_floor": (
+                "mapped analytic flux minus analytic flux, normalized only by "
+                "the analytic grid-flux span"
+            ),
+            "certificate_relative_residual": (
+                "max(abs(mapped-state)) / max(abs(mapped)); recorded as a pointer "
+                "but not substituted for the requested span-normalized map floor"
+            ),
+            "jacobian": (
+                "state minus the target-normalised map on the residual shadow "
+                "frozen at the analytic state"
+            ),
+            "source_pointers": {
+                "production_map": _pointer(
+                    ForwardFluxOperator.flux_map,
+                    (
+                        "external = self.external",
+                        "return self._exclude_shadow_residual",
+                    ),
+                ),
+                "production_relative_residual": _pointer(
+                    fixed_point._relative_residual,
+                    ("return jnp.max(jnp.abs(mapped - state))",),
+                ),
+            },
+        },
+        "one_application": {
+            "analytic_moments_anchor": {
+                "definition": "external plus analytically integrated exact moments",
+                **_norms(analytic_moment_map - analytic, span, grid_count),
+            },
+            "unscaled_production_map": {
+                "definition": (
+                    "production allocation and moment conversion without "
+                    "target-current normalisation, requested topology class fixed"
+                ),
+                **_norms(unscaled_mapped - analytic, span, grid_count),
+            },
+            "certificate_target_normalised_map": {
+                "definition": (
+                    "the production certificate map with requested topology class and "
+                    "analytic total-current target"
+                ),
+                **_norms(certificate_mapped - analytic, span, grid_count),
+            },
+            "booked_current": _booked_current(
+                operator, analytic, requested_class, target_current
+            ),
+        },
         "jacobian": None,
-        "wall_seconds": None,
         "completed": False,
+        "wall_seconds": None,
     }
-    part = _part_path(output, case_name, requested_cells, mode)
-    _write_json(part, row)
-    perturbation_direction = directions[0]
-    for fraction in PERTURBATION_FRACTIONS:
-        result, terminal = _iteration(
-            operator,
-            analytic,
-            perturbation_direction,
-            fraction,
-            span,
-            grid_count,
-            requested_class,
-            target_current,
-            axis_reference,
-        )
-        iterations.append(result)
-        if fraction == 1.0e-2:
-            terminal_for_figure = terminal
-            figure_summary = result
-        _write_json(part, row)
-        print(
-            f"ORACLE_START_ROW case={case_name} cells={abs(requested_cells)} "
-            f"mode={mode} perturbation={fraction:.0e} "
-            f"contracted={result['terminal']['contracted_toward_analytic']} "
-            f"distance={result['terminal']['relative_sup_distance_to_analytic']:.6e}",
-            flush=True,
-        )
-    row["jacobian"] = _jacobian_probe(
+    _write_json(part, measured)
+    certificate_floor = measured["one_application"]["certificate_target_normalised_map"]
+    print(
+        f"MAP_FLOOR case={case_name} cells={abs(requested_cells)} mode={mode} "
+        f"rms={certificate_floor['relative_rms_of_span']:.8e} "
+        f"sup={certificate_floor['relative_sup_of_span']:.8e}",
+        flush=True,
+    )
+    measured["jacobian"] = _jacobian_probe(
         operator,
         analytic,
+        coordinates,
         span,
         requested_class,
         target_current,
-        directions[1:],
     )
-    row["wall_seconds"] = perf_counter() - started
-    row["completed"] = True
-    _write_json(part, row)
-    if terminal_for_figure is None or figure_summary is None:
-        raise RuntimeError("the 1e-2 terminal state was not retained")
-    return row, terminal_for_figure, figure_summary
-
-
-def _stability(mode_row: dict[str, Any]) -> dict[str, Any]:
-    outcomes = {
-        f"{item['requested_relative_perturbation']:.0e}": item["terminal"][
-            "contracted_toward_analytic"
-        ]
-        for item in mode_row["perturbations"]
-    }
-    return {
-        "analytic_flux_is_stable_fixed_point": all(outcomes.values()),
-        "contraction_by_perturbation": outcomes,
-    }
-
-
-def _diagnosis(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    exact = [row["modes"]["exact"] for row in rows]
-    maximum_floor = max(
-        row["analytic_map_floor"]["relative_sup_of_span"] for row in exact
+    measured["wall_seconds"] = perf_counter() - started
+    measured["completed"] = True
+    _write_json(part, measured)
+    print(
+        f"JACOBIAN_DONE case={case_name} cells={abs(requested_cells)} mode={mode}",
+        flush=True,
     )
-    discrepancies = [
-        step["relative_jvp_discrepancy"]
-        for row in exact
-        for direction in row["jacobian"]["directions"]
-        if direction["status"] == "measured"
-        for step in direction["relative_steps"]
-        if step["relative_step_of_flux_span"] == 1.0e-5
-    ]
-    maximum_jacobian_discrepancy = max(discrepancies, default=float("nan"))
-    any_departure = any(
-        not item["terminal"]["contracted_toward_analytic"]
-        for row in exact
-        for item in row["perturbations"]
+    return measured
+
+
+def _row_explanation(modes: dict[str, Any]) -> dict[str, Any]:
+    exact = modes["exact"]["one_application"]
+    control = modes["chord"]["one_application"]
+    anchor = exact["analytic_moments_anchor"]["relative_sup_of_span"]
+    exact_floor = exact["certificate_target_normalised_map"]["relative_sup_of_span"]
+    control_floor = control["certificate_target_normalised_map"]["relative_sup_of_span"]
+    same_exterior = (
+        modes["exact"]["exterior_term"]["sha256_binary64"]
+        == modes["chord"]["exterior_term"]["sha256_binary64"]
     )
-    if maximum_floor > 1.0e-8:
-        classification = "allocation_floor"
+    if anchor > 1.0e-10:
+        classification = "exterior_completion_does_not_close_exact_moments"
         sentence = (
-            "The exact-clip production map does not admit the analytic state at "
-            "the measured floor, so the defect enters before the Newton Jacobian."
+            "The analytic-moment anchor itself misses the analytic flux, so the "
+            "exterior completion is the first inconsistent term."
         )
-    elif maximum_jacobian_discrepancy > 1.0e-3:
-        classification = "jacobian"
+    elif exact_floor > 5.0 * max(control_floor, 1.0e-12):
+        classification = "exact_allocation_or_moment_path"
         sentence = (
-            "The analytic state is a map fixed point, but its exact tangent does "
-            "not agree with the finite-difference residual action."
+            "The same exterior and residual close analytic moments to roundoff, "
+            "while the exact production allocation has a substantially larger floor "
+            "than whole-cell booking; the floor enters through the exact allocation "
+            "or its production moment conversion, not the exterior or residual sign."
         )
-    elif any_departure:
-        classification = "globalisation"
+    elif max(exact_floor, control_floor) > 1.0e-8:
+        classification = "shared_production_map_path"
         sentence = (
-            "The analytic state is a map fixed point and the Jacobian is consistent, "
-            "but at least one production trajectory leaves its analytic neighbourhood."
+            "Both allocation modes miss despite a roundoff analytic-moment anchor, "
+            "so a production-map term shared by both modes is responsible."
         )
     else:
-        classification = "stable_fixed_point_no_defect_reproduced"
+        classification = "analytic_fixed_point_admitted"
         sentence = (
-            "The analytic state is a stable fixed point of the measured exact-clip "
-            "iteration; no allocation, Jacobian, or globalisation defect reproduced."
+            "Both production allocation modes admit the analytic fixed point at the "
+            "measured precision."
         )
     return {
         "classification": classification,
-        "maximum_exact_relative_map_floor_sup": maximum_floor,
-        "maximum_exact_relative_jacobian_discrepancy_at_1e-5": (
-            maximum_jacobian_discrepancy
-        ),
-        "any_exact_trajectory_left_analytic_neighbourhood": any_departure,
+        "same_exterior_sha256": same_exterior,
+        "analytic_moment_anchor_relative_sup": anchor,
+        "exact_certificate_map_relative_sup": exact_floor,
+        "whole_cell_certificate_map_relative_sup": control_floor,
         "sentence": sentence,
     }
 
 
 def _write_report(path: Path, receipt: dict[str, Any]) -> None:
     lines = [
-        "# Analytic-start production Newton probe",
+        "# Analytic map floor and residual tangent",
         "",
-        receipt["diagnosis"]["sentence"],
+        "No Newton or linear solve was entered. Every row-mode part records the "
+        "exterior construction and the exact source lines for the map, relative "
+        "residual, benchmark residual, and production I-minus-J action.",
         "",
-        "Each map-floor pair is relative RMS / relative sup of the analytic flux span. "
-        "Contraction columns list 1e-4, 1e-3, 1e-2, and 1e-1 starts in that order. "
-        "The Jacobian value is the worst central-difference discrepancy at "
-        "relative step 1e-5.",
-        "",
-        "| Row | Mode | Map floor rms / sup | Booked / analytic current | "
-        "Contraction | Trips | Worst JVP discrepancy | Stable fixed point |",
-        "|---|---|---:|---:|---|---|---:|---|",
+        "| Row | Mode | Anchor sup | Certificate map rms / sup | "
+        "Booked / analytic | Worst JVP discrepancy at 1e-5 |",
+        "|---|---|---:|---:|---:|---:|",
     ]
     for row in receipt["rows"]:
         for mode in MODES:
             measured = row["modes"][mode]
-            floor = measured["analytic_map_floor"]
-            current = floor["booked_current"]["booked_over_analytic"]
-            perturbations = measured["perturbations"]
-            contractions = ", ".join(
-                "yes" if item["terminal"]["contracted_toward_analytic"] else "no"
-                for item in perturbations
-            )
-            trips = ", ".join(
-                str(item["terminal"]["trip_count"]) for item in perturbations
-            )
+            application = measured["one_application"]
+            anchor = application["analytic_moments_anchor"]
+            mapped = application["certificate_target_normalised_map"]
+            current = application["booked_current"]
             discrepancies = [
                 step["relative_jvp_discrepancy"]
                 for direction in measured["jacobian"]["directions"]
-                if direction["status"] == "measured"
                 for step in direction["relative_steps"]
                 if step["relative_step_of_flux_span"] == 1.0e-5
             ]
-            stability = row["stability"][mode]["analytic_flux_is_stable_fixed_point"]
             lines.append(
                 f"| {row['case']} {abs(row['requested_cells'])} | {mode} | "
-                f"{floor['relative_rms_of_span']:.3e} / "
-                f"{floor['relative_sup_of_span']:.3e} | {current:.8f} | "
-                f"{contractions} | {trips} | {max(discrepancies):.3e} | "
-                f"{'yes' if stability else 'no'} |"
+                f"{anchor['relative_sup_of_span']:.3e} | "
+                f"{mapped['relative_rms_of_span']:.3e} / "
+                f"{mapped['relative_sup_of_span']:.3e} | "
+                f"{current['booked_over_analytic']:.8f} | "
+                f"{max(discrepancies):.3e} |"
             )
-    lines.extend(
-        (
-            "",
-            "The machine interaction arrays were constructed once per row and reused "
-            "for both allocation modes and every perturbation. Each prefix state was "
-            "recomputed from the same initial state with the corresponding production "
-            "Newton-step budget, preserving the certificate solver rather than "
-            "replacing it with an instrumented iteration.",
-            "",
-            f"Figure directory: `{DEFAULT_OUTPUT.parent}`.",
-            "",
-        )
-    )
+        lines.extend(("", row["explanation"]["sentence"], ""))
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines), encoding="utf-8")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def run(output: Path, report_directory: Path) -> dict[str, Any]:
@@ -848,7 +598,7 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
         default_persistent_compilation_cache_root()
     )
     original_mode = support_clip_mode()
-    rows: list[dict[str, Any]] = []
+    rows = []
     try:
         for case_name, requested_cells in ROWS:
             carrier_case, source_case, exact = certificate._case(case_name)
@@ -864,11 +614,14 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
                 source_case, empty_operator, analytic
             )
             exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
-            exact_internal = oracle_fixture._internal_flux_image(
-                empty_operator, exact_coefficients
+            exact_internal = np.asarray(
+                oracle_fixture._internal_flux_image(empty_operator, exact_coefficients),
+                dtype=np.float64,
             )
             operator = oracle_fixture.forward_operator(
-                source_case, machine, analytic - exact_internal
+                source_case,
+                machine,
+                analytic - exact_internal,
             )
             target_current, _centroid, target_receipt = (
                 certificate._closed_form_current_target(
@@ -880,104 +633,67 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
                 if certificate._is_diverted_case(case_name)
                 else TopologyClass.LIMITED
             )
-            grid_count = len(machine.node)
-            analytic_topology = _analytic_topology(case_name, exact)
-            axis_reference = np.asarray(
-                analytic_topology["axis_rz_m"], dtype=np.float64
-            )
-            analytic_read = _topology(operator, analytic)
-            if analytic_read["axis_flux_wb"] is None:
+            topology = _topology(operator, analytic)
+            if topology["axis_flux_wb"] is None:
                 raise RuntimeError(
                     f"the analytic topology instrument could not read {case_name}"
                 )
             span = abs(
-                float(analytic_read["axis_flux_wb"])
-                - float(analytic_read["boundary_flux_wb"])
+                float(topology["axis_flux_wb"]) - float(topology["boundary_flux_wb"])
             )
             if not np.isfinite(span) or span <= 0.0:
                 raise RuntimeError(f"the analytic flux span is invalid for {case_name}")
-            modes: dict[str, Any] = {}
-            terminals: dict[str, tuple[np.ndarray, dict[str, Any]]] = {}
-            for mode in MODES:
-                measured, terminal, figure_summary = _measure_mode(
+            modes = {
+                mode: _mode_measure(
+                    output,
                     case_name,
                     requested_cells,
                     mode,
                     operator,
                     analytic,
                     coordinates,
-                    grid_count,
+                    len(machine.node),
                     span,
                     requested_class,
                     target_current,
-                    axis_reference,
-                    output,
+                    exact_internal,
                 )
-                modes[mode] = measured
-                terminals[mode] = (terminal, figure_summary)
-            figure = output.parent / f"{_row_slug(case_name, requested_cells)}.png"
-            _render_row(
-                figure,
-                case_name,
-                requested_cells,
-                coordinates,
-                analytic,
-                np.asarray(machine.wall_node, dtype=np.float64),
-                certificate._boundary(case_name, exact),
-                analytic_topology,
-                terminals,
-            )
+                for mode in MODES
+            }
             row = {
                 "case": case_name,
                 "requested_cells": requested_cells,
-                "realised_cells": grid_count,
+                "realised_cells": len(machine.node),
                 "state_dimension": len(analytic),
-                "characteristic_pitch_m": float(
-                    np.sqrt(np.median(np.asarray(machine.area)))
-                ),
                 "analytic_flux_span_wb": span,
                 "analytic_current_target_a": target_current,
                 "analytic_current_target_receipt": target_receipt,
                 "interaction_matrix_cache": machine.cache,
                 "interaction_matrix_construction_count": 1,
                 "modes": modes,
-                "stability": {mode: _stability(modes[mode]) for mode in MODES},
-                "figure": {
-                    "filesystem_path": str(figure.relative_to(ROOT)),
-                    "project_absolute_src": (
-                        f"/nova/{figure.relative_to(ROOT / 'docs')}"
-                    ),
-                    "sha256": hashlib.sha256(figure.read_bytes()).hexdigest(),
-                    "caption": (
-                        "Exact and whole-cell control terminal states from the 1e-2 "
-                        "analytic perturbation; analytic contours and nulls blue, "
-                        "terminal contours and nulls ochre, shared Wb levels, "
-                        "wall shown."
-                    ),
-                },
+                "explanation": _row_explanation(modes),
             }
             rows.append(row)
-            row_part = (
+            _write_json(
                 output.parent
                 / PART_DIRECTORY_NAME
-                / f"{_row_slug(case_name, requested_cells)}.json"
-            )
-            _write_json(
-                row_part,
+                / f"{_row_slug(case_name, requested_cells)}.json",
                 row,
             )
     finally:
         set_support_clip_mode(original_mode)
     receipt = {
-        "schema": "nova.oracle-start-newton-probe",
+        "schema": "nova.oracle-start-map-jacobian",
         "version": 1,
         "source_revision": _source_revision(),
         "production_code_modified": False,
+        "nonlinear_solve_entered": False,
+        "linear_solve_entered": False,
         "lane": {
             **lane,
             "persistent_compilation_cache": cache.receipt(),
             "wall_seconds": perf_counter() - started,
-            "exit_marker": "ORACLE_START_NEWTON_PROBE_EXIT=0",
+            "exit_marker": "ORACLE_START_MAP_JACOBIAN_EXIT=0",
         },
         "design": {
             "rows": [
@@ -988,23 +704,17 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
                 "exact": "signed-flux spline-chain exact clip",
                 "chord": "production whole-cell booking control",
             },
-            "perturbation_relative_sup_fractions": PERTURBATION_FRACTIONS,
-            "smooth_random_seed": RANDOM_SEED,
-            "newton_steps": recovery.NEWTON_STEPS,
-            "gmres_iterations": recovery.KRYLOV_ITERATIONS,
-            "warmup": 0,
             "finite_difference_relative_steps": FINITE_DIFFERENCE_STEPS,
             "random_jacobian_directions": RANDOM_DIRECTION_COUNT,
+            "random_seed": RANDOM_SEED,
             "interaction_matrix_policy": (
-                "one cached OracleMachine and one ForwardFluxOperator per row, reused "
-                "across allocation modes and perturbations"
+                "one cached machine and operator per row, reused across both modes"
             ),
         },
         "rows": rows,
     }
-    receipt["diagnosis"] = _diagnosis(rows)
     _write_json(output, receipt)
-    _write_report(report_directory / "report.md", receipt)
+    _write_report(report_directory / "map-jacobian-report.md", receipt)
     return receipt
 
 
@@ -1020,8 +730,18 @@ def _parse() -> argparse.Namespace:
 def main() -> None:
     arguments = _parse()
     receipt = run(arguments.output, arguments.report_directory)
-    print(json.dumps(_strict(receipt["diagnosis"]), sort_keys=True), flush=True)
-    print("ORACLE_START_NEWTON_PROBE_EXIT=0", flush=True)
+    print(
+        json.dumps(
+            {
+                "completed_rows": len(receipt["rows"]),
+                "nonlinear_solve_entered": receipt["nonlinear_solve_entered"],
+                "linear_solve_entered": receipt["linear_solve_entered"],
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+    print("ORACLE_START_MAP_JACOBIAN_EXIT=0", flush=True)
 
 
 if __name__ == "__main__":

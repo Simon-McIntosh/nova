@@ -547,6 +547,11 @@ class ForwardProfile:
         init=False,
         repr=False,
     )
+    _accelerated_program_cache: dict[tuple[object, ...], Callable] = field(
+        default_factory=dict,
+        init=False,
+        repr=False,
+    )
 
     def __post_init__(self):
         """Validate that the lattice indexes the operator's plasma grid."""
@@ -1740,6 +1745,59 @@ class ForwardProfile:
                 **options,
             )
         external = self.operator.external(current, prescribed_current)
+        program = self._accelerated_history_program(
+            route,
+            requested_class=requested_class,
+            target_current=target_current,
+            **options,
+        )
+        history = program(initial_flux, external)
+        return self._receipt(
+            history.state,
+            history,
+            requested_class,
+            target_current,
+            current,
+            prescribed_current,
+        )
+
+    def _accelerated_history_program(
+        self,
+        route: str,
+        *,
+        requested_class=None,
+        target_current=None,
+        **options,
+    ) -> Callable[[jax.Array, jax.Array], fixed_point.FixedPointResult]:
+        """Return one compiled history program for a static solve configuration.
+
+        The callable is retained by the profile so repeated conductor states
+        reuse the same JAX function identity. Initial flux and exterior flux
+        remain explicit array arguments; topology callbacks and policy values
+        are static properties of the mesh program.
+        """
+
+        def static_value(value):
+            if value is None or isinstance(value, str | int | float | bool):
+                return value
+            try:
+                array = np.asarray(value)
+            except TypeError, ValueError:
+                return repr(value)
+            return tuple(array.shape), str(array.dtype), array.tobytes()
+
+        key = (
+            route,
+            static_value(requested_class),
+            static_value(target_current),
+            tuple(
+                (name, static_value(value)) for name, value in sorted(options.items())
+            ),
+        )
+        cached = self._accelerated_program_cache.get(key)
+        if cached is not None:
+            return cached
+
         mapped = self.operator.traced_flux_map(requested_class, target_current)
         shadowed_map = self.operator.traced_flux_map_with_shadow(
             requested_class, target_current
@@ -1753,43 +1811,40 @@ class ForwardProfile:
                 state, requested_class, previous_shadow=previous
             )
 
-        shadow_options = {
-            "shadow_mask_fn": shadow_mask,
-            "promoted_shadow_mask_fn": promoted_shadow_mask,
-            "shadowed_map_fn": shadowed_map,
-            "map_arguments": (external,),
-        }
-
         if route == "newton_krylov":
-            history = fixed_point.newton_krylov(
-                mapped,
-                initial_flux,
-                **{
-                    "newton_steps": self.newton_steps,
-                    **shadow_options,
-                    **options,
-                },
-            )
+
+            def solve(initial_flux, external):
+                return fixed_point.newton_krylov(
+                    mapped,
+                    initial_flux,
+                    shadow_mask_fn=shadow_mask,
+                    promoted_shadow_mask_fn=promoted_shadow_mask,
+                    shadowed_map_fn=shadowed_map,
+                    map_arguments=(external,),
+                    **{"newton_steps": self.newton_steps, **options},
+                )
+
         else:
             scheme = fixed_point.picard if route == "picard" else fixed_point.anderson
-            history = scheme(
-                mapped,
-                initial_flux,
-                **{
-                    "evaluations": self.evaluations,
-                    "relaxation": self.relaxation,
-                    **shadow_options,
-                    **options,
-                },
-            )
-        return self._receipt(
-            history.state,
-            history,
-            requested_class,
-            target_current,
-            current,
-            prescribed_current,
-        )
+
+            def solve(initial_flux, external):
+                return scheme(
+                    mapped,
+                    initial_flux,
+                    shadow_mask_fn=shadow_mask,
+                    promoted_shadow_mask_fn=promoted_shadow_mask,
+                    shadowed_map_fn=shadowed_map,
+                    map_arguments=(external,),
+                    **{
+                        "evaluations": self.evaluations,
+                        "relaxation": self.relaxation,
+                        **options,
+                    },
+                )
+
+        program = jax.jit(solve)
+        self._accelerated_program_cache[key] = program
+        return program
 
     def constraint_response_matrix(
         self,

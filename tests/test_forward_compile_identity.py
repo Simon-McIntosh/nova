@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 
-import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
@@ -87,24 +86,15 @@ def _maps(profile, requested_class, target_current):
 def _lower_certificate_solve(row, external=None):
     """Lower the production fixed-point program with exterior flux as input."""
     profile, seed, requested_class, target_current, request = row
-    mapped, shadowed, shadow_mask, promoted_shadow_mask = _maps(
-        profile, requested_class, target_current
+    program = profile._accelerated_history_program(
+        "newton_krylov",
+        requested_class=requested_class,
+        target_current=target_current,
+        **request.policy.kernel_options(),
     )
-
-    def solve(external):
-        return fixed_point.newton_krylov(
-            mapped,
-            seed,
-            shadow_mask_fn=shadow_mask,
-            promoted_shadow_mask_fn=promoted_shadow_mask,
-            shadowed_map_fn=shadowed,
-            map_arguments=(external,),
-            **request.policy.kernel_options(),
-        )
-
     if external is None:
         external = profile.operator.external()
-    return jax.jit(solve).lower(external), external
+    return program.lower(seed, external), external
 
 
 def _digest(lowered) -> str:

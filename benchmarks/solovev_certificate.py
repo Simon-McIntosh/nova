@@ -3823,7 +3823,12 @@ def _measure_solve_memory_scaling(output: Path) -> dict[str, Any]:
             "exponent": exponent,
             "prediction": predicted,
             "linear_target_exponent": 1.0,
-            "scaling_defect": exponent > 1.25,
+            "scaling_defect": True,
+            "interpretation": (
+                "the two-rung exponent does not excuse a 96.8 GiB floor at the "
+                "smallest compiled rung; fixed-capacity graph replication violates "
+                "the linear-in-cells execution target"
+            ),
         },
         "failed_execution": {
             "slurm_job_id": "1270272",

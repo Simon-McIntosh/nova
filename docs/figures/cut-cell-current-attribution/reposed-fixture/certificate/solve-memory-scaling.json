@@ -22,7 +22,8 @@
         "temp_size_in_bytes": 367683318992.1561
       }
     },
-    "scaling_defect": false
+    "interpretation": "the two-rung exponent does not excuse a 96.8 GiB floor at the smallest compiled rung; fixed-capacity graph replication violates the linear-in-cells execution target",
+    "scaling_defect": true
   },
   "lane": {
     "execution": "slurm",

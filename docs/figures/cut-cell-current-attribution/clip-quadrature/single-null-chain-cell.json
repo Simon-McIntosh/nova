@@ -1,0 +1,103 @@
+{
+  "analytic_x_point_cells": [
+    26
+  ],
+  "comparison": "64 samples per segment against 128",
+  "controlling_cell": {
+    "absolute_change": 6.067013180838243e-05,
+    "boundary_cell": true,
+    "centroid_m": [
+      1.512916688099041,
+      -0.9910946682752888
+    ],
+    "contains_analytic_x_point": true,
+    "distance_from_centroid_to_x_point_m": 0.0281708437564856,
+    "field": "vertical_first_moment",
+    "hull_cell": false,
+    "index": 26,
+    "reference_value": 0.24580156699511557,
+    "vertex_count_128": 131,
+    "vertex_count_64": 67
+  },
+  "lane": {
+    "jax_enable_x64": true,
+    "platform": "cpu",
+    "slurm_job_id": "1270439"
+  },
+  "maximum_relative_change": 0.00017980198537379994,
+  "ranked_cells": [
+    {
+      "boundary_cell": true,
+      "contains_analytic_x_point": true,
+      "hull_cell": false,
+      "index": 26,
+      "maximum_relative_change": 0.00017980198537379994
+    },
+    {
+      "boundary_cell": true,
+      "contains_analytic_x_point": false,
+      "hull_cell": false,
+      "index": 1029,
+      "maximum_relative_change": 4.029668200163546e-06
+    },
+    {
+      "boundary_cell": true,
+      "contains_analytic_x_point": false,
+      "hull_cell": false,
+      "index": 533,
+      "maximum_relative_change": 3.7168373060979006e-06
+    },
+    {
+      "boundary_cell": true,
+      "contains_analytic_x_point": false,
+      "hull_cell": false,
+      "index": 532,
+      "maximum_relative_change": 3.154110686853012e-06
+    },
+    {
+      "boundary_cell": true,
+      "contains_analytic_x_point": false,
+      "hull_cell": false,
+      "index": 448,
+      "maximum_relative_change": 2.871976532609539e-06
+    },
+    {
+      "boundary_cell": true,
+      "contains_analytic_x_point": false,
+      "hull_cell": false,
+      "index": 1038,
+      "maximum_relative_change": 2.8602602235213117e-06
+    },
+    {
+      "boundary_cell": true,
+      "contains_analytic_x_point": false,
+      "hull_cell": false,
+      "index": 1050,
+      "maximum_relative_change": 2.8336822950386216e-06
+    },
+    {
+      "boundary_cell": true,
+      "contains_analytic_x_point": false,
+      "hull_cell": false,
+      "index": 679,
+      "maximum_relative_change": 2.7637011209074075e-06
+    },
+    {
+      "boundary_cell": true,
+      "contains_analytic_x_point": false,
+      "hull_cell": false,
+      "index": 457,
+      "maximum_relative_change": 2.7049114846418607e-06
+    },
+    {
+      "boundary_cell": true,
+      "contains_analytic_x_point": false,
+      "hull_cell": false,
+      "index": 1037,
+      "maximum_relative_change": 2.464608466390761e-06
+    }
+  ],
+  "realised_cells": 1074,
+  "requested_cells": 1000,
+  "schema": "nova.single-null-chain-sampling-cell"
+}

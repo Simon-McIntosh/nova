@@ -16,8 +16,8 @@
   "lane": {
     "jax_enable_x64": true,
     "platform": "gpu",
-    "slurm_job_id": "1270906",
-    "wall_seconds": 1116.0553623558953
+    "slurm_job_id": "1270914",
+    "wall_seconds": 1137.4754663072526
   },
   "limits": {
     "largest_array_bytes": 1073741824,
@@ -85,7 +85,7 @@
       },
       "arm": "compact-bank-scan",
       "case": "weak-rotation-reactor-static",
-      "compile_wall_seconds": 1093.3233217336237,
+      "compile_wall_seconds": 1113.4335246998817,
       "compiler_artifacts": {
         "optimised_hlo_gzip": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-quadrature/hlo-scan-300/compact-bank-scan-optimised.hlo.txt.gz",
         "qualifying_array_census_gzip": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-quadrature/hlo-scan-300/compact-bank-scan-array-census.jsonl.gz"
@@ -110,11 +110,29 @@
       },
       "executed": false,
       "hlo_instruction_counts": {
+        "scope_body_copies": {
+          "_profile_support": 0,
+          "_traced_clip": 0,
+          "compact_clipped_current_moments": 85,
+          "compact_clipped_field_integrals": 0,
+          "compact_cut_current_scan_body": 83,
+          "compact_cut_field_scan_body": 0
+        },
         "scope_occurrences": {
           "_profile_support": 2,
           "_traced_clip": 2,
           "compact_clipped_current_moments": 92699,
-          "compact_clipped_field_integrals": 0
+          "compact_clipped_field_integrals": 0,
+          "compact_cut_current_scan_body": 45118,
+          "compact_cut_field_scan_body": 0
+        },
+        "scope_while_body_copies": {
+          "_profile_support": 0,
+          "_traced_clip": 0,
+          "compact_clipped_current_moments": 84,
+          "compact_clipped_field_integrals": 0,
+          "compact_cut_current_scan_body": 83,
+          "compact_cut_field_scan_body": 0
         },
         "total": 1042334,
         "while_operations": 2250
@@ -11935,5 +11953,5 @@
     }
   ],
   "schema": "nova.compact-clip-solve-memory",
-  "source_revision": "8ba777a4f62b65709168241b24d76a1c8496ec2a"
+  "source_revision": "be8987a1c564763eaf1e749c9d682f57db15a806"
 }

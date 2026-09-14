@@ -677,7 +677,9 @@ def _top(
 def _build_profile(case_name: str, requested_cells: int):
     configure_dtypes()
     carrier_case, source_case, exact = _case(case_name)
-    machine = _case_machine(case_name, carrier_case, exact, requested_cells)
+    # the certificate and the oracle fixture index machines by a negative cell
+    # count (dplasma<0 = filament count; positive dplasma is a linear spacing)
+    machine = _case_machine(case_name, carrier_case, exact, -requested_cells)
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )

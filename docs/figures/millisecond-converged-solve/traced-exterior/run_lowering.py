@@ -106,12 +106,23 @@ def _write_hlo_difference(fixture, scaled) -> tuple[str, str, Path]:
     RUN_DIRECTORY.mkdir(parents=True, exist_ok=True)
     fixture_text = fixture.as_text(dialect="stablehlo")
     scaled_text = scaled.as_text(dialect="stablehlo")
+    fixture_debug_text = fixture.as_text(dialect="stablehlo", debug_info=True)
+    scaled_debug_text = scaled.as_text(dialect="stablehlo", debug_info=True)
     fixture_path = RUN_DIRECTORY / f"certificate-fixture-{RUN_LABEL}.stablehlo"
     scaled_path = RUN_DIRECTORY / f"certificate-scaled-{RUN_LABEL}.stablehlo"
+    fixture_debug_path = (
+        RUN_DIRECTORY / f"certificate-fixture-{RUN_LABEL}-debug.stablehlo"
+    )
+    scaled_debug_path = (
+        RUN_DIRECTORY / f"certificate-scaled-{RUN_LABEL}-debug.stablehlo"
+    )
     diff_path = RUN_DIRECTORY / f"certificate-{RUN_LABEL}.stablehlo.diff"
+    debug_diff_path = RUN_DIRECTORY / f"certificate-{RUN_LABEL}-debug.stablehlo.diff"
     constants_path = RUN_DIRECTORY / f"certificate-{RUN_LABEL}-constants.json"
     fixture_path.write_text(fixture_text)
     scaled_path.write_text(scaled_text)
+    fixture_debug_path.write_text(fixture_debug_text)
+    scaled_debug_path.write_text(scaled_debug_text)
     diff_path.write_text(
         "\n".join(
             difflib.unified_diff(
@@ -119,6 +130,18 @@ def _write_hlo_difference(fixture, scaled) -> tuple[str, str, Path]:
                 scaled_text.splitlines(),
                 fromfile=str(fixture_path),
                 tofile=str(scaled_path),
+                lineterm="",
+            )
+        )
+        + "\n"
+    )
+    debug_diff_path.write_text(
+        "\n".join(
+            difflib.unified_diff(
+                fixture_debug_text.splitlines(),
+                scaled_debug_text.splitlines(),
+                fromfile=str(fixture_debug_path),
+                tofile=str(scaled_debug_path),
                 lineterm="",
             )
         )
@@ -164,7 +187,9 @@ def _write_hlo_difference(fixture, scaled) -> tuple[str, str, Path]:
     print(
         "STAGE StableHLO artifacts written "
         f"fixture={fixture_path} scaled={scaled_path} diff={diff_path} "
-        f"constants={constants_path} differing={len(differing)}",
+        f"fixture_debug={fixture_debug_path} scaled_debug={scaled_debug_path} "
+        f"debug_diff={debug_diff_path} constants={constants_path} "
+        f"differing={len(differing)}",
         flush=True,
     )
     return fixture_text, scaled_text, constants_path

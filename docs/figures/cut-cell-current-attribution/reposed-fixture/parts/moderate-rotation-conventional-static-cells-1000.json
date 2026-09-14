@@ -1,0 +1,110 @@
+{
+  "analytic_current_target": {
+    "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+    "current_centroid_m": [
+      1.6580796852430872,
+      0.0
+    ],
+    "declared_current_a": 1624991.1778605897,
+    "quadrature_current_a": 1624991.1778605892,
+    "quadrature_nodes": 512,
+    "quadrature_relative_closure": 2.8656234793890617e-16
+  },
+  "case": "moderate-rotation-conventional-static",
+  "combinations": [
+    {
+      "affine_rms_energy_share": 0.9303928398962441,
+      "analytic_current_a": 1624991.1778605897,
+      "booked_current_a": 1624967.8191492907,
+      "booked_over_analytic": 0.9999856253303911,
+      "case": "moderate-rotation-conventional-static",
+      "cut_cell_count": 135,
+      "cut_cell_image_energy_share": 0.005798512935858612,
+      "difference_image_closure_sup_wb": 5.598319911028916e-05,
+      "exterior": "analytic-clipped",
+      "map_floor": {
+        "rms_fraction_of_span": 3.423767978609019e-05,
+        "rms_wb": 4.7289586454457934e-05,
+        "sup_fraction_of_span": 4.461827301652277e-05,
+        "sup_wb": 6.162741437054642e-05
+      },
+      "mode": "exact",
+      "normalisation_amplitude": 1.000014374876243,
+      "realised_cells": 1070,
+      "requested_cells": -1000
+    },
+    {
+      "affine_rms_energy_share": 0.7787686682789821,
+      "analytic_current_a": 1624991.1778605897,
+      "booked_current_a": 1764593.0626361058,
+      "booked_over_analytic": 1.0859093185720008,
+      "case": "moderate-rotation-conventional-static",
+      "cut_cell_count": 0,
+      "cut_cell_image_energy_share": 0.0,
+      "difference_image_closure_sup_wb": 0.3968487236079785,
+      "exterior": "analytic-clipped",
+      "map_floor": {
+        "rms_fraction_of_span": 0.13087757980577372,
+        "rms_wb": 0.18077003651660506,
+        "sup_fraction_of_span": 0.2833888297412589,
+        "sup_wb": 0.3914208161302306
+      },
+      "mode": "chord",
+      "normalisation_amplitude": 0.9208872075202617,
+      "realised_cells": 1070,
+      "requested_cells": -1000
+    },
+    {
+      "affine_rms_energy_share": 0.9541207730752319,
+      "analytic_current_a": 1624991.1778605897,
+      "booked_current_a": 1624967.8191492907,
+      "booked_over_analytic": 0.9999856253303911,
+      "case": "moderate-rotation-conventional-static",
+      "cut_cell_count": 135,
+      "cut_cell_image_energy_share": 0.005798512935858612,
+      "difference_image_closure_sup_wb": null,
+      "exterior": "whole-cell",
+      "map_floor": {
+        "rms_fraction_of_span": 0.12748319626522533,
+        "rms_wb": 0.17608166408882253,
+        "sup_fraction_of_span": 0.1795345586802412,
+        "sup_wb": 0.24797577076824912
+      },
+      "mode": "exact",
+      "normalisation_amplitude": 1.000014374876243,
+      "realised_cells": 1070,
+      "requested_cells": -1000
+    },
+    {
+      "affine_rms_energy_share": 0.9311749979927604,
+      "analytic_current_a": 1624991.1778605897,
+      "booked_current_a": 1764593.0626361058,
+      "booked_over_analytic": 1.0859093185720008,
+      "case": "moderate-rotation-conventional-static",
+      "cut_cell_count": 0,
+      "cut_cell_image_energy_share": 0.0,
+      "difference_image_closure_sup_wb": null,
+      "exterior": "whole-cell",
+      "map_floor": {
+        "rms_fraction_of_span": 0.22545408304971076,
+        "rms_wb": 0.3114004926298002,
+        "sup_fraction_of_span": 0.3026696398902142,
+        "sup_wb": 0.41805175444578335
+      },
+      "mode": "chord",
+      "normalisation_amplitude": 0.9208872075202617,
+      "realised_cells": 1070,
+      "requested_cells": -1000
+    }
+  ],
+  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-repose-fixture-exterior/docs/figures/cut-cell-current-attribution/reposed-fixture/moderate-rotation-conventional-static-cells-1000.svg",
+  "fixture_exterior_cache": {
+    "build_seconds": 32.21028588153422,
+    "hit": false,
+    "lock_wait_seconds": 8.192844688892365e-06,
+    "semantic_key": "4cb11cd761cd8334",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
+  },
+  "realised_cells": 1070,
+  "requested_cells": -1000
+}

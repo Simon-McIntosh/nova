@@ -13,6 +13,7 @@ import json
 import math
 from pathlib import Path
 from time import perf_counter
+from types import SimpleNamespace
 
 import jax
 import jax.numpy as jnp
@@ -30,8 +31,12 @@ from nova.biot.polygonanalytic import (
 )
 from nova.biot.target import FluxTarget
 from nova.database.zarrstore import ZarrStore
-from nova.equilibrium.domain import PlasmaDomain
-from nova.equilibrium.forward_operator import ForwardFluxOperator
+from nova.equilibrium.domain import DomainMasks, PlasmaDomain
+from nova.equilibrium.forward_operator import (
+    ForwardFluxOperator,
+    set_support_clip_mode,
+    support_clip_mode,
+)
 from nova.equilibrium.rotation import IsothermalRotation, RotatingDomainProfile
 from nova.equilibrium.source import ForwardSource
 from nova.equilibrium.stencil_mesh import (
@@ -52,6 +57,8 @@ FIXTURE_REQUESTS = {"coarse": -500, "fine": -1000}
 WALL_POINT_COUNT = 121
 CACHE_SCHEMA = "analytic-oracle-hex-machine"
 CACHE_FILENAME = "analytic_oracle_hex_machine"
+EXTERIOR_CACHE_SCHEMA = "analytic-oracle-clipped-exterior"
+EXTERIOR_CACHE_FILENAME = "analytic_oracle_clipped_exterior"
 OUTPUT = Path(__file__).resolve().parent
 FORBIDDEN_IMPORT_PREFIXES = ("h5py", "imas")
 FORBIDDEN_PATH_FRAGMENTS = (".geqdsk", ".npz", "/archive/", "stored_reference")
@@ -773,11 +780,129 @@ def _polygon_rule(
     return np.asarray(points), np.asarray(area_weights)
 
 
+def _analytic_separatrix(analytic: object, points: int = 2881) -> np.ndarray:
+    """Return the independently declared analytic zero-flux core boundary."""
+    separatrix = getattr(analytic, "separatrix", None)
+    if separatrix is not None:
+        return _clean_vertices(np.asarray(separatrix(points), dtype=np.float64))
+    radius, half_height, _weight, _offset = analytic._surface_nodes(0.0, points // 2)
+    return _clean_vertices(
+        np.vstack(
+            (
+                np.column_stack((radius, half_height)),
+                np.column_stack((radius[::-1], -half_height[::-1])),
+            )
+        )
+    )
+
+
+def _analytic_axis_flux(analytic: object) -> float:
+    """Return the analytic axis flux in the fixture state's convention."""
+    value = float(analytic.axis_flux)
+    if isinstance(analytic, RotatingEquilibrium):
+        return TOTAL_FLUX_FACTOR * value
+    return value
+
+
+def _analytic_profile_support(
+    analytic: object, operator: ForwardFluxOperator, state: np.ndarray
+):
+    """Trace the production spline clip from analytic topology, without a read.
+
+    The analytic zero level and core boundary decide the topology.  The same
+    spline/local-polynomial evaluator and atomic mesh used by the production
+    exact clip decide the per-cell polygon, so fixture posing and an exact-mode
+    map at the analytic state share geometry without asking the production
+    topology read to discover the analytic nulls.
+    """
+    state = jnp.asarray(state)
+    physical = state[: operator.physical_node_number]
+    grid_flux, _wall_flux = operator.topology.split_flux_map(physical)
+    axis_flux = jnp.asarray(_analytic_axis_flux(analytic), dtype=grid_flux.dtype)
+    boundary_flux = jnp.asarray(0.0, dtype=grid_flux.dtype)
+    flux_span = boundary_flux - axis_flux
+    psi_norm = (grid_flux - axis_flux) / flux_span
+    sample_flux = operator.sample_node_flux(state)
+    sample_psi_norm = (sample_flux - axis_flux) / flux_span
+
+    atomic_mesh = operator.moment_geometry.atomic_mesh
+    core = Polygon(_analytic_separatrix(analytic))
+    participation = np.asarray(
+        [
+            core.intersection(Polygon(cell)).area
+            > 256.0 * np.finfo(np.float64).eps * max(core.area, 1.0)
+            for cell in (
+                np.asarray(atomic_mesh.node_coordinates)[indices[:count]]
+                for indices, count in zip(
+                    np.asarray(atomic_mesh.cell_nodes),
+                    np.asarray(atomic_mesh.cell_vertex_count),
+                    strict=True,
+                )
+            )
+        ],
+        dtype=bool,
+    )
+    labels = jnp.where(
+        jnp.asarray(participation),
+        jnp.asarray(int(PlasmaDomain.CORE), dtype=jnp.int32),
+        jnp.asarray(int(PlasmaDomain.EXCLUDED_MATERIAL), dtype=jnp.int32),
+    )
+    masks = DomainMasks(label=labels, psi_norm=psi_norm)
+    topology = SimpleNamespace(
+        axis_flux=axis_flux,
+        boundary_flux=boundary_flux,
+        flux_span=flux_span,
+    )
+    previous = support_clip_mode()
+    set_support_clip_mode("exact")
+    try:
+        return operator._profile_support(
+            masks, topology, physical, sample_psi_norm
+        ).qualify(jnp.asarray(participation))
+    finally:
+        set_support_clip_mode(previous)
+
+
 def exact_current_moments(
+    case: RotatingEquilibrium,
+    operator: ForwardFluxOperator,
+    state: np.ndarray,
+    *,
+    analytic: object | None = None,
+) -> CellCurrentMoments:
+    """Integrate analytic density over the analytic-separatrix clipped cells."""
+    support = _analytic_profile_support(
+        case if analytic is None else analytic, operator, state
+    )
+    counts = np.asarray(support.vertex_count)
+    vertices = np.asarray(support.support_vertices)
+    centres = np.asarray(operator.moment_geometry.atomic_mesh.centroids)
+    values = np.zeros((3, len(centres)))
+    for cell, count in enumerate(counts):
+        if count < 3:
+            continue
+        points, weights = _polygon_rule(vertices[cell, :count])
+        density = np.asarray(case.toroidal_current_density(points[:, 0], points[:, 1]))
+        weighted = weights * density
+        offset = points - centres[cell]
+        values[0, cell] = np.sum(weighted)
+        values[1, cell] = np.sum(weighted * offset[:, 0])
+        values[2, cell] = np.sum(weighted * offset[:, 1])
+    return CellCurrentMoments(*values)
+
+
+def whole_cell_current_moments(
     case: RotatingEquilibrium, operator: ForwardFluxOperator, state: np.ndarray
 ) -> CellCurrentMoments:
-    """Integrate the analytic density over the operator's exact traced supports."""
-    masks, _topology, _sample, support = operator._support_partition(jnp.asarray(state))
+    """Retain the former whole-cell fixture integration as a comparison arm."""
+    previous = support_clip_mode()
+    set_support_clip_mode("chord")
+    try:
+        masks, _topology, _sample, support = operator._support_partition(
+            jnp.asarray(state)
+        )
+    finally:
+        set_support_clip_mode(previous)
     counts = np.asarray(support.vertex_count)
     vertices = np.asarray(support.support_vertices)
     centres = np.asarray(operator.moment_geometry.atomic_mesh.centroids)
@@ -794,6 +919,98 @@ def exact_current_moments(
         values[1, cell] = np.sum(weighted * offset[:, 0])
         values[2, cell] = np.sum(weighted * offset[:, 1])
     return CellCurrentMoments(*values)
+
+
+def _exterior_cache_identity(
+    case: RotatingEquilibrium,
+    analytic: object,
+    machine: OracleMachine,
+    state: np.ndarray,
+) -> dict[str, object]:
+    """Return the geometry and analytic-field identity of one exterior."""
+    return {
+        "schema": EXTERIOR_CACHE_SCHEMA,
+        "machine_semantic_key": machine.cache["semantic_key"],
+        "density_case": case.name,
+        "density_coefficients": {
+            "major_radius": case.major_radius,
+            "pressure_coefficient": case.pressure_coefficient,
+            "field_coefficient": case.field_coefficient,
+            "rotation_parameter": case.rotation_parameter,
+        },
+        "analytic_type": type(analytic).__name__,
+        "analytic_state_sha256_binary64": _float64_digest(state),
+        "analytic_boundary_sha256_binary64": _float64_digest(
+            _analytic_separatrix(analytic)
+        ),
+        "clip": "production-spline-geometry-from-analytic-zero-level",
+        "moment_order": 1,
+    }
+
+
+def cached_fixture_exterior(
+    case: RotatingEquilibrium,
+    analytic: object,
+    machine: OracleMachine,
+    operator: ForwardFluxOperator,
+    state: np.ndarray,
+) -> tuple[CellCurrentMoments, np.ndarray, dict[str, object]]:
+    """Load or build the analytic-clipped fixture exterior for one carrier."""
+    identity = _exterior_cache_identity(case, analytic, machine, state)
+    store = ZarrStore(filename=EXTERIOR_CACHE_FILENAME, dirname=".nova")
+    store.group = store.hash_attrs(identity)
+    with _cache_lock(store) as lock_wait:
+        started = perf_counter()
+        reader = ZarrStore(
+            filename=store.filename, dirname=store.dirname, group=store.group
+        )
+        try:
+            reader.load()
+            if reader.data.attrs.get("semantic_identity") != json.dumps(
+                identity, sort_keys=True, separators=(",", ":")
+            ):
+                raise ValueError("fixture exterior cache identity mismatch")
+            moments = CellCurrentMoments(
+                *(
+                    np.asarray(reader.data[name].values, dtype=np.float64)
+                    for name in ("cell_current", "radial_moment", "vertical_moment")
+                )
+            )
+            exterior = np.asarray(reader.data["exterior"].values, dtype=np.float64)
+            hit = True
+            build_seconds = 0.0
+        except FileNotFoundError, KeyError, OSError, ValueError:
+            moments = exact_current_moments(case, operator, state, analytic=analytic)
+            coefficients = operator.coupling_current_moments(moments)
+            exterior = np.asarray(state) - _internal_flux_image(operator, coefficients)
+            build_seconds = perf_counter() - started
+            encoded = json.dumps(identity, sort_keys=True, separators=(",", ":"))
+            store.data = xarray.Dataset(
+                {
+                    "cell_current": (("cell",), np.asarray(moments.cell_current)),
+                    "radial_moment": (("cell",), np.asarray(moments.radial_moment)),
+                    "vertical_moment": (("cell",), np.asarray(moments.vertical_moment)),
+                    "exterior": (("target",), exterior),
+                },
+                attrs={
+                    "cache_schema": EXTERIOR_CACHE_SCHEMA,
+                    "cache_key": store.group,
+                    "semantic_identity": encoded,
+                },
+            )
+            store.store(mode=store.get_mode())
+            hit = False
+    return (
+        moments,
+        exterior,
+        {
+            "store": str(store.filepath),
+            "semantic_key": store.group,
+            "hit": hit,
+            "lock_wait_seconds": lock_wait,
+            "build_seconds": build_seconds,
+        },
+    )
 
 
 def _internal_flux_image(
@@ -901,10 +1118,11 @@ def measure_fixture(name: str, requested_cells: int) -> dict[str, object]:
     )
     exact = exact_state(case, coordinates)
     zero_exterior = forward_operator(case, machine)
-    exact_physical = exact_current_moments(case, zero_exterior, exact)
+    exact_physical, prescribed_exterior, exterior_cache = cached_fixture_exterior(
+        case, case, machine, zero_exterior, exact
+    )
     exact_coefficients = zero_exterior.coupling_current_moments(exact_physical)
     exact_internal = _internal_flux_image(zero_exterior, exact_coefficients)
-    prescribed_exterior = exact - exact_internal
     operator = forward_operator(case, machine, prescribed_exterior)
     map_fn = operator.flux_map()
     mapped, tangent = jax.linearize(map_fn, jnp.asarray(exact))
@@ -959,6 +1177,7 @@ def measure_fixture(name: str, requested_cells: int) -> dict[str, object]:
         "direct_sample_rows": len(machine.sample_coordinates),
         "state_size": len(exact),
         "cache": machine.cache,
+        "fixture_exterior_cache": exterior_cache,
         "independent_state": {
             "symbol": "x_a",
             "construction": (

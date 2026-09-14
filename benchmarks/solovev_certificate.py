@@ -10,10 +10,12 @@ from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager
+import gzip
 import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import socket
 import subprocess
 import threading
@@ -47,6 +49,8 @@ from nova.equilibrium import (
     SaddleSeedGeometry,
 )
 from nova.equilibrium.forward import RasterFluxReceiptStatus
+from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
+from nova.equilibrium import observation, separatrix_clip
 from nova.equilibrium.analytic_single_null import (
     CerfonFreidbergSingleNull,
     cerfon_freidberg_single_null,
@@ -82,13 +86,40 @@ DIVERTED_GEOMETRY_ROOT = (
     ROOT / "docs/figures/gs-absolute-accuracy/solovev-diverted-case"
 )
 DIVERTED_GEOMETRY_OUTPUT = DIVERTED_GEOMETRY_ROOT / "diverted-case-geometry.json"
+REPOSED_FIXTURE_ROOT = (
+    ROOT / "docs/figures/cut-cell-current-attribution/reposed-fixture"
+)
+REPOSED_FIXTURE_OUTPUT = REPOSED_FIXTURE_ROOT / "map-floor.json"
+REPOSED_CERTIFICATE_ROOT = REPOSED_FIXTURE_ROOT / "certificate"
+REPOSED_CERTIFICATE_OUTPUT = REPOSED_CERTIFICATE_ROOT / "receipt.json"
+REPOSED_CERTIFICATE_BUILD_OUTPUT = REPOSED_CERTIFICATE_ROOT / "machine-build.json"
+REPOSED_CERTIFICATE_SCALING_OUTPUT = (
+    REPOSED_CERTIFICATE_ROOT / "solve-memory-scaling.json"
+)
+REPOSED_CERTIFICATE_IDENTIFICATION_OUTPUT = (
+    REPOSED_CERTIFICATE_ROOT / "solve-memory-identification.json"
+)
+REPOSED_CERTIFICATE_500_OUTPUT = REPOSED_CERTIFICATE_ROOT / "cells-500-receipt.json"
+REPOSED_FIXTURE_ROWS = (
+    ("weak-rotation-reactor-static", -1000),
+    ("moderate-rotation-conventional-static", -1000),
+    ("diverted-single-null", -500),
+    ("diverted-single-null", -1000),
+)
 REQUESTED_CELLS = (-110, -300, -500, -1000)
+MEASUREMENT_REQUESTS = REQUESTED_CELLS + (-2500,)
 CASE_NAMES = (
     "weak-rotation-reactor-static",
     "moderate-rotation-conventional-static",
     "strong-rotation-compact-static",
     "diverted-single-null",
 )
+REPOSED_CERTIFICATE_ROWS = tuple(
+    (case_name, requested_cells)
+    for requested_cells in (-1000, -2500)
+    for case_name in CASE_NAMES
+)
+REPOSED_CERTIFICATE_500_ROWS = tuple((case_name, -500) for case_name in CASE_NAMES)
 DIVERTED_CASE_NAME = "diverted-single-null"
 DIVERTED_CASE_ALIASES = frozenset((DIVERTED_CASE_NAME, "diverted-jump-bearing"))
 DIVERTED_REFERENCE = cerfon_freidberg_single_null()
@@ -385,16 +416,12 @@ def _seed_control(output: Path = SEED_CONTROL_OUTPUT) -> dict[str, Any]:
     )
     oracle_state = _exact_state(case_name, exact, coordinates)
     empty_operator = oracle_fixture.forward_operator(source_case, machine)
-    exact_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, oracle_state
+    exact_physical, fixture_exterior, _fixture_cache = (
+        oracle_fixture.cached_fixture_exterior(
+            source_case, exact, machine, empty_operator, oracle_state
+        )
     )
-    exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
-    exact_internal = oracle_fixture._internal_flux_image(
-        empty_operator, exact_coefficients
-    )
-    operator = oracle_fixture.forward_operator(
-        source_case, machine, oracle_state - exact_internal
-    )
+    operator = oracle_fixture.forward_operator(source_case, machine, fixture_exterior)
     production_seed, _moment_image, production_receipt = recovery._moment_seed(
         source_case, machine, operator
     )
@@ -1028,15 +1055,13 @@ def _nan_census(case_name: str) -> dict[str, Any]:
         )
         oracle_state = _exact_state(case_name, exact, coordinates)
         empty_operator = oracle_fixture.forward_operator(source_case, machine)
-        exact_physical = oracle_fixture.exact_current_moments(
-            source_case, empty_operator, oracle_state
-        )
-        exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
-        exact_internal = oracle_fixture._internal_flux_image(
-            empty_operator, exact_coefficients
+        exact_physical, fixture_exterior, _fixture_cache = (
+            oracle_fixture.cached_fixture_exterior(
+                source_case, exact, machine, empty_operator, oracle_state
+            )
         )
         operator = oracle_fixture.forward_operator(
-            source_case, machine, oracle_state - exact_internal
+            source_case, machine, fixture_exterior
         )
         profile = ForwardProfile(
             operator,
@@ -2127,15 +2152,13 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         )
         oracle_state = _exact_state(case_name, exact, coordinates)
         empty_operator = oracle_fixture.forward_operator(source_case, machine)
-        exact_physical = oracle_fixture.exact_current_moments(
-            source_case, empty_operator, oracle_state
-        )
-        exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
-        exact_internal = oracle_fixture._internal_flux_image(
-            empty_operator, exact_coefficients
+        exact_physical, fixture_exterior, fixture_cache = (
+            oracle_fixture.cached_fixture_exterior(
+                source_case, exact, machine, empty_operator, oracle_state
+            )
         )
         operator = oracle_fixture.forward_operator(
-            source_case, machine, oracle_state - exact_internal
+            source_case, machine, fixture_exterior
         )
         mesh = StencilMesh(machine.node, machine.stencil, machine.area)
         profile = ForwardProfile(
@@ -2328,6 +2351,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         "derivative_support_cells": len(derivative_coordinates),
         "cache": machine.cache,
         "persistent_compilation_cache": compilation_cache.receipt(),
+        "fixture_exterior_cache": fixture_cache,
         "stage_wall_seconds": stage_timings,
         "lane": {
             **_lane(),
@@ -2425,9 +2449,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         "render_data": render_data,
         "figure": {
             "filesystem_path": str(figure.relative_to(ROOT)),
-            "project_absolute_src": (
-                f"/nova/figures/gs-absolute-accuracy/solovev/{figure.name}"
-            ),
+            "project_absolute_src": f"/nova/{figure.relative_to(ROOT / 'docs')}",
             "sha256": hashlib.sha256(figure.read_bytes()).hexdigest(),
             "render_source": "fresh_production_solve",
         },
@@ -2441,7 +2463,7 @@ def _measure(case_name: str, requested_cells: int) -> dict[str, Any]:
 def _validate_row(row: dict[str, Any]) -> None:
     if row["case"] not in CASE_NAMES:
         raise RuntimeError("unknown certificate case")
-    if row["requested_cells"] not in REQUESTED_CELLS:
+    if row["requested_cells"] not in MEASUREMENT_REQUESTS:
         raise RuntimeError("unknown certificate resolution")
     if row["solver"]["qualification"] not in {"qualified", "unqualified"}:
         raise RuntimeError("terminal qualification is missing")
@@ -2475,7 +2497,7 @@ def _validate_row(row: dict[str, Any]) -> None:
                 ):
                     raise RuntimeError("a named accuracy norm is missing")
     src = row["figure"]["project_absolute_src"]
-    if not src.startswith("/nova/figures/gs-absolute-accuracy/solovev/"):
+    if not src.startswith("/nova/figures/"):
         raise RuntimeError("figure src is not project absolute")
     if "render_data" in row:
         _validate_render_data(row["render_data"])
@@ -3005,10 +3027,1306 @@ def _validate(receipt: dict[str, Any]) -> None:
         raise RuntimeError("the locked recovery registry was not reproduced")
 
 
+def _fixture_floor_norms(values: np.ndarray, span: float) -> dict[str, float]:
+    """Return absolute and span-relative norms for one grid residual."""
+    absolute = np.abs(np.asarray(values, dtype=np.float64))
+    return {
+        "rms_wb": float(np.sqrt(np.mean(absolute**2))),
+        "sup_wb": float(np.max(absolute)),
+        "rms_fraction_of_span": float(np.sqrt(np.mean(absolute**2)) / span),
+        "sup_fraction_of_span": float(np.max(absolute) / span),
+    }
+
+
+def _fixture_floor_affine_share(residual: np.ndarray, coordinates: np.ndarray) -> float:
+    """Return the share of squared residual carried by an affine field."""
+    design = np.column_stack(
+        (np.ones(len(coordinates)), coordinates[:, 0], coordinates[:, 1])
+    )
+    coefficients, *_ = np.linalg.lstsq(design, residual, rcond=None)
+    fitted = design @ coefficients
+    energy = float(np.sum(np.asarray(residual) ** 2))
+    return float(np.sum(fitted**2) / energy) if energy > 0.0 else 1.0
+
+
+def _fixture_floor_mode(
+    *,
+    case_name: str,
+    requested_cells: int,
+    exterior_name: str,
+    mode: str,
+    operator: Any,
+    analytic: np.ndarray,
+    clipped_coefficients: Any,
+    target_current: float,
+    requested_class: int,
+    boundary: np.ndarray,
+    machine: Any,
+) -> tuple[dict[str, Any], np.ndarray, np.ndarray]:
+    """Measure one exterior and booking pair at the analytic state."""
+    set_support_clip_mode(mode)
+    moments = operator.cell_current_moments(jnp.asarray(analytic), requested_class)
+    booked = float(np.sum(np.asarray(moments.cell_current)))
+    amplitude = float(operator.current_normalisation_amplitude(target_current, booked))
+    scaled = operator.scaled_current_moments(moments, amplitude)
+    mapped = np.asarray(
+        jax.block_until_ready(
+            operator.flux_map(
+                requested_class=requested_class,
+                target_current=target_current,
+            )(jnp.asarray(analytic))
+        ),
+        dtype=np.float64,
+    )
+    grid_count = len(machine.node)
+    grid_residual = mapped[:grid_count] - analytic[:grid_count]
+    span = abs(
+        oracle_fixture._analytic_axis_flux(
+            DIVERTED_REFERENCE if _is_diverted_case(case_name) else _case(case_name)[2]
+        )
+    )
+    support = operator._support_partition(jnp.asarray(analytic), requested_class)[3]
+    area = np.asarray(support.area)
+    full_area = np.asarray(support.full_area)
+    tolerance = 4096.0 * np.finfo(np.float64).eps * max(float(np.max(full_area)), 1.0)
+    cut = (area > tolerance) & (np.abs(area - full_area) > tolerance)
+    difference = type(scaled)(
+        *(
+            np.asarray(booked_value) - np.asarray(analytic_value)
+            for booked_value, analytic_value in zip(
+                scaled, clipped_coefficients, strict=True
+            )
+        )
+    )
+    cut_difference = type(scaled)(*(np.asarray(value) * cut for value in difference))
+    difference_image = np.asarray(operator.current_moment_image(difference))[
+        :grid_count
+    ]
+    cut_image = np.asarray(operator.current_moment_image(cut_difference))[:grid_count]
+    total_energy = float(np.sum(difference_image**2))
+    cut_energy_share = (
+        float(np.sum(cut_image**2) / total_energy) if total_energy > 0.0 else 1.0
+    )
+    pitch = float(np.sqrt(np.median(np.asarray(machine.area))))
+    distance_pitch = _distance_to_boundary(machine.node, boundary) / pitch
+    record = {
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "realised_cells": grid_count,
+        "exterior": exterior_name,
+        "mode": mode,
+        "map_floor": _fixture_floor_norms(grid_residual, span),
+        "booked_current_a": booked,
+        "analytic_current_a": target_current,
+        "booked_over_analytic": booked / target_current,
+        "normalisation_amplitude": amplitude,
+        "affine_rms_energy_share": _fixture_floor_affine_share(
+            grid_residual, machine.node
+        ),
+        "cut_cell_count": int(np.count_nonzero(cut)),
+        "cut_cell_image_energy_share": cut_energy_share,
+        "difference_image_closure_sup_wb": float(
+            np.max(np.abs(difference_image - grid_residual))
+        )
+        if exterior_name == "analytic-clipped"
+        else None,
+    }
+    part = (
+        REPOSED_FIXTURE_ROOT
+        / "parts"
+        / f"{case_name}-cells-{abs(requested_cells)}-{exterior_name}-{mode}.json"
+    )
+    _write_json(part, record)
+    print(
+        f"FIXTURE_FLOOR case={case_name} cells={abs(requested_cells)} "
+        f"exterior={exterior_name} mode={mode} "
+        f"rms={record['map_floor']['rms_fraction_of_span']:.8e} "
+        f"sup={record['map_floor']['sup_fraction_of_span']:.8e} "
+        f"booked={record['booked_over_analytic']:.8f}",
+        flush=True,
+    )
+    return record, distance_pitch, np.abs(grid_residual) / span
+
+
+def _render_fixture_floor(
+    case_name: str,
+    requested_cells: int,
+    traces: list[tuple[str, np.ndarray, np.ndarray]],
+) -> Path:
+    """Plot map error against distance from the analytic separatrix."""
+    figure, axis = plt.subplots(figsize=(7.2, 4.4), constrained_layout=True)
+    for label, distance, floor in traces:
+        order = np.argsort(distance)
+        axis.plot(distance[order], floor[order], linewidth=1.0, label=label)
+    axis.axhline(1.0e-3, color="black", linestyle="--", linewidth=0.9)
+    axis.set_yscale("log")
+    axis.set_xlabel("target distance from analytic separatrix [cell pitches]")
+    axis.set_ylabel("absolute one-map error / analytic flux span")
+    axis.legend(frameon=False, fontsize=8)
+    axis.set_title(f"{case_name}, {abs(requested_cells)} requested cells")
+    path = REPOSED_FIXTURE_ROOT / f"{case_name}-cells-{abs(requested_cells)}.svg"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path)
+    plt.close(figure)
+    return path
+
+
+def _measure_reposed_fixture(output: Path) -> dict[str, Any]:
+    """Measure analytic and whole-cell fixture exteriors without solving."""
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("the fixture-floor measurement requires binary64")
+    original_mode = support_clip_mode()
+    rows = []
+    try:
+        for case_name, requested_cells in REPOSED_FIXTURE_ROWS:
+            carrier_case, source_case, exact = _case(case_name)
+            machine = _case_machine(case_name, carrier_case, exact, requested_cells)
+            coordinates = np.vstack(
+                (machine.node, machine.wall_node, machine.sample_coordinates)
+            )
+            analytic = _exact_state(case_name, exact, coordinates)
+            empty_operator = oracle_fixture.forward_operator(source_case, machine)
+            clipped_physical, clipped_exterior, cache = (
+                oracle_fixture.cached_fixture_exterior(
+                    source_case, exact, machine, empty_operator, analytic
+                )
+            )
+            whole_physical = oracle_fixture.whole_cell_current_moments(
+                source_case, empty_operator, analytic
+            )
+            clipped_coefficients = empty_operator.coupling_current_moments(
+                clipped_physical
+            )
+            whole_coefficients = empty_operator.coupling_current_moments(whole_physical)
+            whole_exterior = analytic - oracle_fixture._internal_flux_image(
+                empty_operator, whole_coefficients
+            )
+            target_current, _centroid, target_receipt = _closed_form_current_target(
+                case_name, source_case, empty_operator, clipped_physical
+            )
+            requested_class = int(
+                TopologyClass.DIVERTED
+                if _is_diverted_case(case_name)
+                else TopologyClass.LIMITED
+            )
+            boundary = _boundary(case_name, exact)
+            combinations = []
+            traces = []
+            for exterior_name, exterior in (
+                ("analytic-clipped", clipped_exterior),
+                ("whole-cell", whole_exterior),
+            ):
+                operator = oracle_fixture.forward_operator(
+                    source_case, machine, exterior
+                )
+                for mode in ("exact", "chord"):
+                    record, distance, floor = _fixture_floor_mode(
+                        case_name=case_name,
+                        requested_cells=requested_cells,
+                        exterior_name=exterior_name,
+                        mode=mode,
+                        operator=operator,
+                        analytic=analytic,
+                        clipped_coefficients=clipped_coefficients,
+                        target_current=target_current,
+                        requested_class=requested_class,
+                        boundary=boundary,
+                        machine=machine,
+                    )
+                    combinations.append(record)
+                    traces.append((f"{exterior_name} / {mode}", distance, floor))
+            figure = _render_fixture_floor(case_name, requested_cells, traces)
+            row = {
+                "case": case_name,
+                "requested_cells": requested_cells,
+                "realised_cells": len(machine.node),
+                "fixture_exterior_cache": cache,
+                "analytic_current_target": target_receipt,
+                "combinations": combinations,
+                "figure": str(figure),
+            }
+            rows.append(row)
+            _write_json(
+                REPOSED_FIXTURE_ROOT
+                / "parts"
+                / f"{case_name}-cells-{abs(requested_cells)}.json",
+                row,
+            )
+    finally:
+        set_support_clip_mode(original_mode)
+    exact_primary = [
+        combination
+        for row in rows
+        if abs(row["requested_cells"]) == 1000
+        for combination in row["combinations"]
+        if combination["exterior"] == "analytic-clipped"
+        and combination["mode"] == "exact"
+    ]
+    limited_primary = [
+        row for row in exact_primary if not _is_diverted_case(row["case"])
+    ]
+    diverted = [
+        combination
+        for row in rows
+        if _is_diverted_case(row["case"])
+        for combination in row["combinations"]
+        if combination["exterior"] == "analytic-clipped"
+        and combination["mode"] == "exact"
+    ]
+    diverted_by_cells = {
+        abs(row["requested_cells"]): row["map_floor"]["rms_fraction_of_span"]
+        for row in diverted
+    }
+    diverted_pitch = {500: 0.07103816322006563, 1000: 0.050231566935945236}
+    diverted_order = np.log(diverted_by_cells[500] / diverted_by_cells[1000]) / np.log(
+        diverted_pitch[500] / diverted_pitch[1000]
+    )
+    receipt = {
+        "schema": "nova.analytic-clipped-fixture-map-floor",
+        "source_revision": _source_revision(),
+        "lane": _lane(),
+        "rows": rows,
+        "acceptance": {
+            "threshold_rms_fraction_of_span": 1.0e-3,
+            "limited_primary_row_count": len(limited_primary),
+            "limited_rows_passed": bool(limited_primary)
+            and all(
+                row["map_floor"]["rms_fraction_of_span"] <= 1.0e-3
+                for row in limited_primary
+            ),
+            "worst_limited_rms_fraction_of_span": max(
+                row["map_floor"]["rms_fraction_of_span"] for row in limited_primary
+            ),
+            "diverted_single_null": {
+                "rms_fraction_of_span_by_cells": diverted_by_cells,
+                "characteristic_pitch_m_by_cells": diverted_pitch,
+                "apparent_order_in_pitch": float(diverted_order),
+                "disposition": "four-crossing-cell treatment remains section-owned",
+            },
+        },
+    }
+    _write_json(output, receipt)
+    print("REPOSED_FIXTURE_FLOOR_EXIT=0", flush=True)
+    return receipt
+
+
+def _certificate_acceptance_row(row: dict[str, Any]) -> dict[str, Any]:
+    """Project one solved row onto the three locked acceptance tests."""
+    pitch = float(row["characteristic_pitch_m"])
+    exact_topology = row["geometry"]["exact_topology"]
+    terminal_topology = row["geometry"]["root_topology"]
+    span = abs(float(exact_topology["flux_span_wb"]))
+    psi_rms = row["norms"]["psi"]["whole_domain"]["rms"]
+    psi_rms_fraction = float(psi_rms / span) if psi_rms is not None else None
+    axis_error = row["geometry"]["magnetic_axis_position_error_m"]
+    x_error = row["geometry"]["x_point_position_error_m"]
+    diverted = _is_diverted_case(row["case"])
+    x_candidates = int(terminal_topology["x_candidate_count"])
+    nulls_admitted = terminal_topology["axis_rz_m"] is not None and (
+        not diverted
+        or (terminal_topology["x_point_rz_m"] is not None and x_candidates > 0)
+    )
+    residual = row["solver"]["terminal_fixed_point_residual"]
+    converged = bool(row["solver"]["production_telemetry"]["converged"])
+    return {
+        "case": row["case"],
+        "requested_cells": row["requested_cells"],
+        "realised_cells": row["realised_cells"],
+        "characteristic_pitch_m": pitch,
+        "fixed_point": {
+            "terminal_residual": residual,
+            "bound": 1.0e-12,
+            "residual_passed": residual is not None and residual <= 1.0e-12,
+            "converged": converged,
+        },
+        "distance_to_analytic": {
+            "psi_rms_fraction_of_span": psi_rms_fraction,
+            "axis_error_m": axis_error,
+            "axis_error_in_pitch": (
+                axis_error / pitch if axis_error is not None else None
+            ),
+            "x_point_error_m": x_error,
+            "x_point_error_in_pitch": x_error / pitch if x_error is not None else None,
+        },
+        "analytic_null_read": {
+            "admitted": nulls_admitted,
+            "axis_admitted": terminal_topology["axis_rz_m"] is not None,
+            "x_point_required": diverted,
+            "x_point_admitted": terminal_topology["x_point_rz_m"] is not None,
+            "x_candidate_count": x_candidates,
+        },
+        "figure": row["figure"],
+    }
+
+
+def _rung_ratio(numerator: float | None, denominator: float | None) -> float | None:
+    """Return a finite coarse-over-fine ratio when both measures exist."""
+    if numerator is None or denominator is None or denominator == 0.0:
+        return None
+    return float(numerator / denominator)
+
+
+def _certificate_rung_ratios(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Compare the 1000- and 2500-cell acceptance measures per case."""
+    grouped: dict[str, dict[int, dict[str, Any]]] = {}
+    for row in rows:
+        grouped.setdefault(row["case"], {})[abs(row["requested_cells"])] = row
+    ratios = {}
+    for case_name, by_cells in grouped.items():
+        if set(by_cells) != {1000, 2500}:
+            continue
+        coarse = by_cells[1000]
+        fine = by_cells[2500]
+        coarse_distance = coarse["distance_to_analytic"]
+        fine_distance = fine["distance_to_analytic"]
+        ratios[case_name] = {
+            "pitch_1000_over_2500": _rung_ratio(
+                coarse["characteristic_pitch_m"], fine["characteristic_pitch_m"]
+            ),
+            "psi_rms_1000_over_2500": _rung_ratio(
+                coarse_distance["psi_rms_fraction_of_span"],
+                fine_distance["psi_rms_fraction_of_span"],
+            ),
+            "axis_error_1000_over_2500": _rung_ratio(
+                coarse_distance["axis_error_m"], fine_distance["axis_error_m"]
+            ),
+            "x_point_error_1000_over_2500": _rung_ratio(
+                coarse_distance["x_point_error_m"],
+                fine_distance["x_point_error_m"],
+            ),
+        }
+    return ratios
+
+
+def _compiled_memory_fields(analysis: Any) -> dict[str, int]:
+    """Return the stable integer fields exposed by XLA memory analysis."""
+
+    names = (
+        "argument_size_in_bytes",
+        "output_size_in_bytes",
+        "alias_size_in_bytes",
+        "temp_size_in_bytes",
+        "host_argument_size_in_bytes",
+        "host_output_size_in_bytes",
+        "host_alias_size_in_bytes",
+        "host_temp_size_in_bytes",
+        "generated_code_size_in_bytes",
+    )
+    return {
+        name: int(getattr(analysis, name))
+        for name in names
+        if getattr(analysis, name, None) is not None
+    }
+
+
+def _hlo_producer_group(source_file: str | None, source_line: int | None) -> str:
+    """Classify an HLO instruction by the Nova path that authored it."""
+
+    path = source_file or ""
+    if path.endswith("fixed_point.py"):
+        return "fixed-point active-set reconciliation and globalization"
+    if path.endswith("forward_operator.py") and source_line is not None:
+        if source_line < 1000:
+            return "production topology read and tensor-spline null census"
+        if 2150 <= source_line <= 2260:
+            return "exact support clip spline-chain"
+        return "forward current-moment map"
+    if "split_spline" in path or "polygon" in path or "mesh" in path:
+        return "exact support clip spline-chain"
+    return "unclassified compiled support operation"
+
+
+def _hlo_source_hint(operation_name: str | None, opcode: str | None) -> str | None:
+    """Map optimized operation metadata back to its authored array expression."""
+
+    name = operation_name or ""
+    if "nqi,ni->nq" in name or ("jvp()/stack" in name and opcode == "concatenate"):
+        return "nova/equilibrium/stencil_mesh.py:218-220"
+    if "solve_program)/while/body" in name:
+        return "nova/equilibrium/fixed_point.py:3453-3459"
+    return None
+
+
+def _hlo_array_records(hlo: str) -> list[dict[str, Any]]:
+    """List every predicate and each other optimized result above one GiB."""
+
+    result_pattern = re.compile(
+        r"=\s*(?P<dtype>pred|f64|f32|s64|s32|u64|u32|s16|u16|s8|u8)"
+        r"\[(?P<shape>[0-9,]*)\](?:\{[^}]*\})?\s+(?P<opcode>[a-z0-9_-]+)"
+    )
+    instruction_pattern = re.compile(r"^\s*(?P<name>%[^ ]+)")
+    source_pattern = re.compile(r'source_file="(?P<file>[^"]+)"')
+    line_pattern = re.compile(r"source_line=(?P<line>[0-9]+)")
+    operation_pattern = re.compile(r'op_name="(?P<name>[^"]+)"')
+    byte_width = {
+        "pred": 1,
+        "f64": 8,
+        "f32": 4,
+        "s64": 8,
+        "s32": 4,
+        "u64": 8,
+        "u32": 4,
+        "s16": 2,
+        "u16": 2,
+        "s8": 1,
+        "u8": 1,
+    }
+    records = []
+    for text in hlo.splitlines():
+        result = result_pattern.search(text)
+        if result is None:
+            continue
+        shape_text = result.group("shape")
+        shape = tuple(int(value) for value in shape_text.split(",") if value)
+        elements = int(np.prod(shape, dtype=np.int64))
+        logical_bytes = elements * byte_width[result.group("dtype")]
+        if result.group("dtype") != "pred" and logical_bytes <= 2**30:
+            continue
+        source = source_pattern.search(text)
+        line = line_pattern.search(text)
+        operation = operation_pattern.search(text)
+        instruction = instruction_pattern.search(text)
+        source_file = source.group("file") if source is not None else None
+        source_line = int(line.group("line")) if line is not None else None
+        operation_name = operation.group("name") if operation is not None else None
+        opcode = result.group("opcode")
+        records.append(
+            {
+                "instruction_name": (
+                    instruction.group("name") if instruction is not None else None
+                ),
+                "opcode": opcode,
+                "dtype": result.group("dtype"),
+                "shape": list(shape),
+                "element_count": elements,
+                "logical_size_in_bytes": logical_bytes,
+                "operation_name": operation_name,
+                "source_file": source_file,
+                "source_line": source_line,
+                "source_hint": _hlo_source_hint(operation_name, opcode),
+            }
+        )
+    return records
+
+
+def _array_signature_summary(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Count equivalent optimized results while retaining their full census."""
+
+    grouped: dict[tuple[Any, ...], dict[str, Any]] = {}
+    for record in records:
+        key = (
+            record["dtype"],
+            tuple(record["shape"]),
+            record["opcode"],
+            record["source_hint"],
+        )
+        if key not in grouped:
+            grouped[key] = {
+                field: record[field]
+                for field in (
+                    "dtype",
+                    "shape",
+                    "element_count",
+                    "logical_size_in_bytes",
+                    "opcode",
+                    "source_hint",
+                )
+            }
+            grouped[key]["instruction_count"] = 0
+        grouped[key]["instruction_count"] += 1
+    return sorted(
+        grouped.values(),
+        key=lambda item: (item["logical_size_in_bytes"], item["instruction_count"]),
+        reverse=True,
+    )
+
+
+def _write_gzip_text(path: Path, text: str) -> None:
+    """Persist long compiler output compactly outside the receipt."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with gzip.open(path, "wt", encoding="utf-8", compresslevel=6) as stream:
+        stream.write(text)
+
+
+def _write_array_census(path: Path, records: list[dict[str, Any]]) -> None:
+    """Persist one JSON line for every qualifying optimized HLO result."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with gzip.open(path, "wt", encoding="utf-8", compresslevel=6) as stream:
+        for record in records:
+            stream.write(json.dumps(record, sort_keys=True) + "\n")
+
+
+def _largest_hlo_arrays(hlo: str, *, limit: int = 16) -> list[dict[str, Any]]:
+    """Extract the largest typed instruction results and their source metadata."""
+
+    result_pattern = re.compile(
+        r"=\s*(?P<dtype>pred|f64|f32|s64|s32|u64|u32|s16|u16|s8|u8)"
+        r"\[(?P<shape>[0-9,]+)\]"
+    )
+    source_pattern = re.compile(r'source_file="(?P<file>[^"]+)"')
+    line_pattern = re.compile(r"source_line=(?P<line>[0-9]+)")
+    operation_pattern = re.compile(r'op_name="(?P<name>[^"]+)"')
+    byte_width = {
+        "pred": 1,
+        "f64": 8,
+        "f32": 4,
+        "s64": 8,
+        "s32": 4,
+        "u64": 8,
+        "u32": 4,
+        "s16": 2,
+        "u16": 2,
+        "s8": 1,
+        "u8": 1,
+    }
+    records: dict[tuple[Any, ...], dict[str, Any]] = {}
+    for text in hlo.splitlines():
+        result = result_pattern.search(text)
+        if result is None:
+            continue
+        shape = tuple(int(value) for value in result.group("shape").split(","))
+        elements = int(np.prod(shape, dtype=np.int64))
+        source = source_pattern.search(text)
+        line = line_pattern.search(text)
+        operation = operation_pattern.search(text)
+        source_file = source.group("file") if source is not None else None
+        source_line = int(line.group("line")) if line is not None else None
+        operation_name = operation.group("name") if operation is not None else None
+        key = (result.group("dtype"), shape, source_file, source_line, operation_name)
+        records[key] = {
+            "dtype": result.group("dtype"),
+            "shape": list(shape),
+            "element_count": elements,
+            "logical_size_in_bytes": elements * byte_width[result.group("dtype")],
+            "source_file": source_file,
+            "source_line": source_line,
+            "operation_name": operation_name,
+            "producer_group": _hlo_producer_group(source_file, source_line),
+            "instruction": text.strip()[:600],
+        }
+    return sorted(
+        records.values(),
+        key=lambda record: record["logical_size_in_bytes"],
+        reverse=True,
+    )[:limit]
+
+
+def _certificate_compile_problem(
+    case_name: str, requested_cells: int
+) -> tuple[Any, np.ndarray, ForwardSolveRequest, dict[str, Any]]:
+    """Construct the public certificate problem without executing its solve."""
+
+    carrier_case, source_case, exact = _case(case_name)
+    machine = _case_machine(case_name, carrier_case, exact, requested_cells)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic = _exact_state(case_name, exact, coordinates)
+    empty_operator = oracle_fixture.forward_operator(source_case, machine)
+    exact_physical, fixture_exterior, _cache = oracle_fixture.cached_fixture_exterior(
+        source_case, exact, machine, empty_operator, analytic
+    )
+    operator = oracle_fixture.forward_operator(source_case, machine, fixture_exterior)
+    profile = ForwardProfile(
+        operator,
+        StencilMesh(machine.node, machine.stencil, machine.area),
+        newton_steps=recovery.NEWTON_STEPS,
+    )
+    target_current, centroid, current_receipt = _closed_form_current_target(
+        case_name, source_case, operator, exact_physical
+    )
+    seed, _requested_class, _seed_receipt = _production_seed(
+        profile, case_name, target_current, centroid, current_receipt
+    )
+    request = _certificate_solve_request(
+        profile,
+        seed,
+        target_current,
+        carrier_identity=f"solovev-memory:{case_name}:{requested_cells}",
+    )
+    atomic_mesh = operator.moment_geometry.atomic_mesh
+    chord_capacity = int(atomic_mesh.support_capacity)
+    chain_samples = int(separatrix_clip._SPLINE_BOUNDARY_SEGMENTS)
+    quadrature_axis_nodes = len(observation._UNIT_NODE)
+    exact_capacity = chord_capacity * chain_samples
+    return (
+        profile,
+        seed,
+        request,
+        {
+            "realised_cells": len(machine.node),
+            "grid_nodes": int(operator.grid.node_number),
+            "wall_nodes": int(operator.wall.node_number),
+            "sample_nodes": (
+                0 if operator.sample is None else int(operator.sample.node_number)
+            ),
+            "solve_state_size": int(len(seed)),
+            "atomic_support_capacity": chord_capacity,
+            "spline_chain_samples_per_chord": chain_samples,
+            "exact_support_capacity": exact_capacity,
+            "quadrature_nodes_per_axis": quadrature_axis_nodes,
+            "quadrature_nodes_per_triangle": quadrature_axis_nodes**2,
+            "exact_quadrature_points_per_cell": (
+                (exact_capacity - 2) * quadrature_axis_nodes**2
+            ),
+            "whole_cell_quadrature_points_per_cell": (
+                (chord_capacity - 2) * quadrature_axis_nodes**2
+            ),
+            "cell_polynomial_terms": 6,
+            "newton_steps": request.policy.newton_steps,
+            "gmres_iterations": request.policy.gmres_iterations,
+            "active_set_steps": request.policy.active_set_steps,
+        },
+    )
+
+
+def _compile_solve_memory(
+    case_name: str,
+    requested_cells: int,
+    *,
+    arm: str | None = None,
+    compiler_artifact_root: Path | None = None,
+) -> dict[str, Any]:
+    """Compile, but never execute, one production-equivalent solve graph."""
+
+    started = perf_counter()
+    profile, seed, request, dimensions = _certificate_compile_problem(
+        case_name, requested_cells
+    )
+    mapped = profile.flux_map(
+        request.current,
+        target_current=request.target_current,
+        prescribed_current=request.prescribed_current,
+    )
+    shadowed_map = profile.operator.flux_map_with_shadow(
+        request.current,
+        target_current=request.target_current,
+        prescribed_current=request.prescribed_current,
+    )
+
+    def shadow_mask(state):
+        return profile.operator.residual_shadow_mask(state)
+
+    def promoted_shadow_mask(state, previous):
+        return profile.operator.residual_shadow_mask(state, previous_shadow=previous)
+
+    def solve_program(initial):
+        result = recovery.fixed_point.newton_krylov(
+            mapped,
+            initial,
+            shadow_mask_fn=shadow_mask,
+            promoted_shadow_mask_fn=promoted_shadow_mask,
+            shadowed_map_fn=shadowed_map,
+            **request.policy.kernel_options(),
+        )
+        return result.state, result.residual, result.converged
+
+    lowered = jax.jit(solve_program).lower(jnp.asarray(seed, dtype=jnp.float64))
+    compiled = lowered.compile()
+    analysis = _compiled_memory_fields(compiled.memory_analysis())
+    hlo = compiled.as_text()
+    arrays = _largest_hlo_arrays(hlo)
+    record = {
+        "case": case_name,
+        "arm": arm,
+        "requested_cells": requested_cells,
+        "realised_cells": dimensions["realised_cells"],
+        "dimensions": dimensions,
+        "compile_wall_seconds": perf_counter() - started,
+        "memory_analysis": analysis,
+        "largest_array_intermediates": arrays,
+        "largest_predicate_intermediates": [
+            item for item in arrays if item["dtype"] == "pred"
+        ],
+        "executed": False,
+        "method": "jax.jit(solve_program).lower(seed).compile().memory_analysis()",
+    }
+    if compiler_artifact_root is not None:
+        if arm is None:
+            raise ValueError("compiler artifact capture requires a named arm")
+        hlo_path = compiler_artifact_root / f"{arm}-optimised.hlo.txt.gz"
+        census_path = compiler_artifact_root / f"{arm}-array-census.jsonl.gz"
+        census = _hlo_array_records(hlo)
+        _write_gzip_text(hlo_path, hlo)
+        _write_array_census(census_path, census)
+        record["compiler_artifacts"] = {
+            "optimised_hlo_gzip": str(hlo_path),
+            "qualifying_array_census_gzip": str(census_path),
+        }
+        record["predicate_instruction_count"] = sum(
+            item["dtype"] == "pred" for item in census
+        )
+        record["large_nonpredicate_instruction_count"] = sum(
+            item["dtype"] != "pred" for item in census
+        )
+        record["qualifying_array_signatures"] = _array_signature_summary(census)
+    print(
+        f"SOLVE_MEMORY cells={abs(requested_cells)} "
+        f"realised={dimensions['realised_cells']} "
+        f"temp_gib={analysis['temp_size_in_bytes'] / 2**30:.6f}",
+        flush=True,
+    )
+    return record
+
+
+def _measure_solve_memory_scaling(output: Path) -> dict[str, Any]:
+    """Compile two exact-clip solve graphs and extrapolate their memory law."""
+
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("solve memory analysis requires binary64")
+    rows = []
+    for requested_cells in (-300, -500):
+        rows.append(
+            _compile_solve_memory("weak-rotation-reactor-static", requested_cells)
+        )
+        _write_json(
+            output,
+            {
+                "schema": "nova.forward-solve-memory-scaling",
+                "source_revision": _source_revision(),
+                "lane": _lane(),
+                "rows": rows,
+                "completed": False,
+            },
+        )
+    coarse, fine = rows
+    coarse_bytes = coarse["memory_analysis"]["temp_size_in_bytes"]
+    fine_bytes = fine["memory_analysis"]["temp_size_in_bytes"]
+    exponent = float(
+        np.log(fine_bytes / coarse_bytes)
+        / np.log(fine["realised_cells"] / coarse["realised_cells"])
+    )
+    carrier_case, _source_case, exact = _case("weak-rotation-reactor-static")
+    predicted = {}
+    for requested_cells in (-1000, -2500):
+        machine = _case_machine(
+            "weak-rotation-reactor-static", carrier_case, exact, requested_cells
+        )
+        realised = len(machine.node)
+        predicted[str(abs(requested_cells))] = {
+            "realised_cells": realised,
+            "temp_size_in_bytes": float(
+                fine_bytes * (realised / fine["realised_cells"]) ** exponent
+            ),
+        }
+    receipt = {
+        "schema": "nova.forward-solve-memory-scaling",
+        "source_revision": _source_revision(),
+        "lane": _lane(),
+        "rows": rows,
+        "fit": {
+            "independent_variable": "realised atomic cell count",
+            "exponent": exponent,
+            "prediction": predicted,
+            "linear_target_exponent": 1.0,
+            "scaling_defect": True,
+            "interpretation": (
+                "the two-rung exponent does not excuse a 96.8 GiB floor at the "
+                "smallest compiled rung; fixed-capacity graph replication violates "
+                "the linear-in-cells execution target"
+            ),
+        },
+        "failed_execution": {
+            "slurm_job_id": "1270272",
+            "requested_cells": 1000,
+            "requested_allocation_gib": 279.45,
+            "executable": "jit_bitwise_and",
+            "production_entry": "nova/equilibrium/forward.py:2489",
+            "active_set_reconcile": "nova/equilibrium/fixed_point.py:3459",
+        },
+        "completed": True,
+    }
+    _write_json(output, receipt)
+    return receipt
+
+
+def _quadrature_design_candidate(row: dict[str, Any]) -> dict[str, Any] | None:
+    """Return the largest array attributed to cell-quadrature interpolation."""
+
+    candidates = [
+        item
+        for item in row["largest_array_intermediates"]
+        if "nqi,ni->nq" in (item["operation_name"] or "")
+        or "jvp()/stack" in (item["operation_name"] or "")
+    ]
+    return (
+        max(candidates, key=lambda item: item["logical_size_in_bytes"])
+        if candidates
+        else None
+    )
+
+
+def _write_memory_identification_report(
+    path: Path,
+    scaling: dict[str, Any],
+    exact: dict[str, Any],
+    whole: dict[str, Any],
+) -> None:
+    """Put the exact-clip memory defect ahead of the fixture gate report."""
+
+    exact_candidate = _quadrature_design_candidate(exact)
+    whole_candidate = _quadrature_design_candidate(whole)
+    if exact_candidate is None or whole_candidate is None:
+        raise RuntimeError("optimized HLO did not expose the quadrature design array")
+    dimensions = exact["dimensions"]
+    exact_q = dimensions["exact_quadrature_points_per_cell"]
+    whole_q = dimensions["whole_cell_quadrature_points_per_cell"]
+    exact_logical = exact_candidate["logical_size_in_bytes"]
+    whole_logical = whole_candidate["logical_size_in_bytes"]
+    measured = {
+        abs(row["requested_cells"]): row["memory_analysis"]["temp_size_in_bytes"]
+        for row in scaling["rows"]
+    }
+    signature_rows = [
+        item for item in exact["qualifying_array_signatures"] if item["dtype"] != "pred"
+    ]
+    exact_predicate = max(
+        (
+            item
+            for item in exact["qualifying_array_signatures"]
+            if item["dtype"] == "pred"
+        ),
+        key=lambda item: item["logical_size_in_bytes"],
+    )
+    whole_predicate = max(
+        (
+            item
+            for item in whole["qualifying_array_signatures"]
+            if item["dtype"] == "pred"
+        ),
+        key=lambda item: item["logical_size_in_bytes"],
+    )
+    lines = [
+        "<!-- exact-solve-memory-headline:start -->",
+        "# Exact-clip solve memory is dominated by padded support quadrature",
+        "",
+        "The re-posed fixture itself is delivered: one exact-clip production-map "
+        "application at the analytic flux passed the 1000-cell limited rows at "
+        "`3.580157e-5` and `3.423768e-5` RMS of span. Full certificate "
+        "regeneration above 300 cells is handed to the production memory-scaling "
+        "repair because compiling the solve graph reserves an unsafe device-memory "
+        "floor before an iteration executes.",
+        "",
+        "## Measured floor",
+        "",
+        f"Compile-only `memory_analysis()` reports {measured[300] / 2**30:.6g} "
+        f"GiB at {scaling['rows'][0]['realised_cells']} realised cells and "
+        f"{measured[500] / 2**30:.6g} GiB at "
+        f"{scaling['rows'][1]['realised_cells']} cells. Their two-rung apparent "
+        f"exponent is `{scaling['fit']['exponent']:.6g}`, but that sub-linear "
+        "ratio is not exculpatory: the intercept is already 96.8 GiB at 300 "
+        "requested cells, while the actual 1000-cell executable requested 279.45 "
+        "GiB. The 300-cell exact rows therefore fitted only when the H200 was "
+        "otherwise empty; this is a capacity floor and graph-repetition defect, "
+        "not an acceptable linear implementation.",
+        "",
+        "## Array identity and shape arithmetic",
+        "",
+        f"The largest repeated exact-clip value is `{exact_candidate['dtype']}"
+        f"{exact_candidate['shape']}` from HLO `{exact_candidate['operation_name']}`. "
+        f"Its logical size is {exact_logical / 2**30:.6g} GiB. The dimensions are:",
+        "",
+        f"- `{dimensions['realised_cells']}` carried cells;",
+        f"- atomic polygon capacity `{dimensions['atomic_support_capacity']}` "
+        f"expanded by `{dimensions['spline_chain_samples_per_chord']}` spline-chain "
+        f"samples to fixed support capacity `{dimensions['exact_support_capacity']}`;",
+        f"- `(support capacity - 2) * 8 * 8 = ({dimensions['exact_support_capacity']} "
+        f"- 2) * 64 = {exact_q}` degree-fifteen Duffy quadrature points per cell;",
+        "- `6` local quadratic flux-basis terms.",
+        "",
+        f"Thus `{dimensions['realised_cells']} * {exact_q} * 6 * 8 bytes = "
+        f"{dimensions['realised_cells'] * exact_q * 6 * 8:,}` bytes "
+        f"({dimensions['realised_cells'] * exact_q * 6 * 8 / 2**30:.6g} GiB) "
+        "for each materialized design/JVP value. Optimizer padding or bitcasts can "
+        "change the printed middle dimension by one without changing this identity.",
+        "",
+        "The construction path is `fixed_point.py:3453-3459` (reconcile and replay "
+        "the live shadowed map), `forward_operator.py:2195-2235` (global spline and "
+        "exact traced support), `separatrix_clip.py:1082-1108` (multiply polygon "
+        "capacity by the 128-sample chain), `forward_operator.py:2316-2319` "
+        "(quadrature plus cell-field sampling), `observation.py:412-445` "
+        "(64 Duffy points on every capacity slot), and finally "
+        "`stencil_mesh.py:218-220`, which builds the six-column quadratic design "
+        "and contracts it as `nqi,ni->nq`. Newton differentiation and transpose-JVP "
+        f"paths repeat that array within budgets newton={dimensions['newton_steps']}, "
+        f"GMRES={dimensions['gmres_iterations']}, active-set="
+        f"{dimensions['active_set_steps']}, producing the 96.8 GiB total floor.",
+        "",
+        "## Whole-cell control",
+        "",
+        f"With the same 300-cell solve program compiled in whole-cell mode, support "
+        f"capacity stays `{dimensions['atomic_support_capacity']}` and the analogous "
+        f"quadrature has only `({dimensions['atomic_support_capacity']} - 2) * 64 "
+        f"= {whole_q}` points per cell. Its largest matching design/JVP array is "
+        f"`{whole_candidate['dtype']}{whole_candidate['shape']}` at "
+        f"{whole_logical / 2**20:.6g} MiB, versus {exact_logical / 2**30:.6g} GiB "
+        f"in exact mode, and whole-cell total temporaries are "
+        f"{whole['memory_analysis']['temp_size_in_bytes'] / 2**30:.6g} GiB versus "
+        f"{exact['memory_analysis']['temp_size_in_bytes'] / 2**30:.6g} GiB exact. "
+        "This removes the expanded array as a solver- or topology-read baseline and "
+        "identifies the fixed-capacity spline-chain quadrature as its cause.",
+        "",
+        "## Optimized-HLO census",
+        "",
+        f"The exact graph contains {exact['predicate_instruction_count']} predicate "
+        "instructions and "
+        f"{exact['large_nonpredicate_instruction_count']} non-predicate instructions "
+        "whose individual logical result exceeds 1 GiB. Every one is listed with "
+        "shape and producing HLO opcode in "
+        f"`{exact['compiler_artifacts']['qualifying_array_census_gzip']}`; the "
+        "complete optimized HLO is adjacent. The equivalent whole-cell census is "
+        f"`{whole['compiler_artifacts']['qualifying_array_census_gzip']}`.",
+        "",
+        f"The largest exact predicate is `pred{exact_predicate['shape']}` "
+        f"({exact_predicate['logical_size_in_bytes'] / 2**20:.6g} MiB), produced "
+        f"by HLO `{exact_predicate['opcode']}` on the same 196480-point middle "
+        f"dimension. The whole-cell counterpart is "
+        f"`pred{whole_predicate['shape']}` "
+        f"({whole_predicate['logical_size_in_bytes'] / 2**20:.6g} MiB). Thus the "
+        "`jit_bitwise_and` executable name correctly exposes the expanded predicate "
+        "family, but the total is dominated by many repeated 3.0039 GiB binary64 "
+        "design and JVP values rather than one 279 GiB boolean allocation.",
+        "",
+        "| dtype and shape | GiB each | HLO opcode | instruction count | "
+        "authored source |",
+        "|---|---:|---|---:|---|",
+    ]
+    for item in signature_rows:
+        lines.append(
+            f"| `{item['dtype']}{item['shape']}` | "
+            f"{item['logical_size_in_bytes'] / 2**30:.6g} | "
+            f"`{item['opcode']}` | {item['instruction_count']} | "
+            f"`{item['source_hint'] or 'optimized derivative of the cited chain'}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "No 500-cell certificate solve was attempted after this diagnosis. The "
+            "1000- and 2500-cell machines remain cached, and their regeneration is "
+            "explicitly blocked on replacing the all-capacity, all-cell quadrature "
+            "materialization with a linear-in-cells implementation.",
+            "<!-- exact-solve-memory-headline:end -->",
+        ]
+    )
+    finding = "\n".join(lines) + "\n\n"
+    original = path.read_text(encoding="utf-8") if path.exists() else ""
+    start_marker = "<!-- exact-solve-memory-headline:start -->"
+    end_marker = "<!-- exact-solve-memory-headline:end -->"
+    start = original.find(start_marker)
+    end = original.find(end_marker)
+    if start >= 0 and end >= start:
+        original = original[:start] + original[end + len(end_marker) :].lstrip()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(finding + original, encoding="utf-8")
+
+
+def _identify_solve_memory(
+    output: Path, report: Path, hlo_root: Path
+) -> dict[str, Any]:
+    """Compile exact and whole-cell controls and identify the expanded arrays."""
+
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("solve memory identification requires binary64")
+    compilation_cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    scaling = json.loads(REPOSED_CERTIFICATE_SCALING_OUTPUT.read_text(encoding="utf-8"))
+    original_mode = support_clip_mode()
+    arms = []
+    try:
+        for mode, arm in (("exact", "exact-clip"), ("chord", "whole-cell")):
+            set_support_clip_mode(mode)
+            row = _compile_solve_memory(
+                "weak-rotation-reactor-static",
+                -300,
+                arm=arm,
+                compiler_artifact_root=hlo_root,
+            )
+            arms.append(row)
+            _write_json(
+                output,
+                {
+                    "schema": "nova.forward-solve-memory-identification",
+                    "source_revision": _source_revision(),
+                    "lane": _lane(),
+                    "persistent_compilation_cache": compilation_cache.receipt(),
+                    "arms": arms,
+                    "completed": False,
+                    "certificate_disposition": {
+                        "fixture_delivered": True,
+                        "certificate_rows_above_300": "blocked_on_memory_scaling_fix",
+                        "certificate_500_attempted": False,
+                    },
+                },
+            )
+    finally:
+        set_support_clip_mode(original_mode)
+    receipt = json.loads(output.read_text(encoding="utf-8"))
+    receipt["completed"] = True
+    receipt["measured_solve_temporaries"] = {
+        "300_cells_gib": scaling["rows"][0]["memory_analysis"]["temp_size_in_bytes"]
+        / 2**30,
+        "500_cells_gib": scaling["rows"][1]["memory_analysis"]["temp_size_in_bytes"]
+        / 2**30,
+        "1000_cells_measured_allocation_gib": 279.45,
+        "apparent_exponent_300_to_500": scaling["fit"]["exponent"],
+        "finding": "unsafe high memory floor despite a sub-linear two-rung ratio",
+    }
+    _write_json(output, receipt)
+    _write_memory_identification_report(report, scaling, arms[0], arms[1])
+    print("SOLVE_MEMORY_IDENTIFICATION_EXIT=0", flush=True)
+    return receipt
+
+
+def _report_value(value: float | None, precision: int = 6) -> str:
+    """Format a nullable measurement for the Markdown evidence table."""
+
+    return "n/a" if value is None else f"{value:.{precision}g}"
+
+
+def _write_recovery_report(
+    path: Path,
+    scaling: dict[str, Any],
+    certificate: dict[str, Any] | None = None,
+) -> None:
+    """Replace the solve-scaling finding and partial 500-cell table in-place."""
+
+    predicate_arrays = [
+        item
+        for row in scaling["rows"]
+        for item in row["largest_predicate_intermediates"]
+    ]
+    ranked_arrays = [
+        item for row in scaling["rows"] for item in row["largest_array_intermediates"]
+    ]
+    largest = max(
+        predicate_arrays or ranked_arrays,
+        key=lambda item: item["logical_size_in_bytes"],
+    )
+    rows = scaling["rows"]
+    predicted = scaling["fit"]["prediction"]
+    lines = [
+        "<!-- production-solve-scaling:start -->",
+        "## Production exact-clip solve scaling finding",
+        "",
+        "Job `1270272` built and cached all four 2500-cell machines, then the "
+        "weak 1000-cell production solve failed after 493 s when "
+        "`jit_bitwise_and` requested 279.45 GiB. The same one-step map executes "
+        "at 1000 cells, so this is a compiled solve-trajectory allocation, not "
+        "a fixture-builder or standalone-map allocation.",
+        "",
+        "The compile-only probe did not execute either solve. XLA reported "
+        f"{rows[0]['memory_analysis']['temp_size_in_bytes'] / 2**30:.6g} GiB "
+        f"at {rows[0]['realised_cells']} realised cells and "
+        f"{rows[1]['memory_analysis']['temp_size_in_bytes'] / 2**30:.6g} GiB "
+        f"at {rows[1]['realised_cells']} cells, giving exponent "
+        f"`{scaling['fit']['exponent']:.6g}` in realised cell count. The fitted "
+        f"predictions are {predicted['1000']['temp_size_in_bytes'] / 2**30:.6g} "
+        f"GiB at {predicted['1000']['realised_cells']} cells and "
+        f"{predicted['2500']['temp_size_in_bytes'] / 2**30:.6g} GiB at "
+        f"{predicted['2500']['realised_cells']} cells; an exponent materially "
+        "above one is a production scaling defect against the linear-in-cells target.",
+        "",
+        "The largest compiled intermediate retained by the ranker has shape "
+        f"`{largest['shape']}` ({largest['element_count']:,} logical booleans) "
+        f"and is attributed to `{largest['source_file']}:{largest['source_line']}` "
+        f"in the {largest['producer_group']}. The production call enters at "
+        "`nova/equilibrium/forward.py:2489`; the active-set live-map replay is "
+        "at `nova/equilibrium/fixed_point.py:3459`. The complete ranked shapes, "
+        "operation names, source locations, and XLA totals are in "
+        "`docs/figures/cut-cell-current-attribution/reposed-fixture/certificate/solve-memory-scaling.json`.",
+        "",
+        "### 500-cell certificate acceptance",
+        "",
+        "The 1000- and 2500-cell certificate solves are blocked on this "
+        "production scaling defect; their machines remain cached, but no further "
+        "solve at either rung is admissible until the super-linear predicate is "
+        "removed.",
+        "",
+        "| Case | Residual / 1e-12 | Converged | Psi RMS/span | Axis error m / "
+        "pitch | X error m / pitch | Nulls admitted | X candidates |",
+        "|---|---:|:---:|---:|---:|---:|:---:|---:|",
+    ]
+    acceptance_rows = [] if certificate is None else certificate.get("rows", [])
+    for row in acceptance_rows:
+        fixed = row["fixed_point"]
+        distance = row["distance_to_analytic"]
+        nulls = row["analytic_null_read"]
+        residual = fixed["terminal_residual"]
+        residual_cell = (
+            "n/a"
+            if residual is None
+            else f"{residual:.3e} / {'pass' if fixed['residual_passed'] else 'fail'}"
+        )
+        axis = (
+            f"{_report_value(distance['axis_error_m'])} / "
+            f"{_report_value(distance['axis_error_in_pitch'])}"
+        )
+        x_point = (
+            f"{_report_value(distance['x_point_error_m'])} / "
+            f"{_report_value(distance['x_point_error_in_pitch'])}"
+        )
+        lines.append(
+            f"| {row['case']} | {residual_cell} | {fixed['converged']} | "
+            f"{_report_value(distance['psi_rms_fraction_of_span'])} | {axis} | "
+            f"{x_point} | {nulls['admitted']} | {nulls['x_candidate_count']} |"
+        )
+    if not acceptance_rows:
+        lines.append(
+            "| pending | pending | pending | pending | pending | pending | "
+            "pending | pending |"
+        )
+    lines.extend(
+        [
+            "",
+            "Each completed row persists its receipt before the next solve; its "
+            "poloidal panel overlays solved and analytic contours on shared levels, "
+            "marks both null sets and the wall, and captions the residual and "
+            "convergence flag.",
+            "<!-- production-solve-scaling:end -->",
+        ]
+    )
+    replacement = "\n".join(lines) + "\n"
+    original = path.read_text(encoding="utf-8") if path.exists() else ""
+    start = original.find("<!-- production-solve-scaling:start -->")
+    end_marker = "<!-- production-solve-scaling:end -->"
+    end = original.find(end_marker)
+    if start >= 0 and end >= start:
+        content = original[:start] + replacement + original[end + len(end_marker) :]
+    else:
+        content = original.rstrip() + "\n\n" + replacement
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+
+
+def _measure_reposed_certificate_500(
+    output: Path, scaling: dict[str, Any], report: Path
+) -> dict[str, Any]:
+    """Run the bounded certificate table after the compile-only diagnosis."""
+
+    global FIGURE_ROOT, PART_ROOT
+
+    original_mode = support_clip_mode()
+    original_figure_root = FIGURE_ROOT
+    original_part_root = PART_ROOT
+    FIGURE_ROOT = REPOSED_CERTIFICATE_ROOT / "cells-500" / "panels"
+    PART_ROOT = REPOSED_CERTIFICATE_ROOT / "cells-500" / "parts"
+    solved_rows: list[dict[str, Any]] = []
+    receipt: dict[str, Any] = {
+        "schema": "nova.reposed-certificate-500-acceptance",
+        "source_revision": _source_revision(),
+        "lane": _lane(),
+        "rows": solved_rows,
+        "blocked_rungs": {
+            "requested_cells": [1000, 2500],
+            "reason": "production exact-clip solve has super-linear predicate memory",
+            "scaling_receipt": str(REPOSED_CERTIFICATE_SCALING_OUTPUT),
+        },
+        "completed": False,
+    }
+    try:
+        set_support_clip_mode("exact")
+        for case_name, requested_cells in REPOSED_CERTIFICATE_500_ROWS:
+            row = _measure(case_name, requested_cells)
+            solved_rows.append(_certificate_acceptance_row(row))
+            receipt["completed"] = len(solved_rows) == len(REPOSED_CERTIFICATE_500_ROWS)
+            _write_json(output, receipt)
+            _write_recovery_report(report, scaling, receipt)
+    finally:
+        set_support_clip_mode(original_mode)
+        FIGURE_ROOT = original_figure_root
+        PART_ROOT = original_part_root
+    print("REPOSED_CERTIFICATE_500_EXIT=0", flush=True)
+    return receipt
+
+
+def _measure_reposed_certificate_recovery(output: Path, report: Path) -> dict[str, Any]:
+    """Diagnose solve memory, then run the safe 500-cell certificate rows."""
+
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("the re-posed certificate requires binary64")
+    original_mode = support_clip_mode()
+    try:
+        set_support_clip_mode("exact")
+        scaling = _measure_solve_memory_scaling(REPOSED_CERTIFICATE_SCALING_OUTPUT)
+        _write_recovery_report(report, scaling)
+        return _measure_reposed_certificate_500(output, scaling, report)
+    finally:
+        set_support_clip_mode(original_mode)
+
+
+def _measure_reposed_certificate(output: Path) -> dict[str, Any]:
+    """Build the fine carriers, then solve all re-posed certificate rows."""
+    global FIGURE_ROOT, PART_ROOT
+
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("the re-posed certificate requires binary64")
+    original_mode = support_clip_mode()
+    original_figure_root = FIGURE_ROOT
+    original_part_root = PART_ROOT
+    FIGURE_ROOT = REPOSED_CERTIFICATE_ROOT / "panels"
+    PART_ROOT = REPOSED_CERTIFICATE_ROOT / "parts"
+    build_rows = []
+    solved_rows: list[dict[str, Any]] = []
+    try:
+        set_support_clip_mode("exact")
+        for case_name in CASE_NAMES:
+            carrier_case, _source_case, exact = _case(case_name)
+            started = perf_counter()
+            machine = _case_machine(case_name, carrier_case, exact, -2500)
+            build_rows.append(
+                {
+                    "case": case_name,
+                    "requested_cells": -2500,
+                    "realised_cells": len(machine.node),
+                    "wall_seconds": perf_counter() - started,
+                    "cache": machine.cache,
+                }
+            )
+            _write_json(
+                REPOSED_CERTIFICATE_BUILD_OUTPUT,
+                {
+                    "schema": "nova.reposed-certificate-machine-build",
+                    "source_revision": _source_revision(),
+                    "lane": _lane(),
+                    "completed_rows": build_rows,
+                },
+            )
+        for case_name, requested_cells in REPOSED_CERTIFICATE_ROWS:
+            row = _measure(case_name, requested_cells)
+            solved_rows.append(_certificate_acceptance_row(row))
+            _write_json(
+                output,
+                {
+                    "schema": "nova.reposed-certificate-acceptance",
+                    "source_revision": _source_revision(),
+                    "lane": _lane(),
+                    "machine_build": build_rows,
+                    "rows": solved_rows,
+                    "rung_ratios": _certificate_rung_ratios(solved_rows),
+                    "completed": len(solved_rows) == len(REPOSED_CERTIFICATE_ROWS),
+                },
+            )
+    finally:
+        set_support_clip_mode(original_mode)
+        FIGURE_ROOT = original_figure_root
+        PART_ROOT = original_part_root
+    receipt = json.loads(output.read_text(encoding="utf-8"))
+    print("REPOSED_CERTIFICATE_EXIT=0", flush=True)
+    return receipt
+
+
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", choices=CASE_NAMES)
-    parser.add_argument("--requested-cells", type=int, choices=REQUESTED_CELLS)
+    parser.add_argument("--requested-cells", type=int, choices=MEASUREMENT_REQUESTS)
     parser.add_argument("--aggregate", action="store_true")
     parser.add_argument("--aggregate-partial", action="store_true")
     parser.add_argument("--validate", action="store_true")
@@ -3017,6 +4335,12 @@ def _parse() -> argparse.Namespace:
     parser.add_argument("--validate-seed-control", action="store_true")
     parser.add_argument("--nan-census", action="store_true")
     parser.add_argument("--diverted-geometry", action="store_true")
+    parser.add_argument("--reposed-fixture-floor", action="store_true")
+    parser.add_argument("--reposed-certificate", action="store_true")
+    parser.add_argument("--reposed-certificate-recovery", action="store_true")
+    parser.add_argument("--identify-solve-memory", action="store_true")
+    parser.add_argument("--finding-report", type=Path)
+    parser.add_argument("--hlo-root", type=Path)
     parser.add_argument("--scheduler-job-id", action="append", default=[])
     parser.add_argument("--output", type=Path, default=OUTPUT)
     return parser.parse_args()
@@ -3024,6 +4348,80 @@ def _parse() -> argparse.Namespace:
 
 def main() -> None:
     arguments = _parse()
+    if arguments.identify_solve_memory:
+        if arguments.finding_report is None or arguments.hlo_root is None:
+            raise SystemExit(
+                "--identify-solve-memory requires --finding-report and --hlo-root"
+            )
+        output = (
+            REPOSED_CERTIFICATE_IDENTIFICATION_OUTPUT
+            if arguments.output == OUTPUT
+            else arguments.output
+        )
+        receipt = _identify_solve_memory(
+            output, arguments.finding_report, arguments.hlo_root
+        )
+        print(
+            json.dumps(
+                {
+                    "completed": receipt["completed"],
+                    "arms": [arm["arm"] for arm in receipt["arms"]],
+                    "measured_solve_temporaries": receipt["measured_solve_temporaries"],
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        return
+    if arguments.reposed_certificate_recovery:
+        if arguments.finding_report is None:
+            raise SystemExit("--reposed-certificate-recovery requires --finding-report")
+        output = (
+            REPOSED_CERTIFICATE_500_OUTPUT
+            if arguments.output == OUTPUT
+            else arguments.output
+        )
+        receipt = _measure_reposed_certificate_recovery(
+            output, arguments.finding_report
+        )
+        print(
+            json.dumps(
+                {
+                    "completed": receipt["completed"],
+                    "row_count": len(receipt["rows"]),
+                    "blocked_rungs": receipt["blocked_rungs"],
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        return
+    if arguments.reposed_certificate:
+        output = (
+            REPOSED_CERTIFICATE_OUTPUT
+            if arguments.output == OUTPUT
+            else arguments.output
+        )
+        receipt = _measure_reposed_certificate(output)
+        print(
+            json.dumps(
+                {
+                    "completed": receipt["completed"],
+                    "row_count": len(receipt["rows"]),
+                    "rung_ratios": receipt["rung_ratios"],
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        return
+    if arguments.reposed_fixture_floor:
+        output = (
+            REPOSED_FIXTURE_OUTPUT if arguments.output == OUTPUT else arguments.output
+        )
+        receipt = _measure_reposed_fixture(output)
+        print(json.dumps(receipt["acceptance"], sort_keys=True), flush=True)
+        return
     if arguments.diverted_geometry:
         output = (
             DIVERTED_GEOMETRY_OUTPUT if arguments.output == OUTPUT else arguments.output

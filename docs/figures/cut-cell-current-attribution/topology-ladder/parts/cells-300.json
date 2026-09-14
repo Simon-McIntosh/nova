@@ -1,0 +1,139 @@
+{
+  "allocation": {
+    "allocated_cpus": 8,
+    "devices": [
+      "cpu:0"
+    ],
+    "jax_default_backend": "cpu",
+    "jax_platforms": [
+      "cpu"
+    ],
+    "job_id": 1270517,
+    "job_name": "topology-ladder-cpu",
+    "memory_mb": 65536,
+    "node": "98dci4-clu-3141",
+    "partition": "all_debug",
+    "tmpdir": "/tmp"
+  },
+  "analytic": {
+    "axis_flux_wb": 0.005709576080821848,
+    "axis_rz_m": [
+      1.7870647018106887,
+      0.0467736265648528
+    ],
+    "axis_to_x_flux_span_wb": 0.005709576080822001,
+    "grid_flux_span_wb": 0.012708666511624691,
+    "x_point_flux_wb": -1.524015784867935e-16,
+    "x_point_rz_m": [
+      1.5025279999999999,
+      -1.01728
+    ]
+  },
+  "cache": {
+    "build_seconds": 0.0,
+    "hit": true,
+    "load_seconds": 0.14047839865088463,
+    "lock_wait_seconds": 2.0431354641914368e-05,
+    "semantic_key": "170918b0837562c5",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_300.zarr",
+    "store_seconds": 0.0
+  },
+  "census": {
+    "analytic_saddle_ring": {
+      "cell_indices": [
+        21,
+        15,
+        5,
+        7,
+        22,
+        23,
+        17
+      ],
+      "central_cell_centroid_distance_to_analytic_x_in_pitch": 0.7081751281030815,
+      "central_cell_centroid_distance_to_analytic_x_m": 0.06494665202710036,
+      "central_cell_contains_analytic_x": false,
+      "central_cell_index": 21,
+      "centroid_coordinates_rz_m": [
+        [
+          1.5292083397583118,
+          -0.9580665971260703
+        ],
+        [
+          1.4438626850461413,
+          -1.0073409338483068
+        ],
+        [
+          1.5292083397583118,
+          -1.0566152705705434
+        ],
+        [
+          1.6145539944704825,
+          -1.0073409338483068
+        ],
+        [
+          1.6145539944704825,
+          -0.9087922604038338
+        ],
+        [
+          1.5292083397583118,
+          -0.8595179236815972
+        ],
+        [
+          1.4438626850461413,
+          -0.9087922604038338
+        ]
+      ],
+      "centroid_flux_wb": [
+        5.859356505120767e-05,
+        -0.00013926246900143924,
+        -9.286008034996617e-06,
+        -0.0005246092500410958,
+        -8.591795944895511e-05,
+        0.0004411762414210157,
+        3.087859544410884e-05
+      ],
+      "cyclic_sign_change_count": 2,
+      "neighbour_above_centre_bits": "000010",
+      "required_saddle_sign_change_count": 4,
+      "ring_index": 2,
+      "selection": "nearest_eligible_centroid_ring_origin"
+    },
+    "contained_saddle_count": 0,
+    "overflow": false,
+    "raw_ring_saddle_count": 0,
+    "retained_saddle_count": 0,
+    "saddle_candidates": [],
+    "x_candidate_count": 0
+  },
+  "characteristic_pitch_m": 0.09170987436549279,
+  "completed": true,
+  "device_timing": null,
+  "miss": {
+    "reason": "the centroid ring containing the analytic X-point produced 2 cyclic sign changes rather than the four required to seed a saddle",
+    "step": "sign_change_census"
+  },
+  "production_read": {
+    "axis_admitted": true,
+    "axis_position_error_in_pitch": 0.028314751558477912,
+    "axis_position_error_m": 0.0025967423081181503,
+    "axis_rz_m": [
+      1.7844681007475904,
+      0.046746542734105535
+    ],
+    "boundary_flux_wb": 0.001003288209647327,
+    "class": "limited",
+    "saddle_admitted": false,
+    "saddle_flux_wb": null,
+    "saddle_level_error_in_span": null,
+    "saddle_level_error_wb": null,
+    "saddle_position_error_in_pitch": null,
+    "saddle_position_error_m": null,
+    "saddle_rz_m": null
+  },
+  "realised_cells": 340,
+  "requested_cells": 300,
+  "schema": "nova.topology-read-resolution-ladder-part",
+  "source_revision": "a5a9e6fbc18f3fe408bfe569467ce00451573fdd",
+  "version": 1,
+  "wall_seconds": 9.404566256329417
+}

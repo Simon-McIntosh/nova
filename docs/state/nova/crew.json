@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T15:54:32",
+  "updated": "2026-09-14T16:29:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -154422,6 +154422,201 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T135514069958-cca-topology-read-resolution-ladder-3",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-topology-read-resolution-ladder-3",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 536,
+                "cached_input_tokens": 580027,
+                "input_tokens": 580595,
+                "output_tokens": 2629,
+                "reasoning_output_tokens": 444,
+                "total_tokens": 583224,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never open any receipt larger than one megabyte in an editor (load it with json). No production code changes. Commit the benchmark before submitting any job. Facts at this base (main): the hex certificate read is the fixed-design path (forward_operator.py _fixed_design_read, line 1863 region) whose saddle is a six-coefficient quadratic on each cell's hexagonal centroid ring, seeded by the sign-change census over rotated centroid rings (read_census); the census retained zero X candidates at 300 cells and one at 500 and 1000 on the analytic single-null flux (docs/figures/cut-cell-current-attribution/oracle-start, report), and the ring saddle error against the analytic X-point is 1.20 mm at 550 realised cells, 1.52 mm at 1074 and 0.40 mm at 2600 (docs/figures/cut-cell-current-attribution/spline-read/report.md); benchmarks/global_spline_read_on_hex.py already rebuilds the operator from the cached oracle machines (scripts/analytic_oracle_fixtures/measure.py cached_machine and forward_operator; 110, 300, 342, 500, 750, 1000 and 2500 cell machines are cached) and evaluates the analytic flux at the carriers, so reuse its loading code. Build one benchmark that, for the single-null row at 110, 200, 300, 342, 400, 500, 750, 1000 and 2500 requested cells (build the 200 and 400 machines, they are small; persist their build seconds), evaluates the analytic flux at the carriers and runs the production read, recording per rung: realised cells and pitch, x_candidate_count from the census, whether the saddle is admitted, the admitted saddle position and level error against the analytic X-point in metres, pitch units and span, the axis error, the class, and the census stage at which the candidate was lost when none is admitted (which rotated ring the saddle falls in and the sign count that ring produced, so the miss mechanism is shown); then, for the rungs where the saddle is admitted, the read wall time for one state and for a vmapped batch of 16 copies of the analytic flux on the H200 device (one short H200 job for the timing only: betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8 --mem=64G --time=00:20:00, nvidia-smi prologue exiting 3 below 40 GiB free, XLA_PYTHON_CLIENT_PREALLOCATE=false, JAX_PLATFORMS=cuda,cpu, TMPDIR=/tmp in submit environment and payload, root venv python with PYTHONPATH at the worktree, sbatch detached, --output in the run directory); everything else on the CPU debug partition (all_debug, --time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu) in one job with rungs sharded inside and parts persisted as each lands. One SVG of admitted-saddle error in pitch against cell count with the unadmitted rungs marked, and one saddle-region poloidal panel per unadmitted rung with the committed nova.media painters (line contours only, wall, analytic nulls in the analytic style, census candidates hollow, the cells around the analytic X-point outlined and the rotated centroid ring that should have fired drawn), under docs/figures/cut-cell-current-attribution/topology-ladder. The report states the smallest cell count that admits the saddle, the miss mechanism at the rungs below it, and the batched read time per state. Manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 3.0,
+          "goal": "Measure at which plasma cell count the production census admits the analytic X-point of the single-null reference when fed the analytic flux directly, and the cost of the read batched on the device",
+          "id": "cca-topology-read-resolution-ladder-3",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T13:55:14Z",
+            "read_at": "2026-09-14T13:55:15Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 14.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T135514069958-cca-topology-read-resolution-ladder-3/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/topology_read_resolution_ladder.py",
+            "docs/figures/cut-cell-current-attribution/topology-ladder",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/topology-ladder"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19e-cca-topology-ladder",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T13:55:28Z",
+        "completed_at": "2026-09-14T14:27:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1922,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1922,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "af968bc835c540807bef85817676c197eb068bae",
+        "commits": [
+          "0fb945a4953a002f9cd6dc53dc68da198a3260ed",
+          "a5a9e6fbc18f3fe408bfe569467ce00451573fdd",
+          "5b3b4069aad2cccbc369194ec9fa5fdc749f0ae8",
+          "5e48f9d5524ff31bf104993a8cb71c3ba6e9a3f1"
+        ],
+        "changed_lines": {
+          "added": 28,
+          "removed": 17,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1270517 (nine rungs of the production read on the analytic single-null flux, 500-cell positive control admitted, EXIT 0) and H200 job 1270525 (vmapped batch-of-16 read timing per admitted rung, EXIT 0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/topology-ladder/cpu-1270517.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T135514069958-cca-topology-read-resolution-ladder-3/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a033-8e51-7691-953b-cf9b4342e1c9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6780672,
+            "cached_input_tokens_cumulative": 6780672,
+            "input_tokens": 6817915,
+            "input_tokens_cumulative": 6817915,
+            "output_tokens": 13358,
+            "output_tokens_cumulative": 13358,
+            "reasoning_output_tokens": 4351,
+            "reasoning_output_tokens_cumulative": 4351
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T14:27:30Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 15.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T14:27:30Z"
+            }
+          ],
+          "notional_cost_usd": 84.5189,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 6780672,
+          "cumulative_input_tokens": 13598587,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 17709
+        },
+        "follow_on_paths": [
+          "30.0058"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 5,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-topology-read-resolution-ladder-3",
+          "session_id": "01a0a033-8e51-7691-953b-cf9b4342e1c9",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T14:27:30Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 54.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -154734,6 +154929,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2462
+    "_version": 2463
   }
 }

@@ -1,0 +1,196 @@
+{
+  "allocation": {
+    "allocated_cpus": 8,
+    "devices": [
+      "cpu:0"
+    ],
+    "jax_default_backend": "cpu",
+    "jax_platforms": [
+      "cpu"
+    ],
+    "job_id": 1270517,
+    "job_name": "topology-ladder-cpu",
+    "memory_mb": 65536,
+    "node": "98dci4-clu-3141",
+    "partition": "all_debug",
+    "tmpdir": "/tmp"
+  },
+  "analytic": {
+    "axis_flux_wb": 0.005709576080821848,
+    "axis_rz_m": [
+      1.7870647018106887,
+      0.0467736265648528
+    ],
+    "axis_to_x_flux_span_wb": 0.005709576080822001,
+    "grid_flux_span_wb": 0.01223900686174343,
+    "x_point_flux_wb": -1.524015784867935e-16,
+    "x_point_rz_m": [
+      1.5025279999999999,
+      -1.01728
+    ]
+  },
+  "cache": {
+    "build_seconds": 0.0,
+    "hit": true,
+    "load_seconds": 0.13832411542534828,
+    "lock_wait_seconds": 1.8989667296409607e-05,
+    "semantic_key": "cf6f8fca6268a294",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_200.zarr",
+    "store_seconds": 0.0
+  },
+  "census": {
+    "analytic_saddle_ring": {
+      "cell_indices": [
+        66,
+        67,
+        65,
+        64,
+        60,
+        76,
+        68
+      ],
+      "central_cell_centroid_distance_to_analytic_x_in_pitch": 0.5928876135910831,
+      "central_cell_centroid_distance_to_analytic_x_m": 0.0665938472069463,
+      "central_cell_contains_analytic_x": false,
+      "central_cell_index": 66,
+      "centroid_coordinates_rz_m": [
+        [
+          1.4908463433740762,
+          -0.9517187356414161
+        ],
+        [
+          1.3863196904697879,
+          -0.8913702444496346
+        ],
+        [
+          1.3863196904697879,
+          -1.0120672268331976
+        ],
+        [
+          1.4908463433740762,
+          -1.0724157180249791
+        ],
+        [
+          1.5953729962783645,
+          -1.0120672268331976
+        ],
+        [
+          1.5953729962783645,
+          -0.8913702444496346
+        ],
+        [
+          1.4908463433740762,
+          -0.8310217532578532
+        ]
+      ],
+      "centroid_flux_wb": [
+        6.85850612463143e-05,
+        -0.00028028430493989983,
+        -0.000522143965129353,
+        6.915716372687336e-05,
+        -0.0003649418650745605,
+        0.00012519221321564717,
+        0.0005237691220048125
+      ],
+      "cyclic_sign_change_count": 4,
+      "neighbour_above_centre_bits": "001011",
+      "required_saddle_sign_change_count": 4,
+      "ring_index": 30,
+      "selection": "nearest_eligible_centroid_ring_origin"
+    },
+    "contained_saddle_count": 1,
+    "overflow": false,
+    "raw_ring_saddle_count": 1,
+    "retained_saddle_count": 1,
+    "saddle_candidates": [
+      {
+        "flux_wb": -1.0784888697077581e-05,
+        "kind": 0.0,
+        "position_error_m": 0.010067034155547064,
+        "position_rz_m": [
+          1.4994268665774577,
+          -1.0268574813069273
+        ],
+        "slot": 0
+      }
+    ],
+    "x_candidate_count": 1
+  },
+  "characteristic_pitch_m": 0.11232119828510424,
+  "completed": true,
+  "device_timing": {
+    "allocation": {
+      "allocated_cpus": 8,
+      "devices": [
+        "cuda:0"
+      ],
+      "jax_default_backend": "gpu",
+      "jax_platforms": [
+        "cuda",
+        "cpu"
+      ],
+      "job_id": 1270525,
+      "job_name": "topology-ladder-h200",
+      "memory_mb": 65536,
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "tmpdir": "/tmp"
+    },
+    "device_matches_cpu_saddle_atol_m": 1e-12,
+    "realised_cells": 233,
+    "repeat_count": 7,
+    "single_state_seconds_median": 0.003971589729189873,
+    "single_state_seconds_minimum": 0.0038544712588191032,
+    "single_state_seconds_samples": [
+      0.0038544712588191032,
+      0.003971589729189873,
+      0.003973064012825489,
+      0.003891744650900364,
+      0.00392923504114151,
+      0.004040384665131569,
+      0.0040079765021800995
+    ],
+    "state_count": 16,
+    "vmapped_batch_seconds_median": 0.006121927872300148,
+    "vmapped_batch_seconds_minimum": 0.006007387302815914,
+    "vmapped_batch_seconds_per_state_median": 0.00038262049201875925,
+    "vmapped_batch_seconds_per_state_minimum": 0.00037546170642599463,
+    "vmapped_batch_seconds_samples": [
+      0.006097961217164993,
+      0.006007387302815914,
+      0.006121927872300148,
+      0.0062433527782559395,
+      0.006225943565368652,
+      0.006220092065632343,
+      0.006109144538640976
+    ]
+  },
+  "miss": null,
+  "production_read": {
+    "axis_admitted": true,
+    "axis_position_error_in_pitch": 0.0339136629920277,
+    "axis_position_error_m": 0.0038092232655017448,
+    "axis_rz_m": [
+      1.7833647165468691,
+      0.04767932570582514
+    ],
+    "boundary_flux_wb": -1.0784888697077581e-05,
+    "class": "diverted",
+    "saddle_admitted": true,
+    "saddle_flux_wb": -1.0784888697077581e-05,
+    "saddle_level_error_in_span": 0.0018889123367933985,
+    "saddle_level_error_wb": 1.078488869692518e-05,
+    "saddle_position_error_in_pitch": 0.08962719690715878,
+    "saddle_position_error_m": 0.010067034155547064,
+    "saddle_rz_m": [
+      1.4994268665774577,
+      -1.0268574813069273
+    ]
+  },
+  "realised_cells": 233,
+  "requested_cells": 200,
+  "schema": "nova.topology-read-resolution-ladder-part",
+  "source_revision": "a5a9e6fbc18f3fe408bfe569467ce00451573fdd",
+  "version": 1,
+  "wall_seconds": 9.141309140250087
+}

@@ -1,0 +1,19 @@
+{
+  "certificate": {
+    "fixture_sha256": "4af3be210b2f3c1bf5fa579520d886f727bddeae247d853f22601069adc78ff3",
+    "identical": true,
+    "scaled_sha256": "4af3be210b2f3c1bf5fa579520d886f727bddeae247d853f22601069adc78ff3"
+  },
+  "clip_mode": "chord",
+  "compiled_slice": {
+    "first_prescribed_current_sha256": "194c2fa7a8526721892b0f781fc63f19d0890dd7c6ed70eebd4647685beb8341",
+    "identical": true,
+    "second_prescribed_current_sha256": "194c2fa7a8526721892b0f781fc63f19d0890dd7c6ed70eebd4647685beb8341"
+  },
+  "differing_constants": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/traced-exterior/certificate-1270462-constants.json",
+  "exterior_scale": 0.9,
+  "external_shape": [
+    1529
+  ],
+  "requested_cells": -300
+}

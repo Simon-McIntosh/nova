@@ -1895,6 +1895,34 @@ def _requalify_krylov_step(
     )
 
 
+def _bind_traced_map_arguments(
+    map_fn: Callable[..., jax.Array] | None,
+    arguments: tuple[Any, ...],
+) -> Callable[..., jax.Array] | None:
+    """Bind call data while retaining frozen-partition map capabilities.
+
+    The supplied values enter the solver API as array arguments.  JAX can
+    therefore lift them into the loop program's operands instead of treating
+    values captured before the solve as StableHLO constants.
+    """
+    if map_fn is None or not arguments:
+        return map_fn
+
+    def bound(*state_arguments):
+        return map_fn(*state_arguments, *arguments)
+
+    partition_read = getattr(map_fn, "_read_frozen_partition", None)
+    partitioned_map = getattr(map_fn, "_map_frozen_partition", None)
+    partition_shadow = getattr(map_fn, "_frozen_partition_shadow", None)
+    if partition_read is not None:
+        bound._read_frozen_partition = partition_read
+        bound._map_frozen_partition = lambda state, partition: partitioned_map(
+            state, partition, *arguments
+        )
+        bound._frozen_partition_shadow = partition_shadow
+    return bound
+
+
 def picard(
     map_fn: Callable[[jax.Array], jax.Array],
     initial: jax.Array,
@@ -1904,9 +1932,12 @@ def picard(
     shadow_mask_fn: Callable[[jax.Array], jax.Array] | None = None,
     promoted_shadow_mask_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
     shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
+    map_arguments: tuple[Any, ...] = (),
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Relaxed Picard iteration with per-evaluation residual accounting."""
+    map_fn = _bind_traced_map_arguments(map_fn, map_arguments)
+    shadowed_map_fn = _bind_traced_map_arguments(shadowed_map_fn, map_arguments)
     initial = _solver_state(initial, precision)
 
     observe_shadows = shadow_mask_fn is not None
@@ -1972,6 +2003,7 @@ def anderson(
     shadow_mask_fn: Callable[[jax.Array], jax.Array] | None = None,
     promoted_shadow_mask_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
     shadowed_map_fn: Callable[[jax.Array, jax.Array], jax.Array] | None = None,
+    map_arguments: tuple[Any, ...] = (),
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Safeguarded Anderson acceleration of the relaxed iteration.
@@ -1988,6 +2020,8 @@ def anderson(
     plain relaxed step; and a non-finite candidate falls back to the relaxed
     step.  The ridge is relative to the mean diagonal of ΔFᵀΔF.
     """
+    map_fn = _bind_traced_map_arguments(map_fn, map_arguments)
+    shadowed_map_fn = _bind_traced_map_arguments(shadowed_map_fn, map_arguments)
     initial = _solver_state(initial, precision)
     n_flat = initial.shape[0]
     observe_shadows = shadow_mask_fn is not None
@@ -3867,6 +3901,7 @@ def newton_krylov(
     own_mask_acceptance: bool | None = None,
     presettlement_incumbent_scoring: bool = True,
     row_jvp_observers: tuple[Callable[[jax.Array, jax.Array], jax.Array], ...] = (),
+    map_arguments: tuple[Any, ...] = (),
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Run globalized Newton and reconcile state-dependent active sets.
@@ -3927,6 +3962,8 @@ def newton_krylov(
     nonconverged result and its receipt are written atomically at that path with
     an adjacent SHA-256 digest after the device computation returns.
     """
+    map_fn = _bind_traced_map_arguments(map_fn, map_arguments)
+    shadowed_map_fn = _bind_traced_map_arguments(shadowed_map_fn, map_arguments)
     if active_set_steps <= 0:
         raise ValueError("active_set_steps must be positive")
     carry_shadows = promoted_shadow_mask_fn is not None

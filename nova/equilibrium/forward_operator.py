@@ -2648,8 +2648,23 @@ class ForwardFluxOperator:
         """
         external = self.external(current, prescribed_current)
 
+        traced = self.traced_flux_map(requested_class, target_current)
+
         def mapped(psi: jax.Array) -> jax.Array:
             """Return the free-boundary flux map of one trial flux."""
+            return traced(psi, external)
+
+        return mapped
+
+    def traced_flux_map(
+        self,
+        requested_class=None,
+        target_current=None,
+    ) -> Callable[[jax.Array, jax.Array], jax.Array]:
+        """Return a fixed-point map taking the exterior flux as traced data."""
+
+        def mapped(psi: jax.Array, external: jax.Array) -> jax.Array:
+            """Return one map evaluation at an explicitly supplied exterior."""
             image = external + self.internal(psi, requested_class, target_current)
             return self._exclude_shadow_residual(psi, image, requested_class)
 
@@ -2665,7 +2680,31 @@ class ForwardFluxOperator:
         """Return a fixed-point map evaluated with one promoted shadow mask."""
         external = self.external(current, prescribed_current)
 
+        traced = self.traced_flux_map_with_shadow(requested_class, target_current)
+
         def mapped(psi: jax.Array, shadow: jax.Array) -> jax.Array:
+            return traced(psi, shadow, external)
+
+        partition_read = getattr(traced, "_read_frozen_partition", None)
+        partitioned_map = getattr(traced, "_map_frozen_partition", None)
+        partition_shadow = getattr(traced, "_frozen_partition_shadow", None)
+        if partition_read is not None:
+            mapped._read_frozen_partition = partition_read
+            mapped._map_frozen_partition = lambda psi, partition: partitioned_map(
+                psi, partition, external
+            )
+            mapped._frozen_partition_shadow = partition_shadow
+
+        return mapped
+
+    def traced_flux_map_with_shadow(
+        self,
+        requested_class=None,
+        target_current=None,
+    ) -> Callable[[jax.Array, jax.Array, jax.Array], jax.Array]:
+        """Return a shadowed map taking the exterior flux as traced data."""
+
+        def mapped(psi: jax.Array, shadow: jax.Array, external: jax.Array) -> jax.Array:
             image = external + self.internal(psi, requested_class, target_current)
             return self._exclude_shadow_residual(
                 psi, image, requested_class, shadow=shadow
@@ -2680,7 +2719,7 @@ class ForwardFluxOperator:
                     psi, requested_class, previous_shadow
                 )
 
-            def map_partition(psi, partition):
+            def map_partition(psi, partition, external):
                 image = external + self._internal_on_partition(
                     psi, partition, target_current
                 )

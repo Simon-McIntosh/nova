@@ -1164,7 +1164,7 @@ def aggregate(report_directory: Path, figure_directory: Path) -> dict[str, Any]:
         "fitted_orders": fitted,
         "figure": figure,
         "report": str(report_destination),
-        "rows": [row["slug"] for row in rows],
+        "rows": [_slug(row["case"], row["requested_cells"]) for row in rows],
         "completed": True,
     }
     _write_json(report_directory / "receipt.json", receipt)

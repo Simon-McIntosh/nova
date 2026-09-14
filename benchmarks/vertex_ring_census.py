@@ -790,6 +790,44 @@ def _periodic_ring_modes(
     }
 
 
+def _stationary_source_cell(
+    machine: Any,
+    operator: Any,
+    state: np.ndarray,
+    selected_position: np.ndarray,
+) -> int:
+    """Resolve the own-node cell whose fitted root supplied a retained row."""
+
+    stencil = _support_stencil(operator)
+    physical = state[: operator.physical_node_number]
+    centroid_flux, _wall = operator._fixed_design_topology.split_flux_map(
+        jnp.asarray(physical)
+    )
+    pool = np.concatenate(
+        (np.asarray(centroid_flux), state[operator.physical_node_number :])
+    )
+    values = pool[np.asarray(stencil.ring_gather_index)]
+    coefficient = np.einsum("nps,ns->np", stencil.ring_flux_weight, values)
+    h00 = 2.0 * coefficient[:, 3]
+    h01 = coefficient[:, 4]
+    h11 = 2.0 * coefficient[:, 5]
+    determinant = h00 * h11 - h01 * h01
+    safe = np.where(np.abs(determinant) > 1.0e-12, determinant, np.nan)
+    local_radial = (h01 * coefficient[:, 2] - h11 * coefficient[:, 1]) / safe
+    local_vertical = (h01 * coefficient[:, 1] - h00 * coefficient[:, 2]) / safe
+    local = np.column_stack((local_radial, local_vertical))
+    position = np.asarray(stencil.ring_sampling_centre) + local * np.asarray(
+        stencil.ring_coordinate_scale
+    )
+    distance = np.linalg.norm(position - selected_position, axis=1)
+    cell = int(np.nanargmin(distance))
+    if distance[cell] > 1.0e-10:
+        raise RuntimeError(
+            "the retained stationary point does not match an own-node fit"
+        )
+    return cell
+
+
 def _add_periodic_presentation(
     row: dict[str, Any], report_directory: Path
 ) -> dict[str, Any]:
@@ -823,11 +861,17 @@ def _add_periodic_presentation(
     saddle_modes = None
     if certificate._is_diverted_case(case_name):
         saddle_reference = np.asarray(exact.x_point, dtype=np.float64)
-        saddle_cell = int(
-            np.flatnonzero(_true_cell_mask(machine, saddle_reference, pitch))[0]
+        saddle_cell = _stationary_source_cell(
+            machine,
+            operator,
+            state,
+            np.asarray(row["vertex_read"]["saddle"]["position_rz_m"]),
         )
         saddle_modes = _periodic_ring_modes(
             machine, operator, state, saddle_cell, pitch
+        )
+        saddle_modes["analytic_reference_cell_index"] = int(
+            np.flatnonzero(_true_cell_mask(machine, saddle_reference, pitch))[0]
         )
         saddle_modes["nearby_four_sample_cells_within_two_pitches"] = nearby_four(
             saddle_reference
@@ -1575,6 +1619,7 @@ def aggregate(
     }
     _write_json(report_directory / "receipt.json", receipt)
     _write_report(receipt, report_directory / "report.md")
+    _write_report(receipt, figure_directory / "report.md")
     print(
         "VERTEX_CENSUS_AGGREGATE "
         f"saddle_admitted="

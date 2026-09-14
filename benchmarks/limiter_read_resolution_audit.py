@@ -2,11 +2,12 @@
 """Measure analytic limiter reads across plasma and wall resolutions.
 
 The measurement keeps the analytic field fixed and varies only the carrier
-geometry.  Each row records both landmarks published by the public forward
-operator and the tensor-spline connectivity diagnostic used by its lazy class
-comparator.  Diverted rows additionally exercise the private-wall exclusion by
-making a known excluded wall node the unmasked extremum, then requiring the
-masked limited read to choose a different contact.
+geometry.  Each row records the landmarks published by the public forward
+operator and verifies that its unstructured hex carrier takes the fixed-design
+class branch rather than the tensor-grid connectivity branch.  Diverted rows
+additionally exercise the private-wall exclusion by making a known excluded
+wall node the unmasked extremum, then requiring the masked limited read to
+choose a different contact.
 
 Parts are written after every row.  Aggregation is a separate command so two
 processes can shard each wall-count group inside one scheduler allocation
@@ -353,41 +354,40 @@ def _block_tree(value: Any) -> Any:
 def _read_measurement(
     operator: ForwardFluxOperator,
     analytic: np.ndarray,
-) -> tuple[Any, Any, dict[str, Any], dict[str, float]]:
-    """Run the public read path and retain both underlying read products."""
+) -> tuple[Any, Any, bool, dict[str, float]]:
+    """Run the public hex-carrier read and retain its fixed-design product."""
 
     physical = jnp.asarray(analytic)[: operator.physical_node_number]
 
-    def execute() -> tuple[Any, Any, dict[str, Any]]:
-        masks, topology, _connected, admitted = operator._fixed_design_read(physical)
-        connectivity = operator._connectivity_read(physical, topology, classify=True)
-        return _block_tree((masks, topology, admitted, connectivity))
+    def execute() -> tuple[Any, Any, Any]:
+        masks, topology = operator.read(jnp.asarray(analytic))
+        return _block_tree((masks, topology, topology.diverted))
 
     compiled_started = perf_counter()
-    masks, topology, admitted, connectivity = execute()
+    public_masks, public_topology, public_diverted = execute()
     compile_seconds = perf_counter() - compiled_started
     warm = []
     for _ in range(3):
         started = perf_counter()
-        masks, topology, admitted, connectivity = execute()
+        public_masks, public_topology, public_diverted = execute()
         warm.append(perf_counter() - started)
 
-    public_masks, public_topology = operator.read(jnp.asarray(analytic))
-    public_class = bool(_block_tree(public_topology.diverted))
+    masks, topology, _connected, admitted = _block_tree(
+        operator._fixed_design_read(physical)
+    )
     public_boundary = np.asarray(public_topology.boundary, dtype=np.float64)
     if not np.array_equal(np.asarray(public_masks.label), np.asarray(masks.label)):
         raise RuntimeError("public and fixed-design reads returned different masks")
     if not np.array_equal(public_boundary, np.asarray(topology.boundary)):
         raise RuntimeError("public read did not publish the fixed-design boundary")
-    connectivity_class = bool(float(connectivity["class_margin"]) >= 0.0)
-    if public_class != connectivity_class:
-        raise RuntimeError("public class disagrees with the connectivity comparator")
     if not bool(admitted):
         raise RuntimeError("the analytic field did not admit a magnetic axis")
+    if operator._fixed_design_topology.connectivity_radius.size:
+        raise RuntimeError("the expected hex carrier unexpectedly has a raster read")
     return (
         masks,
         topology,
-        connectivity,
+        bool(public_diverted),
         {
             "compile_and_first_read_seconds": compile_seconds,
             "warm_read_seconds_median": float(np.median(warm)),
@@ -402,7 +402,6 @@ def _shadow_measurement(
     analytic: np.ndarray,
     masks: Any,
     topology: Any,
-    connectivity: dict[str, Any],
 ) -> tuple[dict[str, Any], np.ndarray]:
     """Measure the private-wall shadow and make its exclusion observable."""
 
@@ -526,11 +525,7 @@ def _shadow_measurement(
                     unmasked_selected_injected_panel and masked_rejected_injected_panel
                 ),
             },
-            "connectivity_read_private_wall_node_count": int(
-                np.count_nonzero(
-                    np.asarray(connectivity["private_wall_node_mask"], dtype=bool)
-                )
-            ),
+            "connectivity_private_wall_node_count": int(np.count_nonzero(private)),
         },
         shadow,
     )
@@ -625,8 +620,9 @@ def _measure_row(
     )
     analytic = _exact_flux(case_name, exact, coordinates)
     operator = oracle_fixture.forward_operator(source_case, machine)
-    masks, topology, connectivity, read_timing = _read_measurement(operator, analytic)
-    production_diverted = bool(float(connectivity["class_margin"]) >= 0.0)
+    masks, topology, production_diverted, read_timing = _read_measurement(
+        operator, analytic
+    )
     topology_class = "diverted" if production_diverted else "limited"
     analytic_contact = _analytic_wall_extremum(
         case_name, exact, machine.wall_node, float(operator.polarity)
@@ -643,9 +639,6 @@ def _measure_row(
     )
     fixed_node_distance = float(
         np.min(np.linalg.norm(machine.wall_node - contact, axis=1))
-    )
-    connectivity_contact = np.asarray(
-        [connectivity["limiter_r"], connectivity["limiter_z"]], dtype=np.float64
     )
     row: dict[str, Any] = {
         **progress,
@@ -676,23 +669,11 @@ def _measure_row(
             "representation": "three-node quadratic sub-panel interpolation",
         },
         "connectivity_contact": {
-            "coordinate_rz_m": connectivity_contact.tolist(),
-            "flux_wb": float(connectivity["limiter_psi"]),
-            "position_error_m": float(
-                np.linalg.norm(connectivity_contact - exact_contact)
+            "status": "not_applicable_to_unstructured_hex_carrier",
+            "reason": (
+                "the public class comparator takes the moment-geometry branch "
+                "when the fixed-design topology has no tensor axes"
             ),
-            "level_error_in_span": abs(
-                float(connectivity["limiter_psi"]) - analytic_contact["flux_wb"]
-            )
-            / span,
-            "selected_from_exact_nodes": bool(
-                connectivity["limiter_selected_from_exact_nodes"]
-            ),
-            "flux_from_global_surface": bool(
-                connectivity["limiter_flux_from_global_surface"]
-            ),
-            "minimum_bracket_count": int(connectivity["limiter_minimum_bracket_count"]),
-            "refinement_shift_m": float(connectivity["limiter_refinement_shift"]),
         },
         "read_timing": read_timing,
         "resolution_guidance": {
@@ -722,17 +703,27 @@ def _measure_row(
             }
         )
     if certificate._is_diverted_case(case_name):
-        shadow, shadow_mask = _shadow_measurement(
-            operator, analytic, masks, topology, connectivity
-        )
+        shadow, shadow_mask = _shadow_measurement(operator, analytic, masks, topology)
         row["shadow"] = shadow
         if requested_cells == -1000 and wall_nodes == 481:
+            radius = np.linspace(
+                float(np.min(machine.wall_node[:, 0])),
+                float(np.max(machine.wall_node[:, 0])),
+                220,
+            )
+            height = np.linspace(
+                float(np.min(machine.wall_node[:, 1])),
+                float(np.max(machine.wall_node[:, 1])),
+                280,
+            )
+            rr, zz = np.meshgrid(radius, height)
+            render_points = np.column_stack((rr.ravel(), zz.ravel()))
             row["render"] = {
-                "radius": np.asarray(operator.connectivity_grid_axes()[0]),
-                "height": np.asarray(operator.connectivity_grid_axes()[1]),
-                "flux": analytic[: len(machine.node)]
-                .reshape(operator.connectivity_grid_axes()[2])
-                .T,
+                "radius": radius,
+                "height": height,
+                "flux": _exact_flux(case_name, exact, render_points).reshape(
+                    len(height), len(radius)
+                ),
                 "wall": np.asarray(machine.wall_node),
                 "axis": np.asarray(certificate.AXIS_M),
                 "x_point": np.asarray(certificate.X_POINT_M),
@@ -763,7 +754,7 @@ def _measure_row(
 
 
 def _source_contract() -> dict[str, Any]:
-    """Return the verified code-path evidence for the two read products."""
+    """Return verified code-path evidence for the hex-carrier read."""
 
     return {
         "certificate_topology_adapter": _pointer(
@@ -774,14 +765,15 @@ def _source_contract() -> dict[str, Any]:
             ("self._fixed_design_read", "_class_margin_read=lambda"),
         ),
         "fixed_design_read": _pointer(ForwardFluxOperator._fixed_design_read),
-        "connectivity_class_read": _pointer(
-            ForwardFluxOperator._connectivity_read, ("traced_boundary_read",)
+        "hex_class_branch": _pointer(
+            ForwardFluxOperator._connectivity_class_margin,
+            ("self.moment_geometry is not None", "self._fixed_design_read"),
         ),
         "fixed_design_wall_contact": _pointer(
             Topology._wall_anchor_selection,
             ("traced_quadratic_wall", "wall_coordinate"),
         ),
-        "connectivity_wall_contact": _pointer(
+        "unselected_tensor_grid_limiter": _pointer(
             __import__(
                 "nova.equilibrium.connectivity_boundary",
                 fromlist=["_select_reachable_wall_limiter"],
@@ -963,9 +955,10 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
         (
             "The certificate adapter calls the public forward-operator read. That "
             "publishes the fixed-design read's three-node quadratic wall contact; "
-            "its lazy class property separately calls the tensor-spline connectivity "
-            "read. Both are sub-panel, but only the fixed-design contact is the "
-            "boundary landmark stored by the certificate."
+            "because the hex carrier has moment geometry and no tensor axes, its "
+            "lazy class property performs another fixed-design read. The tensor-spline "
+            "connectivity limiter is unavailable on these rows. The published contact "
+            "is therefore sub-panel, but through the three-node quadratic fit."
         ),
         "",
         "| Case | Cells | Wall nodes | Class | Panel / pitch | "

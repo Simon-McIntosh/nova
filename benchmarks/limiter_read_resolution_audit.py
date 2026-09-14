@@ -1091,7 +1091,12 @@ def _render_poloidal_figure(row: dict[str, Any], path: Path) -> None:
             zorder=DEFAULT_INK.zorder_markers,
         )
     path.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(path, format="svg", facecolor=DEFAULT_INK.figure_facecolor)
+    figure.savefig(
+        path,
+        format=path.suffix.removeprefix("."),
+        dpi=180,
+        facecolor=DEFAULT_INK.figure_facecolor,
+    )
     plt.close(figure)
 
 
@@ -1265,6 +1270,9 @@ def _saddle_coupling_summary(rows: list[dict[str, Any]]) -> list[dict[str, Any]]
                 "x_point_error_m": [
                     item["selected_x_point_error_m"] for item in coupling
                 ],
+                "published_boundary_error_m": [
+                    row["production_contact"]["position_error_m"] for row in selected
+                ],
                 "distinct_carrier_node_identities": len(
                     {item["carrier_node_sha256_binary64"] for item in coupling}
                 ),
@@ -1292,28 +1300,33 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
 
     rows = receipt["rows"]
     contract = receipt["source_contract"]
+    adapter = contract["certificate_topology_adapter"]
     public = contract["public_forward_read"]
+    branch = contract["hex_class_branch"]
     contact = contract["fixed_design_wall_contact"]
     lines = [
         "# Analytic limiter read resolution",
         "",
         (
-            "The certificate adapter calls `ForwardFluxOperator.read` at "
-            f"`{public['path']}:{public['line_start']}`. It publishes the "
-            "fixed-design boundary and, because these hex carriers have moment "
-            "geometry but no tensor axes, its lazy class property performs another "
-            "fixed-design read. The tensor-spline connectivity limiter is unavailable "
-            "on these rows."
+            "The certificate adapter calls `operator.read` at "
+            f"`{adapter['path']}:1680`; the public read begins at "
+            f"`{public['path']}:{public['line_start']}` and selects "
+            "`_fixed_design_read` at line 2006. Because these hex carriers have "
+            "moment geometry but no tensor axes, the lazy class property takes the "
+            f"moment-geometry branch at `{branch['path']}:1926` and performs another "
+            "fixed-design read at line 1929. The tensor-spline connectivity limiter "
+            "is unavailable on these rows."
         ),
         "",
         (
             "The contact is selected at "
-            f"`{contact['path']}:{contact['line_start']}-{contact['line_end']}`: "
-            "three wall-node values are fit by a local quadratic and their coordinates "
-            "are interpolated along the same bracket. That operation returns a point "
-            "between nodes, but the measured position error remains first order in "
-            "wall panel length. It is wall-panel-limited, not the global tensor-spline "
-            "restriction and derivative-root polish already available on raster reads."
+            f"`{contact['path']}:496` (the extremal node); three wall-node values are "
+            "fit by `traced_quadratic_wall` at line 519 and their coordinates are "
+            "interpolated by `wall_coordinate` at line 524. That operation returns a "
+            "point between nodes, but the measured position error remains first order "
+            "in wall panel length. It is wall-panel-limited, not the global tensor-"
+            "spline restriction and derivative-root polish already available on "
+            "raster reads."
         ),
         "",
         "| Case | Cells | Wall nodes | Class | Panel / pitch | "
@@ -1388,8 +1401,10 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
             f"All {len(shadow_rows)} single-null controls passed: the injected "
             "private-region node won the unmasked limited read and was rejected by "
             "the masked read. `wall_height_shadow_mask` uses the qualified-saddle "
-            "height band and intersects it with the connectivity-private wall mask; "
-            "each row records whether either side fell back to connectivity alone."
+            "height band and intersects it with the connectivity-private wall mask. "
+            "The selecting exclusion is therefore height-based over connectivity-"
+            "qualified private nodes, not a connectivity-only shadow; each row records "
+            "whether either side fell back to connectivity alone."
         )
     )
     lines.extend(
@@ -1415,13 +1430,21 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
         errors = ", ".join(
             f"{wall}:{error:.6g}"
             for wall, error in zip(
+                item["wall_nodes"], item["published_boundary_error_m"], strict=True
+            )
+        )
+        raw_errors = ", ".join(
+            f"{wall}:{error:.6g}"
+            for wall, error in zip(
                 item["wall_nodes"], item["x_point_error_m"], strict=True
             )
         )
         lines.append(
-            f"- {abs(item['requested_cells'])} requested cells — errors [wall nodes:m] "
+            f"- {abs(item['requested_cells'])} requested cells — published boundary/"
+            f"X-point errors [wall nodes:m] "
             f"{errors}; {item['distinct_carrier_node_identities']} distinct carrier "
-            f"node identities. {item['cause']}."
+            f"node identities. The raw fixed-design saddle candidate errors are "
+            f"{raw_errors}. {item['cause']}."
         )
     lines.append(
         (
@@ -1452,7 +1475,7 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
             "contact-error-vs-wall-resolution.svg` — all contact errors against "
             "local wall-panel-to-cell-pitch ratio.",
             "- `/nova/figures/cut-cell-current-attribution/limiter-read/"
-            "single-null-contact-shadow.svg` — analytic single-null 1000 field, "
+            "single-null-contact-shadow.png` — analytic single-null 1000 field, "
             "wall, analytic nulls, selected wall contact and excluded "
             "private-wall nodes.",
             "",
@@ -1493,7 +1516,7 @@ def aggregate(report_directory: Path, figure_directory: Path) -> dict[str, Any]:
         ),
     }
     contact_figure = figure_directory / "contact-error-vs-wall-resolution.svg"
-    poloidal_figure = figure_directory / "single-null-contact-shadow.svg"
+    poloidal_figure = figure_directory / "single-null-contact-shadow.png"
     _render_error_figure(rows, contact_figure)
     render_row = next(
         row

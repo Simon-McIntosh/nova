@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-14">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 </head>
 <body>
 <main class="plan-doc">
@@ -318,6 +318,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-iteration-positive-control-2026-09-14" data-who="s19-review" data-when="2026-09-14">
     <div class="r-comment-body"><p>Rung three verdict on the iteration (run r-20260914T061257489152, H200 job 1270326). On the single-null 500 row with whole-cell booking under the fixture exterior, where the analytic flux is a fixed point to 4.9e-15, the production Newton-Krylov started from the analytic flux plus perturbations of 1e-4, 1e-3, 1e-2 and 1e-1 of span returned in every arm to residual 6.2e-15 and distance 1.4e-14 from the analytic flux. Where the fixed point is the reference, the iteration contracts to it from a tenth of a span away; Gate C was never the iteration. The exact-clip arms did not run: the solve allocates 131 GiB at 500 cells and 279 GiB at 1000, about 0.2 GiB of booleans per cell, so exact-clip solves above about 300 cells are blocked on f-cca-exact-clip-solve-memory-scaling.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-exact-clip-solve-memory-totals-2026-09-14" data-who="s19-review" data-when="2026-09-14">
+    <div class="r-comment-body"><p>Compile-only memory analysis of the exact-clip production solve (run r-20260914T082732961777, H200 job 1270332): temporaries 96.8 GiB at 300 cells (342 realised), 130.8 GiB at 500 (555 realised), against 279 GiB measured at 1000. A 97 GiB floor at 300 cells means every exact-clip solve of the sprint ran only because the card was empty, and the sixteen-row certificate's coarse rows dying on nan may have been the same pressure. The array is boolean (the failing op is a bitwise and) and is being named from the optimised HLO: every buffer over 1 GiB with its shape, its producing op, the nova quantities whose product gives that shape, and the source line that builds it, confirmed by its absence in whole-cell mode. The fix node opens on that identification.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260910T114647655089-cca-read-representation-discriminator" data-who="s19i-cca-readrep" data-when="2026-09-10T16:13:45.324Z">
     <div class="r-comment-body"><p>Gate A decided. On the exact input (analytic flux at the nodes) the global split spline books the analytic total to 1.00003 with zero boundary root error, the six-point ring quadratic to 0.99997 with 0.15 mm median root error, and the linear edge root falls 0.55 percent short (0.9945, 1.8 mm median root error) on weak, moderate and strong; on the single-null -300 row all three overshoot by 1 to 1.5 percent (linear 1.0099, quadratic 1.0154, spline 1.0140). The terminal-state shortfalls are state error: 100 percent on weak (0.0169) and moderate (0.0096), 99.7 percent on strong, because the committed terminal boundary level sits at 10.4 Wb on weak and 0.077 Wb on moderate against the analytic 0; on the single-null terminal the read boundary level of 0.0010 Wb (21 percent of the span) costs 20 percent of the current under every representation, which is the unadmitted saddle. The spline level disagrees in sign with the nodal flux at 7 to 24 cells per row without affecting its total. Receipt, report and four panels banked on main under docs/figures/cut-cell-current-attribution/read-representation; the worker session exhausted after committing.</p></div>

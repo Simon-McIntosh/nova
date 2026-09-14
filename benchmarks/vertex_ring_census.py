@@ -2,12 +2,13 @@
 """Evaluate an own-vertex-ring stationary-point census on hex carriers.
 
 The benchmark is deliberately separate from the production topology read.  It
-loads the same cached analytic carriers as the production resolution ladder,
-samples every cell centroid and its six authored sampling vertices, and uses
-the cyclic vertex signs to seed a stationary point in that cell.  A quadratic
-fit over those seven own-node values supplies the one-step Newton polish and
-Hessian classification.  The emitted gate labels are data identifiers only;
-the implementation names the measured mechanisms.
+loads the same cached analytic carriers as the production resolution ladder
+and samples every cell centroid and its six authored sampling vertices.  A
+quadratic fit over those seven own-node values supplies the closed-form
+stationary point and Hessian classification.  The original cyclic vertex signs
+about the centroid value remain in the receipt as a negative control, beside
+the equivalent signs about the fitted stationary value.  The emitted gate
+labels are data identifiers only; the implementation names the mechanisms.
 
 Receipt field glossary:
 ``raw`` is the sign-change census, ``typed`` adds a finite capped Newton root
@@ -240,6 +241,59 @@ def _deduplicate(position: jax.Array, valid: jax.Array, distance: float) -> jax.
     )
 
 
+def _cell_edges(operator: Any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return fixed-capacity directed edges for every physical cell polygon."""
+
+    polygons = tuple(
+        np.asarray(polygon, dtype=np.float64)
+        for polygon in operator.moment_geometry.polygons
+    )
+    width = max(len(polygon) for polygon in polygons)
+    start = np.zeros((len(polygons), width, 2), dtype=np.float64)
+    end = np.zeros_like(start)
+    valid = np.zeros((len(polygons), width), dtype=bool)
+    for cell, polygon in enumerate(polygons):
+        count = len(polygon)
+        start[cell, :count] = polygon
+        end[cell, :count] = np.roll(polygon, -1, axis=0)
+        valid[cell, :count] = True
+    return start, end, valid
+
+
+def _inside_or_near_cell(
+    position: jax.Array,
+    edge_start: jax.Array,
+    edge_end: jax.Array,
+    edge_valid: jax.Array,
+    distance_limit: float,
+) -> tuple[jax.Array, jax.Array, jax.Array]:
+    """Test each row's point against its corresponding polygon and edges."""
+
+    point = position[:, None, :]
+    first_x, first_y = edge_start[..., 0], edge_start[..., 1]
+    second_x, second_y = edge_end[..., 0], edge_end[..., 1]
+    point_x, point_y = point[..., 0], point[..., 1]
+    vertical_span = second_y - first_y
+    safe_span = jnp.where(jnp.abs(vertical_span) > 0.0, vertical_span, 1.0)
+    crossing_x = first_x + (point_y - first_y) * (second_x - first_x) / safe_span
+    crossing = (
+        edge_valid
+        & ((first_y > point_y) != (second_y > point_y))
+        & (point_x < crossing_x)
+    )
+    inside = (jnp.sum(crossing, axis=1) % 2) == 1
+
+    edge = edge_end - edge_start
+    relative = point - edge_start
+    length_squared = jnp.sum(edge * edge, axis=-1)
+    safe_length = jnp.where(length_squared > 0.0, length_squared, 1.0)
+    fraction = jnp.clip(jnp.sum(relative * edge, axis=-1) / safe_length, 0.0, 1.0)
+    closest = edge_start + fraction[..., None] * edge
+    separation = jnp.linalg.norm(point - closest, axis=-1)
+    edge_distance = jnp.min(jnp.where(edge_valid, separation, jnp.inf), axis=1)
+    return inside | (edge_distance <= distance_limit), inside, edge_distance
+
+
 def _vertex_read_function(operator: Any, pitch: float):
     """Build the jitted own-vertex census and production qualification."""
 
@@ -248,6 +302,10 @@ def _vertex_read_function(operator: Any, pitch: float):
     weight = jnp.asarray(stencil.ring_flux_weight, dtype=jnp.float64)
     centre = jnp.asarray(stencil.ring_sampling_centre, dtype=jnp.float64)
     scale = jnp.asarray(stencil.ring_coordinate_scale, dtype=jnp.float64)
+    edge_start, edge_end, edge_valid = _cell_edges(operator)
+    edge_start = jnp.asarray(edge_start)
+    edge_end = jnp.asarray(edge_end)
+    edge_valid = jnp.asarray(edge_valid)
     capacity = int(operator._fixed_design_topology.grid.locator.maxsize)
     physical_count = int(operator.physical_node_number)
     axis_kind = operator._fixed_design_topology.grid.extremum_polarity
@@ -281,10 +339,8 @@ def _vertex_read_function(operator: Any, pitch: float):
         local_vertical = (
             h01 * coefficient[:, 1] - h00 * coefficient[:, 2]
         ) / safe_determinant
-        requested_step = jnp.stack((local_radial, local_vertical), axis=1) * scale
-        requested_distance = jnp.linalg.norm(requested_step, axis=1)
-        cap_factor = jnp.minimum(1.0, pitch / jnp.maximum(requested_distance, 1.0e-300))
-        step = requested_step * cap_factor[:, None]
+        step = jnp.stack((local_radial, local_vertical), axis=1) * scale
+        requested_distance = jnp.linalg.norm(step, axis=1)
         position = centre + step
         local = step / scale
         value = (
@@ -296,13 +352,22 @@ def _vertex_read_function(operator: Any, pitch: float):
             + coefficient[:, 5] * local[:, 1] ** 2
         )
         finite = nonsingular & jnp.all(jnp.isfinite(position), axis=1)
-        reached_stationary = finite & (requested_distance <= pitch)
+        near_cell, inside_cell, cell_distance = _inside_or_near_cell(
+            position, edge_start, edge_end, edge_valid, 0.25 * pitch
+        )
+        stationary_delta = values[:, 1:] - value[:, None]
+        stationary_above = stationary_delta > 0.0
+        stationary_crossing = jnp.sum(
+            stationary_above != jnp.roll(stationary_above, -1, axis=1), axis=1
+        )
         saddle_type = determinant < -1.0e-12
         extremum_type = (determinant > 1.0e-12) & (
             jnp.where(h00 + h11 < 0.0, 1, -1) == axis_kind
         )
-        typed_extremum = raw_extremum & reached_stationary & extremum_type
-        typed_saddle = raw_saddle & reached_stationary & saddle_type
+        extremal_centroid = jnp.argmax(operator.polarity * centroid)
+        axis_seed = jnp.arange(centroid.shape[0]) == extremal_centroid
+        typed_extremum = axis_seed & finite & near_cell & extremum_type
+        typed_saddle = finite & near_cell & saddle_type
         candidate_rows = jnp.column_stack((position, value, jnp.zeros_like(value)))
         contained = operator._fixed_design_topology.contained_x_candidates(
             candidate_rows
@@ -345,8 +410,10 @@ def _vertex_read_function(operator: Any, pitch: float):
         qualified_extremum = qualified_extremum & extremum_valid
         return {
             "crossing_count": crossing,
+            "stationary_crossing_count": stationary_crossing,
             "raw_extremum": raw_extremum,
             "raw_saddle": raw_saddle,
+            "axis_seed": axis_seed,
             "typed_extremum": typed_extremum,
             "typed_saddle": typed_saddle,
             "contained_extremum": contained_extremum,
@@ -360,6 +427,8 @@ def _vertex_read_function(operator: Any, pitch: float):
             "raw_position": position,
             "raw_value": value,
             "requested_step_m": requested_distance,
+            "inside_cell": inside_cell,
+            "distance_to_cell_m": cell_distance,
             "hessian_determinant_local": determinant,
             "extremum_overflow": extremum_count > capacity,
             "saddle_overflow": saddle_count > capacity,
@@ -508,15 +577,31 @@ def _reference_cell_probe(
     values = pool[np.asarray(stencil.ring_gather_index)[cell]]
     delta = values[1:] - values[0]
     position = np.asarray(measured["raw_position"])[cell]
+    stationary_value = float(np.asarray(measured["raw_value"])[cell])
+    stationary_delta = values[1:] - stationary_value
     determinant = float(np.asarray(measured["hessian_determinant_local"])[cell])
     return {
         "cell_index": cell,
         "cell_centroid_rz_m": np.asarray(machine.node[cell]).tolist(),
         "vertex_minus_centroid_wb": delta.tolist(),
         "above_centroid_bits": "".join(str(int(value > 0.0)) for value in delta),
-        "cyclic_sign_change_count": int(np.asarray(measured["crossing_count"])[cell]),
+        "centroid_level_cyclic_sign_change_count": int(
+            np.asarray(measured["crossing_count"])[cell]
+        ),
+        "stationary_value_wb": stationary_value,
+        "vertex_minus_stationary_value_wb": stationary_delta.tolist(),
+        "above_stationary_value_bits": "".join(
+            str(int(value > 0.0)) for value in stationary_delta
+        ),
+        "stationary_level_cyclic_sign_change_count": int(
+            np.asarray(measured["stationary_crossing_count"])[cell]
+        ),
         "polished_position_rz_m": position.tolist(),
         "requested_step_m": float(np.asarray(measured["requested_step_m"])[cell]),
+        "inside_cell_polygon": bool(np.asarray(measured["inside_cell"])[cell]),
+        "distance_to_cell_polygon_m": float(
+            np.asarray(measured["distance_to_cell_m"])[cell]
+        ),
         "hessian_determinant_local": determinant,
         "hessian_class": (
             "saddle"
@@ -650,6 +735,14 @@ def _measure_row(
         and instrument["extremum_detected_and_polished"]
     ):
         raise RuntimeError("manufactured stationary-point controls failed")
+    axis_probe = _reference_cell_probe(
+        machine, operator, state, measured, raw_axis_true
+    )
+    saddle_probe = (
+        _reference_cell_probe(machine, operator, state, measured, raw_x_true)
+        if diverted
+        else None
+    )
     production = _production_read(operator, state)
     production["axis_position_error_m"] = float(
         np.linalg.norm(np.asarray(production["axis_rz_m"]) - axis_reference)
@@ -724,6 +817,30 @@ def _measure_row(
             "reference_span_wb": span,
         },
         "vertex_read": {
+            "criteria": {
+                "centroid_value_sign_change": {
+                    "axis_reference_cell_admitted": bool(
+                        np.any(raw_extremum & raw_axis_true)
+                    ),
+                    "saddle_reference_cell_admitted": (
+                        bool(np.any(raw_saddle & raw_x_true)) if diverted else None
+                    ),
+                },
+                "quadratic_stationary_point": {
+                    "axis_seed": "extremal centroid followed by own-node polish",
+                    "saddle_seed": (
+                        "indefinite own-node quadratic with stationary point inside "
+                        "its cell polygon or within one quarter pitch"
+                    ),
+                    "axis_admitted": axis["admitted"],
+                    "saddle_admitted": saddle["admitted"] if saddle else None,
+                    "saddle_stationary_level_has_four_changes": (
+                        saddle_probe["stationary_level_cyclic_sign_change_count"] == 4
+                        if saddle_probe is not None
+                        else None
+                    ),
+                },
+            },
             "axis": axis,
             "saddle": saddle,
             "counts": {
@@ -770,14 +887,8 @@ def _measure_row(
                 "axis-component flood; candidate saddles use production wall "
                 "containment"
             ),
-            "analytic_axis_cell_probe": _reference_cell_probe(
-                machine, operator, state, measured, raw_axis_true
-            ),
-            "analytic_saddle_cell_probe": (
-                _reference_cell_probe(machine, operator, state, measured, raw_x_true)
-                if diverted
-                else None
-            ),
+            "analytic_axis_cell_probe": axis_probe,
+            "analytic_saddle_cell_probe": saddle_probe,
         },
         "production_read": production,
         "instrument_controls": instrument,
@@ -889,7 +1000,9 @@ def _render_saddle_panel(row: dict[str, Any], figure_directory: Path) -> dict[st
     vertices = np.asarray(machine.sampling_vertices[cell], dtype=np.float64)
     points = np.vstack((machine.node[cell], vertices))
     values = limiter_audit._exact_flux(certificate.DIVERTED_CASE_NAME, exact, points)
-    signs = values[1:] - values[0]
+    centroid_signs = values[1:] - values[0]
+    probe = row["vertex_read"]["analytic_saddle_cell_probe"]
+    stationary_signs = values[1:] - probe["stationary_value_wb"]
     extent = max(3.0 * pitch, 0.18)
     radial = np.linspace(ANALYTIC_X[0] - extent, ANALYTIC_X[0] + extent, 241)
     height = np.linspace(ANALYTIC_X[1] - extent, ANALYTIC_X[1] + extent, 241)
@@ -931,22 +1044,29 @@ def _render_saddle_panel(row: dict[str, Any], figure_directory: Path) -> dict[st
     )
     closed = np.vstack((vertices, vertices[0]))
     axis.plot(closed[:, 0], closed[:, 1], color=COLOURS["vertex"], linewidth=1.5)
-    for index, (vertex, sign) in enumerate(zip(vertices, signs, strict=True)):
+    for index, (vertex, centroid_sign, stationary_sign) in enumerate(
+        zip(vertices, centroid_signs, stationary_signs, strict=True)
+    ):
         axis.plot(
             vertex[0],
             vertex[1],
             marker="o",
-            markerfacecolor=COLOURS["positive"] if sign > 0 else COLOURS["negative"],
+            markerfacecolor=(
+                COLOURS["positive"] if stationary_sign > 0 else COLOURS["negative"]
+            ),
             markeredgecolor="white",
             markersize=7,
             linestyle="none",
             zorder=8,
         )
         axis.text(
-            vertex[0], vertex[1], f" {index}:{'+' if sign > 0 else '-'}", fontsize=7
+            vertex[0],
+            vertex[1],
+            f" {index}:c{'+' if centroid_sign > 0 else '-'}"
+            f"/q{'+' if stationary_sign > 0 else '-'}",
+            fontsize=7,
         )
     saddle = row["vertex_read"]["saddle"]
-    probe = row["vertex_read"]["analytic_saddle_cell_probe"]
     if probe is not None:
         position = probe["polished_position_rz_m"]
         axis.plot(
@@ -963,10 +1083,11 @@ def _render_saddle_panel(row: dict[str, Any], figure_directory: Path) -> dict[st
     axis.set_ylim(ANALYTIC_X[1] - extent, ANALYTIC_X[1] + extent)
     poloidal_axes(axis)
     admission = "admitted" if saddle["admitted"] else "unadmitted"
-    sign_changes = probe["cyclic_sign_change_count"] if probe is not None else None
+    centroid_changes = probe["centroid_level_cyclic_sign_change_count"]
+    stationary_changes = probe["stationary_level_cyclic_sign_change_count"]
     axis.set_title(
-        f"{row['realised_cells']} cells: {sign_changes} own-ring sign changes; "
-        f"{admission}",
+        f"{row['realised_cells']} cells: centroid level {centroid_changes}, "
+        f"stationary level {stationary_changes}; {admission}",
         fontsize=9,
     )
     figure_directory.mkdir(parents=True, exist_ok=True)
@@ -996,15 +1117,25 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
             "cells, while its 500-requested positive control admitted one."
         ),
         "",
+        (
+            "The raw vertex-minus-centroid rule is retained as a negative control. "
+            "The centroid-value contour generally cuts only one hyperbola branch "
+            "pair when the centroid is displaced from the saddle, so it produces "
+            "two cyclic changes. The operative criterion instead solves the "
+            "own-node quadratic gradient, classifies its Hessian, and requires the "
+            "stationary point to lie in or within one quarter pitch of its cell."
+        ),
+        "",
         "## Analytic single-null ladder",
         "",
         (
-            "| requested | realised | vertex X | vertex error / pitch | vertex "
-            "level / span | production X | production error / pitch | "
+            "| requested | realised | centroid-sign X | quadratic X | "
+            "quadratic error / pitch | quadratic level / span | production X | "
+            "production error / pitch | "
             "false X raw→final | "
             "false O raw→final | noise X |"
         ),
-        "|---:|---:|:---:|---:|---:|:---:|---:|---:|---:|:---:|",
+        "|---:|---:|:---:|:---:|---:|---:|:---:|---:|---:|---:|:---:|",
     ]
     for row in rows:
         vertex = row["vertex_read"]
@@ -1016,8 +1147,12 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
         noise_admitted = row["smooth_noise_control"][
             "saddle_admitted_against_unperturbed_reference"
         ]
+        raw_admitted = vertex["criteria"]["centroid_value_sign_change"][
+            "saddle_reference_cell_admitted"
+        ]
         lines.append(
             f"| {row['requested_cells']} | {row['realised_cells']} | "
+            f"{'yes' if raw_admitted else 'no'} | "
             f"{'yes' if saddle['admitted'] else 'no'} | "
             f"{saddle_pitch_error if saddle_pitch_error is not None else '—'} | "
             f"{saddle_level_error if saddle_level_error is not None else '—'} | "
@@ -1031,15 +1166,21 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
         )
     lines.extend(["", "## Static axis controls", ""])
     lines.append(
-        "| case | requested | realised | axis admitted | error (m) | error / pitch | "
-        "level / span | false X raw→final | false O raw→final |"
+        "| case | requested | realised | centroid-sign axis | quadratic axis | "
+        "error (m) | error / pitch | level / span | false X raw→final | "
+        "false O raw→final |"
     )
-    lines.append("|:---|---:|---:|:---:|---:|---:|---:|---:|---:|")
+    lines.append("|:---|---:|---:|:---:|:---:|---:|---:|---:|---:|---:|")
     for row in receipt["static_rows"]:
-        axis = row["vertex_read"]["axis"]
-        false = row["vertex_read"]["false_candidates"]
+        vertex = row["vertex_read"]
+        axis = vertex["axis"]
+        false = vertex["false_candidates"]
+        raw_admitted = vertex["criteria"]["centroid_value_sign_change"][
+            "axis_reference_cell_admitted"
+        ]
         lines.append(
             f"| {row['case']} | {row['requested_cells']} | {row['realised_cells']} | "
+            f"{'yes' if raw_admitted else 'no'} | "
             f"{'yes' if axis['admitted'] else 'no'} | {axis['position_error_m']} | "
             f"{axis['position_error_in_pitch']} | {axis['level_error_in_span']} | "
             f"{false['before_hessian_and_containment']['saddle']}→"
@@ -1079,6 +1220,17 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
     lines.append(
         "- Smooth perturbation amplitude is 1e-4 of the analytic axis-to-X span; "
         f"saddle admission survived on {noise_admissions} of {len(rows)} rungs."
+    )
+    stationary_four = sum(
+        row["vertex_read"]["criteria"]["quadratic_stationary_point"][
+            "saddle_stationary_level_has_four_changes"
+        ]
+        for row in rows
+    )
+    lines.append(
+        "- Vertex signs about the fitted stationary value produced four cyclic "
+        f"changes in the analytic saddle cell on {stationary_four} of {len(rows)} "
+        "rungs."
     )
     for figure in receipt["figures"]:
         lines.append(

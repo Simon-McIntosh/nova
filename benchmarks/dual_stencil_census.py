@@ -128,10 +128,10 @@ def _part_path(report_directory: Path, case_name: str, requested_cells: int) -> 
 
 
 def _load_part(path: Path) -> dict[str, Any]:
-    """Load one bounded complete receipt part."""
+    """Load one complete receipt part, rejecting pathologically large files."""
 
-    if path.stat().st_size > 1_000_000:
-        raise RuntimeError(f"part receipt exceeds one megabyte: {path}")
+    if path.stat().st_size > 64 * 1024 * 1024:
+        raise RuntimeError(f"part receipt exceeds the sixty-four MiB bound: {path}")
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not payload.get("completed"):
         raise RuntimeError(f"part receipt is incomplete: {path}")

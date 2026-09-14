@@ -1410,14 +1410,18 @@ def _compiled_slice_solver(
     """
     factors = jnp.asarray(_BACKTRACKING_FACTORS, dtype=jnp.float64)
 
-    def choose(reduced, jacobian, shadow, base_state, merit):
+    def choose(reduced, jacobian, shadow, base_state, merit, external_value):
         direction = kernels["direction"](
             jacobian,
-            kernels["step_scores"](reduced, shadow, base_state).residual,
+            kernels["step_scores"](
+                reduced, shadow, base_state, external_value=external_value
+            ).residual,
         )
         candidates = reduced[None, :] + factors[:, None] * direction[None, :]
         scored = jax.lax.map(
-            lambda candidate: kernels["step_scores"](candidate, shadow, base_state),
+            lambda candidate: kernels["step_scores"](
+                candidate, shadow, base_state, external_value=external_value
+            ),
             candidates,
         )
         valid = jnp.isfinite(scored.merit) & (scored.merit < merit)
@@ -1425,15 +1429,19 @@ def _compiled_slice_solver(
         found = jnp.any(valid)
         return found, accepted, candidates[accepted]
 
-    def trip_body(reduced, shadow, base_state):
-        jacobian = kernels["jacobian"](reduced, shadow, base_state)
+    def trip_body(reduced, shadow, base_state, external_value):
+        jacobian = kernels["jacobian"](
+            reduced, shadow, base_state, external_value=external_value
+        )
 
         def step_body(_index, carry):
             reduced, jacobian, active, step_count, builds, rejected = carry
 
             def run_step(carry):
                 reduced, jacobian, _active, step_count, builds, rejected = carry
-                scores = kernels["step_scores"](reduced, shadow, base_state)
+                scores = kernels["step_scores"](
+                    reduced, shadow, base_state, external_value=external_value
+                )
                 finished = jnp.isfinite(scores.flux_residual) & (
                     scores.flux_residual <= tolerance
                 )
@@ -1448,16 +1456,23 @@ def _compiled_slice_solver(
                         shadow,
                         base_state,
                         scores.merit,
+                        external_value,
                     )
 
                     def refresh(_):
-                        refreshed = kernels["jacobian"](reduced, shadow, base_state)
+                        refreshed = kernels["jacobian"](
+                            reduced,
+                            shadow,
+                            base_state,
+                            external_value=external_value,
+                        )
                         selected = choose(
                             reduced,
                             refreshed,
                             shadow,
                             base_state,
                             scores.merit,
+                            external_value,
                         )
                         return selected, refreshed, 1
 
@@ -1495,12 +1510,9 @@ def _compiled_slice_solver(
     def solve(
         initial,
         shadow,
-        external_value=None,
-        target_value=None,
-        requested_value=None,
+        external_value,
     ):
-        del external_value, target_value, requested_value
-        reduced = kernels["initial_gather"](initial)
+        reduced = kernels["initial_gather"](initial, external_value=external_value)
         if initial_unknown is not None:
             reduced = jnp.concatenate((reduced, initial_unknown))
         state = initial
@@ -1549,9 +1561,14 @@ def _compiled_slice_solver(
                     step_count,
                     builds,
                     rejected,
-                ) = trip_body(reduced, shadow, state)
+                ) = trip_body(reduced, shadow, state, external_value)
                 del jacobian_active, trip_active
-                closed = kernels["boundary"](solved_reduced, shadow, state)
+                closed = kernels["boundary"](
+                    solved_reduced,
+                    shadow,
+                    state,
+                    external_value=external_value,
+                )
                 next_state, promoted, difference, observed, next_reduced, excluded = (
                     closed
                 )
@@ -1869,6 +1886,14 @@ def _compiled_argument_key(value: Any) -> tuple[tuple[int, ...], str, str] | Non
     )
 
 
+def _compiled_argument_layout(value: Any) -> tuple[tuple[int, ...], str] | None:
+    """Return the shape and dtype of an array passed to a compiled program."""
+    if value is None:
+        return None
+    array = np.asarray(value)
+    return tuple(array.shape), array.dtype.str
+
+
 def _compiled_program_key(
     operator: Any,
     coordinates: ReducedCoordinates,
@@ -1882,7 +1907,7 @@ def _compiled_program_key(
     return (
         id(operator),
         tuple(np.asarray(coordinates.cells, dtype=np.intp)),
-        _compiled_argument_key(external),
+        _compiled_argument_layout(external),
         _compiled_argument_key(target_current),
         _compiled_argument_key(requested_class),
         row_count,
@@ -1926,6 +1951,8 @@ def _bind_dynamic_arguments(
     external: jax.Array,
     target_current: Any,
     requested_class: Any,
+    *,
+    bind_external: bool = True,
 ) -> dict[str, Callable[..., Any]]:
     """Bind per-slice field leaves as regular traced kernel arguments."""
     bound = {}
@@ -1933,7 +1960,7 @@ def _bind_dynamic_arguments(
         if name == "direction":
             bound[name] = kernel
             continue
-        value = partial(kernel, external_value=external)
+        value = partial(kernel, external_value=external) if bind_external else kernel
         if target_current is not None:
             value = partial(value, target_value=target_current)
         if requested_class is not None:
@@ -2819,7 +2846,11 @@ def _compiled_result(
         augmentation=augmentation,
     )
     kernels = _bind_dynamic_arguments(
-        raw_kernels, external, target_current, requested_class
+        raw_kernels,
+        external,
+        target_current,
+        requested_class,
+        bind_external=False,
     )
     if augmentation is not None and row_arguments == TRACED_ROWS:
         kernels = _bind_rows(kernels, augmentation.arguments)
@@ -2857,7 +2888,7 @@ def _compiled_result(
     shadow = jnp.ravel(
         jnp.asarray(operator.residual_shadow_mask(initial, requested_class), dtype=bool)
     )
-    output = solver(initial, shadow)
+    output = solver(initial, shadow, external)
     fields = _compiled_output_fields(output)
     return fields, program
 

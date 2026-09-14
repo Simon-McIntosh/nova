@@ -1739,17 +1739,10 @@ class ForwardProfile:
                 constraint_pairs=constraint_pairs,
                 **options,
             )
-        mapped = self.flux_map(
-            current,
-            requested_class,
-            target_current,
-            prescribed_current,
-        )
-        shadowed_map = self.operator.flux_map_with_shadow(
-            current,
-            requested_class,
-            target_current,
-            prescribed_current,
+        external = self.operator.external(current, prescribed_current)
+        mapped = self.operator.traced_flux_map(requested_class, target_current)
+        shadowed_map = self.operator.traced_flux_map_with_shadow(
+            requested_class, target_current
         )
 
         def shadow_mask(state):
@@ -1764,6 +1757,7 @@ class ForwardProfile:
             "shadow_mask_fn": shadow_mask,
             "promoted_shadow_mask_fn": promoted_shadow_mask,
             "shadowed_map_fn": shadowed_map,
+            "map_arguments": (external,),
         }
 
         if route == "newton_krylov":

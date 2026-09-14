@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T10:44:02",
+  "updated": "2026-09-14T11:54:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4565,6 +4565,15 @@
       },
       {
         "id": "s19e-cca-repose-fixture",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
+      },
+      {
+        "id": "s19e-msc-traced-exterior",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -153510,6 +153519,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2452
+    "_version": 2453
   }
 }

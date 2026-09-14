@@ -8,6 +8,7 @@ import pytest
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.clip_quadrature import (
+    clipped_support_current_moments,
     clipped_support_field_integrals,
     clipped_support_quadrature,
     cut_cell_bank_capacity,
@@ -72,7 +73,13 @@ def _dense_integrals(operator, support, field, flux_span):
     gradient_squared = flux_span**2 * (radial_gradient**2 + vertical_gradient**2)
     field_squared = gradient_squared / (2.0 * jnp.pi * radius) ** 2
     volume_weight = 2.0 * jnp.pi * radius * weights
+    density_weight = operator.source.core.current_density(radius, psi_norm) * weights
+    first = jnp.sum(
+        density_weight[..., None] * (points - support.centroids[:, None, :]), axis=1
+    )
     return (
+        jnp.sum(density_weight, axis=1),
+        first,
         jnp.sum(pressure * volume_weight, axis=1),
         jnp.sum(field_squared * volume_weight, axis=1),
     )
@@ -85,8 +92,8 @@ def test_compact_reduction_matches_dense_quadrature(case_name: str):
     operator, support, field, flux_span, bank_capacity = _analytic_support(
         case_name, -110
     )
-    expected_pressure, expected_field = _dense_integrals(
-        operator, support, field, flux_span
+    expected_current, expected_first, expected_pressure, expected_field = (
+        _dense_integrals(operator, support, field, flux_span)
     )
     actual = jax.jit(
         lambda carried_support, carried_field: clipped_support_field_integrals(
@@ -100,6 +107,16 @@ def test_compact_reduction_matches_dense_quadrature(case_name: str):
         )
     )(support, field)
     jax.block_until_ready(actual)
+    actual_current = jax.jit(
+        lambda carried_support, carried_field: clipped_support_current_moments(
+            carried_support,
+            carried_support.included,
+            carried_field,
+            operator.source.core,
+            cut_cell_capacity=bank_capacity,
+        )
+    )(support, field)
+    jax.block_until_ready(actual_current)
 
     whole = np.asarray(support.included) & ~np.asarray(support.boundary)
     cut = np.asarray(support.included) & np.asarray(support.boundary)
@@ -128,6 +145,23 @@ def test_compact_reduction_matches_dense_quadrature(case_name: str):
         rtol=MEASURED_CHAIN_RELATIVE_TOLERANCE,
         atol=1.0e-12,
     )
+    for observed, expected in (
+        (actual_current.cell_current, expected_current),
+        (actual_current.radial_moment, expected_first[:, 0]),
+        (actual_current.vertical_moment, expected_first[:, 1]),
+    ):
+        np.testing.assert_allclose(
+            np.asarray(observed)[whole],
+            np.asarray(expected)[whole],
+            rtol=1.0e-12,
+            atol=1.0e-12,
+        )
+        np.testing.assert_allclose(
+            np.asarray(observed)[cut],
+            np.asarray(expected)[cut],
+            rtol=MEASURED_CHAIN_RELATIVE_TOLERANCE,
+            atol=1.0e-12,
+        )
 
 
 def _tile_cell_field(value, cell_count: int):

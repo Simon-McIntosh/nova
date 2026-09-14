@@ -42,6 +42,7 @@ import numpy as np
 from nova.biot.null import Null2D
 from nova.biot.target import FluxTarget
 from nova.equilibrium.clip_quadrature import (
+    clipped_support_current_moments,
     clipped_support_field_integrals,
     cut_cell_bank_capacity,
 )
@@ -2306,15 +2307,6 @@ class ForwardFluxOperator:
     def _clipped_integral_measure(self, partition) -> ClippedIntegralMeasure:
         """Build the observation measure from one already-traced partition."""
         masks, topology, sample_psi_norm, profile_support = partition
-        profile_moments = self.source.current_moments(
-            masks,
-            self.support_current_moments,
-            profile_support,
-            sample_flux=sample_psi_norm,
-        )
-        cell_current = jnp.where(
-            masks.profile_participation, profile_moments.cell_current, 0.0
-        )
         field = flux_field_polynomial(
             self._support_moment_stencils, masks.psi_norm, sample_psi_norm
         )
@@ -2323,6 +2315,25 @@ class ForwardFluxOperator:
         )
         bank_capacity = cut_cell_bank_capacity(
             self.moment_geometry.atomic_mesh.centroids, ring_centres
+        )
+
+        def compact_current_moments(profile, *_args):
+            return clipped_support_current_moments(
+                profile_support,
+                masks.profile_participation,
+                field,
+                profile,
+                cut_cell_capacity=bank_capacity,
+            )
+
+        profile_moments = self.source.current_moments(
+            masks,
+            compact_current_moments,
+            profile_support,
+            sample_flux=sample_psi_norm,
+        )
+        cell_current = jnp.where(
+            masks.profile_participation, profile_moments.cell_current, 0.0
         )
         field_integrals = clipped_support_field_integrals(
             profile_support,

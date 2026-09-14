@@ -13,7 +13,9 @@ if TYPE_CHECKING:
     from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
 
 __all__ = [
+    "ClippedCurrentMoments",
     "ClippedFieldIntegrals",
+    "clipped_support_current_moments",
     "clipped_support_field_integrals",
     "clipped_support_quadrature",
     "cut_cell_bank_capacity",
@@ -32,6 +34,14 @@ class ClippedFieldIntegrals(NamedTuple):
 
     pressure_volume: jax.Array
     field_volume: jax.Array
+
+
+class ClippedCurrentMoments(NamedTuple):
+    """Per-cell current and centroid-relative first moments."""
+
+    cell_current: jax.Array
+    radial_moment: jax.Array
+    vertical_moment: jax.Array
 
 
 class _QuadratureSupport(NamedTuple):
@@ -223,4 +233,115 @@ def clipped_support_field_integrals(
     return ClippedFieldIntegrals(
         pressure_volume=jnp.where(overflow, jnp.nan, pressure_volume),
         field_volume=jnp.where(overflow, jnp.nan, field_volume),
+    )
+
+
+def _integrate_current_points(
+    points,
+    weights,
+    field: FluxFieldPolynomial,
+    cell_index,
+    moment_centre,
+    profile,
+) -> ClippedCurrentMoments:
+    psi_norm, _radial_gradient, _vertical_gradient = field.sample(points, cell_index)
+    density = profile.current_density(points[..., 0], psi_norm)
+    weighted = density * weights
+    first = jnp.sum(
+        weighted[..., None]
+        * (points - jnp.asarray(moment_centre)[cell_index, None, :]),
+        axis=1,
+    )
+    return ClippedCurrentMoments(
+        cell_current=jnp.sum(weighted, axis=1),
+        radial_moment=first[:, 0],
+        vertical_moment=first[:, 1],
+    )
+
+
+def clipped_support_current_moments(
+    support,
+    selection,
+    field: FluxFieldPolynomial,
+    profile,
+    *,
+    cut_cell_capacity: int,
+) -> ClippedCurrentMoments:
+    """Reduce profile current moments with dense work confined to cut cells."""
+    vertices = jnp.asarray(support.support_vertices)
+    count = jnp.asarray(support.vertex_count)
+    centroids = jnp.asarray(support.centroids)
+    selected = jnp.asarray(selection, dtype=bool)
+    boundary = selected & jnp.asarray(support.boundary, dtype=bool)
+    whole = selected & jnp.asarray(support.included, dtype=bool) & ~boundary
+
+    whole_points, whole_weights = _quadrature_from_arrays(
+        vertices[:, :_WHOLE_CELL_VERTEX_CAPACITY],
+        jnp.minimum(count, _WHOLE_CELL_VERTEX_CAPACITY),
+        centroids,
+        whole,
+    )
+    whole_moments = _integrate_current_points(
+        whole_points,
+        whole_weights,
+        field,
+        jnp.arange(len(vertices), dtype=jnp.int32),
+        centroids,
+        profile,
+    )
+
+    capacity = int(cut_cell_capacity)
+    if capacity < 1:
+        raise ValueError("cut_cell_capacity must be positive")
+    cut_count = jnp.sum(boundary, dtype=jnp.int32)
+    cut_index = jnp.nonzero(boundary, size=capacity, fill_value=0)[0]
+    active = jnp.arange(capacity, dtype=jnp.int32) < cut_count
+
+    def one_cut(entry):
+        cell, live = entry
+
+        def integrate(index):
+            point, weight = _quadrature_from_arrays(
+                vertices[index][None, ...],
+                count[index][None],
+                centroids[index][None, ...],
+                jnp.ones(1, dtype=bool),
+            )
+            value = _integrate_current_points(
+                point,
+                weight,
+                field,
+                jnp.asarray([index], dtype=jnp.int32),
+                centroids,
+                profile,
+            )
+            return (
+                value.cell_current[0],
+                value.radial_moment[0],
+                value.vertical_moment[0],
+            )
+
+        zero = jnp.asarray(0.0, dtype=vertices.dtype)
+        return jax.lax.cond(
+            live,
+            jax.checkpoint(integrate),
+            lambda _index: (zero, zero, zero),
+            cell,
+        )
+
+    cut_current, cut_radial, cut_vertical = jax.lax.map(one_cut, (cut_index, active))
+
+    def scatter(whole_value, cut_value):
+        return whole_value.at[cut_index].add(jnp.where(active, cut_value, 0.0))
+
+    overflow = cut_count > capacity
+    return ClippedCurrentMoments(
+        *(
+            jnp.where(overflow, jnp.nan, value)
+            for value in (
+                scatter(whole_moments.cell_current, cut_current),
+                scatter(whole_moments.radial_moment, cut_radial),
+                scatter(whole_moments.vertical_moment, cut_vertical),
+            )
+        )
     )

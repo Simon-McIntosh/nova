@@ -194,14 +194,20 @@ def _child(stage: str, cells: int, rung_dir: Path, cache_root: Path) -> int:
     checkpoint("backend_compile", {"seconds": backend_compile_seconds})
 
     began = perf_counter()
-    executable = compiled.runtime_executable().serialize()
-    executable_bytes = len(executable)
+    executable_bytes = None
+    serialize_error = None
+    try:
+        executable = compiled.runtime_executable().serialize()
+        executable_bytes = len(executable)
+    except (MemoryError, RuntimeError, ValueError) as error:
+        serialize_error = f"{type(error).__name__}: {error}"
     memory_analysis = _memory_analysis_fields(compiled.memory_analysis())
     checkpoint(
         "serialize",
         {
             "seconds": perf_counter() - began,
             "executable_bytes": executable_bytes,
+            "serialize_error": serialize_error,
             "memory_analysis": memory_analysis,
         },
     )
@@ -238,6 +244,7 @@ def _child(stage: str, cells: int, rung_dir: Path, cache_root: Path) -> int:
             "optimized_instruction_count": optimized_instruction_count,
         },
         "executable_bytes": executable_bytes,
+        "serialize_error": serialize_error,
         "memory_analysis": memory_analysis,
         "peak": _peak_probe(),
         "checkpoints": record["checkpoints"],

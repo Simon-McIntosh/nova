@@ -2053,19 +2053,24 @@ class ForwardFluxOperator:
         """Evaluate every nonempty support through one moment callable."""
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
-        vectors = jnp.zeros(
-            (3, self.grid.node_number), dtype=jnp.asarray(centroid_flux).dtype
+        field = flux_field_polynomial(
+            self._support_moment_stencils, centroid_flux, sample_flux
         )
-        for stencil in self._support_moment_stencils:
-            vectors = vectors + jnp.stack(
-                stencil.support_flux_moments(
-                    profile,
-                    centroid_flux,
-                    sample_flux,
-                    support,
-                )
-            )
-        return CellCurrentMoments(*vectors)
+        ring_centres = np.concatenate(
+            [stencil.ring_centre for stencil in self._support_moment_stencils]
+        )
+        bank_capacity = cut_cell_bank_capacity(
+            self.moment_geometry.atomic_mesh.centroids, ring_centres
+        )
+        selected = field.active & (jnp.asarray(support.vertex_count) >= 3)
+        moments = clipped_support_current_moments(
+            support,
+            selected,
+            field,
+            profile,
+            cut_cell_capacity=bank_capacity,
+        )
+        return CellCurrentMoments(*moments)
 
     def support_flux_coefficients(self, centroid_flux, sample_flux) -> jax.Array:
         """Return one cell-local flux polynomial over either cell tiling."""

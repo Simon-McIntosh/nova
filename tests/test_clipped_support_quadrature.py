@@ -59,7 +59,15 @@ def _analytic_support(case_name: str, requested_cells: int):
     bank_capacity = cut_cell_bank_capacity(
         operator.moment_geometry.atomic_mesh.centroids, ring_centres
     )
-    return operator, support, field, flux_span, bank_capacity
+    return (
+        operator,
+        support,
+        field,
+        flux_span,
+        bank_capacity,
+        centroid_flux,
+        sample_flux,
+    )
 
 
 def _dense_integrals(operator, support, field, flux_span):
@@ -89,9 +97,15 @@ def _dense_integrals(operator, support, field, flux_span):
     "case_name", ("weak-rotation-reactor-static", "diverted-single-null")
 )
 def test_compact_reduction_matches_dense_quadrature(case_name: str):
-    operator, support, field, flux_span, bank_capacity = _analytic_support(
-        case_name, -110
-    )
+    (
+        operator,
+        support,
+        field,
+        flux_span,
+        bank_capacity,
+        centroid_flux,
+        sample_flux,
+    ) = _analytic_support(case_name, -110)
     expected_current, expected_first, expected_pressure, expected_field = (
         _dense_integrals(operator, support, field, flux_span)
     )
@@ -117,6 +131,15 @@ def test_compact_reduction_matches_dense_quadrature(case_name: str):
         )
     )(support, field)
     jax.block_until_ready(actual_current)
+    production_current = jax.jit(
+        lambda centroid, sample, carried_support: operator.support_current_moments(
+            operator.source.core,
+            centroid,
+            sample,
+            carried_support,
+        )
+    )(centroid_flux, sample_flux, support)
+    jax.block_until_ready(production_current)
 
     whole = np.asarray(support.included) & ~np.asarray(support.boundary)
     cut = np.asarray(support.included) & np.asarray(support.boundary)
@@ -145,23 +168,29 @@ def test_compact_reduction_matches_dense_quadrature(case_name: str):
         rtol=MEASURED_CHAIN_RELATIVE_TOLERANCE,
         atol=1.0e-12,
     )
-    for observed, expected in (
-        (actual_current.cell_current, expected_current),
-        (actual_current.radial_moment, expected_first[:, 0]),
-        (actual_current.vertical_moment, expected_first[:, 1]),
+    active = np.asarray(field.active)
+    for observed, expected, carried in (
+        (actual_current.cell_current, expected_current, np.ones_like(active)),
+        (actual_current.radial_moment, expected_first[:, 0], np.ones_like(active)),
+        (actual_current.vertical_moment, expected_first[:, 1], np.ones_like(active)),
+        (production_current.cell_current, expected_current, active),
+        (production_current.radial_moment, expected_first[:, 0], active),
+        (production_current.vertical_moment, expected_first[:, 1], active),
     ):
         np.testing.assert_allclose(
-            np.asarray(observed)[whole],
-            np.asarray(expected)[whole],
+            np.asarray(observed)[whole & carried],
+            np.asarray(expected)[whole & carried],
             rtol=1.0e-12,
             atol=1.0e-12,
         )
         np.testing.assert_allclose(
-            np.asarray(observed)[cut],
-            np.asarray(expected)[cut],
+            np.asarray(observed)[cut & carried],
+            np.asarray(expected)[cut & carried],
             rtol=MEASURED_CHAIN_RELATIVE_TOLERANCE,
             atol=1.0e-12,
         )
+    for observed in production_current:
+        np.testing.assert_array_equal(np.asarray(observed)[~active], 0.0)
 
 
 def _tile_cell_field(value, cell_count: int):
@@ -206,8 +235,8 @@ def _shape_bytes(shape, dtype) -> int:
 
 
 def test_compact_reduction_work_arrays_stay_below_one_gibibyte():
-    operator, support, field, flux_span, bank_capacity = _analytic_support(
-        "weak-rotation-reactor-static", -110
+    operator, support, field, flux_span, bank_capacity, _centroid, _sample = (
+        _analytic_support("weak-rotation-reactor-static", -110)
     )
     cell_count = 2500
     carried_support = _large_support(support, cell_count)

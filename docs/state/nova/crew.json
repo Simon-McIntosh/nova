@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T17:21:08",
+  "updated": "2026-09-14T17:30:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -154662,6 +154662,207 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T143456809994-cca-vertex-ring-census-evaluation",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a74",
+        "node": "cca-vertex-ring-census-evaluation",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1400,
+                "cached_input_tokens": 615211,
+                "input_tokens": 616643,
+                "output_tokens": 2686,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 619329,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Critical evaluation, no production code change; never open any receipt larger than one megabyte in an editor (load it with json); commit the benchmark before submitting any job. Locked design (lead 2026-09-14): the census ring is each cell's own vertices about its centroid, never the ring of neighbouring centroids. Facts at this base (main): the production hex read (_FixedDesignNull2D in nova/equilibrium/forward_operator.py, read_census and _local_fit_census) seeds saddles by a sign-change census over rotated rings of NEIGHBOUR centroids, which exist only for cells with a complete ring (hull cells have none, nova/equilibrium/stencil_mesh.py docstring), and on the analytic single-null flux it missed the X-point at 132 and 340 realised cells (the nearest eligible ring gave two cyclic sign changes, patterns 000110 and 000010, while the analytic X-point sat two cells from that ring's centre) and admitted it at 233 and from 382 up, with saddle errors 10.1, 5.1, 1.6, 1.2, 0.68, 1.5 and 0.40 mm at 233, 382, 449, 550, 814, 1074 and 2616 cells and batched device read costs 0.38, 0.76, 0.98, 1.4, 2.7, 4.9 and 30 ms per state (benchmarks/topology_read_resolution_ladder.py, docs/figures/cut-cell-current-attribution/topology-ladder/report.md, reuse its machine loading and analytic flux evaluation); every cell including hull cells carries six vertex sample values (operator.sample_node_flux; the OracleMachine sampling_vertices and sample_coordinates) and the own-node quadratic fitted from centroid plus vertices is what StencilMesh.sample_flux_field evaluates (ring_gather_index, ring_flux_weight). Build one benchmark that, for every cell of each rung, forms the six vertex values minus the centroid value in cyclic order, counts sign changes (four names a saddle candidate inside the cell, zero with all one sign names an extremum candidate, two is a regular cell), polishes each candidate by Newton on the own-node quadratic of that cell to the gradient zero with a step cap of one pitch, classifies by the quadratic's Hessian, dedupes candidates closer than half a pitch, applies the wall polygon containment, and for saddles below the axis applies the same private exclusion the production read uses; run it on the analytic single-null flux at all nine cached rungs (110, 200, 300, 342, 400, 500, 750, 1000, 2500 requested; the 200 and 400 machines are now cached) and on the weak, moderate and strong static rows at 300 and 1000, recording per rung: admission of the analytic X-point and axis, their position and level error in metres, pitch units and span, the count of false saddle and false extremum candidates before and after the Hessian and containment filters, and beside each the production read's admission and error from the topology ladder receipt. Add two controls: a perturbed flux (analytic plus 1e-4 of span smooth noise) to show the census is not fragile, and one rung where a vertex ring is evaluated with the six values shifted by one position to show the cyclic count is what discriminates. Then time the vertex census plus polish as one jitted vmapped function over a batch of 16 flux states on the H200 at 550, 1074 and 2616 cells (one short job: betelgeuse, gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8 --mem=64G --time=00:20:00, nvidia-smi prologue exiting 3 below 40 GiB free, XLA_PYTHON_CLIENT_PREALLOCATE=false, JAX_PLATFORMS=cuda,cpu, TMPDIR=/tmp in submit environment and payload, root venv python with PYTHONPATH at the worktree, sbatch detached, --output in the run directory) and report per-state cost beside the production 1.4, 4.9 and 30 ms; everything else on all_debug (--time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu) in one job with rungs sharded inside and parts persisted as each lands. One SVG of saddle error in pitch against cells for both censuses with admission marked, and one saddle-region poloidal panel at 132 and 340 cells with the committed nova.media painters (line contours only, wall, analytic nulls in the analytic style, the vertex ring of the cell containing the X-point drawn with its six signs, the polished saddle filled). The report states whether the vertex census admits the saddle at every rung, its position error against the production read, the false-candidate counts, and the batched cost per state. Manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 4.0,
+          "goal": "Measure a sign-change census over each cell's own vertex ring with an own-node quadratic polish against the production neighbour-centroid census on the analytic flux across the cached cell-count rungs",
+          "id": "cca-vertex-ring-census-evaluation",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T14:34:57Z",
+            "read_at": "2026-09-14T14:34:58Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 15.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T143456809994-cca-vertex-ring-census-evaluation/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/vertex_ring_census.py",
+            "docs/figures/cut-cell-current-attribution/vertex-census",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/vertex-census"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19e-cca-vertex-census",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T14:35:13Z",
+        "completed_at": "2026-09-14T15:28:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3189,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3189,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "250bd117e5ee2a6883f7c99e94d29aa4e2b8632f",
+        "commits": [
+          "d9ca602d5fae8c6005e70fca8f7a1382190755d9",
+          "0f8f4095e304d9c53023d144bf2021c361f61ea7",
+          "b742da7d4bddc3b97170242a0717888fc12176f7",
+          "1597701d8c9a1ec28f011c8743918f03bbd5ad51",
+          "b6fff66a06902007dfba51d70be7ff6a3d752e1b",
+          "a01aa289b6d6b13a27f53d578f0873ab9df6909a",
+          "f74ef66fb392123086b48200e5652938d428a319",
+          "0e00567a92072c1a7c911ef0059eb0f13ba1a5a2",
+          "4d88845476751f55bf339a9314b5f7a47f627046",
+          "0e6ce101afb25e0dbdd4b88fcc55f4e6a87cdd43"
+        ],
+        "changed_lines": {
+          "added": 48,
+          "removed": 686,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug jobs 1270626 (raw centroid sign rule, negative control), 1270642 (own-node stationary-point criterion, nine single-null rungs and six limited rows, EXIT 0) and H200 job 1270698 (batch-of-16 timing, EXIT 0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/vertex-census/cpu-job-1270642.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T143456809994-cca-vertex-ring-census-evaluation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a057-f630-7de0-a3d6-ea1831f74949",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9842432,
+            "cached_input_tokens_cumulative": 9842432,
+            "input_tokens": 9911361,
+            "input_tokens_cumulative": 9911361,
+            "output_tokens": 24236,
+            "output_tokens_cumulative": 24236,
+            "reasoning_output_tokens": 6643,
+            "reasoning_output_tokens_cumulative": 6643
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T15:28:22Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 17.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T15:28:22Z"
+            }
+          ],
+          "notional_cost_usd": 134.5593,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 9842432,
+          "cumulative_input_tokens": 19753793,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 30879
+        },
+        "follow_on_paths": [
+          "axis/private"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 5,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-vertex-ring-census-evaluation",
+          "session_id": "01a0a057-f630-7de0-a3d6-ea1831f74949",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T15:28:22Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 42.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -154974,6 +155175,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2468
+    "_version": 2469
   }
 }

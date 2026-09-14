@@ -1,0 +1,310 @@
+{
+  "allocation": {
+    "allocated_cpus": 8,
+    "devices": [
+      "cpu:0"
+    ],
+    "jax_default_backend": "cpu",
+    "jax_platforms": [
+      "cpu"
+    ],
+    "job_id": 1270642,
+    "job_name": "vertex-census-fit",
+    "memory_mb": 65536,
+    "node": "98dci4-clu-3141",
+    "partition": "all_debug",
+    "tmpdir": "/tmp"
+  },
+  "analytic": {
+    "axis_flux_wb": 0.005709576080821848,
+    "axis_rz_m": [
+      1.7870647018106887,
+      0.0467736265648528
+    ],
+    "reference_span_wb": 0.005709576080822001,
+    "x_point_flux_wb": -1.524015784867935e-16,
+    "x_point_rz_m": [
+      1.5025279999999999,
+      -1.01728
+    ]
+  },
+  "cache": {
+    "build_seconds": 0.0,
+    "hit": true,
+    "load_seconds": 0.12308212742209435,
+    "lock_wait_seconds": 1.852773129940033e-05,
+    "semantic_key": "170918b0837562c5",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_300.zarr",
+    "store_seconds": 0.0
+  },
+  "case": "diverted-single-null",
+  "characteristic_pitch_m": 0.09170987436549279,
+  "completed": true,
+  "device_timing": null,
+  "instrument_controls": {
+    "cell_index": 180,
+    "extremum_crossing_count": 0,
+    "extremum_detected_and_polished": true,
+    "extremum_position_error_m": 3.469446951953614e-18,
+    "saddle_crossing_count": 4,
+    "saddle_detected_and_polished": true,
+    "saddle_position_error_m": 0.0,
+    "target_rz_m": [
+      1.6145539944704825,
+      -0.02185419940357569
+    ]
+  },
+  "periodic_ring_presentation": {
+    "axis_cell": {
+      "cell_index": 69,
+      "declared_extremum_kind": 1,
+      "definite_extremum": true,
+      "extremal_centroid_seed_matches_analytic_axis_cell": true,
+      "hessian_class": "extremum",
+      "hessian_determinant_per_m4": 0.0008041919071979266,
+      "isotropic_hessian_per_m2": -0.030798850435372064,
+      "isotropic_mean_minus_centroid_wb": -4.985225659519428e-05,
+      "m1_amplitude_wb": 3.217706705842412e-05,
+      "m1_cos_wb": 4.1540095695324934e-07,
+      "m1_sin_wb": -3.217438556565277e-05,
+      "m1_to_m2_ratio_distance_in_pitch": 0.5132048743149038,
+      "m1_to_m2_ratio_distance_m": 0.047065954547178344,
+      "m2_amplitude_wb": 1.9449110517638223e-05,
+      "m2_cos_wb": -1.9319126579626984e-05,
+      "m2_phase_rad": -1.5129571439939575,
+      "m2_sin_wb": -2.2448269705382597e-06,
+      "m3_amplitude_wb": 8.865390844252514e-08,
+      "m3_cos_wb": 8.865390844252514e-08,
+      "mean_wb": 0.005651203481831355,
+      "nearby_four_sample_cells_within_two_pitches": 0,
+      "ring_radius_m": 0.056897103141447115,
+      "ring_radius_spread_m": 4.85722573273506e-17,
+      "stationary_distance_from_modes_in_pitch": 0.328033326997112,
+      "stationary_distance_from_modes_m": 0.030083895206599758,
+      "stationary_level_cyclic_sign_change_count": 0,
+      "stationary_value_wb": 0.0057095597213196
+    },
+    "axis_seed_and_mode_criterion_agree": true,
+    "basis": "mean; m=1 cosine and sine gradient; m=2 cosine and sine traceless Hessian; m=3 cosine; isotropic Hessian from ring mean minus centroid",
+    "saddle_cell": {
+      "analytic_reference_cell_index": 5,
+      "cell_index": 15,
+      "hessian_class": "saddle",
+      "hessian_determinant_per_m4": -0.0027949679919783525,
+      "isotropic_hessian_per_m2": -0.017076473818739158,
+      "isotropic_mean_minus_centroid_wb": -2.764066653524166e-05,
+      "m1_amplitude_wb": 0.0002606888359711464,
+      "m1_cos_wb": 0.00026064117615120586,
+      "m1_sin_wb": 4.984625814176115e-06,
+      "m1_to_m2_ratio_distance_in_pitch": 0.899244594321279,
+      "m1_to_m2_ratio_distance_m": 0.08246960876905303,
+      "m2_amplitude_wb": 8.992670032915218e-05,
+      "m2_cos_wb": -8.992570251330333e-05,
+      "m2_phase_rad": 1.5684409181019225,
+      "m2_sin_wb": 4.236266965276095e-07,
+      "m3_amplitude_wb": 2.085855476669463e-06,
+      "m3_cos_wb": -2.085855476669463e-06,
+      "mean_wb": -0.0001669031355366809,
+      "nearby_four_sample_cells_within_two_pitches": 0,
+      "ring_radius_m": 0.056897103141447115,
+      "ring_radius_spread_m": 2.7755575615628914e-17,
+      "stationary_distance_from_modes_in_pitch": 0.6882341519777558,
+      "stationary_distance_from_modes_m": 0.06311786761192145,
+      "stationary_level_cyclic_sign_change_count": 4,
+      "stationary_value_wb": 5.055136649171157e-06
+    }
+  },
+  "production_read": {
+    "axis_admitted": true,
+    "axis_flux_wb": 0.005709563556987355,
+    "axis_position_error_in_pitch": 0.028314751558477912,
+    "axis_position_error_m": 0.0025967423081181503,
+    "axis_rz_m": [
+      1.7844681007475904,
+      0.046746542734105535
+    ],
+    "class": "limited",
+    "saddle_admitted": false,
+    "saddle_flux_wb": null,
+    "saddle_level_error_in_span": null,
+    "saddle_level_error_wb": null,
+    "saddle_position_error_in_pitch": null,
+    "saddle_position_error_m": null,
+    "saddle_rz_m": null
+  },
+  "realised_cells": 340,
+  "requested_cells": 300,
+  "schema": "nova.vertex-ring-census-part",
+  "shift_control": {
+    "cyclic_count_changes_after_shift": 0,
+    "cyclic_counts_match_benchmark": true,
+    "interpretation": "the cyclic count is invariant to the arbitrary first vertex while an open-chain count changes when the same ordered ring is shifted",
+    "open_chain_count_changes_after_shift": 256,
+    "vertex_values_shifted_by_one_cyclic_position": true
+  },
+  "smooth_noise_control": {
+    "amplitude_in_span": 0.0001,
+    "axis_admitted_against_unperturbed_reference": true,
+    "axis_position_error_in_pitch": 0.007682415782496253,
+    "saddle_admitted_against_unperturbed_reference": true,
+    "saddle_position_error_in_pitch": 0.09222483880159868
+  },
+  "source_revision": "a01aa289b6d6b13a27f53d578f0873ab9df6909a",
+  "version": 1,
+  "vertex_read": {
+    "analytic_axis_cell_probe": {
+      "above_centroid_bits": "000000",
+      "above_stationary_value_bits": "000000",
+      "cell_centroid_rz_m": [
+        1.785245303894824,
+        0.07669447404089746
+      ],
+      "cell_index": 69,
+      "centroid_level_cyclic_sign_change_count": 0,
+      "distance_to_cell_polygon_m": 0.019212294215967696,
+      "hessian_class": "extremum",
+      "hessian_determinant_local": 6.320938763116967e-09,
+      "inside_cell_polygon": true,
+      "polished_position_rz_m": [
+        1.7863917554433426,
+        0.046632431534628586
+      ],
+      "requested_step_m": 0.030083895206602113,
+      "stationary_level_cyclic_sign_change_count": 0,
+      "stationary_value_wb": 0.0057095597213196025,
+      "vertex_minus_centroid_wb": [
+        -6.866732830942534e-05,
+        -6.988155916994379e-05,
+        -6.62314979428388e-05,
+        -6.967543804021689e-05,
+        -1.4391981807990693e-05,
+        -1.0265734300749299e-05
+      ],
+      "vertex_minus_stationary_value_wb": [
+        -7.717131120247873e-05,
+        -7.838554206299718e-05,
+        -7.473548083589219e-05,
+        -7.817942093327028e-05,
+        -2.2895964701044082e-05,
+        -1.8769717193802687e-05
+      ]
+    },
+    "analytic_saddle_cell_probe": {
+      "above_centroid_bits": "001110",
+      "above_stationary_value_bits": "001110",
+      "cell_centroid_rz_m": [
+        1.5292083397583118,
+        -1.0566152705705434
+      ],
+      "cell_index": 5,
+      "centroid_level_cyclic_sign_change_count": 2,
+      "distance_to_cell_polygon_m": 0.009159370548953744,
+      "hessian_class": "saddle",
+      "hessian_determinant_local": -3.872708832229996e-08,
+      "inside_cell_polygon": true,
+      "polished_position_rz_m": [
+        1.504280885776149,
+        -1.019560955024419
+      ],
+      "requested_step_m": 0.044658708698579776,
+      "stationary_level_cyclic_sign_change_count": 2,
+      "stationary_value_wb": 3.9810316214598336e-07,
+      "vertex_minus_centroid_wb": [
+        -0.0003207629042923134,
+        -0.00010983925250045192,
+        1.101249065954879e-05,
+        1.5068483242889418e-05,
+        0.0001975589265988628,
+        -1.070601226910486e-05
+      ],
+      "vertex_minus_stationary_value_wb": [
+        -0.00033044701548945595,
+        -0.00011952336369759453,
+        1.3283794624061897e-06,
+        5.384372045746817e-06,
+        0.0001878748154017202,
+        -2.039012346624746e-05
+      ]
+    },
+    "axis": {
+      "admitted": true,
+      "flux_wb": 0.0057095597213196025,
+      "level_error_in_span": 2.8652744116823464e-06,
+      "level_error_wb": 1.6359502245932855e-08,
+      "position_error_in_pitch": 0.007497549669006078,
+      "position_error_m": 0.0006875993381935895,
+      "position_rz_m": [
+        1.7863917554433426,
+        0.046632431534628586
+      ]
+    },
+    "capacity_overflow": {
+      "extremum": false,
+      "saddle": false
+    },
+    "counts": {
+      "contained_extremum": 1,
+      "contained_saddle": 3,
+      "qualified_extremum": 1,
+      "raw_extremum": 1,
+      "raw_saddle": 0,
+      "representative_extremum": 1,
+      "representative_saddle": 1,
+      "typed_extremum": 1,
+      "typed_saddle": 3
+    },
+    "criteria": {
+      "centroid_value_sign_change": {
+        "axis_reference_cell_admitted": true,
+        "saddle_reference_cell_admitted": false
+      },
+      "quadratic_stationary_point": {
+        "axis_admitted": true,
+        "axis_seed": "extremal centroid followed by own-node polish",
+        "saddle_admitted": true,
+        "saddle_seed": "indefinite own-node quadratic with stationary point inside its cell polygon or within one quarter pitch",
+        "saddle_stationary_level_has_four_changes": false
+      }
+    },
+    "extremum_rows": [
+      [
+        1.7863917554433426,
+        0.046632431534628586,
+        0.0057095597213196025,
+        1.0
+      ]
+    ],
+    "false_candidates": {
+      "after_hessian_containment_and_dedupe": {
+        "extremum": 0,
+        "saddle": 0
+      },
+      "before_hessian_and_containment": {
+        "extremum": 0,
+        "saddle": 0
+      }
+    },
+    "private_exclusion": "production qualified_o_candidates with its saddle-directed axis-component flood; candidate saddles use production wall containment",
+    "saddle": {
+      "admitted": true,
+      "flux_wb": 5.05513664917151e-06,
+      "level_error_in_span": 0.000885378630176013,
+      "level_error_wb": 5.055136649323912e-06,
+      "position_error_in_pitch": 0.09228814194144236,
+      "position_error_m": 0.008463733902874445,
+      "position_rz_m": [
+        1.5069225365255243,
+        -1.0100465471381574
+      ]
+    },
+    "saddle_rows": [
+      [
+        1.5069225365255243,
+        -1.0100465471381574,
+        5.05513664917151e-06,
+        0.0
+      ]
+    ]
+  },
+  "wall_seconds": 10.872403521090746
+}

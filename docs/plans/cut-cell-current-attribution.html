@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-14">
-<meta name="plan-version" content="59">
+<meta name="plan-version" content="60">
 </head>
 <body>
 <main class="plan-doc">
@@ -386,6 +386,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-lead-dual-stencil-and-polish-2026-09-14" data-who="lead" data-when="2026-09-14">
     <div class="r-comment-body"><p>Lead, 2026-09-14: the local lane is back with very high concurrency; dispatch well-specified work there. Target the polish now, either refactor it or compare against the accuracy the new census gains. Consider a dual approach: vertices around each centroid (the primary census) and, in parallel, centroids around each vertex as a comparator for stationary points that lie close to cell boundaries, where the primary cell's fit extrapolates. Wave dispatched on the local lane: the dual-stencil census and its agreement with the primary near boundaries; the polish accuracy ladder (ring quadratic, own-node quadratic, dual stencil, two-ring cubic) against cells; the census as a pure per-cell kernel timed on device with the reference implementation profiled by stage; and the limiter contact sub-panel read on exact Biot wall values, which touches only the topology module.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260914T143456809994-cca-vertex-ring-census-evaluation" data-who="s19e-cca-vertex-census" data-when="2026-09-14T15:28:22Z">
+    <div class="r-comment-body"><p>The raw rule, cyclic sign changes of the six vertex values about the centroid value, admits no saddles (the displaced-centroid level cuts one hyperbola branch pair). The own-node quadratic&#x27;s stationary point and Hessian on centroid plus six vertices admits the analytic saddle at all nine rungs (132 to 2616 realised cells; production missed 132 and 340) and every axis on all fifteen rows. Saddle position error in pitch 0.087, 0.049, 0.092, 0.043, 0.031, 0.092, 0.046, 0.027, 0.016 across the rungs, worse than the production ring quadratic where both admit (0.017 at 550, 0.030 at 1074, 0.013 at 2616), so the census wins admission and the single-cell polish loses position; the axis error is 0.002 to 0.003 pitch against production 0.010 to 0.015. Mode amplitudes tabled per null cell; no four-vertex cells within two pitches of any null. Batched reference implementation 2.0, 6.1 and 32 ms per state at 550, 1074 and 2616 cells against production 1.4, 4.9 and 30, the reference sharing production&#x27;s dominant stages.</p></div>
 </div>
 </section>
 

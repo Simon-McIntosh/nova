@@ -1,10 +1,10 @@
-"""Measure analytic map floors and residual tangents without solving.
+"""Measure analytic map floors and booked-moment decomposition without solving.
 
 Each row constructs the certificate's analytic exterior completion once, then
 reuses that operator for the exact allocation and whole-cell control.  The
-measurement applies each map at the analytic flux, linearizes the same frozen-
-shadow residual used by the Newton inner iteration, and compares its tangent
-with central finite differences.  It never enters a nonlinear or linear solve.
+measurement applies each map once at the analytic flux, separates its residual
+into exterior and booked-moment terms, and attributes the weak exact-booking
+image by support-cell class.  It never enters a nonlinear or linear solve.
 """
 
 from __future__ import annotations
@@ -59,7 +59,6 @@ ROWS = (
     ("weak-rotation-reactor-static", -1000),
     ("moderate-rotation-conventional-static", -1000),
     (certificate.DIVERTED_CASE_NAME, -1000),
-    (certificate.DIVERTED_CASE_NAME, -300),
     (certificate.DIVERTED_CASE_NAME, -500),
 )
 
@@ -103,30 +102,26 @@ def _allocation() -> dict[str, Any]:
     cpus = int(os.environ.get("SLURM_CPUS_PER_TASK", "0"))
     reservation = os.environ.get("SLURM_JOB_RESERVATION", "")
     platforms = os.environ.get("JAX_PLATFORMS", "")
+    partition = os.environ.get("SLURM_JOB_PARTITION", "")
     if cpus != 8:
         raise RuntimeError(f"expected eight CPUs, received {cpus}")
-    if reservation != "gpu_0003_grpA":
-        raise RuntimeError(f"unexpected reservation {reservation!r}")
-    if platforms != "cuda,cpu":
-        raise RuntimeError(f"expected JAX_PLATFORMS=cuda,cpu, received {platforms!r}")
-    gpu = subprocess.check_output(
-        ["nvidia-smi", "--query-gpu=name,uuid", "--format=csv,noheader"], text=True
-    ).strip()
-    if "H200" not in gpu:
-        raise RuntimeError(f"the measurement requires an H200, received {gpu!r}")
+    if partition != "all_debug":
+        raise RuntimeError(f"expected all_debug, received {partition!r}")
+    if platforms != "cpu":
+        raise RuntimeError(f"expected JAX_PLATFORMS=cpu, received {platforms!r}")
     return {
         "job_id": int(job_id),
         "job_name": os.environ.get("SLURM_JOB_NAME"),
         "node": os.environ.get("SLURMD_NODENAME", socket.gethostname()),
-        "partition": os.environ.get("SLURM_JOB_PARTITION"),
+        "partition": partition,
         "reservation": reservation,
         "allocated_cpus": cpus,
-        "allocated_gpus": int(os.environ.get("SLURM_GPUS_ON_NODE", "1")),
+        "allocated_gpus": int(os.environ.get("SLURM_GPUS_ON_NODE", "0")),
         "memory_mb": int(os.environ.get("SLURM_MEM_PER_NODE", "0")),
-        "gpu": gpu,
+        "gpu": None,
         "tmpdir": os.environ.get("TMPDIR"),
         "jax_platforms": platforms.split(","),
-        "jax_cuda_devices": [str(device) for device in jax.devices("gpu")],
+        "jax_cuda_devices": [],
         "jax_cpu_devices": [str(device) for device in jax.devices("cpu")],
     }
 
@@ -311,6 +306,109 @@ def _point_cell_booking(
             if normalized_cell is not None and analytic_cell != 0.0
             else None
         ),
+    }
+
+
+def _per_cell_moment_attribution(
+    operator: Any,
+    state: jax.Array,
+    requested_class: int,
+    booked_moments: Any,
+    analytic_moments: Any,
+    amplitude: float,
+    residual_shadow: np.ndarray,
+    span: float,
+    grid_count: int,
+) -> dict[str, Any]:
+    """Attribute a booked-moment image difference by support-cell class."""
+    _masks, _topology_state, _sample, support = operator._support_partition(
+        state, requested_class
+    )
+    area = np.asarray(support.area, dtype=np.float64)
+    full_area = np.asarray(support.full_area, dtype=np.float64)
+    included = np.asarray(support.included, dtype=bool)
+    scale = max(float(np.max(np.abs(full_area))), np.finfo(np.float64).tiny)
+    tolerance = 4096.0 * np.finfo(np.float64).eps * scale
+    active = included & (area > tolerance)
+    whole = active & (np.abs(area - full_area) <= tolerance)
+    cut = active & ~whole
+    inactive = ~active
+
+    scaled = operator.scaled_current_moments(booked_moments, amplitude)
+    booked_values = [np.asarray(value, dtype=np.float64) for value in scaled]
+    analytic_values = [
+        np.asarray(value, dtype=np.float64) for value in analytic_moments
+    ]
+    difference = [
+        booked - analytic
+        for booked, analytic in zip(booked_values, analytic_values, strict=True)
+    ]
+    moment_type = type(booked_moments)
+    active_carriers = ~np.asarray(residual_shadow, dtype=bool)
+    category_masks = {
+        "cut": cut,
+        "whole": whole,
+        "inactive": inactive,
+        "all": np.ones(len(area), dtype=bool),
+    }
+    image_attribution = {}
+    absolute_current_total = float(np.sum(np.abs(difference[0])))
+    for name, mask in category_masks.items():
+        selected = moment_type(*(value * mask for value in difference))
+        image = np.asarray(operator.current_moment_image(selected), dtype=np.float64)
+        image_attribution[name] = {
+            "cell_count": int(np.count_nonzero(mask)),
+            "absolute_current_difference_a": float(np.sum(np.abs(difference[0][mask]))),
+            "absolute_current_difference_fraction": (
+                float(np.sum(np.abs(difference[0][mask]))) / absolute_current_total
+                if absolute_current_total > 0.0
+                else 0.0
+            ),
+            "image_on_residual_carriers": _norms(
+                np.where(active_carriers, image, 0.0), span, grid_count
+            ),
+        }
+
+    category = np.full(len(area), "inactive", dtype=object)
+    category[whole] = "whole"
+    category[cut] = "cut"
+    return {
+        "definition": (
+            "target-normalised production coupling moments minus fixture analytic "
+            "coupling moments, per atomic cell, imaged through the frozen blocks"
+        ),
+        "support_classification": (
+            "cut means included with support area strictly between zero and full "
+            "atomic area; whole means included at full area"
+        ),
+        "support_area_tolerance_m2": tolerance,
+        "cell_index": np.arange(len(area), dtype=np.int64),
+        "cell_centre_rz_m": np.asarray(
+            operator.moment_geometry.atomic_mesh.centroids, dtype=np.float64
+        ),
+        "cell_class": category.tolist(),
+        "support_area_fraction": np.divide(
+            area,
+            full_area,
+            out=np.zeros_like(area),
+            where=full_area != 0.0,
+        ),
+        "booked_target_normalised": {
+            "cell_current_a": booked_values[0],
+            "radial_coupling_coefficient": booked_values[1],
+            "vertical_coupling_coefficient": booked_values[2],
+        },
+        "fixture_analytic": {
+            "cell_current_a": analytic_values[0],
+            "radial_coupling_coefficient": analytic_values[1],
+            "vertical_coupling_coefficient": analytic_values[2],
+        },
+        "booked_minus_analytic": {
+            "cell_current_a": difference[0],
+            "radial_coupling_coefficient": difference[1],
+            "vertical_coupling_coefficient": difference[2],
+        },
+        "image_attribution": image_attribution,
     }
 
 
@@ -786,6 +884,7 @@ def _mode_measure_decomposed(
     target_current: float,
     exact_internal: np.ndarray,
     exact_physical: Any,
+    exact_coefficients: Any,
     cell_polygons: tuple[np.ndarray, ...],
     analytic_x_point: np.ndarray | None,
 ) -> dict[str, Any]:
@@ -812,16 +911,17 @@ def _mode_measure_decomposed(
     unscaled_internal = np.asarray(
         operator.current_moment_image(booked_moments), dtype=np.float64
     )
-    unscaled_map = operator.flux_map(requested_class=requested_class)
-    unscaled_mapped = np.asarray(
-        jax.block_until_ready(unscaled_map(state)), dtype=np.float64
-    )
     certificate_map = operator.flux_map(
         requested_class=requested_class,
         target_current=target_current,
     )
     residual_shadow = np.asarray(
         operator.residual_shadow_mask(state, requested_class), dtype=bool
+    )
+    unscaled_mapped = np.where(
+        residual_shadow,
+        analytic,
+        external + unscaled_internal,
     )
 
     normalisation_finding = None
@@ -895,6 +995,25 @@ def _mode_measure_decomposed(
             coordinates[:grid_count],
             residual_shadow,
             span,
+        )
+
+    per_cell_attribution = None
+    if (
+        case_name == "weak-rotation-reactor-static"
+        and requested_cells == -1000
+        and mode == "exact"
+        and amplitude is not None
+    ):
+        per_cell_attribution = _per_cell_moment_attribution(
+            operator,
+            state,
+            requested_class,
+            booked_moments,
+            exact_coefficients,
+            amplitude,
+            residual_shadow,
+            span,
+            grid_count,
         )
 
     part = _part_path(output, case_name, requested_cells, mode)
@@ -981,6 +1100,7 @@ def _mode_measure_decomposed(
         },
         "production_topology_state_at_analytic_flux": topology,
         "analytic_x_point_cell_booking": point_cell_booking,
+        "per_cell_moment_attribution": per_cell_attribution,
         "finding": normalisation_finding,
         "jacobian": None,
         "completed": False,
@@ -995,13 +1115,8 @@ def _mode_measure_decomposed(
             f"topology_class={topology['class']} error={map_error['message']}",
             flush=True,
         )
-        measured["jacobian"] = {
-            "status": "unavailable_due_to_current_normalisation",
-            "reason": map_error,
-            "nonlinear_solve_entered": False,
-            "linear_solve_entered": False,
-            "directions": [],
-        }
+        jacobian_status = "unavailable_due_to_current_normalisation"
+        jacobian_reason = map_error
     else:
         print(
             f"MAP_FLOOR case={case_name} cells={abs(requested_cells)} mode={mode} "
@@ -1009,20 +1124,21 @@ def _mode_measure_decomposed(
             f"sup={certificate_floor['relative_sup_of_span']:.8e}",
             flush=True,
         )
-        measured["jacobian"] = _jacobian_probe(
-            operator,
-            analytic,
-            coordinates,
-            span,
-            requested_class,
-            target_current,
-        )
+        jacobian_status = "not_requested_for_one_application_decomposition"
+        jacobian_reason = None
+    measured["jacobian"] = {
+        "status": jacobian_status,
+        "reason": jacobian_reason,
+        "nonlinear_solve_entered": False,
+        "linear_solve_entered": False,
+        "directions": [],
+    }
     measured["wall_seconds"] = perf_counter() - started
     measured["completed"] = True
     _write_json(part, measured)
     print(
         f"ROW_MODE_DONE case={case_name} cells={abs(requested_cells)} mode={mode} "
-        f"jacobian_status={'measured' if amplitude is not None else 'unavailable'}",
+        f"jacobian_status={jacobian_status}",
         flush=True,
     )
     return measured
@@ -1193,7 +1309,11 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
                 )
                 external_text = f"{external['relative_rms_of_span']:.3e}"
                 internal_text = f"{internal['relative_rms_of_span']:.3e}"
-                jvp_text = f"{max(discrepancies):.3e}"
+                jvp_text = (
+                    f"{max(discrepancies):.3e}"
+                    if discrepancies
+                    else measured["jacobian"]["status"]
+                )
             else:
                 mapped_text = "normalisation refused"
                 affine_text = "unavailable"
@@ -1285,6 +1405,7 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
                     target_current,
                     exact_internal,
                     exact_physical,
+                    exact_coefficients,
                     machine.cell_polygons,
                     (
                         np.asarray(certificate.X_POINT_M, dtype=np.float64)
@@ -1322,8 +1443,8 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
     finally:
         set_support_clip_mode(original_mode)
     receipt = {
-        "schema": "nova.oracle-start-map-jacobian",
-        "version": 1,
+        "schema": "nova.oracle-start-map-decomposition",
+        "version": 2,
         "source_revision": _source_revision(),
         "production_code_modified": False,
         "nonlinear_solve_entered": False,
@@ -1332,7 +1453,7 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
             **lane,
             "persistent_compilation_cache": cache.receipt(),
             "wall_seconds": perf_counter() - started,
-            "exit_marker": "ORACLE_START_MAP_JACOBIAN_EXIT=0",
+            "exit_marker": "ORACLE_START_MAP_DECOMPOSITION_EXIT=0",
         },
         "design": {
             "rows": [
@@ -1343,9 +1464,8 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
                 "exact": "signed-flux spline-chain exact clip",
                 "chord": "production whole-cell booking control",
             },
-            "finite_difference_relative_steps": FINITE_DIFFERENCE_STEPS,
-            "random_jacobian_directions": RANDOM_DIRECTION_COUNT,
-            "random_seed": RANDOM_SEED,
+            "jacobian_measured": False,
+            "map_applications_per_row_mode": 1,
             "interaction_matrix_policy": (
                 "one cached machine and operator per row, reused across both modes"
             ),
@@ -1391,7 +1511,7 @@ def main() -> None:
         ),
         flush=True,
     )
-    print("ORACLE_START_MAP_JACOBIAN_EXIT=0", flush=True)
+    print("ORACLE_START_MAP_DECOMPOSITION_EXIT=0", flush=True)
 
 
 if __name__ == "__main__":

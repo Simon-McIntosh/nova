@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager
+import gzip
 import hashlib
 import json
 import os
@@ -49,6 +50,7 @@ from nova.equilibrium import (
 )
 from nova.equilibrium.forward import RasterFluxReceiptStatus
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
+from nova.equilibrium import observation, separatrix_clip
 from nova.equilibrium.analytic_single_null import (
     CerfonFreidbergSingleNull,
     cerfon_freidberg_single_null,
@@ -93,6 +95,9 @@ REPOSED_CERTIFICATE_OUTPUT = REPOSED_CERTIFICATE_ROOT / "receipt.json"
 REPOSED_CERTIFICATE_BUILD_OUTPUT = REPOSED_CERTIFICATE_ROOT / "machine-build.json"
 REPOSED_CERTIFICATE_SCALING_OUTPUT = (
     REPOSED_CERTIFICATE_ROOT / "solve-memory-scaling.json"
+)
+REPOSED_CERTIFICATE_IDENTIFICATION_OUTPUT = (
+    REPOSED_CERTIFICATE_ROOT / "solve-memory-identification.json"
 )
 REPOSED_CERTIFICATE_500_OUTPUT = REPOSED_CERTIFICATE_ROOT / "cells-500-receipt.json"
 REPOSED_FIXTURE_ROWS = (
@@ -3432,6 +3437,130 @@ def _hlo_producer_group(source_file: str | None, source_line: int | None) -> str
     return "unclassified compiled support operation"
 
 
+def _hlo_source_hint(operation_name: str | None, opcode: str | None) -> str | None:
+    """Map optimized operation metadata back to its authored array expression."""
+
+    name = operation_name or ""
+    if "nqi,ni->nq" in name or ("jvp()/stack" in name and opcode == "concatenate"):
+        return "nova/equilibrium/stencil_mesh.py:218-220"
+    if "solve_program)/while/body" in name:
+        return "nova/equilibrium/fixed_point.py:3453-3459"
+    return None
+
+
+def _hlo_array_records(hlo: str) -> list[dict[str, Any]]:
+    """List every predicate and each other optimized result above one GiB."""
+
+    result_pattern = re.compile(
+        r"=\s*(?P<dtype>pred|f64|f32|s64|s32|u64|u32|s16|u16|s8|u8)"
+        r"\[(?P<shape>[0-9,]*)\](?:\{[^}]*\})?\s+(?P<opcode>[a-z0-9_-]+)"
+    )
+    instruction_pattern = re.compile(r"^\s*(?P<name>%[^ ]+)")
+    source_pattern = re.compile(r'source_file="(?P<file>[^"]+)"')
+    line_pattern = re.compile(r"source_line=(?P<line>[0-9]+)")
+    operation_pattern = re.compile(r'op_name="(?P<name>[^"]+)"')
+    byte_width = {
+        "pred": 1,
+        "f64": 8,
+        "f32": 4,
+        "s64": 8,
+        "s32": 4,
+        "u64": 8,
+        "u32": 4,
+        "s16": 2,
+        "u16": 2,
+        "s8": 1,
+        "u8": 1,
+    }
+    records = []
+    for text in hlo.splitlines():
+        result = result_pattern.search(text)
+        if result is None:
+            continue
+        shape_text = result.group("shape")
+        shape = tuple(int(value) for value in shape_text.split(",") if value)
+        elements = int(np.prod(shape, dtype=np.int64))
+        logical_bytes = elements * byte_width[result.group("dtype")]
+        if result.group("dtype") != "pred" and logical_bytes <= 2**30:
+            continue
+        source = source_pattern.search(text)
+        line = line_pattern.search(text)
+        operation = operation_pattern.search(text)
+        instruction = instruction_pattern.search(text)
+        source_file = source.group("file") if source is not None else None
+        source_line = int(line.group("line")) if line is not None else None
+        operation_name = operation.group("name") if operation is not None else None
+        opcode = result.group("opcode")
+        records.append(
+            {
+                "instruction_name": (
+                    instruction.group("name") if instruction is not None else None
+                ),
+                "opcode": opcode,
+                "dtype": result.group("dtype"),
+                "shape": list(shape),
+                "element_count": elements,
+                "logical_size_in_bytes": logical_bytes,
+                "operation_name": operation_name,
+                "source_file": source_file,
+                "source_line": source_line,
+                "source_hint": _hlo_source_hint(operation_name, opcode),
+            }
+        )
+    return records
+
+
+def _array_signature_summary(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Count equivalent optimized results while retaining their full census."""
+
+    grouped: dict[tuple[Any, ...], dict[str, Any]] = {}
+    for record in records:
+        key = (
+            record["dtype"],
+            tuple(record["shape"]),
+            record["opcode"],
+            record["operation_name"],
+            record["source_hint"],
+        )
+        if key not in grouped:
+            grouped[key] = {
+                field: record[field]
+                for field in (
+                    "dtype",
+                    "shape",
+                    "element_count",
+                    "logical_size_in_bytes",
+                    "opcode",
+                    "operation_name",
+                    "source_hint",
+                )
+            }
+            grouped[key]["instruction_count"] = 0
+        grouped[key]["instruction_count"] += 1
+    return sorted(
+        grouped.values(),
+        key=lambda item: (item["logical_size_in_bytes"], item["instruction_count"]),
+        reverse=True,
+    )
+
+
+def _write_gzip_text(path: Path, text: str) -> None:
+    """Persist long compiler output compactly outside the receipt."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with gzip.open(path, "wt", encoding="utf-8", compresslevel=6) as stream:
+        stream.write(text)
+
+
+def _write_array_census(path: Path, records: list[dict[str, Any]]) -> None:
+    """Persist one JSON line for every qualifying optimized HLO result."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with gzip.open(path, "wt", encoding="utf-8", compresslevel=6) as stream:
+        for record in records:
+            stream.write(json.dumps(record, sort_keys=True) + "\n")
+
+
 def _largest_hlo_arrays(hlo: str, *, limit: int = 16) -> list[dict[str, Any]]:
     """Extract the largest typed instruction results and their source metadata."""
 
@@ -3489,7 +3618,7 @@ def _largest_hlo_arrays(hlo: str, *, limit: int = 16) -> list[dict[str, Any]]:
 
 def _certificate_compile_problem(
     case_name: str, requested_cells: int
-) -> tuple[Any, np.ndarray, ForwardSolveRequest, int]:
+) -> tuple[Any, np.ndarray, ForwardSolveRequest, dict[str, Any]]:
     """Construct the public certificate problem without executing its solve."""
 
     carrier_case, source_case, exact = _case(case_name)
@@ -3520,14 +3649,53 @@ def _certificate_compile_problem(
         target_current,
         carrier_identity=f"solovev-memory:{case_name}:{requested_cells}",
     )
-    return profile, seed, request, len(machine.node)
+    atomic_mesh = operator.moment_geometry.atomic_mesh
+    chord_capacity = int(atomic_mesh.support_capacity)
+    chain_samples = int(separatrix_clip._SPLINE_BOUNDARY_SEGMENTS)
+    quadrature_axis_nodes = len(observation._UNIT_NODE)
+    exact_capacity = chord_capacity * chain_samples
+    return (
+        profile,
+        seed,
+        request,
+        {
+            "realised_cells": len(machine.node),
+            "grid_nodes": int(operator.grid.node_number),
+            "wall_nodes": int(operator.wall.node_number),
+            "sample_nodes": (
+                0 if operator.sample is None else int(operator.sample.node_number)
+            ),
+            "solve_state_size": int(len(seed)),
+            "atomic_support_capacity": chord_capacity,
+            "spline_chain_samples_per_chord": chain_samples,
+            "exact_support_capacity": exact_capacity,
+            "quadrature_nodes_per_axis": quadrature_axis_nodes,
+            "quadrature_nodes_per_triangle": quadrature_axis_nodes**2,
+            "exact_quadrature_points_per_cell": (
+                (exact_capacity - 2) * quadrature_axis_nodes**2
+            ),
+            "whole_cell_quadrature_points_per_cell": (
+                (chord_capacity - 2) * quadrature_axis_nodes**2
+            ),
+            "cell_polynomial_terms": 6,
+            "newton_steps": request.policy.newton_steps,
+            "gmres_iterations": request.policy.gmres_iterations,
+            "active_set_steps": request.policy.active_set_steps,
+        },
+    )
 
 
-def _compile_solve_memory(case_name: str, requested_cells: int) -> dict[str, Any]:
+def _compile_solve_memory(
+    case_name: str,
+    requested_cells: int,
+    *,
+    arm: str | None = None,
+    compiler_artifact_root: Path | None = None,
+) -> dict[str, Any]:
     """Compile, but never execute, one production-equivalent solve graph."""
 
     started = perf_counter()
-    profile, seed, request, realised_cells = _certificate_compile_problem(
+    profile, seed, request, dimensions = _certificate_compile_problem(
         case_name, requested_cells
     )
     mapped = profile.flux_map(
@@ -3561,11 +3729,14 @@ def _compile_solve_memory(case_name: str, requested_cells: int) -> dict[str, Any
     lowered = jax.jit(solve_program).lower(jnp.asarray(seed, dtype=jnp.float64))
     compiled = lowered.compile()
     analysis = _compiled_memory_fields(compiled.memory_analysis())
-    arrays = _largest_hlo_arrays(compiled.as_text())
+    hlo = compiled.as_text()
+    arrays = _largest_hlo_arrays(hlo)
     record = {
         "case": case_name,
+        "arm": arm,
         "requested_cells": requested_cells,
-        "realised_cells": realised_cells,
+        "realised_cells": dimensions["realised_cells"],
+        "dimensions": dimensions,
         "compile_wall_seconds": perf_counter() - started,
         "memory_analysis": analysis,
         "largest_array_intermediates": arrays,
@@ -3575,8 +3746,28 @@ def _compile_solve_memory(case_name: str, requested_cells: int) -> dict[str, Any
         "executed": False,
         "method": "jax.jit(solve_program).lower(seed).compile().memory_analysis()",
     }
+    if compiler_artifact_root is not None:
+        if arm is None:
+            raise ValueError("compiler artifact capture requires a named arm")
+        hlo_path = compiler_artifact_root / f"{arm}-optimised.hlo.txt.gz"
+        census_path = compiler_artifact_root / f"{arm}-array-census.jsonl.gz"
+        census = _hlo_array_records(hlo)
+        _write_gzip_text(hlo_path, hlo)
+        _write_array_census(census_path, census)
+        record["compiler_artifacts"] = {
+            "optimised_hlo_gzip": str(hlo_path),
+            "qualifying_array_census_gzip": str(census_path),
+        }
+        record["predicate_instruction_count"] = sum(
+            item["dtype"] == "pred" for item in census
+        )
+        record["large_nonpredicate_instruction_count"] = sum(
+            item["dtype"] != "pred" for item in census
+        )
+        record["qualifying_array_signatures"] = _array_signature_summary(census)
     print(
-        f"SOLVE_MEMORY cells={abs(requested_cells)} realised={realised_cells} "
+        f"SOLVE_MEMORY cells={abs(requested_cells)} "
+        f"realised={dimensions['realised_cells']} "
         f"temp_gib={analysis['temp_size_in_bytes'] / 2**30:.6f}",
         flush=True,
     )
@@ -3650,6 +3841,215 @@ def _measure_solve_memory_scaling(output: Path) -> dict[str, Any]:
     return receipt
 
 
+def _quadrature_design_candidate(row: dict[str, Any]) -> dict[str, Any] | None:
+    """Return the largest array attributed to cell-quadrature interpolation."""
+
+    candidates = [
+        item
+        for item in row["largest_array_intermediates"]
+        if "nqi,ni->nq" in (item["operation_name"] or "")
+        or "jvp()/stack" in (item["operation_name"] or "")
+    ]
+    return (
+        max(candidates, key=lambda item: item["logical_size_in_bytes"])
+        if candidates
+        else None
+    )
+
+
+def _write_memory_identification_report(
+    path: Path,
+    scaling: dict[str, Any],
+    exact: dict[str, Any],
+    whole: dict[str, Any],
+) -> None:
+    """Put the exact-clip memory defect ahead of the fixture gate report."""
+
+    exact_candidate = _quadrature_design_candidate(exact)
+    whole_candidate = _quadrature_design_candidate(whole)
+    if exact_candidate is None or whole_candidate is None:
+        raise RuntimeError("optimized HLO did not expose the quadrature design array")
+    dimensions = exact["dimensions"]
+    exact_q = dimensions["exact_quadrature_points_per_cell"]
+    whole_q = dimensions["whole_cell_quadrature_points_per_cell"]
+    exact_logical = exact_candidate["logical_size_in_bytes"]
+    whole_logical = whole_candidate["logical_size_in_bytes"]
+    measured = {
+        abs(row["requested_cells"]): row["memory_analysis"]["temp_size_in_bytes"]
+        for row in scaling["rows"]
+    }
+    signature_rows = [
+        item for item in exact["qualifying_array_signatures"] if item["dtype"] != "pred"
+    ]
+    lines = [
+        "<!-- exact-solve-memory-headline:start -->",
+        "# Exact-clip solve memory is dominated by padded support quadrature",
+        "",
+        "The re-posed fixture itself is delivered: one exact-clip production-map "
+        "application at the analytic flux passed the 1000-cell limited rows at "
+        "`3.580157e-5` and `3.423768e-5` RMS of span. Full certificate "
+        "regeneration above 300 cells is handed to the production memory-scaling "
+        "repair because compiling the solve graph reserves an unsafe device-memory "
+        "floor before an iteration executes.",
+        "",
+        "## Measured floor",
+        "",
+        f"Compile-only `memory_analysis()` reports {measured[300] / 2**30:.6g} "
+        f"GiB at {scaling['rows'][0]['realised_cells']} realised cells and "
+        f"{measured[500] / 2**30:.6g} GiB at "
+        f"{scaling['rows'][1]['realised_cells']} cells. Their two-rung apparent "
+        f"exponent is `{scaling['fit']['exponent']:.6g}`, but that sub-linear "
+        "ratio is not exculpatory: the intercept is already 96.8 GiB at 300 "
+        "requested cells, while the actual 1000-cell executable requested 279.45 "
+        "GiB. The 300-cell exact rows therefore fitted only when the H200 was "
+        "otherwise empty; this is a capacity floor and graph-repetition defect, "
+        "not an acceptable linear implementation.",
+        "",
+        "## Array identity and shape arithmetic",
+        "",
+        f"The largest repeated exact-clip value is `{exact_candidate['dtype']}"
+        f"{exact_candidate['shape']}` from HLO `{exact_candidate['operation_name']}`. "
+        f"Its logical size is {exact_logical / 2**30:.6g} GiB. The dimensions are:",
+        "",
+        f"- `{dimensions['realised_cells']}` carried cells;",
+        f"- atomic polygon capacity `{dimensions['atomic_support_capacity']}` "
+        f"expanded by `{dimensions['spline_chain_samples_per_chord']}` spline-chain "
+        f"samples to fixed support capacity `{dimensions['exact_support_capacity']}`;",
+        f"- `(support capacity - 2) * 8 * 8 = ({dimensions['exact_support_capacity']} "
+        f"- 2) * 64 = {exact_q}` degree-fifteen Duffy quadrature points per cell;",
+        "- `6` local quadratic flux-basis terms.",
+        "",
+        f"Thus `{dimensions['realised_cells']} * {exact_q} * 6 * 8 bytes = "
+        f"{dimensions['realised_cells'] * exact_q * 6 * 8:,}` bytes "
+        f"({dimensions['realised_cells'] * exact_q * 6 * 8 / 2**30:.6g} GiB) "
+        "for each materialized design/JVP value. Optimizer padding or bitcasts can "
+        "change the printed middle dimension by one without changing this identity.",
+        "",
+        "The construction path is `fixed_point.py:3453-3459` (reconcile and replay "
+        "the live shadowed map), `forward_operator.py:2195-2235` (global spline and "
+        "exact traced support), `separatrix_clip.py:1082-1108` (multiply polygon "
+        "capacity by the 128-sample chain), `forward_operator.py:2316-2319` "
+        "(quadrature plus cell-field sampling), `observation.py:412-445` "
+        "(64 Duffy points on every capacity slot), and finally "
+        "`stencil_mesh.py:218-220`, which builds the six-column quadratic design "
+        "and contracts it as `nqi,ni->nq`. Newton differentiation and transpose-JVP "
+        f"paths repeat that array within budgets newton={dimensions['newton_steps']}, "
+        f"GMRES={dimensions['gmres_iterations']}, active-set="
+        f"{dimensions['active_set_steps']}, producing the 96.8 GiB total floor.",
+        "",
+        "## Whole-cell control",
+        "",
+        f"With the same 300-cell solve program compiled in whole-cell mode, support "
+        f"capacity stays `{dimensions['atomic_support_capacity']}` and the analogous "
+        f"quadrature has only `({dimensions['atomic_support_capacity']} - 2) * 64 "
+        f"= {whole_q}` points per cell. Its largest matching design/JVP array is "
+        f"`{whole_candidate['dtype']}{whole_candidate['shape']}` at "
+        f"{whole_logical / 2**20:.6g} MiB, versus {exact_logical / 2**30:.6g} GiB "
+        f"in exact mode, and whole-cell total temporaries are "
+        f"{whole['memory_analysis']['temp_size_in_bytes'] / 2**30:.6g} GiB versus "
+        f"{exact['memory_analysis']['temp_size_in_bytes'] / 2**30:.6g} GiB exact. "
+        "This removes the expanded array as a solver- or topology-read baseline and "
+        "identifies the fixed-capacity spline-chain quadrature as its cause.",
+        "",
+        "## Optimized-HLO census",
+        "",
+        f"The exact graph contains {exact['predicate_instruction_count']} predicate "
+        "instructions and "
+        f"{exact['large_nonpredicate_instruction_count']} non-predicate instructions "
+        "whose individual logical result exceeds 1 GiB. Every one is listed with "
+        "shape and producing HLO opcode in "
+        f"`{exact['compiler_artifacts']['qualifying_array_census_gzip']}`; the "
+        "complete optimized HLO is adjacent. The equivalent whole-cell census is "
+        f"`{whole['compiler_artifacts']['qualifying_array_census_gzip']}`.",
+        "",
+        "| dtype and shape | GiB each | HLO opcode | instruction count | "
+        "authored source |",
+        "|---|---:|---|---:|---|",
+    ]
+    for item in signature_rows:
+        lines.append(
+            f"| `{item['dtype']}{item['shape']}` | "
+            f"{item['logical_size_in_bytes'] / 2**30:.6g} | "
+            f"`{item['opcode']}` | {item['instruction_count']} | "
+            f"`{item['source_hint'] or 'optimized derivative of the cited chain'}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "No 500-cell certificate solve was attempted after this diagnosis. The "
+            "1000- and 2500-cell machines remain cached, and their regeneration is "
+            "explicitly blocked on replacing the all-capacity, all-cell quadrature "
+            "materialization with a linear-in-cells implementation.",
+            "<!-- exact-solve-memory-headline:end -->",
+        ]
+    )
+    finding = "\n".join(lines) + "\n\n"
+    original = path.read_text(encoding="utf-8") if path.exists() else ""
+    start_marker = "<!-- exact-solve-memory-headline:start -->"
+    end_marker = "<!-- exact-solve-memory-headline:end -->"
+    start = original.find(start_marker)
+    end = original.find(end_marker)
+    if start >= 0 and end >= start:
+        original = original[:start] + original[end + len(end_marker) :].lstrip()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(finding + original, encoding="utf-8")
+
+
+def _identify_solve_memory(
+    output: Path, report: Path, hlo_root: Path
+) -> dict[str, Any]:
+    """Compile exact and whole-cell controls and identify the expanded arrays."""
+
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("solve memory identification requires binary64")
+    scaling = json.loads(REPOSED_CERTIFICATE_SCALING_OUTPUT.read_text(encoding="utf-8"))
+    original_mode = support_clip_mode()
+    arms = []
+    try:
+        for mode, arm in (("exact", "exact-clip"), ("chord", "whole-cell")):
+            set_support_clip_mode(mode)
+            row = _compile_solve_memory(
+                "weak-rotation-reactor-static",
+                -300,
+                arm=arm,
+                compiler_artifact_root=hlo_root,
+            )
+            arms.append(row)
+            _write_json(
+                output,
+                {
+                    "schema": "nova.forward-solve-memory-identification",
+                    "source_revision": _source_revision(),
+                    "lane": _lane(),
+                    "arms": arms,
+                    "completed": False,
+                    "certificate_disposition": {
+                        "fixture_delivered": True,
+                        "certificate_rows_above_300": "blocked_on_memory_scaling_fix",
+                        "certificate_500_attempted": False,
+                    },
+                },
+            )
+    finally:
+        set_support_clip_mode(original_mode)
+    receipt = json.loads(output.read_text(encoding="utf-8"))
+    receipt["completed"] = True
+    receipt["measured_solve_temporaries"] = {
+        "300_cells_gib": scaling["rows"][0]["memory_analysis"]["temp_size_in_bytes"]
+        / 2**30,
+        "500_cells_gib": scaling["rows"][1]["memory_analysis"]["temp_size_in_bytes"]
+        / 2**30,
+        "1000_cells_measured_allocation_gib": 279.45,
+        "apparent_exponent_300_to_500": scaling["fit"]["exponent"],
+        "finding": "unsafe high memory floor despite a sub-linear two-rung ratio",
+    }
+    _write_json(output, receipt)
+    _write_memory_identification_report(report, scaling, arms[0], arms[1])
+    print("SOLVE_MEMORY_IDENTIFICATION_EXIT=0", flush=True)
+    return receipt
+
+
 def _report_value(value: float | None, precision: int = 6) -> str:
     """Format a nullable measurement for the Markdown evidence table."""
 
@@ -3663,12 +4063,16 @@ def _write_recovery_report(
 ) -> None:
     """Replace the solve-scaling finding and partial 500-cell table in-place."""
 
+    predicate_arrays = [
+        item
+        for row in scaling["rows"]
+        for item in row["largest_predicate_intermediates"]
+    ]
+    ranked_arrays = [
+        item for row in scaling["rows"] for item in row["largest_array_intermediates"]
+    ]
     largest = max(
-        (
-            item
-            for row in scaling["rows"]
-            for item in row["largest_predicate_intermediates"]
-        ),
+        predicate_arrays or ranked_arrays,
         key=lambda item: item["logical_size_in_bytes"],
     )
     rows = scaling["rows"]
@@ -3695,7 +4099,7 @@ def _write_recovery_report(
         f"{predicted['2500']['realised_cells']} cells; an exponent materially "
         "above one is a production scaling defect against the linear-in-cells target.",
         "",
-        "The largest compiled predicate intermediate has shape "
+        "The largest compiled intermediate retained by the ranker has shape "
         f"`{largest['shape']}` ({largest['element_count']:,} logical booleans) "
         f"and is attributed to `{largest['source_file']}:{largest['source_line']}` "
         f"in the {largest['producer_group']}. The production call enters at "
@@ -3901,7 +4305,9 @@ def _parse() -> argparse.Namespace:
     parser.add_argument("--reposed-fixture-floor", action="store_true")
     parser.add_argument("--reposed-certificate", action="store_true")
     parser.add_argument("--reposed-certificate-recovery", action="store_true")
+    parser.add_argument("--identify-solve-memory", action="store_true")
     parser.add_argument("--finding-report", type=Path)
+    parser.add_argument("--hlo-root", type=Path)
     parser.add_argument("--scheduler-job-id", action="append", default=[])
     parser.add_argument("--output", type=Path, default=OUTPUT)
     return parser.parse_args()
@@ -3909,6 +4315,31 @@ def _parse() -> argparse.Namespace:
 
 def main() -> None:
     arguments = _parse()
+    if arguments.identify_solve_memory:
+        if arguments.finding_report is None or arguments.hlo_root is None:
+            raise SystemExit(
+                "--identify-solve-memory requires --finding-report and --hlo-root"
+            )
+        output = (
+            REPOSED_CERTIFICATE_IDENTIFICATION_OUTPUT
+            if arguments.output == OUTPUT
+            else arguments.output
+        )
+        receipt = _identify_solve_memory(
+            output, arguments.finding_report, arguments.hlo_root
+        )
+        print(
+            json.dumps(
+                {
+                    "completed": receipt["completed"],
+                    "arms": [arm["arm"] for arm in receipt["arms"]],
+                    "measured_solve_temporaries": receipt["measured_solve_temporaries"],
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        return
     if arguments.reposed_certificate_recovery:
         if arguments.finding_report is None:
             raise SystemExit("--reposed-certificate-recovery requires --finding-report")

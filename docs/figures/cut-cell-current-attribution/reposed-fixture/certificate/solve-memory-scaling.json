@@ -1,0 +1,576 @@
+{
+  "completed": true,
+  "failed_execution": {
+    "active_set_reconcile": "nova/equilibrium/fixed_point.py:3459",
+    "executable": "jit_bitwise_and",
+    "production_entry": "nova/equilibrium/forward.py:2489",
+    "requested_allocation_gib": 279.45,
+    "requested_cells": 1000,
+    "slurm_job_id": "1270272"
+  },
+  "fit": {
+    "exponent": 0.6217921331888969,
+    "independent_variable": "realised atomic cell count",
+    "linear_target_exponent": 1.0,
+    "prediction": {
+      "1000": {
+        "realised_cells": 1072,
+        "temp_size_in_bytes": 211539768468.18192
+      },
+      "2500": {
+        "realised_cells": 2608,
+        "temp_size_in_bytes": 367683318992.1561
+      }
+    },
+    "scaling_defect": false
+  },
+  "lane": {
+    "execution": "slurm",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_default_backend": "gpu",
+    "jax_platforms": "cuda,cpu",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "precision": "float64",
+    "reservation": "gpu_0003_grpA",
+    "slurm_job_id": "1270332"
+  },
+  "rows": [
+    {
+      "case": "weak-rotation-reactor-static",
+      "compile_wall_seconds": 1046.8204312203452,
+      "executed": false,
+      "largest_array_intermediates": [
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%stack.1341138.7.clone.1.clone.1 = f64[342,196480,6]{2,1,0} concatenate(%broadcast.522451.2.clone.1, %multiply.26033.11.clone.1.clone.1, %bitcast.37859.7.clone.1.clone.1, %bitcast.37861.7.clone.1.clone.1, %bitcast.37862.7.clone.1.clone.1), dimensions={2}, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/jvp()/stack\" scheduling_name=\"stack.1341138.7.clone.1.clone.1\" stack_frame_id=68495}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/jvp()/stack",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            196480,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%multiply.25953.5.clone.1.clone.1 = f64[342,196480,6]{2,1,0} multiply(%param_29.35863, %broadcast.522428.5.clone.1.clone.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/jvp(nqi,ni->nq)/dot_general\" scheduling_name=\"multiply.25953.5.clone.1.clone.1\" stack_frame_id=68493}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/jvp(nqi,ni->nq)/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            196480,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%param_2.459563 = f64[342,196480,6]{2,1,0} parameter(2), metadata={scheduling_name=\"param_2.459563\"}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": null,
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            196480,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%stack.1341190.7.clone.1 = f64[342,196480,6]{2,1,0} concatenate(%broadcast.522567.3.clone.1, %param_5.230893, %slice.601422.5.clone.1, %mul.1388506.5.clone.1, %slice.601423.5.clone.1), dimensions={2}, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/stack\" scheduling_name=\"stack.1341190.7.clone.1\" stack_frame_id=68560}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/stack",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            196480,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%multiply.26002.7.clone.1 = f64[342,196480,6]{2,1,0} multiply(%stack.1341190.7.clone.1, %broadcast.522569.5.clone.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/nqi,ni->nq/dot_general\" scheduling_name=\"multiply.26002.7.clone.1\" stack_frame_id=68558}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/nqi,ni->nq/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            196480,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%multiply.36343.37 = f64[342,196480,6]{2,1,0} multiply(%broadcast.550382.32, %broadcast.550351.42), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"multiply.36343.37\" stack_frame_id=73152}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            196480,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%bitcast.148470.1 = f64[342,320,614,6]{3,2,1,0} bitcast(%multiply.36346.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"bitcast.148470.1\" stack_frame_id=73152}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            320,
+            614,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%stack.1348403.7.clone.1 = f64[342,196480,6]{2,1,0} concatenate(%bitcast.49207.7.clone.1, %multiply.36356.11.clone.1, %bitcast.49209.7.clone.1, %bitcast.49211.7.clone.1, %bitcast.49212.7.clone.1), dimensions={2}, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/jvp()/stack\" scheduling_name=\"stack.1348403.7.clone.1\" stack_frame_id=73186}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/jvp()/stack",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            196480,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%broadcast.550351.42 = f64[342,196480,6]{2,1,0} broadcast(%param_5.165662), dimensions={0,2}, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/jvp(nqi,ni->nq)/dot_general\" scheduling_name=\"broadcast.550351.42\" stack_frame_id=73152}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/jvp(nqi,ni->nq)/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            196480,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%bitcast.80220.7.clone.1 = f64[342,6,196480]{2,1,0} bitcast(%param_30.34631), metadata={scheduling_name=\"bitcast.80220.7.clone.1\"}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": null,
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            6,
+            196480
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%multiply.38412.7.clone.1 = f64[342,6,196480]{2,1,0} multiply(%bitcast.94565.8.clone.1, %broadcast.554305.5.clone.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/jvp(nqi,ni->nq)/dot_general\" scheduling_name=\"multiply.38412.7.clone.1\" stack_frame_id=73152}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/jvp(nqi,ni->nq)/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            6,
+            196480
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%multiply.35615.37 = f64[342,196480,6]{2,1,0} multiply(%broadcast.549113.32, %broadcast.549079.42), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"multiply.35615.37\" stack_frame_id=73152}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            196480,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%bitcast.148473.1 = f64[342,320,614,6]{3,2,1,0} bitcast(%multiply.35619.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"bitcast.148473.1\" stack_frame_id=73152}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            320,
+            614,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%stack.1347803.7.clone.1 = f64[342,196480,6]{2,1,0} concatenate(%bitcast.49459.7.clone.1, %multiply.35628.11.clone.1, %bitcast.49461.7.clone.1, %bitcast.49463.7.clone.1, %bitcast.49464.7.clone.1), dimensions={2}, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/jvp()/stack\" scheduling_name=\"stack.1347803.7.clone.1\" stack_frame_id=73186}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/jvp()/stack",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            196480,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%broadcast.549079.42 = f64[342,196480,6]{2,1,0} broadcast(%param_5.166537), dimensions={0,2}, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/jvp(nqi,ni->nq)/dot_general\" scheduling_name=\"broadcast.549079.42\" stack_frame_id=73152}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/jvp(nqi,ni->nq)/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            196480,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 403176960,
+          "instruction": "%multiply.38421.7.clone.1 = f64[342,6,196480]{2,1,0} multiply(%bitcast.94882.8.clone.1, %broadcast.554319.5.clone.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/jvp(nqi,ni->nq)/dot_general\" scheduling_name=\"multiply.38421.7.clone.1\" stack_frame_id=73152}",
+          "logical_size_in_bytes": 3225415680,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/jvp(nqi,ni->nq)/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            342,
+            6,
+            196480
+          ],
+          "source_file": null,
+          "source_line": null
+        }
+      ],
+      "largest_predicate_intermediates": [],
+      "memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 12232,
+        "generated_code_size_in_bytes": 475426444,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 12265,
+        "temp_size_in_bytes": 103962865936
+      },
+      "method": "jax.jit(solve_program).lower(seed).compile().memory_analysis()",
+      "realised_cells": 342,
+      "requested_cells": -300
+    },
+    {
+      "case": "weak-rotation-reactor-static",
+      "compile_wall_seconds": 1098.7197146331891,
+      "executed": false,
+      "largest_array_intermediates": [
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%pad.26594.1 = f64[555,163713,6]{2,1,0} pad(%multiply.36346.3, %constant_10304479_22), padding=0_0x0_1x0_0, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"pad.26594.1\" stack_frame_id=90446}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            163713,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%bitcast.148918.1 = f64[555,363,451,6]{3,2,1,0} bitcast(%pad.26594.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"bitcast.148918.1\" stack_frame_id=90446}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/while/body/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            363,
+            451,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%pad.26597.1 = f64[555,163713,6]{2,1,0} pad(%multiply.35619.3, %constant_10303876_23), padding=0_0x0_1x0_0, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"pad.26597.1\" stack_frame_id=90446}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            163713,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%bitcast.148921.1 = f64[555,363,451,6]{3,2,1,0} bitcast(%pad.26597.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"bitcast.148921.1\" stack_frame_id=90446}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/while/body/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            363,
+            451,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%pad.26600.1 = f64[555,163713,6]{2,1,0} pad(%multiply.36130.3, %constant_10304258_201), padding=0_0x0_1x0_0, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"pad.26600.1\" stack_frame_id=90446}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            163713,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%bitcast.148924.1 = f64[555,363,451,6]{3,2,1,0} bitcast(%pad.26600.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"bitcast.148924.1\" stack_frame_id=90446}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            363,
+            451,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%pad.26555.1 = f64[555,163713,6]{2,1,0} pad(%multiply.34979.3, %constant_10303155_17), padding=0_0x0_1x0_0, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"pad.26555.1\" stack_frame_id=79482}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            163713,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%bitcast.148879.1 = f64[555,363,451,6]{3,2,1,0} bitcast(%pad.26555.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"bitcast.148879.1\" stack_frame_id=79482}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            363,
+            451,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%pad.26538.1 = f64[555,6,163713]{2,1,0} pad(%multiply.37985.3, %constant_10291507_118), padding=0_0x0_0x0_1, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"pad.26538.1\" stack_frame_id=75035}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            6,
+            163713
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%bitcast.148862.1 = f64[555,6,363,451]{3,2,1,0} bitcast(%pad.26538.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"bitcast.148862.1\" stack_frame_id=75035}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            6,
+            363,
+            451
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%pad.26518.1 = f64[555,163713,6]{2,1,0} pad(%multiply.29348.3, %constant_10289308_22), padding=0_0x0_1x0_0, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body/while/body/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"pad.26518.1\" stack_frame_id=71515}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body/while/body/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            163713,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%bitcast.148842.1 = f64[555,363,451,6]{3,2,1,0} bitcast(%pad.26518.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body/while/body/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"bitcast.148842.1\" stack_frame_id=71515}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body/while/body/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            363,
+            451,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%pad.26543.1 = f64[555,163713,6]{2,1,0} pad(%multiply.30987.3, %constant_10295945_23), padding=0_0x0_1x0_0, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"pad.26543.1\" stack_frame_id=71515}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            163713,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%bitcast.148867.1 = f64[555,363,451,6]{3,2,1,0} bitcast(%pad.26543.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"bitcast.148867.1\" stack_frame_id=71515}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/while/body/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            363,
+            451,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%pad.26546.1 = f64[555,163713,6]{2,1,0} pad(%multiply.32038.3, %constant_10298734_134), padding=0_0x0_1x0_0, metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"pad.26546.1\" stack_frame_id=71515}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            163713,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        },
+        {
+          "dtype": "f64",
+          "element_count": 545164290,
+          "instruction": "%bitcast.148870.1 = f64[555,363,451,6]{3,2,1,0} bitcast(%pad.26546.1), metadata={op_name=\"jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/transpose(jvp(nqi,ni->nq))/dot_general\" scheduling_name=\"bitcast.148870.1\" stack_frame_id=71515}",
+          "logical_size_in_bytes": 4361314320,
+          "operation_name": "jit(solve_program)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/transpose(jvp(nqi,ni->nq))/dot_general",
+          "producer_group": "unclassified compiled support operation",
+          "shape": [
+            555,
+            363,
+            451,
+            6
+          ],
+          "source_file": null,
+          "source_line": null
+        }
+      ],
+      "largest_predicate_intermediates": [],
+      "memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 18160,
+        "generated_code_size_in_bytes": 1125758400,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 18193,
+        "temp_size_in_bytes": 140481952016
+      },
+      "method": "jax.jit(solve_program).lower(seed).compile().memory_analysis()",
+      "realised_cells": 555,
+      "requested_cells": -500
+    }
+  ],
+  "schema": "nova.forward-solve-memory-scaling",
+  "source_revision": "4f0352767b6b19dfca9173f41e0d08aea848f3e9"
+}

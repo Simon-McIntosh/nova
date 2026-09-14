@@ -1350,8 +1350,9 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
             "vertex_census_admitted | vertex_census_position_error_in_pitch | "
             "vertex_census_level_error_in_span | production_admitted | "
             "production_position_error_in_pitch | "
-            "false X raw→final | "
-            "false O raw→final | noise X |"
+            "centroid_sign_false_saddle_before→vertex_census_false_saddle_after | "
+            "centroid_sign_false_extremum_before→vertex_census_false_extremum_after | "
+            "noise X |"
         ),
         "|---:|---:|:---:|:---:|---:|---:|:---:|---:|---:|---:|:---:|",
     ]
@@ -1387,7 +1388,8 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
         "| case | requested | realised | centroid_sign_census_axis_admitted | "
         "vertex_census_axis_admitted | vertex_census_position_error_m | "
         "vertex_census_position_error_in_pitch | vertex_census_level_error_in_span | "
-        "false X raw→final | false O raw→final |"
+        "centroid_sign_false_saddle_before→vertex_census_false_saddle_after | "
+        "centroid_sign_false_extremum_before→vertex_census_false_extremum_after |"
     )
     lines.append("|:---|---:|---:|:---:|:---:|---:|---:|---:|---:|---:|")
     for row in receipt["static_rows"]:
@@ -1426,8 +1428,9 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
                 "| case | requested | null | m1 amplitude (Wb) | m2 amplitude "
                 "(Wb) | m2 phase (rad) | isotropic (Wb) | m3 amplitude (Wb) | "
                 "m1:m2 distance / pitch | closed-form distance / pitch | "
-                "stationary-level changes | four-sample cells within 2 pitch |",
-                "|:---|---:|:---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+                "stationary-level changes | source cell | analytic cell | "
+                "four-sample cells within 2 pitch |",
+                "|:---|---:|:---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
             ]
         )
         for row in presentation_rows:
@@ -1446,6 +1449,8 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
                     f"{modes['m1_to_m2_ratio_distance_in_pitch']:.8g} | "
                     f"{modes['stationary_distance_from_modes_in_pitch']:.8g} | "
                     f"{modes['stationary_level_cyclic_sign_change_count']} | "
+                    f"{modes['cell_index']} | "
+                    f"{modes.get('analytic_reference_cell_index', '—')} | "
                     f"{modes['nearby_four_sample_cells_within_two_pitches']} |"
                 )
         agreement = sum(
@@ -1465,8 +1470,8 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
         lines.append("The accelerator timing job has not completed.")
     else:
         lines.append(
-            "| requested | realised | vertex batch 16 per state (ms) | "
-            "production (ms) |"
+            "| requested | realised | vertex_census_batch16_ms_per_state | "
+            "production_batch16_ms_per_state |"
         )
         lines.append("|---:|---:|---:|---:|")
         for row in timed:
@@ -1492,7 +1497,7 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
         "- Smooth perturbation amplitude is 1e-4 of the analytic axis-to-X span; "
         f"saddle admission survived on {noise_admissions} of {len(rows)} rungs."
     )
-    stationary_four = sum(
+    analytic_cell_stationary_four = sum(
         row["vertex_read"]["criteria"]["quadratic_stationary_point"][
             "saddle_stationary_level_has_four_changes"
         ]
@@ -1500,9 +1505,25 @@ def _write_report(receipt: dict[str, Any], destination: Path) -> None:
     )
     lines.append(
         "- Vertex signs about the fitted stationary value produced four cyclic "
-        f"changes in the analytic saddle cell on {stationary_four} of {len(rows)} "
-        "rungs."
+        "changes in the geometric analytic-X cell on "
+        f"{analytic_cell_stationary_four} of {len(rows)} rungs."
     )
+    if presentation_rows:
+        source_cell_stationary_four = sum(
+            row["periodic_ring_presentation"]["saddle_cell"][
+                "stationary_level_cyclic_sign_change_count"
+            ]
+            == 4
+            for row in rows
+        )
+        lines.append(
+            "- The retained candidate's source cell produced four stationary-level "
+            f"changes on {source_cell_stationary_four} of {len(rows)} rungs. The "
+            "quarter-pitch exterior tolerance can admit an indefinite fitted root "
+            "whose hyperbola has only one branch pair crossing the sampled ring, so "
+            "this sign count is corroborating mode evidence rather than an equivalent "
+            "admission rule for tolerance-band roots."
+        )
     for figure in receipt["figures"]:
         lines.append(
             f"- [{Path(figure['path']).stem}]({figure['project_absolute_src']})"

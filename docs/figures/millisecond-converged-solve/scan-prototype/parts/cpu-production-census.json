@@ -1,0 +1,58 @@
+{
+  "arm": "production",
+  "compile_wall_seconds": 79.29637936875224,
+  "dimensions": {
+    "active_set_steps": 16,
+    "atomic_support_capacity": 24,
+    "cell_polynomial_terms": 6,
+    "exact_quadrature_points_per_cell": 196480,
+    "exact_support_capacity": 3072,
+    "gmres_iterations": 30,
+    "grid_nodes": 342,
+    "newton_steps": 10,
+    "quadrature_nodes_per_axis": 8,
+    "quadrature_nodes_per_triangle": 64,
+    "realised_cells": 342,
+    "sample_nodes": 1066,
+    "solve_state_size": 1529,
+    "spline_chain_samples_per_chord": 128,
+    "wall_nodes": 121,
+    "whole_cell_quadrature_points_per_cell": 1408
+  },
+  "instruction_count": 657378,
+  "lane": {
+    "clip_mode": "chord",
+    "execution": "slurm",
+    "hostname": "98dci4-clu-3142.iter.org",
+    "jax_default_backend": "cpu",
+    "jax_platforms": "cpu",
+    "node": "98dci4-clu-3142",
+    "partition": "all_debug",
+    "requested_cells": 300,
+    "slurm_job_id": "1270960"
+  },
+  "loop_driver": "fori_loop",
+  "memory_analysis": {
+    "alias_size_in_bytes": 0,
+    "argument_size_in_bytes": 12232,
+    "generated_code_size_in_bytes": 0,
+    "host_alias_size_in_bytes": 0,
+    "host_argument_size_in_bytes": 0,
+    "host_output_size_in_bytes": 0,
+    "host_temp_size_in_bytes": 0,
+    "output_size_in_bytes": 29106,
+    "temp_size_in_bytes": 265838376
+  },
+  "method": "jax.jit(program).lower(seed).compile().as_text()",
+  "optimised_hlo_bytes": 174092078,
+  "requested_cells": 300,
+  "schema": "nova.scanned-trip-loop-compile-census",
+  "serialisation": {
+    "serialisation_error": "TypeError: int() argument must be a string, a bytes-like object or a real number, not 'nanobind.nb_bound_method'",
+    "serialized_executable_bytes": null,
+    "serialized_executable_mib": null,
+    "size_of_generated_code_bytes": null
+  },
+  "source_revision": "ac4c66a770d330ff111d82f0183d8a0ccf2f6388",
+  "total_hlo_lines": 850019
+}

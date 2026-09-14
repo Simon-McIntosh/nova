@@ -24,6 +24,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+from benchmarks import analytic_operator_ladder
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import fixed_point
 from nova.equilibrium.forward_operator import (
@@ -31,6 +32,7 @@ from nova.equilibrium.forward_operator import (
     set_support_clip_mode,
     support_clip_mode,
 )
+from nova.equilibrium.source import CurrentNormalisationError
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.jax.config import (
     configure_dtypes,
@@ -47,7 +49,7 @@ DEFAULT_OUTPUT = (
     / "map-floor-jacobian.json"
 )
 DEFAULT_REPORT_DIRECTORY = DEFAULT_OUTPUT.parent
-PART_DIRECTORY_NAME = "map-jacobian-parts"
+PART_DIRECTORY_NAME = "parts"
 FINITE_DIFFERENCE_STEPS = (1.0e-5, 1.0e-7)
 RANDOM_DIRECTION_COUNT = 4
 RANDOM_SEED = 271828
@@ -134,13 +136,24 @@ def _row_slug(case_name: str, requested_cells: int) -> str:
 
 
 def _part_path(output: Path, case_name: str, requested_cells: int, mode: str) -> Path:
-    name = f"{_row_slug(case_name, requested_cells)}-{mode}.json"
+    name = f"{_row_slug(case_name, requested_cells)}-map-jacobian-{mode}.json"
     return output.parent / PART_DIRECTORY_NAME / name
 
 
 def _array_digest(value: Any) -> str:
     array = np.ascontiguousarray(np.asarray(value), dtype="<f8")
     return hashlib.sha256(array.tobytes()).hexdigest()
+
+
+def _number_or_token(value: float) -> float | str:
+    number = float(value)
+    if np.isnan(number):
+        return "nan"
+    if np.isposinf(number):
+        return "inf"
+    if np.isneginf(number):
+        return "-inf"
+    return number
 
 
 def _pointer(
@@ -186,34 +199,73 @@ def _topology(operator: Any, state: np.ndarray) -> dict[str, Any]:
     except NoQualifiedAxisError as error:
         return {
             "read_status": "no_qualified_axis",
+            "class": None,
+            "boundary_rz_m": None,
             "axis_flux_wb": None,
             "boundary_flux_wb": None,
+            "x_point_rz_m": None,
+            "x_point_flux_wb": None,
             "exception_text": str(error),
         }
+    axis = np.asarray(topology.axis, dtype=np.float64)
+    boundary = np.asarray(topology.boundary, dtype=np.float64)
+    x_point = np.asarray(topology.x_point, dtype=np.float64)
+    determinate = bool(topology.class_determinate)
     return {
         "read_status": "qualified_axis",
+        "class": (
+            "indeterminate"
+            if not determinate
+            else "diverted"
+            if bool(topology.diverted)
+            else "limited"
+        ),
+        "axis_rz_m": axis.tolist() if np.all(np.isfinite(axis)) else None,
+        "boundary_rz_m": (boundary.tolist() if np.all(np.isfinite(boundary)) else None),
         "axis_flux_wb": float(topology.axis_flux),
         "boundary_flux_wb": float(topology.boundary_flux),
+        "x_point_rz_m": (x_point.tolist() if np.all(np.isfinite(x_point)) else None),
+        "x_point_flux_wb": (
+            float(topology.x_point_flux)
+            if np.isfinite(float(topology.x_point_flux))
+            else None
+        ),
         "exception_text": None,
     }
 
 
-def _booked_current(
+def _current_booking(
     operator: Any,
     analytic: np.ndarray,
     requested_class: int,
     target_current: float,
-) -> dict[str, Any]:
+) -> tuple[dict[str, Any], Any, float | None]:
     moments = operator.cell_current_moments(jnp.asarray(analytic), requested_class)
     booked = float(jnp.sum(moments.cell_current))
-    amplitude = float(operator.current_normalisation_amplitude(target_current, booked))
-    return {
+    error_record = None
+    try:
+        amplitude = float(
+            operator.current_normalisation_amplitude(target_current, booked)
+        )
+        status = "finite"
+    except CurrentNormalisationError as error:
+        amplitude = None
+        status = "current_normalisation_error"
+        error_record = {
+            "type": type(error).__name__,
+            "message": str(error),
+            "attempted_amplitude": _number_or_token(error.amplitude),
+        }
+    record = {
         "booked_plasma_current_a": booked,
         "analytic_plasma_current_a": target_current,
         "booked_over_analytic": booked / target_current,
         "normalisation_amplitude": amplitude,
+        "status": status,
+        "normalisation_error": error_record,
         "cell_current_sha256_binary64": _array_digest(moments.cell_current),
     }
+    return record, moments, amplitude
 
 
 def _smooth_directions(
@@ -264,6 +316,142 @@ def _relative_discrepancy(reference: np.ndarray, candidate: np.ndarray) -> float
         np.finfo(np.float64).tiny,
     )
     return numerator / denominator
+
+
+def _affine_decomposition(
+    residual: np.ndarray,
+    carrier_coordinates: np.ndarray,
+    span: float,
+) -> dict[str, Any]:
+    """Split one carrier residual into an affine fit and its remainder."""
+    values = np.asarray(residual, dtype=np.float64)[: len(carrier_coordinates)]
+    coordinates = np.asarray(carrier_coordinates, dtype=np.float64)
+    design = np.column_stack(
+        (np.ones(len(coordinates)), coordinates[:, 0], coordinates[:, 1])
+    )
+    coefficients, _residuals, rank, singular_values = np.linalg.lstsq(
+        design, values, rcond=None
+    )
+    fitted = design @ coefficients
+    remainder = values - fitted
+    total_energy = float(np.sum(values**2))
+    remainder_energy = float(np.sum(remainder**2))
+    return {
+        "basis": "constant plus raw R and Z in metres",
+        "coefficient_constant_wb": float(coefficients[0]),
+        "coefficient_r_wb_per_m": float(coefficients[1]),
+        "coefficient_z_wb_per_m": float(coefficients[2]),
+        "rank": int(rank),
+        "singular_values": singular_values.tolist(),
+        "affine_part": _norms(fitted, span, len(fitted)),
+        "remainder": _norms(remainder, span, len(remainder)),
+        "rms_energy_fraction_explained": (
+            1.0 - remainder_energy / total_energy if total_energy > 0.0 else 1.0
+        ),
+    }
+
+
+def _decompose_image(
+    analytic: np.ndarray,
+    mapped: np.ndarray,
+    internal_image: np.ndarray,
+    analytic_internal_image: np.ndarray,
+    certificate_external: np.ndarray,
+    carrier_coordinates: np.ndarray,
+    residual_shadow: np.ndarray,
+    span: float,
+) -> dict[str, Any]:
+    """Attribute a one-application residual to exterior and internal images."""
+    grid_count = len(carrier_coordinates)
+    actual_residual = np.asarray(mapped) - analytic
+    implied_exterior = analytic - internal_image
+    external_difference = certificate_external - implied_exterior
+    internal_difference = internal_image - analytic_internal_image
+    analytic_anchor_residual = certificate_external + analytic_internal_image - analytic
+    raw_reconstruction = analytic_anchor_residual + internal_difference
+    active = ~np.asarray(residual_shadow, dtype=bool)
+    masked_reconstruction = np.where(active, raw_reconstruction, 0.0)
+    closure = actual_residual - masked_reconstruction
+    return {
+        "a_affine_residual": _affine_decomposition(
+            actual_residual, carrier_coordinates, span
+        ),
+        "b_external_term": {
+            "certificate_external_definition": (
+                "the external array captured by ForwardFluxOperator.flux_map"
+            ),
+            "implied_exterior_definition": (
+                "analytic total flux minus the evaluated booked internal image"
+            ),
+            "certificate_minus_implied_exterior": _norms(
+                external_difference, span, grid_count
+            ),
+            "certificate_minus_implied_exterior_on_residual_carriers": _norms(
+                np.where(active, external_difference, 0.0), span, grid_count
+            ),
+            "certificate_external_constructed_for_evaluated_booking": bool(
+                np.max(np.abs(external_difference[:grid_count]))
+                <= 4096.0
+                * np.finfo(np.float64).eps
+                * max(float(np.max(np.abs(analytic[:grid_count]))), 1.0)
+            ),
+            "source_pointers": {
+                "implied_exterior": _pointer(
+                    _decompose_image,
+                    ("implied_exterior = analytic - internal_image",),
+                ),
+                "certificate_external_capture": _pointer(
+                    ForwardFluxOperator.flux_map,
+                    ("external = self.external",),
+                ),
+            },
+        },
+        "c_internal_image": {
+            "definition": (
+                "evaluated booked internal image minus analytically integrated "
+                "moments imaged through the same frozen blocks"
+            ),
+            "booked_minus_analytic_moments": _norms(
+                internal_difference, span, grid_count
+            ),
+            "booked_minus_analytic_moments_on_residual_carriers": _norms(
+                np.where(active, internal_difference, 0.0), span, grid_count
+            ),
+        },
+        "analytic_moment_anchor": _norms(analytic_anchor_residual, span, grid_count),
+        "actual_map_residual": _norms(actual_residual, span, grid_count),
+        "decomposition_closure": _norms(closure, span, grid_count),
+        "residual_carrier_count": int(np.count_nonzero(active[:grid_count])),
+        "carrier_count": grid_count,
+    }
+
+
+def _unavailable_decomposition(
+    analytic: np.ndarray,
+    unscaled_internal: np.ndarray,
+    analytic_internal: np.ndarray,
+    external: np.ndarray,
+    carrier_coordinates: np.ndarray,
+    span: float,
+) -> dict[str, Any]:
+    """Retain the finite unscaled terms when normalisation is undefined."""
+    grid_count = len(carrier_coordinates)
+    implied_exterior = analytic - unscaled_internal
+    return {
+        "status": "certificate_map_unavailable_due_to_current_normalisation",
+        "a_affine_residual": None,
+        "b_external_term": {
+            "unscaled_certificate_minus_implied_exterior": _norms(
+                external - implied_exterior, span, grid_count
+            ),
+            "certificate_external_constructed_for_evaluated_booking": False,
+        },
+        "c_internal_image": {
+            "unscaled_booked_minus_analytic_moments": _norms(
+                unscaled_internal - analytic_internal, span, grid_count
+            )
+        },
+    }
 
 
 def _jacobian_probe(
@@ -470,9 +658,9 @@ def _mode_measure(
                 ),
                 **_norms(certificate_mapped - analytic, span, grid_count),
             },
-            "booked_current": _booked_current(
+            "booked_current": _current_booking(
                 operator, analytic, requested_class, target_current
-            ),
+            )[0],
         },
         "jacobian": None,
         "completed": False,
@@ -499,6 +687,246 @@ def _mode_measure(
     _write_json(part, measured)
     print(
         f"JACOBIAN_DONE case={case_name} cells={abs(requested_cells)} mode={mode}",
+        flush=True,
+    )
+    return measured
+
+
+def _mode_measure_decomposed(
+    output: Path,
+    case_name: str,
+    requested_cells: int,
+    mode: str,
+    operator: Any,
+    analytic: np.ndarray,
+    coordinates: np.ndarray,
+    grid_count: int,
+    span: float,
+    requested_class: int,
+    target_current: float,
+    exact_internal: np.ndarray,
+) -> dict[str, Any]:
+    """Measure and persist one mode, retaining normalisation refusals."""
+    started = perf_counter()
+    set_support_clip_mode(mode)
+    if support_clip_mode() != mode:
+        raise RuntimeError(f"clip-mode setter did not select {mode}")
+
+    state = jnp.asarray(analytic)
+    topology = _topology(operator, analytic)
+    external = np.asarray(operator.external(), dtype=np.float64)
+    analytic_moment_map = external + exact_internal
+    booking, booked_moments, amplitude = _current_booking(
+        operator, analytic, requested_class, target_current
+    )
+    unscaled_internal = np.asarray(
+        operator.current_moment_image(booked_moments), dtype=np.float64
+    )
+    unscaled_map = operator.flux_map(requested_class=requested_class)
+    unscaled_mapped = np.asarray(
+        jax.block_until_ready(unscaled_map(state)), dtype=np.float64
+    )
+    certificate_map = operator.flux_map(
+        requested_class=requested_class,
+        target_current=target_current,
+    )
+    residual_shadow = np.asarray(
+        operator.residual_shadow_mask(state, requested_class), dtype=bool
+    )
+
+    normalisation_finding = None
+    if amplitude is None:
+        try:
+            certificate_map(state)
+        except CurrentNormalisationError as error:
+            map_error = {
+                "type": type(error).__name__,
+                "message": str(error),
+                "attempted_amplitude": _number_or_token(error.amplitude),
+            }
+        else:
+            raise RuntimeError(
+                "the certificate map did not reproduce its recorded "
+                "current-normalisation refusal"
+            )
+        certificate_floor = {
+            "status": "unavailable_due_to_current_normalisation",
+            "definition": (
+                "the production certificate map with requested topology class "
+                "and analytic total-current target"
+            ),
+            "absolute_rms_wb": None,
+            "absolute_sup_wb": None,
+            "relative_rms_of_span": None,
+            "relative_sup_of_span": None,
+            "error": map_error,
+        }
+        decomposition = _unavailable_decomposition(
+            analytic,
+            unscaled_internal,
+            exact_internal,
+            external,
+            coordinates[:grid_count],
+            span,
+        )
+        normalisation_finding = {
+            "classification": "analytic_flux_books_no_admissible_current",
+            "statement": (
+                "The production certificate map is undefined at the analytic "
+                "flux because its selected allocation books no admissible current."
+            ),
+            "normalisation_error": map_error,
+            "production_topology_state": topology,
+            "booked_current": booking,
+        }
+    else:
+        scaled_moments = operator.scaled_current_moments(booked_moments, amplitude)
+        certificate_internal = np.asarray(
+            operator.current_moment_image(scaled_moments), dtype=np.float64
+        )
+        certificate_mapped = np.asarray(
+            jax.block_until_ready(certificate_map(state)), dtype=np.float64
+        )
+        certificate_floor = {
+            "status": "finite",
+            "definition": (
+                "the production certificate map with requested topology class "
+                "and analytic total-current target"
+            ),
+            **_norms(certificate_mapped - analytic, span, grid_count),
+            "error": None,
+        }
+        decomposition = _decompose_image(
+            analytic,
+            certificate_mapped,
+            certificate_internal,
+            exact_internal,
+            external,
+            coordinates[:grid_count],
+            residual_shadow,
+            span,
+        )
+
+    part = _part_path(output, case_name, requested_cells, mode)
+    measured = {
+        "schema": "nova.oracle-start-map-jacobian-part",
+        "version": 2,
+        "source_revision": _source_revision(),
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "realised_cells": grid_count,
+        "mode": mode,
+        "mode_semantics": (
+            "signed-flux spline-chain exact clip"
+            if mode == "exact"
+            else "production whole-cell booking control"
+        ),
+        "exterior_term": {
+            "definition": (
+                "analytic total flux minus the analytically integrated exact "
+                "plasma-current moment image; constructed before mode selection"
+            ),
+            "sha256_binary64": _array_digest(external),
+            "source_pointers": {
+                "construction": _pointer(
+                    run,
+                    (
+                        "analytic - fixture_exact_internal",
+                        "            operator = oracle_fixture.forward_operator(",
+                    ),
+                ),
+                "fixture_image": _pointer(
+                    oracle_fixture._internal_flux_image,
+                    ("return np.asarray(",),
+                ),
+            },
+        },
+        "residual_definitions": {
+            "map_floor": (
+                "mapped analytic flux minus analytic flux, normalized only by "
+                "the analytic grid-flux span"
+            ),
+            "certificate_relative_residual": (
+                "max(abs(mapped-state)) / max(abs(mapped)); recorded as a source "
+                "pointer but not substituted for the span-normalized map floor"
+            ),
+            "jacobian": (
+                "state minus the target-normalised map on the residual shadow "
+                "frozen at the analytic state"
+            ),
+            "source_pointers": {
+                "production_map": _pointer(
+                    ForwardFluxOperator.flux_map,
+                    (
+                        "external = self.external",
+                        "return self._exclude_shadow_residual",
+                    ),
+                ),
+                "production_relative_residual": _pointer(
+                    fixed_point._relative_residual,
+                    ("return jnp.max(jnp.abs(mapped - state))",),
+                ),
+            },
+        },
+        "one_application": {
+            "analytic_moments_anchor": {
+                "definition": "external plus analytically integrated exact moments",
+                **_norms(analytic_moment_map - analytic, span, grid_count),
+            },
+            "unscaled_production_map": {
+                "definition": (
+                    "production allocation and moment conversion without "
+                    "target-current normalisation, requested topology class fixed"
+                ),
+                **_norms(unscaled_mapped - analytic, span, grid_count),
+            },
+            "certificate_target_normalised_map": certificate_floor,
+            "booked_current": booking,
+            "decomposition": decomposition,
+        },
+        "production_topology_state_at_analytic_flux": topology,
+        "finding": normalisation_finding,
+        "jacobian": None,
+        "completed": False,
+        "wall_seconds": None,
+    }
+    _write_json(part, measured)
+
+    if amplitude is None:
+        print(
+            f"MAP_FLOOR_REFUSED case={case_name} cells={abs(requested_cells)} "
+            f"mode={mode} booked_current={booking['booked_plasma_current_a']:.8e} "
+            f"topology_class={topology['class']} error={map_error['message']}",
+            flush=True,
+        )
+        measured["jacobian"] = {
+            "status": "unavailable_due_to_current_normalisation",
+            "reason": map_error,
+            "nonlinear_solve_entered": False,
+            "linear_solve_entered": False,
+            "directions": [],
+        }
+    else:
+        print(
+            f"MAP_FLOOR case={case_name} cells={abs(requested_cells)} mode={mode} "
+            f"rms={certificate_floor['relative_rms_of_span']:.8e} "
+            f"sup={certificate_floor['relative_sup_of_span']:.8e}",
+            flush=True,
+        )
+        measured["jacobian"] = _jacobian_probe(
+            operator,
+            analytic,
+            coordinates,
+            span,
+            requested_class,
+            target_current,
+        )
+    measured["wall_seconds"] = perf_counter() - started
+    measured["completed"] = True
+    _write_json(part, measured)
+    print(
+        f"ROW_MODE_DONE case={case_name} cells={abs(requested_cells)} mode={mode} "
+        f"jacobian_status={'measured' if amplitude is not None else 'unavailable'}",
         flush=True,
     )
     return measured
@@ -550,6 +978,75 @@ def _row_explanation(modes: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _mode_attribution(mode: str, measured: dict[str, Any]) -> dict[str, Any]:
+    application = measured["one_application"]
+    floor = application["certificate_target_normalised_map"]
+    decomposition = application["decomposition"]
+    if floor["status"] != "finite":
+        return {
+            "classification": "certificate_map_undefined",
+            "certificate_exterior_constructed_for_different_booking": True,
+            "sentence": (
+                f"{mode} has no finite target-normalised map: the analytic-flux "
+                "topology read led the allocation to book no admissible current, "
+                "so neither a map-floor Jacobian nor Newton trajectory exists."
+            ),
+        }
+    affine = decomposition["a_affine_residual"]
+    external = decomposition["b_external_term"][
+        "certificate_minus_implied_exterior_on_residual_carriers"
+    ]
+    internal = decomposition["c_internal_image"][
+        "booked_minus_analytic_moments_on_residual_carriers"
+    ]
+    floor_rms = floor["relative_rms_of_span"]
+    affine_fraction = affine["rms_energy_fraction_explained"]
+    different_booking = not decomposition["b_external_term"][
+        "certificate_external_constructed_for_evaluated_booking"
+    ]
+    return {
+        "classification": "booked_internal_image_mismatch",
+        "certificate_map_relative_rms": floor_rms,
+        "affine_relative_rms": affine["affine_part"]["relative_rms_of_span"],
+        "affine_remainder_relative_rms": affine["remainder"]["relative_rms_of_span"],
+        "affine_rms_energy_fraction_explained": affine_fraction,
+        "certificate_minus_implied_exterior_relative_rms": external[
+            "relative_rms_of_span"
+        ],
+        "booked_minus_analytic_internal_relative_rms": internal["relative_rms_of_span"],
+        "decomposition_closure_relative_sup": decomposition["decomposition_closure"][
+            "relative_sup_of_span"
+        ],
+        "certificate_exterior_constructed_for_different_booking": different_booking,
+        "sentence": (
+            f"{mode} floor {floor_rms:.6g} rms of span is carried by the booked "
+            f"internal-image difference ({internal['relative_rms_of_span']:.6g}); "
+            "the external-minus-implied-exterior value is the same incompatibility "
+            "viewed from the boundary supply "
+            f"({external['relative_rms_of_span']:.6g}). "
+            f"The affine fit explains {affine_fraction:.1%} of residual rms energy "
+            f"and leaves {affine['remainder']['relative_rms_of_span']:.6g} rms of "
+            "span. The certificate exterior closes analytically integrated moments, "
+            "not the production booking evaluated by this map."
+        ),
+    }
+
+
+def _row_explanation_decomposed(modes: dict[str, Any]) -> dict[str, Any]:
+    attributions = {
+        mode: _mode_attribution(mode, measured) for mode, measured in modes.items()
+    }
+    same_exterior = (
+        modes["exact"]["exterior_term"]["sha256_binary64"]
+        == modes["chord"]["exterior_term"]["sha256_binary64"]
+    )
+    return {
+        "same_exterior_sha256": same_exterior,
+        "by_mode": attributions,
+        "sentence": " ".join(attributions[mode]["sentence"] for mode in MODES),
+    }
+
+
 def _write_report(path: Path, receipt: dict[str, Any]) -> None:
     lines = [
         "# Analytic map floor and residual tangent",
@@ -558,30 +1055,60 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
         "exterior construction and the exact source lines for the map, relative "
         "residual, benchmark residual, and production I-minus-J action.",
         "",
-        "| Row | Mode | Anchor sup | Certificate map rms / sup | "
-        "Booked / analytic | Worst JVP discrepancy at 1e-5 |",
-        "|---|---|---:|---:|---:|---:|",
+        "Comparison anchors: the operator refinement ladder closes the analytic "
+        "field to 3e-15 relative sup when analytically integrated moments are "
+        "imaged with their implied exterior; the committed weak-110 whole-cell "
+        "certificate row is self-consistent at residual 0.0074.",
+        "",
+        "| Row | Mode | Map rms / sup | Affine rms / remainder (energy) | "
+        "External mismatch rms | Internal mismatch rms | Booked / analytic | "
+        "Worst JVP discrepancy at 1e-5 |",
+        "|---|---|---:|---:|---:|---:|---:|---:|",
     ]
     for row in receipt["rows"]:
         for mode in MODES:
             measured = row["modes"][mode]
             application = measured["one_application"]
-            anchor = application["analytic_moments_anchor"]
             mapped = application["certificate_target_normalised_map"]
             current = application["booked_current"]
-            discrepancies = [
-                step["relative_jvp_discrepancy"]
-                for direction in measured["jacobian"]["directions"]
-                for step in direction["relative_steps"]
-                if step["relative_step_of_flux_span"] == 1.0e-5
-            ]
+            if mapped["status"] == "finite":
+                decomposition = application["decomposition"]
+                affine = decomposition["a_affine_residual"]
+                external = decomposition["b_external_term"][
+                    "certificate_minus_implied_exterior_on_residual_carriers"
+                ]
+                internal = decomposition["c_internal_image"][
+                    "booked_minus_analytic_moments_on_residual_carriers"
+                ]
+                discrepancies = [
+                    step["relative_jvp_discrepancy"]
+                    for direction in measured["jacobian"]["directions"]
+                    for step in direction["relative_steps"]
+                    if step["relative_step_of_flux_span"] == 1.0e-5
+                ]
+                mapped_text = (
+                    f"{mapped['relative_rms_of_span']:.3e} / "
+                    f"{mapped['relative_sup_of_span']:.3e}"
+                )
+                affine_text = (
+                    f"{affine['affine_part']['relative_rms_of_span']:.3e} / "
+                    f"{affine['remainder']['relative_rms_of_span']:.3e} "
+                    f"({affine['rms_energy_fraction_explained']:.1%})"
+                )
+                external_text = f"{external['relative_rms_of_span']:.3e}"
+                internal_text = f"{internal['relative_rms_of_span']:.3e}"
+                jvp_text = f"{max(discrepancies):.3e}"
+            else:
+                mapped_text = "normalisation refused"
+                affine_text = "unavailable"
+                external_text = "unavailable"
+                internal_text = "unavailable"
+                jvp_text = "unavailable"
             lines.append(
                 f"| {row['case']} {abs(row['requested_cells'])} | {mode} | "
-                f"{anchor['relative_sup_of_span']:.3e} | "
-                f"{mapped['relative_rms_of_span']:.3e} / "
-                f"{mapped['relative_sup_of_span']:.3e} | "
-                f"{current['booked_over_analytic']:.8f} | "
-                f"{max(discrepancies):.3e} |"
+                f"{mapped_text} | {affine_text} | {external_text} | "
+                f"{internal_text} | {current['booked_over_analytic']:.8f} | "
+                f"{jvp_text} |"
             )
         lines.extend(("", row["explanation"]["sentence"], ""))
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -614,14 +1141,17 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
                 source_case, empty_operator, analytic
             )
             exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
-            exact_internal = np.asarray(
+            fixture_exact_internal = np.asarray(
                 oracle_fixture._internal_flux_image(empty_operator, exact_coefficients),
                 dtype=np.float64,
             )
             operator = oracle_fixture.forward_operator(
                 source_case,
                 machine,
-                analytic - exact_internal,
+                analytic - fixture_exact_internal,
+            )
+            exact_internal = np.asarray(
+                operator.current_moment_image(exact_coefficients), dtype=np.float64
             )
             target_current, _centroid, target_receipt = (
                 certificate._closed_form_current_target(
@@ -643,8 +1173,9 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
             )
             if not np.isfinite(span) or span <= 0.0:
                 raise RuntimeError(f"the analytic flux span is invalid for {case_name}")
-            modes = {
-                mode: _mode_measure(
+            modes = {}
+            for mode in MODES:
+                modes[mode] = _mode_measure_decomposed(
                     output,
                     case_name,
                     requested_cells,
@@ -658,8 +1189,6 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
                     target_current,
                     exact_internal,
                 )
-                for mode in MODES
-            }
             row = {
                 "case": case_name,
                 "requested_cells": requested_cells,
@@ -670,8 +1199,15 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
                 "analytic_current_target_receipt": target_receipt,
                 "interaction_matrix_cache": machine.cache,
                 "interaction_matrix_construction_count": 1,
+                "fixture_and_same_operator_exact_image": {
+                    "fixture_sha256": _array_digest(fixture_exact_internal),
+                    "same_operator_sha256": _array_digest(exact_internal),
+                    "absolute_sup_delta_wb": float(
+                        np.max(np.abs(fixture_exact_internal - exact_internal))
+                    ),
+                },
                 "modes": modes,
-                "explanation": _row_explanation(modes),
+                "explanation": _row_explanation_decomposed(modes),
             }
             rows.append(row)
             _write_json(
@@ -710,6 +1246,17 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
             "interaction_matrix_policy": (
                 "one cached machine and operator per row, reused across both modes"
             ),
+            "comparison_anchors": {
+                "analytic_operator_ladder_relative_sup": 3.0e-15,
+                "committed_weak_110_whole_cell_self_consistency": 0.0074,
+                "operator_ladder_source": _pointer(
+                    analytic_operator_ladder._measure,
+                    (
+                        "prescribed_exterior = analytic - exact_internal",
+                        "mapped_analytic = np.asarray(",
+                    ),
+                ),
+            },
         },
         "rows": rows,
     }

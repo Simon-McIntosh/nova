@@ -1,0 +1,47 @@
+{
+  "schema": "nova.compact-clip-scan-path-identification",
+  "source_revision": "8ba777a4f62b65709168241b24d76a1c8496ec2a",
+  "compiled_measurement": {
+    "job": "1270906",
+    "requested_cells": 300,
+    "realised_cells": 342,
+    "temporary_gib": 55.309830993413925,
+    "largest_array_gib": 0.6626687049865723,
+    "total_hlo_instructions": 1042334,
+    "compact_current_scope_occurrences": 92699,
+    "hlo_while_operations": 2250
+  },
+  "comparison": {
+    "job": "1270750",
+    "source_revision": "7e199bae",
+    "temporary_gib": 71.33315762132406,
+    "total_hlo_instructions": 1040557,
+    "compact_current_scope_occurrences": 92941,
+    "hlo_while_operations": 2250
+  },
+  "pre_scan_memory_comparison": {
+    "job": "1270773",
+    "source_revision": "1d3aeb6c93ca4ef9447fb870928e1f5d747fee14",
+    "temporary_gib": 55.309830993413925,
+    "largest_array_gib": 0.6626687049865723
+  },
+  "scan_body_marker": {
+    "scope": "compact_cut_current_scan_body",
+    "status": "pending_recompile"
+  },
+  "traced_current_moment_route": [
+    "ForwardProfile.solve -> ForwardProfile._solve_accelerated",
+    "ForwardProfile._solve_accelerated -> fixed_point.newton_krylov",
+    "newton_krylov -> _active_set_newton_krylov",
+    "_active_set_newton_krylov reads shadowed_map_fn._read_frozen_partition and shadowed_map_fn._map_frozen_partition",
+    "read_partition -> ForwardFluxOperator._frozen_topology_partition",
+    "map_partition -> ForwardFluxOperator._internal_on_partition",
+    "_internal_on_partition -> _current_moments_on_partition",
+    "_current_moments_on_partition -> _partitioned_current_moments",
+    "_partitioned_current_moments -> ForwardSource.current_moments",
+    "ForwardSource.current_moments -> ForwardFluxOperator.support_current_moments",
+    "ForwardFluxOperator.support_current_moments -> clipped_support_current_moments",
+    "clipped_support_current_moments -> lax.scan(compact_cut_current_scan_body)"
+  ],
+  "interpretation": "The reconcile's frozen-partition map reaches the compact scanned bank. The identical memory and while-operation counts are consistent with lax.map already lowering through lax.scan; the remaining program duplication is across fixed-point map evaluations rather than across bank entries."
+}

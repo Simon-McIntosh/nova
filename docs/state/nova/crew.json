@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T16:29:14",
+  "updated": "2026-09-14T16:34:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4592,6 +4592,15 @@
       },
       {
         "id": "s19e-cca-topology-ladder",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
+      },
+      {
+        "id": "s19e-cca-vertex-census",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -154929,6 +154938,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2463
+    "_version": 2464
   }
 }

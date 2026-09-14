@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="690" font-family="DejaVu Sans, Arial, sans-serif" font-size="12">
+<rect width="980" height="690" fill="#ffffff"/>
+<text x="14" y="24" font-size="15" font-weight="bold" fill="#1a1a1a">Solve instruction share by function (1000 cells)</text>
+<text x="14" y="40" font-size="11" fill="#555">625512 instructions total</text>
+<rect x="300" y="56" width="660" height="18" fill="rgb(32,173,223)" rx="2"/>
+<text x="290" y="69" text-anchor="end" fill="#222">_FixedDesignNull2D._compatibili...</text>
+<text x="966" y="69" fill="#333">39,914  (6.4%)</text>
+<text x="972" y="69" text-anchor="end" fill="#777" font-size="10">forward_operator.py:780</text>
+<rect x="300" y="82" width="489" height="18" fill="rgb(29,175,226)" rx="2"/>
+<text x="290" y="95" text-anchor="end" fill="#222">traced_wall_flux</text>
+<text x="795" y="95" fill="#333">29,577  (4.7%)</text>
+<text x="972" y="95" text-anchor="end" fill="#777" font-size="10">select.py:405</text>
+<rect x="300" y="108" width="486" height="18" fill="rgb(29,175,226)" rx="2"/>
+<text x="290" y="121" text-anchor="end" fill="#222">Topology.boundary</text>
+<text x="792" y="121" fill="#333">29,440  (4.7%)</text>
+<text x="972" y="121" text-anchor="end" fill="#777" font-size="10">topology.py:610</text>
+<rect x="300" y="134" width="353" height="18" fill="rgb(26,176,229)" rx="2"/>
+<text x="290" y="147" text-anchor="end" fill="#222">Null2D.interpolate</text>
+<text x="659" y="147" fill="#333">21,349  (3.4%)</text>
+<text x="972" y="147" text-anchor="end" fill="#777" font-size="10">null.py:212</text>
+<rect x="300" y="160" width="334" height="18" fill="rgb(26,177,229)" rx="2"/>
+<text x="290" y="173" text-anchor="end" fill="#222">_traced_clip</text>
+<text x="640" y="173" fill="#333">20,201  (3.2%)</text>
+<text x="972" y="173" text-anchor="end" fill="#777" font-size="10">separatrix_clip.py:954</text>
+<rect x="300" y="186" width="303" height="18" fill="rgb(25,177,230)" rx="2"/>
+<text x="290" y="199" text-anchor="end" fill="#222">wall_coordinate</text>
+<text x="609" y="199" fill="#333">18,346  (2.9%)</text>
+<text x="972" y="199" text-anchor="end" fill="#777" font-size="10">select.py:112</text>
+<rect x="300" y="212" width="266" height="18" fill="rgb(25,177,230)" rx="2"/>
+<text x="290" y="225" text-anchor="end" fill="#222">_active_set_newton_krylov</text>
+<text x="572" y="225" fill="#333">16,108  (2.6%)</text>
+<text x="972" y="225" text-anchor="end" fill="#777" font-size="10">fixed_point.py:3837</text>
+<rect x="300" y="238" width="262" height="18" fill="rgb(25,177,230)" rx="2"/>
+<text x="290" y="251" text-anchor="end" fill="#222">Topology.read_qualification</text>
+<text x="568" y="251" fill="#333">15,872  (2.5%)</text>
+<text x="972" y="251" text-anchor="end" fill="#777" font-size="10">topology.py:1052</text>
+<rect x="300" y="264" width="238" height="18" fill="rgb(24,178,231)" rx="2"/>
+<text x="290" y="277" text-anchor="end" fill="#222">_direct_profile_current_moments</text>
+<text x="544" y="277" fill="#333">14,436  (2.3%)</text>
+<text x="972" y="277" text-anchor="end" fill="#777" font-size="10">stencil_mesh.py:488</text>
+<rect x="300" y="290" width="172" height="18" fill="rgb(23,178,232)" rx="2"/>
+<text x="290" y="303" text-anchor="end" fill="#222">Topology.axis_component</text>
+<text x="478" y="303" fill="#333">10,457  (1.7%)</text>
+<text x="972" y="303" text-anchor="end" fill="#777" font-size="10">topology.py:839</text>
+<rect x="300" y="316" width="168" height="18" fill="rgb(23,179,232)" rx="2"/>
+<text x="290" y="329" text-anchor="end" fill="#222">_FixedDesignNull2D.read_census</text>
+<text x="474" y="329" fill="#333">10,204  (1.6%)</text>
+<text x="972" y="329" text-anchor="end" fill="#777" font-size="10">forward_operator.py:868</text>
+<rect x="300" y="342" width="163" height="18" fill="rgb(23,179,232)" rx="2"/>
+<text x="290" y="355" text-anchor="end" fill="#222">Topology.x_point_data</text>
+<text x="469" y="355" fill="#333">9,910  (1.6%)</text>
+<text x="972" y="355" text-anchor="end" fill="#777" font-size="10">topology.py:421</text>
+<rect x="300" y="368" width="155" height="18" fill="rgb(23,179,232)" rx="2"/>
+<text x="290" y="381" text-anchor="end" fill="#222">hex_edge_admissibility</text>
+<text x="461" y="381" fill="#333">9,406  (1.5%)</text>
+<text x="972" y="381" text-anchor="end" fill="#777" font-size="10">flux_surface_connectivity.py:341</text>
+<rect x="300" y="394" width="128" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="407" text-anchor="end" fill="#222">null_coordinate</text>
+<text x="434" y="407" fill="#333">7,777  (1.2%)</text>
+<text x="972" y="407" text-anchor="end" fill="#777" font-size="10">select.py:277</text>
+<rect x="300" y="420" width="123" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="433" text-anchor="end" fill="#222">traced_quadratic_wall</text>
+<text x="429" y="433" fill="#333">7,480  (1.2%)</text>
+<text x="972" y="433" text-anchor="end" fill="#777" font-size="10">select.py:354</text>
+<rect x="300" y="446" width="121" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="459" text-anchor="end" fill="#222">_canonicalize_reciprocal_hex_edges</text>
+<text x="427" y="459" fill="#333">7,338  (1.2%)</text>
+<text x="972" y="459" text-anchor="end" fill="#777" font-size="10">connectivity_boundary.py:693</text>
+<rect x="300" y="472" width="121" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="485" text-anchor="end" fill="#222">traced_quadratic_surface</text>
+<text x="427" y="485" fill="#333">7,326  (1.2%)</text>
+<text x="972" y="485" text-anchor="end" fill="#777" font-size="10">select.py:457</text>
+<rect x="300" y="498" width="112" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="511" text-anchor="end" fill="#222">_traced_bracket</text>
+<text x="418" y="511" fill="#333">6,814  (1.1%)</text>
+<text x="972" y="511" text-anchor="end" fill="#777" font-size="10">select.py:383</text>
+<rect x="300" y="524" width="110" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="537" text-anchor="end" fill="#222">reduce_sum</text>
+<text x="416" y="537" fill="#333">6,659  (1.1%)</text>
+<text x="972" y="537" text-anchor="end" fill="#777" font-size="10"></text>
+<rect x="300" y="550" width="107" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="563" text-anchor="end" fill="#222">wall_height_shadow_mask</text>
+<text x="413" y="563" fill="#333">6,488  (1.0%)</text>
+<text x="972" y="563" text-anchor="end" fill="#777" font-size="10">connectivity_boundary.py:451</text>
+<rect x="300" y="576" width="104" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="589" text-anchor="end" fill="#222">_points_inside_polygon</text>
+<text x="410" y="589" fill="#333">6,318  (1.0%)</text>
+<text x="972" y="589" text-anchor="end" fill="#777" font-size="10">connectivity_boundary.py:186</text>
+<rect x="300" y="602" width="99" height="18" fill="rgb(21,179,234)" rx="2"/>
+<text x="290" y="615" text-anchor="end" fill="#222">Null2D.categorize</text>
+<text x="405" y="615" fill="#333">5,991  (1.0%)</text>
+<text x="972" y="615" text-anchor="end" fill="#777" font-size="10">null.py:179</text>
+<rect x="300" y="628" width="96" height="18" fill="rgb(21,179,234)" rx="2"/>
+<text x="290" y="641" text-anchor="end" fill="#222">Topology.o_point_qualification</text>
+<text x="402" y="641" fill="#333">5,830  (0.9%)</text>
+<text x="972" y="641" text-anchor="end" fill="#777" font-size="10">topology.py:467</text>
+<rect x="300" y="654" width="96" height="18" fill="rgb(21,179,234)" rx="2"/>
+<text x="290" y="667" text-anchor="end" fill="#222">Bernstein.coefficent_matrix</text>
+<text x="402" y="667" fill="#333">5,828  (0.9%)</text>
+<text x="972" y="667" text-anchor="end" fill="#777" font-size="10">interpolant.py:131</text>
+<rect x="300" y="680" width="92" height="18" fill="rgb(21,179,234)" rx="2"/>
+<text x="290" y="693" text-anchor="end" fill="#222">InteriorCurrentMomentStencil.su...</text>
+<text x="398" y="693" fill="#333">5,599  (0.9%)</text>
+<text x="972" y="693" text-anchor="end" fill="#777" font-size="10">stencil_mesh.py:169</text>
+</svg>

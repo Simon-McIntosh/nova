@@ -195,6 +195,7 @@ def clipped_support_field_integrals(
     cut_vertex_count = count[cut_index]
     cut_centroids = centroids[cut_index]
 
+    @jax.named_scope("compact_cut_field_scan_body")
     def scan_cut(_carry, entry):
         cell, polygon, polygon_count, centroid, live = entry
 
@@ -311,6 +312,7 @@ def clipped_support_current_moments(
     cut_vertex_count = count[cut_index]
     cut_centroids = centroids[cut_index]
 
+    @jax.named_scope("compact_cut_current_scan_body")
     def scan_cut(_carry, entry):
         cell, polygon, polygon_count, centroid, live = entry
 

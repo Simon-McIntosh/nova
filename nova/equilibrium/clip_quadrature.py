@@ -195,7 +195,7 @@ def clipped_support_field_integrals(
     cut_vertex_count = count[cut_index]
     cut_centroids = centroids[cut_index]
 
-    def scan_cut(integrals, entry):
+    def scan_cut(_carry, entry):
         cell, polygon, polygon_count, centroid, live = entry
 
         def integrate(operand):
@@ -217,7 +217,7 @@ def clipped_support_field_integrals(
             )
             return value.pressure_volume[0], value.field_volume[0]
 
-        pressure_value, field_value = jax.lax.cond(
+        values = jax.lax.cond(
             live,
             jax.checkpoint(integrate),
             lambda _operand: (
@@ -226,17 +226,19 @@ def clipped_support_field_integrals(
             ),
             (cell, polygon, polygon_count, centroid),
         )
-        pressure_volume, field_volume = integrals
-        return (
-            pressure_volume.at[cell].add(pressure_value),
-            field_volume.at[cell].add(field_value),
-        ), None
+        return None, values
 
-    (pressure_volume, field_volume), _ = jax.lax.scan(
+    _, (cut_pressure, cut_field) = jax.lax.scan(
         scan_cut,
-        (whole_integrals.pressure_volume, whole_integrals.field_volume),
+        None,
         (cut_index, cut_vertices, cut_vertex_count, cut_centroids, active),
         unroll=1,
+    )
+    pressure_volume = whole_integrals.pressure_volume.at[cut_index].add(
+        jnp.where(active, cut_pressure, 0.0)
+    )
+    field_volume = whole_integrals.field_volume.at[cut_index].add(
+        jnp.where(active, cut_field, 0.0)
     )
     overflow = cut_count > capacity
     return ClippedFieldIntegrals(
@@ -309,7 +311,7 @@ def clipped_support_current_moments(
     cut_vertex_count = count[cut_index]
     cut_centroids = centroids[cut_index]
 
-    def scan_cut(moments, entry):
+    def scan_cut(_carry, entry):
         cell, polygon, polygon_count, centroid, live = entry
 
         def integrate(operand):
@@ -335,34 +337,32 @@ def clipped_support_current_moments(
             )
 
         zero = jnp.asarray(0.0, dtype=vertices.dtype)
-        current, radial, vertical = jax.lax.cond(
+        values = jax.lax.cond(
             live,
             jax.checkpoint(integrate),
             lambda _operand: (zero, zero, zero),
             (cell, polygon, polygon_count, centroid),
         )
-        cell_current, radial_moment, vertical_moment = moments
-        return (
-            cell_current.at[cell].add(current),
-            radial_moment.at[cell].add(radial),
-            vertical_moment.at[cell].add(vertical),
-        ), None
+        return None, values
 
-    (cell_current, radial_moment, vertical_moment), _ = jax.lax.scan(
+    _, (cut_current, cut_radial, cut_vertical) = jax.lax.scan(
         scan_cut,
-        (
-            whole_moments.cell_current,
-            whole_moments.radial_moment,
-            whole_moments.vertical_moment,
-        ),
+        None,
         (cut_index, cut_vertices, cut_vertex_count, cut_centroids, active),
         unroll=1,
     )
+
+    def scatter(whole_value, cut_value):
+        return whole_value.at[cut_index].add(jnp.where(active, cut_value, 0.0))
 
     overflow = cut_count > capacity
     return ClippedCurrentMoments(
         *(
             jnp.where(overflow, jnp.nan, value)
-            for value in (cell_current, radial_moment, vertical_moment)
+            for value in (
+                scatter(whole_moments.cell_current, cut_current),
+                scatter(whole_moments.radial_moment, cut_radial),
+                scatter(whole_moments.vertical_moment, cut_vertical),
+            )
         )
     )

@@ -10,6 +10,7 @@ perturbation magnitudes while persisting every completed arm.
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import hashlib
 import inspect
 import json
@@ -32,15 +33,16 @@ import numpy as np
 from benchmarks import analytic_operator_ladder
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import fixed_point
+from nova.equilibrium import ForwardProfile
 from nova.equilibrium.forward_operator import (
     ForwardFluxOperator,
     set_support_clip_mode,
     support_clip_mode,
 )
 from nova.equilibrium.source import CurrentNormalisationError
+from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.jax.config import (
-    Precision,
     configure_dtypes,
     configure_persistent_compilation_cache,
     default_persistent_compilation_cache_root,
@@ -326,7 +328,7 @@ def _point_cell_booking(
 def _per_cell_moment_attribution(
     operator: Any,
     state: jax.Array,
-    requested_class: int,
+    requested_class: int | None,
     booked_moments: Any,
     analytic_moments: Any,
     amplitude: float,
@@ -429,7 +431,7 @@ def _per_cell_moment_attribution(
 def _current_booking(
     operator: Any,
     analytic: np.ndarray,
-    requested_class: int,
+    requested_class: int | None,
     target_current: float,
 ) -> tuple[dict[str, Any], Any, float | None]:
     moments = operator.cell_current_moments(jnp.asarray(analytic), requested_class)
@@ -1504,6 +1506,24 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
 
 NEWTON_ROWS = (
     ("fixture_exterior_control", certificate.DIVERTED_CASE_NAME, -500, "chord"),
+    (
+        "reposed_exact_booking_iteration_probe",
+        "weak-rotation-reactor-static",
+        -500,
+        "exact",
+    ),
+    (
+        "reposed_exact_booking_iteration_probe",
+        "moderate-rotation-conventional-static",
+        -500,
+        "exact",
+    ),
+    (
+        "reposed_exact_booking_iteration_probe",
+        certificate.DIVERTED_CASE_NAME,
+        -500,
+        "exact",
+    ),
     ("fixture_exterior_control", certificate.DIVERTED_CASE_NAME, -1000, "chord"),
     (
         "reposed_exact_booking_iteration_probe",
@@ -1676,7 +1696,7 @@ def _terminal_measurement(
     span: float,
     grid_count: int,
     pitch: float,
-    requested_class: int,
+    requested_class: int | None,
     target_current: float,
 ) -> dict[str, Any]:
     topology = _topology(operator, state)
@@ -1918,29 +1938,21 @@ def _measure_newton_row(
         else None
     )
     direction = _smooth_directions(coordinates, 1, RANDOM_SEED)[0]
+    analytic_shadow = np.asarray(
+        operator.residual_shadow_mask(jnp.asarray(analytic)), dtype=bool
+    )
+    direction[analytic_shadow] = 0.0
     direction /= float(np.max(np.abs(direction[:grid_count])))
     initials = [
         analytic + fraction * built["span"] * direction
         for fraction in PERTURBATION_FRACTIONS
     ]
-    mapped, shadowed, shadow_mask, promoted_shadow_mask = _solver_functions(
-        operator, built["requested_class"], built["target_current"]
+    profile = ForwardProfile(
+        operator,
+        StencilMesh(machine.node, machine.stencil, machine.area),
+        newton_steps=NEWTON_STEPS,
     )
-
-    def solve(initial):
-        return fixed_point.newton_krylov(
-            mapped,
-            initial,
-            newton_steps=NEWTON_STEPS,
-            gmres_iterations=recovery.KRYLOV_ITERATIONS,
-            warmup=0,
-            convergence_tolerance=FIXED_POINT_TOLERANCE,
-            active_set_steps=ACTIVE_SET_STEPS,
-            shadow_mask_fn=shadow_mask,
-            promoted_shadow_mask_fn=promoted_shadow_mask,
-            shadowed_map_fn=shadowed,
-            precision=Precision.DOUBLE,
-        )
+    start_map = operator.flux_map(target_current=built["target_current"])
 
     row = {
         "schema": "nova.oracle-start-newton-row",
@@ -1959,7 +1971,12 @@ def _measure_newton_row(
         "analytic_current_target_a": built["target_current"],
         "analytic_current_target_receipt": built["target_receipt"],
         "smooth_direction_sha256_binary64": _array_digest(direction),
-        "compiled_program_count": 1,
+        "analytic_residual_shadow_count": int(np.count_nonzero(analytic_shadow)),
+        "analytic_residual_carrier_count": int(np.count_nonzero(~analytic_shadow)),
+        "program_reuse": (
+            "one ForwardProfile and one public request policy per row; the first "
+            "receipt compiles and the remaining same-shape requests reuse it"
+        ),
         "perturbations": [],
         "completed": False,
         "wall_seconds": None,
@@ -1967,18 +1984,43 @@ def _measure_newton_row(
     part = _newton_part_path(output, exterior_kind, case_name, requested_cells)
     _write_json(part, row)
 
-    compile_started = perf_counter()
-    compiled_solve = jax.jit(solve).lower(jnp.asarray(initials[0])).compile()
-    row["compile_wall_seconds"] = perf_counter() - compile_started
-    _write_json(part, row)
-
     figure_state = None
     figure_terminal = None
     for fraction, initial in zip(PERTURBATION_FRACTIONS, initials, strict=True):
         arm_started = perf_counter()
-        history = compiled_solve(jnp.asarray(initial))
+        mapped_initial = np.asarray(
+            jax.block_until_ready(start_map(jnp.asarray(initial))), dtype=np.float64
+        )
+        direct_start_residual = float(
+            fixed_point._relative_residual(
+                jnp.asarray(mapped_initial), jnp.asarray(initial)
+            )
+        )
+        if not np.isfinite(direct_start_residual) or direct_start_residual <= 0.0:
+            raise RuntimeError(
+                f"the perturbed start has no production-map residual: "
+                f"{direct_start_residual!r}"
+            )
+        request = certificate._certificate_solve_request(
+            profile,
+            jnp.asarray(initial),
+            built["target_current"],
+            carrier_identity=(
+                f"oracle-start:{exterior_kind}:{case_name}:{requested_cells}"
+            ),
+        )
+        request = replace(
+            request,
+            policy=replace(
+                request.policy,
+                newton_steps=NEWTON_STEPS,
+                active_set_steps=ACTIVE_SET_STEPS,
+            ),
+        )
+        solve_receipt = profile.solve(request)
+        history = solve_receipt.equilibrium.fixed_point
         jax.block_until_ready(history.state)
-        terminal = np.asarray(history.state, dtype=np.float64)
+        terminal = np.asarray(solve_receipt.equilibrium.flux, dtype=np.float64)
         terminal_measurement = _terminal_measurement(
             operator,
             terminal,
@@ -1989,7 +2031,7 @@ def _measure_newton_row(
             built["span"],
             grid_count,
             pitch,
-            built["requested_class"],
+            None,
             built["target_current"],
         )
         initial_distance = _norms(initial - analytic, built["span"], grid_count)
@@ -2013,6 +2055,7 @@ def _measure_newton_row(
             "initial_relative_fixed_point_residual_from_result_trace": (
                 float(finite_trace[0]) if len(finite_trace) else None
             ),
+            "initial_relative_fixed_point_residual_direct": direct_start_residual,
             "terminal": terminal_measurement,
             "contracted_toward_analytic": contracted,
             "left_analytic_neighbourhood": not contracted,
@@ -2022,6 +2065,12 @@ def _measure_newton_row(
             ),
             "returned_to_analytic_fixed_point": returned,
             "fixed_point_result": _fixed_point_telemetry(history),
+            "public_solve_receipt": {
+                "compilation_cache_hit": solve_receipt.compilation_cache_hit,
+                "qualified": bool(solve_receipt.qualified),
+                "wall_seconds": solve_receipt.wall_seconds,
+                "resolved_defaults": solve_receipt.resolved_defaults.to_dict(),
+            },
             "solve_wall_seconds": perf_counter() - arm_started,
         }
         row["perturbations"].append(arm)
@@ -2160,7 +2209,10 @@ def run_newton_probe(output: Path, report_directory: Path) -> dict[str, Any]:
         "design": {
             "perturbation_relative_sup_fractions": PERTURBATION_FRACTIONS,
             "smooth_random_seed": RANDOM_SEED,
-            "compiled_programs_per_row": 1,
+            "program_identity_per_row": 1,
+            "program_reuse_evidence": (
+                "ForwardSolveReceipt.compilation_cache_hit on each public solve"
+            ),
             "newton_steps": NEWTON_STEPS,
             "active_set_steps": ACTIVE_SET_STEPS,
             "gmres_iterations": recovery.KRYLOV_ITERATIONS,

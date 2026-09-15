@@ -2496,14 +2496,24 @@ class ForwardFluxOperator:
         near_level = jnp.any(valid & (jnp.abs(level) <= roundoff[:, None]), axis=1)
         return (positive & negative) | near_level
 
-    def _profile_support(self, masks, topology, physical, sample_psi_norm):
+    def _profile_support(
+        self,
+        masks,
+        topology,
+        physical,
+        sample_psi_norm,
+        *,
+        fixed_participation=None,
+    ):
         """Return the plasma-side support for the active clip mode.
 
         The committed chord clip reproduces the prior committed clip:
         full atomic cells selected by the profile partition label alone.
         The opt-in exact mode traces the curved boundary with every cut
         cell participating, and its chord-cells variant replaces only the
-        two named cells' geometry with that chord result.
+        two named cells' geometry with that chord result. A derivative check
+        may hold the discrete participation set fixed while revaluing every
+        continuous spline root on that branch.
         """
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
@@ -2547,7 +2557,11 @@ class ForwardFluxOperator:
             atomic_mesh.cell_vertex_count,
             curved_level(cell_vertices),
         )
-        participation = masks.profile_participation | vertex_participation
+        participation = (
+            masks.profile_participation | vertex_participation
+            if fixed_participation is None
+            else jnp.asarray(fixed_participation, dtype=bool)
+        )
         traced_support = _implicit_traced_clip(
             atomic_mesh.node_coordinates,
             atomic_mesh.cell_nodes,

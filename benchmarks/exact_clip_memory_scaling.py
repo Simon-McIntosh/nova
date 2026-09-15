@@ -371,6 +371,58 @@ def _normalise_direction(direction: jax.Array) -> jax.Array:
     return direction / scale
 
 
+def _fixed_clip_map(profile, request, state):
+    """Return the smooth production-map branch selected by one terminal read."""
+    operator = profile.operator
+    masks, topology, _sample_psi_norm, support = operator._support_partition(state)
+    participation = jnp.asarray(support.vertex_count) >= 3
+    shadow = operator.residual_shadow_mask(state)
+    external = operator.external(request.current, request.prescribed_current)
+
+    def mapped(candidate):
+        physical = jnp.asarray(candidate)[: operator.physical_node_number]
+        grid_flux, _wall_flux = operator.topology.split_flux_map(physical)
+        psi_norm = operator.topology.normalize(
+            topology.axis_flux,
+            topology.boundary_flux,
+            grid_flux,
+        )
+        candidate_masks = masks._replace(psi_norm=psi_norm)
+        sample_flux = operator.sample_node_flux(candidate)
+        sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+        candidate_support = operator._profile_support(
+            candidate_masks,
+            topology,
+            physical,
+            sample_psi_norm,
+            fixed_participation=participation,
+        )
+        partition = (
+            candidate_masks,
+            topology,
+            sample_psi_norm,
+            candidate_support,
+        )
+        moments = operator._partitioned_current_moments(partition)
+        if request.target_current is not None:
+            amplitude = operator.current_normalisation_amplitude(
+                request.target_current,
+                jnp.sum(moments.cell_current),
+            )
+            moments = operator.scaled_current_moments(moments, amplitude)
+        image = external + operator.current_moment_image(moments)
+        return operator._exclude_shadow_residual(
+            candidate,
+            image,
+            shadow=shadow,
+        )
+
+    return mapped, {
+        "fixed_participating_cells": int(jnp.sum(participation)),
+        "fixed_shadowed_carriers": int(jnp.sum(shadow)),
+    }
+
+
 def measure_jvp_accuracy(
     output: Path,
     part_root: Path,
@@ -399,11 +451,7 @@ def measure_jvp_accuracy(
                     f"terminal state size {state.size} does not match "
                     f"compiled size {dimensions['solve_state_size']}"
                 )
-            mapped = profile.flux_map(
-                request.current,
-                target_current=request.target_current,
-                prescribed_current=request.prescribed_current,
-            )
+            mapped, branch = _fixed_clip_map(profile, request, state)
             compiled_map = jax.jit(mapped)
             mapped_state, tangent_action = jax.linearize(compiled_map, state)
             residual = mapped_state - state
@@ -474,6 +522,7 @@ def measure_jvp_accuracy(
                 "terminal_state_size": int(state.size),
                 "fixed_point_residual_l2": float(jnp.linalg.norm(residual)),
                 "gmres_info": int(gmres_info),
+                "branch": branch,
                 "relative_error_bound": JVP_RELATIVE_ERROR_BOUND,
                 "directions": comparisons,
                 "passed": all(

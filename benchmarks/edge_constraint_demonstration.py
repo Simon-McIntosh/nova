@@ -517,11 +517,18 @@ def _free_reference(
     """Bracket and directly measure the free current reaching one edge target."""
     samples: list[dict[str, Any]] = []
     program = free.program
-    for factor in (0.0, 0.5, 1.0, 1.5):
+
+    def sample_at(current_delta_a: float) -> None:
+        nonlocal program
+        if any(
+            np.isclose(current_delta_a, sample["current_delta_a"], atol=1.0e-9)
+            for sample in samples
+        ):
+            return
         sample, program = _free_sample(
             profile,
             free,
-            current_delta_a=factor * constrained_current_a,
+            current_delta_a=current_delta_a,
             direction=direction,
             prescribed_current=prescribed_current,
             requested_class=requested_class,
@@ -539,18 +546,38 @@ def _free_reference(
                 "reached": False,
             }
         )
-    converged = [sample for sample in samples if sample["converged"]]
-    bracket = next(
-        (
-            (lower, upper)
-            for lower, upper in zip(converged, converged[1:])
-            if lower["position_error_mm"] * upper["position_error_mm"] <= 0.0
-        ),
-        None,
-    )
+
+    def find_bracket() -> tuple[dict[str, Any], dict[str, Any]] | None:
+        converged = sorted(
+            (sample for sample in samples if sample["converged"]),
+            key=lambda sample: sample["current_delta_a"],
+        )
+        return next(
+            (
+                (lower, upper)
+                for lower, upper in zip(converged, converged[1:])
+                if lower["position_error_mm"] * upper["position_error_mm"] <= 0.0
+            ),
+            None,
+        )
+
+    for factor in (0.0, 0.5, 1.0, 1.5):
+        sample_at(factor * constrained_current_a)
+    bracket = find_bracket()
+    if bracket is None:
+        for magnitude_a in (CURRENT_STEP_CAP_A, 2_000.0, 4_000.0, 8_000.0):
+            sample_at(-magnitude_a)
+            sample_at(magnitude_a)
+            bracket = find_bracket()
+            if bracket is not None:
+                break
     if bracket is not None:
         lower, upper = bracket
-        for _ in range(FREE_REFERENCE_REFINEMENTS):
+        endpoint_reached = (
+            min(abs(lower["position_error_mm"]), abs(upper["position_error_mm"]))
+            <= 1.0e3 * POSITION_TOLERANCE_M
+        )
+        for _ in range(0 if endpoint_reached else FREE_REFERENCE_REFINEMENTS):
             denominator = upper["position_error_mm"] - lower["position_error_mm"]
             if denominator == 0.0:
                 break

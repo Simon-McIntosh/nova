@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import numpy as np
 
 from nova.utilities.importmanager import skip_import
@@ -9,8 +11,10 @@ from nova.utilities.importmanager import skip_import
 with skip_import("jax"):
     import jax.numpy as jnp
 
+    import benchmarks.edge_constraint_demonstration as demonstration
     from benchmarks.edge_constraint_demonstration import (
         _edge_pair,
+        _free_reference,
         outboard_midplane_edge_radius,
     )
     from nova.equilibrium import reduced_newton
@@ -25,6 +29,51 @@ SOLVE_TOLERANCE = 1.0e-8
 NEWTON_STEPS = 24
 OUTWARD_COMMAND_M = 0.005
 TRIP_CAP_A = 1.0e-3
+
+
+def test_zero_constrained_current_still_brackets_direct_free_reference(monkeypatch):
+    """A refused constrained route cannot collapse every free probe to zero."""
+    sampled_currents: list[float] = []
+
+    def fake_free_sample(*_args, current_delta_a, program, **_kwargs):
+        sampled_currents.append(current_delta_a)
+        displacement_mm = 0.005 * current_delta_a
+        return (
+            {
+                "current_delta_a": current_delta_a,
+                "converged": True,
+                "termination": "converged",
+                "trip_count": 1,
+                "edge_radius_m": 1.0 + displacement_mm / 1.0e3,
+                "edge_displacement_mm": displacement_mm,
+                "position_error_mm": displacement_mm - 5.0,
+                "terminal_fixed_point_residual": 0.0,
+            },
+            program,
+        )
+
+    monkeypatch.setattr(demonstration, "_free_sample", fake_free_sample)
+    persisted: list[dict] = []
+    result = _free_reference(
+        object(),
+        SimpleNamespace(program=object()),
+        constrained_current_a=0.0,
+        direction=np.asarray([1.0]),
+        prescribed_current=np.asarray([0.0]),
+        requested_class=None,
+        target_current=None,
+        edge_radius_m=1.0,
+        chord_height_m=0.0,
+        target_displacement_m=0.005,
+        persist=persisted.append,
+    )
+
+    assert sampled_currents[:3] == [0.0, -1_000.0, 1_000.0]
+    assert len(sampled_currents) == len(set(sampled_currents))
+    assert result["bracketed"]
+    assert result["reached"]
+    assert result["current_delta_a"] == 1_000.0
+    assert persisted[-1] == result
 
 
 def _prescribed(profile) -> None:

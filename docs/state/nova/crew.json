@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T10:26:24",
+  "updated": "2026-09-15T10:30:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4654,6 +4654,15 @@
         "created": "2026-09-15"
       },
       {
+        "id": "s19h-cca-abort-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
         "id": "s19h-cca-abort-l",
         "harness": "codex-luna",
         "role": "implement",
@@ -4717,6 +4726,15 @@
         "created": "2026-09-15"
       },
       {
+        "id": "s19h-fsa-shimgate-l",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
         "id": "s19h-pfs-axisflux-l",
         "harness": "codex-luna",
         "role": "implement",
@@ -4727,6 +4745,15 @@
       },
       {
         "id": "s19h-pfs-budget-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-pfs-cache-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -161728,6 +161755,210 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T060114136950-pfs-legacy-conditioning-checks-retarget",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-legacy-conditioning-checks-retarget",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 7153,
+                "cached_input_tokens": 552579,
+                "input_tokens": 559764,
+                "output_tokens": 379,
+                "reasoning_output_tokens": 148,
+                "total_tokens": 560143,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "benchmarks/batched_labeller_receipt.py evaluates the five conditioning-quality checks (finite centroid errors, material conditioning improvement, conditioned error limit, no coincident free and conditioned rows, no conditioned row worse than free) only over rows where the sequential reference route completed, records each excluded row identity with the reference exception text in the receipt, and leaves the accepted parity contract's assertions byte-unchanged (proved by diff in the report); scripts/labeller_parallel/run.sh accepts --engine batched in its usage line and validation and its --dry-run prints the batched driver arguments; tests/test_batched_labeller.py passes in one fresh all_debug CPU process with zero added failures",
+          "estimated_hours": null,
+          "goal": "The paired batched-engine benchmark evaluates its five legacy conditioning-quality checks only over rows both routes complete, with the labeller launcher accepting the batched engine",
+          "id": "pfs-legacy-conditioning-checks-retarget",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-15T06:01:15Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T060114136950-pfs-legacy-conditioning-checks-retarget/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/batched_labeller_receipt.py",
+            "scripts/labeller_parallel/run.sh",
+            "tests/test_batched_labeller.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/legacy-checks",
+            "docs/evidence/archive/playable-forward-solve-landed.html",
+            "docs/plans/playable-forward-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-pfs-legacy-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-15T06:01:39Z",
+        "completed_at": "2026-09-15T08:20:40.748Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 8295,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 8341,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "0f872fd69bc1a3766fbb1610ee3412fca647887e",
+        "commits": [
+          "96a0ddfd90c48a6ffa3bc033cba4f99a11da388b",
+          "353ecbdd92940539c54b1d041804bcf00ddfc6b0"
+        ],
+        "changed_lines": {
+          "added": 40,
+          "removed": 6,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider tests/test_batched_labeller.py (4 passed, 1601 s)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/legacy-checks/test-batched-labeller.log",
+          "log_digest": "cefde4d1318b312a0398b0d8409bb27df81eb1f2e79b6aa20a535d1e91c509f2"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T060114136950-pfs-legacy-conditioning-checks-retarget/manifest.md",
+        "scope_changed": false,
+        "session_id": "e3496e68-ba50-4484-83e0-e56211dfe4be",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 9507486,
+            "input_tokens_cumulative": 9507486,
+            "output_tokens": 53792,
+            "output_tokens_cumulative": 53792,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T08:20:40.748Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 9675283,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 200000",
+          "elapsed_seconds": 8337.909,
+          "generated_tokens": 59491,
+          "generation_seconds": 7704.181,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 83.2,
+          "machine_seconds": 633.728,
+          "peak_input_tokens": 166497,
+          "tokens_per_second": 7.72,
+          "wall_tokens_per_second": 7.14
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-legacy-conditioning-checks-retarget",
+          "session_id": "e3496e68-ba50-4484-83e0-e56211dfe4be",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T08:20:40.748Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 83.0,
+        "orientation_input_tokens": 2991855.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -162040,6 +162271,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2536
+    "_version": 2540
   }
 }

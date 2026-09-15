@@ -341,6 +341,41 @@
       terminal residual and converged flag for each state.</figcaption>
     </figure>
 </section>
+<section id="iteration-count-gate">
+  <h2 id="iteration-count-gate-h">The newton_krylov iteration-count repair: KeyError fixed, gate test not green</h2>
+
+  <p><strong>2026-09-15, commit <code>df288d3b</code>.</strong> The recorded latent defect — the
+  newton_krylov portfolio route raising <code>KeyError: 'newton_steps'</code> inside
+  <code>_iteration_count</code> (forward.py, line 2606) when the caller supplied
+  <code>warmup</code> and <code>gmres_iterations</code> but not <code>newton_steps</code> — is
+  repaired. The count now reads the fields the accelerated routes actually populate:
+  <code>newton_steps</code> falls back to the profile field the route injects, evaluations to the
+  profile field the fixed-point routes inject, warmup to the declared solve policy. Reproduction
+  quoted (options <code>{'warmup': 0, 'gmres_iterations': 30}</code>):</p>
+
+  <pre>KeyError: 'newton_steps'
+nova/equilibrium/forward.py:2606: KeyError</pre>
+
+  <p>The target test now completes the <code>solve_portfolio</code> call with <code>newton_steps</code>
+  absent — the KeyError is gone — but does not pass: on one fresh all_debug CPU process at the
+  repaired head, both the full-module selection (<code>-m 'slow or not slow'</code>, job 1271123,
+  5 failed) and the delta arms' exact selection (<code>-m 'not slow'</code>, job 1271183,
+  1 failed/4 deselected) fail the same test at an assertion the KeyError had masked:
+  <code>achieved_class[0]</code> reads <code>[1, 1]</code> (the limited disc branch reads DIVERTED)
+  against the test's <code>[0, 1]</code> (test_two_class_recovery.py:225). The not-slow failure set
+  at head therefore still contains the id the delta-gate base arm never ran (module
+  <code>not_run</code> in quadrature-delta-3) and the after arm logged as the KeyError
+  (quadrature-delta-4): the recorded defect is fixed, the id persists on a distinct assertion.
+  The achieved-class divergence lives in the solved flux's topology (a feed of
+  <code>operator.read</code>, untouched by the iteration-count change), and the module's four slow
+  tests fail on stale fixture banks and receipt-schema drift that predate this repair — both
+  attributable to the open §2 topology and fixture-requalification work, not to the reported
+  iteration count. Gate logs under
+  <code>~/.config/reckon/crew/reports/nova/s19-handoff/iteration-count/</code> and the node
+  manifest at
+  <code>~/.config/reckon/crew/runs/r-20260915T055602091466-cca-newton-krylov-iteration-count/manifest.md</code>.</p>
+</section>
+
 </main>
 </body>
 </html>

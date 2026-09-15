@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T07:50:35",
+  "updated": "2026-09-15T08:12:55",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4720,9 +4720,11 @@
         "id": "s19h-scout-l",
         "harness": "codex-luna",
         "role": "investigate",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0a3a1-de00-7d82-8ba3-bada41ae7702",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"read-only\"}": "01a0a3a1-de00-7d82-8ba3-bada41ae7702"
+        },
         "created": "2026-09-15"
       },
       {
@@ -159331,6 +159333,177 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T055426304767-s19h-reuse-map-scout",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a73",
+        "node": "s19h-reuse-map-scout",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 7153,
+                "cached_input_tokens": 552579,
+                "input_tokens": 559764,
+                "output_tokens": 379,
+                "reasoning_output_tokens": 148,
+                "total_tokens": 560143,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "Report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/reuse-map.md exists with one fitness-verdict row (path:line, Reuse or Generalise or Replace) for each of six capabilities: the X-point-cell wedge clip on the spline-chain clip (nova/equilibrium/separatrix_clip.py, clip_quadrature.py, the common_support complement clip), mesh-sized arrays as jitted-program arguments (the traced-exterior plumbing merged at a37c5c00 plus the operator pytree boundary), strict-exit DIII-D per-member row persistence in benchmarks/strict_exit_incidence.py, the step-count field the newton_krylov route populates that forward.py _iteration_count should read, the pointer-jumping private-mask kernel banked under docs/figures/cut-cell-current-attribution for the rectangular label kernel, the edge-constraint demonstration driver on solve_constrained_reduced_newton; searched capability-shaped across this repository plus /home/ITER/mcintos/Code/imas-ambix",
+          "estimated_hours": null,
+          "goal": "A reuse map for the S19 handoff wave naming the existing machinery each new node extends",
+          "id": "s19h-reuse-map-scout",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T05:54:27Z",
+            "read_at": "2026-09-15T05:54:28Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 20.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T055426304767-s19h-reuse-map-scout/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/reuse-map.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "s19h-scout-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-15T05:54:48Z",
+        "completed_at": "2026-09-15T06:09:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 892,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 892,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "0f872fd69bc1a3766fbb1610ee3412fca647887e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "test -s /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/reuse-map.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/reuse-map.md",
+          "log_digest": "d3dfcc4601227650f1402f77eee0b915b824bb925e7ebf98a9a600b8bba4bfee"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T055426304767-s19h-reuse-map-scout/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a3a1-de00-7d82-8ba3-bada41ae7702",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T06:09:40Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 20.0,
+              "resets_at": 1789970252,
+              "observed_at": "2026-09-15T06:09:40Z"
+            }
+          ],
+          "notional_cost_usd": 3.1075,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": "read-only investigate node; the deliverable is the report outside the worktree",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/s19h-reuse-map-scout",
+          "session_id": "01a0a3a1-de00-7d82-8ba3-bada41ae7702",
+          "session_source": "pointer",
+          "retained_at": "2026-09-15T06:09:40Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 69.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -159643,6 +159816,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2517
+    "_version": 2519
   }
 }

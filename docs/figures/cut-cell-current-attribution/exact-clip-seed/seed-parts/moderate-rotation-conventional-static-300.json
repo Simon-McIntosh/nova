@@ -1,34 +1,60 @@
 {
   "accepted": true,
   "amplitude_bound": 0.01,
-  "amplitude_error": 0.002438998522855451,
-  "booked_current_at_unit_amplitude_a": 1621037.4698660928,
+  "amplitude_error": 0.0024389985230057754,
+  "booked_current_at_unit_amplitude_a": 1621037.4698658497,
   "case": "moderate-rotation-conventional-static",
-  "elapsed_seconds": 144.5290175229311,
+  "elapsed_seconds": 63.229139938019216,
   "historical_exact_clip": {
-    "amplitude_within_one_percent": false,
-    "case": "moderate-rotation-conventional-static",
-    "converged": false,
-    "figure": {
-      "filesystem_path": "docs/figures/cut-cell-current-attribution/gate-c-resolve/moderate-rotation-conventional-static-production-route-cells-300.png",
-      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/gate-c-resolve/moderate-rotation-conventional-static-production-route-cells-300.png",
-      "render_source": "fresh_production_solve",
-      "sha256": "a262dcdf60ec0fed2ba44bbee7d5660e0190b603b0938013e89e9da9966f861b"
+    "committed_whole_cell": {
+      "amplitude_within_one_percent": false,
+      "case": "moderate-rotation-conventional-static",
+      "converged": false,
+      "figure": {
+        "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.png",
+        "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.png",
+        "render_source": "persisted_part_receipt",
+        "sha256": "aee39e616e0b65c9687422ea2b5474813825056b4045d6991f480a54e0d0356c"
+      },
+      "magnetic_axis_position_error_m": 0.011291968233627754,
+      "qualification": "unqualified",
+      "qualification_bound": 1e-12,
+      "qualification_reason": "fixed_point_residual_outside_qualification_bound",
+      "realised_cells": 341,
+      "requested_cells": -300,
+      "seed_amplitude": 0.9004296609893683,
+      "terminal_amplitude": 0.9603461569301386,
+      "terminal_fixed_point_residual": 0.008455791545012673,
+      "terminal_fixed_point_residual_status": "finite",
+      "termination": "active_set_settled",
+      "trip_count": 3,
+      "x_point_position_error_m": null
     },
-    "magnetic_axis_position_error_m": 0.08108354685896184,
-    "part": "docs/figures/cut-cell-current-attribution/gate-c-resolve/parts/moderate-rotation-conventional-static-production-route-cells-300.json",
-    "qualification": "unqualified",
-    "qualification_bound": 1e-12,
-    "qualification_reason": "fixed_point_residual_outside_qualification_bound",
-    "realised_cells": 341,
-    "requested_cells": -300,
-    "seed_amplitude": 1.9711556729403572,
-    "terminal_amplitude": 2.1928232539373878,
-    "terminal_fixed_point_residual": 0.09707463943117534,
-    "terminal_fixed_point_residual_status": "finite",
-    "termination": "active_set_cycle_detected",
-    "trip_count": 4,
-    "x_point_position_error_m": null
+    "gate_c_exact_clip": {
+      "amplitude_within_one_percent": false,
+      "case": "moderate-rotation-conventional-static",
+      "converged": false,
+      "figure": {
+        "filesystem_path": "docs/figures/cut-cell-current-attribution/gate-c-resolve/moderate-rotation-conventional-static-production-route-cells-300.png",
+        "project_absolute_src": "/nova/figures/cut-cell-current-attribution/gate-c-resolve/moderate-rotation-conventional-static-production-route-cells-300.png",
+        "render_source": "fresh_production_solve",
+        "sha256": "a262dcdf60ec0fed2ba44bbee7d5660e0190b603b0938013e89e9da9966f861b"
+      },
+      "magnetic_axis_position_error_m": 0.08108354685896184,
+      "part": "docs/figures/cut-cell-current-attribution/gate-c-resolve/parts/moderate-rotation-conventional-static-production-route-cells-300.json",
+      "qualification": "unqualified",
+      "qualification_bound": 1e-12,
+      "qualification_reason": "fixed_point_residual_outside_qualification_bound",
+      "realised_cells": 341,
+      "requested_cells": -300,
+      "seed_amplitude": 1.9711556729403572,
+      "terminal_amplitude": 2.1928232539373878,
+      "terminal_fixed_point_residual": 0.09707463943117534,
+      "terminal_fixed_point_residual_status": "finite",
+      "termination": "active_set_cycle_detected",
+      "trip_count": 4,
+      "x_point_position_error_m": null
+    }
   },
   "realised_cells": 341,
   "requested_cells": -300,
@@ -36,7 +62,7 @@
     "anchor_available": true,
     "anchor_m": [
       2.1549116336951215,
-      0.0064466652126341315
+      0.006446665212634234
     ],
     "branch_index": 0,
     "construction": "current_centroid_disc",
@@ -61,16 +87,59 @@
     ],
     "declared_boundary_m": [
       2.1549116336951215,
-      0.0064466652126341315
+      0.006446665212634234
     ],
     "factory": "profile.cold_seed_portfolio",
     "plasma_current_a": 1624991.1778605897,
     "requested_class": "limited",
     "seed_radius_m": 0.44721614229132306,
-    "state_sha256_binary64": "11a8cbdb1ec257eb80c00329dc3590f84abda25ea809a3ac0a6aa31015a4ace1",
+    "state_sha256_binary64": "1b88bc8bf227384782bbb2733621abbadd9c8665941fb3bca17fb29c1bb16a56",
     "stored_flux_samples_used": false,
     "supported_cell_count": 98
   },
-  "seed_amplitude": 1.0024389985228555,
+  "seed_amplitude": 1.0024389985230058,
+  "solve": {
+    "analytic_boundary_flux_wb": 1.1362438767648086e-16,
+    "axis_error_in_pitch": 0.14427391546140902,
+    "axis_error_m": 0.011482153543148818,
+    "boundary_flux_error_wb": 0.06144400148700369,
+    "boundary_flux_wb": -0.06144400148700358,
+    "certificate_figure": {
+      "filesystem_path": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-production-route-cells-300.png",
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-production-route-cells-300.png",
+      "render_source": "fresh_production_solve",
+      "sha256": "fbd94044ba471a66cd798e4aaae3e8e116a9215465a6a35b37b47c4a615a8b69"
+    },
+    "comparison_figure": {
+      "difference_levels": [
+        -0.08994647204392545,
+        -0.05910989487706167,
+        -0.03884509967962939,
+        -0.025527735622922036,
+        -0.016775997266279107,
+        -0.011024639569891862,
+        -0.007245034421311831,
+        -0.004761200893074475,
+        0.004761200893074475,
+        0.007245034421311831,
+        0.011024639569891862,
+        0.016775997266279107,
+        0.025527735622922036,
+        0.03884509967962939,
+        0.05910989487706167,
+        0.08994647204392545
+      ],
+      "difference_normalisation": "analytic flux span",
+      "filesystem_path": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-300-comparison.png",
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-300-comparison.png",
+      "sha256": "010313754b194ad2d0fc79fa6eb4f7753a0fb61b5603312bfd18ffeb8ad41960"
+    },
+    "converged": true,
+    "part": "docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/moderate-rotation-conventional-static-production-route-cells-300.json",
+    "seed_amplitude": 1.0024389985230058,
+    "terminal_amplitude": 0.9649515980901505,
+    "terminal_residual": 3.856209915032976e-13,
+    "termination": "converged"
+  },
   "target_current_a": 1624991.1778605897
 }

@@ -4,7 +4,13 @@ from types import SimpleNamespace
 import jax.numpy as jnp
 import pytest
 
-from benchmarks.program_scope_census import _executable_size, _loop_inventory, reanalyze
+from benchmarks.program_scope_census import (
+    _executable_size,
+    _loop_inventory,
+    _render_constant_svg,
+    build_rung_report,
+    reanalyze,
+)
 from benchmarks.solve_program_size_gate import (
     MAX_300_EXECUTABLE_BYTES,
     MAX_300_SOLVE_INSTRUCTIONS,
@@ -302,3 +308,19 @@ def test_reanalysis_preserves_executable_measurement(tmp_path, monkeypatch):
     assert results[300]["compile_seconds"] == 4.5
     assert results[300]["solve"]["executable"] == executable
     assert results[300]["map"]["executable"] == executable
+
+
+def test_partial_census_report_does_not_require_an_unmeasured_rung(tmp_path):
+    row = _receipts()[300]
+    row["solve"]["large_constants"] = {
+        "groups": {"mesh arrays": {"captured_bytes": 123}}
+    }
+    figure = tmp_path / "captured.svg"
+
+    report = build_rung_report({300: row})
+    _render_constant_svg({300: row}, figure)
+
+    assert "Missing cell counts were not measured" in report
+    assert "654,832 / 9,908" in report
+    assert "300 cells" in figure.read_text(encoding="utf-8")
+    assert "1000 cells" not in figure.read_text(encoding="utf-8")

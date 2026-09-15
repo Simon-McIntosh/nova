@@ -1532,11 +1532,12 @@ def _render_svg(entry: dict[str, Any], path: Path) -> None:
 
 
 def _render_constant_svg(results: dict[int, dict[str, Any]], path: Path) -> None:
-    """Render grouped captured literal bytes at both measured cell counts."""
+    """Render grouped captured literal bytes at the measured cell counts."""
+    measured_cells = tuple(sorted(results))
     groups = sorted(
         {
             group
-            for cells in REQUIRED_CELLS
+            for cells in measured_cells
             for group in results[cells]["solve"]["large_constants"]["groups"]
         }
     )
@@ -1550,7 +1551,7 @@ def _render_constant_svg(results: dict[int, dict[str, Any]], path: Path) -> None
             results[cells]["solve"]["large_constants"]["groups"]
             .get(group, {})
             .get("captured_bytes", 0)
-            for cells in REQUIRED_CELLS
+            for cells in measured_cells
             for group in groups
         ),
         default=1,
@@ -1564,9 +1565,9 @@ def _render_constant_svg(results: dict[int, dict[str, Any]], path: Path) -> None
         '<text x="16" y="25" font-size="16" font-weight="bold" fill="#1a1a1a">'
         "Captured optimised-HLO literal bytes by source group</text>",
         '<text x="16" y="44" font-size="11" fill="#555">Only literals larger '
-        "than 1 KiB; linear bar scale, paired CPU compilations</text>",
+        "than 1 KiB; linear bar scale, CPU compilations</text>",
     ]
-    for legend_index, cells in enumerate(REQUIRED_CELLS):
+    for legend_index, cells in enumerate(measured_cells):
         x = 760 + legend_index * 130
         parts.append(
             f'<rect x="{x}" y="18" width="16" height="10" fill="{colors[cells]}"/>'
@@ -1578,7 +1579,7 @@ def _render_constant_svg(results: dict[int, dict[str, Any]], path: Path) -> None
             f'<text x="{label_x - 12}" y="{y + 24}" text-anchor="end" '
             f'fill="#222">{group}</text>'
         )
-        for offset, cells in enumerate(REQUIRED_CELLS):
+        for offset, cells in enumerate(measured_cells):
             value = (
                 results[cells]["solve"]["large_constants"]["groups"]
                 .get(group, {})
@@ -1621,6 +1622,42 @@ def _location(source: dict[str, Any] | None) -> str:
         pass
     function = source.get("function") or "unknown"
     return f"{path}:{source.get('line') or '?'} `{function}`"
+
+
+def _replication_count(program: dict[str, Any], path: str) -> int:
+    return int(program["replication"][path]["copy_count"])
+
+
+def build_rung_report(results: dict[int, dict[str, Any]]) -> str:
+    """Summarize an intentionally partial census without inventing missing rungs."""
+    lines = [
+        "# Program scope census",
+        "",
+        "This receipt contains only the requested compilation rungs. Missing cell "
+        "counts were not measured and are not inferred.",
+        "",
+        "| cells | compile seconds | solve / map instructions | executable bytes | "
+        "moment copies solve / map | topology copies solve / map |",
+        "|---:|---:|---:|---:|---:|---:|",
+    ]
+    for cells, row in sorted(results.items()):
+        solve = row["solve"]
+        mapped = row["map"]
+        executable = solve.get("executable", {})
+        serialized = executable.get("serialized_bytes")
+        serialized_display = (
+            f"{int(serialized):,}" if serialized is not None else "unavailable"
+        )
+        lines.append(
+            f"| {cells} | {float(row['compile_seconds']):.3f} | "
+            f"{int(solve['total_instructions']):,} / "
+            f"{int(mapped['total_instructions']):,} | {serialized_display} | "
+            f"{_replication_count(solve, 'current-moment path')} / "
+            f"{_replication_count(mapped, 'current-moment path')} | "
+            f"{_replication_count(solve, 'topology read')} / "
+            f"{_replication_count(mapped, 'topology read')} |"
+        )
+    return "\n".join(lines) + "\n"
 
 
 def build_report(
@@ -2010,6 +2047,13 @@ def main() -> None:
     )
     parser.add_argument("--host-profile-path", default=None)
     parser.add_argument(
+        "--cache-root",
+        default=None,
+        help=(
+            "persistent compilation cache root; use an empty directory for cold timing"
+        ),
+    )
+    parser.add_argument(
         "--profile-cached-entry",
         action="store_true",
         help="warm and cProfile one cache-hit public compiled-slice call",
@@ -2045,7 +2089,9 @@ def main() -> None:
         )
     else:
         configure_persistent_compilation_cache(
-            default_persistent_compilation_cache_root()
+            arguments.cache_root
+            if arguments.cache_root
+            else default_persistent_compilation_cache_root()
         )
         results, host_profile = measure(
             arguments.case,
@@ -2063,7 +2109,11 @@ def main() -> None:
             f"CENSUS_FIGURE {figure_dir / 'captured-bytes-by-group.svg'}",
             flush=True,
         )
-    report = build_report(results, host_profile)
+    report = (
+        build_report(results, host_profile)
+        if set(results) == set(REQUIRED_CELLS)
+        else build_rung_report(results)
+    )
     report_dir = Path(arguments.report_dir) if arguments.report_dir else run_dir
     report_dir.mkdir(parents=True, exist_ok=True)
     report_path = report_dir / "scope-census-index.md"

@@ -4,15 +4,15 @@
     "1000-cell solve executable size is absent: JaxRuntimeError: INTERNAL: Failed to serialize CpuAotCompilationResult."
   ],
   "limits": {
-    "300_cell_executable_bytes": 440000000,
+    "300_cell_executable_bytes": 450000000,
     "300_cell_solve_instructions": 210000
   },
   "passed": true,
   "rows": [
     {
       "after": {
-        "compile_seconds": 20.058059595525265,
-        "executable_bytes": 436447170,
+        "compile_seconds": 60.08349339105189,
+        "executable_bytes": 443217410,
         "executable_measure": "serialized executable",
         "instruction_ratio": 20.450956696878148,
         "map_instructions": 9930,

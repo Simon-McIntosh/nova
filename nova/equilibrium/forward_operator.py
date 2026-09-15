@@ -42,6 +42,7 @@ import numpy as np
 from nova.biot.null import Null2D
 from nova.biot.target import FluxTarget
 from nova.equilibrium.clip_quadrature import (
+    ClippedCurrentMoments,
     clipped_support_current_moments,
     clipped_support_field_integrals,
     cut_cell_bank_capacity,
@@ -123,6 +124,83 @@ def support_clip_mode() -> str:
 #: The two boundary cells whose contaminated moments the discriminator
 #: reverts to their chord values to test the two-cell-destabilisation arm.
 _CHORD_REVERTED_CELLS = (101, 102)
+
+
+def _cell_banked_current_moments(
+    support,
+    selection,
+    field,
+    profile,
+    *,
+    cut_cell_capacity: int,
+) -> ClippedCurrentMoments:
+    """Integrate cut supports independently and scatter them beside whole cells.
+
+    The high-capacity exact polygons occupy only the compact cut-cell bank. A
+    one-cell vectorized integration receives that cell's polynomial directly,
+    so differentiation never forms the all-carried-cells by all-cut-cells
+    boolean and polynomial arrays produced when a scan closes over the complete
+    field. Whole cells retain the existing 24-vertex integration, and the cut
+    cell calculation is unchanged before its result is scattered to the
+    original carrier index.
+    """
+    selected = jnp.asarray(selection, dtype=bool)
+    boundary = selected & jnp.asarray(support.boundary, dtype=bool)
+    whole = selected & jnp.asarray(support.included, dtype=bool) & ~boundary
+    whole_moments = clipped_support_current_moments(
+        support,
+        whole,
+        field,
+        profile,
+        cut_cell_capacity=1,
+    )
+
+    capacity = int(cut_cell_capacity)
+    if capacity < 1:
+        raise ValueError("cut_cell_capacity must be positive")
+    cell_count = support.support_vertices.shape[0]
+    cut_count = jnp.sum(boundary, dtype=jnp.int32)
+    cut_index = jnp.nonzero(boundary, size=capacity, fill_value=0)[0]
+    active = jnp.arange(capacity, dtype=jnp.int32) < cut_count
+
+    def gather_rows(tree):
+        def gather(value):
+            array = jnp.asarray(value)
+            if array.ndim and array.shape[0] == cell_count:
+                return array[cut_index]
+            return jnp.broadcast_to(array, (capacity,) + array.shape)
+
+        return jax.tree.map(gather, tree)
+
+    compact_support = gather_rows(support)
+    compact_field = gather_rows(field)
+
+    def integrate_one(one_support, one_field, live):
+        singleton_support = jax.tree.map(lambda value: value[None, ...], one_support)
+        singleton_field = jax.tree.map(lambda value: value[None, ...], one_field)
+        moments = clipped_support_current_moments(
+            singleton_support,
+            jnp.asarray([live]),
+            singleton_field,
+            profile,
+            cut_cell_capacity=1,
+        )
+        return jax.tree.map(lambda value: value[0], moments)
+
+    cut_moments = jax.vmap(integrate_one)(compact_support, compact_field, active)
+
+    def scatter(whole_value, cut_value):
+        combined = whole_value.at[cut_index].add(
+            jnp.where(active, cut_value, jnp.zeros((), dtype=cut_value.dtype))
+        )
+        return jnp.where(cut_count > capacity, jnp.nan, combined)
+
+    return ClippedCurrentMoments(
+        *(
+            scatter(whole_value, cut_value)
+            for whole_value, cut_value in zip(whole_moments, cut_moments, strict=True)
+        )
+    )
 
 
 def _substitute_chord_cell_supports(exact, chord, cell_indices, participation):
@@ -2088,7 +2166,12 @@ class ForwardFluxOperator:
             self.moment_geometry.atomic_mesh.centroids, ring_centres
         )
         selected = field.active & (jnp.asarray(support.vertex_count) >= 3)
-        moments = clipped_support_current_moments(
+        moment_integrator = (
+            clipped_support_current_moments
+            if _SUPPORT_CLIP_MODE == "chord"
+            else _cell_banked_current_moments
+        )
+        moments = moment_integrator(
             support,
             selected,
             field,

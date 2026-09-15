@@ -221,6 +221,11 @@ def _markdown(payload: dict[str, Any]) -> str:
     """Render the durable report beside the machine-readable receipt."""
     rows = payload["rows"]
     candidate_names = payload["candidate_names"]
+    best_name = max(
+        candidate_names,
+        key=lambda name: payload["candidates"][name]["spread_reduction_mm"],
+    )
+    best = payload["candidates"][best_name]
     lines = [
         "# EFIT centroid-offset attribution",
         "",
@@ -244,6 +249,12 @@ def _markdown(payload: dict[str, Any]) -> str:
             "tested quantities explains the row dependence; the mean is only a "
             "convention reference."
         ),
+        (
+            f"The largest reduction is {best['spread_reduction_mm']:.3f} mm "
+            f"({best['spread_reduction_fraction']:.1%}) from "
+            f"`{best_name}`; it does not account for the 6.582 mm variation. "
+            "The variation is therefore unattributed by these candidates."
+        ),
         "",
         "## Seven-row receipt",
         "",
@@ -263,24 +274,25 @@ def _markdown(payload: dict[str, Any]) -> str:
             "",
             "## Candidate comparison",
             "",
-            "| candidate | mean centroid shift from baseline (mm) | "
-            "candidate offset spread (mm) | spread fraction | residual RMS (mm) |",
-            "|:--|--:|--:|--:|--:|",
+            "| candidate | mean shift (mm) | offset spread (mm) | "
+            "spread reduction (mm) | reduction fraction | residual RMS (mm) |",
+            "|:--|--:|--:|--:|--:|--:|",
         ]
     )
     for name in candidate_names:
         item = payload["candidates"][name]
         lines.append(
             f"| {name} | {item['mean_shift_mm']:+.3f} | "
-            f"{item['spread_mm']:.3f} | {item['spread_fraction']:.3f} | "
+            f"{item['spread_mm']:.3f} | {item['spread_reduction_mm']:+.3f} | "
+            f"{item['spread_reduction_fraction']:.3f} | "
             f"{item['residual_rms_mm']:.3f} |"
         )
     lines.extend(
         [
             "",
-            "The spread fraction is candidate offset range divided by the "
-            "baseline range; it is descriptive, not a fitted acceptance "
-            "threshold.",
+            "Spread reduction is baseline range minus candidate range. It is "
+            "descriptive, not a fitted acceptance threshold; a negative value "
+            "means the candidate increases the observed variation.",
             "",
             "## Correlations of the baseline convention term",
             "",
@@ -407,6 +419,10 @@ def measure(
             ),
             "spread_mm": float(np.ptp(offsets) * 10.0),
             "spread_fraction": float(np.ptp(offsets) / np.ptp(baseline_offsets)),
+            "spread_reduction_mm": float(baseline_spread_mm - np.ptp(offsets) * 10.0),
+            "spread_reduction_fraction": float(
+                1.0 - np.ptp(offsets) / np.ptp(baseline_offsets)
+            ),
             "residual_rms_mm": float(np.sqrt(np.mean(offsets**2)) * 10.0),
         }
     baseline_current = np.asarray([item["plasma_current_kA"] for item in rows])

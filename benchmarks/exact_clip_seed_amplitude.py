@@ -15,6 +15,7 @@ completed evidence into an empty aggregate.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -25,6 +26,10 @@ from typing import Any
 
 import jax
 import jax.numpy as jnp
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import numpy as np
 
 from benchmarks import solovev_certificate as certificate
@@ -32,6 +37,8 @@ from nova.equilibrium import ForwardProfile
 from nova.equilibrium.forward_operator import set_support_clip_mode
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import configure_dtypes
+from nova.media import poloidal
+from nova.media.ink import DEFAULT_INK, poloidal_axes
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.oracle_rebaseline import measure as recovery
 
@@ -96,7 +103,10 @@ def _lane() -> dict[str, Any]:
 def _historical_rows() -> dict[tuple[str, int], dict[str, Any]]:
     receipt = json.loads(HISTORICAL_RECEIPT.read_text(encoding="utf-8"))
     return {
-        (row["case"], int(row["requested_cells"])): row["landed"]
+        (row["case"], int(row["requested_cells"])): {
+            "gate_c_exact_clip": row["landed"],
+            "committed_whole_cell": row["committed"],
+        }
         for row in receipt["rows"]
         if row["case"] in STATIC_CASES
     }
@@ -174,7 +184,98 @@ def _seed_row(
     }
 
 
-def _solve_summary(row: dict[str, Any]) -> dict[str, Any]:
+def _difference_levels(field: np.ndarray) -> np.ndarray:
+    finite = np.abs(np.asarray(field)[np.isfinite(field)])
+    upper = float(np.max(finite))
+    nonzero = finite[finite > 0.0]
+    if nonzero.size == 0:
+        return np.asarray([-1.0e-15, 1.0e-15])
+    lower = max(float(np.percentile(nonzero, 10.0)), upper * 1.0e-5)
+    positive = np.geomspace(lower, upper, 8) if upper > lower else np.asarray([upper])
+    return np.concatenate((-positive[::-1], positive))
+
+
+def _draw_solve_comparison(row: dict[str, Any], path: Path) -> dict[str, Any]:
+    """Draw solved/reference contours and signed flux-span difference contours."""
+
+    data = row["render_data"]
+    coordinates = np.asarray(data["coordinates_rz_m"], dtype=np.float64)
+    solved_values = np.asarray(data["terminal_flux_wb"], dtype=np.float64)
+    analytic_values = np.asarray(data["analytic_flux_wb"], dtype=np.float64)
+    wall = np.asarray(data["wall_units_rz_m"][0], dtype=np.float64)
+    boundary = np.asarray(data["boundary_rz_m"], dtype=np.float64)
+    solved_topology = data["terminal_topology"]
+    analytic_topology = data["analytic_topology"]
+    radial, height, solved = certificate._raster_field(coordinates, solved_values, wall)
+    _, _, analytic = certificate._raster_field(coordinates, analytic_values, wall)
+    span = max(abs(float(analytic_topology["flux_span_wb"])), np.finfo(np.float64).tiny)
+    difference = (solved - analytic) / span
+    shared_levels = poloidal.contour_levels(
+        np.concatenate((solved.ravel(), analytic.ravel())), count=12
+    )
+    difference_levels = _difference_levels(difference)
+    figure, axes = plt.subplots(1, 2, figsize=(11.0, 5.2), constrained_layout=True)
+    wall_units = (wall,)
+    poloidal.draw_flux_contours(
+        axes[0], radial, height, analytic, shared_levels, color="#3366cc"
+    )
+    poloidal.draw_flux_contours(
+        axes[0], radial, height, solved, shared_levels, color="#cc7722"
+    )
+    poloidal.draw_boundary(axes[0], boundary[:, 0], boundary[:, 1], color="#3366cc")
+    poloidal.draw_flux_contours(
+        axes[1], radial, height, difference, difference_levels, color="#7a3e9d"
+    )
+    for axis in axes:
+        poloidal.draw_wall(axis, units=wall_units)
+        poloidal.draw_nulls(
+            axis,
+            magnetic_axis=analytic_topology["axis_rz_m"],
+            x_points=analytic_topology["x_point_rz_m"],
+            style=DEFAULT_INK.variant(
+                axis_marker="^", axis_color="#3366cc", xpoint_color="#3366cc"
+            ),
+            contain=wall_units,
+        )
+        poloidal.draw_nulls(
+            axis,
+            magnetic_axis=solved_topology["axis_rz_m"],
+            x_points=solved_topology["x_point_rz_m"],
+            style=DEFAULT_INK.variant(
+                axis_marker="^", axis_color="#cc7722", xpoint_color="#cc7722"
+            ),
+            contain=wall_units,
+        )
+        poloidal_axes(axis)
+    axes[0].set_title("analytic blue / solved ochre; shared Wb levels", fontsize=9)
+    axes[1].set_title("(solved - analytic) / analytic flux span", fontsize=9)
+    axes[1].text(
+        0.02,
+        0.02,
+        "levels: " + ", ".join(f"{level:.2e}" for level in difference_levels),
+        transform=axes[1].transAxes,
+        fontsize=6,
+        va="bottom",
+        bbox=DEFAULT_INK.label_bbox,
+    )
+    figure.suptitle(
+        f"{row['case']} · {abs(int(row['requested_cells']))} requested cells"
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+    return {
+        "filesystem_path": str(path.relative_to(ROOT)),
+        "project_absolute_src": f"/nova/{path.relative_to(ROOT / 'docs')}",
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "difference_normalisation": "analytic flux span",
+        "difference_levels": difference_levels.tolist(),
+    }
+
+
+def _solve_summary(
+    row: dict[str, Any], comparison_figure: dict[str, Any]
+) -> dict[str, Any]:
     samples = row["solver"]["lambda_amplitude_history"]["samples"]
     amplitudes = {sample["state"]: sample["amplitude"] for sample in samples}
     root_topology = row["geometry"]["root_topology"]
@@ -192,7 +293,8 @@ def _solve_summary(row: dict[str, Any]) -> dict[str, Any]:
         "boundary_flux_wb": root_topology["boundary_flux_wb"],
         "analytic_boundary_flux_wb": exact_topology["boundary_flux_wb"],
         "boundary_flux_error_wb": row["geometry"]["boundary_flux_error_wb"],
-        "figure": row["figure"],
+        "certificate_figure": row["figure"],
+        "comparison_figure": comparison_figure,
         "part": str(
             certificate._part_path(row["case"], row["requested_cells"]).relative_to(
                 ROOT
@@ -237,7 +339,13 @@ def run(output_root: Path, *, solve: bool) -> dict[str, Any]:
             _write_json(row_path, row)
             if solve:
                 solved = certificate._measure(case_name, requested_cells)
-                row["solve"] = _solve_summary(solved)
+                comparison_path = (
+                    output_root
+                    / "panels"
+                    / f"{case_name}-{abs(requested_cells)}-comparison.png"
+                )
+                comparison = _draw_solve_comparison(solved, comparison_path)
+                row["solve"] = _solve_summary(solved, comparison)
                 _write_json(row_path, row)
             receipt["rows"].append(row)
             _write_json(receipt_path, receipt)

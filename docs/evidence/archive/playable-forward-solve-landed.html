@@ -1562,6 +1562,20 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
 <p><strong>Caveat on the acceptance, not the work.</strong> The flat-top target was reachable inside a single trip cap, so the multi-trip path the cap exists for is exercised weakly; a command needing several caps is the outstanding proof.</p>
 <p>Report: <code>~/.config/reckon/crew/reports/nova/playable/constrained-newton-globalisation.md</code>; receipts under <code>docs/figures/playable-forward-solve/constraint-globalisation/</code>.</p>
 </section>
+<section id="the-efit-centroid-convention-variation-is-unattributed"><h2>The EFIT centroid-convention variation is unattributed (2026-09-15)</h2>
+<p>Node <code>pfs-efit-centroid-offset-attribution</code> (all_debug CPU, diagnosis only; commits <code>8e5e4728</code> and <code>86e14b83</code>). The benchmark is <code>benchmarks/efit_centroid_offset_attribution.py</code>; the gate log is <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/centroid-offset/all_debug.log</code>.</p>
+<p><strong>Reproduction.</strong> On the seven convention-split rows of shot 22086 (12, 18, 24, 30, 36, 43 and 45), the centroid from EFIT's own signed <code>efm/plasma_current_rz</code> on its 65 by 65 grid minus EFIT's published <code>current_centrd_r</code> has mean <strong>-4.233552 cm</strong>, population standard deviation <strong>0.230514 cm</strong>, range <strong>-4.526747 to -3.868566 cm</strong>, and spread <strong>6.581806 mm</strong>. This reproduces the recorded 6.582 mm defect. The row-wise receipt keeps EFIT plasma current, elongation and the stored solenoid circuit beside every offset.</p>
+<table><caption>Candidate formation rules on the same seven rows</caption><thead><tr><th>Candidate</th><th>Offset spread</th><th>Spread reduction</th><th>Residual RMS</th><th>Reading</th></tr></thead><tbody>
+<tr><th scope="row">radial-coordinate weighting</th><td>7.077 mm</td><td>-0.495 mm</td><td>43.543 mm</td><td>increases the variation</td></tr>
+<tr><th scope="row">absolute density weighting</th><td>6.582 mm</td><td>0.000 mm</td><td>42.398 mm</td><td>bit-equivalent on these positive-density rows</td></tr>
+<tr><th scope="row">one-cell boundary-support erosion</th><td>6.301 mm</td><td>+0.280 mm (4.3%)</td><td>43.371 mm</td><td>small reduction, not the carrier</td></tr>
+<tr><th scope="row">half-weighted outer cells</th><td>6.431 mm</td><td>+0.150 mm (2.3%)</td><td>42.881 mm</td><td>small reduction, not the carrier</td></tr>
+<tr><th scope="row">positive elliptical Gaussian fit</th><td>47.426 mm</td><td>-40.844 mm</td><td>57.426 mm</td><td>worsens the variation</td></tr>
+</tbody></table>
+<p><strong>Verdict.</strong> None of the four candidate families accounts for the discharge variation. The strongest is one-cell support erosion, which removes only 0.280 mm of 6.582 mm; the variation is therefore <strong>unattributed</strong> by this measurement. Pearson correlations of the baseline convention term on the seven rows are <code>r=0.8919</code> against EFIT plasma current, <code>r=0.7018</code> against elongation, and <code>r=-0.9018</code> against stored solenoid current. These are diagnostic correlations on seven rows, not a correction model. A universal constant correction is not justified: the mean is a useful convention reference, but it would leave the measured row dependence visible.</p>
+<p><strong>Row 24.</strong> The native convention-split receipt remains <code>active_set_settled</code> at terminal residual <strong>1.1609292101e-3</strong> with <code>converged=false</code>. Its finite terminal centroid may remain terminal-state evidence, but a converged rerun is required before row 24 is used as converged-solve evidence. No solver repair or tolerance change was made.</p>
+<p>Receipt: <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/centroid-offset/receipt.json</code>; report: <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/centroid-offset/report.md</code>.</p>
+</section>
 </main>
 </body>
 </html>

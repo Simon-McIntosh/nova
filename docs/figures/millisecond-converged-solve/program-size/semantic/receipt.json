@@ -1,0 +1,281 @@
+{
+  "certificate": {
+    "assignment": {
+      "cpu_count": 8,
+      "device": "NVIDIA H200 NVL",
+      "host": "98dci4-gpu-0003.iter.org",
+      "jax_platforms": [
+        "cuda",
+        "cpu"
+      ],
+      "job_id": 1271640,
+      "job_name": "solve-program-semantic",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "requested_memory_mib": 131072,
+      "reservation": "gpu_0003_grpA",
+      "tmpdir": "/tmp"
+    },
+    "captured_at": "2026-09-15T17:34:47.065741+00:00",
+    "comparison": "pre-wrapper traced map against the frozen-partition accelerated program",
+    "measurement_revision": "4e82bafb3abbd972096f84f306dfc8b28577e2fe",
+    "passed": false,
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 0.0,
+      "root": "/home/ITER/mcintos/.cache",
+      "runtime_identity": {
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "NVIDIA H200 NVL",
+            "platform": "gpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
+      },
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-0745ecebea4cb264e054"
+    },
+    "rows": [
+      {
+        "baseline_seconds": 104.17620991263539,
+        "baseline_state_finite": true,
+        "baseline_state_sha256_binary64": "f9598a166437ef23dc46e6d9f5d6cbade584fe299b5ee0771f071332eaf914ed",
+        "baseline_terminal_residual": 3.4707767690226504e-16,
+        "baseline_terminal_residual_finite": true,
+        "candidate_seconds": 41.160414438694715,
+        "candidate_state_finite": true,
+        "candidate_state_sha256_binary64": "9cb5d9c80d7a3f0b6ceccb7208a2a09a513406b1eabc31fbcc1fa22e3e008ea5",
+        "candidate_terminal_residual": 1.3883107076090602e-15,
+        "candidate_terminal_residual_finite": true,
+        "case": "weak-rotation-reactor-static",
+        "converged_equal": true,
+        "maximum_absolute_state_difference": 5.684341886080802e-14,
+        "realised_state_values": 1529,
+        "requested_cells": -300,
+        "terminal_state_bit_identical": false
+      },
+      {
+        "baseline_seconds": 102.04228826612234,
+        "baseline_state_finite": true,
+        "baseline_state_sha256_binary64": "887ae18a0600051aa31b1f31bbabea4ae11923334a06a08f46965248d00129ce",
+        "baseline_terminal_residual": 1.9588366260638553e-16,
+        "baseline_terminal_residual_finite": true,
+        "candidate_seconds": 40.851841270923615,
+        "candidate_state_finite": true,
+        "candidate_state_sha256_binary64": "e12ddb29ea908d111c3fad893c18fb8325fea76bd71982a8c0d46a684b6a1420",
+        "candidate_terminal_residual": 1.5670693008510843e-15,
+        "candidate_terminal_residual_finite": true,
+        "case": "moderate-rotation-conventional-static",
+        "converged_equal": true,
+        "maximum_absolute_state_difference": 1.7763568394002505e-15,
+        "realised_state_values": 1535,
+        "requested_cells": -300,
+        "terminal_state_bit_identical": false
+      },
+      {
+        "baseline_seconds": 104.70973984152079,
+        "baseline_state_finite": true,
+        "baseline_state_sha256_binary64": "f540c01f24886d300c6bd1fa0a3d54507a3c0b2c70bc72f68e287316817a6263",
+        "baseline_terminal_residual": 2.9130076803021795e-16,
+        "baseline_terminal_residual_finite": true,
+        "candidate_seconds": 40.57459536753595,
+        "candidate_state_finite": true,
+        "candidate_state_sha256_binary64": "444f56bea88319b22e622700ac4bddb83aeaea79cc7ca97b1a8dc01e01ae467f",
+        "candidate_terminal_residual": 1.1652030721208718e-15,
+        "candidate_terminal_residual_finite": true,
+        "case": "strong-rotation-compact-static",
+        "converged_equal": true,
+        "maximum_absolute_state_difference": 1.249000902703301e-16,
+        "realised_state_values": 1525,
+        "requested_cells": -300,
+        "terminal_state_bit_identical": false
+      },
+      {
+        "baseline_seconds": 164.3271118402481,
+        "baseline_state_finite": true,
+        "baseline_state_sha256_binary64": "c7d00b8dfce08497a8aa83689904efb49f5cf83485ac457c1cb4ea5be11a0355",
+        "baseline_terminal_residual": 0.20916476784377447,
+        "baseline_terminal_residual_finite": true,
+        "candidate_seconds": 46.69201208092272,
+        "candidate_state_finite": true,
+        "candidate_state_sha256_binary64": "c085c4e4c666f6c4960cc491f3833e52f64352c42a702046740944f9ab2e181e",
+        "candidate_terminal_residual": null,
+        "candidate_terminal_residual_finite": false,
+        "case": "diverted-single-null",
+        "converged_equal": true,
+        "maximum_absolute_state_difference": 0.0022199809164994903,
+        "realised_state_values": 2226,
+        "requested_cells": -500,
+        "terminal_state_bit_identical": false
+      }
+    ],
+    "schema": "nova.solve-program-certificate-identity"
+  },
+  "mast_assignment": {
+    "cpu_count": 8,
+    "device": "NVIDIA H200 NVL",
+    "host": "98dci4-gpu-0003.iter.org",
+    "jax_platforms": [
+      "cuda",
+      "cpu"
+    ],
+    "job_id": 1271640,
+    "job_name": "solve-program-semantic",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "requested_memory_mib": 131072,
+    "reservation": "gpu_0003_grpA",
+    "tmpdir": "/tmp"
+  },
+  "mast_measurement_revision": "4e82bafb3abbd972096f84f306dfc8b28577e2fe",
+  "mast_rows": [
+    {
+      "after_compiled_boundary_ms_per_trip": 45.666431076824665,
+      "banked_boundary_ms_per_trip": 46.1,
+      "before_compiled_boundary_ms_per_trip": 166.04638658463955,
+      "compiled_host_terminal_flux_ulp": 0,
+      "identity": "21978/35 pure",
+      "terminal_flux_bit_identical": true,
+      "trips": 1
+    },
+    {
+      "after_compiled_boundary_ms_per_trip": 45.46282719820738,
+      "banked_boundary_ms_per_trip": 46.1,
+      "before_compiled_boundary_ms_per_trip": 50.64697377383709,
+      "compiled_host_terminal_flux_ulp": 0,
+      "identity": "21978/35 mixed",
+      "terminal_flux_bit_identical": true,
+      "trips": 1
+    },
+    {
+      "after_compiled_boundary_ms_per_trip": 51.088535226881504,
+      "banked_boundary_ms_per_trip": 46.1,
+      "before_compiled_boundary_ms_per_trip": 54.76085562258959,
+      "compiled_host_terminal_flux_ulp": 0,
+      "identity": "21983/35 pure",
+      "terminal_flux_bit_identical": true,
+      "trips": 1
+    },
+    {
+      "after_compiled_boundary_ms_per_trip": 51.0760098695755,
+      "banked_boundary_ms_per_trip": 46.1,
+      "before_compiled_boundary_ms_per_trip": 60.158408246934414,
+      "compiled_host_terminal_flux_ulp": 0,
+      "identity": "21983/35 mixed",
+      "terminal_flux_bit_identical": true,
+      "trips": 1
+    },
+    {
+      "after_compiled_boundary_ms_per_trip": 53.31915896385908,
+      "banked_boundary_ms_per_trip": 46.1,
+      "before_compiled_boundary_ms_per_trip": 152.31867879629135,
+      "compiled_host_terminal_flux_ulp": 0,
+      "identity": "21985/51 pure",
+      "terminal_flux_bit_identical": true,
+      "trips": 1
+    },
+    {
+      "after_compiled_boundary_ms_per_trip": 51.03868090858062,
+      "banked_boundary_ms_per_trip": 46.1,
+      "before_compiled_boundary_ms_per_trip": 83.85788245747487,
+      "compiled_host_terminal_flux_ulp": 0,
+      "identity": "21985/51 mixed",
+      "terminal_flux_bit_identical": true,
+      "trips": 3
+    },
+    {
+      "after_compiled_boundary_ms_per_trip": 50.45085912570357,
+      "banked_boundary_ms_per_trip": 46.1,
+      "before_compiled_boundary_ms_per_trip": 76.51999173685908,
+      "compiled_host_terminal_flux_ulp": 0,
+      "identity": "21986/46 pure",
+      "terminal_flux_bit_identical": true,
+      "trips": 2
+    },
+    {
+      "after_compiled_boundary_ms_per_trip": 51.69946017364661,
+      "banked_boundary_ms_per_trip": 46.1,
+      "before_compiled_boundary_ms_per_trip": 53.62728533024589,
+      "compiled_host_terminal_flux_ulp": 0,
+      "identity": "21986/46 mixed",
+      "terminal_flux_bit_identical": true,
+      "trips": 3
+    },
+    {
+      "after_compiled_boundary_ms_per_trip": 53.79378795623779,
+      "banked_boundary_ms_per_trip": 46.1,
+      "before_compiled_boundary_ms_per_trip": 57.26295802742243,
+      "compiled_host_terminal_flux_ulp": 0,
+      "identity": "21989/55 pure",
+      "terminal_flux_bit_identical": true,
+      "trips": 1
+    },
+    {
+      "after_compiled_boundary_ms_per_trip": 55.067786015570164,
+      "banked_boundary_ms_per_trip": 46.1,
+      "before_compiled_boundary_ms_per_trip": 108.38781483471394,
+      "compiled_host_terminal_flux_ulp": 0,
+      "identity": "21989/55 mixed",
+      "terminal_flux_bit_identical": true,
+      "trips": 1
+    },
+    {
+      "after_compiled_boundary_ms_per_trip": 46.1480263620615,
+      "banked_boundary_ms_per_trip": 46.1,
+      "before_compiled_boundary_ms_per_trip": 63.66639817133546,
+      "compiled_host_terminal_flux_ulp": 0,
+      "identity": "22086/43 pure",
+      "terminal_flux_bit_identical": true,
+      "trips": 1
+    },
+    {
+      "after_compiled_boundary_ms_per_trip": 45.07846385240555,
+      "banked_boundary_ms_per_trip": 46.1,
+      "before_compiled_boundary_ms_per_trip": 50.577943213284016,
+      "compiled_host_terminal_flux_ulp": 0,
+      "identity": "22086/43 mixed",
+      "terminal_flux_bit_identical": true,
+      "trips": 1
+    }
+  ],
+  "passed": false,
+  "schema": "nova.solve-program-semantic-gate"
+}

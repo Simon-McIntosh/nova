@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="78">
+<meta name="plan-version" content="79">
 </head>
 <body>
 <main class="plan-doc">
@@ -451,6 +451,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260914T185929330315-cca-private-region-parallel-kernel" data-who="s19i-cca-private-region" data-when="2026-09-15T01:08:06.773Z">
     <div class="r-comment-body"><p>Pointer-jumping connected components over the confined-cell adjacency seeded at the axis cell reproduces the production private-region mask exactly (zero differing cells) at every rung and costs 0.021, 0.026, 0.020 and 0.047 ms per state for a batch of 16 at 550, 814, 1074 and 2616 cells, against the production per-representative flood's 0.50, 0.75, 1.00 and 2.86 ms in the same harness (scaling exponent 1.12): 24 to 61 times faster, flat in cells, with no per-candidate loop. The doubling flood matches at 814 but disagrees on 3, 12 and 1492 cells at the other rungs with its pass count set from the diameter; the saddle-wedge level test is fastest (0.007 to 0.016 ms) but disagrees on 3 to 13 cells where the separatrix legs curve away from the saddle's eigenvectors. Pointer jumping is the replacement for the exclusion stage that carried 70 to 92 percent of the production read.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260915T041619672372-cca-private-region-figure-and-wedge-audit" data-who="s19e-cca-private-region-audit" data-when="2026-09-15T04:56:45Z">
+    <div class="r-comment-body"><p>The private-region figures were redrawn with the authored private cells and the sparse connectivity rings traversed, so the earlier overlapping-hexagon panel was a drawing defect, not a mesh one. The flood fill is verified against an independent BFS over the same rings at 550, 814, 1074 and 2616 cells with zero membership differences, and the pointer-jumping mask agrees with the flood fill at every rung. The saddle-wedge shortcut disagrees with the flood fill on 3, 5, 5 and 13 cells; with the correct tangent pair the wedge disagreements on the three finer meshes vanish and only the coarsest mesh keeps three genuine curvature differences, so a wedge shortcut would need an explicit coarse-mesh fallback for a saving of 0.013 to 0.031 ms while the pointer-jumping mask is exact without one. Banked on main at f6b86929 and merged at 6f4f14a4.</p></div>
 </div>
 </section>
 

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T06:30:05",
+  "updated": "2026-09-15T07:06:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -158759,6 +158759,274 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T041619672372-cca-private-region-figure-and-wedge-audit",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a74",
+        "node": "cca-private-region-figure-and-wedge-audit",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 946,
+                "cached_input_tokens": 928455,
+                "input_tokens": 929403,
+                "output_tokens": 3242,
+                "reasoning_output_tokens": 954,
+                "total_tokens": 932645,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Critical evaluation and figure repair; never open any receipt larger than one megabyte in an editor (load it with json); commit before submitting any job. Facts at this base (main): benchmarks/private_region_parallel_kernel.py and benchmarks/private_region_figures.py (banked from run r-20260914T185929330315, results in benchmarks/private_region_results.json and docs/figures/cut-cell-current-attribution/private-region/receipt.json) compared four private-region mask formulations on the analytic single-null flux at 550, 814, 1074 and 2616 cells: the production per-representative flood (a), a doubling flood (b), pointer-jumping connected components (c, zero differing cells at every rung) and a saddle-wedge level test (d, 3 to 13 differing cells); the lead viewed docs/figures/cut-cell-current-attribution/private-region/private-mask-poloidal-1000.svg and found the drawn hexagons overlapping and misplaced (cells drawn on top of each other and rotated relative to the lattice) and the wedge disagreements clustered on one side of a separatrix leg rather than following the curvature of the legs, which suggests a convention error rather than curved legs. The oracle machine carries every cell's true polygon (OracleMachine.cell_polygons from scripts/analytic_oracle_fixtures/measure.py, with centroids in node); the committed nova.media painters draw walls and nulls (draw_wall, draw_nulls) and the plotting rules are line contours, no axes, wall on every panel, both null sets. Deliver three things. (1) Figure repair: draw cells from their own polygon vertices, never a synthesised regular hexagon; regenerate the poloidal panel at 1074 and 2616 cells with the production private mask hatched, the pointer-jumping mask outlined, and the wedge disagreements outlined in a third line style, plus the analytic separatrix legs and the saddle eigenvector directions drawn from the admitted X-point; state what was wrong in the old renderer. (2) Oracle verification: recompute the private mask independently of production with a numpy breadth-first search from the axis cell over the confined-cell adjacency (cells inside the separatrix level and inside the wall, reachable from the axis) and compare cell by cell with the production flood mask at every rung; report the count of differing cells and, if nonzero, which cells and why (the production flood's hysteresis band, its saddle-cell bridging rule, or its representative-candidate loop), so the oracle itself is confirmed or corrected before the fast methods are judged against it. (3) Wedge audit: for every cell where the wedge test disagrees with the confirmed oracle, tabulate its centroid position relative to the saddle in the eigenvector frame (coordinates along both eigenvectors in pitch units), its flux relative to the X-point level, and which side of each leg the test placed it; test the three convention candidates (eigenvector sign or ordering, the flux-side inequality, the wedge defined by the wrong eigenvector pair) by flipping each and recounting disagreements; then quantify the true curvature effect separately by comparing the straight eigenvector legs to the analytic separatrix branches at each disagreeing cell's radius. Report whether a convention fix makes the wedge exact at every rung, and if not what residual disagreement is genuine curvature, with the wedge's 0.007 to 0.016 ms cost beside pointer jumping's 0.02 to 0.05. CPU only (all_debug, --time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu, TMPDIR=/tmp in submit environment and payload, root venv python with PYTHONPATH at the worktree, sbatch detached, --output in the run directory); the machines are cached. Manifest with the SLURM job number under blockers before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 4.0,
+          "goal": "Correct the private-region evidence figures to draw the mesh's own cell polygons, verify the flood-fill oracle independently, and locate why the saddle-wedge test disagrees with it",
+          "id": "cca-private-region-figure-and-wedge-audit",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T04:16:20Z",
+            "read_at": "2026-09-15T04:16:22Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 19.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T041619672372-cca-private-region-figure-and-wedge-audit/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/private_region_figures.py",
+            "benchmarks/private_region_wedge_audit.py",
+            "docs/figures/cut-cell-current-attribution/private-region",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/private-region-audit",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19e-cca-private-region-audit",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T04:16:32Z",
+        "completed_at": "2026-09-15T04:56:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2413,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2413,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "b6227f5a174ae6956daab7047a7ec18a5ffc86bc",
+        "commits": [
+          "176e6ea68ad2c808382a1b7c27b63a9494175129",
+          "cf126775b7587870848b0a715e43e47d1cce9f7e",
+          "5234f3c102d937eff994881a227f771f80e9c213",
+          "3b07c0b964c4b21702d71f07f1df02b7d6e6d58e",
+          "66c39328c566e77152ebc24766cc21a34d043ce1"
+        ],
+        "changed_lines": {
+          "added": 8327,
+          "removed": 1609,
+          "files": 9
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug jobs 1271029, 1271030, 1271031 and 1271036: private-region figure repair, BFS flood-fill proof over the connectivity rings, and the wedge audit at 550, 814, 1074 and 2616 cells, each EXIT=0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T041619672372-cca-private-region-figure-and-wedge-audit/private-region-audit-1271036.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T041619672372-cca-private-region-figure-and-wedge-audit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a347-e677-7350-9025-ba48951510b1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7438848,
+            "cached_input_tokens_cumulative": 7438848,
+            "input_tokens": 7498762,
+            "input_tokens_cumulative": 7498762,
+            "output_tokens": 23977,
+            "output_tokens_cumulative": 23977,
+            "reasoning_output_tokens": 6467,
+            "reasoning_output_tokens_cumulative": 6467
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T04:56:45Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 20.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T04:56:45Z"
+            }
+          ],
+          "notional_cost_usd": 99.3931,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: SLURM job 1271023 running on 98dci4-clu-3141 (all_debug; 00:59:00; 8 cpus; 64G); waiting for completion before the after_suite/failure_attribution verdict can be computed. Scheduled wait; not a fault - resume when the job lands.",
+              "elapsed_seconds": 309,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2227,
+              "log_fresh": false,
+              "manifest_commits": [
+                "(none yet - read-only test role; no repo writes until the landing record at completion)"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "9c9160b88342f1eb74c39f5bd033f06f77eb9d99ef4c53096df7e4482074d1fd",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T033357673076-cca-quadrature-delta-after-arm/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T033357673076-cca-quadrature-delta-after-arm/manifest.md; resolve the blocker before resuming the run",
+              "node": "cca-quadrature-delta-after-arm",
+              "phase": "starting",
+              "plan": "cut-cell-current-attribution",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260915T033357673076-cca-quadrature-delta-after-arm",
+              "session": "s19-review",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260915T033357673076-cca-quadrature-delta-after-arm",
+                "session_id": "9c66979d-85a7-4291-a54c-7e8c150a59ba",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 2286,
+              "terminal_at": "2026-09-15T03:38:19Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-quadrature-delta-after-arm"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 7438848,
+          "cumulative_input_tokens": 14937610,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 30444
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-private-region-figure-and-wedge-audit",
+          "session_id": "01a0a347-e677-7350-9025-ba48951510b1",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T04:56:45Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 85.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -159071,6 +159339,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2501
+    "_version": 2502
   }
 }

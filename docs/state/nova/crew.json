@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T06:16:19",
+  "updated": "2026-09-15T06:30:05",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4793,6 +4793,15 @@
         "created": "2026-09-14"
       },
       {
+        "id": "s19i-cca-limiter-oracle-rebase",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
         "id": "s19i-cca-limiter-subpanel",
         "harness": "clive",
         "role": "implement",
@@ -4919,6 +4928,15 @@
         "created": "2026-09-14"
       },
       {
+        "id": "s19i-cca-wall-pitch",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
         "id": "s19i-cca-wholecell-rows",
         "harness": "clive",
         "role": "implement",
@@ -4926,6 +4944,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-14"
+      },
+      {
+        "id": "s19i-cca-zero-residual",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
       },
       {
         "id": "s19i-dvf-s4",
@@ -5052,6 +5079,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-14"
+      },
+      {
+        "id": "s19i-msc-profile-args",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
       },
       {
         "id": "s19i-msc-scan-prototype",
@@ -159035,6 +159071,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2497
+    "_version": 2501
   }
 }

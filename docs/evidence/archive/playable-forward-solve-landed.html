@@ -1562,6 +1562,20 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
 <p><strong>Caveat on the acceptance, not the work.</strong> The flat-top target was reachable inside a single trip cap, so the multi-trip path the cap exists for is exercised weakly; a command needing several caps is the outstanding proof.</p>
 <p>Report: <code>~/.config/reckon/crew/reports/nova/playable/constrained-newton-globalisation.md</code>; receipts under <code>docs/figures/playable-forward-solve/constraint-globalisation/</code>.</p>
 </section>
+<section id="bounded-shape-inverse">
+<h2>The bounded shape inverse holds uncommanded extrema and admits the selected current through a nonlinear solve (2026-09-15)</h2>
+<p><strong>Mechanism.</strong> The least-squares residual includes held flux and matching field rows at every uncommanded turning point. A regularisation sweep with zero placement rounds selects the smallest dimensionless current penalty whose proposal stays within 20 kA; the curve explicitly does not represent a map-only admission boundary. The selected weight then runs the ordinary placement inverse and a completed nonlinear forward solve at fractions 1, 1/2, and successively smaller nonzero fractions through 2<sup>-20</sup>. Only a completed axis-qualified nonlinear state is accepted, and the accepted fraction is serialized. Exhaustion is a typed refusal with the full nonzero sequence; zero is never an achieved shape.</p>
+<table>
+<caption>All-debug CPU command receipts at source <code>b5559a8c</code></caption>
+<thead><tr><th scope="col">Command</th><th scope="col">Commanded motion</th><th scope="col">Achieved motion</th><th scope="col">Maximum uncommanded drift</th><th scope="col">Accepted fraction</th><th scope="col">Maximum current change</th><th scope="col">Forward result</th></tr></thead>
+<tbody>
+<tr><th scope="row">Null</th><td>0 mm; inverse RHS and current delta exact</td><td>0 A current change</td><td>45.083 mm on the repeated nonlinear solve</td><td>1.0</td><td>0 A</td><td>converged, qualified axis</td></tr>
+<tr><th scope="row">Upper point +20 mm</th><td>upper +20.000 mm</td><td>upper +32.941 mm</td><td>18.411 mm</td><td>1.0</td><td>7.467 kA</td><td>converged, qualified axis</td></tr>
+<tr><th scope="row">Elongation +5%</th><td>upper and lower 54.950 mm outward</td><td>upper 112.446 mm; lower 118.984 mm outward</td><td>29.984 mm</td><td>0.5 after the full step refused</td><td>6.625 kA</td><td>converged, qualified axis</td></tr>
+</tbody>
+</table>
+<p><strong>Gate.</strong> The upper-point drift contracts from the banked 123.660 mm to 18.411 mm, all three commands remain below 20 kA, and elongation produces an achieved shape rather than <code>NoQualifiedAxisError</code> or a zero-fraction no-op. The three receipts and aggregate are under <code>docs/figures/playable-forward-solve/shape-inverse/</code>; the measurement log is <code>~/.config/reckon/crew/reports/nova/s19-handoff/shape-inverse/all-debug-three-command.log</code>. No H200 arm was run.</p>
+</section>
 </main>
 </body>
 </html>

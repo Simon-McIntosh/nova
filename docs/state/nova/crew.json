@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T05:33:49",
+  "updated": "2026-09-15T05:33:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5367,6 +5367,15 @@
       },
       {
         "id": "s19t-cca-quadrature-delta-3",
+        "harness": "clive",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19t-cca-quadrature-delta-4",
         "harness": "clive",
         "role": "test",
         "session_id": null,
@@ -159017,6 +159026,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2495
+    "_version": 2496
   }
 }

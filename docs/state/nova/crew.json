@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T09:33:40",
+  "updated": "2026-09-15T09:39:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4708,8 +4708,35 @@
         "created": "2026-09-15"
       },
       {
+        "id": "s19h-pfs-axisflux-l",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
         "id": "s19h-pfs-budget-c",
         "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-pfs-centroid-l",
+        "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-pfs-f32-l",
+        "harness": "codex-luna",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -160473,6 +160500,200 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T072411425290-cank-shafranov-profile-amplitude-row",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a74",
+        "node": "cank-shafranov-profile-amplitude-row",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 353,
+                "cached_input_tokens": 679388,
+                "input_tokens": 679773,
+                "output_tokens": 154,
+                "reasoning_output_tokens": 36,
+                "total_tokens": 679927,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "A ShafranovConstraint (or equivalently named) row in nova/equilibrium/constraint.py evaluates beta_p + l_i/2 from the flux state through the existing internal-inductance and pressure integrals and takes the pressure-gradient or FF-prime amplitude as its compensating unknown through the ProfileAmplitude form the interface already declares; CPU contracts in tests/test_shafranov_constraint.py on the Solovev fixture pass on all_debug (JAX_PLATFORMS=cpu, root venv python directly): the row's response to the amplitude equals a central difference to 1e-6 relative, the imposed row converges to its own free-solve value with zero compensating change (bit-identical state), and an imposed target displaced by 5 percent converges with the amplitude change and residual recorded; the receipt benchmarks/shafranov_row_receipt.py writes docs/figures/constraint-augmented-newton-krylov/shafranov/receipt.json on the twelve MAST bank rows (CPU or one H200 job, persisted per row) tabulating the free beta_p + l_i/2 against the value the bank's extracted profiles imply and the amplitude the row demands to match it; if the source tangent needed is absent from nova/equilibrium/source.py, stop with NEEDS-HELP naming the missing derivative rather than editing source.py",
+          "estimated_hours": null,
+          "goal": "The Shafranov beta-p plus half-l-i constraint row with a profile-amplitude compensating unknown on the constraint interface",
+          "id": "cank-shafranov-profile-amplitude-row",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T07:24:11Z",
+            "read_at": "2026-09-15T07:24:12Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 23.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T072411425290-cank-shafranov-profile-amplitude-row/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/constraint.py",
+            "tests/test_shafranov_constraint.py",
+            "benchmarks/shafranov_row_receipt.py",
+            "docs/figures/constraint-augmented-newton-krylov/shafranov",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/shafranov",
+            "docs/evidence/archive/constraint-augmented-newton-krylov-landed.html",
+            "docs/plans/constraint-augmented-newton-krylov.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-cank-shafranov-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T07:24:37Z",
+        "completed_at": "2026-09-15T07:34:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 603,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 603,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "6a2e4f6c0ae17a09d376cbc13d464cc4a63920c5",
+        "commits": [
+          "ac5193669337f2055142f6ed07aa109103694fec"
+        ],
+        "changed_lines": {
+          "added": 21,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T072411425290-cank-shafranov-profile-amplitude-row/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a3f4-1759-78e3-8266-9d7b28bc0d3a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7050752,
+            "cached_input_tokens_cumulative": 7050752,
+            "input_tokens": 7254952,
+            "input_tokens_cumulative": 7254952,
+            "output_tokens": 16823,
+            "output_tokens_cumulative": 16823,
+            "reasoning_output_tokens": 4792,
+            "reasoning_output_tokens_cumulative": 4792
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T07:34:40Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 24.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T07:34:40Z"
+            }
+          ],
+          "notional_cost_usd": 29.3563,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 7050752,
+          "cumulative_input_tokens": 14305704,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 21615
+        },
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cank-shafranov-profile-amplitude-row",
+          "session_id": "01a0a3f4-1759-78e3-8266-9d7b28bc0d3a",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T07:34:40Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 63.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -160785,6 +161006,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2526
+    "_version": 2530
   }
 }

@@ -600,6 +600,60 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   positive-polarity level range and annotation overlap before job 1271525 produced the
   accepted figure.</p>
 </section>
+<section id="limited-shadow-oracle-overlay-error">
+  <h2>Limited terminal states: analytic-oracle overlay and flux-span error</h2>
+
+  <p>The receipt-only extension of
+  <code>benchmarks/limited_shadow_before_after.py</code> draws every persisted terminal
+  state under <code>limited-shadow/solve-parts</code> that belongs to the three required
+  1000-cell limited whole-cell rows, the single-null 500 control, or an exact-clip
+  directory discovered by glob. Job 1271601 ran once on <code>all_debug</code> with four
+  CPU cores, 32 GiB, <code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code> in both the
+  submission environment and payload, and the root-environment Python directly. It read
+  four terminal parts, found no exact-clip terminal part at render time, made zero solve
+  calls, and exited zero. The renderer commits are <code>2497734b</code>,
+  <code>8a463fa8</code> and <code>58a12e4d</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/limited-shadow/oracle-overlay-error.png"
+         alt="Four persisted Solovev terminal states with solved and analytic contours overlaid, signed normalized error contours, and outboard midplane error traces against a roundoff floor">
+    <figcaption>Each row uses twelve shared analytic Wb levels for solved and analytic
+    contours, draws both null sets and the wall, then shows signed
+    <code>(solved - analytic) psi</code> divided by analytic flux span on the fixed levels
+    plus or minus 1e-1 through 1e-5. The outboard midplane trace runs from the analytic
+    axis to the wall on a logarithmic scale with one pitch and the 1e-14 roundoff floor
+    marked. The exact-clip glob is evaluated on every render, so a later persisted exact
+    terminal row joins the figure without a source edit.</figcaption>
+  </figure>
+
+  <table>
+    <caption>Persisted terminal-state error against the analytic Solovev oracle</caption>
+    <thead><tr><th scope="col">Row</th><th scope="col">Max difference / span</th><th scope="col">RMS difference / span</th><th scope="col">Axis error (pitch)</th><th scope="col">Boundary error (Wb)</th><th scope="col">Boundary error / span</th><th scope="col">Amplitude</th><th scope="col">Converged</th><th scope="col">Terminal residual</th><th scope="col">Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>weak 1000 whole-cell</td><td>0.209890</td><td>0.112986</td><td>0.635491</td><td>4.95939</td><td>0.0993052</td><td>0.896835</td><td>yes</td><td>1.38774e-15</td><td><strong>not oracle-matched</strong></td></tr>
+      <tr><td>moderate 1000 whole-cell</td><td>0.209313</td><td>0.113013</td><td>0.642871</td><td>0.140971</td><td>0.102065</td><td>0.896695</td><td>yes</td><td>5.87522e-16</td><td><strong>not oracle-matched</strong></td></tr>
+      <tr><td>strong 1000 whole-cell</td><td>0.203774</td><td>0.110639</td><td>0.643907</td><td>0.0118363</td><td>0.102424</td><td>0.894785</td><td>yes</td><td>2.91253e-16</td><td><strong>not oracle-matched</strong></td></tr>
+      <tr><td>single-null 500 control</td><td>1.54980e-14</td><td>4.44188e-15</td><td>0.0201717</td><td>2.49028e-19</td><td>4.36238e-17</td><td>1.000000</td><td>yes</td><td>2.42301e-17</td><td><strong>oracle-matched</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Interpretation.</strong> A converged whole-cell row is a self-consistent
+  fixed point and is not an oracle match until its difference panel is at the roundoff
+  floor. The three limited rows have residuals between 2.9e-16 and 1.4e-15 but remain
+  about 0.64 pitch wrong at the axis, 4.96, 0.14 and 0.012 Wb wrong at the boundary,
+  about 0.20 of flux span wrong at maximum, and near 0.897 in plasma-current amplitude.
+  Those are discretisation errors the exact clip must remove. By contrast, the
+  single-null control is 1.55e-14 of span at maximum and is within one hundred times
+  the 1e-14 roundoff floor.</p>
+
+  <p>The machine-readable table and input hashes are in
+  <code>docs/figures/cut-cell-current-attribution/limited-shadow/oracle-overlay-error-receipt.json</code>;
+  the human report and accepted job log are under
+  <code>~/.config/reckon/crew/reports/nova/s19-handoff/oracle-overlay/</code>. The receipt
+  pins the PNG SHA-256, the twelve analytic contour levels per row, every visible fixed
+  difference level, the outboard chord extent and maximum, the roundoff-floor source,
+  and the glob discovery census.</p>
+</section>
 <section id="cpu-backend-abort-closing">
   <h2>CPU test-lane backend abort: attributed to process-cumulative in-process compilation</h2>
 

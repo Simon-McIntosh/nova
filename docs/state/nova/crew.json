@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T09:19:05",
+  "updated": "2026-09-15T09:33:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4645,6 +4645,15 @@
         "created": "2026-09-15"
       },
       {
+        "id": "s19h-cank-shafranov-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
         "id": "s19h-cca-abort-l",
         "harness": "codex-luna",
         "role": "implement",
@@ -4710,6 +4719,24 @@
       {
         "id": "s19h-pfs-legacy-c",
         "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-pfs-shapeinv-t",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-pfs-writerread-l",
+        "harness": "codex-luna",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -160235,6 +160262,217 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T060912451169-cca-xpoint-cell-wedge-clip-oracle",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a73",
+        "node": "cca-xpoint-cell-wedge-clip-oracle",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5351,
+                "cached_input_tokens": 588269,
+                "input_tokens": 593622,
+                "output_tokens": 845,
+                "reasoning_output_tokens": 430,
+                "total_tokens": 594467,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "One all_debug CPU job (JAX_PLATFORMS=cpu, root venv python directly, TMPDIR=/tmp) reports on the Cerfon-Freidberg single-null oracle at the cached 300, 1000 and 2500-cell rungs with 110 as reference: the X-point cell's core-side current within 1e-6 relative of the analytic core-wedge integral and exactly 0.0 private-flux and common-SOL current for the confined profile, with the analytic saddle inserted as a clip vertex, the four edge roots paired by branch, four wedges emitted as fixed-capacity polygons with exact-zero padding and no data-dependent shape, moments integrated per wedge with that wedge's profile; receipt plus one line-contour panel per rung (analytic and solved null sets in their styles, wall units, the cut cell outlined) under docs/figures/cut-cell-current-attribution/xpoint-cell/; tests/test_xpoint_cell_wedge_clip.py pins the wedge partition on a synthetic saddle cell; every test module importing the changed clip modules passes one per fresh CPU process with zero added failures against the base ids",
+          "estimated_hours": null,
+          "goal": "The four-crossing X-point cell clipped into branch-paired fixed-capacity wedges whose per-wedge moments match the analytic wedge integrals on the single-null oracle",
+          "id": "cca-xpoint-cell-wedge-clip-oracle",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T06:09:14Z",
+            "read_at": "2026-09-15T06:09:16Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 20.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T060912451169-cca-xpoint-cell-wedge-clip-oracle/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/separatrix_clip.py",
+            "nova/equilibrium/clip_quadrature.py",
+            "benchmarks/xpoint_cell_wedge_oracle.py",
+            "tests/test_xpoint_cell_wedge_clip.py",
+            "docs/figures/cut-cell-current-attribution/xpoint-cell",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/xpoint-cell",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-cca-xcell-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T06:09:48Z",
+        "completed_at": "2026-09-15T07:29:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4758,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4758,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "0f872fd69bc1a3766fbb1610ee3412fca647887e",
+        "commits": [
+          "770f3cf62e4dfeb53f0ab09b7226f6668b99f412",
+          "130881df57e12a832d81f2e91b85afb70b171c40",
+          "7eacc96cc54a384d4c7c7d46cbe96a2c4c22a9a9",
+          "c807b3297ada2aab3e90ddc33e9c5aa836822cb7",
+          "40d5ad7c799e58c04bd670a7b7c2eeeed8dd13ff",
+          "016acfd52c4ea5f75aa64020319c20487399d83c",
+          "f57409c8475a983020639aa51f855175ec46d1c7",
+          "4d80ad6f5ae694f7fd57eb817b1b513ed6412aff",
+          "8e8d8e9741b33368637dccb98972347de72d0e1b",
+          "49a32f22148d6683c4ea2441f16bdcf09defc76b",
+          "5b0daf3b3463a0e56e98a9b4b50f9bdefb1162d4",
+          "d03c171dc457c64e2948996f6d81b4b4ace48d47"
+        ],
+        "changed_lines": {
+          "added": 13722,
+          "removed": 0,
+          "files": 15
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "gate_check": {
+          "command": "one all_debug allocation, eight direct importer modules one per fresh CPU process at 49a32f22 (after-summary.tsv) plus oracle ladder job 1271095",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/xpoint-cell/after-summary.tsv",
+          "log_digest": "b5c446400501b8f257d7fea3548dcfc46648865bcccc770a46c4bf4aedbf3faa"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T060912451169-cca-xpoint-cell-wedge-clip-oracle/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a3af-9889-7520-96da-3aa0de4f2c99",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 30604800,
+            "cached_input_tokens_cumulative": 30604800,
+            "input_tokens": 31260472,
+            "input_tokens_cumulative": 31260472,
+            "output_tokens": 74039,
+            "output_tokens_cumulative": 74039,
+            "reasoning_output_tokens": 18576,
+            "reasoning_output_tokens_cumulative": 18576
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T07:29:06Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 24.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T07:29:06Z"
+            }
+          ],
+          "notional_cost_usd": 290.5892,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 30604800,
+          "cumulative_input_tokens": 61865272,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 92615
+        },
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-xpoint-cell-wedge-clip-oracle",
+          "session_id": "01a0a3af-9889-7520-96da-3aa0de4f2c99",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T07:29:06Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 122.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -160547,6 +160785,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2522
+    "_version": 2526
   }
 }

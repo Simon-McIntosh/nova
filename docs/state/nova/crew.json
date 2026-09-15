@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T09:11:18",
+  "updated": "2026-09-15T09:19:05",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -160030,6 +160030,211 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T060730104983-cank-edge-constraint-synthetic-target",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a74",
+        "node": "cank-edge-constraint-synthetic-target",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 393,
+                "cached_input_tokens": 572145,
+                "input_tokens": 572542,
+                "output_tokens": 25,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 572567,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "docs/figures/constraint-augmented-newton-krylov/edge-constraint/receipt.json from one H200 job (betelgeuse, gpu_0003_grpA, one card, 8 cores, 128G, persistent compilation cache, TMPDIR=/tmp in submit environment and payload, root venv python directly) on 22086/43 mixed records, for a boundary-flux point row placed at a named outboard-midplane edge point displaced 5, 10 and 20 mm outward from the converged separatrix, per command: convergence to a stated tolerance in mm, the merit sequence per trip (monotone where steps are nonzero), the largest compensating current applied per trip against the 1000 A cap, any accepted overshoot, the total compensating current beside a directly measured free-solve reference reaching the same displacement, and the trip count; a refusal names the trip that stopped lowering the merit; a CPU contract in tests/test_edge_constraint_demonstration.py on the Solovev fixture passes on all_debug; receipt rows persist per command as they land",
+          "estimated_hours": null,
+          "goal": "A receipt demonstrating whether the constrained reduced route recovers a synthetic edge-quantity displacement on a converged MAST equilibrium",
+          "id": "cank-edge-constraint-synthetic-target",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T06:07:30Z",
+            "read_at": "2026-09-15T06:07:31Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 20.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T060730104983-cank-edge-constraint-synthetic-target/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/edge_constraint_demonstration.py",
+            "tests/test_edge_constraint_demonstration.py",
+            "docs/figures/constraint-augmented-newton-krylov/edge-constraint",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/edge-constraint",
+            "docs/evidence/archive/constraint-augmented-newton-krylov-landed.html",
+            "docs/plans/constraint-augmented-newton-krylov.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-cank-edge-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T06:07:55Z",
+        "completed_at": "2026-09-15T07:15:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4050,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4050,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "0f872fd69bc1a3766fbb1610ee3412fca647887e",
+        "commits": [
+          "5cc33df37ee538207a9a3941abf491b52030e709",
+          "df470e46fab946a8cfeaf0c6c1550a7b015e0b48",
+          "80037ce8ab5dcdca11d008d77d6a08b2a285a7ee",
+          "054a4366cbd776029b1924caef3374e44ac6ae76",
+          "a2f562584ee023934e85c4a1eb1c7cb7a3a10e19",
+          "95e17e2cd60515875f731dc464ff72077ea433b5",
+          "d62b640ef98e2435fe81d61174ec968a9ef62dd8",
+          "06d824f3315b44ac5c6921c1b10b3ecbea965acb"
+        ],
+        "changed_lines": {
+          "added": 2083,
+          "removed": 0,
+          "files": 6
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider tests/test_edge_constraint_demonstration.py on all_debug job 1271086 (2 passed), then H200 job 1271106 receipt verdict pass",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/edge-constraint/cpu-contract-final.log",
+          "log_digest": "0e4fc7f6aae798ed8b391eb2e773a4e4cf70b5204b570b11c4ae1f46a251abd7"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T060730104983-cank-edge-constraint-synthetic-target/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a3ad-dcc1-7a13-99a1-5af233ea24b9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3534464,
+            "cached_input_tokens_cumulative": 3534464,
+            "input_tokens": 3585857,
+            "input_tokens_cumulative": 3585857,
+            "output_tokens": 20137,
+            "output_tokens_cumulative": 20137,
+            "reasoning_output_tokens": 3691,
+            "reasoning_output_tokens_cumulative": 3691
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T07:15:25Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 23.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T07:15:25Z"
+            }
+          ],
+          "notional_cost_usd": 142.0964,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 3534464,
+          "cumulative_input_tokens": 7120321,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 23828
+        },
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cank-edge-constraint-synthetic-target",
+          "session_id": "01a0a3ad-dcc1-7a13-99a1-5af233ea24b9",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T07:15:25Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 119.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -160342,6 +160547,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2521
+    "_version": 2522
   }
 }

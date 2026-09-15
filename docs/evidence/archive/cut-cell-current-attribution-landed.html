@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="cut-cell-current-attribution-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="cut-cell-current-attribution">
+<title>cut-cell-current-attribution-landed</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Cut-cell current attribution — cumulative execution evidence">
+<meta name="plan-summary" content="Landing record of the cut-cell-current-attribution plan: the §1 root cause (whole-cell booking since 2026-08-27), the Gate A/B/C oracle gates, the reposed fixture exterior, the exact-clip quadrature memory findings, and the clipped-support quadrature per-module test-delta gate that closes §2 re-verification">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1>Cut-cell current attribution — cumulative execution evidence</h1>
+
+<section id="s1-root-cause">
+  <h2 id="s1-root-cause-h">§1 — Root cause, found: the production current moments have not clipped a cell since 2026-08-27</h2>
+
+  <p><strong>Settled 2026-09-10, commit <code>c9a89e58</code>.</strong> The forward operator's
+  profile support replaced <code>traced_clip(signed_flux)</code> with
+  <code>traced_clip(jnp.ones(...))</code> qualified by the profile participation label, so every
+  cell has since been booked whole or not at all by which side of the separatrix its centroid
+  falls on. What this explains, in order: 16 of 43 cut cells participating on the weak 110-cell
+  row is the count whose centroids sit inside; the dominated error cells on single-null 110 are
+  two-crossing cells booked whole (840.6 A against 85.6 A analytic); the four-crossing X-point
+  cell is booked whole at 459.7 A against a 10.5 A core-side sliver; and on the transport machine
+  1072.71 A of scrape-off-layer current (0.19576 percent of <em>I</em><sub>p</sub>) is 844.30 A in
+  sixteen separatrix-crossing cells plus 228.41 A in fifteen open cells carrying the
+  edge-extrapolated profile. The full record with every panel lives at
+  <a href="/nova/cut-cell-attribution-evidence.html">the cut-cell attribution evidence</a>.</p>
+</section>
+
+<section id="gates">
+  <h2 id="gates-h">The three oracle gates — allocation, coupling, iteration</h2>
+
+  <p><strong>Gate A, allocation.</strong> On the exact input (analytic flux at the nodes) the
+  global split spline books the analytic total to 1.00003 with zero boundary root error; the
+  six-point ring quadratic books 0.99997 with a 0.15 mm median root error; the linear edge root
+  falls 0.55 percent short (0.9945, 1.8 mm median root error) on weak, moderate and strong. The
+  terminal-state shortfalls are state error (100 percent weak, 99.7 percent strong), and on the
+  single-null 300 row every representation loses 20 percent at the terminal because the read
+  admits no saddle and puts the boundary at the limiter, 21 percent of the span away — the §3 and
+  null-identification census defect priced in current. Ship: the lead's locked choice of the
+  global spline stands on its own number; the clip's linear edge root is the one representation
+  with a measurable allocation error, so the consistent read (§4) replaces it.</p>
+
+  <p><strong>Gate B, coupling.</strong> Gate B found a one to two percent smooth error when
+  clipped first moments were imaged through the frozen linear-basis blocks; the held line rebuilt
+  polygon-analytic blocks per trip, which changes the Biot geometry per trip — neither cacheable
+  nor batchable nor differentiable. The lead's locked design is the frozen interaction matrix with
+  the clipped current expanded to its moments about the atomic centroid (amplitude, gradient,
+  curvature) to second order, imaged by matmul: a cached construction linear in cut cells, exact
+  at the wall targets through the frozen Biot wall blocks.</p>
+
+  <p><strong>Gate C, iteration.</strong> On the single-null 500 row under the fixture exterior,
+  where the analytic flux is a fixed point to 4.9e-15, the production Newton-Krylov returned from
+  perturbations of 1e-4 to 1e-1 of span to residual 6.2e-15 and distance 1.4e-14 from the analytic
+  flux. Where the fixed point is the reference, the iteration contracts to it from a tenth of a
+  span away; Gate C was never the iteration.</p>
+</section>
+
+<section id="reposed-fixture">
+  <h2 id="reposed-fixture-h">The reposed fixture exterior and the exact-clip memory findings</h2>
+
+  <p>The fixture exterior is re-posed from the analytic density integrated over each cell's
+  clipped region inside the analytic separatrix, cached with the machine. Gate at 1000 cells:
+  exact-clip one-map floor 3.58e-5 of span on weak and 3.42e-5 on moderate (booked 0.99999)
+  against 0.136 and 0.127 under the old whole-cell-integrated exterior; whole-cell booking now
+  over-books 8.6 percent; single-null exact 0.109 at 500 and 0.045 at 1000 cells, apparent order
+  2.5 in pitch.</p>
+
+  <p><strong>The exact-clip solve memory array is identified</strong> (H200 job 1270367, optimised
+  HLO under <code>docs/figures/cut-cell-current-attribution/reposed-fixture/optimised-hlo</code>).
+  It is <code>f64[cells, 196480, 6]</code>, 3.0 GiB per copy at 342 cells, repeated across the
+  Newton JVP and transpose paths from <code>fixed_point.py:3459</code>:
+  <code>clipped_support_quadrature</code> fans every cell's fixed-capacity support polygon into
+  capacity-minus-two triangles and places a 64-point Gauss rule on each, and the exact clip's
+  support capacity is 24 times 128 vertices, so 3070 triangles times 64 points equals 196480
+  quadrature points for every cell, whole cells included. In whole-cell mode the capacity is 24,
+  the array is <code>f64[342, 1408, 6]</code> at 22 MiB and the program's temporaries total
+  0.19 GiB — 97 GiB against 0.19 GiB, so the exact-clip solve allocates 97, 131 and 279 GiB of
+  booleans at 300, 500 and 1000 cells and fails even on an empty card. The fix is linear in cut
+  cells: a chain capacity justified by the position accuracy the clip needs (a pitch over a
+  thousand), the quadrature applied only to the cut cells at that capacity, and whole cells on
+  the 24-vertex path.</p>
+</section>
+
+<section id="delta-gate">
+  <h2 id="delta-gate-h">The clipped-support quadrature per-module test delta gate across the 21-commit window</h2>
+
+  <p><strong>Gate outcome: no added failures, no fixed failures.</strong> The delta window is the
+  21 clip-quadrature commits <code>e2825a0d</code> (base) to <code>295f6d55</code> (after head).
+  Both arms ran one test module per fresh process (<code>-m 'not slow'</code>, per-module
+  <code>--junitxml</code>, 300 s per-module timeout) in single CPU jobs with the persistent
+  compilation cache enabled by config flag and directory. The baseline arm (job 1271013) ran the
+  53-module comparable order; the after arm (job 1271023, <code>run_ccad4_after.sh</code>) ran the
+  53 baseline-comparable modules first, then the delta addition, then the eight modules the
+  baseline window never reached — all 62 completed.</p>
+
+  <table>
+    <thead>
+      <tr><th></th><th>Baseline <code>e2825a0d</code> (job 1271013)</th><th>After <code>295f6d55</code> (job 1271023)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Modules ordered</td><td>53 (baseline order)</td><td>62 (all)</td></tr>
+      <tr><td>Modules completed</td><td>53</td><td>53 done, 3 aborted, 6 no-tests</td></tr>
+      <tr><td>Completed with tested cases</td><td>45</td><td>45 (identical set)</td></tr>
+      <tr><td>Passed / Failed</td><td>329 / 10</td><td>364 / 11</td></tr>
+      <tr><td>Aborted (rc 124)</td><td>0</td><td>3 — all zero-test collection-only modules</td></tr>
+      <tr><td>Not run (wall guard)</td><td>8</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <p>The three after-arm aborts (<code>test_forward_receipt_raster.py</code>,
+  <code>test_labeller_parallel.py</code>, <code>test_reduced_newton_constraints.py</code>) are
+  zero-test modules on both arms (baseline rc 0 at 300–301 s with 0 tests; after rc 124 at 300 s),
+  so they carry no tested cases and no failure signal. The six no-tests modules collected zero
+  cases under the non-slow filter, including <code>test_clipped_support_quadrature.py</code> whose
+  three tests are all slow-marked at both revisions. Over the 45 modules that ran tests on both
+  arms, the per-module pass/fail counts are identical in every case: all 10 baseline failure ids
+  reproduce verbatim on the after arm, and no baseline pass turns to a fail.</p>
+
+  <h3>Failure ids — baseline (10) and after (11)</h3>
+
+  <table>
+    <thead>
+      <tr><th>Failure</th><th>Baseline</th><th>After</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>test_equilibrium_forward::test_the_solve_defaults_to_the_root_find</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_equilibrium_sol::test_the_private_flux_branch_is_labelled_and_reached_by_its_own_closure</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_equilibrium_sol::test_varying_the_private_flux_policy_moves_only_its_own_current</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_equilibrium_stencil_mesh::test_the_conservation_receipts_agree_between_the_meshes</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_forward_census::test_forward_census_exact_diverted_oracle</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_forward_operator_domain::test_residual_support_has_no_boundary_flux_partition</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_forward_operator_domain::test_point_cell_arm_uses_profile_owned_support_eager_and_jit</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_forward_operator_domain::test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_oracle_axis_admission::test_coarse_diverted_exact_field_admits_axis_and_saddle</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_prescribed_current_solve::test_solve_and_solve_branch_trace_prescribed_current_replacements</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_two_class_recovery::test_cold_seed_receipts_keep_one_fixed_branch_axis_under_vmap</code></td><td>—</td><td>X</td></tr>
+    </tbody>
+  </table>
+
+  <p>The one after-only failure is <strong>not an added failure of this delta window</strong>:
+  <code>test_two_class_recovery.py</code> was one of the eight modules the baseline window never
+  reached, so it has no baseline measurement to regress against. Its failure is a pre-existing
+  latent defect — <code>KeyError: 'newton_steps'</code> in
+  <code>equilibrium/forward.py:2557</code> <code>_iteration_count</code> on the newton_krylov
+  portfolio route when the caller passes <code>gmres_iterations</code> but no
+  <code>newton_steps</code>. Both <code>forward.py</code> and <code>test_two_class_recovery.py</code>
+  are byte-identical at base <code>e2825a0d</code> and after-head <code>295f6d55</code> (empty git
+  diff), and the introducing commit <code>87ed6fdf</code> is an ancestor of the base — no commit
+  in the 21-commit delta window touches it.</p>
+
+  <h3>The eight baseline-unmeasured modules, all now measured</h3>
+
+  <p>None of the eight baseline-not-run modules remain unmeasured: all completed on the after arm,
+  seven with clean passes and one with the latent failure above.</p>
+
+  <table>
+    <thead>
+      <tr><th>Module</th><th>After-arm result</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>test_structured_read_census_rows.py</code></td><td>2 passed</td></tr>
+      <tr><td><code>test_topology_o_qualification.py</code></td><td>6 passed</td></tr>
+      <tr><td><code>test_two_branch_batch_cost.py</code></td><td>2 passed</td></tr>
+      <tr><td><code>test_two_class_recovery.py</code></td><td>1 failed (latent <code>newton_steps</code> KeyError)</td></tr>
+      <tr><td><code>test_vertical_position_constraint.py</code></td><td>1 passed</td></tr>
+      <tr><td><code>test_wall_anchor_shadow.py</code></td><td>3 passed</td></tr>
+      <tr><td><code>test_wall_height_exclusion.py</code></td><td>15 passed</td></tr>
+      <tr><td><code>test_wall_units_solver.py</code></td><td>6 passed</td></tr>
+    </tbody>
+  </table>
+
+  <p>Per-module junit, logs and the arm ledger are under
+  <code>~/.config/reckon/crew/reports/nova/s19-review/quadrature-delta-4/after/</code> (arm.jsonl,
+  footer <code>{"arm":"after","revision":"295f6d55...","modules":62,"done":53,"aborted":3,
+  "no_tests":6,"absent":0,"not_run":0,"passed_total":364,"failed_total":11}</code>); the baseline
+  ledger is at <code>quadrature-delta-3/base/arm.jsonl</code>.</p>
+
+  <p><strong>Binaries.</strong> After arm: 62 modules ordered, 62 completed, 53 done (45 with
+  tested cases), 3 aborted (zero-test), 6 no-tests, 364 passed, 11 failed. Baseline arm: 53 done
+  (45 with tested cases), 329 passed, 10 failed, 1 absent (clipped-support), 8 not-run. Delta over
+  the 45 comparable modules: <strong>0 added, 0 fixed</strong>.</p>
+</section>
+
+</main>
+</body>
+</html>

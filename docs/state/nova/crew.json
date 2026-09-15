@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T16:29:14",
+  "updated": "2026-09-15T16:30:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4783,6 +4783,15 @@
       },
       {
         "id": "s19h-msc-census-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-msc-progsize-s",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -166956,6 +166965,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2573
+    "_version": 2574
   }
 }

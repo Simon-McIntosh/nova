@@ -1,0 +1,269 @@
+"""Measure exact component integration at the production topology boundary.
+
+One H200 allocation replays every persisted MAST bank member through the
+width-one reduced solve, persisting each terminal-state identity and trip split
+as it lands.  It then runs the committed four-row Solovev solve gate, whose
+rows compare their terminal flux arrays bit-for-bit with the banked production
+states.  The resulting receipt states the topology-read share of each trip and
+the per-solve read wall against the pre-integration 46.1 ms / 95 percent record.
+"""
+
+from __future__ import annotations
+
+import argparse
+from datetime import UTC, datetime
+import json
+import os
+from pathlib import Path
+import socket
+import subprocess
+import time
+from typing import Any
+
+import jax
+import jax.numpy as jnp
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+
+from benchmarks import limited_row_shadow_census as certificate_gate
+from benchmarks import trip_quantum_width_one as trip_quantum
+from nova.equilibrium import reduced_newton
+from nova.equilibrium.topology import TopologyClass
+from nova.jax.config import (
+    configure_dtypes,
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
+)
+
+
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_OUTPUT_ROOT = (
+    ROOT / "docs/figures/playable-forward-solve/parallel-components-read"
+)
+PREVIOUS_TRIP_MS = 46.1
+PREVIOUS_TOPOLOGY_SHARE = 0.95
+
+
+def _strict(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {key: _strict(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_strict(item) for item in value]
+    if isinstance(value, np.ndarray):
+        return _strict(value.tolist())
+    if isinstance(value, np.generic):
+        return _strict(value.item())
+    if isinstance(value, float) and not np.isfinite(value):
+        return None
+    return value
+
+
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(_strict(payload), indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _revision() -> str:
+    return subprocess.check_output(
+        ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
+    ).strip()
+
+
+def _allocation() -> dict[str, Any]:
+    devices = jax.devices("gpu")
+    if os.environ.get("SLURM_JOB_PARTITION") != "betelgeuse":
+        raise RuntimeError("measurement requires betelgeuse")
+    if os.environ.get("SLURM_JOB_RESERVATION") != "gpu_0003_grpA":
+        raise RuntimeError("measurement requires gpu_0003_grpA")
+    if os.environ.get("TMPDIR") != "/tmp":
+        raise RuntimeError("measurement requires TMPDIR=/tmp")
+    if os.environ.get("JAX_PLATFORMS") != "cuda,cpu":
+        raise RuntimeError("measurement requires JAX_PLATFORMS=cuda,cpu")
+    if len(devices) != 1 or "H200" not in devices[0].device_kind:
+        raise RuntimeError(f"measurement requires one H200, received {devices}")
+    return {
+        "job_id": os.environ.get("SLURM_JOB_ID"),
+        "node": os.environ.get("SLURMD_NODENAME", socket.gethostname()),
+        "partition": os.environ.get("SLURM_JOB_PARTITION"),
+        "reservation": os.environ.get("SLURM_JOB_RESERVATION"),
+        "cpus": int(os.environ.get("SLURM_CPUS_PER_TASK", "0")),
+        "memory_mib": int(os.environ.get("SLURM_MEM_PER_NODE", "0")),
+        "device": devices[0].device_kind,
+    }
+
+
+def _solve_member(member) -> dict[str, Any]:
+    state = jnp.asarray(member.state)
+    requested = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+
+    def solve(program):
+        return reduced_newton.solve_reduced_newton(
+            member.operator,
+            state,
+            requested_class=requested,
+            target_current=member.target_current,
+            tolerance=member.tolerance,
+            newton_steps=12,
+            active_set_steps=16,
+            program=program,
+            stream=False,
+        )
+
+    first = solve(None)
+    started = time.perf_counter()
+    result = solve(first.program)
+    wall = time.perf_counter() - started
+    terminal = np.asarray(result.state, dtype=np.float64)
+    banked = np.asarray(member.state, dtype=np.float64)
+    trip_wall = float(np.sum(result.trip_wall_per_trip))
+    topology_wall = float(np.sum(result.boundary_wall_per_trip))
+    trip_count = len(result.trip_wall_per_trip)
+    return {
+        "identity": member.identity,
+        "state_authority": member.state_authority,
+        "banked_state_sha256": trip_quantum._array_sha256(banked),
+        "terminal_state_sha256": trip_quantum._array_sha256(terminal),
+        "terminal_flux_bit_identical_to_banked": bool(np.array_equal(terminal, banked)),
+        "converged": bool(result.converged),
+        "termination": result.termination_name,
+        "terminal_residual": float(result.terminal_residual),
+        "trip_count": trip_count,
+        "solve_wall_s": wall,
+        "trip_wall_s": trip_wall,
+        "trip_ms": 1.0e3 * trip_wall / trip_count if trip_count else None,
+        "topology_read_per_solve_ms": 1.0e3 * topology_wall,
+        "topology_read_per_trip_ms": (
+            1.0e3 * topology_wall / trip_count if trip_count else None
+        ),
+        "topology_read_share": topology_wall / trip_wall if trip_wall else None,
+        "active_set_mask_differences": result.active_set_mask_differences,
+    }
+
+
+def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    admitted = [row for row in rows if row.get("trip_count")]
+    trip_ms = np.asarray([row["trip_ms"] for row in admitted], dtype=float)
+    read_ms = np.asarray(
+        [row["topology_read_per_trip_ms"] for row in admitted], dtype=float
+    )
+    shares = np.asarray([row["topology_read_share"] for row in admitted], dtype=float)
+    solve_read = np.asarray(
+        [row["topology_read_per_solve_ms"] for row in admitted], dtype=float
+    )
+    return {
+        "row_count": len(rows),
+        "bit_identical_count": sum(
+            bool(row.get("terminal_flux_bit_identical_to_banked")) for row in rows
+        ),
+        "converged_count": sum(bool(row.get("converged")) for row in rows),
+        "median_trip_ms": float(np.median(trip_ms)),
+        "median_topology_read_per_trip_ms": float(np.median(read_ms)),
+        "median_topology_read_per_solve_ms": float(np.median(solve_read)),
+        "median_topology_read_share": float(np.median(shares)),
+        "previous_trip_ms": PREVIOUS_TRIP_MS,
+        "previous_topology_read_per_trip_ms": (
+            PREVIOUS_TRIP_MS * PREVIOUS_TOPOLOGY_SHARE
+        ),
+        "previous_topology_read_share": PREVIOUS_TOPOLOGY_SHARE,
+    }
+
+
+def _draw(summary: dict[str, Any], path: Path) -> None:
+    figure, axes = plt.subplots(1, 2, figsize=(8.4, 3.8))
+    axes[0].bar(
+        ["before", "after"],
+        [summary["previous_trip_ms"], summary["median_trip_ms"]],
+        color=["#607d8b", "#7e57c2"],
+    )
+    axes[0].set_ylabel("compiled trip [ms]")
+    axes[1].bar(
+        ["before", "after"],
+        [
+            100.0 * summary["previous_topology_read_share"],
+            100.0 * summary["median_topology_read_share"],
+        ],
+        color=["#607d8b", "#7e57c2"],
+    )
+    axes[1].set_ylabel("topology-read share [%]")
+    for axis in axes:
+        axis.spines[["top", "right"]].set_visible(False)
+    figure.tight_layout()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
+    arguments = parser.parse_args()
+    output_root = arguments.output_root.resolve()
+    receipt_path = output_root / "parallel-components-read-receipt.json"
+    figure_path = output_root / "parallel-components-read-wall.png"
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    allocation = _allocation()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    members, inputs = trip_quantum._build_members()
+    receipt: dict[str, Any] = {
+        "schema": "nova.parallel-components-production-read",
+        "revision": _revision(),
+        "captured_at": datetime.now(UTC).isoformat(),
+        "allocation": allocation,
+        "cache": cache.receipt(),
+        "inputs": inputs,
+        "mast_rows": [],
+        "mast_summary": None,
+        "solovev_certificate": None,
+        "completed": False,
+    }
+    _write_json(receipt_path, receipt)
+
+    for member in members:
+        try:
+            row = _solve_member(member)
+        except Exception as error:  # noqa: BLE001 - persist the row that failed
+            row = {
+                "identity": member.identity,
+                "failure": f"{type(error).__name__}: {error}",
+            }
+        receipt["mast_rows"].append(row)
+        _write_json(receipt_path, receipt)
+        print("MAST_ROW " + json.dumps(_strict(row), sort_keys=True), flush=True)
+
+    receipt["mast_summary"] = _summary(receipt["mast_rows"])
+    _write_json(receipt_path, receipt)
+    certificate = certificate_gate._solve_gate(
+        output_root / "solovev-certificate", regenerate_rows=True
+    )
+    receipt["solovev_certificate"] = {
+        "receipt": "solovev-certificate/solve-receipt.json",
+        "row_count": len(certificate["rows"]),
+        "acceptance": certificate["acceptance"],
+        "terminal_flux_bit_identical_count": sum(
+            bool(row["terminal_flux_bit_identical_to_before"])
+            for row in certificate["rows"]
+        ),
+    }
+    receipt["completed"] = True
+    _draw(receipt["mast_summary"], figure_path)
+    _write_json(receipt_path, receipt)
+    if receipt["mast_summary"]["bit_identical_count"] != len(members):
+        raise RuntimeError("a MAST terminal flux differs from its banked state")
+    if receipt["solovev_certificate"]["terminal_flux_bit_identical_count"] != 4:
+        raise RuntimeError("a Solovev terminal flux differs from its committed row")
+    print(f"RECEIPT_WRITTEN={receipt_path}", flush=True)
+    print("EXIT_MARKER=0", flush=True)
+
+
+if __name__ == "__main__":
+    main()

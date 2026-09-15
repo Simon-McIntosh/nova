@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="82">
+<meta name="plan-version" content="84">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 </head>
 <body>
@@ -463,6 +463,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260915T041619672372-cca-private-region-figure-and-wedge-audit" data-who="s19e-cca-private-region-audit" data-when="2026-09-15T04:56:45Z">
     <div class="r-comment-body"><p>The private-region figures were redrawn with the authored private cells and the sparse connectivity rings traversed, so the earlier overlapping-hexagon panel was a drawing defect, not a mesh one. The flood fill is verified against an independent BFS over the same rings at 550, 814, 1074 and 2616 cells with zero membership differences, and the pointer-jumping mask agrees with the flood fill at every rung. The saddle-wedge shortcut disagrees with the flood fill on 3, 5, 5 and 13 cells; with the correct tangent pair the wedge disagreements on the three finer meshes vanish and only the coarsest mesh keeps three genuine curvature differences, so a wedge shortcut would need an explicit coarse-mesh fallback for a saving of 0.013 to 0.031 ms while the pointer-jumping mask is exact without one. Banked on main at f6b86929 and merged at 6f4f14a4.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260915T055426304767-s19h-reuse-map-scout" data-who="s19h-scout-l" data-when="2026-09-15T06:09:40Z">
+    <div class="r-comment-body"><p>Reuse map for the S19 handoff wave delivered at ~/.config/reckon/crew/reports/nova/s19-handoff/reuse-map.md: six capabilities, all Generalise, none Replace; anchors separatrix_clip.py:1139, forward_operator.py:1639, strict_exit_incidence.py:1511, forward.py:2602, flux_surface_connectivity.py:225 with benchmarks/private_region_parallel_kernel.py:347, reduced_newton_constrained_rows.py:215</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s19h-reuse-map-20260915" data-who="reckon-ship s19-handoff" data-when="2026-09-15T06:13:00Z">
+    <div class="r-comment-body">Reuse map for the handoff wave landed (s19h-reuse-map-scout, codex-luna, read-only, promoted 32d859f9): ~/.config/reckon/crew/reports/nova/s19-handoff/reuse-map.md. Six capabilities, every verdict Generalise, none Replace. Anchors: the X-point wedge clip extends the fixed-shape traced clip and branch bank at separatrix_clip.py:810-1204 (branch packing 1139-1168) with clip_quadrature.py:79-370 integrating padded supports, the common support being the complementary traced_clip(-signed_flux) call site, not a second clipper (tests/test_saddle_partition.py:50-129 guard the two-branch shape today); mesh-sized arrays as program arguments extend the operator pytree boundary at forward_operator.py:1639-1668 and the dynamic-argument binding at reduced_newton.py:1757-1760; the strict-exit DIII-D rows move the existing row schema and atomic write of strict_exit_incidence.py:1876-1884 to the per-member completion point at 1511-1587; _iteration_count (forward.py:2602) should read FixedPointResult.newton_step_equivalents and the promotion counters from fixed_point.py:2486-2511 and 3310-3322; the pointer-jumping private mask ports benchmarks/private_region_parallel_kernel.py:347-384 onto the rectangular label seam of flux_surface_connectivity.py:225-252 keeping the BFS positive control of private_region_wedge_audit.py; the edge-constraint demonstration extends benchmarks/reduced_newton_constrained_rows.py:215-285 over solve_constrained_reduced_newton (reduced_newton.py:2353-2370) with the row forms of constraint.py:905-1009. Wave-one nodes cite these seams.</div>
 </div>
 </section>
 

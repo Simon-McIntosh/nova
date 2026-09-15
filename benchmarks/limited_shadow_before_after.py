@@ -317,7 +317,10 @@ def _oracle_metrics(state: TerminalState) -> dict[str, Any]:
     finite = np.isfinite(difference)
     if not np.any(finite):
         raise ValueError(f"no finite solved-minus-analytic samples in {state.path}")
-    analytic_topology = data["analytic_topology"]
+    analytic_topology = dict(data["analytic_topology"])
+    banked_read = payload["banked_read"]
+    analytic_topology["axis_rz_m"] = banked_read["reference_axis_rz_m"]
+    analytic_topology["x_point_rz_m"] = banked_read["reference_x_points_rz_m"]
     terminal_topology = data["terminal_topology"]
     span = abs(float(analytic_topology["flux_span_wb"]))
     if not np.isfinite(span) or span <= 0:
@@ -326,12 +329,7 @@ def _oracle_metrics(state: TerminalState) -> dict[str, Any]:
     roundoff_floor, map_condition, floor_source = _roundoff_floor(payload)
     max_over_span = float(np.max(np.abs(normalized[finite])))
     rms_over_span = float(np.sqrt(np.mean(np.square(normalized[finite]))))
-    axis_error_m = float(
-        np.linalg.norm(
-            np.asarray(terminal_topology["axis_rz_m"], dtype=np.float64)
-            - np.asarray(analytic_topology["axis_rz_m"], dtype=np.float64)
-        )
-    )
+    axis_error_m = float(payload["geometry"]["magnetic_axis_position_error_m"])
     pitch = float(payload["characteristic_pitch_m"])
     signed_boundary_error = float(terminal_topology["boundary_flux_wb"]) - float(
         analytic_topology["boundary_flux_wb"]

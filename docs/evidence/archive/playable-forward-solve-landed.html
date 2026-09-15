@@ -1612,6 +1612,43 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
 </table>
 <p><strong>Gate.</strong> The upper-point drift contracts from the banked 123.660 mm to 18.411 mm, all three commands remain below 20 kA, and elongation produces an achieved shape rather than <code>NoQualifiedAxisError</code> or a zero-fraction no-op. The three receipts and aggregate are under <code>docs/figures/playable-forward-solve/shape-inverse/</code>; the measurement log is <code>~/.config/reckon/crew/reports/nova/s19-handoff/shape-inverse/all-debug-three-command.log</code>. No H200 arm was run.</p>
 </section>
+<section id="exact-parallel-components">
+<h2>Exact parallel rectangular components preserve the canonical labels (2026-09-15)</h2>
+<p><strong>Mechanism.</strong> Commit <code>28c205c7</code> adds <code>nova/equilibrium/parallel_components.py</code>, a standalone
+fixed-shape hook-and-compress classifier. Every foreground cell is labelled by the one-based minimum flat index reachable through
+four-neighbour foreground edges; each trip hooks parents through real edges and pointer-jumps the resulting forest, returning an explicit
+settled bit. No production topology caller changed. Commit <code>2982b6b6</code> persists the identity census, paired timing receipt and
+wall-per-element figure.</p>
+<p><strong>Currency check.</strong> The earlier 66-trip defect did not reproduce on the current analytic double-null fixture: the
+reconstructed bounded read and canonical full-cap read differed on zero domain labels, and their wall and X-point flux values were each
+bit-identical. The new test therefore pins the current correct behaviour and exercises the new standalone classifier directly rather than
+reimplementing a production guard that already holds.</p>
+<p><strong>CPU gate.</strong> One <code>all_debug</code> allocation ran four tests in four fresh Python processes: 36 deterministic
+perforated masks, a winding enclave, the analytic double-null domain and the stride-two MAST 22086/43 lattice all matched both the host
+flood reference and <code>label_connected_components</code> bit for bit. The four processes passed in 7.10, 5.37, 23.20 and 5.29 seconds,
+with zero added failures.</p>
+<table>
+<caption>One-card accelerator wall per element; every row and batch has zero label mismatches</caption>
+<thead><tr><th scope="col">Batch</th><th scope="col">Canonical fixed point</th><th scope="col">Parallel hook and compress</th><th scope="col">Speedup</th></tr></thead>
+<tbody>
+<tr><th scope="row">1</th><td>21.0335 ms</td><td>0.3676 ms</td><td>57.2×</td></tr>
+<tr><th scope="row">8</th><td>4.6618 ms</td><td>0.05629 ms</td><td>82.8×</td></tr>
+<tr><th scope="row">16</th><td>2.0377 ms</td><td>0.02793 ms</td><td>73.0×</td></tr>
+<tr><th scope="row">64</th><td>0.64383 ms</td><td>0.006073 ms</td><td>106.0×</td></tr>
+</tbody>
+</table>
+<p><strong>Device receipt.</strong> Job <code>1271446</code> ran on one H200 with eight CPU cores and 128 GiB. All twelve persisted
+MAST rows had zero mismatches, nontrivial component counts from one through five, and settled in 4–6 active trips. Parsed HLO carries a
+1,089-trip canonical loop and parallel loops of 13 hook-and-compress trips plus 11 pointer jumps. The admitted batch-1 result is also
+5.4 times faster than the rejected bounded pass's recorded 1.986 ms, without its label movement.</p>
+<figure><img src="/nova/figures/playable-forward-solve/parallel-components/parallel-components-wall.png"
+alt="Device wall per element against batch for canonical and exact parallel component classifiers"><figcaption>The exact parallel pass
+remains below the canonical wall at every measured batch after the twelve-row identity gate admitted timing.</figcaption></figure>
+<p>Receipt: <code>docs/figures/playable-forward-solve/parallel-components/parallel-components-receipt.json</code>. Per-row table:
+<code>docs/figures/playable-forward-solve/parallel-components/parallel-components-rows.md</code>. Gate logs:
+<code>~/.config/reckon/crew/reports/nova/s19-handoff/parallel-components/cpu-fresh-processes.log</code> and
+<code>~/.config/reckon/crew/reports/nova/s19-handoff/parallel-components/h200-identity.log</code>.</p>
+</section>
 </main>
 </body>
 </html>

@@ -178,6 +178,40 @@ def test_measure_uses_the_current_quadrature_node_owner(monkeypatch, tmp_path):
     assert part["row"] == receipt["rows"][0]
 
 
+def test_measure_can_bank_memory_without_serializing_hlo(monkeypatch, tmp_path):
+    """A protobuf-sized program still yields its executable memory receipt."""
+    monkeypatch.setattr(memory_scaling, "configure_dtypes", lambda: None)
+    monkeypatch.setattr(memory_scaling, "support_clip_mode", lambda: "chord")
+    monkeypatch.setattr(memory_scaling, "set_support_clip_mode", lambda _mode: None)
+    monkeypatch.setattr(memory_scaling.certificate, "_source_revision", lambda: "abc")
+    monkeypatch.setattr(
+        memory_scaling.certificate, "_lane", lambda: {"platform": "gpu"}
+    )
+
+    def compiled(*_args, **_kwargs):
+        return {
+            "requested_cells": -1000,
+            "realised_cells": 1065,
+            "memory_analysis": {"temp_size_in_bytes": 4 * 2**30},
+            "qualifying_array_signatures": [],
+        }
+
+    monkeypatch.setattr(memory_scaling, "_compile_memory_only", compiled)
+    monkeypatch.setattr(
+        memory_scaling.certificate,
+        "_compile_solve_memory",
+        lambda *_args, **_kwargs: pytest.fail("HLO serialization was attempted"),
+    )
+    receipt = memory_scaling.measure(
+        tmp_path / "receipt.json",
+        tmp_path / "hlo",
+        [1000],
+        capture_hlo=False,
+    )
+    assert receipt["completed"] is True
+    assert receipt["rows"][0]["memory_analysis"]["temp_size_in_bytes"] == 4 * 2**30
+
+
 class _MeasuredDevice:
     def __init__(self, peak_bytes: int):
         self.peak_bytes = peak_bytes

@@ -16,9 +16,11 @@ import math
 import os
 from pathlib import Path
 import tempfile
+from time import perf_counter
 from typing import Any
 
 import jax
+import jax.numpy as jnp
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import clip_quadrature
@@ -108,12 +110,82 @@ def _scaling(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _compile_memory_only(
+    case_name: str,
+    requested_cells: int,
+    *,
+    arm: str,
+) -> dict[str, Any]:
+    """Compile one solve and read memory without serializing multi-GiB HLO.
+
+    Accelerator programs at the failing resolution can exceed protobuf's
+    two-GiB serialization limit even though the compiled executable exposes a
+    valid memory analysis. Keeping that receipt independent from the optional
+    text census prevents the diagnostic export from erasing the gate it was
+    meant to measure.
+    """
+    started = perf_counter()
+    profile, seed, request, dimensions = certificate._certificate_compile_problem(
+        case_name, requested_cells
+    )
+    mapped = profile.flux_map(
+        request.current,
+        target_current=request.target_current,
+        prescribed_current=request.prescribed_current,
+    )
+    shadowed_map = profile.operator.flux_map_with_shadow(
+        request.current,
+        target_current=request.target_current,
+        prescribed_current=request.prescribed_current,
+    )
+
+    def shadow_mask(state):
+        return profile.operator.residual_shadow_mask(state)
+
+    def promoted_shadow_mask(state, previous):
+        return profile.operator.residual_shadow_mask(state, previous_shadow=previous)
+
+    def solve_program(initial):
+        result = certificate.recovery.fixed_point.newton_krylov(
+            mapped,
+            initial,
+            shadow_mask_fn=shadow_mask,
+            promoted_shadow_mask_fn=promoted_shadow_mask,
+            shadowed_map_fn=shadowed_map,
+            **request.policy.kernel_options(),
+        )
+        return result.state, result.residual, result.converged
+
+    compiled = (
+        jax.jit(solve_program).lower(jnp.asarray(seed, dtype=jnp.float64)).compile()
+    )
+    analysis = certificate._compiled_memory_fields(compiled.memory_analysis())
+    return {
+        "case": case_name,
+        "arm": arm,
+        "requested_cells": requested_cells,
+        "realised_cells": dimensions["realised_cells"],
+        "dimensions": dimensions,
+        "compile_wall_seconds": perf_counter() - started,
+        "memory_analysis": analysis,
+        "largest_array_intermediates": [],
+        "largest_predicate_intermediates": [],
+        "qualifying_array_signatures": [],
+        "executed": False,
+        "method": (
+            "jax.jit(solve_program).lower(seed).compile().memory_analysis(); "
+            "optimized HLO serialization deliberately skipped"
+        ),
+    }
+
+
 def measure(
     output: Path,
     compiler_root: Path,
     requested_cells: list[int],
     *,
     part_root: Path | None = None,
+    capture_hlo: bool = True,
 ) -> dict:
     """Compile exact-clip rungs and persist each result before continuing.
 
@@ -134,12 +206,19 @@ def measure(
     try:
         set_support_clip_mode("exact")
         for requested in requested_cells:
-            row = certificate._compile_solve_memory(
-                "weak-rotation-reactor-static",
-                -abs(requested),
-                arm=f"exact-{abs(requested)}",
-                compiler_artifact_root=compiler_root,
-            )
+            if capture_hlo:
+                row = certificate._compile_solve_memory(
+                    "weak-rotation-reactor-static",
+                    -abs(requested),
+                    arm=f"exact-{abs(requested)}",
+                    compiler_artifact_root=compiler_root,
+                )
+            else:
+                row = _compile_memory_only(
+                    "weak-rotation-reactor-static",
+                    -abs(requested),
+                    arm=f"exact-{abs(requested)}",
+                )
             row["pairwise_predicate_candidates"] = _pairwise_predicates(row)
             _atomic_json(
                 part_root / f"requested-{abs(requested)}.json",
@@ -275,6 +354,7 @@ def _parse() -> argparse.Namespace:
     parser.add_argument("--part-root", type=Path)
     parser.add_argument("--figure-root", type=Path)
     parser.add_argument("--execute-solve", action="store_true")
+    parser.add_argument("--skip-hlo", action="store_true")
     parser.add_argument("--cells", type=int, nargs="+", default=[110, 300, 500])
     return parser.parse_args()
 
@@ -298,6 +378,7 @@ def main() -> None:
         arguments.compiler_root,
         arguments.cells,
         part_root=arguments.part_root,
+        capture_hlo=not arguments.skip_hlo,
     )
     print(
         json.dumps(

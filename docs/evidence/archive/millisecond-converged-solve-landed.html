@@ -499,7 +499,22 @@
 <p><strong>Node:</strong> <code>msc-cache-entry-overhead</code>; implementation commit <code>3df8f0d5</code>. The cached program retains the exact immutable seed object that supplied its reduced coordinates and the unchanged default exterior that supplied its traced exterior argument. A warm public call can therefore enter the executable without rebuilding either value. Conductor inputs are absent from the entry key: replacing a conductor current recomputes the exterior as traced data and retains the same compiled-program key. An equal but distinct seed array deliberately misses the shortcut and re-derives its coordinates.</p>
 <p><strong>Reproduction.</strong> At base <code>cd584063</code>, two equal calls returned the same program while the instrument recorded <code>coordinate_derivations=2</code>. The earlier H200 receipt measured the resulting public/direct ratios at 1.39 to 1.72.</p>
 <p><strong>H200 measure.</strong> One paired same-job allocation, job <code>1271496</code> on one H200 with eight CPU cores and 128 GiB, measured all twelve MAST bank members. Warm-public/direct ratios span <code>1.0048</code> to <code>1.0402</code>; every row is inside the 1.10 ceiling. Compiled-versus-host and cached-versus-direct terminal flux are both <code>0 ULP</code> on all twelve. The incrementally written receipt is <code>docs/figures/millisecond-converged-solve/compiled-slice-cache/receipt.json</code>.</p>
-<p><strong>CPU gate.</strong> The focused cache file passes 3 of 3. In one <code>all_debug</code> allocation, thirteen of fourteen named tests completed green in distinct fresh Python processes; the final nonconverged-result referee was still compiling when the 39-minute allocation reached its time limit, so its result is absent rather than inferred. The implementation is committed and the H200 acceptance measure passes, but the node remains incomplete until that one fresh-process CPU referee returns a verdict. Logs: <code>~/.config/reckon/crew/reports/nova/s19-handoff/cache-entry/</code>.</p>
+<table><thead><tr><th>MAST member</th><th>Warm public (ms)</th><th>Direct dispatch (ms)</th><th>Overhead</th><th>Same program</th><th>Host flux (ULP)</th></tr></thead><tbody>
+<tr><td>21978/35 pure</td><td>149.952</td><td>145.860</td><td>2.805%</td><td>yes</td><td>0</td></tr>
+<tr><td>21978/35 mixed</td><td>147.247</td><td>143.876</td><td>2.343%</td><td>yes</td><td>0</td></tr>
+<tr><td>21983/35 pure</td><td>152.210</td><td>149.178</td><td>2.032%</td><td>yes</td><td>0</td></tr>
+<tr><td>21983/35 mixed</td><td>154.279</td><td>151.630</td><td>1.747%</td><td>yes</td><td>0</td></tr>
+<tr><td>21985/51 pure</td><td>158.658</td><td>152.860</td><td>3.793%</td><td>yes</td><td>0</td></tr>
+<tr><td>21985/51 mixed</td><td>258.955</td><td>254.750</td><td>1.651%</td><td>yes</td><td>0</td></tr>
+<tr><td>21986/46 pure</td><td>210.716</td><td>203.194</td><td>3.702%</td><td>yes</td><td>0</td></tr>
+<tr><td>21986/46 mixed</td><td>258.155</td><td>255.212</td><td>1.153%</td><td>yes</td><td>0</td></tr>
+<tr><td>21989/55 pure</td><td>164.661</td><td>158.301</td><td>4.018%</td><td>yes</td><td>0</td></tr>
+<tr><td>21989/55 mixed</td><td>160.655</td><td>156.255</td><td>2.816%</td><td>yes</td><td>0</td></tr>
+<tr><td>22086/43 pure</td><td>152.243</td><td>150.400</td><td>1.226%</td><td>yes</td><td>0</td></tr>
+<tr><td>22086/43 mixed</td><td>152.379</td><td>151.647</td><td>0.483%</td><td>yes</td><td>0</td></tr>
+</tbody></table>
+<p><strong>Hoisted derivation.</strong> The immutable seed's reduced-coordinate derivation and the unchanged default external-flux derivation now live with the retained <code>ReducedProgram</code>; the warm public entry looks up that prepared program before either derivation. Conductor currents never enter the entry key. A changed current recomputes the traced exterior and preserves the compiled-program key, while an equal but distinct seed recomputes its coordinates rather than aliasing the retained seed.</p>
+<p><strong>CPU gate.</strong> The focused cache file passes 3 of 3. Job <code>1271460</code> ran the referee set one test per fresh CPU process: the cache-policy and counter referees passed in 478.19 s and 317.60 s (log lines 181 and 201), then the 39-minute allocation expired while the nonconverged-result referee compiled. The only unfinished test was resubmitted alone, still as a fresh process inside one <code>all_debug</code> job with a 59-minute limit; job <code>1271523</code> passed it in 299.42 s and wrote its per-test sentinel. The focused cache tests and every referee therefore pass with zero added failures. Logs: <code>~/.config/reckon/crew/reports/nova/s19-handoff/cache-entry/</code>.</p>
 </section>
 </main>
 </body>

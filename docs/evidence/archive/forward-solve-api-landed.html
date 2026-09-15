@@ -248,36 +248,44 @@
 <p>Receipt: <code>docs/figures/forward-solve-api/coil-edit-latency/coil-edit-latency.json</code>. Report: <code>~/.config/reckon/crew/reports/nova/forward-solve-api/coil-edit-latency.md</code>.</p>
 </section>
   <section id="transport-shim-delta-gate">
-    <h2>§3 transport test delta gate: incomplete at the scheduler ceiling</h2>
-    <p><strong>Measurement:</strong> The single foreground <code>all_debug</code> allocation
-    (job <code>1271211</code>, <code>--time=00:59:00</code>, 4 CPUs, 64G, CPU JAX,
-    <code>TMPDIR=/tmp</code>) compared a git archive of base <code>0f872fd6</code> with
-    shim-removal commit <code>fb402f8f768af3b843964ad28a077be1c1ae2d5d</code> using one
-    fresh direct-Python process per <code>tests/test_transport_*.py</code> module. The
-    allocation exited <code>143</code> at its wall limit while starting the eighth base
-    module, <code>tests/test_transport_geometry_reference.py</code>; the after revision
-    was not reached.</p>
+    <h2>§3 transport shim-removal test delta: zero added failures</h2>
+    <p><strong>Measurement:</strong> Every <code>tests/test_transport_*.py</code> module ran
+    in a fresh direct-Python process on <code>all_debug</code> with CPU JAX, 4 CPUs,
+    64G and <code>TMPDIR=/tmp</code> in the submit environment and payload. Base
+    <code>0f872fd6</code> used its git archive across jobs <code>1271211</code> and
+    <code>1271339</code>; shim-removal commit
+    <code>fb402f8f768af3b843964ad28a077be1c1ae2d5d</code> used its clean worktree in
+    job <code>1271292</code>. The first base allocation reached its 59-minute limit
+    after seven completed modules; the authorised base-remainder job ran the four
+    unreached modules. Every completed module wrote a JSON receipt carrying its
+    pytest return code and failure IDs before the runner advanced.</p>
     <table>
-      <caption>Completed base receipts; the after revision has no receipts</caption>
+      <caption>Per-module pass/fail census at base and after</caption>
       <thead><tr><th scope="col">Module</th><th scope="col">Base pass</th><th scope="col">Base fail</th><th scope="col">After pass/fail</th></tr></thead>
       <tbody>
-        <tr><th scope="row"><code>test_transport_cocos.py</code></th><td>6</td><td>0</td><td>not run</td></tr>
-        <tr><th scope="row"><code>test_transport_coupled_window.py</code></th><td>12</td><td>0</td><td>not run</td></tr>
-        <tr><th scope="row"><code>test_transport_ensemble.py</code></th><td>6</td><td>0</td><td>not run</td></tr>
-        <tr><th scope="row"><code>test_transport_environment.py</code></th><td>1</td><td>0</td><td>not run</td></tr>
-        <tr><th scope="row"><code>test_transport_evolved_state.py</code></th><td>4 (1 xfailed)</td><td>0</td><td>not run</td></tr>
-        <tr><th scope="row"><code>test_transport_forward_seam.py</code></th><td>2</td><td>0</td><td>not run</td></tr>
-        <tr><th scope="row"><code>test_transport_geometry.py</code></th><td>4</td><td>0</td><td>not run</td></tr>
-        <tr><th scope="row"><code>test_transport_geometry_reference.py</code></th><td>incomplete</td><td>unavailable</td><td>not run</td></tr>
-        <tr><th scope="row">Remaining three modules</th><td>not run</td><td>unavailable</td><td>not run</td></tr>
+        <tr><th scope="row"><code>test_transport_cocos.py</code></th><td>6</td><td>0</td><td>6 / 0</td></tr>
+        <tr><th scope="row"><code>test_transport_coupled_window.py</code></th><td>12</td><td>0</td><td>16 / 0</td></tr>
+        <tr><th scope="row"><code>test_transport_ensemble.py</code></th><td>6</td><td>0</td><td>6 / 0</td></tr>
+        <tr><th scope="row"><code>test_transport_environment.py</code></th><td>1</td><td>0</td><td>1 / 0</td></tr>
+        <tr><th scope="row"><code>test_transport_evolved_state.py</code></th><td>4 (1 xfailed)</td><td>0</td><td>4 (1 xfailed) / 0</td></tr>
+        <tr><th scope="row"><code>test_transport_forward_seam.py</code></th><td>2</td><td>0</td><td>2 / 0</td></tr>
+        <tr><th scope="row"><code>test_transport_geometry.py</code></th><td>4</td><td>0</td><td>4 / 0</td></tr>
+        <tr><th scope="row"><code>test_transport_geometry_reference.py</code></th><td>6</td><td>0</td><td>6 / 0</td></tr>
+        <tr><th scope="row"><code>test_transport_public_surface.py</code></th><td>3</td><td>0</td><td>3 / 0</td></tr>
+        <tr><th scope="row"><code>test_transport_window_batch.py</code></th><td>5</td><td>0</td><td>5 / 0</td></tr>
+        <tr><th scope="row"><code>test_transport_window_gradients.py</code></th><td>1</td><td>0</td><td>1 / 0</td></tr>
       </tbody>
     </table>
-    <p><strong>Result:</strong> The seven completed base modules contain 35 passes, zero
-    failures and one expected xfail. Failure IDs are therefore absent from those base
-    receipts. The after-side counts and the added-failure set are
-    <strong>NOT MEASURABLE</strong>, not an empty set, because the scheduler ceiling
-    prevented the after-side processes from starting. Logs, JUnit receipts, the base
-    archive and the exact driver are retained at
+    <p><strong>Result:</strong> Base: 11 modules, 51 collected, 50 passed, 0 failed,
+    0 errors and 1 expected xfail. After: 11 modules, 55 collected, 54 passed,
+    0 failed, 0 errors and 1 expected xfail. The four added passing cases are in
+    <code>test_transport_coupled_window.py</code>. Base failure IDs <code>[]</code>;
+    after failure IDs <code>[]</code>; added failure IDs <code>[]</code>; removed
+    failure IDs <code>[]</code>. A synthetic one-failure JUnit positive control proved
+    the receipt parser recovers
+    <code>tests/test_transport_probe.py::test_known_failure</code>, so the empty sets
+    are observed rather than an untested parser path. Logs, per-module JSON receipts,
+    JUnit XML, the base archive and <code>measurement-summary.json</code> are retained at
     <code>~/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate/</code>.</p>
   </section>
 </main>

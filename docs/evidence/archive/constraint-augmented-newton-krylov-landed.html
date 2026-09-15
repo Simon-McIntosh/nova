@@ -285,25 +285,32 @@
     <code>~/.config/reckon/crew/reports/nova/s19-labeller/thomson-scout.md</code>.</p>
   </section>
   <section id="edge-constraint-synthetic-target">
-    <h2>Synthetic outboard-edge constraint: driver and CPU refusal contract landed; MAST receipt held</h2>
-    <p><strong>Node:</strong> <code>cank-edge-constraint-synthetic-target</code>, commit <code>5cc33df3</code>. The driver
+    <h2>Synthetic outboard-edge constraint: CPU contracts landed; the one H200 attempt failed before measurement</h2>
+    <p><strong>Node:</strong> <code>cank-edge-constraint-synthetic-target</code>, implementation commits <code>5cc33df3</code>,
+    <code>80037ce8</code> and <code>054a4366</code>. The driver
     <code>benchmarks/edge_constraint_demonstration.py</code> names the measured quantity as the outboard intersection of the last closed flux
     surface with the horizontal chord through the seed magnetic axis on MAST 22086/43. It places one boundary-referenced
     <code>IsofluxConstraint</code> at 5, 10 and 20 mm outward commands, persists every command and trip, reads the production merit at each trip
     boundary, enforces a 1000 A per-trip cap and 100 kA terminal ceiling, records accepted overshoot, and brackets a directly measured
     unconstrained current reference. Its poloidal output uses shared-level line contours, the wall and both seed and terminal null sets.</p>
-    <p><strong>CPU contract:</strong> the first <code>all_debug</code> run, job 1271066, reproduced a meaningful negative control: a 5 mm
+    <p><strong>CPU contracts:</strong> the first <code>all_debug</code> run, job 1271066, reproduced a meaningful negative control: a 5 mm
     outward point on the wall-limited Solov'ev fixture accepted zero current, contradicting the test's initial expectation of a nonzero capped
     application. The corrected contract names the behavior rather than hiding it: job 1271069 passed 1 test in 299.84 s, requiring the seed row
     residual to be nonzero and above tolerance, the trip to take zero Newton steps, the row to stay unqualified, and the production termination
-    to read <code>sufficient_decrease_refused</code>.</p>
-    <p><strong>Open evidence gate:</strong> no H200 job was launched and no <code>receipt.json</code> or contour figure is claimed. Before launch,
-    the shared environment's editable pointer was read directly and resolved to
-    <code>/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/msc-scanned-trip-loop-prototype</code>, not the Nova main checkout.
-    Worker policy forbids repairing that shared environment or producing accelerator evidence with the wrong package identity. The environment
-    owner must confirm no live process depends on that pointer, run <code>uv sync --inexact --all-extras</code> from the main checkout, verify the
-    editable path, and resume this node for the one-card measurement. H200 usage is zero jobs and zero GPU-minutes against the authorised
-    one-card ceiling. Decision evidence remains open.</p>
+    to read <code>sufficient_decrease_refused</code>. A separate armed contract confirms that a zero constrained current produces direct free
+    probes at 0, &minus;1000 and +1000 A instead of a uniform zero column. At the repaired head, <code>all_debug</code> job 1271086 passed both tests
+    in 317.11 s.</p>
+    <p><strong>Failed H200 receipt:</strong> after the shared environment was repaired and verified, exactly one authorised allocation was
+    launched. Betelgeuse job 1271084 ran on <code>98dci4-gpu-0003</code> under <code>gpu_0003_grpA</code> with one H200, 8 CPUs and 128G for 39 s;
+    <code>TMPDIR=/tmp</code> was present in the submit and payload environments, and the root virtual-environment Python ran directly with this
+    worktree on <code>PYTHONPATH</code>. It failed before the free equilibrium was constructed with
+    <code>AttributeError: module 'benchmarks.settled_mask_stall' has no attribute 'FIXED_POINT_CRITERION'</code>. The
+    <a href="/nova/figures/constraint-augmented-newton-krylov/edge-constraint/receipt.json">machine-readable failed receipt</a> records zero
+    command rows, no contour, the scheduler account and log digest. Commit <code>054a4366</code> repairs all three call sites by importing the
+    canonical tolerance directly, and the CPU gate above verifies the repaired import path. No second H200 allocation was launched.</p>
+    <p><strong>Decision:</strong> the edge-displacement capability remains unmeasured. There is no honest value for the 5, 10 or 20 mm terminal
+    error, merit sequence, compensating current, overshoot, direct free-solve reference or trip count, and no terminal state from which to draw a
+    spatial contour. A replacement one-card H200 allocation at the repaired revision is required; the followup remains open.</p>
   </section>
 </main>
 </body>

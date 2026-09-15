@@ -1708,6 +1708,28 @@ remains below the canonical wall at every measured batch after the twelve-row id
   <p>Logs: <code>~/.config/reckon/crew/reports/nova/s19-handoff/playable-cache/baseline-current-main.log</code>, <code>after-cold-warm.log</code> (rejected instrument), <code>after-default-cache.log</code>, <code>full-file-gates-after-repair.log</code>, and <code>shape-reuse-contract.log</code>.</p>
   <p><strong>Follow-on.</strong> Rerun <code>benchmarks/playable_keyframe_receipt.py</code> on the H200 and adjudicate its 60 s keyframe target. The CPU fence proves reusable program and cache behavior on the debug machine; it does not substitute for the device receipt.</p>
 </section>
+<section id="parallel-components-production-read">
+  <h2>The production topology read uses exact parallel components (2026-09-15)</h2>
+  <p><strong>Mechanism.</strong> Commits <code>40f56922</code>, <code>1e24d2e1</code>, <code>cfb2adf4</code>, <code>e99fb128</code> and <code>9f8416a7</code> route the rectangular, ordinary hex and saddle-aware hex production labellers through fixed-shape pointer jumping and persist the paired production evidence. The graph-capable entry consumes the production centre-first neighbour rows and their directed admissibility; an edge is available when either direction admits it, reproducing the star-hyperedge propagation. Public signatures are unchanged. A caller cap below the logarithmic schedule retains the canonical truncated semantics; a sufficient cap executes at most <code>ceil(log2(cell_count)) + 2</code> trips.</p>
+  <p><strong>Discriminator.</strong> One fresh <code>all_debug</code> allocation captured all 25 graph-versus-canonical calls made by the two topology discriminators. Every call had zero differing cells, and one additional canonical propagation trip changed zero labels. Thus the pairwise graph was already using OR symmetrisation, the canonical result was settled, and no extra saddle-cell component semantic was lost. Restoring the original wrappers reproduced the two existing failures exactly: 51 of 3195 topology-class labels and a wall/X tie shift of <code>5.6166e-5 Wb</code>. They are baseline failures, not failures added by the production routing.</p>
+  <table>
+    <caption>Fresh CPU processes, base <code>9ff82581</code> against the integrated read</caption>
+    <thead><tr><th scope="col">Gate</th><th scope="col">Integrated result</th><th scope="col">Base failures</th><th scope="col">Added failures</th></tr></thead>
+    <tbody>
+      <tr><th scope="row"><code>test_parallel_components.py</code></th><td>6 passed</td><td>0</td><td>0</td></tr>
+      <tr><th scope="row"><code>test_jax_topology.py</code></th><td>9 passed, 2 failed</td><td>2 identical</td><td>0</td></tr>
+      <tr><th scope="row"><code>test_connectivity_boundary.py</code></th><td>16 passed, 1 failed</td><td>1 identical</td><td>0</td></tr>
+      <tr><th scope="row"><code>test_forward_operator_domain.py</code></th><td>3 passed, 3 failed</td><td>3 identical</td><td>0</td></tr>
+      <tr><th scope="row"><code>test_hex_flood_coil_nulls.py</code></th><td>2 failed</td><td>2 identical</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p><strong>One-card receipt.</strong> Job <code>1271551</code> used one H200, eight CPU cores and 128 GiB. The twelve MAST production rows retained the already-admitted zero-mismatch component identity and the production wrapper discriminator observed zero label differences on every actual read. All four fresh certificate terminal arrays—single-null 500 cells and weak, moderate and strong rotation at 1000 cells—are bit-identical to their committed production rows, with zero differing binary64 elements. The median compiled trip fell from <code>46.1 ms</code> to <code>24.544 ms</code>; the topology read fell from <code>43.795 ms</code> to <code>16.380 ms</code> per trip, and its share fell from 95 percent to <code>68.57 percent</code>. Median topology-read wall per solve is <code>16.627 ms</code>.</p>
+  <figure>
+    <img src="/nova/figures/playable-forward-solve/parallel-components-read/parallel-components-read-wall.png" alt="Before and after compiled trip wall and topology-read share">
+    <figcaption>The exact component read reduces both the compiled trip boundary and the fraction spent reading topology; the component and four-row certificate identities admit this timing.</figcaption>
+  </figure>
+  <p>The first H200 launcher exited 1 only after all rows, certificate parts and figures had landed, because its first adjudicator compared each solve terminal with its input seed. That implausible zero-of-twelve result was rejected as an instrument claim. Follow-on job <code>1271598</code> used the same one-card, eight-core, 128 GiB shape and persistent cache; for each MAST member it solved once through the canonical production read and once through the parallel production read from the same seed, persisting the canonical array before starting the parallel arm and both arrays before moving to the next member. All twelve pairs have identical hashes and zero differing binary64 elements, including the non-converged terminal states; the job and its assertion exited 0. Receipts: <code>docs/figures/playable-forward-solve/parallel-components-read/parallel-components-read-receipt.json</code> and <code>mast-paired-terminal-receipt.json</code>. Paired arrays: <code>docs/figures/playable-forward-solve/parallel-components-read/mast-paired-terminals/</code>. Logs: <code>~/.config/reckon/crew/reports/nova/s19-handoff/parallel-components-read/logs/</code>.</p>
+</section>
 </main>
 </body>
 </html>

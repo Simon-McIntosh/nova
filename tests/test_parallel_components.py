@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
+import re
 
 import jax
 import jax.numpy as jnp
@@ -16,6 +18,7 @@ from nova.equilibrium import flux_surface_connectivity as canonical
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.parallel_components import (
     label_parallel_connected_components_with_steps,
+    label_parallel_graph_components_with_steps,
 )
 from nova.equilibrium.topology import Topology
 from nova.equilibrium.wall_mask import inside_polygon
@@ -42,6 +45,37 @@ def _minimum_index_reference(mask: np.ndarray) -> np.ndarray:
         selected = components == component
         labels[selected] = np.flatnonzero(selected.reshape(-1))[0] + 1
     return labels
+
+
+def _minimum_graph_reference(
+    mask: np.ndarray, rings: np.ndarray, admissible: np.ndarray
+) -> np.ndarray:
+    """Return canonical labels for an explicit centre-first graph."""
+    parent = np.arange(mask.size, dtype=np.int32)
+    foreground = mask.reshape(-1)
+
+    def root(vertex: int) -> int:
+        while parent[vertex] != vertex:
+            parent[vertex] = parent[parent[vertex]]
+            vertex = int(parent[vertex])
+        return vertex
+
+    for ring, links in zip(rings, admissible, strict=True):
+        centre = int(ring[0])
+        for neighbour, open_link in zip(ring[1:], links[1:], strict=True):
+            neighbour = int(neighbour)
+            if not (open_link and foreground[centre] and foreground[neighbour]):
+                continue
+            centre_root = root(centre)
+            neighbour_root = root(neighbour)
+            lower = min(centre_root, neighbour_root)
+            parent[centre_root] = lower
+            parent[neighbour_root] = lower
+
+    labels = np.zeros(mask.size, dtype=np.int32)
+    for vertex in np.flatnonzero(foreground):
+        labels[vertex] = root(int(vertex)) + 1
+    return labels.reshape(mask.shape)
 
 
 def _assert_parallel_identity(mask: np.ndarray) -> int:
@@ -158,6 +192,67 @@ def test_narrow_enclave_path_resolves_to_its_minimum_index():
     mask[7, 7:12] = True
 
     _assert_parallel_identity(mask)
+
+
+def test_explicit_neighbour_graph_is_exact_with_masked_hex_links():
+    """Pointer jumping preserves arbitrary admissible hex components exactly."""
+    rng = np.random.default_rng(7119)
+    shape = (33, 33)
+    rings = hex_stencil(shape)
+    schedule_limit = math.ceil(math.log2(np.prod(shape))) + 2
+    for _ in range(12):
+        mask = ndimage.binary_closing(rng.random(shape) > 0.41)
+        mask &= rng.random(shape) > 0.08
+        admissible = np.ones(rings.shape, dtype=bool)
+        admissible[:, 1:] = rng.random(rings[:, 1:].shape) > 0.17
+        labels, steps, settled = label_parallel_graph_components_with_steps(
+            jnp.asarray(mask),
+            jnp.asarray(rings),
+            jnp.asarray(admissible),
+            mask.size,
+        )
+        expected = _minimum_graph_reference(mask, rings, admissible)
+        np.testing.assert_array_equal(np.asarray(labels), expected)
+        assert bool(settled)
+        assert int(steps) <= schedule_limit
+
+
+def test_production_component_wrappers_compile_the_logarithmic_schedule():
+    """Sufficient caller caps do not become production HLO trip counts."""
+    rng = np.random.default_rng(2811)
+    mask = ndimage.binary_closing(rng.random((33, 33)) > 0.43)
+    mask &= rng.random(mask.shape) > 0.07
+    rings = jnp.asarray(hex_stencil(mask.shape))
+    cell_count = mask.size
+    schedule_limit = math.ceil(math.log2(cell_count)) + 2
+
+    rectangular, rectangular_steps = canonical.label_connected_components_with_steps(
+        jnp.asarray(mask), cell_count
+    )
+    hexagonal, hexagonal_steps = canonical.label_hex_connected_components_with_steps(
+        jnp.asarray(mask), rings, cell_count
+    )
+    np.testing.assert_array_equal(
+        np.asarray(rectangular), _minimum_index_reference(mask)
+    )
+    np.testing.assert_array_equal(
+        np.asarray(hexagonal),
+        _minimum_graph_reference(mask, np.asarray(rings), np.ones(rings.shape, bool)),
+    )
+    assert int(rectangular_steps) <= schedule_limit
+    assert int(hexagonal_steps) <= schedule_limit
+
+    compiled = canonical.label_hex_connected_components_with_steps.lower(
+        jnp.asarray(mask), rings, cell_count
+    ).compile()
+    trip_counts = [
+        int(value)
+        for value in re.findall(
+            r'"known_trip_count":\{"n":"(\d+)"\}', compiled.as_text()
+        )
+    ]
+    assert schedule_limit in trip_counts
+    assert cell_count not in trip_counts
 
 
 def test_double_null_confined_mask_and_flux_decisions_are_unchanged():

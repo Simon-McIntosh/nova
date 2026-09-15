@@ -70,6 +70,10 @@ import jax
 import jax.numpy as jnp
 
 from nova.equilibrium.morphology import _dilate4 as _dilate4
+from nova.equilibrium.parallel_components import (
+    label_parallel_connected_components_with_steps,
+    label_parallel_graph_components_with_steps,
+)
 from nova.linalg.split_spline import fit_split_spline
 from nova.linalg.tensor_spline import TensorBSpline, fit_tensor_spline
 
@@ -227,22 +231,27 @@ def label_connected_components_with_steps(
 ) -> tuple[jnp.ndarray, jnp.ndarray]:
     """Return canonical labels for every 4-connected confined component.
 
-    Every confined cell starts with its one-based flat-grid index. Row and
-    column scans then propagate the minimum index within each uninterrupted
-    segment. Alternating the two segment fills to a fixed point leaves every
-    component carrying its minimum member index, with zero reserved for cells
-    outside ``confined``. ``n_iter`` is a static safety cap; ``nr + nz`` is
-    sufficient for a grid whose components use 4-connectivity.
+    The exact rectangular hook-and-compress primitive leaves every component
+    carrying its minimum member index, with zero reserved for cells outside
+    ``confined``. ``n_iter`` remains the caller's static safety cap. The pass
+    itself reaches and confirms its fixed point within
+    ``ceil(log2(cell_count)) + 2`` trips, so a larger caller cap does not enlarge
+    the compiled schedule.
 
     Labels are stable across execution order and need not be consecutive. The
     scalar step count is an execution diagnostic.
     """
 
-    def propagate(labels):
-        row_filled = _fill_label_segments(labels, confined, axis=1)
-        return _fill_label_segments(row_filled, confined, axis=0)
+    schedule_limit = (max(confined.size, 1) - 1).bit_length() + 2
+    if n_iter < schedule_limit:
 
-    return _iterate_component_labels(confined, n_iter, propagate)
+        def propagate(labels):
+            row_filled = _fill_label_segments(labels, confined, axis=1)
+            return _fill_label_segments(row_filled, confined, axis=0)
+
+        return _iterate_component_labels(confined, n_iter, propagate)
+    labels, steps, _settled = label_parallel_connected_components_with_steps(confined)
+    return labels, steps
 
 
 @partial(jax.jit, static_argnums=(1,))
@@ -409,19 +418,20 @@ def label_hex_connected_components_with_steps(
     search and quadratic derivative operator instead of interpreting the array
     carrying the cells as a rectangular raster.
 
-    Every confined cell starts with its one-based flat index. A fixed-shape
-    scatter-min propagates the minimum through each open ring for exactly
-    ``n_iter`` masked trips. Once labels reach a fixed point, later trips
-    preserve them bitwise. A ring whose centre is not confined is closed: its
-    neighbours cannot connect through a missing cell. Zero remains reserved for
-    unconfined cells. ``n_iter`` is a static safety cap; the number of cells is
-    sufficient for any finite ring graph.
+    Every confined cell starts with its one-based flat index. The explicit-graph
+    hook-and-compress pass consumes the centre-first six-neighbour rows directly.
+    A ring whose centre is not confined is closed: its neighbours cannot connect
+    through a missing cell. Zero remains reserved for unconfined cells.
+    ``n_iter`` remains the caller's static cap; the pass needs at most
+    ``ceil(log2(cell_count)) + 2`` trips.
     """
-    return _iterate_component_labels(
+    labels, steps, _settled = label_parallel_graph_components_with_steps(
         confined,
+        rings,
+        jnp.ones(rings.shape, dtype=bool),
         n_iter,
-        lambda labels: _propagate_hex_ring_minima(labels, confined, rings),
     )
+    return labels, steps
 
 
 @partial(jax.jit, static_argnums=(2,))
@@ -446,13 +456,13 @@ def label_saddle_aware_hex_connected_components_with_steps(
     ``link_admissible`` mask has the same cells-by-seven packing as ``rings``;
     only its six centre-to-neighbour entries control propagation.
     """
-    return _iterate_component_labels(
+    labels, steps, _settled = label_parallel_graph_components_with_steps(
         confined,
+        rings,
+        link_admissible,
         n_iter,
-        lambda labels: _propagate_admissible_hex_minima(
-            labels, confined, rings, link_admissible
-        ),
     )
+    return labels, steps
 
 
 @partial(jax.jit, static_argnums=(3,))

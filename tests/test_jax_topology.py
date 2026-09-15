@@ -20,6 +20,9 @@ with skip_import("jax"):
     from nova.equilibrium.conservation import FluxLattice
     from nova.equilibrium.domain import PlasmaDomain, classify_domains
     from nova.equilibrium.forward_operator import ForwardFluxOperator
+    from nova.equilibrium.parallel_components import (
+        label_parallel_connected_components,
+    )
     from nova.equilibrium.topology import Topology, TopologyState
     from nova.geometry import select
     from nova.jax.config import Precision, configure_dtypes
@@ -673,6 +676,16 @@ def test_mast_bank_slices_classification_is_batch_invariant():
     confineds = jnp.stack([item[0] for item in operands])
     seeds = jnp.stack([item[1] for item in operands])
     links = jnp.stack([item[2] for item in operands])
+
+    production_labels = jnp.stack(
+        [fsc.label_connected_components(confined, n_iter) for confined in confineds]
+    )
+    exact_labels = jnp.stack(
+        [label_parallel_connected_components(confined) for confined in confineds]
+    )
+    np.testing.assert_array_equal(
+        np.asarray(production_labels), np.asarray(exact_labels)
+    )
 
     def assert_batch_invariant(element, per_element_args, *batched):
         """Assert the vmapped element equals the per-slice stack bit-exactly."""

@@ -331,6 +331,24 @@
     <p><strong>Decision:</strong> the constrained reduced route recovers the named outboard-midplane edge displacement on this converged MAST
     equilibrium for all three commands. This node's scientific evidence gate passes; merged-head verification remains a separately owned gate.</p>
   </section>
+  <section id="shafranov-profile-amplitude-blocker">
+    <h2>Shafranov profile-amplitude row: source tangent absent</h2>
+    <p><strong>Node:</strong> <code>cank-shafranov-profile-amplitude-row</code>. The value side of the requested row is available without new
+    numerical machinery: <code>observe_moments</code> already evaluates poloidal beta from the topology-qualified clipped pressure integral and
+    internal inductance from the clipped poloidal-field integral, so the row would read
+    &beta;<sub>p</sub> + l<sub>i</sub>/2 from those two observations.</p>
+    <p><strong>Reproduced blocker:</strong> the declared <code>ProfileAmplitudeUnknown</code> cannot supply the square augmented system's
+    compensating column. Its <code>flux_delta</code> calls <code>ForwardFluxOperator.profile_component_image</code>, but that method does not
+    exist; a direct CPU invocation exits 1 with
+    <code>AttributeError: 'ForwardFluxOperator' object has no attribute 'profile_component_image'</code>. The source interface likewise carries
+    absolute <code>p_prime</code> and <code>ff_prime</code> evaluations and their primitives, but no derivative or source image with respect to
+    either profile amplitude.</p>
+    <p><strong>Disposition:</strong> implementation stopped before adding a value-only row, tests, or a twelve-bank-row receipt, because those
+    outputs could not satisfy the required amplitude-response and displaced-target gates. The prerequisite is an explicit pressure-gradient
+    and/or <code>ff_prime</code> amplitude tangent owned by <code>nova/equilibrium/source.py</code> and its operator projection; this worker's
+    exclusive scope does not include either implementation path. Reproduction and option analysis are recorded under
+    <code>~/.config/reckon/crew/reports/nova/s19-handoff/shafranov/</code>.</p>
+  </section>
 </main>
 </body>
 </html>

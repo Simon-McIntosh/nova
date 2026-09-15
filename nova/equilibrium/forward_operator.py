@@ -46,11 +46,15 @@ from nova.equilibrium.clip_quadrature import (
     clipped_support_field_integrals,
     cut_cell_bank_capacity,
 )
-from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.cell_partition import cell_partition_geometry
 from nova.equilibrium.connectivity_boundary import (
     traced_boundary_read,
     wall_height_shadow_mask,
+)
+from nova.equilibrium.domain import (
+    DomainMasks,
+    PlasmaDomain,
+    saddle_qualified_domains,
 )
 from nova.equilibrium.flux_surface_connectivity import (
     fit_tensor_spline,
@@ -1885,9 +1889,21 @@ class ForwardFluxOperator:
             requested_class,
             private_wall_node_mask,
         )
+        masks = saddle_qualified_domains(
+            result.masks, self._private_flux_saddle_admitted(result.state)
+        )
         same_axis = jnp.all(jnp.equal(initial.state.axis, result.state.axis))
         admitted = result.axis_admitted & (~initial.axis_admitted | same_axis)
-        return result.masks, result.state, result.connected, admitted
+        return masks, result.state, result.connected | masks.core, admitted
+
+    @staticmethod
+    def _private_flux_saddle_admitted(topology: TopologyState) -> jax.Array:
+        """Return whether a finite saddle owns the selected plasma boundary."""
+        return (
+            topology.boundary_is_xpoint
+            & jnp.all(jnp.isfinite(topology.x_point))
+            & jnp.isfinite(topology.x_point_flux)
+        )
 
     def _current(self, current) -> jax.Array:
         """Return the conductor currents one evaluation should use."""
@@ -2524,7 +2540,17 @@ class ForwardFluxOperator:
     def _residual_shadow_components_from_read(
         self, physical, masks, topology, previous_shadow=None
     ):
-        """Build residual shadows from one already-completed topology read."""
+        """Build residual shadows from one already-completed topology read.
+
+        A limited class has no admitted saddle and therefore no private-flux
+        region: every physical grid carrier participates in the residual even
+        if the connectivity flood provisionally split wall-cut cells from the
+        axis component. Diverted reads retain private shadow only behind their
+        finite admitted saddle.
+        """
+        masks = saddle_qualified_domains(
+            masks, self._private_flux_saddle_admitted(topology)
+        )
         reading = self._carrier_shadow_read(physical, masks)
         previous_wall_shadow = self._previous_wall_shadow(previous_shadow)
         if previous_wall_shadow is None:

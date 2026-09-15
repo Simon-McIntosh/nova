@@ -17,7 +17,7 @@ and whether it is connected to the magnetic axis. With the closed test
 label                selection
 ===================  =========================================
 ``CORE``             inside and closed and connected
-``PRIVATE_FLUX``     inside and closed and not connected
+``PRIVATE_FLUX``     inside and closed and not connected, behind an admitted saddle
 ``COMMON_SOL``       inside and not closed
 ``EXCLUDED_MATERIAL`` outside the material boundary
 ===================  =========================================
@@ -37,10 +37,11 @@ edge into the scrape-off layer.
 The open-field-line source support is consequently strict and live:
 :math:`\psi_N > 1` inside the material, excluding the topological private-flux
 mask.  It is derived at every profile evaluation rather than read from the
-``COMMON_SOL`` diagnostic label. ``PRIVATE_FLUX`` remains what the CONNECTIVITY
-test removes from the closed set: geometrically outside the boundary curve
-although its flux value sits below one, which is exactly why connectivity and
-not flux value decides it.
+``COMMON_SOL`` diagnostic label. A connectivity split becomes
+``PRIVATE_FLUX`` only when an admitted saddle gives that split physical
+meaning. On a limited plasma, wall-cut shared links may leave closed boundary
+cells disconnected from the axis flood; without a saddle those cells remain
+core, never a private region that consumers may exclude.
 """
 
 from __future__ import annotations
@@ -63,6 +64,7 @@ __all__ = [
     "axis_connected_component",
     "classify_domains",
     "profile_domain_change",
+    "saddle_qualified_domains",
 ]
 
 
@@ -212,3 +214,27 @@ def classify_domains(
     )
     label = jnp.where(inside_material, label, jnp.int8(PlasmaDomain.EXCLUDED_MATERIAL))
     return DomainMasks(label=label, psi_norm=psi_norm)
+
+
+@jax.jit
+def saddle_qualified_domains(
+    masks: DomainMasks, saddle_admitted: jax.Array
+) -> DomainMasks:
+    """Retain a private-flux region only behind an admitted saddle.
+
+    Connectivity is a geometric instrument, not sufficient physical evidence
+    for a private-flux branch. A limited boundary can close shared-edge links
+    at the wall and leave otherwise closed cells outside the axis flood. When
+    no finite saddle is admitted as the plasma boundary, those provisional
+    disconnected cells belong to the single closed core component. A diverted
+    read with an admitted saddle keeps its private labels unchanged.
+    """
+    private_without_saddle = masks.private_flux & ~jnp.asarray(
+        saddle_admitted, dtype=bool
+    )
+    label = jnp.where(
+        private_without_saddle,
+        jnp.int8(PlasmaDomain.CORE),
+        masks.label,
+    )
+    return DomainMasks(label=label, psi_norm=masks.psi_norm)

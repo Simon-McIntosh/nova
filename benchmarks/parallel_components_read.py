@@ -12,7 +12,9 @@ percent record.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 from datetime import UTC, datetime
+from functools import partial
 import json
 import os
 from pathlib import Path
@@ -31,7 +33,12 @@ import numpy as np
 
 from benchmarks import limited_row_shadow_census as certificate_gate
 from benchmarks import trip_quantum_width_one as trip_quantum
-from nova.equilibrium import reduced_newton
+from nova.equilibrium import (
+    connectivity_boundary,
+    domain,
+    flux_surface_connectivity as connectivity,
+    reduced_newton,
+)
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import (
     configure_dtypes,
@@ -54,6 +61,7 @@ MAST_COMPONENT_RECEIPT = (
 SOLOVEV_COMMITTED_PART_ROOT = (
     ROOT / "docs/figures/cut-cell-current-attribution/limited-shadow/solve-parts/chord"
 )
+_PARALLEL_SADDLE_COMPONENTS = connectivity.label_saddle_aware_hex_connected_components
 
 
 def _strict(value: Any) -> Any:
@@ -76,6 +84,44 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
         json.dumps(_strict(payload), indent=2, sort_keys=True, allow_nan=False) + "\n",
         encoding="utf-8",
     )
+
+
+@partial(jax.jit, static_argnums=(3,))
+def _canonical_saddle_components(
+    confined: jax.Array,
+    rings: jax.Array,
+    link_admissible: jax.Array,
+    n_iter: int,
+) -> jax.Array:
+    """Run the production saddle graph through its canonical propagation."""
+    labels, _steps = connectivity._iterate_component_labels(
+        confined,
+        n_iter,
+        lambda current: connectivity._propagate_admissible_hex_minima(
+            current, confined, rings, link_admissible
+        ),
+    )
+    return labels
+
+
+@contextmanager
+def _production_component_read(labeler):
+    """Select one production component implementation for a fresh trace."""
+    previous_domain = domain.label_saddle_aware_hex_connected_components
+    previous_boundary = (
+        connectivity_boundary.label_saddle_aware_hex_connected_components
+    )
+    domain.label_saddle_aware_hex_connected_components = labeler
+    connectivity_boundary.label_saddle_aware_hex_connected_components = labeler
+    jax.clear_caches()
+    try:
+        yield
+    finally:
+        domain.label_saddle_aware_hex_connected_components = previous_domain
+        connectivity_boundary.label_saddle_aware_hex_connected_components = (
+            previous_boundary
+        )
+        jax.clear_caches()
 
 
 def _revision() -> str:
@@ -155,6 +201,115 @@ def _solve_member(member) -> dict[str, Any]:
         "topology_read_share": topology_wall / trip_wall if trip_wall else None,
         "active_set_mask_differences": result.active_set_mask_differences,
     }
+
+
+def _solve_member_once(member, labeler) -> tuple[np.ndarray, dict[str, Any]]:
+    state = jnp.asarray(member.state)
+    requested = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+    with _production_component_read(labeler):
+        started = time.perf_counter()
+        result = reduced_newton.solve_reduced_newton(
+            member.operator,
+            state,
+            requested_class=requested,
+            target_current=member.target_current,
+            tolerance=member.tolerance,
+            newton_steps=12,
+            active_set_steps=16,
+            program=None,
+            stream=False,
+        )
+        terminal = np.asarray(result.state, dtype=np.float64)
+        wall = time.perf_counter() - started
+    return terminal, {
+        "sha256": trip_quantum._array_sha256(terminal),
+        "converged": bool(result.converged),
+        "termination": result.termination_name,
+        "terminal_residual": float(result.terminal_residual),
+        "trip_count": len(result.trip_wall_per_trip),
+        "solve_wall_s": wall,
+    }
+
+
+def _paired_member_path(output_root: Path, identity: str) -> Path:
+    slug = identity.replace("/", "-").replace(" ", "-")
+    return output_root / "mast-paired-terminals" / f"{slug}.npz"
+
+
+def _run_mast_paired(output_root: Path) -> None:
+    receipt_path = output_root / "mast-paired-terminal-receipt.json"
+    allocation = _allocation()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+    )
+    members, inputs = trip_quantum._build_members()
+    receipt: dict[str, Any] = {
+        "schema": "nova.mast-paired-component-read-terminal-identity",
+        "revision": _revision(),
+        "captured_at": datetime.now(UTC).isoformat(),
+        "allocation": allocation,
+        "cache": cache.receipt(),
+        "inputs": inputs,
+        "rows": [],
+        "completed": False,
+    }
+    _write_json(receipt_path, receipt)
+    for member in members:
+        terminal_path = _paired_member_path(output_root, member.identity)
+        terminal_path.parent.mkdir(parents=True, exist_ok=True)
+        canonical, canonical_summary = _solve_member_once(
+            member, _canonical_saddle_components
+        )
+        np.savez_compressed(terminal_path, canonical=canonical)
+        row = {
+            "identity": member.identity,
+            "state_authority": member.state_authority,
+            "terminal_arrays": str(terminal_path.relative_to(ROOT)),
+            "state": "canonical_persisted",
+            "canonical": canonical_summary,
+        }
+        receipt["rows"].append(row)
+        _write_json(receipt_path, receipt)
+        print("MAST_CANONICAL " + json.dumps(_strict(row), sort_keys=True), flush=True)
+
+        parallel, parallel_summary = _solve_member_once(
+            member, _PARALLEL_SADDLE_COMPONENTS
+        )
+        np.savez_compressed(terminal_path, canonical=canonical, parallel=parallel)
+        different = np.flatnonzero(
+            canonical.view(np.uint64) != parallel.view(np.uint64)
+        )
+        row.update(
+            {
+                "state": "paired",
+                "parallel": parallel_summary,
+                "terminal_flux_bit_identical": bool(
+                    np.array_equal(canonical, parallel)
+                ),
+                "different_element_count": int(len(different)),
+                "differing_flat_indices": different.tolist(),
+            }
+        )
+        _write_json(receipt_path, receipt)
+        print("MAST_PAIRED " + json.dumps(_strict(row), sort_keys=True), flush=True)
+
+    receipt["summary"] = {
+        "row_count": len(receipt["rows"]),
+        "bit_identical_count": sum(
+            bool(row["terminal_flux_bit_identical"]) for row in receipt["rows"]
+        ),
+        "different_element_count": sum(
+            int(row["different_element_count"]) for row in receipt["rows"]
+        ),
+    }
+    receipt["completed"] = True
+    _write_json(receipt_path, receipt)
+    if receipt["summary"]["row_count"] != 12:
+        raise RuntimeError("the paired MAST gate did not run twelve rows")
+    if receipt["summary"]["bit_identical_count"] != 12:
+        raise RuntimeError("a paired MAST terminal flux differs")
+    print(f"RECEIPT_WRITTEN={receipt_path}", flush=True)
+    print("EXIT_MARKER=0", flush=True)
 
 
 def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -296,6 +451,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--finalize-existing", action="store_true")
+    parser.add_argument("--mast-paired-only", action="store_true")
     arguments = parser.parse_args()
     output_root = arguments.output_root.resolve()
     receipt_path = output_root / "parallel-components-read-receipt.json"
@@ -307,6 +463,9 @@ def main() -> None:
 
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
+    if arguments.mast_paired_only:
+        _run_mast_paired(output_root)
+        return
     allocation = _allocation()
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()

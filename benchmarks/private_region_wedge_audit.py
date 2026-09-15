@@ -103,8 +103,17 @@ def independent_private_mask(
             "breadth-first-search positive control failed: expected one confined "
             f"axis seed, found {len(seed_cells)}"
         )
-    if not np.array_equal(rings[:, 0], np.arange(len(rings))):
-        raise RuntimeError("connectivity rings are not centred in cell order")
+    adjacency: list[set[int]] = [set() for _ in range(len(confined))]
+    authored_edges = 0
+    for row in range(len(rings)):
+        centre = int(rings[row, 0])
+        for slot in range(1, rings.shape[1]):
+            if not admissible[row, slot]:
+                continue
+            neighbour = int(rings[row, slot])
+            adjacency[centre].add(neighbour)
+            adjacency[neighbour].add(centre)
+            authored_edges += 1
 
     reached = np.zeros_like(confined, dtype=bool)
     queue: deque[int] = deque([int(seed_cells[0])])
@@ -112,10 +121,7 @@ def independent_private_mask(
     traversed_edges = 0
     while queue:
         cell = queue.popleft()
-        for slot in range(1, rings.shape[1]):
-            if not admissible[cell, slot]:
-                continue
-            neighbour = int(rings[cell, slot])
+        for neighbour in adjacency[cell]:
             if not confined[neighbour] or reached[neighbour]:
                 continue
             reached[neighbour] = True
@@ -127,6 +133,8 @@ def independent_private_mask(
         "confined_cells": int(np.count_nonzero(confined)),
         "reached_cells": int(np.count_nonzero(reached)),
         "private_cells": int(np.count_nonzero(private)),
+        "authored_ring_rows": int(len(rings)),
+        "authored_directed_edges": authored_edges,
         "queue_edges_accepting_new_cell": traversed_edges,
         "axis_seed_reached": bool(reached[seed_cells[0]]),
     }
@@ -633,6 +641,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--csv", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument("--cells", type=int, nargs="+", default=list(REQUESTED_CELLS))
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.csv.parent.mkdir(parents=True, exist_ok=True)
@@ -640,7 +649,7 @@ def main() -> None:
 
     rungs: list[dict[str, Any]] = []
     details: list[dict[str, Any]] = []
-    for requested in REQUESTED_CELLS:
+    for requested in args.cells:
         row, rung_details = audit_rung(requested)
         rungs.append(row)
         details.extend(rung_details)
@@ -668,7 +677,7 @@ def main() -> None:
     baseline_counts = [
         row["wedge_candidates_differing_cells"]["banked_eigenvectors"] for row in rungs
     ]
-    if tangent_counts == [0, 0, 0, 0]:
+    if all(count == 0 for count in tangent_counts):
         wedge_verdict = (
             "Replacing the Hessian eigenvectors with the saddle quadratic's zero-level "
             "tangents makes the wedge exact at every measured rung; the prior "

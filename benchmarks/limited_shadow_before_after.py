@@ -263,7 +263,6 @@ def _render(figure_path: Path) -> dict[str, Any]:
             np.asarray(pair["analytic"]),
             count=12,
             boundary=_topology_flux(analytic_topology, "boundary_flux_wb"),
-            axis=_topology_flux(analytic_topology, "axis_flux_wb"),
         )
         metric = metrics[case]
         state_columns = (
@@ -401,6 +400,7 @@ def _render(figure_path: Path) -> dict[str, Any]:
             ),
         ),
         loc="upper center",
+        bbox_to_anchor=(0.5, 0.958),
         ncol=3,
         frameon=False,
         fontsize=8,
@@ -408,6 +408,7 @@ def _render(figure_path: Path) -> dict[str, Any]:
     figure.suptitle(
         "Limited Solovev terminal flux: residual-shadow removal",
         fontsize=13,
+        y=0.992,
     )
     figure.text(
         0.5,

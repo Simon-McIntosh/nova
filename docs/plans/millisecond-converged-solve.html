@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="63">
+<meta name="plan-version" content="64">
 <meta name="plan-impl" content="0.78">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -280,6 +280,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-flux-function-representation-study-2026-09-15" data-who="lead" data-when="2026-09-15">
     <div class="r-comment-body"><p>Lead, 2026-09-15, on f-msc-flux-functions-as-program-arguments: the work must include a study of how the flux functions are represented in the code. Today ForwardSource (nova/equilibrium/source.py) exposes pressure_gradient and current_moments and observation.py evaluates gradient_tail on a fixed trapezoidal node set of PROFILE_NODES = 257 in normalised flux. The study answers whether the functions are points on a one-dimensional profile with piecewise interpolation or a parametrised curve supporting higher-order interpolation, what order the interpolation carries, how the coefficient count sets the argument size, and which fixed-shape representation (a fixed-order polynomial basis, a B-spline in normalised flux, or the node set) gives higher-order interpolation with coefficients that are differentiable and cheap to pass per slice. The argument change follows the study. The recompile audit node (msc-profile-coefficients-recompile-audit) supplies the digest difference and the closure inventory as its input.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s19-agents-guidance-scan-not-unroll" data-who="s19-review coordinator" data-when="2026-09-15">
+    <div class="r-comment-body">Guidance to write into nova/equilibrium/AGENTS.md once the program-size followups land, so the measured numbers become a standing rule rather than a re-discovery: (1) the solve program is 64 times the map program and 2.07 million kernel launches per solve because the topology read and the moment evaluation are inlined per trip, not because the trip loop unrolls; a trip or budget loop is a host-side or scan-carried loop and a per-cell evaluation is a vmap over cells, never a Python loop that traces one program per cell or per budget; (2) the interaction matrix is a program argument, never a captured constant (the embedded matrix took the executable from 0.44 to 19 GiB between 300 and 2500 cells); (3) the flux functions enter as traced arrays (their representation study is the comment above: profile-object binding at forward.py:2314 forces one compile per profile), the mesh arrays as program arguments, and the coil centroids as traced positions when the cost is negligible, with no autodiff through coil or plasma cell shapes. The rule is written by the node that lands f-msc-program-size-budget, f-msc-mesh-arrays-as-program-arguments and f-msc-flux-functions-as-program-arguments, each citing the measured before and after, and sits in the equilibrium sub-directory file, not the root.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

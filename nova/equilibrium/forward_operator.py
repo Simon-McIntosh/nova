@@ -1899,10 +1899,12 @@ class ForwardFluxOperator:
     @staticmethod
     def _private_flux_saddle_admitted(topology: TopologyState) -> jax.Array:
         """Return whether a finite saddle owns the selected plasma boundary."""
+        x_point = getattr(topology, "x_point", jnp.full(2, jnp.nan))
+        finite_point = jnp.all(jnp.isfinite(x_point))
         return (
-            topology.boundary_is_xpoint
-            & jnp.all(jnp.isfinite(topology.x_point))
-            & jnp.isfinite(topology.x_point_flux)
+            getattr(topology, "boundary_is_xpoint", finite_point)
+            & finite_point
+            & jnp.isfinite(getattr(topology, "x_point_flux", 0.0))
         )
 
     def _current(self, current) -> jax.Array:

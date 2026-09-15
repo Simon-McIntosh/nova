@@ -260,9 +260,9 @@ def _solve_gate(output_root: Path) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     solve_plan = [
         *(("chord", case_name, -1000) for case_name in LIMITED_CASES[:2]),
-        ("exact", CASE_NAME, -1000),
         ("chord", LIMITED_CASES[2], -1000),
         ("chord", certificate.DIVERTED_CASE_NAME, -500),
+        ("exact", CASE_NAME, -1000),
     ]
     receipt_path = output_root / "solve-receipt.json"
     try:

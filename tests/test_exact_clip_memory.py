@@ -481,7 +481,7 @@ def test_exact_clip_terminal_state_matches_reference_bit_for_bit(tmp_path):
     driver = output_root / "terminal_driver.py"
     driver.write_text(TERMINAL_DRIVER, encoding="utf-8")
     reference_path = output_root / "weak-300-reference.npz"
-    current_path = output_root / "weak-300-scan-current.npz"
+    current_path = output_root / "weak-300-implicit-current.npz"
     for checkout, output in (
         (MAIN_CHECKOUT, reference_path),
         (WORKTREE, current_path),
@@ -511,7 +511,7 @@ def test_whole_cell_terminal_state_matches_committed_control(tmp_path):
     driver = output_root / "terminal_driver.py"
     driver.write_text(TERMINAL_DRIVER, encoding="utf-8")
     reference_path = output_root / "single-null-500-base-cpu.npz"
-    current_path = output_root / "single-null-500-current-cpu.npz"
+    current_path = output_root / "single-null-500-implicit-current-cpu.npz"
     for checkout, output in (
         (MAIN_CHECKOUT, reference_path),
         (WORKTREE, current_path),

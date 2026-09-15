@@ -435,7 +435,7 @@ def measure_jvp_accuracy(
                 )
 
             state_scale = float(jnp.maximum(jnp.max(jnp.abs(state)), 1.0))
-            difference_step = float(np.cbrt(np.finfo(np.float64).eps) * state_scale)
+            difference_step = float(np.sqrt(np.finfo(np.float64).eps) * state_scale)
             comparisons = []
             for name, direction in directions:
                 _primal, tangent = jax.jvp(
@@ -455,6 +455,10 @@ def measure_jvp_accuracy(
                 comparisons.append(
                     {
                         "direction": name,
+                        "finite_difference_rule": (
+                            "sqrt(binary64 epsilon) times terminal infinity scale "
+                            "for a max-unit direction"
+                        ),
                         "finite_difference_step": difference_step,
                         "tangent_l2": tangent_norm,
                         "central_difference_l2": central_norm,

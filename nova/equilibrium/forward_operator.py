@@ -396,7 +396,7 @@ def _implicit_level_root_jvp(primals, tangents):
         point = chord + candidate[..., None] * normal[:, None, :]
         return evaluator(point)
 
-    _value, root_derivative = jax.jvp(
+    root_value, root_derivative = jax.jvp(
         residual_at_root,
         (root,),
         (jnp.ones_like(root),),
@@ -408,10 +408,21 @@ def _implicit_level_root_jvp(primals, tangents):
         -partial_tangent / safe_derivative,
         0.0,
     )
+    candidate = root - root_value / safe_derivative
     tangent = jnp.where(
-        root <= lower,
+        candidate < lower,
         lower_tangent,
-        jnp.where(root >= upper, upper_tangent, implicit_tangent),
+        jnp.where(candidate > upper, upper_tangent, implicit_tangent),
+    )
+    tangent = jnp.where(
+        candidate == lower,
+        0.5 * (implicit_tangent + lower_tangent),
+        tangent,
+    )
+    tangent = jnp.where(
+        candidate == upper,
+        0.5 * (implicit_tangent + upper_tangent),
+        tangent,
     )
     tangent = tangent.at[:, 0].set(0.0)
     tangent = tangent.at[:, -1].set(0.0)

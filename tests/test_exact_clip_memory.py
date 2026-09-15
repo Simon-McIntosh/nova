@@ -472,6 +472,11 @@ def test_implicit_level_root_jvp_matches_central_difference():
     central = (root(offset + step) - root(offset - step)) / (2.0 * step)
     assert float(tangent) == pytest.approx(float(central), rel=1.0e-10)
 
+    clamped = jnp.asarray(2.0, dtype=jnp.float64)
+    _primal, clamped_tangent = jax.jvp(root, (clamped,), (jnp.ones_like(clamped),))
+    clamped_central = (root(clamped + step) - root(clamped - step)) / (2.0 * step)
+    assert float(clamped_tangent) == pytest.approx(float(clamped_central), abs=1.0e-14)
+
 
 @pytest.mark.slow
 def test_exact_clip_terminal_state_matches_reference_bit_for_bit(tmp_path):

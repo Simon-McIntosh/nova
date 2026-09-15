@@ -367,6 +367,16 @@ evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylo
 <div class="r-comment" data-section="s4" data-id="c-20260909T1031-compensator-bound-landed" data-who="reckon-ship s19-review" data-when="2026-09-09T10:31:00Z">
     <div class="r-comment-body">cank-compensator-bound landed: commit d884fe59 merged to main; gate 2 passed in 722 s on all_debug CPU x64; measure: over-ceiling refusal and no-axis refusal both exercised, in-bound receipt bit-identical; impl 0.42 to 0.52. Remaining section 4 nodes: the eliminated policy as a real outer mode (waits for the clipped-moment resume to release forward.py), the Thomson forward model (in flight), the Shafranov row.</div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260915T060730104983-cank-edge-constraint-synthetic-target" data-who="cank-edge-constraint-synthetic-target" data-when="2026-09-15T08:35:00Z">
+    <div class="r-comment-body"><p>Partial landing, commit <code>5cc33df3</code>: a durable 22086/43 driver now places one boundary-referenced
+    outboard-midplane edge row at 5, 10 and 20 mm outward commands and records capped per-trip current, production-merit monotonicity, overshoot,
+    direct free-solve current references, refusal trips and shared-level poloidal contours. The Solov'ev CPU contract passed 1 test in 299.84 s on
+    <code>all_debug</code> job 1271069 after the first run exposed the correct limited-fixture result: nonzero row residual, zero accepted steps and
+    <code>sufficient_decrease_refused</code>. The required H200 receipt remains unrun because the shared Nova editable install points at a peer
+    worktree rather than main; policy requires the environment owner to repair that identity before accelerator evidence is trusted. No
+    <code>receipt.json</code>, contour figure, followup resolution or implementation advance is claimed. Full partial record:
+    <a href="/nova/evidence/archive/constraint-augmented-newton-krylov-landed#edge-constraint-synthetic-target">edge-constraint evidence</a>.</p></div>
+</div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
 <h2><span class="sec">§</span> Open questions</h2>

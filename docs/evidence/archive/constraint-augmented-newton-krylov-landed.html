@@ -284,6 +284,27 @@
     open decision <code>thomson-crossing-source</code> on this plan and is the lead's; the C1 prototype waits on it. Report at
     <code>~/.config/reckon/crew/reports/nova/s19-labeller/thomson-scout.md</code>.</p>
   </section>
+  <section id="edge-constraint-synthetic-target">
+    <h2>Synthetic outboard-edge constraint: driver and CPU refusal contract landed; MAST receipt held</h2>
+    <p><strong>Node:</strong> <code>cank-edge-constraint-synthetic-target</code>, commit <code>5cc33df3</code>. The driver
+    <code>benchmarks/edge_constraint_demonstration.py</code> names the measured quantity as the outboard intersection of the last closed flux
+    surface with the horizontal chord through the seed magnetic axis on MAST 22086/43. It places one boundary-referenced
+    <code>IsofluxConstraint</code> at 5, 10 and 20 mm outward commands, persists every command and trip, reads the production merit at each trip
+    boundary, enforces a 1000 A per-trip cap and 100 kA terminal ceiling, records accepted overshoot, and brackets a directly measured
+    unconstrained current reference. Its poloidal output uses shared-level line contours, the wall and both seed and terminal null sets.</p>
+    <p><strong>CPU contract:</strong> the first <code>all_debug</code> run, job 1271066, reproduced a meaningful negative control: a 5 mm
+    outward point on the wall-limited Solov'ev fixture accepted zero current, contradicting the test's initial expectation of a nonzero capped
+    application. The corrected contract names the behavior rather than hiding it: job 1271069 passed 1 test in 299.84 s, requiring the seed row
+    residual to be nonzero and above tolerance, the trip to take zero Newton steps, the row to stay unqualified, and the production termination
+    to read <code>sufficient_decrease_refused</code>.</p>
+    <p><strong>Open evidence gate:</strong> no H200 job was launched and no <code>receipt.json</code> or contour figure is claimed. Before launch,
+    the shared environment's editable pointer was read directly and resolved to
+    <code>/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/msc-scanned-trip-loop-prototype</code>, not the Nova main checkout.
+    Worker policy forbids repairing that shared environment or producing accelerator evidence with the wrong package identity. The environment
+    owner must confirm no live process depends on that pointer, run <code>uv sync --inexact --all-extras</code> from the main checkout, verify the
+    editable path, and resume this node for the one-card measurement. H200 usage is zero jobs and zero GPU-minutes against the authorised
+    one-card ceiling. Decision evidence remains open.</p>
+  </section>
 </main>
 </body>
 </html>

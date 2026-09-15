@@ -23,7 +23,7 @@ from __future__ import annotations
 import dataclasses
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from types import MappingProxyType, SimpleNamespace
+from types import MappingProxyType
 from typing import Any
 
 import jax
@@ -38,12 +38,11 @@ from nova.equilibrium import (
     SelectionHistory,
     SelectionPolicy,
     SelectionReceipt,
-    select_forward_branch,
 )
+from nova.equilibrium.branch_selection import select_achieved_forward_branch
 from nova.equilibrium.forward import (
     ForwardEquilibrium,
     ForwardProfile,
-    ForwardPortfolio,
 )
 from nova.equilibrium.source import ForwardSource
 from nova.equilibrium.topology import TopologyClass
@@ -1644,18 +1643,6 @@ def equilibrium_sweep(
         core_counts = tuple(
             core_count if index == int(achieved_class) else 0 for index in (0, 1)
         )
-        qualified = bool(solve_receipt.qualified)
-        residual = float(np.asarray(equilibrium.fixed_point.residual))
-        availability = tuple(
-            qualified if index == int(achieved_class) else False for index in (0, 1)
-        )
-        portfolio = ForwardPortfolio(
-            branches=SimpleNamespace(
-                converged=availability,
-                topology_consistent=(True, True),
-                residual=(residual, residual),
-            )
-        )
         if policy is None:
             policy = SelectionPolicy(
                 cold_start_class=achieved_class,
@@ -1665,11 +1652,13 @@ def equilibrium_sweep(
             limited=core_counts[int(TopologyClass.LIMITED)] > 0,
             diverted=core_counts[int(TopologyClass.DIVERTED)] > 0,
         )
-        selection = select_forward_branch(
-            portfolio,
-            history,
-            policy,
-            admissibility,
+        selection = select_achieved_forward_branch(
+            achieved_class,
+            qualified=bool(solve_receipt.qualified),
+            residual=float(np.asarray(equilibrium.fixed_point.residual)),
+            history=history,
+            policy=policy,
+            admissibility=admissibility,
         )
         branch_receipt = EquilibriumBranchReceipt(
             sample_index=sample_index,

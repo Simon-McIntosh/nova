@@ -10,8 +10,11 @@ improvement.
 from __future__ import annotations
 
 import argparse
+from datetime import UTC, datetime
+import hashlib
 import json
 from pathlib import Path
+import time
 from typing import Any
 
 
@@ -20,6 +23,13 @@ BASELINE_300_EXECUTABLE_BYTES = 461_724_765
 MAX_300_EXECUTABLE_BYTES = 450_000_000
 MAX_300_SOLVE_INSTRUCTIONS = 210_000
 REPLICATION_PATHS = ("current-moment path", "topology read")
+CERTIFICATE_ROWS = (
+    ("weak-rotation-reactor-static", -300),
+    ("moderate-rotation-conventional-static", -300),
+    ("strong-rotation-compact-static", -300),
+    ("diverted-single-null", -500),
+)
+BANKED_BOUNDARY_MS_PER_TRIP = 46.1
 
 
 def _load_rungs(directory: Path) -> dict[int, dict[str, Any]]:
@@ -230,11 +240,279 @@ def _report(result: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _certificate_operands(case_name: str, requested_cells: int):
+    """Build the exact production certificate operands for one committed row."""
+    import numpy as np
+
+    from benchmarks import solovev_certificate as certificate
+    from nova.equilibrium.forward import ForwardProfile
+    from nova.equilibrium.stencil_mesh import StencilMesh
+
+    carrier_case, source_case, exact = certificate._case(case_name)
+    machine = certificate._case_machine(case_name, carrier_case, exact, requested_cells)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    oracle_state = certificate._exact_state(case_name, exact, coordinates)
+    empty_operator = certificate.oracle_fixture.forward_operator(source_case, machine)
+    exact_physical, fixture_exterior, _fixture_cache = (
+        certificate.oracle_fixture.cached_fixture_exterior(
+            source_case, exact, machine, empty_operator, oracle_state
+        )
+    )
+    operator = certificate.oracle_fixture.forward_operator(
+        source_case, machine, fixture_exterior
+    )
+    profile = ForwardProfile(
+        operator,
+        StencilMesh(machine.node, machine.stencil, machine.area),
+        newton_steps=certificate.recovery.NEWTON_STEPS,
+    )
+    target_current, centroid, current_receipt = certificate._closed_form_current_target(
+        case_name, source_case, operator, exact_physical
+    )
+    seed, requested_class, _seed_receipt = certificate._production_seed(
+        profile, case_name, target_current, centroid, current_receipt
+    )
+    request = certificate._certificate_solve_request(
+        profile,
+        seed,
+        target_current,
+        carrier_identity=f"solovev:{case_name}:{requested_cells}",
+    )
+    return profile, seed, requested_class, target_current, request
+
+
+def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str, Any]:
+    """Compare the pre-wrapper and frozen-partition terminal states exactly."""
+    import jax
+    import jax.numpy as jnp
+    import numpy as np
+
+    from nova.equilibrium import fixed_point
+
+    profile, seed, requested_class, target_current, request = _certificate_operands(
+        case_name, requested_cells
+    )
+    state = jnp.asarray(seed)
+    external = profile.operator.external()
+    mapped = profile.operator.traced_flux_map(requested_class, target_current)
+    shadowed = profile.operator.traced_flux_map_with_shadow(
+        requested_class, target_current
+    )
+
+    def shadow_mask(value):
+        return profile.operator.residual_shadow_mask(value, requested_class)
+
+    def promoted_shadow_mask(value, previous):
+        return profile.operator.residual_shadow_mask(
+            value, requested_class, previous_shadow=previous
+        )
+
+    options = request.policy.kernel_options()
+    baseline_started = time.perf_counter()
+    baseline = fixed_point.newton_krylov(
+        mapped,
+        state,
+        shadow_mask_fn=shadow_mask,
+        promoted_shadow_mask_fn=promoted_shadow_mask,
+        shadowed_map_fn=shadowed,
+        map_arguments=(external,),
+        **options,
+    )
+    jax.block_until_ready(baseline.state)
+    baseline_seconds = time.perf_counter() - baseline_started
+    candidate_program = profile._accelerated_history_program(
+        "newton_krylov",
+        requested_class=requested_class,
+        target_current=target_current,
+        **options,
+    )
+    candidate_started = time.perf_counter()
+    candidate = candidate_program(state, external)
+    jax.block_until_ready(candidate.state)
+    candidate_seconds = time.perf_counter() - candidate_started
+    baseline_state = np.asarray(baseline.state, dtype=np.float64)
+    candidate_state = np.asarray(candidate.state, dtype=np.float64)
+    baseline_hash = hashlib.sha256(baseline_state.tobytes()).hexdigest()
+    candidate_hash = hashlib.sha256(candidate_state.tobytes()).hexdigest()
+    max_absolute_difference = float(
+        np.max(np.abs(candidate_state - baseline_state), initial=0.0)
+    )
+    return {
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "realised_state_values": int(baseline_state.size),
+        "baseline_seconds": baseline_seconds,
+        "candidate_seconds": candidate_seconds,
+        "baseline_state_sha256_binary64": baseline_hash,
+        "candidate_state_sha256_binary64": candidate_hash,
+        "terminal_state_bit_identical": bool(
+            np.array_equal(candidate_state, baseline_state)
+        ),
+        "maximum_absolute_state_difference": max_absolute_difference,
+        "baseline_terminal_residual": float(baseline.residual),
+        "candidate_terminal_residual": float(candidate.residual),
+        "converged_equal": bool(
+            np.asarray(candidate.converged).item()
+            == np.asarray(baseline.converged).item()
+        ),
+    }
+
+
+def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str, Any]:
+    """Persist the four certificate identity rows as each comparison lands."""
+    from benchmarks.trip_quantum_width_one import _require_allocation, _require_revision
+    from nova.jax.config import (
+        configure_dtypes,
+        configure_persistent_compilation_cache,
+        default_persistent_compilation_cache_root,
+    )
+
+    configure_dtypes()
+    receipt: dict[str, Any] = {
+        "schema": "nova.solve-program-certificate-identity",
+        "measurement_revision": _require_revision(),
+        "captured_at": datetime.now(UTC).isoformat(),
+        "assignment": _require_allocation(),
+        "persistent_compilation_cache": configure_persistent_compilation_cache(
+            cache_root or default_persistent_compilation_cache_root(),
+            minimum_compile_seconds=0.0,
+        ).receipt(),
+        "comparison": (
+            "pre-wrapper traced map against the frozen-partition accelerated program"
+        ),
+        "rows": [],
+        "passed": None,
+    }
+    _write_json(output, receipt)
+    for case_name, requested_cells in CERTIFICATE_ROWS:
+        print(f"CERTIFICATE_START case={case_name} cells={requested_cells}", flush=True)
+        row = _certificate_identity_row(case_name, requested_cells)
+        receipt["rows"].append(row)
+        _write_json(output, receipt)
+        print(
+            f"CERTIFICATE_DONE case={case_name} cells={requested_cells} "
+            f"bit_identical={int(row['terminal_state_bit_identical'])}",
+            flush=True,
+        )
+    receipt["passed"] = len(receipt["rows"]) == len(CERTIFICATE_ROWS) and all(
+        row["terminal_state_bit_identical"] and row["converged_equal"]
+        for row in receipt["rows"]
+    )
+    _write_json(output, receipt)
+    return receipt
+
+
+def write_semantic_report(
+    certificate_path: Path,
+    mast_path: Path,
+    dispatch_path: Path,
+    output_dir: Path,
+) -> dict[str, Any]:
+    """Join certificate identity and MAST timing into one reviewable receipt."""
+    certificate = json.loads(certificate_path.read_text(encoding="utf-8"))
+    mast = json.loads(mast_path.read_text(encoding="utf-8"))
+    dispatch = json.loads(dispatch_path.read_text(encoding="utf-8"))
+    trip_counts = {
+        str(row["identity"]): int(row["compiled"]["program_dispatch_trips"])
+        for row in dispatch["width_one"]["members"]
+    }
+    timing_rows = []
+    for row in mast["members"]:
+        identity = str(row["identity"])
+        trips = trip_counts[identity]
+        timing_rows.append(
+            {
+                "identity": identity,
+                "trips": trips,
+                "banked_boundary_ms_per_trip": BANKED_BOUNDARY_MS_PER_TRIP,
+                "before_compiled_boundary_ms_per_trip": (
+                    1.0e3 * float(row["dispatch_reference_wall_s"]) / trips
+                ),
+                "after_compiled_boundary_ms_per_trip": (
+                    1.0e3 * float(row["same_job_direct_wall_s"]) / trips
+                ),
+                "compiled_host_terminal_flux_ulp": int(
+                    row["compiled_host_terminal_flux_ulp"]
+                ),
+                "terminal_flux_bit_identical": int(
+                    row["compiled_host_terminal_flux_ulp"]
+                )
+                == 0,
+            }
+        )
+    result = {
+        "schema": "nova.solve-program-semantic-gate",
+        "certificate": certificate,
+        "mast_assignment": mast["assignment"],
+        "mast_measurement_revision": mast["measurement_revision"],
+        "mast_rows": timing_rows,
+        "passed": bool(certificate["passed"])
+        and len(timing_rows) == 12
+        and all(row["terminal_flux_bit_identical"] for row in timing_rows),
+    }
+    output_dir.mkdir(parents=True, exist_ok=True)
+    _write_json(output_dir / "receipt.json", result)
+    lines = [
+        "# Solve program semantic and boundary gate",
+        "",
+        "## Certificate terminal-state identity",
+        "",
+        "| case | cells | state values | baseline / candidate seconds | "
+        "bit identical |",
+        "|---|---:|---:|---:|:---:|",
+    ]
+    for row in certificate["rows"]:
+        lines.append(
+            f"| {row['case']} | {abs(int(row['requested_cells']))} | "
+            f"{int(row['realised_state_values']):,} | "
+            f"{float(row['baseline_seconds']):.3f} / "
+            f"{float(row['candidate_seconds']):.3f} | "
+            f"{'yes' if row['terminal_state_bit_identical'] else 'no'} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## MAST compiled-slice boundary and terminal identity",
+            "",
+            "| member | trips | banked boundary [ms/trip] | before compiled "
+            "[ms/trip] | after compiled [ms/trip] | host difference [ULP] |",
+            "|---|---:|---:|---:|---:|---:|",
+        ]
+    )
+    for row in timing_rows:
+        lines.append(
+            f"| {row['identity']} | {row['trips']} | "
+            f"{row['banked_boundary_ms_per_trip']:.1f} | "
+            f"{row['before_compiled_boundary_ms_per_trip']:.3f} | "
+            f"{row['after_compiled_boundary_ms_per_trip']:.3f} | "
+            f"{row['compiled_host_terminal_flux_ulp']} |"
+        )
+    lines.extend(["", f"Verdict: **{'PASS' if result['passed'] else 'FAIL'}**."])
+    (output_dir / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return result
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--baseline-dir", type=Path, required=True)
-    parser.add_argument("--candidate-dir", type=Path, required=True)
-    parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--baseline-dir", type=Path)
+    parser.add_argument("--candidate-dir", type=Path)
+    parser.add_argument("--output-dir", type=Path)
+    parser.add_argument("--certificate-output", type=Path)
+    parser.add_argument("--cache-root", type=Path)
+    parser.add_argument("--semantic-report", action="store_true")
+    parser.add_argument("--certificate-receipt", type=Path)
+    parser.add_argument("--mast-receipt", type=Path)
+    parser.add_argument("--dispatch-receipt", type=Path)
     parser.add_argument(
         "--baseline-300-executable-bytes",
         type=int,
@@ -242,6 +520,36 @@ def main() -> int:
         help="recorded baseline executable bytes for the 300-cell comparison",
     )
     args = parser.parse_args()
+    if args.certificate_output is not None:
+        result = run_certificate_identity(args.certificate_output, args.cache_root)
+        print(
+            f"CERTIFICATE_IDENTITY_GATE={'PASS' if result['passed'] else 'FAIL'}",
+            flush=True,
+        )
+        return 0 if result["passed"] else 1
+    if args.semantic_report:
+        required = (
+            args.certificate_receipt,
+            args.mast_receipt,
+            args.dispatch_receipt,
+            args.output_dir,
+        )
+        if any(path is None for path in required):
+            parser.error("semantic report requires all three receipts and output-dir")
+        result = write_semantic_report(
+            args.certificate_receipt,
+            args.mast_receipt,
+            args.dispatch_receipt,
+            args.output_dir,
+        )
+        print(f"SEMANTIC_GATE={'PASS' if result['passed'] else 'FAIL'}")
+        return 0 if result["passed"] else 1
+    if (
+        args.baseline_dir is None
+        or args.candidate_dir is None
+        or args.output_dir is None
+    ):
+        parser.error("size gate requires baseline-dir, candidate-dir, and output-dir")
     result = evaluate_gate(
         _load_rungs(args.baseline_dir),
         _load_rungs(args.candidate_dir),

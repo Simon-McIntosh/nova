@@ -1,4 +1,5 @@
 from copy import deepcopy
+import json
 from types import SimpleNamespace
 
 import jax.numpy as jnp
@@ -15,6 +16,7 @@ from benchmarks.solve_program_size_gate import (
     MAX_300_EXECUTABLE_BYTES,
     MAX_300_SOLVE_INSTRUCTIONS,
     evaluate_gate,
+    write_semantic_report,
 )
 from nova.equilibrium import fixed_point
 from nova.equilibrium.forward import ForwardProfile
@@ -267,8 +269,6 @@ def test_loop_inventory_finds_both_compiled_slice_budgets():
 
 
 def test_reanalysis_preserves_executable_measurement(tmp_path, monkeypatch):
-    import json
-
     from benchmarks import program_scope_census
 
     case = "case"
@@ -324,3 +324,61 @@ def test_partial_census_report_does_not_require_an_unmeasured_rung(tmp_path):
     assert "654,832 / 9,908" in report
     assert "300 cells" in figure.read_text(encoding="utf-8")
     assert "1000 cells" not in figure.read_text(encoding="utf-8")
+
+
+def test_semantic_report_requires_all_twelve_bit_identical_mast_rows(tmp_path):
+    certificate = {
+        "passed": True,
+        "rows": [
+            {
+                "case": "certificate",
+                "requested_cells": -300,
+                "realised_state_values": 4,
+                "baseline_seconds": 2.0,
+                "candidate_seconds": 1.0,
+                "terminal_state_bit_identical": True,
+            }
+        ],
+    }
+    mast_rows = [
+        {
+            "identity": f"member-{index}",
+            "dispatch_reference_wall_s": 0.12,
+            "same_job_direct_wall_s": 0.09,
+            "compiled_host_terminal_flux_ulp": 0,
+        }
+        for index in range(12)
+    ]
+    dispatch_rows = [
+        {
+            "identity": f"member-{index}",
+            "compiled": {"program_dispatch_trips": 3},
+        }
+        for index in range(12)
+    ]
+    certificate_path = tmp_path / "certificate.json"
+    mast_path = tmp_path / "mast.json"
+    dispatch_path = tmp_path / "dispatch.json"
+    certificate_path.write_text(json.dumps(certificate), encoding="utf-8")
+    mast_path.write_text(
+        json.dumps(
+            {
+                "assignment": {"device": "H200"},
+                "measurement_revision": "revision",
+                "members": mast_rows,
+            }
+        ),
+        encoding="utf-8",
+    )
+    dispatch_path.write_text(
+        json.dumps({"width_one": {"members": dispatch_rows}}), encoding="utf-8"
+    )
+
+    result = write_semantic_report(
+        certificate_path, mast_path, dispatch_path, tmp_path / "report"
+    )
+
+    assert result["passed"] is True
+    assert len(result["mast_rows"]) == 12
+    assert result["mast_rows"][0]["before_compiled_boundary_ms_per_trip"] == 40.0
+    assert result["mast_rows"][0]["after_compiled_boundary_ms_per_trip"] == 30.0

@@ -523,6 +523,53 @@
 <p><strong>Hoisted derivation.</strong> The immutable seed's reduced-coordinate derivation and the unchanged default external-flux derivation now live with the retained <code>ReducedProgram</code>; the warm public entry looks up that prepared program before either derivation. Conductor currents never enter the entry key. A changed current recomputes the traced exterior and preserves the compiled-program key, while an equal but distinct seed recomputes its coordinates rather than aliasing the retained seed.</p>
 <p><strong>CPU gate.</strong> The focused cache file passes 3 of 3. Job <code>1271460</code> ran the referee set one test per fresh CPU process: the cache-policy and counter referees passed in 478.19 s and 317.60 s (log lines 181 and 201), then the 39-minute allocation expired while the nonconverged-result referee compiled. The only unfinished test was resubmitted alone, still as a fresh process inside one <code>all_debug</code> job with a 59-minute limit; job <code>1271523</code> passed it in 299.42 s and wrote its per-test sentinel. The focused cache tests and every referee therefore pass with zero added failures. Logs: <code>~/.config/reckon/crew/reports/nova/s19-handoff/cache-entry/</code>.</p>
 </section>
+<section id="program-size-gate-refusal">
+  <h2>The executable-size gate rejects the measured 120/2 candidate (2026-09-15)</h2>
+  <p><strong>Node:</strong> <code>msc-program-size-budget</code>. Commits
+  <code>f01fece3</code>, <code>2a23f9c3</code>, <code>695dadf5</code>,
+  <code>1a06d463</code>, <code>1d62930b</code>, <code>de7383f0</code>,
+  <code>ddd2d8bd</code>, <code>28bc0ca4</code> and <code>d5c6b851</code> add the
+  executable-size gate, make its runtime-size reading accept both a method and a
+  property, reject a zero-byte reading as absent evidence, inventory the already
+  compiled loop forms, preserve executable receipts during HLO reanalysis, write
+  the equilibrium compilation guidance, and persist the measured refusal. The
+  attempted solver wrapper was removed after it failed the gate; no solver change
+  is represented as landed.</p>
+  <table>
+    <caption>Optimized CPU HLO and executable gate, baseline to rejected candidate</caption>
+    <thead><tr><th scope="col">Requested cells</th><th scope="col">Baseline solve/map instructions</th><th scope="col">Candidate solve/map instructions</th><th scope="col">Candidate solve/map ratio</th><th scope="col">Executable bytes</th><th scope="col">Moment copies</th><th scope="col">Topology reads</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">300</th><td>654,832 / 9,908</td><td>203,078 / 9,930</td><td>20.45</td><td>436,447,170</td><td>120</td><td>2</td></tr>
+      <tr><th scope="row">1000</th><td>662,331 / 10,024</td><td>204,531 / 10,046</td><td>20.36</td><td>Unavailable: CPU serialization refused and generated-code size reported zero</td><td>120</td><td>2</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Positive control and refusal.</strong> At both sizes the map program
+  contains exactly one current-moment sentinel and one topology-read sentinel, so
+  the solve counts are not an empty instrument. The executable gate then refuses
+  the candidate at both rungs: 120 current-moment copies and two topology reads,
+  plus no valid 1000-cell executable-size receipt. CPU job <code>1271562</code>
+  compiled and persisted both HLO rungs; job <code>1271573</code> reanalysed those
+  files with the corrected sentinels. The full receipts and refusal are under
+  <code>docs/figures/millisecond-converged-solve/program-size/</code>.</p>
+  <figure>
+    <img src="/nova/figures/millisecond-converged-solve/program-size/candidate/scope-census-instruction-share.svg"
+         alt="Horizontal bars showing the largest source-attributed instruction groups in the rejected 1000-cell candidate">
+    <figcaption>The candidate removes about 69 percent of the solve instructions,
+    but its remaining graph is still 20.36 times one map and retains all 120
+    current-moment traces, so instruction reduction alone does not satisfy the
+    structural gate.</figcaption>
+  </figure>
+  <p><strong>Required continuation.</strong> Nested JIT and exported StableHLO
+  calls were each checked with three call sites and optimized to three inlined
+  bodies, so they cannot provide the promised reuse boundary. The remaining
+  semantics-preserving design is one request-driven <code>lax</code> evaluator
+  state machine: residual, merit, acceptance, recovery, reconciliation and JVP
+  requests carry their continuation through one operator body. That rewrite must
+  reach one moment and one topology sentinel before the committed 300-cell and
+  twelve-member H200 identity/per-trip gates are informative. Because the
+  structural gate already refuses this candidate, those expensive semantic and
+  timing gates were not run. Focused instrument tests pass 9 of 9 on CPU.</p>
+</section>
 </main>
 </body>
 </html>

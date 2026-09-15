@@ -284,6 +284,53 @@
     open decision <code>thomson-crossing-source</code> on this plan and is the lead's; the C1 prototype waits on it. Report at
     <code>~/.config/reckon/crew/reports/nova/s19-labeller/thomson-scout.md</code>.</p>
   </section>
+  <section id="edge-constraint-synthetic-target">
+    <h2>Synthetic outboard-edge constraint: all three MAST commands recovered on one H200</h2>
+    <p><strong>Node:</strong> <code>cank-edge-constraint-synthetic-target</code>, implementation commits <code>5cc33df3</code>,
+    <code>80037ce8</code> and <code>054a4366</code>. The driver
+    <code>benchmarks/edge_constraint_demonstration.py</code> names the measured quantity as the outboard intersection of the last closed flux
+    surface with the horizontal chord through the seed magnetic axis on MAST 22086/43. It places one boundary-referenced
+    <code>IsofluxConstraint</code> at 5, 10 and 20 mm outward commands, persists every command and trip, reads the production merit at each trip
+    boundary, enforces a 1000 A per-trip cap and 100 kA terminal ceiling, records accepted overshoot, and brackets a directly measured
+    unconstrained current reference. Its poloidal output uses shared-level line contours, the wall and both seed and terminal null sets.</p>
+    <p><strong>CPU contracts:</strong> the first <code>all_debug</code> run, job 1271066, reproduced a meaningful negative control: a 5 mm
+    outward point on the wall-limited Solov'ev fixture accepted zero current, contradicting the test's initial expectation of a nonzero capped
+    application. The corrected contract names the behavior rather than hiding it: job 1271069 passed 1 test in 299.84 s, requiring the seed row
+    residual to be nonzero and above tolerance, the trip to take zero Newton steps, the row to stay unqualified, and the production termination
+    to read <code>sufficient_decrease_refused</code>. A separate armed contract confirms that a zero constrained current produces direct free
+    probes at 0, &minus;1000 and +1000 A instead of a uniform zero column. At the repaired head, <code>all_debug</code> job 1271086 passed both tests
+    in 317.11 s.</p>
+    <p><strong>Infrastructure preflight:</strong> the first allocation, job 1271084, exposed a driver import defect before the free equilibrium
+    was constructed: <code>settled_mask_stall</code> does not export <code>FIXED_POINT_CRITERION</code>. Commit <code>054a4366</code> imports the
+    canonical tolerance directly at all three solve sites. Before the authorised replacement, the complete driver imported successfully on the
+    login node through the root environment at clean committed revision <code>95e17e2c</code>.</p>
+    <p><strong>H200 result:</strong> betelgeuse job 1271106 completed in 3 min 39 s on <code>98dci4-gpu-0003</code> under
+    <code>gpu_0003_grpA</code>, with one NVIDIA H200 NVL, 8 CPUs and 128G. <code>TMPDIR=/tmp</code> was set in both environments; the root
+    virtual-environment Python ran directly with the assigned worktree on <code>PYTHONPATH</code>. The receipt identifies JAX 0.11.0 on
+    <code>cuda:0</code>, x64 enabled, seed terminal residual 3.383&times;10<sup>&minus;10</sup>, and the explicit persistent cache namespace
+    <code>~/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054</code>.</p>
+    <table>
+      <thead><tr><th>Outward command</th><th>Terminal error</th><th>Merit sequence</th><th>Largest trip / cap</th><th>Total / direct free</th><th>Overshoot</th><th>Trips</th></tr></thead>
+      <tbody>
+        <tr><td>5 mm</td><td>2.937&times;10<sup>&minus;9</sup> mm</td><td>0.0221709 &rarr; 0.0115476</td><td>182.247 / 1000 A</td><td>182.247 / 182.247 A</td><td>none</td><td>1</td></tr>
+        <tr><td>10 mm</td><td>1.792&times;10<sup>&minus;10</sup> mm</td><td>0.0348467 &rarr; 0.0127207</td><td>408.271 / 1000 A</td><td>408.271 / 408.271 A</td><td>none</td><td>1</td></tr>
+        <tr><td>20 mm</td><td>1.735&times;10<sup>&minus;14</sup> mm</td><td>0.0600943 &rarr; 0.0192876</td><td>949.192 / 1000 A</td><td>949.192 / 949.192 A</td><td>none</td><td>1</td></tr>
+      </tbody>
+    </table>
+    <p>All three commands converged within the stated 0.250 mm tolerance. Every nonzero-step merit sequence was monotone, every trip respected
+    the 1000 A cap, no accepted overshoot occurred, every directly measured free solve reached the same displacement, and constrained versus
+    free current differed by 0.000%. There were no refusals. The complete values and each direct-free probe are in the
+    <a href="/nova/figures/constraint-augmented-newton-krylov/edge-constraint/receipt.json">machine-readable H200 receipt</a>.</p>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/edge-constraint/edge-contours.png"
+           alt="Three MAST poloidal panels comparing the free and terminal flux contours for 5, 10 and 20 millimetre outboard-edge commands">
+      <figcaption>MAST 22086/43 at 5, 10 and 20 mm outward commands. Free-state contours are blue and terminal constrained contours ochre on
+      one shared physical level array; every panel includes the unit-faithful wall, both magnetic-axis and X-point sets, and the terminal error
+      and trip count. The hollow target and achieved marker overlap at this scale because each error is below 3&times;10<sup>&minus;9</sup> mm.</figcaption>
+    </figure>
+    <p><strong>Decision:</strong> the constrained reduced route recovers the named outboard-midplane edge displacement on this converged MAST
+    equilibrium for all three commands. This node's scientific evidence gate passes; merged-head verification remains a separately owned gate.</p>
+  </section>
 </main>
 </body>
 </html>

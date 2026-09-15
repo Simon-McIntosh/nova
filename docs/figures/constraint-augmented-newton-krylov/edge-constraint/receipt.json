@@ -1,0 +1,780 @@
+{
+  "receipt": "synthetic outboard-midplane edge displacement",
+  "identity": "22086/43",
+  "source": {
+    "revision": "95e17e2cd60515875f731dc464ff72077ea433b5",
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "backend": "gpu",
+    "devices": [
+      "cuda:0"
+    ],
+    "scheduler": {
+      "job_id": "1271106",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA",
+      "cpus_per_task": "8"
+    }
+  },
+  "configuration": {
+    "quantity": "outboard intersection of the last closed flux surface with the horizontal chord through the seed magnetic axis",
+    "seed_edge_point_rz_m": [
+      1.3985608412791182,
+      0.022469960077988193
+    ],
+    "commanded_displacements_mm": [
+      5.0,
+      10.0,
+      20.0
+    ],
+    "position_tolerance_mm": 0.25,
+    "current_step_cap_a": 1000.0,
+    "current_ceiling_a": 100000.0,
+    "current_agreement_percent": 10.0,
+    "active_set_trip_budget": 12,
+    "newton_steps_per_trip": 24,
+    "constraint": "one IsofluxConstraint row referenced to the terminal boundary flux",
+    "compensator": "matrix-led direction over the active MAST circuit mapping",
+    "persistent_compilation_cache": {
+      "selection": "explicit_per_recipe",
+      "root": "/home/ITER/mcintos/.cache",
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "version_key": "runtime-0745ecebea4cb264e054",
+      "runtime_identity": {
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0",
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_enable_x64": true,
+          "jax_default_matmul_precision": null,
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "platform": "gpu",
+            "kind": "NVIDIA H200 NVL",
+            "process_index": 0,
+            "id": 0
+          }
+        ]
+      },
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "minimum_compile_seconds": 1.0,
+      "maximum_bytes": 8589934592
+    }
+  },
+  "evidence_inputs": {
+    "response_carrier": {
+      "loaded_from_persisted_carrier": true,
+      "carrier": {
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "stored_circuit_count": 101,
+        "frozen_reference_count": 6,
+        "warm_load_seconds": 0.005278384312987328,
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "size_bytes": 645864
+      },
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cank-edge-constraint-synthetic-target/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.023411 direct_builders=0 verdict=PASS",
+        "direct_green_operator_builder_entries": 0,
+        "passes": true
+      }
+    },
+    "seed_terminal_residual": 3.382712354874449e-10,
+    "seed_trip_count": 3,
+    "seed_axis_rz_m": [
+      0.9033613060950442,
+      0.022469960077988193
+    ],
+    "seed_x_point_rz_m": [
+      0.5849783468400666,
+      1.2305027246683173
+    ],
+    "seed_flux_span_wb": 0.46394373691378105
+  },
+  "commands": [
+    {
+      "commanded_displacement_mm": 5.0,
+      "target_point_rz_m": [
+        1.403560841279118,
+        0.022469960077988193
+      ],
+      "position_tolerance_mm": 0.25,
+      "current_step_cap_a": 1000.0,
+      "status": "converged",
+      "trips": [
+        {
+          "trip": 1,
+          "newton_steps": 3,
+          "accepted_factors": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "merit_before": 0.0221709138647837,
+          "merit_after": 0.011547635209027393,
+          "merit_change": -0.010623278655756307,
+          "applied_compensating_current_a": 182.24653084043368,
+          "largest_applied_compensating_current_a": 182.24653084043368,
+          "largest_per_circuit_application_a": 182.24653084043368,
+          "cumulative_compensating_current_a": 182.24653084043368,
+          "achieved_edge_radius_m": 1.4035608412820553,
+          "achieved_displacement_mm": 5.0000000029370995,
+          "position_error_mm": 2.9370993484545416e-09,
+          "row_physical_residual_wb": 4.873920711467861e-12,
+          "row_qualified": true,
+          "accepted_overshoot": false,
+          "termination": "converged",
+          "terminal_fixed_point_residual": 4.626153061426783e-11,
+          "edge_motion_this_trip_mm": 5.0000000029370995
+        }
+      ],
+      "merit_sequence": [
+        0.0221709138647837,
+        0.011547635209027393
+      ],
+      "terminal_position_error_mm": 2.9370993484545416e-09,
+      "cumulative_compensating_current_a": 182.24653084043368,
+      "trip_count": 1,
+      "nonzero_step_merit_sequence": [
+        0.0221709138647837,
+        0.011547635209027393
+      ],
+      "merit_monotone_where_steps_are_nonzero": true,
+      "largest_trip_application_a": 182.24653084043368,
+      "current_cap_respected": true,
+      "accepted_overshoot": false,
+      "total_compensating_current_a": 182.24653084043368,
+      "terminal_edge_radius_m": 1.4035608412820553,
+      "terminal_displacement_mm": 5.0000000029370995,
+      "terminal_fixed_point_residual": 4.626153061426783e-11,
+      "refusal": null,
+      "free_solve_reference": {
+        "method": "direct free solves bracketed and refined by secant; the constrained current sets the probe scale but is not extrapolated",
+        "position_tolerance_mm": 0.25,
+        "refinement_limit": 4,
+        "samples": [
+          {
+            "current_delta_a": 0.0,
+            "converged": true,
+            "termination": "converged",
+            "trip_count": 1,
+            "edge_radius_m": 1.398560841346709,
+            "edge_displacement_mm": 6.759082182838938e-08,
+            "position_error_mm": -4.999999932409178,
+            "terminal_fixed_point_residual": 3.5950598278932e-10
+          },
+          {
+            "current_delta_a": 91.12326542021684,
+            "converged": true,
+            "termination": "converged",
+            "trip_count": 1,
+            "edge_radius_m": 1.4011749082484157,
+            "edge_displacement_mm": 2.614066969297557,
+            "position_error_mm": -2.385933030702443,
+            "terminal_fixed_point_residual": 6.461385148991913e-09
+          },
+          {
+            "current_delta_a": 182.24653084043368,
+            "converged": true,
+            "termination": "converged",
+            "trip_count": 1,
+            "edge_radius_m": 1.4035608415116347,
+            "edge_displacement_mm": 5.000000232516566,
+            "position_error_mm": 2.3251656589701186e-07,
+            "terminal_fixed_point_residual": 1.0759521185501022e-09
+          },
+          {
+            "current_delta_a": 273.3697962606505,
+            "converged": true,
+            "termination": "converged",
+            "trip_count": 1,
+            "edge_radius_m": 1.4056721524784983,
+            "edge_displacement_mm": 7.111311199380133,
+            "position_error_mm": 2.1113111993801326,
+            "terminal_fixed_point_residual": 2.855882323528781e-09
+          }
+        ],
+        "bracketed": true,
+        "reached": true,
+        "current_delta_a": 182.24653084043368,
+        "edge_displacement_mm": 5.000000232516566,
+        "position_error_mm": 2.3251656589701186e-07
+      },
+      "total_current_difference_percent": 0.0,
+      "selection": {
+        "rule": "dominant_authority",
+        "singular_values_row_scales_per_ampere": [
+          0.00010403491035797321
+        ],
+        "direction_authority_row_scales_per_ampere": [
+          0.00010474892417665761
+        ],
+        "leading_circuits": [
+          {
+            "circuit": 0,
+            "family": "sol"
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower"
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower"
+          },
+          {
+            "circuit": 8,
+            "family": "p4_lower"
+          },
+          {
+            "circuit": 9,
+            "family": "p5_upper"
+          }
+        ],
+        "direction": [
+          {
+            "circuit": 0,
+            "family": "sol",
+            "component": -1.0
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower",
+            "component": -0.07619278941117055
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower",
+            "component": -0.05439771330674627
+          },
+          {
+            "circuit": 8,
+            "family": "p4_lower",
+            "component": -0.04742147843666667
+          },
+          {
+            "circuit": 9,
+            "family": "p5_upper",
+            "component": 0.04438957325057726
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper",
+            "component": 0.013429923068686135
+          },
+          {
+            "circuit": 5,
+            "family": "p3_upper",
+            "component": -0.012633402399436259
+          },
+          {
+            "circuit": 4,
+            "family": "p2_outer_lower",
+            "component": -0.0123443288944978
+          },
+          {
+            "circuit": 3,
+            "family": "p2_inner_lower",
+            "component": -0.009624510774937731
+          },
+          {
+            "circuit": 2,
+            "family": "p2_outer_upper",
+            "component": -0.008783619572746659
+          },
+          {
+            "circuit": 10,
+            "family": "p5_lower",
+            "component": -0.0070330802320160875
+          },
+          {
+            "circuit": 1,
+            "family": "p2_inner_upper",
+            "component": -0.006897184486059259
+          },
+          {
+            "circuit": 7,
+            "family": "p4_upper",
+            "component": 0.005539055690656423
+          }
+        ]
+      },
+      "accepted": true
+    },
+    {
+      "commanded_displacement_mm": 10.0,
+      "target_point_rz_m": [
+        1.4085608412791182,
+        0.022469960077988193
+      ],
+      "position_tolerance_mm": 0.25,
+      "current_step_cap_a": 1000.0,
+      "status": "converged",
+      "trips": [
+        {
+          "trip": 1,
+          "newton_steps": 4,
+          "accepted_factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "merit_before": 0.03484669425699481,
+          "merit_after": 0.012720666501727639,
+          "merit_change": -0.022126027755267175,
+          "applied_compensating_current_a": 408.2705042645847,
+          "largest_applied_compensating_current_a": 408.2705042645847,
+          "largest_per_circuit_application_a": 408.2705042645847,
+          "cumulative_compensating_current_a": 408.2705042645847,
+          "achieved_edge_radius_m": 1.4085608412792974,
+          "achieved_displacement_mm": 10.000000000179199,
+          "position_error_mm": 1.7919866979188015e-10,
+          "row_physical_residual_wb": 2.9770630405323573e-13,
+          "row_qualified": true,
+          "accepted_overshoot": false,
+          "termination": "converged",
+          "terminal_fixed_point_residual": 1.2036077104015672e-10,
+          "edge_motion_this_trip_mm": 10.000000000179199
+        }
+      ],
+      "merit_sequence": [
+        0.03484669425699481,
+        0.012720666501727639
+      ],
+      "terminal_position_error_mm": 1.7919866979188015e-10,
+      "cumulative_compensating_current_a": 408.2705042645847,
+      "trip_count": 1,
+      "nonzero_step_merit_sequence": [
+        0.03484669425699481,
+        0.012720666501727639
+      ],
+      "merit_monotone_where_steps_are_nonzero": true,
+      "largest_trip_application_a": 408.2705042645847,
+      "current_cap_respected": true,
+      "accepted_overshoot": false,
+      "total_compensating_current_a": 408.2705042645847,
+      "terminal_edge_radius_m": 1.4085608412792974,
+      "terminal_displacement_mm": 10.000000000179199,
+      "terminal_fixed_point_residual": 1.2036077104015672e-10,
+      "refusal": null,
+      "free_solve_reference": {
+        "method": "direct free solves bracketed and refined by secant; the constrained current sets the probe scale but is not extrapolated",
+        "position_tolerance_mm": 0.25,
+        "refinement_limit": 4,
+        "samples": [
+          {
+            "current_delta_a": 0.0,
+            "converged": true,
+            "termination": "converged",
+            "trip_count": 1,
+            "edge_radius_m": 1.398560841346709,
+            "edge_displacement_mm": 6.759082182838938e-08,
+            "position_error_mm": -9.999999932409178,
+            "terminal_fixed_point_residual": 3.5950598278932e-10
+          },
+          {
+            "current_delta_a": 204.13525213229235,
+            "converged": true,
+            "termination": "converged",
+            "trip_count": 1,
+            "edge_radius_m": 1.404089278163457,
+            "edge_displacement_mm": 5.528436884338905,
+            "position_error_mm": -4.471563115661095,
+            "terminal_fixed_point_residual": 9.078913943414643e-09
+          },
+          {
+            "current_delta_a": 408.2705042645847,
+            "converged": true,
+            "termination": "converged",
+            "trip_count": 1,
+            "edge_radius_m": 1.408560841675389,
+            "edge_displacement_mm": 10.000000396270803,
+            "position_error_mm": 3.962708026300499e-07,
+            "terminal_fixed_point_residual": 3.8426691180182044e-09
+          },
+          {
+            "current_delta_a": 612.405756396877,
+            "converged": true,
+            "termination": "converged",
+            "trip_count": 1,
+            "edge_radius_m": 1.4125853065384542,
+            "edge_displacement_mm": 14.024465259335983,
+            "position_error_mm": 4.024465259335983,
+            "terminal_fixed_point_residual": 7.432874944140893e-09
+          }
+        ],
+        "bracketed": true,
+        "reached": true,
+        "current_delta_a": 408.2705042645847,
+        "edge_displacement_mm": 10.000000396270803,
+        "position_error_mm": 3.962708026300499e-07
+      },
+      "total_current_difference_percent": 0.0,
+      "selection": {
+        "rule": "dominant_authority",
+        "singular_values_row_scales_per_ampere": [
+          0.00010354990139248251
+        ],
+        "direction_authority_row_scales_per_ampere": [
+          0.00010426403077806014
+        ],
+        "leading_circuits": [
+          {
+            "circuit": 0,
+            "family": "sol"
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower"
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower"
+          },
+          {
+            "circuit": 8,
+            "family": "p4_lower"
+          },
+          {
+            "circuit": 9,
+            "family": "p5_upper"
+          }
+        ],
+        "direction": [
+          {
+            "circuit": 0,
+            "family": "sol",
+            "component": -1.0
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower",
+            "component": -0.07629069838040733
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower",
+            "component": -0.05439982931545907
+          },
+          {
+            "circuit": 8,
+            "family": "p4_lower",
+            "component": -0.04741419517676895
+          },
+          {
+            "circuit": 9,
+            "family": "p5_upper",
+            "component": 0.04493558891650674
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper",
+            "component": 0.013803645623701557
+          },
+          {
+            "circuit": 5,
+            "family": "p3_upper",
+            "component": -0.012368001843005174
+          },
+          {
+            "circuit": 4,
+            "family": "p2_outer_lower",
+            "component": -0.01235959772663483
+          },
+          {
+            "circuit": 3,
+            "family": "p2_inner_lower",
+            "component": -0.009636309267339924
+          },
+          {
+            "circuit": 2,
+            "family": "p2_outer_upper",
+            "component": -0.008767316581655936
+          },
+          {
+            "circuit": 1,
+            "family": "p2_inner_upper",
+            "component": -0.006884541141668497
+          },
+          {
+            "circuit": 10,
+            "family": "p5_lower",
+            "component": -0.006784307181540076
+          },
+          {
+            "circuit": 7,
+            "family": "p4_upper",
+            "component": 0.005845680584718681
+          }
+        ]
+      },
+      "accepted": true
+    },
+    {
+      "commanded_displacement_mm": 20.0,
+      "target_point_rz_m": [
+        1.4185608412791182,
+        0.022469960077988193
+      ],
+      "position_tolerance_mm": 0.25,
+      "current_step_cap_a": 1000.0,
+      "status": "converged",
+      "trips": [
+        {
+          "trip": 1,
+          "newton_steps": 5,
+          "accepted_factors": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "merit_before": 0.060094348403406606,
+          "merit_after": 0.019287620935793993,
+          "merit_change": -0.040806727467612616,
+          "applied_compensating_current_a": 949.1922207576285,
+          "largest_applied_compensating_current_a": 949.1922207576285,
+          "largest_per_circuit_application_a": 949.1922207576285,
+          "cumulative_compensating_current_a": 949.1922207576285,
+          "achieved_edge_radius_m": 1.4185608412791182,
+          "achieved_displacement_mm": 20.000000000000018,
+          "position_error_mm": 1.734723475976807e-14,
+          "row_physical_residual_wb": -8.326672684688674e-17,
+          "row_qualified": true,
+          "accepted_overshoot": false,
+          "termination": "converged",
+          "terminal_fixed_point_residual": 3.4157925748833135e-14,
+          "edge_motion_this_trip_mm": 20.000000000000018
+        }
+      ],
+      "merit_sequence": [
+        0.060094348403406606,
+        0.019287620935793993
+      ],
+      "terminal_position_error_mm": 1.734723475976807e-14,
+      "cumulative_compensating_current_a": 949.1922207576285,
+      "trip_count": 1,
+      "nonzero_step_merit_sequence": [
+        0.060094348403406606,
+        0.019287620935793993
+      ],
+      "merit_monotone_where_steps_are_nonzero": true,
+      "largest_trip_application_a": 949.1922207576285,
+      "current_cap_respected": true,
+      "accepted_overshoot": false,
+      "total_compensating_current_a": 949.1922207576285,
+      "terminal_edge_radius_m": 1.4185608412791182,
+      "terminal_displacement_mm": 20.000000000000018,
+      "terminal_fixed_point_residual": 3.4157925748833135e-14,
+      "refusal": null,
+      "free_solve_reference": {
+        "method": "direct free solves bracketed and refined by secant; the constrained current sets the probe scale but is not extrapolated",
+        "position_tolerance_mm": 0.25,
+        "refinement_limit": 4,
+        "samples": [
+          {
+            "current_delta_a": 0.0,
+            "converged": true,
+            "termination": "converged",
+            "trip_count": 1,
+            "edge_radius_m": 1.398560841346709,
+            "edge_displacement_mm": 6.759082182838938e-08,
+            "position_error_mm": -19.999999932409178,
+            "terminal_fixed_point_residual": 3.5950598278932e-10
+          },
+          {
+            "current_delta_a": 474.5961103788143,
+            "converged": true,
+            "termination": "converged",
+            "trip_count": 1,
+            "edge_radius_m": 1.4099094558968899,
+            "edge_displacement_mm": 11.348614617771702,
+            "position_error_mm": -8.651385382228298,
+            "terminal_fixed_point_residual": 4.314204756410964e-09
+          },
+          {
+            "current_delta_a": 949.1922207576285,
+            "converged": true,
+            "termination": "converged",
+            "trip_count": 1,
+            "edge_radius_m": 1.4185608453690413,
+            "edge_displacement_mm": 20.000004089923085,
+            "position_error_mm": 4.089923084232838e-06,
+            "terminal_fixed_point_residual": 2.762814084393853e-09
+          },
+          {
+            "current_delta_a": 1423.7883311364428,
+            "converged": false,
+            "termination": "active_set_settled",
+            "trip_count": 1,
+            "edge_radius_m": 1.4258033673021524,
+            "edge_displacement_mm": 27.24252602303423,
+            "position_error_mm": 7.24252602303423,
+            "terminal_fixed_point_residual": 0.00026808749759710097
+          }
+        ],
+        "bracketed": true,
+        "reached": true,
+        "current_delta_a": 949.1922207576285,
+        "edge_displacement_mm": 20.000004089923085,
+        "position_error_mm": 4.089923084232838e-06
+      },
+      "total_current_difference_percent": 0.0,
+      "selection": {
+        "rule": "dominant_authority",
+        "singular_values_row_scales_per_ampere": [
+          0.00010236360013289428
+        ],
+        "direction_authority_row_scales_per_ampere": [
+          0.00010307830719853606
+        ],
+        "leading_circuits": [
+          {
+            "circuit": 0,
+            "family": "sol"
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower"
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower"
+          },
+          {
+            "circuit": 8,
+            "family": "p4_lower"
+          },
+          {
+            "circuit": 9,
+            "family": "p5_upper"
+          }
+        ],
+        "direction": [
+          {
+            "circuit": 0,
+            "family": "sol",
+            "component": -1.0
+          },
+          {
+            "circuit": 6,
+            "family": "p3_lower",
+            "component": -0.07655637454182439
+          },
+          {
+            "circuit": 12,
+            "family": "p6_lower",
+            "component": -0.05445664544656283
+          },
+          {
+            "circuit": 8,
+            "family": "p4_lower",
+            "component": -0.04744269732401856
+          },
+          {
+            "circuit": 9,
+            "family": "p5_upper",
+            "component": 0.04614624021158804
+          },
+          {
+            "circuit": 11,
+            "family": "p6_upper",
+            "component": 0.014664029237237692
+          },
+          {
+            "circuit": 4,
+            "family": "p2_outer_lower",
+            "component": -0.012400997391376426
+          },
+          {
+            "circuit": 5,
+            "family": "p3_upper",
+            "component": -0.011749125658900324
+          },
+          {
+            "circuit": 3,
+            "family": "p2_inner_lower",
+            "component": -0.00966836431803362
+          },
+          {
+            "circuit": 2,
+            "family": "p2_outer_upper",
+            "component": -0.008733608916581532
+          },
+          {
+            "circuit": 1,
+            "family": "p2_inner_upper",
+            "component": -0.006858476432284367
+          },
+          {
+            "circuit": 7,
+            "family": "p4_upper",
+            "component": 0.006546685419594325
+          },
+          {
+            "circuit": 10,
+            "family": "p5_lower",
+            "component": -0.006295547821895961
+          }
+        ]
+      },
+      "accepted": true
+    }
+  ],
+  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cank-edge-constraint-synthetic-target/docs/figures/constraint-augmented-newton-krylov/edge-constraint/edge-contours.png",
+  "verdict": {
+    "status": "pass",
+    "commands_measured": 3,
+    "commands_accepted": 3,
+    "largest_abs_position_error_mm": 2.9370993484545416e-09,
+    "largest_trip_application_a": 949.1922207576285,
+    "any_accepted_overshoot": false,
+    "refusals": []
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T17:22:17",
+  "updated": "2026-09-15T17:37:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4711,6 +4711,15 @@
       },
       {
         "id": "s19h-cca-lfsfig-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-cca-oracleoverlay-s",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -167381,6 +167390,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2576
+    "_version": 2577
   }
 }

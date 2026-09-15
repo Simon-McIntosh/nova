@@ -217,6 +217,14 @@ def test_measure_can_bank_memory_without_serializing_hlo(monkeypatch, tmp_path):
     assert receipt["rows"][0]["memory_analysis"]["temp_size_in_bytes"] == 4 * 2**30
 
 
+def test_jvp_terminal_state_reader_refuses_empty_receipt(tmp_path):
+    """An empty state cannot make a derivative check vacuously pass."""
+    path = tmp_path / "empty.npz"
+    np.savez(path, flux=np.empty(0, dtype=np.float64))
+    with pytest.raises(RuntimeError, match="empty or nonfinite"):
+        memory_scaling._terminal_state(path)
+
+
 class _MeasuredDevice:
     def __init__(self, peak_bytes: int):
         self.peak_bytes = peak_bytes

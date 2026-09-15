@@ -21,6 +21,7 @@ from typing import Any
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import clip_quadrature
@@ -29,6 +30,7 @@ from nova.jax.config import configure_dtypes
 
 
 SCHEMA = "nova.exact-clip-memory-scaling"
+JVP_RELATIVE_ERROR_BOUND = 1.0e-8
 
 
 def scaling_exponent(
@@ -347,6 +349,169 @@ def solve_and_measure(
     return receipt
 
 
+def _terminal_state(path: Path) -> np.ndarray:
+    """Read one explicitly named terminal state and prove it is populated."""
+    if path.suffix == ".npz":
+        with np.load(path) as stored:
+            state = np.asarray(stored["flux"], dtype=np.float64)
+    else:
+        stored = json.loads(path.read_text(encoding="utf-8"))
+        state = np.asarray(stored["render_data"]["terminal_flux_wb"], dtype=np.float64)
+    if state.ndim != 1 or state.size == 0 or not np.all(np.isfinite(state)):
+        raise RuntimeError(f"terminal state is empty or nonfinite: {path}")
+    return state
+
+
+def _normalise_direction(direction: jax.Array) -> jax.Array:
+    """Return a finite max-unit direction or refuse an empty instrument."""
+    direction = jnp.asarray(direction, dtype=jnp.float64)
+    scale = jnp.max(jnp.abs(direction))
+    if not np.isfinite(float(scale)) or float(scale) == 0.0:
+        raise RuntimeError("JVP direction is empty or nonfinite")
+    return direction / scale
+
+
+def measure_jvp_accuracy(
+    output: Path,
+    part_root: Path,
+    state_paths: dict[int, Path],
+) -> dict[str, Any]:
+    """Check implicit exact-clip tangents against central primal differences."""
+    configure_dtypes()
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("exact-clip JVP validation requires binary64")
+    if not hasattr(certificate.observation, "_UNIT_NODE"):
+        certificate.observation._UNIT_NODE = clip_quadrature._UNIT_NODE
+    original_mode = support_clip_mode()
+    rows: list[dict[str, Any]] = []
+    try:
+        set_support_clip_mode("exact")
+        for requested in (110, 300):
+            state_path = state_paths[requested]
+            state = jnp.asarray(_terminal_state(state_path), dtype=jnp.float64)
+            profile, _seed, request, dimensions = (
+                certificate._certificate_compile_problem(
+                    "weak-rotation-reactor-static", -requested
+                )
+            )
+            if state.shape != (dimensions["solve_state_size"],):
+                raise RuntimeError(
+                    f"terminal state size {state.size} does not match "
+                    f"compiled size {dimensions['solve_state_size']}"
+                )
+            mapped = profile.flux_map(
+                request.current,
+                target_current=request.target_current,
+                prescribed_current=request.prescribed_current,
+            )
+            compiled_map = jax.jit(mapped)
+            mapped_state, tangent_action = jax.linearize(compiled_map, state)
+            residual = mapped_state - state
+
+            def linear_action(vector):
+                return vector - tangent_action(vector)
+
+            newton_direction, gmres_info = jax.scipy.sparse.linalg.gmres(
+                linear_action,
+                residual,
+                tol=1.0e-12,
+                maxiter=request.policy.gmres_iterations,
+                restart=request.policy.gmres_iterations,
+                solve_method="batched",
+            )
+            newton_direction = _normalise_direction(
+                jax.block_until_ready(newton_direction)
+            )
+            generator = np.random.default_rng(20260915 + requested)
+            directions = [("newton", newton_direction)]
+            for index in range(3):
+                directions.append(
+                    (
+                        f"random-{index + 1}",
+                        _normalise_direction(
+                            jnp.asarray(generator.standard_normal(state.shape))
+                        ),
+                    )
+                )
+
+            state_scale = float(jnp.maximum(jnp.max(jnp.abs(state)), 1.0))
+            difference_step = float(np.cbrt(np.finfo(np.float64).eps) * state_scale)
+            comparisons = []
+            for name, direction in directions:
+                _primal, tangent = jax.jvp(
+                    compiled_map,
+                    (state,),
+                    (direction,),
+                )
+                upper = compiled_map(state + difference_step * direction)
+                lower = compiled_map(state - difference_step * direction)
+                central = (upper - lower) / (2.0 * difference_step)
+                tangent, central = jax.block_until_ready((tangent, central))
+                error = tangent - central
+                tangent_norm = float(jnp.linalg.norm(tangent))
+                central_norm = float(jnp.linalg.norm(central))
+                error_norm = float(jnp.linalg.norm(error))
+                scale = max(tangent_norm, central_norm, np.finfo(np.float64).tiny)
+                comparisons.append(
+                    {
+                        "direction": name,
+                        "finite_difference_step": difference_step,
+                        "tangent_l2": tangent_norm,
+                        "central_difference_l2": central_norm,
+                        "error_l2": error_norm,
+                        "relative_error": error_norm / scale,
+                        "error_linf": float(jnp.max(jnp.abs(error))),
+                    }
+                )
+            row = {
+                "requested_cells": requested,
+                "realised_cells": dimensions["realised_cells"],
+                "terminal_state": str(state_path),
+                "terminal_state_size": int(state.size),
+                "fixed_point_residual_l2": float(jnp.linalg.norm(residual)),
+                "gmres_info": int(gmres_info),
+                "relative_error_bound": JVP_RELATIVE_ERROR_BOUND,
+                "directions": comparisons,
+                "passed": all(
+                    item["relative_error"] <= JVP_RELATIVE_ERROR_BOUND
+                    for item in comparisons
+                ),
+            }
+            _atomic_json(
+                part_root / f"requested-{requested}.json",
+                {
+                    "schema": "nova.exact-clip-jvp-accuracy",
+                    "source_revision": certificate._source_revision(),
+                    "lane": certificate._lane(),
+                    "row": row,
+                },
+            )
+            rows.append(row)
+            receipt = {
+                "schema": "nova.exact-clip-jvp-accuracy",
+                "source_revision": certificate._source_revision(),
+                "lane": certificate._lane(),
+                "rows": rows,
+                "completed": len(rows) == 2,
+                "passed": len(rows) == 2 and all(item["passed"] for item in rows),
+            }
+            _atomic_json(output, receipt)
+            print(
+                "EXACT_CLIP_JVP "
+                f"requested={requested} "
+                + " ".join(
+                    f"{item['direction']}={item['relative_error']:.3e}"
+                    for item in comparisons
+                ),
+                flush=True,
+            )
+    finally:
+        set_support_clip_mode(original_mode)
+    if not receipt["passed"]:
+        raise RuntimeError("exact-clip JVP central-difference gate failed")
+    return receipt
+
+
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
@@ -354,6 +519,9 @@ def _parse() -> argparse.Namespace:
     parser.add_argument("--part-root", type=Path)
     parser.add_argument("--figure-root", type=Path)
     parser.add_argument("--execute-solve", action="store_true")
+    parser.add_argument("--check-jvp", action="store_true")
+    parser.add_argument("--state-110", type=Path)
+    parser.add_argument("--state-300", type=Path)
     parser.add_argument("--skip-hlo", action="store_true")
     parser.add_argument("--cells", type=int, nargs="+", default=[110, 300, 500])
     return parser.parse_args()
@@ -369,6 +537,15 @@ def main() -> None:
             arguments.figure_root or arguments.output.parent / "solve-panels",
             arguments.part_root or arguments.output.parent / "solve-parts",
             arguments.cells[0],
+        )
+        return
+    if arguments.check_jvp:
+        if arguments.state_110 is None or arguments.state_300 is None:
+            raise ValueError("--state-110 and --state-300 are required for JVP checks")
+        measure_jvp_accuracy(
+            arguments.output,
+            arguments.part_root or arguments.output.parent / "jvp-parts",
+            {110: arguments.state_110, 300: arguments.state_300},
         )
         return
     if arguments.compiler_root is None:

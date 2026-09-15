@@ -211,6 +211,15 @@
     <strong>C.</strong> The dataset, conditional on B: the labeller sharded across H200 jobs over the decoder's shot list, each shot's session
     file written as it lands with a digest manifest, resumable, in the shape A names, so imas-ambix trains on exactly what the forward solve
     produced.</p>
+  <p><strong>Boundary-read seam measured.</strong> On one all_debug CPU process replaying persisted shot 27079 state, row 15's public
+    topology receipt returned <code>0.3044709155444226 Wb</code>, only <code>1.16997546655 mWb</code> from the axis, while the held
+    active-partition read returned <code>0.2565692689948400 Wb</code>, <code>49.0716220161 mWb</code> from the axis. The writer persists
+    the public value unchanged. Against the frame EFIT LCFS, the public persisted surface encloses <code>0.0418457467</code> of the EFIT
+    area and the active-partition contour encloses <code>1.9525779835</code>; neither raw boundary is acceptable. The report, full
+    reproduction log, area receipt and comparison figure are at
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/writer-boundary/report.md</code>. The repair recommendation is
+    one canonical boundary decision shared by the public receipt and active-set machinery, with the writer remaining on the public receipt;
+    no source was changed by this measurement.</p>
 
   
 

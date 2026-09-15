@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T15:08:50",
+  "updated": "2026-09-15T15:18:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -164684,6 +164684,282 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T082216084371-cca-limited-row-private-shadow-root-cause",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-limited-row-private-shadow-root-cause",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2244,
+                "cached_input_tokens": 803222,
+                "input_tokens": 805498,
+                "output_tokens": 1695,
+                "reasoning_output_tokens": 131,
+                "total_tokens": 807193,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "A receipt under docs/figures/cut-cell-current-attribution/limited-shadow/ lists, for the persisted weak 2500 and weak 1000 terminal states and for the analytic flux supplied at the nodes, every carrier the residual shadow excludes with its index, R and Z, domain label, psi_norm, connectivity component id and distance to the wall polygon, and names the labelling rule and code line that marks them PRIVATE_FLUX on a class with zero X candidates; the fix makes the flood shadow empty on a limited class (no admitted saddle, no private-flux region, no physical carrier copied through the residual) and states that rule in the docstring, with the diverted rows keeping their private shadow behind the admitted saddle; gates, each persisted as it lands: the shadow census excluded count is 0 on the weak, moderate and strong rows at 1000 cells; the unmasked one-application residual at each new terminal state equals the solver's terminal residual to 1e-12 relative; the null census over each limited terminal flux admits exactly one extremum and zero saddles inside the wall (no self-closing contour); the single-null 500 whole-cell row is bit-identical to its committed terminal state; one H200 job (one card, 8 cores, 128G, persistent cache, TMPDIR=/tmp in submit environment and payload, root venv python directly with PYTHONPATH the worktree) re-solves weak, moderate and strong at 1000 cells whole-cell and weak at 1000 cells exact-clip, tabling axis error in pitch, terminal residual, boundary flux against the analytic zero and plasma current amplitude before and after, with one line-contour panel per row (solved beside analytic on shared levels, both null sets, wall units, residual and converged flag in the caption); every test module importing the changed files passes one per fresh CPU process with zero added failures against the base ids",
+          "estimated_hours": null,
+          "goal": "The self-closing outboard-midplane contours on the limited Solovev rows root-caused to the carriers the residual shadow excludes and fixed at the core so the terminal flux matches the analytic oracle",
+          "id": "cca-limited-row-private-shadow-root-cause",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T08:22:16Z",
+            "read_at": "2026-09-15T08:22:18Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 26.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T082216084371-cca-limited-row-private-shadow-root-cause/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/domain.py",
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "nova/equilibrium/cell_partition.py",
+            "benchmarks/limited_row_shadow_census.py",
+            "tests/test_limited_row_residual_shadow.py",
+            "docs/figures/cut-cell-current-attribution/limited-shadow",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/limited-shadow",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-cca-shadow-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T08:22:47Z",
+        "completed_at": "2026-09-15T13:12:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 17373,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "3082be61cb6dd4a4d9cae1889993717c4e63e58c",
+        "commits": [
+          "d7e7ff0ba1e383ab8921c2fadb129f841db774f4",
+          "e73fcd7e5bc8b84e899c602336ec4d9a8ad975d6",
+          "963fa9b07284403d998f874f9697e08fcf2ae974",
+          "10b89a02145f409630e6f5c87820955ed24c54a9",
+          "129b8be4d62dec9fbd8f7f54ef38005c23bb94c0",
+          "a27a06d6f3fe8d470e9c99346b99377d563e3e80",
+          "eb99be2e5a5fe35bc009ad1b6ec025e10b396ee7",
+          "6d6751c8403b0d192560fdf2bb60f8d9d46e11d7",
+          "96c75b41ba863f78d868867f3f65cb5e7258553b",
+          "a1cc51d11b1c66f4ebbd757cdd8c2e41e0b879e6",
+          "fc0ee9e3e29333c36bfbea48694da645bf605811",
+          "c2043fe9ebdb632848f79e16d75c5a8b66b83509",
+          "c782f320f270da9acb5f89fddf1e7d8092d4c2d7",
+          "787b5c7e81b743864e3eafd005b7160c8e80a1c9",
+          "bbdbb2448401813a4b8e6d957ea44f8519db4bc2"
+        ],
+        "changed_lines": {
+          "added": 175455,
+          "removed": 8,
+          "files": 17
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1271409 (one card, 8 cores, 128G): single-null 500 whole-cell control then weak, moderate, strong 1000 whole-cell rows; all_debug jobs 1271209 reproduction, 1271374 focused tests, 1271373 and 1271375 base and after fresh-process modules",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/limited-shadow/h200-whole-cell-control-followup-cuda.log",
+          "log_digest": "sha256:c867e524848b6dc2bc58392756c1ec370a51f6e83946b755dd9f5bc82b2ffc26"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T082216084371-cca-limited-row-private-shadow-root-cause/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a0a429-57a9-7be0-bfc7-05ea8d6fe0ea",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 52647680,
+            "cached_input_tokens_cumulative": 52647680,
+            "input_tokens": 53010448,
+            "input_tokens_cumulative": 53010448,
+            "output_tokens": 84452,
+            "output_tokens_cumulative": 84452,
+            "reasoning_output_tokens": 20044,
+            "reasoning_output_tokens_cumulative": 20044
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T13:12:20Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 38.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T13:12:20Z"
+            }
+          ],
+          "notional_cost_usd": 825.2921,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 2179,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 553,
+              "log_fresh": true,
+              "manifest_commits": [
+                "3b786c40",
+                "03066756",
+                "6a2b4428",
+                "fcc8f968"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "a23e495d4199b533276791268911547a2deb9f1ab50c702b05fa4b5fe9d16b40",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T073636283020-pfs-axis-flux-departure-projection/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan playable-forward-solve --section '\u00a78' --role review --spec-level exact --node review-of-pfs-axis-flux-departure-projection --goal 'attach an independent review to run r-20260915T073636283020-pfs-axis-flux-departure-projection' --done-when 'the review for r-20260915T073636283020-pfs-axis-flux-departure-projection parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260915T073636283020-pfs-axis-flux-departure-projection.json --time-budget 55m --session s19-handoff-20260915 --local",
+              "node": "pfs-axis-flux-departure-projection",
+              "phase": "starting",
+              "plan": "playable-forward-solve",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260915T073636283020-pfs-axis-flux-departure-projection",
+              "session": "s19-handoff-20260915",
+              "terminal_age_seconds": 596,
+              "terminal_at": "2026-09-15T08:12:37Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-axis-flux-departure-projection"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 52647680,
+          "cumulative_input_tokens": 105658128,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 104496
+        },
+        "follow_on_paths": [
+          "159.06"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-limited-row-private-shadow-root-cause",
+          "session_id": "01a0a429-57a9-7be0-bfc7-05ea8d6fe0ea",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T13:12:20Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 173.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -164996,6 +165272,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2559
+    "_version": 2560
   }
 }

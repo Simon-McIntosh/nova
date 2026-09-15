@@ -15,10 +15,12 @@ if TYPE_CHECKING:
 __all__ = [
     "ClippedCurrentMoments",
     "ClippedFieldIntegrals",
+    "SaddleWedgeCurrentMoments",
     "clipped_support_current_moments",
     "clipped_support_field_integrals",
     "clipped_support_quadrature",
     "cut_cell_bank_capacity",
+    "saddle_wedge_current_moments",
 ]
 
 
@@ -38,6 +40,14 @@ class ClippedFieldIntegrals(NamedTuple):
 
 class ClippedCurrentMoments(NamedTuple):
     """Per-cell current and centroid-relative first moments."""
+
+    cell_current: jax.Array
+    radial_moment: jax.Array
+    vertical_moment: jax.Array
+
+
+class SaddleWedgeCurrentMoments(NamedTuple):
+    """Current and centroid-relative first moments for four saddle wedges."""
 
     cell_current: jax.Array
     radial_moment: jax.Array
@@ -267,6 +277,60 @@ def _integrate_current_points(
         cell_current=jnp.sum(weighted, axis=1),
         radial_moment=first[:, 0],
         vertical_moment=first[:, 1],
+    )
+
+
+@jax.named_scope("saddle_wedge_current_moments")
+def saddle_wedge_current_moments(wedges, field, profiles, selection=None):
+    """Integrate one statically declared profile over each saddle wedge.
+
+    ``profiles`` is a four-item tuple in core, private-flux, and common-SOL
+    order. The tuple length and all polygon capacities are static; changing the
+    crossing geometry therefore changes values but never compiled shapes.
+    """
+    profiles = tuple(profiles)
+    if len(profiles) != 4:
+        raise ValueError("profiles must contain exactly four wedge profiles")
+    vertices = jnp.asarray(wedges.support_vertices)
+    count = jnp.asarray(wedges.vertex_count)
+    centroids = jnp.asarray(wedges.centroids)
+    if vertices.ndim != 4 or vertices.shape[1] != 4 or vertices.shape[-1] != 2:
+        raise ValueError("wedge vertices must have shape (cells, 4, capacity, 2)")
+    cell_count = vertices.shape[0]
+    if count.shape != (cell_count, 4):
+        raise ValueError("wedge counts must have shape (cells, 4)")
+    if selection is None:
+        selected = jnp.asarray(wedges.saddle, dtype=bool)
+    else:
+        selected = jnp.asarray(selection, dtype=bool) & jnp.asarray(
+            wedges.saddle, dtype=bool
+        )
+        if selected.shape != (cell_count,):
+            raise ValueError("selection must carry one flag per cell")
+
+    cell_index = jnp.arange(cell_count, dtype=jnp.int32)
+    current = []
+    radial = []
+    vertical = []
+    for wedge, profile in enumerate(profiles):
+        points, weights = _quadrature_from_arrays(
+            vertices[:, wedge], count[:, wedge], centroids, selected
+        )
+        moments = _integrate_current_points(
+            points,
+            weights,
+            field,
+            cell_index,
+            centroids,
+            profile,
+        )
+        current.append(moments.cell_current)
+        radial.append(moments.radial_moment)
+        vertical.append(moments.vertical_moment)
+    return SaddleWedgeCurrentMoments(
+        cell_current=jnp.stack(current, axis=1),
+        radial_moment=jnp.stack(radial, axis=1),
+        vertical_moment=jnp.stack(vertical, axis=1),
     )
 
 

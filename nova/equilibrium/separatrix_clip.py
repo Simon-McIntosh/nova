@@ -27,6 +27,7 @@ __all__ = [
     "AtomicCellMesh",
     "ClippedSupports",
     "LinearCurrentMoments",
+    "SaddleCellWedges",
     "TracedClippedSupports",
     "complete_polynomial_powers",
     "padded_linear_current_moments",
@@ -257,6 +258,49 @@ class TracedClippedSupports(NamedTuple):
             gradient.reshape(2 * cell_count, 2),
         )
         return current.reshape(cell_count, 2), first.reshape(cell_count, 2, 2)
+
+
+class SaddleCellWedges(NamedTuple):
+    """Four fixed-capacity regions meeting at a separatrix saddle.
+
+    Wedges are ordered as core, private flux, and the two common scrape-off-layer
+    regions.  The core reference supplied to :meth:`AtomicCellMesh.traced_saddle_wedges`
+    selects the first of the two same-sign lobes; the remaining same-sign lobe is
+    private flux.  The opposite-sign lobes are ordered counter-clockwise about the
+    core direction.  Non-saddle cells carry zero counts and exact-zero geometry.
+    """
+
+    support_vertices: object
+    vertex_count: object
+    centroids: object
+    area: object
+    full_area: object
+    first_area_moment: object
+    second_area_moment: object
+    saddle: object
+    saddle_vertex: object
+
+    def linear_current_moments(self, density, gradient):
+        """Integrate one independently declared linear profile per wedge."""
+        density = jnp.asarray(density)
+        gradient = jnp.asarray(gradient)
+        cell_count = self.support_vertices.shape[0]
+        if density.shape != (cell_count, 4):
+            raise ValueError("density must have shape (cells, 4)")
+        if gradient.shape != (cell_count, 4, 2):
+            raise ValueError("gradient must have shape (cells, 4, 2)")
+        current, first = padded_linear_current_moments(
+            self.support_vertices.reshape(
+                4 * cell_count, self.support_vertices.shape[2], 2
+            ),
+            self.vertex_count.reshape(4 * cell_count),
+            jnp.broadcast_to(self.centroids[:, None, :], (cell_count, 4, 2)).reshape(
+                4 * cell_count, 2
+            ),
+            density.reshape(4 * cell_count),
+            gradient.reshape(4 * cell_count, 2),
+        )
+        return current.reshape(cell_count, 4), first.reshape(cell_count, 4, 2)
 
 
 def padded_linear_current_moments(
@@ -1222,6 +1266,110 @@ def _traced_clip(
     )
 
 
+def _ordered_saddle_wedges(positive, negative, core_reference):
+    """Combine opposite clip signs into one deterministic four-wedge carrier."""
+    reference = jnp.asarray(core_reference, dtype=positive.support_vertices.dtype)
+    cell_count = positive.support_vertices.shape[0]
+    if reference.shape == (2,):
+        reference = jnp.broadcast_to(reference, (cell_count, 2))
+    if reference.shape != (cell_count, 2):
+        raise ValueError("core_reference must have shape (2,) or (cells, 2)")
+
+    saddle = positive.saddle & negative.saddle
+    saddle_vertex = positive.saddle_vertex
+    core_direction = reference - saddle_vertex
+
+    def branch_centroids(support):
+        safe_area = jnp.where(support.branch_area > 0.0, support.branch_area, 1.0)
+        return support.centroids[:, None, :] + (
+            support.branch_first_area_moment / safe_area[..., None]
+        )
+
+    def gather(value, order):
+        index = order[(...,) + (None,) * (value.ndim - 2)]
+        return jnp.take_along_axis(value, jnp.broadcast_to(index, value.shape), axis=1)
+
+    positive_centroids = branch_centroids(positive)
+    positive_score = jnp.einsum(
+        "nbi,ni->nb", positive_centroids - saddle_vertex[:, None, :], core_direction
+    )
+    positive_swap = positive_score[:, 1] > positive_score[:, 0]
+    positive_order = jnp.stack(
+        (
+            jnp.where(positive_swap, 1, 0),
+            jnp.where(positive_swap, 0, 1),
+        ),
+        axis=1,
+    )
+
+    negative_centroids = branch_centroids(negative)
+    negative_direction = negative_centroids - saddle_vertex[:, None, :]
+    negative_cross = (
+        core_direction[:, None, 0] * negative_direction[..., 1]
+        - core_direction[:, None, 1] * negative_direction[..., 0]
+    )
+    negative_swap = negative_cross[:, 1] > negative_cross[:, 0]
+    negative_order = jnp.stack(
+        (
+            jnp.where(negative_swap, 1, 0),
+            jnp.where(negative_swap, 0, 1),
+        ),
+        axis=1,
+    )
+
+    vertices = jnp.concatenate(
+        (
+            gather(positive.branch_support_vertices, positive_order),
+            gather(negative.branch_support_vertices, negative_order),
+        ),
+        axis=1,
+    )
+    vertex_count = jnp.concatenate(
+        (
+            gather(positive.branch_vertex_count, positive_order),
+            gather(negative.branch_vertex_count, negative_order),
+        ),
+        axis=1,
+    )
+    area = jnp.concatenate(
+        (
+            gather(positive.branch_area, positive_order),
+            gather(negative.branch_area, negative_order),
+        ),
+        axis=1,
+    )
+    first = jnp.concatenate(
+        (
+            gather(positive.branch_first_area_moment, positive_order),
+            gather(negative.branch_first_area_moment, negative_order),
+        ),
+        axis=1,
+    )
+    second = jnp.concatenate(
+        (
+            gather(positive.branch_second_area_moment, positive_order),
+            gather(negative.branch_second_area_moment, negative_order),
+        ),
+        axis=1,
+    )
+    slot = jnp.arange(vertices.shape[2])
+    live = slot[None, None, :] < vertex_count[..., None]
+    selected = saddle[:, None]
+    vertex_count = jnp.where(selected, vertex_count, 0)
+    vertices = jnp.where((selected[..., None] & live)[..., None], vertices, 0.0)
+    return SaddleCellWedges(
+        support_vertices=vertices,
+        vertex_count=vertex_count,
+        centroids=positive.centroids,
+        area=jnp.where(selected, area, 0.0),
+        full_area=jnp.where(saddle, positive.full_area, 0.0),
+        first_area_moment=jnp.where(selected[..., None], first, 0.0),
+        second_area_moment=jnp.where(selected[..., None, None], second, 0.0),
+        saddle=saddle,
+        saddle_vertex=jnp.where(saddle[:, None], saddle_vertex, 0.0),
+    )
+
+
 @dataclass(frozen=True)
 class ClippedSupports:
     """Fixed-shape supports and exact polygon moments for one flux map."""
@@ -1401,6 +1549,32 @@ class AtomicCellMesh:
             curve_evaluator,
             participating_cell,
         )
+
+    def traced_saddle_wedges(
+        self,
+        signed_flux,
+        *,
+        saddle_vertex,
+        core_reference,
+        participating_cell=None,
+    ) -> SaddleCellWedges:
+        """Return the four branch-paired regions of every saddle cell.
+
+        ``signed_flux`` must be positive on the core side. ``core_reference``
+        is normally the magnetic axis and distinguishes the core wedge from the
+        same-sign private-flux wedge. All non-saddle cells are exact-zero rows.
+        """
+        positive = self.traced_clip(
+            signed_flux,
+            saddle_vertex=saddle_vertex,
+            participating_cell=participating_cell,
+        )
+        negative = self.traced_clip(
+            -jnp.asarray(signed_flux),
+            saddle_vertex=saddle_vertex,
+            participating_cell=participating_cell,
+        )
+        return _ordered_saddle_wedges(positive, negative, core_reference)
 
     def clip(self, signed_flux: np.ndarray) -> ClippedSupports:
         """Clip every cell to ``signed_flux > 0`` using shared crossings."""

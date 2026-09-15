@@ -450,7 +450,8 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
     reference_lcfs_count = int(np.asarray(reference_labelled.lcfs_vertex_count))
     # The receiver-grid separatrix of the base frame (fraction 0) is the
     # reference every edited raster is displaced against; it is built through
-    # the same integral-state and raster path the per-edit receipt uses.
+    # the same integral-state and raster path the per-edit receipt uses, with
+    # the operator's own external-conductor current in the conductor slot.
     reference_moments, _reference_support, reference_masks, reference_topology, _ = (
         profile._integral_state(
             mixed_seed.state, TopologyClass.DIVERTED, target_current
@@ -460,7 +461,6 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
         reference_moments,
         reference_masks,
         reference_topology,
-        current=jnp.asarray(base_current),
         prescribed_current=jnp.asarray(base_current),
     )
     reference_raster_vertex_count = int(

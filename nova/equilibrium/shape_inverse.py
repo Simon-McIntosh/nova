@@ -33,7 +33,7 @@ warm-started reduced forward solve on those prescribed currents.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Literal
 
@@ -53,6 +53,7 @@ from nova.equilibrium.constraint import (
 )
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.observation import MomentIntegralSupport
+from nova.equilibrium.topology import NoQualifiedAxisError
 from nova.linalg.regression import MoorePenrose
 
 if TYPE_CHECKING:
@@ -67,6 +68,19 @@ GAMMA = 1.0e-12
 PICARD_ROUNDS = 3
 
 IsofluxReference = Literal["boundary", "reference_point"]
+
+
+class NoAdmissibleShapeStepError(ValueError):
+    """Every nonzero fraction of a proposed shape-current step was refused."""
+
+    def __init__(
+        self,
+        refusal_sequence: Sequence[float],
+        proposed_delta: np.ndarray,
+    ) -> None:
+        self.refusal_sequence = tuple(float(value) for value in refusal_sequence)
+        self.proposed_delta = np.asarray(proposed_delta, dtype=float).copy()
+        super().__init__("no axis-admissible current fraction remains")
 
 
 @dataclass(frozen=True)
@@ -95,6 +109,8 @@ class ShapeInverseResult:
     picard_boundary_flux: np.ndarray
     current_step_fraction: float | None
     current_step_limited: bool
+    accepted_fraction: float
+    admissibility_trials: int
     least_squares_residual: float
     uncapped_least_squares_residual: float
     flux_points: np.ndarray
@@ -383,7 +399,10 @@ def shape_steering_target(
     the explicit cardinal control semantics.  The remaining rows are every
     point of the measured boundary polygon after its continuous bounding-box
     deformation.  X-point rows remain attached to ``target.x_point`` so a
-    moved null is read at its commanded location rather than at the seed.
+    moved null is read at its commanded location rather than at the seed. A
+    non-null command also appends the uncommanded extrema at their prior
+    locations, including their matching field rows, so the least-squares step
+    must trade the desired motion against drift at every other turning point.
     """
     previous = achieved_target(profile, flux)
     source_polygon = boundary_polygon(profile, flux)
@@ -398,11 +417,122 @@ def shape_steering_target(
     previous_points = np.concatenate(
         (np.asarray(previous.flux_points, dtype=float), source_polygon)
     )
-    commanded_points = np.concatenate((commanded_turning_points, transformed_polygon))
+    command_delta = commanded_turning_points - np.asarray(previous.flux_points)
+    command_scale = max(
+        1.0,
+        float(np.max(np.abs(commanded_turning_points))),
+        float(np.max(np.abs(previous.flux_points))),
+    )
+    uncommanded = np.flatnonzero(
+        np.max(np.abs(command_delta), axis=1)
+        <= 64.0 * np.finfo(float).eps * command_scale
+    )
+    moved = bool(
+        np.any(np.abs(command_delta) > 64.0 * np.finfo(float).eps * command_scale)
+    )
+    held_points = (
+        np.asarray(previous.flux_points, dtype=float)[uncommanded]
+        if moved
+        else np.empty((0, 2))
+    )
+    commanded_points = np.concatenate(
+        (commanded_turning_points, transformed_polygon, held_points)
+    )
+    radial_held = (
+        np.asarray(previous.flux_points, dtype=float)[
+            np.intersect1d(uncommanded, (0, 2))
+        ]
+        if moved
+        else np.empty((0, 2))
+    )
+    vertical_held = (
+        np.asarray(previous.flux_points, dtype=float)[
+            np.intersect1d(uncommanded, (1, 3))
+        ]
+        if moved
+        else np.empty((0, 2))
+    )
     return (
-        replace(target, flux_points=jnp.asarray(commanded_points, dtype=jnp.float64)),
+        replace(
+            target,
+            flux_points=jnp.asarray(commanded_points, dtype=jnp.float64),
+            radial_field_points=jnp.asarray(
+                np.concatenate((target.radial_field_points, radial_held)),
+                dtype=jnp.float64,
+            ),
+            vertical_field_points=jnp.asarray(
+                np.concatenate((target.vertical_field_points, vertical_held)),
+                dtype=jnp.float64,
+            ),
+        ),
         previous_points,
     )
+
+
+def _admits_axis(
+    profile: ForwardProfile,
+    state: jax.Array,
+    current: np.ndarray,
+    *,
+    requested_class=None,
+    target_current=None,
+    forward_solve: Callable[[np.ndarray], object] | None = None,
+) -> bool:
+    """Return whether a tentative prescribed-current forward state has an axis.
+
+    Callers with an established nonlinear solve pass it through ``forward_solve``.
+    The inverse itself otherwise projects one forward map before reading topology,
+    which keeps a direct inverse call self-contained while still refusing a trial
+    state that has already lost its axis.
+    """
+    try:
+        trial = (
+            forward_solve(current)
+            if forward_solve is not None
+            else profile.flux_map(
+                requested_class=requested_class,
+                target_current=target_current,
+                prescribed_current=jnp.asarray(current),
+            )(state)
+        )
+        trial_flux = jnp.asarray(getattr(trial, "flux", trial))
+        profile.operator.read(trial_flux, requested_class=requested_class)
+    except NoQualifiedAxisError:
+        return False
+    return True
+
+
+def _admissible_delta(
+    profile: ForwardProfile,
+    state: jax.Array,
+    initial_current: np.ndarray,
+    free: np.ndarray,
+    delta: np.ndarray,
+    *,
+    requested_class=None,
+    target_current=None,
+    forward_solve: Callable[[np.ndarray], object] | None = None,
+) -> tuple[np.ndarray, float, int]:
+    """Contract one current update until its forward state admits an axis."""
+    fraction = 1.0
+    trials = 0
+    refusals = []
+    while fraction >= 2.0**-20:
+        candidate = initial_current.copy()
+        candidate[free] += fraction * delta
+        trials += 1
+        if _admits_axis(
+            profile,
+            state,
+            candidate,
+            requested_class=requested_class,
+            target_current=target_current,
+            forward_solve=forward_solve,
+        ):
+            return fraction * delta, fraction, trials
+        refusals.append(fraction)
+        fraction *= 0.5
+    raise NoAdmissibleShapeStepError(refusals, delta)
 
 
 def _consistency_floor(
@@ -764,6 +894,7 @@ def solve_shape_inverse(
     current_step_reference=None,
     delta_regularisation: float = 0.0,
     delta_current_scale=None,
+    forward_solve: Callable[[np.ndarray], object] | None = None,
 ) -> ShapeInverseResult:
     """Solve seed-anchored free-circuit changes with plasma-placement rounds.
 
@@ -877,6 +1008,8 @@ def solve_shape_inverse(
     picard_current_history = []
     picard_boundary_history = []
     current_step_limited = False
+    accepted_fraction = 1.0
+    admissibility_trials = 0
     for iteration in range(placement_rounds + 1):
         _masks, topology = profile.operator.read(state, requested_class=requested_class)
         picard_boundary_history.append(float(np.asarray(topology.boundary_flux)))
@@ -928,6 +1061,25 @@ def solve_shape_inverse(
             current_step_fraction,
         )
         current_step_limited = current_step_limited or limited
+        final_without_referee = iteration == placement_rounds and forward_solve is None
+        if final_without_referee:
+            fraction = 1.0
+            trials = 0
+        else:
+            applied_round_delta, fraction, trials = _admissible_delta(
+                profile,
+                state,
+                initial_current,
+                free,
+                applied_round_delta,
+                requested_class=requested_class,
+                target_current=target_current,
+                forward_solve=(
+                    forward_solve if iteration == placement_rounds else None
+                ),
+            )
+        accepted_fraction = fraction
+        admissibility_trials += trials
         current[free] = initial_current[free] + applied_round_delta
         picard_current_history.append(current.copy())
         if iteration < placement_rounds:
@@ -969,6 +1121,8 @@ def solve_shape_inverse(
         picard_boundary_flux=np.asarray(picard_boundary_history),
         current_step_fraction=current_step_fraction,
         current_step_limited=current_step_limited,
+        accepted_fraction=accepted_fraction,
+        admissibility_trials=admissibility_trials,
         least_squares_residual=float(
             np.linalg.norm(weighted @ delta_free - weighted_rhs)
         ),
@@ -1003,6 +1157,7 @@ __all__ = [
     "FIELD_WEIGHT",
     "GAMMA",
     "PICARD_ROUNDS",
+    "NoAdmissibleShapeStepError",
     "ShapeInverseResult",
     "achieved_target",
     "boundary_polygon",

@@ -90,6 +90,9 @@ class ProductionSolver:
     last_rounds: tuple[InverseRoundReceipt, ...] = field(
         init=False, default=(), repr=False
     )
+    _admitted_forward: (
+        tuple[np.ndarray, ForwardEquilibrium, int, object | None] | None
+    ) = field(init=False, default=None, repr=False)
 
     def __post_init__(self) -> None:
         """Validate the route and start from the carrier's own currents."""
@@ -195,6 +198,36 @@ class ProductionSolver:
             None,
         )
 
+    def _forward_axis_referee(self, profile: ForwardProfile, flux: np.ndarray):
+        """Return a nonlinear axis referee whose admitted result is reusable."""
+        self._admitted_forward = None
+
+        def solve(prescribed_current: np.ndarray) -> ForwardEquilibrium:
+            equilibrium, trips, program = self._forward(
+                profile, flux, prescribed_current
+            )
+            self._admitted_forward = (
+                np.asarray(prescribed_current, dtype=float).copy(),
+                equilibrium,
+                trips,
+                program,
+            )
+            return equilibrium
+
+        return solve
+
+    def _forward_after_admission(
+        self,
+        profile: ForwardProfile,
+        flux: np.ndarray,
+        prescribed_current: np.ndarray,
+    ) -> tuple[ForwardEquilibrium, int, object | None]:
+        """Reuse the nonlinear solve that admitted these exact currents."""
+        admitted = self._admitted_forward
+        if admitted is not None and np.array_equal(admitted[0], prescribed_current):
+            return admitted[1:]
+        return self._forward(profile, flux, prescribed_current)
+
     def solve_target(
         self, previous: ForwardEquilibrium, target: object
     ) -> tuple[ForwardEquilibrium, object | None]:
@@ -211,9 +244,10 @@ class ProductionSolver:
             gamma=self.inverse_gamma,
             current_step_fraction=self.current_step_fraction,
             current_step_reference=self.reference_current,
+            forward_solve=self._forward_axis_referee(profile, flux),
         )
         self.prescribed_current = inverse.currents
-        equilibrium, round_trips, program_out = self._forward(
+        equilibrium, round_trips, program_out = self._forward_after_admission(
             profile, flux, self.prescribed_current
         )
         error = turning_point_error(profile, target, equilibrium.flux)

@@ -1118,6 +1118,24 @@ def _profile_cached_entry(
     }
 
 
+def _executable_size(comp) -> dict[str, Any]:
+    """Return executable byte measures without mistaking silence for zero."""
+    runtime = comp.runtime_executable()
+    generated = getattr(runtime, "size_of_generated_code_in_bytes", None)
+    generated_bytes = int(generated) if generated is not None else None
+    serialized_bytes = None
+    serialization_error = None
+    try:
+        serialized_bytes = len(runtime.serialize())
+    except (MemoryError, RuntimeError, ValueError) as error:
+        serialization_error = f"{type(error).__name__}: {error}"
+    return {
+        "serialized_bytes": serialized_bytes,
+        "generated_code_bytes": generated_bytes,
+        "serialization_error": serialization_error,
+    }
+
+
 def _census_compiled(comp, label, run_dir, case_name, cells):
     text = comp.as_text()
     hlo_dir = run_dir / "hlo"
@@ -1129,6 +1147,7 @@ def _census_compiled(comp, label, run_dir, case_name, cells):
     census["cells"] = cells
     census["hlo_text_bytes"] = len(text)
     census["hlo_text_path"] = str(hlo_path)
+    census["executable"] = _executable_size(comp)
     length = len(text)
     return census, length
 
@@ -1151,6 +1170,7 @@ def _rung_receipt(entry: dict[str, Any]) -> dict[str, Any]:
                 "straight_line_instructions",
                 "replication",
                 "large_constants",
+                "executable",
             )
         },
         "map": {
@@ -1164,6 +1184,7 @@ def _rung_receipt(entry: dict[str, Any]) -> dict[str, Any]:
                 "straight_line_instructions",
                 "replication",
                 "large_constants",
+                "executable",
             )
         },
     }

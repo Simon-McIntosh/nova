@@ -883,13 +883,13 @@ def _render_oracle(figure_path: Path) -> dict[str, Any]:
     figure, axes = plt.subplots(
         len(metrics),
         3,
-        figsize=(11.7, max(12.8, 3.25 * len(metrics))),
+        figsize=(11.7, max(13.8, 3.35 * len(metrics))),
         squeeze=False,
     )
     figure.subplots_adjust(
         left=0.035,
         right=0.985,
-        bottom=0.045,
+        bottom=0.085,
         top=0.935,
         wspace=0.17,
         hspace=0.30,
@@ -929,7 +929,7 @@ def _render_oracle(figure_path: Path) -> dict[str, Any]:
     )
     figure.text(
         0.5,
-        0.006,
+        0.01,
         "A converged row is a self-consistent fixed point, not an oracle match. "
         "Oracle-matched means max |solved − analytic| is within 100 roundoff "
         "floors; the quoted floor is 1e−14 of analytic flux span unless a part "

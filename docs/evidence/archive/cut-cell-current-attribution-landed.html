@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="cut-cell-current-attribution-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="cut-cell-current-attribution">
+<title>cut-cell-current-attribution-landed</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Cut-cell current attribution — cumulative execution evidence">
+<meta name="plan-summary" content="Landing record of the cut-cell-current-attribution plan: the §1 root cause (whole-cell booking since 2026-08-27), the Gate A/B/C oracle gates, the reposed fixture exterior, the exact-clip quadrature memory findings, and the clipped-support quadrature per-module test-delta gate that closes §2 re-verification">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1>Cut-cell current attribution — cumulative execution evidence</h1>
+
+<section id="s1-root-cause">
+  <h2 id="s1-root-cause-h">§1 — Root cause, found: the production current moments have not clipped a cell since 2026-08-27</h2>
+
+  <p><strong>Settled 2026-09-10, commit <code>c9a89e58</code>.</strong> The forward operator's
+  profile support replaced <code>traced_clip(signed_flux)</code> with
+  <code>traced_clip(jnp.ones(...))</code> qualified by the profile participation label, so every
+  cell has since been booked whole or not at all by which side of the separatrix its centroid
+  falls on. What this explains, in order: 16 of 43 cut cells participating on the weak 110-cell
+  row is the count whose centroids sit inside; the dominated error cells on single-null 110 are
+  two-crossing cells booked whole (840.6 A against 85.6 A analytic); the four-crossing X-point
+  cell is booked whole at 459.7 A against a 10.5 A core-side sliver; and on the transport machine
+  1072.71 A of scrape-off-layer current (0.19576 percent of <em>I</em><sub>p</sub>) is 844.30 A in
+  sixteen separatrix-crossing cells plus 228.41 A in fifteen open cells carrying the
+  edge-extrapolated profile. The full record with every panel lives at
+  <a href="/nova/cut-cell-attribution-evidence.html">the cut-cell attribution evidence</a>.</p>
+</section>
+
+<section id="gates">
+  <h2 id="gates-h">The three oracle gates — allocation, coupling, iteration</h2>
+
+  <p><strong>Gate A, allocation.</strong> On the exact input (analytic flux at the nodes) the
+  global split spline books the analytic total to 1.00003 with zero boundary root error; the
+  six-point ring quadratic books 0.99997 with a 0.15 mm median root error; the linear edge root
+  falls 0.55 percent short (0.9945, 1.8 mm median root error) on weak, moderate and strong. The
+  terminal-state shortfalls are state error (100 percent weak, 99.7 percent strong), and on the
+  single-null 300 row every representation loses 20 percent at the terminal because the read
+  admits no saddle and puts the boundary at the limiter, 21 percent of the span away — the §3 and
+  null-identification census defect priced in current. Ship: the lead's locked choice of the
+  global spline stands on its own number; the clip's linear edge root is the one representation
+  with a measurable allocation error, so the consistent read (§4) replaces it.</p>
+
+  <p><strong>Gate B, coupling.</strong> Gate B found a one to two percent smooth error when
+  clipped first moments were imaged through the frozen linear-basis blocks; the held line rebuilt
+  polygon-analytic blocks per trip, which changes the Biot geometry per trip — neither cacheable
+  nor batchable nor differentiable. The lead's locked design is the frozen interaction matrix with
+  the clipped current expanded to its moments about the atomic centroid (amplitude, gradient,
+  curvature) to second order, imaged by matmul: a cached construction linear in cut cells, exact
+  at the wall targets through the frozen Biot wall blocks.</p>
+
+  <p><strong>Gate C, iteration.</strong> On the single-null 500 row under the fixture exterior,
+  where the analytic flux is a fixed point to 4.9e-15, the production Newton-Krylov returned from
+  perturbations of 1e-4 to 1e-1 of span to residual 6.2e-15 and distance 1.4e-14 from the analytic
+  flux. Where the fixed point is the reference, the iteration contracts to it from a tenth of a
+  span away; Gate C was never the iteration.</p>
+</section>
+
+<section id="reposed-fixture">
+  <h2 id="reposed-fixture-h">The reposed fixture exterior and the exact-clip memory findings</h2>
+
+  <p>The fixture exterior is re-posed from the analytic density integrated over each cell's
+  clipped region inside the analytic separatrix, cached with the machine. Gate at 1000 cells:
+  exact-clip one-map floor 3.58e-5 of span on weak and 3.42e-5 on moderate (booked 0.99999)
+  against 0.136 and 0.127 under the old whole-cell-integrated exterior; whole-cell booking now
+  over-books 8.6 percent; single-null exact 0.109 at 500 and 0.045 at 1000 cells, apparent order
+  2.5 in pitch.</p>
+
+  <p><strong>The exact-clip solve memory array is identified</strong> (H200 job 1270367, optimised
+  HLO under <code>docs/figures/cut-cell-current-attribution/reposed-fixture/optimised-hlo</code>).
+  It is <code>f64[cells, 196480, 6]</code>, 3.0 GiB per copy at 342 cells, repeated across the
+  Newton JVP and transpose paths from <code>fixed_point.py:3459</code>:
+  <code>clipped_support_quadrature</code> fans every cell's fixed-capacity support polygon into
+  capacity-minus-two triangles and places a 64-point Gauss rule on each, and the exact clip's
+  support capacity is 24 times 128 vertices, so 3070 triangles times 64 points equals 196480
+  quadrature points for every cell, whole cells included. In whole-cell mode the capacity is 24,
+  the array is <code>f64[342, 1408, 6]</code> at 22 MiB and the program's temporaries total
+  0.19 GiB — 97 GiB against 0.19 GiB, so the exact-clip solve allocates 97, 131 and 279 GiB of
+  booleans at 300, 500 and 1000 cells and fails even on an empty card. The fix is linear in cut
+  cells: a chain capacity justified by the position accuracy the clip needs (a pitch over a
+  thousand), the quadrature applied only to the cut cells at that capacity, and whole cells on
+  the 24-vertex path.</p>
+</section>
+
+<section id="delta-gate">
+  <h2 id="delta-gate-h">The clipped-support quadrature per-module test delta gate across the 21-commit window</h2>
+
+  <p><strong>Gate outcome: no added failures, no fixed failures.</strong> The delta window is the
+  21 clip-quadrature commits <code>e2825a0d</code> (base) to <code>295f6d55</code> (after head).
+  Both arms ran one test module per fresh process (<code>-m 'not slow'</code>, per-module
+  <code>--junitxml</code>, 300 s per-module timeout) in single CPU jobs with the persistent
+  compilation cache enabled by config flag and directory. The baseline arm (job 1271013) ran the
+  53-module comparable order; the after arm (job 1271023, <code>run_ccad4_after.sh</code>) ran the
+  53 baseline-comparable modules first, then the delta addition, then the eight modules the
+  baseline window never reached — all 62 completed.</p>
+
+  <table>
+    <thead>
+      <tr><th></th><th>Baseline <code>e2825a0d</code> (job 1271013)</th><th>After <code>295f6d55</code> (job 1271023)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Modules ordered</td><td>53 (baseline order)</td><td>62 (all)</td></tr>
+      <tr><td>Modules completed</td><td>53</td><td>53 done, 3 aborted, 6 no-tests</td></tr>
+      <tr><td>Completed with tested cases</td><td>45</td><td>45 (identical set)</td></tr>
+      <tr><td>Passed / Failed</td><td>329 / 10</td><td>364 / 11</td></tr>
+      <tr><td>Aborted (rc 124)</td><td>0</td><td>3 — all zero-test collection-only modules</td></tr>
+      <tr><td>Not run (wall guard)</td><td>8</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <p>The three after-arm aborts (<code>test_forward_receipt_raster.py</code>,
+  <code>test_labeller_parallel.py</code>, <code>test_reduced_newton_constraints.py</code>) are
+  zero-test modules on both arms (baseline rc 0 at 300–301 s with 0 tests; after rc 124 at 300 s),
+  so they carry no tested cases and no failure signal. The six no-tests modules collected zero
+  cases under the non-slow filter, including <code>test_clipped_support_quadrature.py</code> whose
+  three tests are all slow-marked at both revisions. Over the 45 modules that ran tests on both
+  arms, the per-module pass/fail counts are identical in every case: all 10 baseline failure ids
+  reproduce verbatim on the after arm, and no baseline pass turns to a fail.</p>
+
+  <h3>Failure ids — baseline (10) and after (11)</h3>
+
+  <table>
+    <thead>
+      <tr><th>Failure</th><th>Baseline</th><th>After</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>test_equilibrium_forward::test_the_solve_defaults_to_the_root_find</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_equilibrium_sol::test_the_private_flux_branch_is_labelled_and_reached_by_its_own_closure</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_equilibrium_sol::test_varying_the_private_flux_policy_moves_only_its_own_current</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_equilibrium_stencil_mesh::test_the_conservation_receipts_agree_between_the_meshes</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_forward_census::test_forward_census_exact_diverted_oracle</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_forward_operator_domain::test_residual_support_has_no_boundary_flux_partition</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_forward_operator_domain::test_point_cell_arm_uses_profile_owned_support_eager_and_jit</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_forward_operator_domain::test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_oracle_axis_admission::test_coarse_diverted_exact_field_admits_axis_and_saddle</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_prescribed_current_solve::test_solve_and_solve_branch_trace_prescribed_current_replacements</code></td><td>X</td><td>X</td></tr>
+      <tr><td><code>test_two_class_recovery::test_cold_seed_receipts_keep_one_fixed_branch_axis_under_vmap</code></td><td>—</td><td>X</td></tr>
+    </tbody>
+  </table>
+
+  <p>The one after-only failure is <strong>not an added failure of this delta window</strong>:
+  <code>test_two_class_recovery.py</code> was one of the eight modules the baseline window never
+  reached, so it has no baseline measurement to regress against. Its failure is a pre-existing
+  latent defect — <code>KeyError: 'newton_steps'</code> in
+  <code>equilibrium/forward.py:2557</code> <code>_iteration_count</code> on the newton_krylov
+  portfolio route when the caller passes <code>gmres_iterations</code> but no
+  <code>newton_steps</code>. Both <code>forward.py</code> and <code>test_two_class_recovery.py</code>
+  are byte-identical at base <code>e2825a0d</code> and after-head <code>295f6d55</code> (empty git
+  diff), and the introducing commit <code>87ed6fdf</code> is an ancestor of the base — no commit
+  in the 21-commit delta window touches it.</p>
+
+  <h3>The eight baseline-unmeasured modules, all now measured</h3>
+
+  <p>None of the eight baseline-not-run modules remain unmeasured: all completed on the after arm,
+  seven with clean passes and one with the latent failure above.</p>
+
+  <table>
+    <thead>
+      <tr><th>Module</th><th>After-arm result</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>test_structured_read_census_rows.py</code></td><td>2 passed</td></tr>
+      <tr><td><code>test_topology_o_qualification.py</code></td><td>6 passed</td></tr>
+      <tr><td><code>test_two_branch_batch_cost.py</code></td><td>2 passed</td></tr>
+      <tr><td><code>test_two_class_recovery.py</code></td><td>1 failed (latent <code>newton_steps</code> KeyError)</td></tr>
+      <tr><td><code>test_vertical_position_constraint.py</code></td><td>1 passed</td></tr>
+      <tr><td><code>test_wall_anchor_shadow.py</code></td><td>3 passed</td></tr>
+      <tr><td><code>test_wall_height_exclusion.py</code></td><td>15 passed</td></tr>
+      <tr><td><code>test_wall_units_solver.py</code></td><td>6 passed</td></tr>
+    </tbody>
+  </table>
+
+  <p>Per-module junit, logs and the arm ledger are under
+  <code>~/.config/reckon/crew/reports/nova/s19-review/quadrature-delta-4/after/</code> (arm.jsonl,
+  footer <code>{"arm":"after","revision":"295f6d55...","modules":62,"done":53,"aborted":3,
+  "no_tests":6,"absent":0,"not_run":0,"passed_total":364,"failed_total":11}</code>); the baseline
+  ledger is at <code>quadrature-delta-3/base/arm.jsonl</code>.</p>
+
+  <p><strong>Binaries.</strong> After arm: 62 modules ordered, 62 completed, 53 done (45 with
+  tested cases), 3 aborted (zero-test), 6 no-tests, 364 passed, 11 failed. Baseline arm: 53 done
+  (45 with tested cases), 329 passed, 10 failed, 1 absent (clipped-support), 8 not-run. Delta over
+  the 45 comparable modules: <strong>0 added, 0 fixed</strong>.</p>
+</section>
+
+<section id="xpoint-cell-wedge-oracle">
+  <h2>Four fixed-capacity wedges in the single-null X-point cell</h2>
+
+  <p>The analytic saddle, rather than the production null census, selects the cut cell by
+  point-in-polygon. This distinction is decisive on the coarse meshes: the production census
+  does not admit the saddle at 132 or 340 realised cells. At the requested 300-cell rung, the
+  unique strict-containment candidate is realised cell 5. The saddle is interior and
+  6.500849 mm from its nearest edge. Four roots cross the boundary, but edge 2 carries two of
+  them at fractions 0.2072052925 and 0.9283123862 despite same-sign endpoint samples. The
+  endpoint-sign path therefore found only two roots and emitted an all-zero saddle row. This
+  reproduced the recorded defect before the repair.</p>
+
+  <p>The repair accepts up to two ordered roots per edge, pairs the four roots cyclically by
+  branch, and emits four polygons with a static capacity of 12 vertices. Every polygon begins
+  with the analytic saddle; unused coordinates are bitwise zero. A saddle coincident with an
+  edge root is represented by the same layout, leaving the repeated-root wedge with exact-zero
+  area. Each wedge is integrated with its own profile. The independent analytic integrator also
+  preserves disjoint vertical intervals instead of replacing them with their enclosing range.
+  Neither repair changes an equality guard or widens the <code>1e-6</code> current tolerance.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Requested / realised cells</th>
+        <th>X-point cell</th>
+        <th>Wedge vertex counts</th>
+        <th>Core current relative error</th>
+        <th>Private / common-SOL current (A)</th>
+        <th>Area closure (m²)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>110 / 132 (reference)</td><td>9</td><td>4, 4, 6, 4</td><td>2.8664e-16</td><td>0.0 / [0.0, 0.0]</td><td>+3.4694e-18</td></tr>
+      <tr><td>300 / 340</td><td>5</td><td>5, 4, 3, 6</td><td>3.6115e-16</td><td>0.0 / [0.0, 0.0]</td><td>-3.4694e-18</td></tr>
+      <tr><td>1000 / 1074</td><td>26</td><td>3, 5, 5, 5</td><td>3.5182e-16</td><td>0.0 / [0.0, 0.0]</td><td>+1.7347e-18</td></tr>
+      <tr><td>2500 / 2616</td><td>1479</td><td>4, 5, 6, 3</td><td>2.7328e-14</td><td>0.0 / [0.0, 0.0]</td><td>+1.9516e-18</td></tr>
+    </tbody>
+  </table>
+
+  <p>A single <code>all_debug</code> allocation (job 1271095, four CPUs,
+  <code>JAX_PLATFORMS=cpu</code>, x64 enabled, <code>TMPDIR=/tmp</code>) produced the reference
+  and three measured rungs. The maximum measured core-current relative error is
+  <strong>2.7328042230513393e-14</strong>, 36.6 million times below the limit. All four rows
+  report exact-zero private-flux and both common-SOL currents, the saddle in every wedge, and
+  exact-zero padding. Each rung was persisted independently before the aggregate receipt was
+  assembled.</p>
+
+  <div class="figure-grid">
+    <figure>
+      <img src="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-110.svg" alt="Reference 110-cell-rung line contours and outlined analytic X-point cell">
+      <figcaption>Requested 110-cell reference: analytic and solved line contours share levels;
+      both null sets, wall units and the outlined cut cell are shown.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-300.svg" alt="Measured 300-cell-rung line contours and outlined analytic X-point cell">
+      <figcaption>Requested 300-cell rung: cell 5 owns the analytic saddle and one boundary edge
+      carries two crossings.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-1000.svg" alt="Measured 1000-cell-rung line contours and outlined analytic X-point cell">
+      <figcaption>Requested 1000-cell rung with the same analytic-saddle ownership and
+      fixed-capacity wedge layout.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-2500.svg" alt="Measured 2500-cell-rung line contours and outlined analytic X-point cell">
+      <figcaption>Requested 2500-cell rung; the largest core-current relative error remains
+      2.7328e-14.</figcaption>
+    </figure>
+  </div>
+
+  <p>The focused synthetic saddle-cell module exercises the four-way partition, per-profile
+  moment isolation, a static non-saddle row, two roots on one edge, an edge-coincident saddle
+  with one exact-zero-area wedge, and refusal of an incomplete profile tuple: 6 passed in
+  20.21 s. The importer gate ran every affected module in a fresh CPU process. The baseline
+  carried 46 passes and zero failures; the repaired head carries the same 46 passes plus the six
+  new tests, with <strong>52 passed and zero added failures</strong>.</p>
+
+  <p><strong>Receipt.</strong>
+  <code>docs/figures/cut-cell-current-attribution/xpoint-cell/receipt.json</code>, with one
+  independently durable JSON part per rung under <code>parts/</code>. Implementation and
+  evidence commits: <code>770f3cf6</code>, <code>130881df</code>, <code>7eacc96c</code>,
+  <code>c807b329</code>, <code>40d5ad7c</code>, <code>016acfd5</code>,
+  <code>f57409c8</code>, <code>4d80ad6f</code>, <code>8e8d8e97</code>, and
+  <code>49a32f22</code>.</p>
+</section>
+
+
+<section id="zero-residual-check">
+<p>Execution evidence for
+    <a href="/nova/cut-cell-current-attribution">cut-cell-current-attribution</a>. One anchor per
+    material result.</p>
+
+    <h2 id="zero-residual-map-reapplication">§2 — one map application at the persisted weak-2500 terminal state</h2>
+
+    <p><strong>Node <code>cca-zero-residual-check</code>, committed <code>b6820524</code>,
+    2026-09-15, all_debug CPU job 1271078.</strong> The weak-rotation-reactor-static 2500-cell row
+    records a terminal fixed-point residual of exactly 0.0 with a converged flag, beside a 104 mm
+    axis error and a qualification bound of 0.0 — the empty-identity signature. This node reloaded
+    the row from its persisted part, rebuilt the operator with the re-posed exterior exactly as the
+    row driver did (both caches hit, coordinate rebuild delta 0.0), applied the production map once,
+    and reported the difference under three definitions.</p>
+
+    <table>
+      <caption>The three residual definitions at the terminal state</caption>
+      <thead><tr><th scope="col">Case</th><th scope="col">Recorded scalar</th><th scope="col">Recomputed scalar (masked)</th><th scope="col">rms over entering (frac span)</th><th scope="col">Sup over entering (frac span)</th><th scope="col">Sup over shadowed</th><th scope="col">Unmasked scalar</th></tr></thead>
+      <tbody>
+        <tr><td>weak 2500</td><td><strong>0.0</strong> (converged)</td><td>5.46e-15</td><td>1.06e-15</td><td><strong>4.78e-15</strong></td><td>44.1 Wb (92.7% of span)</td><td>1.059</td></tr>
+        <tr><td>moderate 2500</td><td>2.0106e-3</td><td>2.0106e-3</td><td>4.98e-4</td><td><strong>1.75e-3</strong></td><td>1.124 Wb (84.3% of span)</td><td>0.969</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Verdict.</strong> The weak 0.0 is a <em>genuine machine-precision fixed point of the
+    masked production map, not an empty identity</em>: the recomputed scalar is 5.46e-15 (relative
+    sup 4.78e-15) over 8955 of 9009 carriers, all 2554 profile-owned cells entering. The unmasked
+    physical map disagrees by 44.1 Wb on the 54 shadowed carriers and only there — sup over the 8955
+    entering carriers is 2.27e-13 Wb while sup over the shadowed set is 44.1 Wb. The mask
+    copy-through that empties them is <code>_exclude_shadow_residual</code>'s
+    <code>jnp.where(shadow, psi, mapped)</code> at <code>nova/equilibrium/forward_operator.py:2611</code>.
+    The production scalar is a true statement about the norm the residual enters and a false one about
+    the physical map, and the mask exactly hides the disagreement. The moderate row is genuinely
+    unconverged under identical treatment — recomputed scalar agrees to full precision, masked sup
+    1.75e-3 over 9050 of 9123 entering — no empty identity involved.</p>
+
+    <table>
+      <caption>Residual-mask census</caption>
+      <thead><tr><th scope="col">Case</th><th scope="col">State length</th><th scope="col">Grid</th><th scope="col">Wall</th><th scope="col">Sample</th><th scope="col">Entering</th><th scope="col">Excluded</th><th scope="col">Excluded fraction</th></tr></thead>
+      <tbody>
+        <tr><td>weak 2500</td><td>9009</td><td>2608</td><td>121</td><td>6280</td><td><strong>8955</strong></td><td>54</td><td>0.0060</td></tr>
+        <tr><td>moderate 2500</td><td>9123</td><td>2621</td><td>121</td><td>6381</td><td><strong>9050</strong></td><td>73</td><td>0.0080</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Qualification bound traced.</strong> The bound is 1e-12, not 0.0; the plan comment
+    conflates the recorded value with the bound. Policy field
+    <code>LOCKED_RECOVERY_BOUNDS['fixed_point_residual']</code> at
+    <code>tests/test_solovev_recovery_gates.py:28</code> feeds
+    <code>TERMINAL_RESIDUAL_BOUND</code> at <code>benchmarks/solovev_certificate.py:129</code>,
+    applied as kernel and qualification tolerance at
+    <code>benchmarks/solovev_certificate.py:2101-2102</code>, evaluated in
+    <code>_apply_joint_qualification</code> at 1764-1776. The weak row stays unqualified on
+    <em>position</em> (axis on its 0.0978 m resolution-scaled bound, 104 mm off), not on residual.</p>
+
+    <figure>
+      <img src="/nova/figures/cut-cell-current-attribution/zero-residual/panels/zero-residual-map.png"
+           alt="Weak and moderate 2500-cell terminal states and residuals: line contours on shared levels, wall and nulls drawn">
+      <figcaption>Flux contour panels of the weak and moderate 2500-cell terminal states —
+      solved contours on one shared level array, relative residual panel on a shared level array;
+      circle markers on the flux panels at the magnetic axes, wall drawn. Caption carries the
+      terminal residual and converged flag for each state.</figcaption>
+    </figure>
+</section>
+<section id="iteration-count-gate">
+  <h2 id="iteration-count-gate-h">The newton_krylov iteration-count repair: KeyError fixed, gate test not green</h2>
+
+  <p><strong>2026-09-15, commit <code>df288d3b</code>.</strong> The recorded latent defect — the
+  newton_krylov portfolio route raising <code>KeyError: 'newton_steps'</code> inside
+  <code>_iteration_count</code> (forward.py, line 2606) when the caller supplied
+  <code>warmup</code> and <code>gmres_iterations</code> but not <code>newton_steps</code> — is
+  repaired. The count now reads the fields the accelerated routes actually populate:
+  <code>newton_steps</code> falls back to the profile field the route injects, evaluations to the
+  profile field the fixed-point routes inject, warmup to the declared solve policy. Reproduction
+  quoted (options <code>{'warmup': 0, 'gmres_iterations': 30}</code>):</p>
+
+  <pre>KeyError: 'newton_steps'
+nova/equilibrium/forward.py:2606: KeyError</pre>
+
+  <p>The target test now completes the <code>solve_portfolio</code> call with <code>newton_steps</code>
+  absent — the KeyError is gone — but does not pass: on one fresh all_debug CPU process at the
+  repaired head, both the full-module selection (<code>-m 'slow or not slow'</code>, job 1271123,
+  5 failed) and the delta arms' exact selection (<code>-m 'not slow'</code>, job 1271183,
+  1 failed/4 deselected) fail the same test at an assertion the KeyError had masked:
+  <code>achieved_class[0]</code> reads <code>[1, 1]</code> (the limited disc branch reads DIVERTED)
+  against the test's <code>[0, 1]</code> (test_two_class_recovery.py:225). The not-slow failure set
+  at head therefore still contains the id the delta-gate base arm never ran (module
+  <code>not_run</code> in quadrature-delta-3) and the after arm logged as the KeyError
+  (quadrature-delta-4): the recorded defect is fixed, the id persists on a distinct assertion.
+  The achieved-class divergence lives in the solved flux's topology (a feed of
+  <code>operator.read</code>, untouched by the iteration-count change), and the module's four slow
+  tests fail on stale fixture banks and receipt-schema drift that predate this repair — both
+  attributable to the open §2 topology and fixture-requalification work, not to the reported
+  iteration count. Gate logs under
+  <code>~/.config/reckon/crew/reports/nova/s19-handoff/iteration-count/</code> and the node
+  manifest at
+  <code>~/.config/reckon/crew/runs/r-20260915T055602091466-cca-newton-krylov-iteration-count/manifest.md</code>.</p>
+</section>
+
+<section id="wall-at-cell-pitch">
+  <h2 id="wall-at-cell-pitch-h">Wall contact resolved when the fixture wall is rebuilt at one panel per cell pitch</h2>
+
+  <p><strong>Node <code>cca-wall-at-cell-pitch</code>, benchmark
+  <code>benchmarks/wall_at_cell_pitch.py</code> (commits <code>2d327477</code>,
+  <code>840834b9</code>, <code>26461a6a</code>), figure and report at
+  <code>8a666b14</code>, 2026-09-15.</strong> With the production contact read at the
+  polyline tangency to sub-micron accuracy (three-node quadratic in arc length), the
+  remaining limited-row contact error is the sagitta of the fixture wall polyline
+  against the true limiter, first order in panel length. This node re-sampled the wall
+  at one, half and a quarter outboard panel per realised cell pitch (odd counts) beside
+  the fixed 121-node baseline, on the weak and moderate analytic rows at 1000 and 2500
+  requested cells, and recorded contact position error against the analytic outboard
+  tangency, level error in span, machine build wall time split (plasma and wall blocks),
+  interaction-matrix bytes and the wall panel length over pitch. Both cell counts ran
+  CPU on <code>all_debug</code> with the persistent compilation cache (jobs 1271206 and
+  1271237); the 2500 job was cut short by a serve restart after the weak group landed,
+  leaving the moderate 2500 group with its 121-node baseline only (13 of 16 rows),
+  noted per row and in the extrapolation caveat rather than re-measured.</p>
+
+  <div class="figure-grid">
+    <figure>
+      <img src="/nova/figures/cut-cell-current-attribution/wall-pitch/contact-error-vs-panel-pitch.svg" alt="Wall contact error against panel length over pitch for the weak and moderate rows at 1000 and 2500 cells">
+      <figcaption>Contact position error (in pitch) against wall panel length over realised
+      cell pitch on log-log axes. The open markers are the one, half and quarter-pitch
+      samplings; the level-filled markers are the fixed 121-node baselines. The light line
+      is the first-order reference slope the sagitta must follow.</figcaption>
+    </figure>
+  </div>
+
+  <p><strong>Verdict: the polyline sagitta is the contact error and needs a curved wall
+  representation at all practical counts.</strong> The measured error/pitch per panel/pitch
+  slope is 0.475 on every row, and the error falls linearly with panel length (first
+  order). One thousandth of the cell pitch — the position accuracy the clip needs — would
+  therefore require roughly 57 000 wall nodes at 1000 cells and 91 000 at 2500 (the
+  per-count figures: weak 1000 needs 57 275 at ~2950 s build, ~1.47 GB wall family; weak
+  2500 needs 90 561 at ~10 750 s build, ~5.67 GB; moderate 1000 needs 56 927 at ~2990 s,
+  ~1.46 GB; moderate 2500 needs 89 957 from the fixed baseline, ~5.66 GB). The contact
+  error falls with the panel over pitch — 0.474 of the pitch at one panel per pitch, 0.237
+  at half, 0.119 at a quarter — tracking the first-order slope to the resolution sampled,
+  so no practical polyline count reaches one thousandth of pitch and the wall must be
+  represented as a periodic spline with the tangency taken on the curve. Parts, receipts
+  and the extrapolation table are under
+  <code>~/.config/reckon/crew/reports/nova/s19-review/wall-pitch/</code>.</p>
+</section>
+
+</main>
+</body>
+</html>

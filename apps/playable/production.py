@@ -95,6 +95,7 @@ class ProductionSolver:
     _admitted_forward: (
         tuple[np.ndarray, ForwardEquilibrium, int, object | None] | None
     ) = field(init=False, default=None, repr=False)
+    _program_handle: object | None = field(init=False, default=None, repr=False)
 
     def __post_init__(self) -> None:
         """Validate the route and start from the carrier's own currents."""
@@ -187,12 +188,16 @@ class ProductionSolver:
         profile: ForwardProfile,
         flux: np.ndarray,
         prescribed_current: np.ndarray,
-        *,
-        program: object | None = None,
     ) -> tuple[ForwardEquilibrium, int, object | None]:
         """Run one unconstrained forward response on prescribed currents."""
         if self.route == "reduced_newton":
-            result = self._reduced(profile, flux, prescribed_current, program=program)
+            result = self._reduced(
+                profile,
+                flux,
+                prescribed_current,
+                program=self._program_handle,
+            )
+            self._program_handle = result.program
             return (
                 self._reduced_receipt(profile, result),
                 int(result.active_set_iterations),
@@ -215,23 +220,14 @@ class ProductionSolver:
             None,
         )
 
-    def _forward_axis_referee(
-        self,
-        profile: ForwardProfile,
-        flux: np.ndarray,
-        *,
-        program: object | None = None,
-    ):
+    def _forward_axis_referee(self, profile: ForwardProfile, flux: np.ndarray):
         """Return a nonlinear axis referee whose program and result are reusable."""
         self._admitted_forward = None
-        program_handle = program
 
         def solve(prescribed_current: np.ndarray) -> ForwardEquilibrium:
-            nonlocal program_handle
             equilibrium, trips, program_out = self._forward(
-                profile, flux, prescribed_current, program=program_handle
+                profile, flux, prescribed_current
             )
-            program_handle = program_out
             self._admitted_forward = (
                 np.asarray(prescribed_current, dtype=float).copy(),
                 equilibrium,
@@ -247,21 +243,17 @@ class ProductionSolver:
         profile: ForwardProfile,
         flux: np.ndarray,
         prescribed_current: np.ndarray,
-        *,
-        program: object | None = None,
     ) -> tuple[ForwardEquilibrium, int, object | None]:
         """Reuse the nonlinear solve that admitted these exact currents."""
         admitted = self._admitted_forward
         if admitted is not None and np.array_equal(admitted[0], prescribed_current):
             return admitted[1:]
-        return self._forward(profile, flux, prescribed_current, program=program)
+        return self._forward(profile, flux, prescribed_current)
 
     def solve_target(
         self,
         previous: ForwardEquilibrium,
         target: object,
-        *,
-        program: object | None = None,
     ) -> tuple[ForwardEquilibrium, object | None]:
         """Drive one target through placement Picard and one forward solve."""
         profile = self.machine.profile
@@ -276,11 +268,11 @@ class ProductionSolver:
             gamma=self.inverse_gamma,
             current_step_fraction=self.current_step_fraction,
             current_step_reference=self.reference_current,
-            forward_solve=self._forward_axis_referee(profile, flux, program=program),
+            forward_solve=self._forward_axis_referee(profile, flux),
         )
         self.prescribed_current = inverse.currents
         equilibrium, round_trips, program_out = self._forward_after_admission(
-            profile, flux, self.prescribed_current, program=program
+            profile, flux, self.prescribed_current
         )
         error = turning_point_error(profile, target, equilibrium.flux)
         achieved = achieved_target(profile, equilibrium.flux)
@@ -316,12 +308,13 @@ class ProductionSolver:
         solve. A prime builds it; each moved key and every admission trial
         re-enters that same program with the changed current as a traced input.
         """
+        self._program_handle = program
         profile = self.machine.profile
         flux = self._flux(previous)
         started = perf_counter()
         if previous is None or action is None:
             equilibrium, trips, program_out = self._forward(
-                profile, flux, self.prescribed_current, program=program
+                profile, flux, self.prescribed_current
             )
             self.last_target = achieved_target(profile, equilibrium.flux)
             self.last_rounds = ()
@@ -338,7 +331,7 @@ class ProductionSolver:
         target = move_bounding_box(
             achieved_target(profile, flux), prior_shape, parameter, delta
         )
-        equilibrium, program_out = self.solve_target(previous, target, program=program)
+        equilibrium, program_out = self.solve_target(previous, target)
         return SolveResult(
             equilibrium,
             perf_counter() - started,

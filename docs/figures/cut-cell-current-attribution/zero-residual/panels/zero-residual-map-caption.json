@@ -1,0 +1,46 @@
+{
+  "flux_levels_wb": [
+    -12.57141928806472,
+    -6.546858634450527,
+    -0.5222979808363348,
+    5.502262672777858,
+    11.52682332639205,
+    17.551383980006243,
+    23.575944633620438,
+    29.600505287234625,
+    35.62506594084882,
+    41.649626594463015
+  ],
+  "residual_levels_relative_span": [
+    0.0,
+    0.10640009711363853,
+    0.21280019422727706,
+    0.3192002913409156,
+    0.4256003884545541,
+    0.5320004855681927,
+    0.6384005826818312,
+    0.7448006797954697
+  ],
+  "series": {
+    "moderate-rotation-conventional-static": {
+      "case": "moderate-rotation-conventional-static",
+      "converged": false,
+      "entering_cold": 9050,
+      "entering_promoted": 9050,
+      "recomputed_unmasked_scalar": 0.9693697830441665,
+      "recorded_scalar": 0.002010600391485635,
+      "span_wb": -1.3328073995319099,
+      "sup_all": 1.1235770982548257
+    },
+    "weak-rotation-reactor-static": {
+      "case": "weak-rotation-reactor-static",
+      "converged": true,
+      "entering_cold": 8955,
+      "entering_promoted": 8955,
+      "recomputed_unmasked_scalar": 1.0589578569021467,
+      "recorded_scalar": 0.0,
+      "span_wb": -47.59430613890367,
+      "sup_all": 44.11443748514162
+    }
+  }
+}

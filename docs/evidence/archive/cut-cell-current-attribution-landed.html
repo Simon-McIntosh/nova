@@ -276,6 +276,71 @@
   <code>49a32f22</code>.</p>
 </section>
 
+
+<section id="zero-residual-check">
+<p>Execution evidence for
+    <a href="/nova/cut-cell-current-attribution">cut-cell-current-attribution</a>. One anchor per
+    material result.</p>
+
+    <h2 id="zero-residual-map-reapplication">§2 — one map application at the persisted weak-2500 terminal state</h2>
+
+    <p><strong>Node <code>cca-zero-residual-check</code>, committed <code>b6820524</code>,
+    2026-09-15, all_debug CPU job 1271078.</strong> The weak-rotation-reactor-static 2500-cell row
+    records a terminal fixed-point residual of exactly 0.0 with a converged flag, beside a 104 mm
+    axis error and a qualification bound of 0.0 — the empty-identity signature. This node reloaded
+    the row from its persisted part, rebuilt the operator with the re-posed exterior exactly as the
+    row driver did (both caches hit, coordinate rebuild delta 0.0), applied the production map once,
+    and reported the difference under three definitions.</p>
+
+    <table>
+      <caption>The three residual definitions at the terminal state</caption>
+      <thead><tr><th scope="col">Case</th><th scope="col">Recorded scalar</th><th scope="col">Recomputed scalar (masked)</th><th scope="col">rms over entering (frac span)</th><th scope="col">Sup over entering (frac span)</th><th scope="col">Sup over shadowed</th><th scope="col">Unmasked scalar</th></tr></thead>
+      <tbody>
+        <tr><td>weak 2500</td><td><strong>0.0</strong> (converged)</td><td>5.46e-15</td><td>1.06e-15</td><td><strong>4.78e-15</strong></td><td>44.1 Wb (92.7% of span)</td><td>1.059</td></tr>
+        <tr><td>moderate 2500</td><td>2.0106e-3</td><td>2.0106e-3</td><td>4.98e-4</td><td><strong>1.75e-3</strong></td><td>1.124 Wb (84.3% of span)</td><td>0.969</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Verdict.</strong> The weak 0.0 is a <em>genuine machine-precision fixed point of the
+    masked production map, not an empty identity</em>: the recomputed scalar is 5.46e-15 (relative
+    sup 4.78e-15) over 8955 of 9009 carriers, all 2554 profile-owned cells entering. The unmasked
+    physical map disagrees by 44.1 Wb on the 54 shadowed carriers and only there — sup over the 8955
+    entering carriers is 2.27e-13 Wb while sup over the shadowed set is 44.1 Wb. The mask
+    copy-through that empties them is <code>_exclude_shadow_residual</code>'s
+    <code>jnp.where(shadow, psi, mapped)</code> at <code>nova/equilibrium/forward_operator.py:2611</code>.
+    The production scalar is a true statement about the norm the residual enters and a false one about
+    the physical map, and the mask exactly hides the disagreement. The moderate row is genuinely
+    unconverged under identical treatment — recomputed scalar agrees to full precision, masked sup
+    1.75e-3 over 9050 of 9123 entering — no empty identity involved.</p>
+
+    <table>
+      <caption>Residual-mask census</caption>
+      <thead><tr><th scope="col">Case</th><th scope="col">State length</th><th scope="col">Grid</th><th scope="col">Wall</th><th scope="col">Sample</th><th scope="col">Entering</th><th scope="col">Excluded</th><th scope="col">Excluded fraction</th></tr></thead>
+      <tbody>
+        <tr><td>weak 2500</td><td>9009</td><td>2608</td><td>121</td><td>6280</td><td><strong>8955</strong></td><td>54</td><td>0.0060</td></tr>
+        <tr><td>moderate 2500</td><td>9123</td><td>2621</td><td>121</td><td>6381</td><td><strong>9050</strong></td><td>73</td><td>0.0080</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Qualification bound traced.</strong> The bound is 1e-12, not 0.0; the plan comment
+    conflates the recorded value with the bound. Policy field
+    <code>LOCKED_RECOVERY_BOUNDS['fixed_point_residual']</code> at
+    <code>tests/test_solovev_recovery_gates.py:28</code> feeds
+    <code>TERMINAL_RESIDUAL_BOUND</code> at <code>benchmarks/solovev_certificate.py:129</code>,
+    applied as kernel and qualification tolerance at
+    <code>benchmarks/solovev_certificate.py:2101-2102</code>, evaluated in
+    <code>_apply_joint_qualification</code> at 1764-1776. The weak row stays unqualified on
+    <em>position</em> (axis on its 0.0978 m resolution-scaled bound, 104 mm off), not on residual.</p>
+
+    <figure>
+      <img src="/nova/figures/cut-cell-current-attribution/zero-residual/panels/zero-residual-map.png"
+           alt="Weak and moderate 2500-cell terminal states and residuals: line contours on shared levels, wall and nulls drawn">
+      <figcaption>Flux contour panels of the weak and moderate 2500-cell terminal states —
+      solved contours on one shared level array, relative residual panel on a shared level array;
+      circle markers on the flux panels at the magnetic axes, wall drawn. Caption carries the
+      terminal residual and converged flag for each state.</figcaption>
+    </figure>
+</section>
 </main>
 </body>
 </html>

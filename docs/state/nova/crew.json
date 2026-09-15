@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T15:58:34",
+  "updated": "2026-09-15T16:26:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -166233,6 +166233,212 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T135839401744-cca-lfs-contour-before-after-figure",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-lfs-contour-before-after-figure",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3910,
+                "cached_input_tokens": 532530,
+                "input_tokens": 536442,
+                "output_tokens": 2175,
+                "reasoning_output_tokens": 64,
+                "total_tokens": 538617,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "A benchmark benchmarks/limited_shadow_before_after.py renders, in one all_debug CPU job (JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on the node, foreground srun under 59 minutes, no solve is run: every state is read from committed receipts), a figure docs/figures/cut-cell-current-attribution/limited-shadow/lfs-contours-before-after.png with one row per Solovev row (weak 1000, moderate 1000, strong 1000, and weak 2500 if its pre-fix terminal state is persisted) and three columns: the pre-fix terminal flux (the committed terminal states the root-cause node's reproduction read at base 3082be61, persisted under docs/figures/cut-cell-current-attribution/limited-shadow/reproduction or the certificate rows they came from, with the path stated in the caption) drawn as line contours on the analytic levels with the 54 excluded carriers of the weak 2500 reproduction (indices in the receipt) marked, so the self-closing outboard-midplane patch is visible; the post-fix terminal flux from docs/figures/cut-cell-current-attribution/limited-shadow/solve-parts/chord/*.json on the same levels with both null sets; and the analytic flux on the same levels; every panel obeys nova/AGENTS.md plotting rules (axis off, line contours only, nova.media draw_nulls and draw_wall, shared physical levels, residual and converged flag in the caption); the figure is referenced with project-absolute src from the limited-shadow evidence section and a plan section 2 comment; the receipt beside it states per row the pre-fix and post-fix terminal residual, axis error in pitch and boundary flux error from the solve receipt; manifest in plain key: value lines, any waiting declaration with wait_probe as a JSON list such as [\"squeue\",\"-h\",\"-j\",\"1271409\"] and wait_terminal exit:0",
+          "estimated_hours": null,
+          "goal": "One figure that shows the low-field-side self-closing contours on the pre-fix Solovev terminal states beside the post-fix terminal states on shared levels, with the carriers the old shadow excluded marked, so the removal is demonstrated rather than tabled",
+          "id": "cca-lfs-contour-before-after-figure",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T13:58:40Z",
+            "read_at": "2026-09-15T13:58:41Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 41.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T135839401744-cca-lfs-contour-before-after-figure/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/limited_shadow_before_after.py",
+            "docs/figures/cut-cell-current-attribution/limited-shadow",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/lfs-figure",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19h-cca-lfsfig-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T13:59:10Z",
+        "completed_at": "2026-09-15T14:21:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1365,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1365,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "6a3b80a275ddbc05f475bd5aca2447541d6eeaa2",
+        "commits": [
+          "65ac8361baaa50b5d7eb28739af0bcc99fea1d0e",
+          "fc36a4fcecd65cbccf41d08d58938e3e5eae286e",
+          "02be6d3470f71c3a7b1c5beecf991f8e5a81b828",
+          "68f6e2d7a355ccb962a36c694bbd70943e4e6718",
+          "0dc8a4396bece4bddbdf68f9d43c24b273fabca1"
+        ],
+        "changed_lines": {
+          "added": 683,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1271525: benchmarks/limited_shadow_before_after.py, receipt-only render of three rows, zero solves",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/cut-cell-current-attribution/limited-shadow/lfs-contours-before-after-receipt.json",
+          "log_digest": "sha256:4f8c3aa041fdf04e845586f0dfbd26a939aa63595921ac6dcc428c56e2ce8be3"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T135839401744-cca-lfs-contour-before-after-figure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a55d-5155-7853-b4f1-d215208be0a7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15696128,
+            "cached_input_tokens_cumulative": 15696128,
+            "input_tokens": 15836154,
+            "input_tokens_cumulative": 15836154,
+            "output_tokens": 35345,
+            "output_tokens_cumulative": 35345,
+            "reasoning_output_tokens": 9952,
+            "reasoning_output_tokens_cumulative": 9952
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T14:21:55Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 43.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T14:21:55Z"
+            }
+          ],
+          "notional_cost_usd": 77.0901,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 15696128,
+          "cumulative_input_tokens": 31532282,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 45297
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-lfs-contour-before-after-figure",
+          "session_id": "01a0a55d-5155-7853-b4f1-d215208be0a7",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T14:21:55Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 35.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -166545,6 +166751,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2571
+    "_version": 2572
   }
 }

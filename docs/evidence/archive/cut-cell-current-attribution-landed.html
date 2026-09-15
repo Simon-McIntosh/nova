@@ -715,6 +715,64 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   record with per-case last Python frames and versions is the closing record in the
   s19-handoff cpu-abort report under <code>~/.config/reckon/crew/reports</code>.</p>
 </section>
+<section id="exact-clip-seed-unit-current">
+  <h2>Exact-clip cold seed books the declared current at unit amplitude</h2>
+
+  <p>The defect reproduced before repair on the committed certificate receipt:
+  weak 110 began at amplitude 2.054064, cycled at residual 0.075215 and missed
+  the analytic axis by 0.173084 m; weak 300 began at 2.025096, cycled at
+  0.098270 and missed by 0.365894 m. A radius-only discriminator on
+  <code>all_debug</code> job 1271686 could not reach the target: fractions 0.35
+  through 1.00 produced amplitudes 1.89784, 1.84237, 1.93776, 1.80845, 2.01208
+  and 2.44368. The alternative geometric coordinate was bracketed: moving the
+  limited seed boundary through 0.5 to 1.0 of its axis-to-boundary span moved
+  amplitude from 1.10144 through unity to 0.896835.</p>
+
+  <p><code>ForwardProfile.cold_seed_portfolio</code> and
+  <code>ForwardProfile.moment_seed</code> now use that boundary coordinate only
+  when the exact clip is selected. The grid and direct-sample seed field stay
+  fixed while a uniform wall-flux shift chooses the limited boundary level;
+  a safeguarded scalar solve evaluates the operator's own unscaled clipped
+  current and returns once the declared one-percent amplitude bound is met.
+  The analytic normalization is
+  <code>target current / sum(unscaled clipped cell current)</code>. A missing
+  bracket or a solve outside the bound is refused, while every other clip mode
+  returns the input seed bit-for-bit. Implementation and tests are commits
+  <code>29a690a2</code> and <code>9dfc35b1</code>.</p>
+
+  <table>
+    <caption>Exact-clip seed amplitude before and after boundary-level alignment</caption>
+    <thead><tr><th scope="col">Static case</th><th scope="col">Requested cells</th><th scope="col">Historical</th><th scope="col">Aligned</th><th scope="col">Within 1%</th></tr></thead>
+    <tbody>
+      <tr><td>weak rotation</td><td>110</td><td>2.054064</td><td>1.009016</td><td>yes</td></tr>
+      <tr><td>weak rotation</td><td>300</td><td>2.025096</td><td>0.998336</td><td>yes</td></tr>
+      <tr><td>moderate rotation</td><td>110</td><td>2.082365</td><td>0.999331</td><td>yes</td></tr>
+      <tr><td>moderate rotation</td><td>300</td><td>1.971156</td><td>1.002439</td><td>yes</td></tr>
+      <tr><td>strong rotation</td><td>110</td><td>1.905067</td><td>1.009832</td><td>yes</td></tr>
+      <tr><td>strong rotation</td><td>300</td><td>1.803822</td><td>1.003210</td><td>yes</td></tr>
+    </tbody>
+  </table>
+
+  <p>One CPU job, 1271699, ran all six rows with
+  <code>JAX_PLATFORMS=cpu</code>, x64 enabled, four cores, 64 GiB and
+  <code>TMPDIR=/tmp</code>; all six row receipts were written independently and
+  the aggregate exited zero. The machine-readable record is
+  <code>docs/figures/cut-cell-current-attribution/exact-clip-seed/receipt.json</code>.
+  No figure is used for this result because the decision is a six-row scalar
+  comparison and the table is its natural representation. The new guard and
+  its exact refusal pass 3 of 3 tests, and the pre-existing raster cold-seed
+  controls pass 3 of 3 in fresh CPU processes. The separate moment-seed module
+  is not evidence: it fails collection before reaching the selected test because
+  <code>benchmarks.diiid_forward_gs_match</code> no longer exports
+  <code>_separatrix</code>, an out-of-scope import defect.</p>
+
+  <p><strong>Open acceptance.</strong> The required single-card H200 job over the
+  six static solves, its solved-versus-analytic contour and difference panels,
+  and the complete per-module <code>forward.py</code> importer delta were not
+  started after the CPU gate because they could not complete inside this node's
+  55-minute fence. The driving followup stays open; this record establishes the
+  landed seed construction and CPU amplitude gate only.</p>
+</section>
 </main>
 </body>
 </html>

@@ -13,6 +13,7 @@ import pytest
 from apps.playable.shape import PlasmaShape, move_bounding_box
 from nova.equilibrium.shape_inverse import (
     GAMMA,
+    _admissible_delta,
     _cap_current_delta,
     achieved_target,
     bounding_box_pairs,
@@ -23,6 +24,7 @@ from nova.equilibrium.shape_inverse import (
     shape_values,
     solve_shape_inverse,
 )
+from nova.equilibrium.topology import NoQualifiedAxisError
 
 
 @pytest.fixture(scope="module")
@@ -80,6 +82,50 @@ def test_shape_steering_target_keeps_a_moved_x_point_commanded(machine, seed_tar
         machine.seed,
     )
     np.testing.assert_allclose(rows.x_point, commanded_x_point)
+
+
+def test_shape_steering_target_holds_uncommanded_turning_points(machine, seed_target):
+    """An upper-point command adds residual rows at the other prior extrema."""
+    commanded = np.asarray(seed_target.flux_points).copy()
+    commanded[1, 1] += 0.02
+    target = replace(
+        seed_target,
+        flux_points=commanded,
+        radial_field_points=commanded[[0, 2]],
+        vertical_field_points=commanded[[1, 3]],
+    )
+
+    rows, previous = shape_steering_target(machine.profile, target, machine.seed)
+
+    np.testing.assert_allclose(rows.flux_points[-3:], previous[[0, 2, 3]])
+    np.testing.assert_allclose(rows.radial_field_points[-2:], previous[[0, 2]])
+    np.testing.assert_allclose(rows.vertical_field_points[-1:], previous[[3]])
+
+
+def test_axis_admissibility_contracts_the_current_delta():
+    """A refused forward state halves the proposed current update until admitted."""
+
+    class Operator:
+        @staticmethod
+        def read(flux, requested_class=None):
+            del requested_class
+            if float(np.asarray(flux)[0]) > 5.0:
+                raise NoQualifiedAxisError("refused trial")
+            return None, None
+
+    profile = SimpleNamespace(operator=Operator())
+    delta, fraction, trials = _admissible_delta(
+        profile,
+        jnp.zeros(1),
+        np.asarray([0.0]),
+        np.asarray([0]),
+        np.asarray([12.0]),
+        forward_solve=lambda current: jnp.asarray(current),
+    )
+
+    np.testing.assert_allclose(delta, [3.0])
+    assert fraction == 0.25
+    assert trials == 3
 
 
 def test_response_matrix_matches_central_differences(machine, seed_target):

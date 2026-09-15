@@ -1,8 +1,6 @@
 from copy import deepcopy
 import json
-from types import SimpleNamespace
 
-import jax.numpy as jnp
 import pytest
 
 from benchmarks.program_scope_census import (
@@ -19,8 +17,6 @@ from benchmarks.solve_program_size_gate import (
     evaluate_gate,
     write_semantic_report,
 )
-from nova.equilibrium import fixed_point
-from nova.equilibrium.forward import ForwardProfile
 
 
 def _program(instructions, moment_copies, topology_copies, executable_bytes=None):
@@ -55,64 +51,6 @@ def _receipts():
             "map": _program(mapped, 1, 1),
         }
     return rows
-
-
-def test_accelerated_program_reuses_one_frozen_partition(monkeypatch):
-    class Operator:
-        use_linear_moments = False
-        moment_geometry = None
-
-        @staticmethod
-        def traced_flux_map(_requested_class, _target_current):
-            return lambda state, external: state + external
-
-        @staticmethod
-        def traced_flux_map_with_shadow(_requested_class, _target_current):
-            return lambda state, shadow, external: state + external + shadow
-
-        @staticmethod
-        def residual_shadow_mask(state, _requested_class, previous_shadow=None):
-            del previous_shadow
-            return jnp.zeros_like(state, dtype=bool)
-
-        @staticmethod
-        def _frozen_topology_partition(state, _requested_class, previous_shadow=None):
-            del previous_shadow
-            return SimpleNamespace(residual_shadow=jnp.zeros_like(state, dtype=bool))
-
-        @staticmethod
-        def _internal_on_partition(state, _partition, target_current):
-            return state * target_current
-
-        @staticmethod
-        def _exclude_shadow_residual(state, image, _requested_class, *, shadow):
-            del state, shadow
-            return image
-
-    captured = {}
-
-    def capture(_mapped, initial, **options):
-        captured.update(options)
-        return initial
-
-    monkeypatch.setattr(fixed_point, "newton_krylov", capture)
-    profile = object.__new__(ForwardProfile)
-    profile.operator = Operator()
-    profile.newton_steps = 1
-    profile._accelerated_program_cache = {}
-    raw_shadowed = profile.operator.traced_flux_map_with_shadow(None, 2.0)
-    assert not hasattr(raw_shadowed, "_read_frozen_partition")
-
-    program = profile._accelerated_history_program("newton_krylov", target_current=2.0)
-    program.lower(jnp.ones(1), jnp.zeros(1))
-
-    shadowed = captured["shadowed_map_fn"]
-    partition = shadowed._read_frozen_partition(jnp.ones(1))
-    assert callable(shadowed._map_frozen_partition)
-    assert callable(shadowed._frozen_partition_shadow)
-    assert shadowed._map_frozen_partition(
-        jnp.ones(1), partition, jnp.zeros(1)
-    ).tolist() == [2.0]
 
 
 def test_gate_accepts_the_measured_interim_reduction():

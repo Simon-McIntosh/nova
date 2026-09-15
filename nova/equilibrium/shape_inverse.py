@@ -53,6 +53,7 @@ from nova.equilibrium.constraint import (
 )
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.observation import MomentIntegralSupport
+from nova.equilibrium.topology import NoQualifiedAxisError
 from nova.linalg.regression import MoorePenrose
 
 if TYPE_CHECKING:
@@ -483,12 +484,8 @@ def _admits_axis(
         )
         trial_flux = jnp.asarray(getattr(trial, "flux", trial))
         profile.operator.read(trial_flux, requested_class=requested_class)
-    except Exception as error:
-        from nova.equilibrium.topology import NoQualifiedAxisError
-
-        if isinstance(error, NoQualifiedAxisError):
-            return False
-        raise
+    except NoQualifiedAxisError:
+        return False
     return True
 
 

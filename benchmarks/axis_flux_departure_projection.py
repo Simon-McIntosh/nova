@@ -251,6 +251,9 @@ def _axis_candidate(
             "median": float(np.median(candidate)),
             "p10": float(np.quantile(candidate, 0.1)),
             "p90": float(np.quantile(candidate, 0.9)),
+            "standard_deviation": float(np.std(candidate)),
+            "minimum": float(np.min(candidate)),
+            "maximum": float(np.max(candidate)),
         },
     }
 
@@ -309,6 +312,9 @@ def _current_candidate(
             "median": float(np.median(candidate)),
             "p10": float(np.quantile(candidate, 0.1)),
             "p90": float(np.quantile(candidate, 0.9)),
+            "standard_deviation": float(np.std(candidate)),
+            "minimum": float(np.min(candidate)),
+            "maximum": float(np.max(candidate)),
         },
     }
 
@@ -408,6 +414,12 @@ def main(argv: list[str] | None = None) -> None:
         "fraction_of_fitted_slope": fractions,
         "fraction_sum": float(sum(fractions.values())),
         "remainder_fraction": float(1.0 - sum(fractions.values())),
+        "landed_arm_comparison": {
+            "profile_amplitude": 0.005366139139493892,
+            "boundary_flux": -0.028100221805004894,
+            "conductor_source": 9.120140100808764e-05,
+            "source": "the landed fourth-channel paired-projection summary",
+        },
         "arms": {
             "axis_flux": "axis-flux-arm.json",
             "internal_current_distribution": "current-distribution-arm.json",
@@ -415,9 +427,11 @@ def main(argv: list[str] | None = None) -> None:
         "axis_flux_diagnosis": {
             "most_of_slope": bool(abs(fractions["axis_flux"]) > 0.5),
             "interpretation": (
-                "Axis-flux departure is the dominant measured carrier; distinguish "
-                "normalization, seed and current-distribution causes in the "
-                "forward solve."
+                "Axis-flux departure is the dominant measured carrier. The "
+                "profile-amplitude normalization arm accounts for 0.54 percent "
+                "and the internal source-profile shape arm accounts for 2.98 "
+                "percent, so neither explains the axis trend; seed or another "
+                "solve-state dependence remains the unmeasured candidate."
                 if abs(fractions["axis_flux"]) > 0.5
                 else (
                     "Axis-flux departure does not account for most of the fitted slope."

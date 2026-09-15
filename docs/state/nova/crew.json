@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T01:58:37",
+  "updated": "2026-09-15T02:16:25",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -157507,6 +157507,294 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T160220568583-msc-solve-profile-kernel-count",
+        "plan": "millisecond-converged-solve",
+        "section": "",
+        "node": "msc-solve-profile-kernel-count",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 943,
+                "cached_input_tokens": 681207,
+                "input_tokens": 682154,
+                "output_tokens": 3690,
+                "reasoning_output_tokens": 631,
+                "total_tokens": 685844,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. Never open any receipt larger than one megabyte in an editor (load it with json). Commit the benchmark before submitting any job; every SLURM job is sbatch detached from your shell with --output in the run directory, TMPDIR=/tmp exported in the submit environment and the payload, the root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python with PYTHONPATH at the worktree, never uv on a compute node. H200 jobs: betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:59:00, nvidia-smi prologue exiting 3 below 40 GiB free, XLA_PYTHON_CLIENT_PREALLOCATE=false, JAX_PLATFORMS=cuda,cpu, persistent compilation cache enabled, rows sharded inside ONE job with parts persisted as each lands. Write the manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync. No production code change. Facts at this base (main): the persistent compilation cache holds a 903 MB solve executable and two 400 MB certificate programs (directory /home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054), a converged forward solve costs about 42.8 ms per slice on one H200 (docs/figures/dual-branch-selection/two-branch-batch-cost.json) and a scan iteration about 7.6 microseconds regardless of body; the exterior is now a traced argument and the certificate solve compiles once per mesh (run r-20260914T095453924389, merged); the certificate driver is benchmarks/solovev_certificate.py and its rows are solved through profile.solve(ForwardSolveRequest) in whole-cell clip mode by default (exact-clip solves do not fit a card above 300 cells and are excluded here). Build one benchmark that, on the weak row at 300 and 1000 cells in whole-cell mode, solves once to warm the cache, then solves again under jax.profiler.trace writing to the run directory, and from the trace tables: total device kernels launched, distinct kernel programs, total kernel wall, total host-to-device gap (launch latency and host work between kernels), the ten heaviest kernels by summed time with their HLO op names, and the fraction of wall in scan or while bodies; beside it the compiled program's HLO instruction count (compiled.as_text() op count), the serialized executable size in bytes, and the compile time. Also lower the same solve with the Newton budget doubled and report how the instruction count changes, which says whether the Newton loop is unrolled or scanned. One SVG of cumulative kernel time against kernel index for each cell count. The report states the kernel count per solve, the launch-latency floor it implies at 7.6 microseconds per kernel against the 1 ms target, the dominant kernels, and whether trips and Newton steps are unrolled in the program.",
+          "estimated_hours": 3.0,
+          "goal": "Measure the kernel count, launch-latency share and compute share of one whole-cell certificate solve at 300 and 1000 cells on the H200 with the JAX profiler, and the executable size and HLO instruction count of its program",
+          "id": "msc-solve-profile-kernel-count",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-14T16:02:21Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T160220568583-msc-solve-profile-kernel-count/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/solve_profile_kernel_count.py",
+            "docs/figures/millisecond-converged-solve/solve-profile",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/solve-profile"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-msc-solve-profile",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-14T16:02:35Z",
+        "completed_at": "2026-09-15T00:14:22.645Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 29492,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 29507,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "299f791d313b73b510e1e0c2ecd54c3ed8c2f780",
+        "commits": [
+          "7d3c7e7579c1eacd80616d16efda0e82cbb2261d",
+          "144762eab9c15460354731ae24b4d4361a14acfb",
+          "1a65d754920772898b6afb2b2780eaa0a5e846b4",
+          "7d9a3ab9f7e009873b70c6abb4d8932862d6877e",
+          "95fb102e0dceb924af63fcbb7151fdd0c19ef799",
+          "02ee9982d1ce90c4414c8e92dc8ea2f1016a5084",
+          "049a6f20048d5cb88de92e1e6be4f2714ce795c6",
+          "4d57f0d3d3a73c0d939729b1224ad008d9b5df09",
+          "954ca09246cd25ca9077c464a4cf14651242ee4b",
+          "f470baf5b7c39f39009f4aa481895c50dcc32d2e"
+        ],
+        "changed_lines": {
+          "added": 32,
+          "removed": 115,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1270967 (whole-cell weak solve at 300 and 1000 cells under jax.profiler.trace, kernel tables, HLO census, executable size, doubled-Newton lowering, EXIT 0)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T160220568583-msc-solve-profile-kernel-count/h200-1270967.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T160220568583-msc-solve-profile-kernel-count/manifest.md",
+        "scope_changed": false,
+        "session_id": "6ab750e9-1774-4137-88a0-204f9275d631",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 40048928,
+            "input_tokens_cumulative": 40048928,
+            "output_tokens": 270779,
+            "output_tokens_cumulative": 270779,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T00:14:22.645Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: compile-only job 1270773 is running or queued; manifest prepared before waiting on that job",
+              "elapsed_seconds": 530,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1043,
+              "log_fresh": false,
+              "manifest_commits": [
+                "3212db17",
+                "92b7c281",
+                "c6f8490d",
+                "31da4cd4",
+                "04270151",
+                "38ca111f",
+                "bceb7852",
+                "582de9ae",
+                "60a5236d",
+                "7e199bae",
+                "ab5fabc1",
+                "1d3aeb6c\"]; changed_paths: [\"nova/equilibrium/observation.py",
+                "nova/equilibrium/stencil_mesh.py",
+                "nova/equilibrium/clip_quadrature.py",
+                "nova/equilibrium/forward_operator.py",
+                "tests/test_clipped_support_quadrature.py",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/chain-capacity.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/single-null-chain-cell.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-identification-300.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-producers-300.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/solve-memory-300.json",
+                "docs/figures/cut-cell-current-attribution/clip-quadrature/hlo-large-buffers-300.json",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-quadrature/needs-help.md",
+                "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-quadrature/run_compile_memory_300.sh"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "8311b0458ad5f8ebf6f395962d1b28ab2545d4bf377e2128dff754a2d28f09fe",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T112013796921-cca-clip-quadrature-linear-in-cut-cells/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T112013796921-cca-clip-quadrature-linear-in-cut-cells/manifest.md; resolve the blocker before resuming the run",
+              "node": "cca-clip-quadrature-linear-in-cut-cells",
+              "phase": "working",
+              "plan": "cut-cell-current-attribution",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260914T112013796921-cca-clip-quadrature-linear-in-cut-cells",
+              "session": "s19-review",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260914T112013796921-cca-clip-quadrature-linear-in-cut-cells",
+                "session_id": "01a09fa5-b09e-7be2-95cb-47ce2c322f5c",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 1077,
+              "terminal_at": "2026-09-14T15:44:32Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 40879406,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 29503.601,
+          "generated_tokens": 310555,
+          "generation_seconds": 21107.386,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 83.0,
+          "machine_seconds": 8396.215,
+          "peak_input_tokens": 165939,
+          "tokens_per_second": 14.71,
+          "wall_tokens_per_second": 10.53
+        },
+        "follow_on_paths": [
+          "1.8-2.0",
+          "Newton/scan"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/msc-solve-profile-kernel-count",
+          "session_id": "6ab750e9-1774-4137-88a0-204f9275d631",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T00:14:22.645Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 323.0,
+        "orientation_input_tokens": 8777676.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -157819,6 +158107,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2489
+    "_version": 2490
   }
 }

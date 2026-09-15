@@ -1,11 +1,12 @@
 """Measure exact component integration at the production topology boundary.
 
 One H200 allocation replays every persisted MAST bank member through the
-width-one reduced solve, persisting each terminal-state identity and trip split
-as it lands.  It then runs the committed four-row Solovev solve gate, whose
-rows compare their terminal flux arrays bit-for-bit with the banked production
-states.  The resulting receipt states the topology-read share of each trip and
-the per-solve read wall against the pre-integration 46.1 ms / 95 percent record.
+width-one reduced solve, persisting each terminal-state digest and trip split
+as it lands.  It then runs the committed four-row Solovev solve gate and
+compares each fresh terminal flux array bit-for-bit with its committed
+production row.  The resulting receipt states the topology-read share of each
+trip and the per-solve read wall against the pre-integration 46.1 ms / 95
+percent record.
 """
 
 from __future__ import annotations
@@ -45,6 +46,14 @@ DEFAULT_OUTPUT_ROOT = (
 )
 PREVIOUS_TRIP_MS = 46.1
 PREVIOUS_TOPOLOGY_SHARE = 0.95
+MAST_COMPONENT_RECEIPT = (
+    ROOT
+    / "docs/figures/playable-forward-solve/parallel-components"
+    / "parallel-components-receipt.json"
+)
+SOLOVEV_COMMITTED_PART_ROOT = (
+    ROOT / "docs/figures/cut-cell-current-attribution/limited-shadow/solve-parts/chord"
+)
 
 
 def _strict(value: Any) -> Any:
@@ -127,9 +136,11 @@ def _solve_member(member) -> dict[str, Any]:
     return {
         "identity": member.identity,
         "state_authority": member.state_authority,
-        "banked_state_sha256": trip_quantum._array_sha256(banked),
+        "input_state_sha256": trip_quantum._array_sha256(banked),
         "terminal_state_sha256": trip_quantum._array_sha256(terminal),
-        "terminal_flux_bit_identical_to_banked": bool(np.array_equal(terminal, banked)),
+        "terminal_flux_bit_identical_to_input_seed": bool(
+            np.array_equal(terminal, banked)
+        ),
         "converged": bool(result.converged),
         "termination": result.termination_name,
         "terminal_residual": float(result.terminal_residual),
@@ -158,9 +169,6 @@ def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     )
     return {
         "row_count": len(rows),
-        "bit_identical_count": sum(
-            bool(row.get("terminal_flux_bit_identical_to_banked")) for row in rows
-        ),
         "converged_count": sum(bool(row.get("converged")) for row in rows),
         "median_trip_ms": float(np.median(trip_ms)),
         "median_topology_read_per_trip_ms": float(np.median(read_ms)),
@@ -172,6 +180,91 @@ def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         ),
         "previous_topology_read_share": PREVIOUS_TOPOLOGY_SHARE,
     }
+
+
+def _mast_component_identity() -> dict[str, Any]:
+    receipt = json.loads(MAST_COMPONENT_RECEIPT.read_text(encoding="utf-8"))
+    rows = receipt["rows"]
+    return {
+        "receipt": str(MAST_COMPONENT_RECEIPT.relative_to(ROOT)),
+        "source_commit": receipt["source_commit"],
+        "row_count": len(rows),
+        "label_mismatch_count": sum(int(row["label_mismatches"]) for row in rows),
+        "verdict": receipt["verdict"],
+    }
+
+
+def _terminal_flux(row: dict[str, Any]) -> np.ndarray:
+    return np.asarray(row["render_data"]["terminal_flux_wb"], dtype=np.float64)
+
+
+def _solovev_terminal_identity(output_root: Path) -> dict[str, Any]:
+    generated_root = output_root / "solovev-certificate/solve-parts/chord"
+    rows = []
+    for generated_path in sorted(generated_root.glob("*.json")):
+        committed_path = SOLOVEV_COMMITTED_PART_ROOT / generated_path.name
+        generated = _terminal_flux(
+            json.loads(generated_path.read_text(encoding="utf-8"))
+        )
+        committed = _terminal_flux(
+            json.loads(committed_path.read_text(encoding="utf-8"))
+        )
+        different = int(
+            np.count_nonzero(generated.view(np.uint64) != committed.view(np.uint64))
+        )
+        rows.append(
+            {
+                "identity": generated_path.stem,
+                "element_count": len(generated),
+                "different_element_count": different,
+                "terminal_flux_bit_identical_to_committed": bool(
+                    np.array_equal(generated, committed)
+                ),
+                "committed_part": str(committed_path.relative_to(ROOT)),
+                "generated_part": str(generated_path.relative_to(ROOT)),
+                "committed_sha256": trip_quantum._array_sha256(committed),
+                "generated_sha256": trip_quantum._array_sha256(generated),
+            }
+        )
+    return {
+        "receipt": "solovev-certificate/solve-receipt.json",
+        "row_count": len(rows),
+        "terminal_flux_bit_identical_count": sum(
+            bool(row["terminal_flux_bit_identical_to_committed"]) for row in rows
+        ),
+        "rows": rows,
+    }
+
+
+def _finalize_existing(output_root: Path) -> None:
+    receipt_path = output_root / "parallel-components-read-receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    for row in receipt["mast_rows"]:
+        if "banked_state_sha256" in row:
+            row["input_state_sha256"] = row.pop("banked_state_sha256")
+        if "terminal_flux_bit_identical_to_banked" in row:
+            row["terminal_flux_bit_identical_to_input_seed"] = row.pop(
+                "terminal_flux_bit_identical_to_banked"
+            )
+    receipt["mast_summary"].pop("bit_identical_count", None)
+    receipt["mast_component_identity"] = _mast_component_identity()
+    receipt["solovev_terminal_identity"] = _solovev_terminal_identity(output_root)
+    receipt["measurement_launcher_exit_status"] = 1
+    receipt["measurement_launcher_exit_note"] = (
+        "all rows and figures landed before a superseded "
+        "input-versus-terminal assertion"
+    )
+    receipt["completed"] = True
+    _draw(receipt["mast_summary"], output_root / "parallel-components-read-wall.png")
+    _write_json(receipt_path, receipt)
+    if receipt["mast_component_identity"]["row_count"] != 12:
+        raise RuntimeError("the MAST component receipt does not contain twelve rows")
+    if receipt["mast_component_identity"]["label_mismatch_count"] != 0:
+        raise RuntimeError("a MAST component label differs from the canonical result")
+    if receipt["solovev_terminal_identity"]["terminal_flux_bit_identical_count"] != 4:
+        raise RuntimeError("a Solovev terminal flux differs from its committed row")
+    print(f"RECEIPT_FINALIZED={receipt_path}", flush=True)
+    print("EXIT_MARKER=0", flush=True)
 
 
 def _draw(summary: dict[str, Any], path: Path) -> None:
@@ -202,10 +295,15 @@ def _draw(summary: dict[str, Any], path: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
+    parser.add_argument("--finalize-existing", action="store_true")
     arguments = parser.parse_args()
     output_root = arguments.output_root.resolve()
     receipt_path = output_root / "parallel-components-read-receipt.json"
     figure_path = output_root / "parallel-components-read-wall.png"
+
+    if arguments.finalize_existing:
+        _finalize_existing(output_root)
+        return
 
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
@@ -223,7 +321,9 @@ def main() -> None:
         "inputs": inputs,
         "mast_rows": [],
         "mast_summary": None,
+        "mast_component_identity": None,
         "solovev_certificate": None,
+        "solovev_terminal_identity": None,
         "completed": False,
     }
     _write_json(receipt_path, receipt)
@@ -241,6 +341,7 @@ def main() -> None:
         print("MAST_ROW " + json.dumps(_strict(row), sort_keys=True), flush=True)
 
     receipt["mast_summary"] = _summary(receipt["mast_rows"])
+    receipt["mast_component_identity"] = _mast_component_identity()
     _write_json(receipt_path, receipt)
     certificate = certificate_gate._solve_gate(
         output_root / "solovev-certificate", regenerate_rows=True
@@ -249,17 +350,16 @@ def main() -> None:
         "receipt": "solovev-certificate/solve-receipt.json",
         "row_count": len(certificate["rows"]),
         "acceptance": certificate["acceptance"],
-        "terminal_flux_bit_identical_count": sum(
-            bool(row["terminal_flux_bit_identical_to_before"])
-            for row in certificate["rows"]
-        ),
     }
+    receipt["solovev_terminal_identity"] = _solovev_terminal_identity(output_root)
     receipt["completed"] = True
     _draw(receipt["mast_summary"], figure_path)
     _write_json(receipt_path, receipt)
-    if receipt["mast_summary"]["bit_identical_count"] != len(members):
-        raise RuntimeError("a MAST terminal flux differs from its banked state")
-    if receipt["solovev_certificate"]["terminal_flux_bit_identical_count"] != 4:
+    if receipt["mast_component_identity"]["row_count"] != len(members):
+        raise RuntimeError("the MAST component receipt has the wrong row count")
+    if receipt["mast_component_identity"]["label_mismatch_count"] != 0:
+        raise RuntimeError("a MAST component label differs from the canonical result")
+    if receipt["solovev_terminal_identity"]["terminal_flux_bit_identical_count"] != 4:
         raise RuntimeError("a Solovev terminal flux differs from its committed row")
     print(f"RECEIPT_WRITTEN={receipt_path}", flush=True)
     print("EXIT_MARKER=0", flush=True)

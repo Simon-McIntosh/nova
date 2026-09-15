@@ -693,7 +693,7 @@ def main() -> None:
     verdict = (
         (
             "The independent NumPy breadth-first search confirms both the production "
-            "flood and pointer jumping cell by cell at all four rungs. "
+            "flood and pointer jumping cell by cell at every measured rung. "
             if exact_oracle
             else "The independent NumPy breadth-first search found an oracle "
             "disagreement; the per-cell reason census in the receipt is authoritative. "

@@ -25,6 +25,7 @@ import numpy as np
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import clip_quadrature
+from nova.equilibrium import forward_operator
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.jax.config import configure_dtypes
 
@@ -423,10 +424,62 @@ def _fixed_clip_map(profile, request, state):
     }
 
 
+def _clip_branch_levels(profile, topology):
+    """Return continuous values whose signs select exact-clip packing branches."""
+    operator = profile.operator
+
+    def levels(candidate):
+        physical = jnp.asarray(candidate)[: operator.physical_node_number]
+        grid_flux, _wall_flux = operator.topology.split_flux_map(physical)
+        psi_norm = operator.topology.normalize(
+            topology.axis_flux,
+            topology.boundary_flux,
+            grid_flux,
+        )
+        sample_flux = operator.sample_node_flux(candidate)
+        sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+        masks = forward_operator.DomainMasks(
+            label=jnp.zeros_like(psi_norm, dtype=jnp.int32),
+            psi_norm=psi_norm,
+        )
+        coefficient = operator.support_flux_coefficients(
+            masks.psi_norm,
+            sample_psi_norm,
+        )
+        inside_coefficient = (-coefficient).at[:, 0].add(1.0)
+        coordinate = jnp.asarray(operator.grid.coordinate, dtype=psi_norm.dtype)
+        surface_value = psi_norm[None, :]
+        surface = forward_operator.fit_split_spline(
+            coordinate[None, :, 0],
+            coordinate[None, :, 1],
+            surface_value,
+            surface_value - 1.0,
+            order=6,
+            regularization=1.0e-14,
+        )
+        evaluator = forward_operator._ExactClipLevel(
+            surface,
+            inside_coefficient,
+            operator._support_curve_centre,
+            operator._support_curve_scale,
+        )
+        atomic_mesh = operator.moment_geometry.atomic_mesh
+        vertices = jnp.asarray(atomic_mesh.node_coordinates)[
+            jnp.asarray(atomic_mesh.cell_nodes)
+        ]
+        shared_level = operator.polarity * (
+            operator.shared_node_flux(physical) - topology.boundary_flux
+        )
+        return jnp.concatenate((shared_level.ravel(), evaluator(vertices).ravel()))
+
+    return jax.jit(levels)
+
+
 def measure_jvp_accuracy(
     output: Path,
     part_root: Path,
     state_paths: dict[int, Path],
+    requested_cells: tuple[int, ...] = (110, 300),
 ) -> dict[str, Any]:
     """Check implicit exact-clip tangents against central primal differences."""
     configure_dtypes()
@@ -438,7 +491,7 @@ def measure_jvp_accuracy(
     rows: list[dict[str, Any]] = []
     try:
         set_support_clip_mode("exact")
-        for requested in (110, 300):
+        for requested in requested_cells:
             state_path = state_paths[requested]
             state = jnp.asarray(_terminal_state(state_path), dtype=jnp.float64)
             profile, _seed, request, dimensions = (
@@ -452,6 +505,17 @@ def measure_jvp_accuracy(
                     f"compiled size {dimensions['solve_state_size']}"
                 )
             mapped, branch = _fixed_clip_map(profile, request, state)
+            _masks, topology, _sample_psi_norm, _support = (
+                profile.operator._support_partition(state)
+            )
+            branch_levels = _clip_branch_levels(profile, topology)
+            base_levels = jax.block_until_ready(branch_levels(state))
+            base_sign = base_levels > 0.0
+            branch |= {
+                "packing_level_count": int(base_levels.size),
+                "packing_exact_zero_count": int(jnp.sum(base_levels == 0.0)),
+                "packing_minimum_absolute_level": float(jnp.min(jnp.abs(base_levels))),
+            }
             compiled_map = jax.jit(mapped)
             mapped_state, tangent_action = jax.linearize(compiled_map, state)
             residual = mapped_state - state
@@ -500,6 +564,40 @@ def measure_jvp_accuracy(
                 central_norm = float(jnp.linalg.norm(central))
                 error_norm = float(jnp.linalg.norm(error))
                 scale = max(tangent_norm, central_norm, np.finfo(np.float64).tiny)
+                step_probes = []
+                for multiplier in (0.25, 1.0, 4.0, 16.0, 64.0, 256.0):
+                    probe_step = difference_step * multiplier
+                    probe_upper = compiled_map(state + probe_step * direction)
+                    probe_lower = compiled_map(state - probe_step * direction)
+                    probe_central = (probe_upper - probe_lower) / (2.0 * probe_step)
+                    upper_levels = branch_levels(state + probe_step * direction)
+                    lower_levels = branch_levels(state - probe_step * direction)
+                    probe_central, upper_levels, lower_levels = jax.block_until_ready(
+                        (probe_central, upper_levels, lower_levels)
+                    )
+                    probe_error = float(jnp.linalg.norm(tangent - probe_central))
+                    probe_norm = float(jnp.linalg.norm(probe_central))
+                    step_probes.append(
+                        {
+                            "multiplier": multiplier,
+                            "step": probe_step,
+                            "relative_error": probe_error
+                            / max(
+                                tangent_norm,
+                                probe_norm,
+                                np.finfo(np.float64).tiny,
+                            ),
+                            "upper_sign_changes": int(
+                                jnp.sum((upper_levels > 0.0) != base_sign)
+                            ),
+                            "lower_sign_changes": int(
+                                jnp.sum((lower_levels > 0.0) != base_sign)
+                            ),
+                            "opposed_probe_signs": int(
+                                jnp.sum((upper_levels > 0.0) != (lower_levels > 0.0))
+                            ),
+                        }
+                    )
                 comparisons.append(
                     {
                         "direction": name,
@@ -513,6 +611,7 @@ def measure_jvp_accuracy(
                         "error_l2": error_norm,
                         "relative_error": error_norm / scale,
                         "error_linf": float(jnp.max(jnp.abs(error))),
+                        "step_probes": step_probes,
                     }
                 )
             row = {
@@ -595,10 +694,14 @@ def main() -> None:
     if arguments.check_jvp:
         if arguments.state_110 is None or arguments.state_300 is None:
             raise ValueError("--state-110 and --state-300 are required for JVP checks")
+        requested = tuple(cell for cell in arguments.cells if cell in (110, 300))
+        if not requested:
+            raise ValueError("JVP checks require cell count 110 or 300")
         measure_jvp_accuracy(
             arguments.output,
             arguments.part_root or arguments.output.parent / "jvp-parts",
             {110: arguments.state_110, 300: arguments.state_300},
+            requested,
         )
         return
     if arguments.compiler_root is None:

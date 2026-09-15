@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T15:18:18",
+  "updated": "2026-09-15T15:21:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4676,6 +4676,15 @@
       {
         "id": "s19h-cca-abort-l",
         "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-cca-clipmem-s",
+        "harness": "codex",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -165272,6 +165281,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2560
+    "_version": 2561
   }
 }

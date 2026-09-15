@@ -1892,10 +1892,8 @@ def build_report(
     traced_map_seam = _source_line(ForwardFluxOperator.traced_flux_map, "def ")
     profile_seam = _source_line(DomainProfile.pressure_gradient, "def ")
     moment_seam = _source_line(ForwardSource.current_moments, "def ")
-    compiled_loop = _source_line(
-        reduced_newton._compiled_slice_solver,
-        "return jax.lax.fori_loop(",
-        occurrence=1,
+    compiled_loop = next(
+        row for row in _loop_inventory() if row["loop"] == "compiled active-set trips"
     )
     public_entry = _source_line(reduced_newton.solve_reduced_newton_compiled, "def ")
     coordinate_seam = _source_line(reduced_newton.reduced_coordinates, "def ")

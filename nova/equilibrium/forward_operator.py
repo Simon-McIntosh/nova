@@ -1890,13 +1890,15 @@ class ForwardFluxOperator:
             private_wall_node_mask,
         )
         masks = result.masks
+        connected = result.connected
         if isinstance(masks, DomainMasks):
             masks = saddle_qualified_domains(
                 masks, self._private_flux_saddle_admitted(result.state)
             )
+            connected = connected | masks.core
         same_axis = jnp.all(jnp.equal(initial.state.axis, result.state.axis))
         admitted = result.axis_admitted & (~initial.axis_admitted | same_axis)
-        return masks, result.state, result.connected | masks.core, admitted
+        return masks, result.state, connected, admitted
 
     @staticmethod
     def _private_flux_saddle_admitted(topology: TopologyState) -> jax.Array:

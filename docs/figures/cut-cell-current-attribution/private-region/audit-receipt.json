@@ -1,0 +1,1169 @@
+{
+  "rungs": [
+    {
+      "requested": 500,
+      "realised": 550,
+      "pitch_m": 0.07633547420825515,
+      "oracle_bfs": {
+        "axis_seed_cell": 347,
+        "confined_cells": 308,
+        "reached_cells": 305,
+        "private_cells": 3,
+        "authored_ring_rows": 378,
+        "authored_directed_edges": 1872,
+        "queue_edges_accepting_new_cell": 304,
+        "axis_seed_reached": true
+      },
+      "oracle_comparison": {
+        "production_private_cells": 3,
+        "numpy_bfs_private_cells": 3,
+        "production_flood_differing_cells": 0,
+        "production_label_differing_cells": 0,
+        "pointer_jumping_differing_cells": 0,
+        "mismatches": []
+      },
+      "saddle": {
+        "x_point_rz_m": [
+          1.5013803017894352,
+          -1.0176279706952234
+        ],
+        "eigenvalues": [
+          -0.0838467746867132,
+          0.04283167801014024
+        ],
+        "eigenvectors_columns": [
+          [
+            -0.9966017747178301,
+            -0.08237052038970716
+          ],
+          [
+            0.08237052038970716,
+            -0.9966017747178301
+          ]
+        ],
+        "eigenvector_quadratic_values": [
+          -0.08384677468671317,
+          0.042831678010140234
+        ],
+        "separatrix_tangent_quadratic_values": [
+          -6.938893903907228e-18,
+          0.0
+        ]
+      },
+      "wedge_candidates_differing_cells": {
+        "banked_eigenvectors": 3,
+        "eigenvector_sign_reversed": 3,
+        "eigenvector_order_reversed": 3,
+        "flux_side_inequality_reversed": 3,
+        "zero_level_tangent_pair": 3
+      },
+      "convention_invariance": {
+        "sign_reversal_changes_mask": 0,
+        "order_reversal_changes_mask": 0,
+        "banked_matches_original_driver": 0
+      },
+      "curvature_at_banked_disagreements_pitch": {
+        "count": 3,
+        "median": 0.006337442093269103,
+        "maximum": 0.027443973261707635
+      },
+      "legacy_renderer_reproduction": {
+        "selected_cells": 5,
+        "compared_cells": 5,
+        "skipped_cells_without_inferred_pitch_neighbour": [],
+        "legacy_overlap_pairs": 6,
+        "legacy_overlap_area_pitch2": 0.6424503026308311,
+        "authored_overlap_pairs": 0,
+        "authored_overlap_area_pitch2": 0.0,
+        "intersection_over_union_min": 0.14729383064851542,
+        "intersection_over_union_median": 0.5230362845708739,
+        "centroid_error_pitch_max": 5.817599411756028e-15,
+        "centroid_error_pitch_median": 4.113663994279558e-15,
+        "area_ratio_min": 0.9999999999999862,
+        "area_ratio_max": 6.789150608665219
+      }
+    },
+    {
+      "requested": 750,
+      "realised": 814,
+      "pitch_m": 0.05922550254944988,
+      "oracle_bfs": {
+        "axis_seed_cell": 603,
+        "confined_cells": 457,
+        "reached_cells": 448,
+        "private_cells": 9,
+        "authored_ring_rows": 588,
+        "authored_directed_edges": 2784,
+        "queue_edges_accepting_new_cell": 447,
+        "axis_seed_reached": true
+      },
+      "oracle_comparison": {
+        "production_private_cells": 9,
+        "numpy_bfs_private_cells": 9,
+        "production_flood_differing_cells": 0,
+        "production_label_differing_cells": 0,
+        "pointer_jumping_differing_cells": 0,
+        "mismatches": []
+      },
+      "saddle": {
+        "x_point_rz_m": [
+          1.502318825680531,
+          -1.0166320341023196
+        ],
+        "eigenvalues": [
+          -0.0838201159910972,
+          0.04269805902756247
+        ],
+        "eigenvectors_columns": [
+          [
+            -0.9964649775805656,
+            -0.08400921649058887
+          ],
+          [
+            0.08400921649058887,
+            -0.9964649775805656
+          ]
+        ],
+        "eigenvector_quadratic_values": [
+          -0.08382011599109718,
+          0.04269805902756246
+        ],
+        "separatrix_tangent_quadratic_values": [
+          1.0408340855860843e-17,
+          -1.0408340855860843e-17
+        ]
+      },
+      "wedge_candidates_differing_cells": {
+        "banked_eigenvectors": 5,
+        "eigenvector_sign_reversed": 5,
+        "eigenvector_order_reversed": 5,
+        "flux_side_inequality_reversed": 9,
+        "zero_level_tangent_pair": 0
+      },
+      "convention_invariance": {
+        "sign_reversal_changes_mask": 0,
+        "order_reversal_changes_mask": 0,
+        "banked_matches_original_driver": 0
+      },
+      "curvature_at_banked_disagreements_pitch": {
+        "count": 5,
+        "median": 0.009034968198045253,
+        "maximum": 0.01948597505839795
+      },
+      "legacy_renderer_reproduction": {
+        "selected_cells": 9,
+        "compared_cells": 7,
+        "skipped_cells_without_inferred_pitch_neighbour": [
+          36,
+          37
+        ],
+        "legacy_overlap_pairs": 10,
+        "legacy_overlap_area_pitch2": 0.9406412043977939,
+        "authored_overlap_pairs": 0,
+        "authored_overlap_area_pitch2": 0.0,
+        "intersection_over_union_min": 0.00485338321544703,
+        "intersection_over_union_median": 0.6180407159429596,
+        "centroid_error_pitch_max": 8.383328283873995e-15,
+        "centroid_error_pitch_median": 5.302082349990491e-15,
+        "area_ratio_min": 0.90293388725967,
+        "area_ratio_max": 206.04183836488852
+      }
+    },
+    {
+      "requested": 1000,
+      "realised": 1074,
+      "pitch_m": 0.05304559903108299,
+      "oracle_bfs": {
+        "axis_seed_cell": 766,
+        "confined_cells": 606,
+        "reached_cells": 594,
+        "private_cells": 12,
+        "authored_ring_rows": 813,
+        "authored_directed_edges": 3688,
+        "queue_edges_accepting_new_cell": 593,
+        "axis_seed_reached": true
+      },
+      "oracle_comparison": {
+        "production_private_cells": 12,
+        "numpy_bfs_private_cells": 12,
+        "production_flood_differing_cells": 0,
+        "production_label_differing_cells": 0,
+        "pointer_jumping_differing_cells": 0,
+        "mismatches": []
+      },
+      "saddle": {
+        "x_point_rz_m": [
+          1.502509916049071,
+          -1.0187961354585344
+        ],
+        "eigenvalues": [
+          -0.08425028697355075,
+          0.043089772244736986
+        ],
+        "eigenvectors_columns": [
+          [
+            -0.9965079938856882,
+            -0.08349741386367009
+          ],
+          [
+            0.08349741386367009,
+            -0.9965079938856882
+          ]
+        ],
+        "eigenvector_quadratic_values": [
+          -0.08425028697355073,
+          0.04308977224473697
+        ],
+        "separatrix_tangent_quadratic_values": [
+          -3.469446951953614e-18,
+          6.938893903907228e-18
+        ]
+      },
+      "wedge_candidates_differing_cells": {
+        "banked_eigenvectors": 5,
+        "eigenvector_sign_reversed": 5,
+        "eigenvector_order_reversed": 5,
+        "flux_side_inequality_reversed": 12,
+        "zero_level_tangent_pair": 0
+      },
+      "convention_invariance": {
+        "sign_reversal_changes_mask": 0,
+        "order_reversal_changes_mask": 0,
+        "banked_matches_original_driver": 0
+      },
+      "curvature_at_banked_disagreements_pitch": {
+        "count": 5,
+        "median": 0.01237561396150377,
+        "maximum": 0.022190671919040266
+      },
+      "legacy_renderer_reproduction": {
+        "selected_cells": 12,
+        "compared_cells": 12,
+        "skipped_cells_without_inferred_pitch_neighbour": [],
+        "legacy_overlap_pairs": 21,
+        "legacy_overlap_area_pitch2": 1.0278219567920386,
+        "authored_overlap_pairs": 0,
+        "authored_overlap_area_pitch2": 0.0,
+        "intersection_over_union_min": 0.015628066319998354,
+        "intersection_over_union_median": 0.8940866780019497,
+        "centroid_error_pitch_max": 1.1839568125255799e-14,
+        "centroid_error_pitch_median": 4.185919453844238e-15,
+        "area_ratio_min": 0.9657748603495198,
+        "area_ratio_max": 63.98744281756449
+      }
+    },
+    {
+      "requested": 2500,
+      "realised": 2616,
+      "pitch_m": 0.01948526637002106,
+      "oracle_bfs": {
+        "axis_seed_cell": 1949,
+        "confined_cells": 1523,
+        "reached_cells": 1496,
+        "private_cells": 27,
+        "authored_ring_rows": 2229,
+        "authored_directed_edges": 9204,
+        "queue_edges_accepting_new_cell": 1495,
+        "axis_seed_reached": true
+      },
+      "oracle_comparison": {
+        "production_private_cells": 27,
+        "numpy_bfs_private_cells": 27,
+        "production_flood_differing_cells": 0,
+        "production_label_differing_cells": 0,
+        "pointer_jumping_differing_cells": 0,
+        "mismatches": []
+      },
+      "saddle": {
+        "x_point_rz_m": [
+          1.5026409710654152,
+          -1.0176673783598384
+        ],
+        "eigenvalues": [
+          -0.08406408403532406,
+          0.042895614827600265
+        ],
+        "eigenvectors_columns": [
+          [
+            -0.9964591138633346,
+            -0.08407873927871433
+          ],
+          [
+            0.08407873927871433,
+            -0.9964591138633346
+          ]
+        ],
+        "eigenvector_quadratic_values": [
+          -0.08406408403532406,
+          0.04289561482760028
+        ],
+        "separatrix_tangent_quadratic_values": [
+          6.938893903907228e-18,
+          6.938893903907228e-18
+        ]
+      },
+      "wedge_candidates_differing_cells": {
+        "banked_eigenvectors": 13,
+        "eigenvector_sign_reversed": 13,
+        "eigenvector_order_reversed": 13,
+        "flux_side_inequality_reversed": 27,
+        "zero_level_tangent_pair": 0
+      },
+      "convention_invariance": {
+        "sign_reversal_changes_mask": 0,
+        "order_reversal_changes_mask": 0,
+        "banked_matches_original_driver": 0
+      },
+      "curvature_at_banked_disagreements_pitch": {
+        "count": 13,
+        "median": 0.026087881876446173,
+        "maximum": 0.031124069266964028
+      },
+      "legacy_renderer_reproduction": {
+        "selected_cells": 27,
+        "compared_cells": 0,
+        "skipped_cells_without_inferred_pitch_neighbour": [
+          1371,
+          1373,
+          1442,
+          1443,
+          1444,
+          1445,
+          1446,
+          1447,
+          1448,
+          1449,
+          1450,
+          1451,
+          1452,
+          1453,
+          1454,
+          1455,
+          1456,
+          1458,
+          1459,
+          1460,
+          1461,
+          1462,
+          1464,
+          1465,
+          1466,
+          1469,
+          1471
+        ],
+        "legacy_overlap_pairs": 0,
+        "legacy_overlap_area_pitch2": 0.0,
+        "authored_overlap_pairs": 0,
+        "authored_overlap_area_pitch2": 0.0,
+        "intersection_over_union_min": null,
+        "intersection_over_union_median": null,
+        "centroid_error_pitch_max": null,
+        "centroid_error_pitch_median": null,
+        "area_ratio_min": null,
+        "area_ratio_max": null
+      }
+    }
+  ],
+  "disagreement_cells": [
+    {
+      "requested_cells": 500,
+      "realised_cells": 550,
+      "cell": 1,
+      "radius_m": 1.4416099453243207,
+      "height_m": -1.1763627769450886,
+      "negative_curvature_coordinate_pitch": 0.609050709596061,
+      "positive_curvature_coordinate_pitch": 2.1368663347659695,
+      "flux_minus_xpoint_wb": 0.0005398943704670403,
+      "flux_minus_xpoint_fraction_of_span": 0.09457674278022822,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.0922185455485571,
+        -0.915384701911513,
+        0.9128225576633697
+      ],
+      "eigenvector_line_heights_m": [
+        -1.012687867746577,
+        -1.7407901292785235
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0881586431610892,
+        -0.9174796506246041
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 1.0418573884143043,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.027443973261707635
+    },
+    {
+      "requested_cells": 500,
+      "realised_cells": 550,
+      "cell": 2,
+      "radius_m": 1.50157426955981,
+      "height_m": -1.1533557437843989,
+      "negative_curvature_coordinate_pitch": -0.14899070245973736,
+      "positive_curvature_coordinate_pitch": 1.7717917353077794,
+      "flux_minus_xpoint_wb": 0.000472707816542355,
+      "flux_minus_xpoint_fraction_of_span": 0.08280724530736502,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "private",
+      "oracle_private": false,
+      "baseline_wedge_private": true,
+      "analytic_branch_heights_m": [
+        -1.020663721543764,
+        -1.01884858298796,
+        -1.0184931285373733,
+        -1.0184931285373733,
+        -1.0184367453625673,
+        -1.0184367453625673,
+        0.924133014011842
+      ],
+      "eigenvector_line_heights_m": [
+        -1.017644002400755,
+        -1.0152811526433396
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0173990833656117,
+        -1.0179529737151103
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 0.010384987714226983,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.006337442093269103
+    },
+    {
+      "requested_cells": 500,
+      "realised_cells": 550,
+      "cell": 5,
+      "radius_m": 1.50157426955981,
+      "height_m": -1.0770202695761435,
+      "negative_curvature_coordinate_pitch": -0.06662018207002997,
+      "positive_curvature_coordinate_pitch": 0.7751899605899465,
+      "flux_minus_xpoint_wb": 8.228449272201834e-05,
+      "flux_minus_xpoint_fraction_of_span": 0.014414299775416866,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "private",
+      "oracle_private": false,
+      "baseline_wedge_private": true,
+      "analytic_branch_heights_m": [
+        -1.020663721543764,
+        -1.01884858298796,
+        -1.0184931285373733,
+        -1.0184931285373733,
+        -1.0184367453625673,
+        -1.0184367453625673,
+        0.924133014011842
+      ],
+      "eigenvector_line_heights_m": [
+        -1.017644002400755,
+        -1.0152811526433396
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0173990833656117,
+        -1.0179529737151103
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 0.010384987714226983,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.006337442093269103
+    },
+    {
+      "requested_cells": 750,
+      "realised_cells": 814,
+      "cell": 31,
+      "radius_m": 1.4852845665825347,
+      "height_m": -1.188645050707801,
+      "negative_curvature_coordinate_pitch": 0.042606035413047014,
+      "positive_curvature_coordinate_pitch": 2.918269563881856,
+      "flux_minus_xpoint_wb": 0.0007948247615722376,
+      "flux_minus_xpoint_fraction_of_span": 0.13916563302670046,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.0374195809805882,
+        -0.9884154361191156,
+        0.9225036770582916
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0151959226558391,
+        -1.218681801011978
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0366930089359054,
+        -0.9879399753026654
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 0.37523798647708506,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.008027974368866545
+    },
+    {
+      "requested_cells": 750,
+      "realised_cells": 814,
+      "cell": 32,
+      "radius_m": 1.4313317108194485,
+      "height_m": -1.1652546774258308,
+      "negative_curvature_coordinate_pitch": 0.983537487952144,
+      "positive_curvature_coordinate_pitch": 2.6012583129894424,
+      "flux_minus_xpoint_wb": 0.000381385212648881,
+      "flux_minus_xpoint_fraction_of_span": 0.06677662437229002,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.1056037270223198,
+        -0.8981146811698361,
+        0.9092813478533633
+      ],
+      "eigenvector_line_heights_m": [
+        -1.010647306054088,
+        -1.8586369565798657
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.1002324253224196,
+        -0.8970632015575828
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 1.603302916491907,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.017753831829039272
+    },
+    {
+      "requested_cells": 750,
+      "realised_cells": 814,
+      "cell": 34,
+      "radius_m": 1.48399032335166,
+      "height_m": -1.1372253074190959,
+      "negative_curvature_coordinate_pitch": 0.13731861962767894,
+      "positive_curvature_coordinate_pitch": 2.054971781969174,
+      "flux_minus_xpoint_wb": 0.00036153148322999064,
+      "flux_minus_xpoint_fraction_of_span": 0.06330044074527856,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.0387523190466466,
+        -0.986426974621046,
+        0.9223469730901098
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0150868085753444,
+        -1.2340333077384074
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.038217218514599,
+        -0.9857599859842172
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 0.39958310951507464,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.009034968198045253
+    },
+    {
+      "requested_cells": 750,
+      "realised_cells": 814,
+      "cell": 37,
+      "radius_m": 1.48399032335166,
+      "height_m": -1.0748976537245587,
+      "negative_curvature_coordinate_pitch": 0.22572812443860035,
+      "positive_curvature_coordinate_pitch": 1.0063133262723192,
+      "flux_minus_xpoint_wb": 7.117728159670742e-05,
+      "flux_minus_xpoint_fraction_of_span": 0.012462409237140065,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.0387523190466466,
+        -0.986426974621046,
+        0.9223469730901098
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0150868085753444,
+        -1.2340333077384074
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.038217218514599,
+        -0.9857599859842172
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 0.39958310951507464,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.009034968198045253
+    },
+    {
+      "requested_cells": 750,
+      "realised_cells": 814,
+      "cell": 47,
+      "radius_m": 1.393673032702934,
+      "height_m": -1.1704835553922726,
+      "negative_curvature_coordinate_pitch": 1.609725165684988,
+      "positive_curvature_coordinate_pitch": 2.742651284729104,
+      "flux_minus_xpoint_wb": 0.00010894140247364717,
+      "flux_minus_xpoint_fraction_of_span": 0.01907451802089304,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.156318773039066,
+        -0.8347859795113018,
+        0.8919587716110564
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0074724066709495,
+        -2.305320730249986
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.1445824489785918,
+        -0.8336319128458022
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 2.5132140709796156,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.01948597505839795
+    },
+    {
+      "requested_cells": 1000,
+      "realised_cells": 1074,
+      "cell": 0,
+      "radius_m": 1.4276374213835674,
+      "height_m": -1.1860322414322462,
+      "negative_curvature_coordinate_pitch": 1.1433042177045614,
+      "positive_curvature_coordinate_pitch": 3.259531031818358,
+      "flux_minus_xpoint_wb": 0.0005435175763633313,
+      "flux_minus_xpoint_fraction_of_span": 0.09520569935715573,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.1103823025795718,
+        -0.891938968252732,
+        0.9079014645118769
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0125225684500914,
+        -1.9123691936392166
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.106894478400053,
+        -0.8931020795285377
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 1.8448228678148746,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.021926630993914516
+    },
+    {
+      "requested_cells": 1000,
+      "realised_cells": 1074,
+      "cell": 2,
+      "radius_m": 1.4664458524385202,
+      "height_m": -1.1785011501461902,
+      "negative_curvature_coordinate_pitch": 0.4261083367008883,
+      "positive_curvature_coordinate_pitch": 3.056965757889857,
+      "flux_minus_xpoint_wb": 0.0006610234946381048,
+      "flux_minus_xpoint_fraction_of_span": 0.11578871932646054,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.060574262022473,
+        -0.9569437998978311,
+        0.9193253446891356
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0157743272408661,
+        -1.4492062046685041
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0612307338784384,
+        -0.9582526949230068
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 0.8445551676276767,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.01237561396150377
+    },
+    {
+      "requested_cells": 1000,
+      "realised_cells": 1074,
+      "cell": 4,
+      "radius_m": 1.4194284522132579,
+      "height_m": -1.1530211012672509,
+      "negative_curvature_coordinate_pitch": 1.3494786870669369,
+      "positive_curvature_coordinate_pitch": 2.6523093592604328,
+      "flux_minus_xpoint_wb": 0.0002002923394568014,
+      "flux_minus_xpoint_fraction_of_span": 0.03508437092587851,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.1212586272385794,
+        -0.878143951612153,
+        0.9045943015477136
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0118347388487103,
+        -2.010339933345371
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.1165535205408712,
+        -0.8793210690970007
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 2.062826895889143,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.022190671919040266
+    },
+    {
+      "requested_cells": 1000,
+      "realised_cells": 1074,
+      "cell": 5,
+      "radius_m": 1.4661709478281382,
+      "height_m": -1.1260379969196594,
+      "negative_curvature_coordinate_pitch": 0.5138532645435004,
+      "positive_curvature_coordinate_pitch": 2.0718322368216793,
+      "flux_minus_xpoint_wb": 0.00025806779235152885,
+      "flux_minus_xpoint_fraction_of_span": 0.04520465523264013,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.0609456491363969,
+        -0.9564625036315926,
+        0.919264191116386
+      ],
+      "eigenvector_line_heights_m": [
+        -1.015751292981064,
+        -1.452487080436094
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0615541990007082,
+        -0.9577911919955681
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 0.851990683126239,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.01147220269781039
+    },
+    {
+      "requested_cells": 1000,
+      "realised_cells": 1074,
+      "cell": 8,
+      "radius_m": 1.4661709478281382,
+      "height_m": -1.0720606654619111,
+      "negative_curvature_coordinate_pitch": 0.5988172891997809,
+      "positive_curvature_coordinate_pitch": 1.0578208340143491,
+      "flux_minus_xpoint_wb": 2.642724069914327e-05,
+      "flux_minus_xpoint_fraction_of_span": 0.004629149161424559,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.0609456491363969,
+        -0.9564625036315926,
+        0.919264191116386
+      ],
+      "eigenvector_line_heights_m": [
+        -1.015751292981064,
+        -1.452487080436094
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0615541990007082,
+        -0.9577911919955681
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 0.851990683126239,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.01147220269781039
+    },
+    {
+      "requested_cells": 2500,
+      "realised_cells": 2616,
+      "cell": 1447,
+      "radius_m": 1.4633828329159173,
+      "height_m": -1.1559848790229121,
+      "negative_curvature_coordinate_pitch": 1.4107874100573214,
+      "positive_curvature_coordinate_pitch": 7.24283190306751,
+      "flux_minus_xpoint_wb": 0.0004571131498087642,
+      "flux_minus_xpoint_fraction_of_span": 0.08005830623343187,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.0647123009546362,
+        -0.9515811402552896,
+        0.918643964384351
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0143548743984445,
+        -1.4829351724295878
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0638566630869801,
+        -0.9515923636653618
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 2.58438481670791,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.0005759946956368416
+    },
+    {
+      "requested_cells": 2500,
+      "realised_cells": 2616,
+      "cell": 1451,
+      "radius_m": 1.4396865224411037,
+      "height_m": -1.1932009192178876,
+      "negative_curvature_coordinate_pitch": 2.462008697364853,
+      "positive_curvature_coordinate_pitch": 9.248276304104179,
+      "flux_minus_xpoint_wb": 0.0006954874641048217,
+      "flux_minus_xpoint_fraction_of_span": 0.12180692768543327,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.094702816007418,
+        -0.9120248240625044,
+        0.9121781302783768
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0123554387140692,
+        -1.7637719777875982
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0917366309890726,
+        -0.9117093193685142
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 4.226135569798717,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.016191962070153606
+    },
+    {
+      "requested_cells": 2500,
+      "realised_cells": 2616,
+      "cell": 1452,
+      "radius_m": 1.4105951937232426,
+      "height_m": -1.1789103614822418,
+      "negative_curvature_coordinate_pitch": 4.011376878431039,
+      "positive_curvature_coordinate_pitch": 8.642998755859852,
+      "flux_minus_xpoint_wb": 0.00034216465454268107,
+      "flux_minus_xpoint_fraction_of_span": 0.059926350198182765,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.1331074244509696,
+        -0.863352429793301,
+        0.9006513473076608
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0099007848215906,
+        -2.108547837701636
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.125964124410264,
+        -0.8627459690131152
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 6.323066736153927,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.031124069266964028
+    },
+    {
+      "requested_cells": 2500,
+      "realised_cells": 2616,
+      "cell": 1453,
+      "radius_m": 1.4636112145132465,
+      "height_m": -1.188404296552374,
+      "negative_curvature_coordinate_pitch": 1.2592187005492697,
+      "positive_curvature_coordinate_pitch": 8.899746487323217,
+      "flux_minus_xpoint_wb": 0.0007522265390358277,
+      "flux_minus_xpoint_fraction_of_span": 0.13174414834541312,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.064403764905759,
+        -0.9519809851684737,
+        0.918694768736477
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0143741446690564,
+        -1.48022850810458
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.063587960007244,
+        -0.9519767506513674
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 2.5675615250338746,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.00021731892322545145
+    },
+    {
+      "requested_cells": 2500,
+      "realised_cells": 2616,
+      "cell": 1454,
+      "radius_m": 1.4338326469678215,
+      "height_m": -1.1730282102853524,
+      "negative_curvature_coordinate_pitch": 2.8484157065726503,
+      "positive_curvature_coordinate_pitch": 8.24192140881682,
+      "flux_minus_xpoint_wb": 0.0004638177082196655,
+      "flux_minus_xpoint_fraction_of_span": 0.08123253539451468,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.1022704635115361,
+        -0.9023812606038328,
+        0.9102154923456014
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0118615032752334,
+        -1.8331491784546619
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.098624026411724,
+        -0.901856714885749
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 4.639862679804106,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.026920120470656676
+    },
+    {
+      "requested_cells": 2500,
+      "realised_cells": 2616,
+      "cell": 1455,
+      "radius_m": 1.4042616761103768,
+      "height_m": -1.1559712299680702,
+      "negative_curvature_coordinate_pitch": 4.4342494452998995,
+      "positive_curvature_coordinate_pitch": 7.497241132568376,
+      "flux_minus_xpoint_wb": 9.78164904066389e-05,
+      "flux_minus_xpoint_fraction_of_span": 0.017131475099612423,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.1418079580470846,
+        -0.8526282580108641,
+        0.8975508178564316
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0093663783731166,
+        -2.183609516816891
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.1334158442863063,
+        -0.8520860832145527
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 6.797011503919452,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.027824859358633987
+    },
+    {
+      "requested_cells": 2500,
+      "realised_cells": 2616,
+      "cell": 1456,
+      "radius_m": 1.4338182308825755,
+      "height_m": -1.138915748080478,
+      "negative_curvature_coordinate_pitch": 2.996347882642006,
+      "positive_curvature_coordinate_pitch": 6.497502773288759,
+      "flux_minus_xpoint_wb": 0.00019966756256355536,
+      "flux_minus_xpoint_fraction_of_span": 0.034969562514846626,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.1022919104291584,
+        -0.9023552498276518,
+        0.9102101076792871
+      ],
+      "eigenvector_line_heights_m": [
+        -1.01186028688185,
+        -1.8333200306778616
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0986409877017256,
+        -0.9018324513039959
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 4.641025779685589,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.026830453006289712
+    },
+    {
+      "requested_cells": 2500,
+      "realised_cells": 2616,
+      "cell": 1458,
+      "radius_m": 1.4633828329159173,
+      "height_m": -1.121846617138044,
+      "negative_curvature_coordinate_pitch": 1.5580936857807262,
+      "positive_curvature_coordinate_pitch": 5.497031689683335,
+      "flux_minus_xpoint_wb": 0.0002270759358555883,
+      "flux_minus_xpoint_fraction_of_span": 0.03976983558354258,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.0647123009546362,
+        -0.9515811402552896,
+        0.918643964384351
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0143548743984445,
+        -1.4829351724295878
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0638566630869801,
+        -0.9515923636653618
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 2.58438481670791,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.0005759946956368416
+    },
+    {
+      "requested_cells": 2500,
+      "realised_cells": 2616,
+      "cell": 1460,
+      "radius_m": 1.4929474349492593,
+      "height_m": -1.1047774861956097,
+      "negative_curvature_coordinate_pitch": 0.1198394889194364,
+      "positive_curvature_coordinate_pitch": 4.496560606077898,
+      "flux_minus_xpoint_wb": 0.00018575162092464116,
+      "flux_minus_xpoint_fraction_of_span": 0.032532339438413924,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.0277882326680365,
+        -1.0018606053541204,
+        0.923403045787955
+      ],
+      "eigenvector_line_heights_m": [
+        -1.016849461915039,
+        -1.1325503141813116
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0290723384722344,
+        -1.0013522760267282
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 0.5613867701509752,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.026087881876446173
+    },
+    {
+      "requested_cells": 2500,
+      "realised_cells": 2616,
+      "cell": 1464,
+      "radius_m": 1.4929474349492593,
+      "height_m": -1.0706392243107414,
+      "negative_curvature_coordinate_pitch": 0.2671457646428411,
+      "positive_curvature_coordinate_pitch": 2.750760392693723,
+      "flux_minus_xpoint_wb": 6.55303296059209e-05,
+      "flux_minus_xpoint_fraction_of_span": 0.01147691156415723,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.0277882326680365,
+        -1.0018606053541204,
+        0.923403045787955
+      ],
+      "eigenvector_line_heights_m": [
+        -1.016849461915039,
+        -1.1325503141813116
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0290723384722344,
+        -1.0013522760267282
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 0.5613867701509752,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.026087881876446173
+    },
+    {
+      "requested_cells": 2500,
+      "realised_cells": 2616,
+      "cell": 1466,
+      "radius_m": 1.4929474349492593,
+      "height_m": -1.0365009624258732,
+      "negative_curvature_coordinate_pitch": 0.4144520403662458,
+      "positive_curvature_coordinate_pitch": 1.0049601793095482,
+      "flux_minus_xpoint_wb": 6.081884094365618e-06,
+      "flux_minus_xpoint_fraction_of_span": 0.0010651746498797083,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.0277882326680365,
+        -1.0018606053541204,
+        0.923403045787955
+      ],
+      "eigenvector_line_heights_m": [
+        -1.016849461915039,
+        -1.1325503141813116
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0290723384722344,
+        -1.0013522760267282
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 0.5613867701509752,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.026087881876446173
+    },
+    {
+      "requested_cells": 2500,
+      "realised_cells": 2616,
+      "cell": 1469,
+      "radius_m": 1.4338182308825755,
+      "height_m": -1.1047774861956097,
+      "negative_curvature_coordinate_pitch": 3.1436541583654107,
+      "positive_curvature_coordinate_pitch": 4.751702559904585,
+      "flux_minus_xpoint_wb": 1.0977592825013043e-05,
+      "flux_minus_xpoint_fraction_of_span": 0.0019226038202105743,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.1022919104291584,
+        -0.9023552498276518,
+        0.9102101076792871
+      ],
+      "eigenvector_line_heights_m": [
+        -1.01186028688185,
+        -1.8333200306778616
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0986409877017256,
+        -0.9018324513039959
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 4.641025779685589,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.026830453006289712
+    },
+    {
+      "requested_cells": 2500,
+      "realised_cells": 2616,
+      "cell": 1471,
+      "radius_m": 1.4633828329159173,
+      "height_m": -1.0877083552531757,
+      "negative_curvature_coordinate_pitch": 1.7053999615041309,
+      "positive_curvature_coordinate_pitch": 3.7512314762991603,
+      "flux_minus_xpoint_wb": 6.97284180828318e-05,
+      "flux_minus_xpoint_fraction_of_span": 0.012212160272316645,
+      "first_eigenvector_side": "private",
+      "second_eigenvector_side": "outside",
+      "oracle_private": true,
+      "baseline_wedge_private": false,
+      "analytic_branch_heights_m": [
+        -1.0647123009546362,
+        -0.9515811402552896,
+        0.918643964384351
+      ],
+      "eigenvector_line_heights_m": [
+        -1.0143548743984445,
+        -1.4829351724295878
+      ],
+      "separatrix_tangent_line_heights_m": [
+        -1.0638566630869801,
+        -0.9515923636653618
+      ],
+      "nearest_eigenvector_line_to_analytic_branch_pitch": 2.58438481670791,
+      "nearest_tangent_line_to_analytic_branch_pitch": 0.0005759946956368416
+    }
+  ],
+  "oracle_confirmed": true,
+  "verdict": "The independent NumPy breadth-first search confirms both the production flood and pointer jumping cell by cell at every measured rung. The zero-level tangent pair reduces the banked disagreement counts from [3, 5, 5, 13] to [3, 0, 0, 0]; the remaining cells are the finite-radius curvature residual quantified in pitch units in the receipt and CSV. The banked costs remain 0.007 to 0.016 ms for the wedge and 0.020 to 0.047 ms for pointer jumping.",
+  "timing_context_ms": {
+    "banked_wedge_range": [
+      0.007,
+      0.016
+    ],
+    "banked_pointer_jumping_range": [
+      0.02,
+      0.047
+    ]
+  }
+}

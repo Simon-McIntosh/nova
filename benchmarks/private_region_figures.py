@@ -8,16 +8,17 @@ Two panels, drawn with the committed nova.media painters:
                                   formulations, beside the production read's
                                   dominant private-exclusion stage from the
                                   census receipt.
-  private-mask-poloidal-1000.svg  the poloidal scene at the 1000-cell rung:
-                                  analytic flux line contours with the
-                                  boundary level pinned, the first wall, the
-                                  analytic nulls, the private-region cells
-                                  hatched, and the cells where a formulation
-                                  disagrees with the production mask outlined.
+  private-mask-poloidal-1074.svg  the poloidal scene at 1074 realised cells.
+  private-mask-poloidal-2616.svg  the poloidal scene at 2616 realised cells.
 
-The 1000-cell rung is rebuilt and all four masks recomputed as the positive
-control; the per-rung disagreement counts must equal the measured receipt or
-the script raises, so the figure cannot drift from what was timed.
+Both poloidal panels use each cached oracle cell's own polygon vertices.  The
+production private mask is hatched, the pointer-jumping mask is outlined, and
+the saddle-wedge disagreements carry a third line style.  Analytic separatrix
+legs and the Hessian eigenvector directions make the wedge convention visible.
+
+Both rungs are rebuilt and all four masks recomputed as the positive control;
+the per-rung disagreement counts must equal the measured receipt or the script
+raises, so the figure cannot drift from what was timed.
 """
 
 from __future__ import annotations
@@ -30,6 +31,7 @@ import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
+from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
 import nova.media.poloidal as media
@@ -38,11 +40,20 @@ from nova.jax.config import configure_dtypes
 from benchmarks import limiter_read_resolution_audit as limiter_audit
 from benchmarks import solovev_certificate as certificate
 from benchmarks import private_region_parallel_kernel as prk
+from benchmarks import private_region_wedge_audit as wedge_audit
+from benchmarks import xpoint_cell_allocation_rca as allocation_rca
 
 configure_dtypes()
 
 _DIVERTED = prk.DIVERTED
-_RECEIPT = Path(__file__).parent / "private_region_results.json"
+_RECEIPT = (
+    Path(__file__).parents[1]
+    / "docs"
+    / "figures"
+    / "cut-cell-current-attribution"
+    / "private-region"
+    / "receipt.json"
+)
 _CENSUS_PATTERN = (
     Path(__file__).parents[1]
     / "docs"
@@ -60,6 +71,12 @@ _OUT_DIR = (
     / "private-region"
 )
 _STYLE = DEFAULT_INK.variant(axis_marker="^", axis_markersize=8)
+_REFERENCE_STYLE = _STYLE.variant(
+    axis_color="#3366cc", xpoint_color="#3366cc", xpoint_marker="x"
+)
+_ADMITTED_STYLE = _STYLE.variant(
+    axis_color="#ff7f0e", xpoint_color="#ff7f0e", xpoint_marker="+"
+)
 
 
 def _case_scene(requested_cells: int):
@@ -86,52 +103,11 @@ def _census_reference_ms() -> dict[int, dict[str, float]]:
     return reference
 
 
-def _hexagon_vertices(
-    centre: np.ndarray, neighbours: np.ndarray, pitch: float
-) -> np.ndarray:
-    """The regular hexagon around ``centre`` snapped to the mesh lattice.
-
-    The mesh is a locally exact hexagonal packing whose edge directions lie
-    on thirty-degree multiples, so the centre-to-neighbour axis selects one
-    lattice direction and the cell's six Voronoi corners sit half a step off
-    it, at the corner radius ``pitch / sqrt(3)``.  A cell with fewer than six
-    at-pitch neighbours lies on the packing edge; its footprint is still the
-    full lattice hexagon, oriented from the neighbours it does have.
-    """
-    offset = neighbours - centre
-    mean_angle = float(np.arctan2(np.mean(offset[:, 1]), np.mean(offset[:, 0])))
-    lattice_step = int(np.rint(mean_angle / (np.pi / 6.0)))
-    vertex_angle = (lattice_step + 0.5) * np.pi / 6.0
-    phi = vertex_angle + np.arange(6) * (np.pi / 3.0)
-    radius = pitch / np.sqrt(3.0)
-    return centre + radius * np.stack((np.cos(phi), np.sin(phi)), axis=-1)
-
-
-def _cell_polygons(
-    coordinate: np.ndarray, rings: np.ndarray, pitch: float, selected: np.ndarray
+def _selected_polygons(
+    polygons: list[np.ndarray], selected: np.ndarray
 ) -> list[np.ndarray]:
-    """Hexagon polygons for the selected cells from at-pitch neighbours.
-
-    The saddle-aware ``connectivity_rings`` table excludes the cut cells that
-    sit on the separatrix legs, and the private-region cells are exactly those
-    cells, so the ring table cannot close their hexagons.  The underlying
-    mesh is an exact-pitch hexagonal packing, so the neighbours that do close
-    a cell's hexagon are the coordinate points one pitch away, found from
-    geometry rather than from the filtered edge table.  The ``rings`` argument
-    keeps the call site's vocabulary; the neighbours come from the mesh.
-    """
-    positions = np.asarray(coordinate, dtype=np.float64)
-    radius = 1.05 * float(pitch)
-    radius2 = radius * radius
-    polygons: list[np.ndarray] = []
-    for cell in np.nonzero(selected)[0]:
-        cell = int(cell)
-        dist2 = np.sum((positions - positions[cell]) ** 2, axis=1)
-        nids = np.nonzero((dist2 > 1e-9) & (dist2 <= radius2))[0]
-        if nids.size == 0:
-            continue
-        polygons.append(_hexagon_vertices(positions[cell], positions[nids], pitch))
-    return polygons
+    """Return authored polygons for selected cells without synthesising geometry."""
+    return [polygons[int(cell)] for cell in np.flatnonzero(selected)]
 
 
 def figure_cost() -> None:
@@ -184,12 +160,12 @@ def figure_cost() -> None:
     plt.close(fig)
 
 
-def figure_poloidal() -> None:
-    """Poloidal panel at the 1000-cell rung: private cells and disagreements."""
-    bundle = prk._build_rung(1000)
-    machine, _exact = _case_scene(1000)
+def figure_poloidal(requested_cells: int) -> Path:
+    """Poloidal panel at one rung: authored cells, masks, legs, and directions."""
+    bundle = prk._build_rung(requested_cells)
+    machine, exact = _case_scene(requested_cells)
     receipt = json.loads(_RECEIPT.read_text())
-    row = next(r for r in receipt["rungs"] if r["requested"] == 1000)
+    row = next(r for r in receipt["rungs"] if r["requested"] == requested_cells)
 
     masks: dict[str, np.ndarray] = {}
     for key in "abcd":
@@ -198,7 +174,8 @@ def figure_poloidal() -> None:
         masks[key] = mask
         if int(np.count_nonzero(mask)) != row["private"][key]:
             raise RuntimeError(
-                f"formulation {key} at 1000 cells: measured {row['private'][key]} "
+                f"formulation {key} at {requested_cells} cells: measured "
+                f"{row['private'][key]} "
                 f"private cells, rebuilt {int(np.count_nonzero(mask))}"
             )
     counts = {
@@ -208,15 +185,14 @@ def figure_poloidal() -> None:
     for key in "abcd":
         if counts[key] != row["differing_cells"][key]:
             raise RuntimeError(
-                f"disagreement {key} at 1000 cells: measured "
+                f"disagreement {key} at {requested_cells} cells: measured "
                 f"{row['differing_cells'][key]}, rebuilt {counts[key]}"
             )
     if counts["a"] != 0 or counts["c"] != 0:
-        raise RuntimeError("a/c disagree with production at 1000 cells")
+        raise RuntimeError(f"a/c disagree with production at {requested_cells} cells")
 
     coordinate = np.asarray(bundle.topo.connectivity_coordinate, dtype=np.float64)
-    rings = np.asarray(bundle.topo.connectivity_rings, dtype=np.int64)
-    pitch = float(bundle.raster["pitch"])
+    polygons = wedge_audit.aligned_cell_polygons(bundle, machine)
 
     r_span = (float(coordinate[:, 0].min()), float(coordinate[:, 0].max()))
     z_span = (float(coordinate[:, 1].min()), float(coordinate[:, 1].max()))
@@ -225,7 +201,7 @@ def figure_poloidal() -> None:
     height = np.linspace(z_span[0] - margin, z_span[1] + margin, 240)
     rr, zz = np.meshgrid(radius, height, indexing="ij")
     flux2d = limiter_audit._exact_flux(
-        _DIVERTED, _exact, np.stack((rr.ravel(), zz.ravel()), axis=-1)
+        _DIVERTED, exact, np.stack((rr.ravel(), zz.ravel()), axis=-1)
     ).reshape(radius.size, height.size)
 
     fig, axes = plt.subplots(figsize=(6.4, 6.0))
@@ -238,14 +214,10 @@ def figure_poloidal() -> None:
     media.draw_wall(axes, radius=wall[:, 0], height=wall[:, 1], style=_STYLE)
 
     production = bundle.production_private
-    # At this rung the raster formulation (b) returns no private cells at all,
-    # so its disagreement is the whole private set; the disagreements with
-    # spatial structure are the saddle-wedge test's (d) five misses, and those
-    # are the cells worth drawing against the hatched private set.
     disagreement = masks["d"] != production
     axes.add_collection(
         PolyCollection(
-            _cell_polygons(coordinate, rings, pitch, production),
+            _selected_polygons(polygons, production),
             facecolors="none",
             edgecolors="#cc0000",
             linewidths=0.7,
@@ -255,40 +227,125 @@ def figure_poloidal() -> None:
     )
     axes.add_collection(
         PolyCollection(
-            _cell_polygons(coordinate, rings, pitch, disagreement),
+            _selected_polygons(polygons, masks["c"]),
+            facecolors="none",
+            edgecolors="#2ca02c",
+            linewidths=1.2,
+            linestyles="--",
+            zorder=_STYLE.zorder_plasma + 2,
+        )
+    )
+    axes.add_collection(
+        PolyCollection(
+            _selected_polygons(polygons, disagreement),
             facecolors="none",
             edgecolors="#ff7f0e",
             linewidths=1.6,
+            linestyles=":",
+            zorder=_STYLE.zorder_plasma + 3,
+        )
+    )
+
+    branches = allocation_rca._analytic_separatrix_branches(_DIVERTED, exact)
+    for position, leg in enumerate(branches["legs"]):
+        leg = np.asarray(leg, dtype=np.float64)
+        axes.plot(
+            leg[:, 0],
+            leg[:, 1],
+            color=_STYLE.separatrix_color,
+            linewidth=_STYLE.separatrix_linewidth,
+            linestyle="-",
+            label="analytic separatrix legs" if position == 0 else None,
+            zorder=_STYLE.zorder_separatrix,
+        )
+
+    geometry = wedge_audit.saddle_geometry(exact, bundle.x_point)
+    ray_length = 0.42 * (z_span[1] - z_span[0])
+    for position, direction in enumerate(geometry.eigenvector_rays):
+        endpoint = np.asarray(bundle.x_point) + ray_length * direction
+        axes.plot(
+            [bundle.x_point[0], endpoint[0]],
+            [bundle.x_point[1], endpoint[1]],
+            color="#6a3d9a",
+            linewidth=1.1,
+            linestyle="-.",
+            label="Hessian eigenvectors" if position == 0 else None,
             zorder=_STYLE.zorder_plasma + 1,
         )
+    media.draw_nulls(
+        axes,
+        magnetic_axis=np.asarray(certificate.AXIS_M),
+        x_points=np.asarray(certificate.X_POINT_M)[None, :],
+        contain=wall,
+        style=_REFERENCE_STYLE,
     )
     media.draw_nulls(
         axes,
         magnetic_axis=bundle.axis,
         x_points=bundle.x_point[None, :],
         contain=wall,
-        style=_STYLE,
+        style=_ADMITTED_STYLE,
     )
     handles = [
         Patch(
             facecolor="none",
             edgecolor="#cc0000",
             hatch="///",
-            label="private-flux cells",
+            label="production private mask",
         ),
-        Patch(facecolor="none", edgecolor="#ff7f0e", label="saddle-wedge misses"),
+        Patch(
+            facecolor="none",
+            edgecolor="#2ca02c",
+            linestyle="--",
+            label="pointer-jumping mask",
+        ),
+        Patch(
+            facecolor="none",
+            edgecolor="#ff7f0e",
+            linestyle=":",
+            label="wedge disagreements",
+        ),
+        Line2D(
+            [],
+            [],
+            color=_STYLE.separatrix_color,
+            linewidth=_STYLE.separatrix_linewidth,
+            label="analytic separatrix legs",
+        ),
+        Line2D([], [], color="#6a3d9a", linestyle="-.", label="Hessian eigenvectors"),
+        Line2D(
+            [],
+            [],
+            color=_REFERENCE_STYLE.xpoint_color,
+            marker="x",
+            linestyle="none",
+            label="analytic nulls",
+        ),
+        Line2D(
+            [],
+            [],
+            color=_ADMITTED_STYLE.xpoint_color,
+            marker="+",
+            linestyle="none",
+            label="admitted nulls",
+        ),
     ]
-    axes.legend(handles=handles, fontsize=8, loc="upper right")
-    fig.savefig(_OUT_DIR / "private-mask-poloidal-1000.svg")
+    axes.legend(handles=handles, fontsize=7, loc="upper right")
+    output = _OUT_DIR / f"private-mask-poloidal-{bundle.realised}.svg"
+    fig.savefig(output)
+    if requested_cells == 1000:
+        fig.savefig(_OUT_DIR / "private-mask-poloidal-1000.svg")
     plt.close(fig)
+    return output
 
 
 def main() -> None:
     _OUT_DIR.mkdir(parents=True, exist_ok=True)
     figure_cost()
-    figure_poloidal()
+    outputs = [figure_poloidal(requested) for requested in (1000, 2500)]
     print("wrote", _OUT_DIR / "private-mask-cost-cells.svg")
-    print("wrote", _OUT_DIR / "private-mask-poloidal-1000.svg")
+    for output in outputs:
+        print("wrote", output)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,395 @@
+{
+  "allocation": {
+    "allocated_cpus": 4,
+    "jax_default_backend": "cpu",
+    "jax_enable_x64": true,
+    "jax_platforms": [
+      "cpu"
+    ],
+    "job_id": 1271095,
+    "node": "98dci4-clu-3141",
+    "partition": "all_debug",
+    "tmpdir": "/tmp"
+  },
+  "analytic_moments": [
+    [
+      0.3879761966018837,
+      0.0062056567925470206,
+      -0.001703638309542095
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "candidate_cells": [
+    {
+      "cell": 1479,
+      "centroid_rz_m": [
+        1.4929474349492593,
+        -1.002362700541005
+      ],
+      "characteristic_pitch_m": 0.03176923239135847,
+      "contains_contracted": true,
+      "contains_expanded": true,
+      "contains_strict": true,
+      "edge_root_count": 4,
+      "edge_roots": [
+        {
+          "edge": 0,
+          "end_rz_m": [
+            1.483092567604812,
+            -1.0194318314834392
+          ],
+          "endpoint_sign_change": true,
+          "endpoint_signed_flux_wb": [
+            8.796790525368793e-08,
+            -1.5057617917930048e-05
+          ],
+          "root_count": 1,
+          "roots": [
+            {
+              "coordinate_rz_m": [
+                1.5007020266111954,
+                -1.0194318314834392
+              ],
+              "flux_residual_wb": 0.0,
+              "fraction": 0.10656032238194214,
+              "kind": "sign-change",
+              "multiplicity": 1
+            }
+          ],
+          "saddle_distance_m": 0.002151831483439226,
+          "saddle_fraction": 0.013917097212951968,
+          "saddle_on_edge": false,
+          "start_rz_m": [
+            1.5028023022937067,
+            -1.0194318314834392
+          ]
+        },
+        {
+          "edge": 1,
+          "end_rz_m": [
+            1.4732377002603647,
+            -1.002362700541005
+          ],
+          "endpoint_sign_change": false,
+          "endpoint_signed_flux_wb": [
+            -1.5057617917930048e-05,
+            -3.400169664337885e-05
+          ],
+          "root_count": 0,
+          "roots": [],
+          "saddle_distance_m": 0.019554191650923394,
+          "saddle_fraction": -0.3984921964828733,
+          "saddle_on_edge": false,
+          "start_rz_m": [
+            1.483092567604812,
+            -1.0194318314834392
+          ]
+        },
+        {
+          "edge": 2,
+          "end_rz_m": [
+            1.483092567604812,
+            -0.9852935695985708
+          ],
+          "endpoint_sign_change": false,
+          "endpoint_signed_flux_wb": [
+            -3.400169664334351e-05,
+            -6.958738922054304e-07
+          ],
+          "root_count": 0,
+          "roots": [],
+          "saddle_distance_m": 0.03282479338848228,
+          "saddle_fraction": 0.08759070630415892,
+          "saddle_on_edge": false,
+          "start_rz_m": [
+            1.4732377002603647,
+            -1.002362700541005
+          ]
+        },
+        {
+          "edge": 3,
+          "end_rz_m": [
+            1.5028023022937067,
+            -0.9852935695985708
+          ],
+          "endpoint_sign_change": true,
+          "endpoint_signed_flux_wb": [
+            -6.958738922054304e-07,
+            2.0567640987163922e-05
+          ],
+          "root_count": 1,
+          "roots": [
+            {
+              "coordinate_rz_m": [
+                1.4834772441108168,
+                -0.9852935695985708
+              ],
+              "flux_residual_wb": -6.626155586382323e-18,
+              "fraction": 0.019517081892622953,
+              "kind": "sign-change",
+              "multiplicity": 1
+            }
+          ],
+          "saddle_distance_m": 0.03198643040142912,
+          "saddle_fraction": 0.986082902787048,
+          "saddle_on_edge": false,
+          "start_rz_m": [
+            1.483092567604812,
+            -0.9852935695985708
+          ]
+        },
+        {
+          "edge": 4,
+          "end_rz_m": [
+            1.5126571696381539,
+            -1.002362700541005
+          ],
+          "endpoint_sign_change": false,
+          "endpoint_signed_flux_wb": [
+            2.0567640987163922e-05,
+            2.0433312093517038e-06
+          ],
+          "root_count": 0,
+          "roots": [],
+          "saddle_distance_m": 0.018031247896577594,
+          "saddle_fraction": 1.3984921964828907,
+          "saddle_on_edge": false,
+          "start_rz_m": [
+            1.5028023022937067,
+            -0.9852935695985708
+          ]
+        },
+        {
+          "edge": 5,
+          "end_rz_m": [
+            1.5028023022937067,
+            -1.0194318314834392
+          ],
+          "endpoint_sign_change": false,
+          "endpoint_signed_flux_wb": [
+            2.0433312093517038e-06,
+            8.796790528902742e-08
+          ],
+          "root_count": 2,
+          "roots": [
+            {
+              "coordinate_rz_m": [
+                1.5072279138523954,
+                -1.011766447409226
+              ],
+              "flux_residual_wb": -2.2087185287941078e-18,
+              "fraction": 0.5509212449031644,
+              "kind": "sign-change",
+              "multiplicity": 1
+            },
+            {
+              "coordinate_rz_m": [
+                1.5032970373560133,
+                -1.0185749252192386
+              ],
+              "flux_residual_wb": -2.2087185287941102e-17,
+              "fraction": 0.9497978973217509,
+              "kind": "sign-change",
+              "multiplicity": 1
+            }
+          ],
+          "saddle_distance_m": 0.0013134684963861537,
+          "saddle_fraction": 0.9124092936958283,
+          "saddle_on_edge": false,
+          "start_rz_m": [
+            1.5126571696381539,
+            -1.002362700541005
+          ]
+        }
+      ],
+      "nearest_edge_distance_m": 0.0013134684963861537,
+      "selected": true,
+      "wedge_shape": {
+        "saddle_row": true,
+        "vertex_capacity": 12,
+        "wedges": [
+          {
+            "first_vertex_delta_from_saddle_m": [
+              0.0,
+              0.0
+            ],
+            "first_vertex_exact_saddle": true,
+            "first_vertex_rz_m": [
+              1.5025279999999999,
+              -1.01728
+            ],
+            "nonzero_padding_coordinates_rz_m": [],
+            "nonzero_padding_slots": [],
+            "vertex_count": 4,
+            "wedge": 0
+          },
+          {
+            "first_vertex_delta_from_saddle_m": [
+              0.0,
+              0.0
+            ],
+            "first_vertex_exact_saddle": true,
+            "first_vertex_rz_m": [
+              1.5025279999999999,
+              -1.01728
+            ],
+            "nonzero_padding_coordinates_rz_m": [],
+            "nonzero_padding_slots": [],
+            "vertex_count": 5,
+            "wedge": 1
+          },
+          {
+            "first_vertex_delta_from_saddle_m": [
+              0.0,
+              0.0
+            ],
+            "first_vertex_exact_saddle": true,
+            "first_vertex_rz_m": [
+              1.5025279999999999,
+              -1.01728
+            ],
+            "nonzero_padding_coordinates_rz_m": [],
+            "nonzero_padding_slots": [],
+            "vertex_count": 6,
+            "wedge": 2
+          },
+          {
+            "first_vertex_delta_from_saddle_m": [
+              0.0,
+              0.0
+            ],
+            "first_vertex_exact_saddle": true,
+            "first_vertex_rz_m": [
+              1.5025279999999999,
+              -1.01728
+            ],
+            "nonzero_padding_coordinates_rz_m": [],
+            "nonzero_padding_slots": [],
+            "vertex_count": 3,
+            "wedge": 3
+          }
+        ]
+      }
+    }
+  ],
+  "common_sol_current_a": [
+    0.0,
+    0.0
+  ],
+  "completed": true,
+  "core_current_relative_error": 2.7328042230513393e-14,
+  "exact_zero_padding": true,
+  "figure_src": "/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-2500.svg",
+  "machine_cache": {
+    "build_seconds": 0.0,
+    "hit": true,
+    "load_seconds": 0.5760065726935863,
+    "lock_wait_seconds": 8.23289155960083e-06,
+    "semantic_key": "1172913775658e53",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_2500.zarr",
+    "store_seconds": 0.0
+  },
+  "measured_moments": [
+    [
+      0.3879761966018943,
+      0.006205656792547219,
+      -0.0017036383095421143
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "observed_nulls": {
+    "axis_admitted": true,
+    "axis_rz_m": [
+      1.7867481174903699,
+      0.04679677747568988
+    ],
+    "saddle_admitted": true,
+    "saddle_rz_m": [
+      1.5026409710654152,
+      -1.0176673783598384
+    ]
+  },
+  "oracle_completed": true,
+  "private_flux_current_a": 0.0,
+  "profile_order": [
+    "confined-core",
+    "zero-private",
+    "zero-sol",
+    "zero-sol"
+  ],
+  "realised_cells": 2616,
+  "reference": false,
+  "relative_moment_error": [
+    [
+      2.7328042230513393e-14,
+      3.200722254538691e-14,
+      1.1327990549490004e-14
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "requested_cells": 2500,
+  "saddle_case": "interior-four-crossing",
+  "saddle_inserted_as_first_vertex": true,
+  "schema": "nova.xpoint-cell-wedge-oracle-part",
+  "source_revision": "8e8d8e9741b33368637dccb98972347de72d0e1b",
+  "stage": "complete",
+  "version": 1,
+  "wall_seconds": 21.960975212976336,
+  "wedge_area_closure_m2": 1.951563910473908e-18,
+  "wedge_area_m2": [
+    1.7694362540981485e-05,
+    0.0002013688512988586,
+    0.0007850578304551196,
+    5.16308244118252e-06
+  ],
+  "wedge_vertex_capacity": 12,
+  "wedge_vertex_count": [
+    4,
+    5,
+    6,
+    3
+  ],
+  "xpoint_cell": 1479
+}

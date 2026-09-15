@@ -190,6 +190,92 @@
   the 45 comparable modules: <strong>0 added, 0 fixed</strong>.</p>
 </section>
 
+<section id="xpoint-cell-wedge-oracle">
+  <h2>Four fixed-capacity wedges in the single-null X-point cell</h2>
+
+  <p>The analytic saddle, rather than the production null census, selects the cut cell by
+  point-in-polygon. This distinction is decisive on the coarse meshes: the production census
+  does not admit the saddle at 132 or 340 realised cells. At the requested 300-cell rung, the
+  unique strict-containment candidate is realised cell 5. The saddle is interior and
+  6.500849 mm from its nearest edge. Four roots cross the boundary, but edge 2 carries two of
+  them at fractions 0.2072052925 and 0.9283123862 despite same-sign endpoint samples. The
+  endpoint-sign path therefore found only two roots and emitted an all-zero saddle row. This
+  reproduced the recorded defect before the repair.</p>
+
+  <p>The repair accepts up to two ordered roots per edge, pairs the four roots cyclically by
+  branch, and emits four polygons with a static capacity of 12 vertices. Every polygon begins
+  with the analytic saddle; unused coordinates are bitwise zero. A saddle coincident with an
+  edge root is represented by the same layout, leaving the repeated-root wedge with exact-zero
+  area. Each wedge is integrated with its own profile. The independent analytic integrator also
+  preserves disjoint vertical intervals instead of replacing them with their enclosing range.
+  Neither repair changes an equality guard or widens the <code>1e-6</code> current tolerance.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Requested / realised cells</th>
+        <th>X-point cell</th>
+        <th>Wedge vertex counts</th>
+        <th>Core current relative error</th>
+        <th>Private / common-SOL current (A)</th>
+        <th>Area closure (m²)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>110 / 132 (reference)</td><td>9</td><td>4, 4, 6, 4</td><td>2.8664e-16</td><td>0.0 / [0.0, 0.0]</td><td>+3.4694e-18</td></tr>
+      <tr><td>300 / 340</td><td>5</td><td>5, 4, 3, 6</td><td>3.6115e-16</td><td>0.0 / [0.0, 0.0]</td><td>-3.4694e-18</td></tr>
+      <tr><td>1000 / 1074</td><td>26</td><td>3, 5, 5, 5</td><td>3.5182e-16</td><td>0.0 / [0.0, 0.0]</td><td>+1.7347e-18</td></tr>
+      <tr><td>2500 / 2616</td><td>1479</td><td>4, 5, 6, 3</td><td>2.7328e-14</td><td>0.0 / [0.0, 0.0]</td><td>+1.9516e-18</td></tr>
+    </tbody>
+  </table>
+
+  <p>A single <code>all_debug</code> allocation (job 1271095, four CPUs,
+  <code>JAX_PLATFORMS=cpu</code>, x64 enabled, <code>TMPDIR=/tmp</code>) produced the reference
+  and three measured rungs. The maximum measured core-current relative error is
+  <strong>2.7328042230513393e-14</strong>, 36.6 million times below the limit. All four rows
+  report exact-zero private-flux and both common-SOL currents, the saddle in every wedge, and
+  exact-zero padding. Each rung was persisted independently before the aggregate receipt was
+  assembled.</p>
+
+  <div class="figure-grid">
+    <figure>
+      <img src="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-110.svg" alt="Reference 110-cell-rung line contours and outlined analytic X-point cell">
+      <figcaption>Requested 110-cell reference: analytic and solved line contours share levels;
+      both null sets, wall units and the outlined cut cell are shown.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-300.svg" alt="Measured 300-cell-rung line contours and outlined analytic X-point cell">
+      <figcaption>Requested 300-cell rung: cell 5 owns the analytic saddle and one boundary edge
+      carries two crossings.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-1000.svg" alt="Measured 1000-cell-rung line contours and outlined analytic X-point cell">
+      <figcaption>Requested 1000-cell rung with the same analytic-saddle ownership and
+      fixed-capacity wedge layout.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-2500.svg" alt="Measured 2500-cell-rung line contours and outlined analytic X-point cell">
+      <figcaption>Requested 2500-cell rung; the largest core-current relative error remains
+      2.7328e-14.</figcaption>
+    </figure>
+  </div>
+
+  <p>The focused synthetic saddle-cell module exercises the four-way partition, per-profile
+  moment isolation, a static non-saddle row, two roots on one edge, an edge-coincident saddle
+  with one exact-zero-area wedge, and refusal of an incomplete profile tuple: 6 passed in
+  20.21 s. The importer gate ran every affected module in a fresh CPU process. The baseline
+  carried 46 passes and zero failures; the repaired head carries the same 46 passes plus the six
+  new tests, with <strong>52 passed and zero added failures</strong>.</p>
+
+  <p><strong>Receipt.</strong>
+  <code>docs/figures/cut-cell-current-attribution/xpoint-cell/receipt.json</code>, with one
+  independently durable JSON part per rung under <code>parts/</code>. Implementation and
+  evidence commits: <code>770f3cf6</code>, <code>130881df</code>, <code>7eacc96c</code>,
+  <code>c807b329</code>, <code>40d5ad7c</code>, <code>016acfd5</code>,
+  <code>f57409c8</code>, <code>4d80ad6f</code>, <code>8e8d8e97</code>, and
+  <code>49a32f22</code>.</p>
+</section>
+
 </main>
 </body>
 </html>

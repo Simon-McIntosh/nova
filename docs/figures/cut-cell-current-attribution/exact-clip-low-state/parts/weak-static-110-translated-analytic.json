@@ -1,0 +1,45 @@
+{
+  "analytic_boundary_level_wb": 1.1345091532888318e-15,
+  "arm": "C",
+  "arm_b_boundary_level_wb": -0.0018776984508585212,
+  "axis_displacement_m": 8.589269485441502e-06,
+  "axis_displacement_rz_m": [
+    -8.588178611823594e-06,
+    1.36888366752963e-07
+  ],
+  "boundary_mismatch_fraction_of_span": 2.5643106035490506e-05,
+  "completed": true,
+  "match_fraction_of_arm_b_offset": 0.6820975615656876,
+  "mechanism": "analytic flux translated rigidly by arm B axis displacement, then read by the production limiter",
+  "supports_displaced_equilibrium": false,
+  "translated_boundary_level_wb": -0.0005969249161714811,
+  "translated_minus_arm_b_boundary_wb": 0.0012807735346870401,
+  "translated_state_sha256_binary64": "1b5518c7a632c7f079551803ce5002125fc1f7fe29bc18334591118b10316ed0",
+  "translated_topology": {
+    "analytic_authored_boundary_flux_wb": 0.0,
+    "axis_flux_wb": 49.94611942094068,
+    "axis_rz_m": [
+      6.184868376795699,
+      1.3688835476255434e-07
+    ],
+    "boundary_flux_offset_from_analytic_zero_wb": -0.0005969249161714811,
+    "boundary_flux_wb": -0.0005969249161714811,
+    "boundary_rz_m": [
+      7.801395759549072,
+      2.7054478023424977e-06
+    ],
+    "class": "limited",
+    "exception_text": null,
+    "o_candidate_count": 1,
+    "o_second_best_flux_margin_wb": null,
+    "read_status": "qualified_axis",
+    "wall_contact_rz_m": [
+      7.801395759549072,
+      2.7054478023424977e-06
+    ],
+    "x_candidate_count": 0,
+    "x_point_flux_wb": null,
+    "x_point_rz_m": null,
+    "x_second_best_flux_margin_wb": null
+  }
+}

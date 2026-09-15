@@ -1,0 +1,80 @@
+{
+  "arm": "D",
+  "boundary_class_absolute_difference_fraction": 0.5767078489895773,
+  "completed": true,
+  "fixture_reference_census_by_terminal_class": {
+    "all": {
+      "absolute_difference_a": 2018.303277971525,
+      "analytic_current_a": 16314562.779243158,
+      "booked_current_a": 16314773.311828371,
+      "booked_minus_analytic_a": 210.5325852125352,
+      "cell_count": 135
+    },
+    "cut": {
+      "absolute_difference_a": 1163.971342047571,
+      "absolute_difference_fraction": 0.5767078489895773,
+      "analytic_current_a": 3376280.4505476947,
+      "booked_current_a": 3377345.3150688317,
+      "booked_minus_analytic_a": 1064.8645211364892,
+      "cell_count": 43
+    },
+    "inactive": {
+      "absolute_difference_a": 0.0,
+      "absolute_difference_fraction": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_current_a": 0.0,
+      "booked_minus_analytic_a": 0.0,
+      "cell_count": 14
+    },
+    "whole": {
+      "absolute_difference_a": 854.331935923954,
+      "absolute_difference_fraction": 0.4232921510104228,
+      "analytic_current_a": 12938282.328695463,
+      "booked_current_a": 12937427.996759538,
+      "booked_minus_analytic_a": -854.331935923954,
+      "cell_count": 78
+    }
+  },
+  "mechanism": "target-normalised production booked current against analytic current on the same terminal support and against analytic clipped fixture moments",
+  "normalisation_amplitude": 0.9999339686741854,
+  "participation": {
+    "analytic_active_cells": 121,
+    "changed_cells": [],
+    "changed_class_count": 0,
+    "terminal_active_cells": 121
+  },
+  "supports_booking_error_in_cut_or_inactive_cells": false,
+  "terminal_support_census": {
+    "all": {
+      "absolute_difference_a": 1077.3572514684165,
+      "analytic_current_a": 16315850.66907984,
+      "booked_current_a": 16314773.311828371,
+      "booked_minus_analytic_a": -1077.3572514684165,
+      "cell_count": 135
+    },
+    "cut": {
+      "absolute_difference_a": 223.0253155444625,
+      "absolute_difference_fraction": 0.207011476685643,
+      "analytic_current_a": 3377568.3403843762,
+      "booked_current_a": 3377345.3150688317,
+      "booked_minus_analytic_a": -223.0253155444625,
+      "cell_count": 43
+    },
+    "inactive": {
+      "absolute_difference_a": 0.0,
+      "absolute_difference_fraction": 0.0,
+      "analytic_current_a": 0.0,
+      "booked_current_a": 0.0,
+      "booked_minus_analytic_a": 0.0,
+      "cell_count": 14
+    },
+    "whole": {
+      "absolute_difference_a": 854.331935923954,
+      "absolute_difference_fraction": 0.792988523314357,
+      "analytic_current_a": 12938282.328695463,
+      "booked_current_a": 12937427.996759538,
+      "booked_minus_analytic_a": -854.331935923954,
+      "cell_count": 78
+    }
+  }
+}

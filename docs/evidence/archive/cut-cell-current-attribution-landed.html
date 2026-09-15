@@ -715,6 +715,90 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   record with per-case last Python frames and versions is the closing record in the
   s19-handoff cpu-abort report under <code>~/.config/reckon/crew/reports</code>.</p>
 </section>
+<section id="exact-clip-low-state-discriminator">
+  <h2>Exact-clip low state: a seed-selected second fixed point</h2>
+
+  <p><strong>Question.</strong> The weak 300-cell exact-clip solve converged with
+  axis flux 46.66 Wb against the 49.96 Wb analytic value even though the weak
+  110-cell row matched the oracle. One H200 job tested four arms on both rows:
+  production iteration from the analytic flux; the repaired-seed reference state;
+  a rigid translation of the analytic flux by the reference state's axis error;
+  and a per-cell booked-versus-analytic current census over the same clipped
+  polygons. Job 1271758 completed both rows in 58 minutes with exit zero and the
+  receipt marker <code>LOW_STATE_EXIT rows=2 completed=True</code>.</p>
+
+  <table>
+    <caption>Fixed-point and displacement discriminator</caption>
+    <thead>
+      <tr><th>requested cells</th><th>analytic-start residual</th><th>analytic-start max difference / span</th><th>analytic-start axis flux</th><th>seed-start residual</th><th>seed-start axis flux</th><th>changed participation cells</th><th>reading</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>110</td><td>3.666e-13</td><td>1.135e-4</td><td>49.942887 Wb</td><td>3.420e-13</td><td>49.942887 Wb</td><td>0</td><td>oracle-near positive control</td></tr>
+      <tr><td>300</td><td>9.305e-14</td><td>1.080e-4</td><td>49.952060 Wb</td><td>2.079e-13</td><td>46.664612 Wb</td><td>25</td><td><strong>seed-selected second fixed point</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Arm A: the analytic state stays fixed.</strong> At both cell counts the
+  analytic start converged after one production trip. Its states after 1, 2 and 4
+  trips are unchanged. At 300 cells the terminal residual is 9.305e-14 and the
+  maximum solved-minus-analytic difference is 1.080e-4 of span, while the repaired
+  seed separately converges at 2.079e-13 with axis flux 46.664612 Wb. A wrong map
+  at the analytic state is therefore ruled out: the discrete map carries two
+  converged fixed points on the 300-cell mesh.</p>
+
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/exact-clip-low-state/panels/weak-static-110-terminals.png"
+         alt="Weak 110-cell analytic-start and repaired-seed exact-clip terminal flux contours over the analytic field with signed difference panels">
+    <figcaption>Weak 110 positive control. The analytic start and repaired-seed
+    start reach the same oracle-near terminal. Blue contours and triangles are the
+    analytic flux and axis; ochre contours and triangles are the solved fields and
+    axes. The wall is black. Both signed difference panels use the same fixed
+    fractions of analytic flux span. Arm A residual 3.666e-13; arm B residual
+    3.420e-13; both converged.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/exact-clip-low-state/panels/weak-static-300-terminals.png"
+         alt="Weak 300-cell analytic-start and repaired-seed exact-clip terminal flux contours over the analytic field with signed difference panels">
+    <figcaption>Weak 300 discriminator. The analytic-start terminal remains
+    oracle-near while the repaired seed converges to the visibly displaced low
+    state. Contours, null markers, wall and signed difference levels use the same
+    vocabulary as the 110-cell panel. Arm A residual 9.305e-14; arm B residual
+    2.079e-13; both converged.</figcaption>
+  </figure>
+
+  <p><strong>Arm C: displacement explains most of the boundary offset.</strong>
+  Rigidly translating the analytic flux by the low state's measured 33.2 mm axis
+  displacement changes the production limiter level by 2.319 Wb, against the low
+  state's 2.022 Wb offset. The remaining 0.297 Wb mismatch is 14.7 percent of the
+  low-state offset, so rigid displacement explains 85.3 percent. This names the
+  geometry of the second state; it does not make that state unique because arm A
+  retains the oracle under the same exterior.</p>
+
+  <p><strong>Arm D: the 428 kA difference is a class exchange, not missing
+  current.</strong> Twenty-five cells change participation class between the
+  analytic and low states. Against the analytically clipped fixture current grouped
+  by terminal class, cut cells book 427,983 A more and whole cells book 427,632 A
+  less; inactive cells differ by -143 A and the all-class remainder is 207 A. The
+  low state moves the support boundary and redistributes current between whole and
+  cut cells while retaining the target current.</p>
+
+  <p><strong>Conclusion and consequence.</strong> The arms jointly support a
+  seed-selected second self-consistent state. Two fixed points with the same target
+  current and exterior mean the fixture exterior holds plasma position weakly. The
+  operational defect is seed-basin selection. The next measurement is positional
+  stiffness: apply one production map to analytic states rigidly translated from
+  0 to 60 mm and measure residual against displacement, exposing the width and
+  curvature of the weak restoring basin without iteration-history ambiguity.</p>
+
+  <p>The machine-readable receipt, four per-row arm parts, complete list of the 25
+  changed cells and source figure hashes are under
+  <code>docs/figures/cut-cell-current-attribution/exact-clip-low-state/</code>.
+  The run log and human report are under
+  <code>~/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-low-state/</code>.
+  The measurement harness is commit <code>fc3abf0c</code>; no Nova product source
+  file changed.</p>
+</section>
 </main>
 </body>
 </html>

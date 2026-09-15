@@ -1023,8 +1023,7 @@ def _loop_inventory() -> list[dict[str, Any]]:
         {
             **_source_line(
                 reduced_newton._compiled_slice_solver,
-                "return jax.lax.fori_loop(",
-                occurrence=1,
+                "carry = jax.lax.fori_loop(",
             ),
             "loop": "compiled active-set trips",
             "form": "jax.lax.fori_loop",

@@ -2603,8 +2603,10 @@ class ForwardProfile:
         """Return the fixed number of nonlinear state updates a route performs."""
 
         if route == "newton_krylov":
-            return int(options["warmup"]) + int(options["newton_steps"])
-        return int(options["evaluations"])
+            warmup = options.get("warmup", declared_forward_solve_policy().warmup)
+            newton_steps = options.get("newton_steps", self.newton_steps)
+            return int(warmup) + int(newton_steps)
+        return int(options.get("evaluations", self.evaluations))
 
     def _branch_receipt(
         self,

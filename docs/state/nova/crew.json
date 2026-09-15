@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T17:44:36",
+  "updated": "2026-09-15T18:02:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -167087,6 +167087,211 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T153758207836-cca-oracle-overlay-error-figure",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-oracle-overlay-error-figure",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 455,
+                "cached_input_tokens": 600752,
+                "input_tokens": 601209,
+                "output_tokens": 3412,
+                "reasoning_output_tokens": 1103,
+                "total_tokens": 604621,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "benchmarks/limited_shadow_before_after.py (merged e21af68a) is extended, not replaced, so its receipt-only render (no solve; all_debug CPU, JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on the node, one foreground srun under 59 minutes) writes docs/figures/cut-cell-current-attribution/limited-shadow/oracle-overlay-error.png with one row per persisted terminal state (weak, moderate and strong 1000 whole-cell post-fix rows from limited-shadow/solve-parts/chord, the single-null 500 control, and any exact-clip row that exists under solve-parts at render time, discovered by glob so the weak 1000 exact-clip row drops in when the memory node lands) and three columns: (1) solved contours drawn OVER the analytic contours on the same twelve shared analytic levels in one panel, both null sets with draw_nulls, wall with draw_wall, axis off; (2) the signed difference solved minus analytic psi divided by the analytic flux span as line contours on fixed levels 1e-1, 1e-2, 1e-3, 1e-4, 1e-5 and minus the same, with the caption stating max absolute difference over span, the roundoff floor (machine epsilon times the condition of the map, quoted as 1e-14 of span unless the receipt gives a measured floor), and whether the row is within a hundred times that floor; (3) the same difference along the outboard midplane chord from axis to wall as a line plot on a log scale with the pitch marked, so the outboard error is read in numbers; a table in the receipt oracle-overlay-error-receipt.json and in the report per row: max difference over span, rms difference over span, axis error in pitch, boundary level error in Wb and in span, plasma current amplitude, converged flag, terminal residual, and the verdict oracle-matched (within a hundred roundoff floors) or not; the evidence section and plan section 2 comment state in plain words that a converged whole-cell row is a self-consistent fixed point and not an oracle match until its difference panel is at the floor, with the current figures (0.64 pitch axis error, 4.96, 0.14 and 0.012 Wb boundary error, amplitude 0.897) named as the discretisation error the exact clip must remove; nova/AGENTS.md plotting rules obeyed throughout; the weak 2500 pre-fix flux is not persisted and is not required; manifest in plain key: value lines, any waiting declaration with wait_probe as a JSON list such as [\"squeue\",\"-h\",\"-j\",\"1271409\"] and wait_terminal exit:0",
+          "estimated_hours": null,
+          "goal": "Every limited Solovev terminal state drawn with the analytic oracle overlaid on the same panel and a difference panel in fractions of flux span with the roundoff floor drawn, so error that is not roundoff reads as error",
+          "id": "cca-oracle-overlay-error-figure",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T15:37:58Z",
+            "read_at": "2026-09-15T15:38:00Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 47.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T153758207836-cca-oracle-overlay-error-figure/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/limited_shadow_before_after.py",
+            "docs/figures/cut-cell-current-attribution/limited-shadow",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/oracle-overlay",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19h-cca-oracleoverlay-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T15:38:29Z",
+        "completed_at": "2026-09-15T15:57:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1123,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1123,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "0014649f05deaac67e77aaa39baa43cb7e9897b4",
+        "commits": [
+          "2497734b974b5492ba1aa8861d0833385a7ba332",
+          "8a463fa8ff4451b02436ffaee97f2d587b07c5c9",
+          "58a12e4d6d76b9de193b0df02dbafb3aeab916fa",
+          "0465d63b4d6936b585f2b5eb3e586b33991d04bb"
+        ],
+        "changed_lines": {
+          "added": 994,
+          "removed": 1,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1271601: receipt-only render of four persisted rows, zero solves",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/cut-cell-current-attribution/limited-shadow/oracle-overlay-error-receipt.json",
+          "log_digest": "sha256:59d25e51404c2cda7bc03440bd6eec0a864db48d2a06c17f4471199f1f68725f"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T153758207836-cca-oracle-overlay-error-figure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a5b8-3ed1-79e0-b32e-890e451de1f3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13082880,
+            "cached_input_tokens_cumulative": 13082880,
+            "input_tokens": 13326428,
+            "input_tokens_cumulative": 13326428,
+            "output_tokens": 42221,
+            "output_tokens_cumulative": 42221,
+            "reasoning_output_tokens": 13339,
+            "reasoning_output_tokens_cumulative": 13339
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T15:57:12Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 48.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T15:57:12Z"
+            }
+          ],
+          "notional_cost_usd": 54.1501,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 13082880,
+          "cumulative_input_tokens": 26409308,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 55560
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-oracle-overlay-error-figure",
+          "session_id": "01a0a5b8-3ed1-79e0-b32e-890e451de1f3",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T15:57:12Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 101.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -167399,6 +167604,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2578
+    "_version": 2579
   }
 }

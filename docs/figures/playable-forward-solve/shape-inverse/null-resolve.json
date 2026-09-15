@@ -1,6 +1,7 @@
 {
   "arm": "null-resolve",
   "status": "complete",
+  "achieved_shape_status": "achieved",
   "previous_turning_points_m": [
     [
       1.4033222091278932,
@@ -465,7 +466,9 @@
     "delta_current_scale_a": 20000.0,
     "minimum_weight_with_every_circuit_below_twenty_ka": 0.0,
     "selected_delta_regularisation_weight": 0.0,
-    "selection": "smallest_weight_with_twenty_ka_compliance"
+    "selection": "smallest_weight_with_twenty_ka_compliance",
+    "placement_picard_rounds": 0,
+    "admission_boundary": "The weight curve selects a 20 kA-compliant proposal and does not encode a map-only admission boundary. The selected step's completed nonlinear line search is the admission authority."
   },
   "linear_row_closure": [
     {
@@ -5527,19 +5530,19 @@
     }
   ],
   "trips": 1,
-  "wall_s": 2.639181911945343e-05,
+  "wall_s": 2.5220215320587158e-05,
   "converged": true,
   "qualified_axis": true,
   "runtime": {
-    "source_commit": "642f4cfee4474d2d2190740c6c4d0f96e969cced",
+    "source_commit": "b5559a8c56ad4fb0638fa587e2382f2d95d7b5a4",
     "python": "3.14.2",
     "jax": "0.11.0",
     "devices": [
       "cpu:0"
     ],
     "scheduler": {
-      "job_id": "1271220",
-      "node": "98dci4-clu-3141",
+      "job_id": "1271308",
+      "node": "98dci4-clu-3143",
       "partition": "all_debug",
       "reservation": null
     },
@@ -5556,7 +5559,7 @@
         ],
         "stored_circuit_count": 101,
         "frozen_reference_count": 6,
-        "warm_load_seconds": 0.00861581414937973,
+        "warm_load_seconds": 0.007962776347994804,
         "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
         "size_bytes": 645864
       },
@@ -5570,7 +5573,7 @@
           "--receipt",
           "docs/figures/plateau-input-attribution/mast-response-carrier.json"
         ],
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.021311 direct_builders=0 verdict=PASS",
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.021826 direct_builders=0 verdict=PASS",
         "direct_green_operator_builder_entries": 0,
         "passes": true
       }

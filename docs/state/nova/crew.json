@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T10:30:37",
+  "updated": "2026-09-15T10:33:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -161959,6 +161959,207 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T073636283020-pfs-axis-flux-departure-projection",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-axis-flux-departure-projection",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 609,
+                "cached_input_tokens": 699335,
+                "input_tokens": 699976,
+                "output_tokens": 284,
+                "reasoning_output_tokens": 71,
+                "total_tokens": 700260,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "docs/figures/playable-forward-solve/span-ratio/axis-flux-projection.json records, on the same 43,017 rows and in the same paired-projection shape as the landed profile-amplitude, boundary-flux and conductor-source arms (their receipts under docs/figures/playable-forward-solve/), the fraction of the diverted span-ratio solenoid slope accounted for by the nova-minus-EFIT axis-flux departure and by the internal current distribution, each arm persisted as it lands, with extended precision asserted inside the measurement and JAX_PLATFORMS=cpu on all_debug at --time=00:59:00; the report states whether the axis-flux departure accounts for most of the slope and, if so, which of normalisation, seed or current distribution sets the axis flux as the solenoid current changes, and whether it shares a mechanism with the unqualified-axis normalisation defect; diagnosis only, no solver change, no PNG read",
+          "estimated_hours": null,
+          "goal": "A paired projection of the nova-minus-EFIT axis flux and the internal current distribution onto the diverted span-ratio slope over the 43,017 census rows",
+          "id": "pfs-axis-flux-departure-projection",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T07:36:37Z",
+            "read_at": "2026-09-15T07:36:38Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 24.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T073636283020-pfs-axis-flux-departure-projection/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/axis_flux_departure_projection.py",
+            "docs/figures/playable-forward-solve/span-ratio",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/axis-flux",
+            "docs/evidence/archive/playable-forward-solve-landed.html",
+            "docs/plans/playable-forward-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-pfs-axisflux-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T07:37:01Z",
+        "completed_at": "2026-09-15T08:13:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2179,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2179,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "30bf0d02310a53ea79f4e0e235531a3c67e317d6",
+        "commits": [
+          "3b786c4025780270a0db27c70572b76e4f95318a",
+          "03066756c30b6a1d3e40be86ace149e712d7c792",
+          "6a2b4428d4204d56b3b2558602deed43b3d2fad1",
+          "fcc8f968e036455da9d34308ff2ca1d0ba6fea7b"
+        ],
+        "changed_lines": {
+          "added": 644,
+          "removed": 2,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/axis_flux_departure_projection.py on all_debug CPU, job 1271171 exit 0, 43017 rows",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/axis-flux/measurement-final.log",
+          "log_digest": "f424c448610286bec78a9567caea4c726b851ee8b610ec3e528c76d98ea5ed1b"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T073636283020-pfs-axis-flux-departure-projection/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a3ff-72f0-77b0-a0fb-deb435d86520",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 21461760,
+            "cached_input_tokens_cumulative": 21461760,
+            "input_tokens": 21969214,
+            "input_tokens_cumulative": 21969214,
+            "output_tokens": 43804,
+            "output_tokens_cumulative": 43804,
+            "reasoning_output_tokens": 10686,
+            "reasoning_output_tokens_cumulative": 10686
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T08:13:20Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 25.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T08:13:20Z"
+            }
+          ],
+          "notional_cost_usd": 4.4464,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 21461760,
+          "cumulative_input_tokens": 43430974,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 54490
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-axis-flux-departure-projection",
+          "session_id": "01a0a3ff-72f0-77b0-a0fb-deb435d86520",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T08:13:20Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 88.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -162271,6 +162472,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2540
+    "_version": 2541
   }
 }

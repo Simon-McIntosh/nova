@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from benchmarks import settled_mask_stall as settled
+from benchmarks.efit_forward_parity_slice import FIXED_POINT_CRITERION
 from nova.equilibrium import reduced_newton
 from nova.equilibrium.constraint import (
     ConstraintBinding,
@@ -285,7 +286,7 @@ def _command_row(
             requested_class=requested_class,
             target_current=target_current,
             prescribed_current=jnp.asarray(prescribed_current),
-            tolerance=settled.FIXED_POINT_CRITERION,
+            tolerance=FIXED_POINT_CRITERION,
             newton_steps=NEWTON_STEPS,
             active_set_steps=1,
             constraint_current_step_cap=CURRENT_STEP_CAP_A,
@@ -461,7 +462,7 @@ def _free_sample(
             prescribed_current=jnp.asarray(
                 prescribed_current + current_delta_a * direction
             ),
-            tolerance=settled.FIXED_POINT_CRITERION,
+            tolerance=FIXED_POINT_CRITERION,
             newton_steps=NEWTON_STEPS,
             active_set_steps=ACTIVE_SET_TRIPS,
             program=program,
@@ -838,7 +839,7 @@ def measure(*, output: Path, figure: Path, report: Path) -> dict[str, Any]:
         requested_class=requested,
         target_current=target_current,
         prescribed_current=jnp.asarray(prescribed_current),
-        tolerance=settled.FIXED_POINT_CRITERION,
+        tolerance=FIXED_POINT_CRITERION,
         newton_steps=NEWTON_STEPS,
         active_set_steps=ACTIVE_SET_TRIPS,
     )

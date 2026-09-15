@@ -19,6 +19,7 @@ import tempfile
 from typing import Any
 
 from benchmarks import solovev_certificate as certificate
+from nova.equilibrium import clip_quadrature
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.jax.config import configure_dtypes
 
@@ -108,6 +109,8 @@ def _scaling(rows: list[dict[str, Any]]) -> dict[str, Any]:
 def measure(output: Path, compiler_root: Path, requested_cells: list[int]) -> dict:
     """Compile exact-clip rungs and persist each completed memory receipt."""
     configure_dtypes()
+    if not hasattr(certificate.observation, "_UNIT_NODE"):
+        certificate.observation._UNIT_NODE = clip_quadrature._UNIT_NODE
     original_mode = support_clip_mode()
     rows: list[dict[str, Any]] = []
     try:

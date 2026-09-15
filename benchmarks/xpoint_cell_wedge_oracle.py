@@ -355,7 +355,9 @@ def _wedge_shape_diagnostics(wedges: Any, x_point: np.ndarray) -> dict[str, Any]
     }
 
 
-def _vertical_bounds(vertices: np.ndarray, radius: float) -> tuple[float, float]:
+def _vertical_intervals(
+    vertices: np.ndarray, radius: float
+) -> list[tuple[float, float]]:
     heights = []
     for first, second in zip(vertices, np.roll(vertices, -1, axis=0), strict=True):
         span = float(second[0] - first[0])
@@ -364,9 +366,15 @@ def _vertical_bounds(vertices: np.ndarray, radius: float) -> tuple[float, float]
         fraction = (radius - float(first[0])) / span
         if 0.0 <= fraction <= 1.0:
             heights.append(float(first[1] + fraction * (second[1] - first[1])))
-    if len(heights) < 2:
-        return 0.0, 0.0
-    return min(heights), max(heights)
+    unique = []
+    for height in sorted(heights):
+        if not unique or abs(height - unique[-1]) > 1.0e-12:
+            unique.append(height)
+    return [
+        (lower, upper)
+        for lower, upper in zip(unique[0::2], unique[1::2])
+        if upper > lower
+    ]
 
 
 def _analytic_polygon_moments(
@@ -393,13 +401,29 @@ def _analytic_polygon_moments(
             continue
 
         def integrand(radius: float, moment: int) -> float:
-            bottom, top = _vertical_bounds(vertices, radius)
             current = density(radius)
             if moment == 0:
-                return current * (top - bottom)
+                return current * sum(
+                    top - bottom
+                    for bottom, top in _vertical_intervals(vertices, radius)
+                )
             if moment == 1:
-                return current * (radius - centre[0]) * (top - bottom)
-            return 0.5 * current * ((top - centre[1]) ** 2 - (bottom - centre[1]) ** 2)
+                return (
+                    current
+                    * (radius - centre[0])
+                    * sum(
+                        top - bottom
+                        for bottom, top in _vertical_intervals(vertices, radius)
+                    )
+                )
+            return (
+                0.5
+                * current
+                * sum(
+                    (top - centre[1]) ** 2 - (bottom - centre[1]) ** 2
+                    for bottom, top in _vertical_intervals(vertices, radius)
+                )
+            )
 
         for moment in range(3):
             value, _error = quad(
@@ -635,6 +659,17 @@ def _measure_row(
     scale = np.maximum(np.abs(expected), 1.0e-12)
     relative_error = np.abs(actual - expected) / scale
     core_current_relative_error = float(relative_error[0, 0])
+    progress = progress | {
+        "stage": "moments-integrated",
+        "measured_moments": actual,
+        "analytic_moments": expected,
+        "relative_moment_error": relative_error,
+        "core_current_relative_error": core_current_relative_error,
+        "private_flux_current_a": float(actual[1, 0]),
+        "common_sol_current_a": [float(actual[2, 0]), float(actual[3, 0])],
+        "wall_seconds": perf_counter() - started,
+    }
+    _write_json(part_path, progress)
     if core_current_relative_error > CORE_CURRENT_RELATIVE_LIMIT:
         raise AssertionError(
             f"core current relative error {core_current_relative_error:.3e} exceeds "

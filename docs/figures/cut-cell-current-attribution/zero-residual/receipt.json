@@ -1,0 +1,274 @@
+{
+  "clip_mode": "chord",
+  "completed": true,
+  "device": {
+    "host": "98dci4-clu-3141.iter.org",
+    "kind": "cpu",
+    "platform": "cpu",
+    "slurm_job_id": "1271078"
+  },
+  "driver_sha256": "ae46f483be84870ccd8daa81b141c8ca1b315284efd2ef45b9ee9b3a86666675",
+  "figure": {
+    "png_relative": "docs/figures/cut-cell-current-attribution/zero-residual/panels/zero-residual-map.png",
+    "render_source": "zero_residual_check",
+    "sha256": "886803d937901684aa55052d420248b399261d82df69acd1fe08f0f7fee699ff",
+    "src": "/nova/figures/cut-cell-current-attribution/zero-residual/panels/zero-residual-map.png"
+  },
+  "rows": {
+    "moderate-rotation-conventional-static": {
+      "cache": {
+        "fixture_exterior": {
+          "build_seconds": 0.0,
+          "hit": true,
+          "lock_wait_seconds": 6.3944607973098755e-06,
+          "semantic_key": "eb75e195a0186b7a",
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
+        },
+        "machine": {
+          "build_seconds": 0.0,
+          "hit": true,
+          "load_seconds": 0.5066392291337252,
+          "lock_wait_seconds": 1.5616416931152344e-05,
+          "semantic_key": "89cbacdfc568073c",
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_2500.zarr",
+          "store_seconds": 0.0
+        }
+      },
+      "case": "moderate-rotation-conventional-static",
+      "clip_mode": "chord",
+      "coordinate_rebuild_max_delta_m": 0.0,
+      "grid_node_number": 2621,
+      "peak_live_bytes_observed": 0,
+      "persisted_solver": {
+        "converged": false,
+        "qualification": "unqualified",
+        "qualification_bound": 1e-12,
+        "terminal_fixed_point_residual": 0.002010600391485635
+      },
+      "requested_cells": -2500,
+      "resolution_scaled_position_bound_m": 0.027569326379528893,
+      "sample_node_number": 6381,
+      "schema": "nova.zero-residual-check-row",
+      "source_part_relative": "docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows/moderate-rotation-conventional-static-production-route-cells-2500.json",
+      "source_revision": "fb80e97511ea48ca8ac107d4a87fce50792a6154",
+      "span_wb": -1.3328073995319099,
+      "state_length": 9123,
+      "statistics": {
+        "masked_diff": {
+          "cold": {
+            "count": 9050,
+            "relative_rms": 0.0004983547616012321,
+            "relative_sup": 0.001748524686020884,
+            "rms": 0.000664210913854083,
+            "sup": 0.0023304466397928436
+          },
+          "promoted": {
+            "count": 9050,
+            "relative_rms": 0.0004983547616012321,
+            "relative_sup": 0.001748524686020884,
+            "rms": 0.000664210913854083,
+            "sup": 0.0023304466397928436
+          }
+        },
+        "physical_unmasked": {
+          "argmax_index": 697,
+          "sup_all": 1.1235770982548257,
+          "sup_entering_cold": 0.0023304466397928436,
+          "sup_entering_promoted": 0.0023304466397928436,
+          "sup_shadowed_cold": 1.1235770982548257,
+          "sup_shadowed_promoted": 1.1235770982548257
+        },
+        "profile_owned": {
+          "entering_cold": 2548,
+          "profile_total": 2548
+        },
+        "shadow_census_cold": {
+          "entering": 9050,
+          "excluded": 73,
+          "excluded_fraction": 0.00800175380905404,
+          "total": 9123
+        },
+        "shadow_census_promoted": {
+          "entering": 9050,
+          "excluded": 73,
+          "excluded_fraction": 0.00800175380905404,
+          "total": 9123
+        },
+        "solver_scalar": {
+          "persisted": null,
+          "recomputed_cold": 0.002010600391482564,
+          "recomputed_promoted": 0.002010600391482564,
+          "unmasked_all_carriers": 0.9693697830441665
+        }
+      },
+      "topology": {
+        "axis_flux_wb": 1.1584668159749338,
+        "axis_rz_m": [
+          1.669584363075094,
+          0.0012688806955203434
+        ],
+        "boundary_flux_wb": -0.17434058355697607,
+        "class": "limited",
+        "exception_text": null,
+        "flux_span_wb": -1.3328073995319099,
+        "o_candidate_count": 1,
+        "o_second_best_flux_margin_wb": null,
+        "read_status": "qualified_axis",
+        "x_candidate_count": 0,
+        "x_point_rz_m": null,
+        "x_second_best_flux_margin_wb": null
+      },
+      "wall_node_number": 121,
+      "wall_seconds": 55.15303027071059
+    },
+    "weak-rotation-reactor-static": {
+      "cache": {
+        "fixture_exterior": {
+          "build_seconds": 0.0,
+          "hit": true,
+          "lock_wait_seconds": 8.441507816314697e-06,
+          "semantic_key": "8f2a98c27aa3a475",
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
+        },
+        "machine": {
+          "build_seconds": 0.0,
+          "hit": true,
+          "load_seconds": 0.5152259673923254,
+          "lock_wait_seconds": 1.4727935194969177e-05,
+          "semantic_key": "78af4c9e26323151",
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_2500.zarr",
+          "store_seconds": 0.0
+        }
+      },
+      "case": "weak-rotation-reactor-static",
+      "clip_mode": "chord",
+      "coordinate_rebuild_max_delta_m": 0.0,
+      "grid_node_number": 2608,
+      "peak_live_bytes_observed": 0,
+      "persisted_solver": {
+        "converged": true,
+        "qualification": "unqualified",
+        "qualification_bound": 1e-12,
+        "terminal_fixed_point_residual": 0.0
+      },
+      "requested_cells": -2500,
+      "resolution_scaled_position_bound_m": 0.09776228571840812,
+      "sample_node_number": 6280,
+      "schema": "nova.zero-residual-check-row",
+      "source_part_relative": "docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows/weak-rotation-reactor-static-production-route-cells-2500.json",
+      "source_revision": "fb80e97511ea48ca8ac107d4a87fce50792a6154",
+      "span_wb": -47.59430613890367,
+      "state_length": 9009,
+      "statistics": {
+        "masked_diff": {
+          "cold": {
+            "count": 8955,
+            "relative_rms": 1.0602451656716067e-15,
+            "relative_sup": 4.777329346490387e-15,
+            "rms": 5.0461632997267086e-14,
+            "sup": 2.2737367544323206e-13
+          },
+          "promoted": {
+            "count": 8955,
+            "relative_rms": 1.0602451656716067e-15,
+            "relative_sup": 4.777329346490387e-15,
+            "rms": 5.0461632997267086e-14,
+            "sup": 2.2737367544323206e-13
+          }
+        },
+        "physical_unmasked": {
+          "argmax_index": 1054,
+          "sup_all": 44.11443748514162,
+          "sup_entering_cold": 2.2737367544323206e-13,
+          "sup_entering_promoted": 2.2737367544323206e-13,
+          "sup_shadowed_cold": 44.11443748514162,
+          "sup_shadowed_promoted": 44.11443748514162
+        },
+        "profile_owned": {
+          "entering_cold": 2554,
+          "profile_total": 2554
+        },
+        "shadow_census_cold": {
+          "entering": 8955,
+          "excluded": 54,
+          "excluded_fraction": 0.005994005994005994,
+          "total": 9009
+        },
+        "shadow_census_promoted": {
+          "entering": 8955,
+          "excluded": 54,
+          "excluded_fraction": 0.005994005994005994,
+          "total": 9009
+        },
+        "solver_scalar": {
+          "persisted": null,
+          "recomputed_cold": 5.458057583629558e-15,
+          "recomputed_promoted": 5.458057583629558e-15,
+          "unmasked_all_carriers": 1.0589578569021467
+        }
+      },
+      "topology": {
+        "axis_flux_wb": 41.659787520334795,
+        "axis_rz_m": [
+          6.095776173942807,
+          7.075306581460396e-05
+        ],
+        "boundary_flux_wb": -5.9345186185688705,
+        "class": "limited",
+        "exception_text": null,
+        "flux_span_wb": -47.59430613890367,
+        "o_candidate_count": 1,
+        "o_second_best_flux_margin_wb": null,
+        "read_status": "qualified_axis",
+        "x_candidate_count": 0,
+        "x_point_rz_m": null,
+        "x_second_best_flux_margin_wb": null
+      },
+      "wall_node_number": 121,
+      "wall_seconds": 55.89032275788486
+    }
+  },
+  "schema": "nova.zero-residual-check-acceptance",
+  "source_revision": "fb80e97511ea48ca8ac107d4a87fce50792a6154",
+  "verdict": {
+    "moderate_2500": {
+      "entering_carriers": 9050,
+      "qualification": "unqualified",
+      "recorded_scalar": 0.002010600391485635,
+      "unmasked_sup_all": 1.1235770982548257,
+      "unmasked_sup_entering": 0.0023304466397928436,
+      "unmasked_sup_shadowed": 1.1235770982548257
+    },
+    "qualification_bound_trace": {
+      "application_lines": [
+        "benchmarks/solovev_certificate.py:2101-2102"
+      ],
+      "applied_as": [
+        "kernel_tolerance",
+        "qualification_tolerance"
+      ],
+      "bound_value": 1e-12,
+      "carrier_constant": "TERMINAL_RESIDUAL_BOUND",
+      "carrier_line": "benchmarks/solovev_certificate.py:129",
+      "evaluation_line": "benchmarks/solovev_certificate.py:1764-1776",
+      "evaluation_site": "_apply_joint_qualification",
+      "note": "the plan comment conflates the recorded residual VALUE (0.0) with the qualification BOUND; the bound is 1e-12, the value 0.0",
+      "recorded_solver_scalar_source": "equilibrium.fixed_point live_residual (active-set reconcile), relative sup max|g-x|/max|g|",
+      "shadow_line": "nova/equilibrium/forward_operator.py:2611 _exclude_shadow_residual copies shadowed carriers through",
+      "source_field": "LOCKED_RECOVERY_BOUNDS['fixed_point_residual']",
+      "source_line": "tests/test_solovev_recovery_gates.py:28"
+    },
+    "weak_2500": {
+      "converged": true,
+      "entering_carriers": 8955,
+      "qualification": "unqualified",
+      "recomputed_promoted_scalar": 5.458057583629558e-15,
+      "recorded_scalar": 0.0,
+      "unmasked_relative_scalar": 1.0589578569021467,
+      "unmasked_sup_all": 44.11443748514162,
+      "unmasked_sup_entering": 2.2737367544323206e-13,
+      "unmasked_sup_shadowed": 44.11443748514162,
+      "verdict": "masked_fixed_point_rejects_shadowed_disagreement"
+    }
+  }
+}

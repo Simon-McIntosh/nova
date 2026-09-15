@@ -1,0 +1,106 @@
+{
+  "cache": {
+    "fixture_exterior": {
+      "build_seconds": 0.0,
+      "hit": true,
+      "lock_wait_seconds": 8.441507816314697e-06,
+      "semantic_key": "8f2a98c27aa3a475",
+      "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
+    },
+    "machine": {
+      "build_seconds": 0.0,
+      "hit": true,
+      "load_seconds": 0.5152259673923254,
+      "lock_wait_seconds": 1.4727935194969177e-05,
+      "semantic_key": "78af4c9e26323151",
+      "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_2500.zarr",
+      "store_seconds": 0.0
+    }
+  },
+  "case": "weak-rotation-reactor-static",
+  "clip_mode": "chord",
+  "coordinate_rebuild_max_delta_m": 0.0,
+  "grid_node_number": 2608,
+  "peak_live_bytes_observed": 0,
+  "persisted_solver": {
+    "converged": true,
+    "qualification": "unqualified",
+    "qualification_bound": 1e-12,
+    "terminal_fixed_point_residual": 0.0
+  },
+  "requested_cells": -2500,
+  "resolution_scaled_position_bound_m": 0.09776228571840812,
+  "sample_node_number": 6280,
+  "schema": "nova.zero-residual-check-row",
+  "source_part_relative": "docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows/weak-rotation-reactor-static-production-route-cells-2500.json",
+  "source_revision": "fb80e97511ea48ca8ac107d4a87fce50792a6154",
+  "span_wb": -47.59430613890367,
+  "state_length": 9009,
+  "statistics": {
+    "masked_diff": {
+      "cold": {
+        "count": 8955,
+        "relative_rms": 1.0602451656716067e-15,
+        "relative_sup": 4.777329346490387e-15,
+        "rms": 5.0461632997267086e-14,
+        "sup": 2.2737367544323206e-13
+      },
+      "promoted": {
+        "count": 8955,
+        "relative_rms": 1.0602451656716067e-15,
+        "relative_sup": 4.777329346490387e-15,
+        "rms": 5.0461632997267086e-14,
+        "sup": 2.2737367544323206e-13
+      }
+    },
+    "physical_unmasked": {
+      "argmax_index": 1054,
+      "sup_all": 44.11443748514162,
+      "sup_entering_cold": 2.2737367544323206e-13,
+      "sup_entering_promoted": 2.2737367544323206e-13,
+      "sup_shadowed_cold": 44.11443748514162,
+      "sup_shadowed_promoted": 44.11443748514162
+    },
+    "profile_owned": {
+      "entering_cold": 2554,
+      "profile_total": 2554
+    },
+    "shadow_census_cold": {
+      "entering": 8955,
+      "excluded": 54,
+      "excluded_fraction": 0.005994005994005994,
+      "total": 9009
+    },
+    "shadow_census_promoted": {
+      "entering": 8955,
+      "excluded": 54,
+      "excluded_fraction": 0.005994005994005994,
+      "total": 9009
+    },
+    "solver_scalar": {
+      "persisted": null,
+      "recomputed_cold": 5.458057583629558e-15,
+      "recomputed_promoted": 5.458057583629558e-15,
+      "unmasked_all_carriers": 1.0589578569021467
+    }
+  },
+  "topology": {
+    "axis_flux_wb": 41.659787520334795,
+    "axis_rz_m": [
+      6.095776173942807,
+      7.075306581460396e-05
+    ],
+    "boundary_flux_wb": -5.9345186185688705,
+    "class": "limited",
+    "exception_text": null,
+    "flux_span_wb": -47.59430613890367,
+    "o_candidate_count": 1,
+    "o_second_best_flux_margin_wb": null,
+    "read_status": "qualified_axis",
+    "x_candidate_count": 0,
+    "x_point_rz_m": null,
+    "x_second_best_flux_margin_wb": null
+  },
+  "wall_node_number": 121,
+  "wall_seconds": 55.89032275788486
+}

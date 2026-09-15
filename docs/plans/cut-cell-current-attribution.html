@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="73">
+<meta name="plan-version" content="74">
 </head>
 <body>
 <main class="plan-doc">
@@ -400,6 +400,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260914T205228093973-cca-quadrature-delta-gate-serial" data-who="s19t-cca-quadrature-delta" data-when="2026-09-14T23:55:50.259Z">
     <div class="r-comment-body"><p>The delta is unmeasured, not empty: both arms abort with SIGABRT in the JAX CPU backend during tests/test_constraint_response_matrix.py (baseline in the compilation-cache read path at test_a_derivation_reaches_only_the_circuits_it_is_allowed_to_drive after 46 passed and 1 failed; after in pjit cache_miss at test_two_competing_rows_receive_distinct_decoupled_directions after 46 passed), with private caches and sequential arms, so the crash is independent of shared-cache concurrency and of the quadrature change and belongs to the same family as the pre-existing test_reduced_newton_constraints SIGABRT recorded on 2026-09-10. The quadrature commits stay held; the delta reruns with the aborting module excluded and named.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260914T235837756000-cca-quadrature-delta-gate-excluding-abort" data-who="s19t-cca-quadrature-delta-2" data-when="2026-09-15T01:04:16.755Z">
+    <div class="r-comment-body"><p>Excluding the two known aborting modules moved the abort later: both arms again die with SIGABRT in the JAX CPU backend after about 61 tests, baseline and after alike, so the crash is spread across the forward-operator test surface and no single-process gate over it can finish. The added-failure set remains unmeasured. The per-module gate (cca-quadrature-delta-gate-per-module) replaces this design.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260910T114647655089-cca-read-representation-discriminator" data-who="s19i-cca-readrep" data-when="2026-09-10T16:13:45.324Z">
     <div class="r-comment-body"><p>Gate A decided. On the exact input (analytic flux at the nodes) the global split spline books the analytic total to 1.00003 with zero boundary root error, the six-point ring quadratic to 0.99997 with 0.15 mm median root error, and the linear edge root falls 0.55 percent short (0.9945, 1.8 mm median root error) on weak, moderate and strong; on the single-null -300 row all three overshoot by 1 to 1.5 percent (linear 1.0099, quadratic 1.0154, spline 1.0140). The terminal-state shortfalls are state error: 100 percent on weak (0.0169) and moderate (0.0096), 99.7 percent on strong, because the committed terminal boundary level sits at 10.4 Wb on weak and 0.077 Wb on moderate against the analytic 0; on the single-null terminal the read boundary level of 0.0010 Wb (21 percent of the span) costs 20 percent of the current under every representation, which is the unadmitted saddle. The spline level disagrees in sign with the nodal flux at 7 to 24 cells per row without affecting its total. Receipt, report and four panels banked on main under docs/figures/cut-cell-current-attribution/read-representation; the worker session exhausted after committing.</p></div>

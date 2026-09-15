@@ -1338,11 +1338,12 @@ def reanalyze(
         solve_text = solve_path.read_text(encoding="utf-8")
         map_text = map_path.read_text(encoding="utf-8")
         source_part = hlo_dir.parent / "parts" / f"{case_name}_{requested_cells}c.json"
-        compile_seconds = None
-        if source_part.exists():
-            compile_seconds = json.loads(source_part.read_text(encoding="utf-8")).get(
-                "compile_seconds"
-            )
+        source_entry = (
+            json.loads(source_part.read_text(encoding="utf-8"))
+            if source_part.exists()
+            else {}
+        )
+        compile_seconds = source_entry.get("compile_seconds")
         solve_census = _census_module(solve_text, cells=requested_cells)
         map_census = _census_module(map_text, cells=requested_cells)
         solve_census.update(
@@ -1361,6 +1362,15 @@ def reanalyze(
                 "hlo_text_path": str(map_path),
             }
         )
+        for label, census in (("solve", solve_census), ("map", map_census)):
+            source_executable = source_entry.get(label, {}).get("executable")
+            census["executable"] = source_executable or {
+                "serialized_bytes": None,
+                "generated_code_bytes": None,
+                "serialization_error": (
+                    "reanalyzed HLO has no persisted executable-size measurement"
+                ),
+            }
         for census in (solve_census, map_census):
             census["top30_instructions"] = _top(
                 census["attributed"], 30, "instructions"

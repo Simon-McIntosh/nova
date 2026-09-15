@@ -555,15 +555,28 @@ def measure_jvp_accuracy(
                     (state,),
                     (direction,),
                 )
+                _level_primal, level_tangent = jax.jvp(
+                    branch_levels,
+                    (state,),
+                    (direction,),
+                )
                 upper = compiled_map(state + difference_step * direction)
                 lower = compiled_map(state - difference_step * direction)
                 central = (upper - lower) / (2.0 * difference_step)
-                tangent, central = jax.block_until_ready((tangent, central))
+                upper_levels = branch_levels(state + difference_step * direction)
+                lower_levels = branch_levels(state - difference_step * direction)
+                level_central = (upper_levels - lower_levels) / (2.0 * difference_step)
+                tangent, central, level_tangent, level_central = jax.block_until_ready(
+                    (tangent, central, level_tangent, level_central)
+                )
                 error = tangent - central
                 tangent_norm = float(jnp.linalg.norm(tangent))
                 central_norm = float(jnp.linalg.norm(central))
                 error_norm = float(jnp.linalg.norm(error))
                 scale = max(tangent_norm, central_norm, np.finfo(np.float64).tiny)
+                level_error_norm = float(jnp.linalg.norm(level_tangent - level_central))
+                level_tangent_norm = float(jnp.linalg.norm(level_tangent))
+                level_central_norm = float(jnp.linalg.norm(level_central))
                 step_probes = []
                 for multiplier in (0.25, 1.0, 4.0, 16.0, 64.0, 256.0):
                     probe_step = difference_step * multiplier
@@ -611,6 +624,12 @@ def measure_jvp_accuracy(
                         "error_l2": error_norm,
                         "relative_error": error_norm / scale,
                         "error_linf": float(jnp.max(jnp.abs(error))),
+                        "packing_level_jvp_relative_error": level_error_norm
+                        / max(
+                            level_tangent_norm,
+                            level_central_norm,
+                            np.finfo(np.float64).tiny,
+                        ),
                         "step_probes": step_probes,
                     }
                 )

@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="73">
 </head>
 <body>
 <main class="plan-doc">
@@ -218,6 +218,11 @@
 <article class="r-fu" data-id="f-cca-wall-polyline-sagitta" data-status="open" data-written-by="s19-review" data-written-at="2026-09-14" data-recommends-skill="/reckon-ship" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Wall geometry at cell pitch or a curved wall, since the limiter read now reaches the polyline tangency exactly</h4>
     <div class="r-fu-body"><p>With the contact read at the polyline tangency to 1e-7 m, the remaining limited-row contact error is the polyline's sagitta against the true limiter, first order in panel length (51, 26, 13 mm at 241, 481, 961 nodes). Either build the fixture and machine walls at one panel per cell pitch or finer (169 nodes at 1000 cells, 263 at 2500, from the limiter audit), or represent the wall as a periodic spline and take the tangency on the curve; measure both on the analytic rows for contact position error against wall count and cell count, and for the interaction-matrix build cost of the finer wall. Also rebase the raster-oracle bit-identity test onto the delivered selector in its own commit, stating the mechanism (the oracle called the retired blend), and rerun the topology delta gate serially so the two held limiter commits can merge.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §2</pre>
+    </article>
+<article class="r-fu" data-id="f-cca-cpu-backend-abort-in-touched-surface-tests" data-status="open" data-written-by="s19-review" data-written-at="2026-09-15" data-recommends-skill="/reckon-ship" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The CPU test lane aborts inside the JAX backend on the forward-operator importers, before pytest can report</h4>
+    <div class="r-fu-body"><p>Measured 2026-09-14 and 15 across three delta-gate runs (jobs 1270925, 1270957, 1270982): pytest over the sixty-odd modules importing observation, stencil_mesh, clip_quadrature or forward_operator dies with SIGABRT (exit 134) in the JAX CPU backend on both the baseline and the changed code, whether the two arms run concurrently or strictly sequentially with private compilation caches, and excluding the first aborting module (tests/test_constraint_response_matrix.py, alongside the known tests/test_reduced_newton_constraints.py) only moves the abort to a later module. The abort kills the interpreter before the summary, so no failure ids are collected and every delta over this surface is unmeasured. Two things follow. First, the delta gate over this surface runs one module per fresh process (the per-file lane the suite serialisation memory already prescribes), so an abort loses one module and names it while the others are measured; the held quadrature commits (run r-20260914T112013796921) and the held limiter commits (run r-20260914T152335508652) merge on that gate. Second, the abort itself is a defect to find: which module and which op aborts the CPU backend, with the JAX and XLA versions, a minimal reproduction, and whether it is the compilation-cache serialisation of an oversized executable (the same 2 GiB limit the solve profile hit) or a kernel fault; report it upstream if it is the backend.</p></div>
     <pre class="r-fu-prompt">/reckon-ship cut-cell-current-attribution §2</pre>
     </article>
 </section>

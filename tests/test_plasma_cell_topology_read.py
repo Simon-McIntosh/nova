@@ -79,7 +79,15 @@ def _single_null_flux(radius, height):
 
 
 def _containment_stationary_read(operator, physical):
-    """Select boundary state from zero-/four-crossing containment candidates."""
+    """Select boundary state from zero-/four-crossing containment candidates.
+
+    The wall read mirrors the production selector: the arc-length quadratic
+    extremum through the extremal wall node and its neighbours
+    (``wall_anchor_data``).  The earlier oracle called ``topology.wall``, the
+    Null1D blend of the winner bracket with its strongest rival that the
+    production selector retired, leaving the oracle wall one ULP away from
+    the delivered read on the raster fixtures.
+    """
     topology = operator._fixed_design_topology
     radial = np.unique(np.asarray(operator.grid.coordinate)[:, 0])
     vertical = np.unique(np.asarray(operator.grid.coordinate)[:, 1])
@@ -118,7 +126,7 @@ def _containment_stationary_read(operator, physical):
         retained[1, saddle_index],
         jnp.full(4, jnp.nan),
     )
-    wall = topology.wall(wall_flux, operator.polarity)
+    wall = topology.wall_anchor_data(wall_flux, operator.polarity)
 
     saddle_heights = jnp.where(saddle_valid, retained[1, :, 1], jnp.nan)
     lower_saddle = jnp.nanmin(saddle_heights)

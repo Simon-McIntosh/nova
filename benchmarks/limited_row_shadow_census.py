@@ -51,7 +51,7 @@ REQUESTED_CELLS = (-1000, -2500)
 LIMITED_CASES = (
     "weak-rotation-reactor-static",
     "moderate-rotation-conventional-static",
-    "strong-rotation-spherical-static",
+    "strong-rotation-compact-static",
 )
 
 

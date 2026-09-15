@@ -511,51 +511,11 @@ def _report_text(payload: dict[str, Any], receipt: Path, figure: Path) -> str:
     )
 
 
-def measure(receipt: Path, figure: Path, reports: tuple[Path, ...]) -> dict[str, Any]:
-    """Run the reproduction, direct probes, and measured multi-cap target."""
-    payload = _base_payload()
-
-    def persist() -> None:
-        _write_json(receipt, payload)
-
-    persist()
-    prepared = shard.prepare_labeller()
-    prepared = shard._prepared_with_polarity(prepared, shard._shot_polarity(SHOT))
-    group = zarr.open_group(str(shard.SHOT_STORE / f"{SHOT}.zarr"), mode="r")["efm"]
-    state = globalisation._row_state(prepared, group, ROW)
-    active_names = globalisation._circuit_names(prepared.policy_evidence)
-    direction = comparison._direction(
-        active_names,
-        "p6_upper",
-        state["current"].size,
-    )
+def _adjudicate(payload: dict[str, Any]) -> dict[str, Any]:
+    """Apply the declared acceptance rule to a complete measured payload."""
     historical = payload["historical_input"]
-    reproduction = _run_capped_iteration(
-        "historical_target_reproduction",
-        prepared,
-        state,
-        direction,
-        target_centroid_z_m=historical["target_centroid_z_m"],
-        free_current_reference_a=historical["free_current_reference_a"],
-        payload=payload,
-        persist=persist,
-    )
-    free = _free_responses(prepared, state, direction, payload, persist)
-    selected = free[TARGET_REFERENCE_CURRENT_A]
-    if not selected["converged"] or selected["centroid_z_m"] is None:
-        raise RuntimeError(
-            "the directly measured plus 3000 A free target is unavailable"
-        )
-    target = _run_capped_iteration(
-        "direct_three_kiloampere_target",
-        prepared,
-        state,
-        direction,
-        target_centroid_z_m=float(selected["centroid_z_m"]),
-        free_current_reference_a=TARGET_REFERENCE_CURRENT_A,
-        payload=payload,
-        persist=persist,
-    )
+    reproduction = payload["measurements"]["historical_target_reproduction"]
+    target = payload["measurements"]["direct_three_kiloampere_target"]
     acceptance = {
         "historical_five_cap_behaviour_reproduced": (
             reproduction["capped_application_count"]
@@ -598,6 +558,55 @@ def measure(receipt: Path, figure: Path, reports: tuple[Path, ...]) -> dict[str,
     )
     payload["passed"] = all(acceptance[key] for key in gating_keys)
     payload["status"] = "complete"
+    return payload
+
+
+def measure(receipt: Path, figure: Path, reports: tuple[Path, ...]) -> dict[str, Any]:
+    """Run the reproduction, direct probes, and measured multi-cap target."""
+    payload = _base_payload()
+
+    def persist() -> None:
+        _write_json(receipt, payload)
+
+    persist()
+    prepared = shard.prepare_labeller()
+    prepared = shard._prepared_with_polarity(prepared, shard._shot_polarity(SHOT))
+    group = zarr.open_group(str(shard.SHOT_STORE / f"{SHOT}.zarr"), mode="r")["efm"]
+    state = globalisation._row_state(prepared, group, ROW)
+    active_names = globalisation._circuit_names(prepared.policy_evidence)
+    direction = comparison._direction(
+        active_names,
+        "p6_upper",
+        state["current"].size,
+    )
+    historical = payload["historical_input"]
+    _run_capped_iteration(
+        "historical_target_reproduction",
+        prepared,
+        state,
+        direction,
+        target_centroid_z_m=historical["target_centroid_z_m"],
+        free_current_reference_a=historical["free_current_reference_a"],
+        payload=payload,
+        persist=persist,
+    )
+    free = _free_responses(prepared, state, direction, payload, persist)
+    selected = free[TARGET_REFERENCE_CURRENT_A]
+    if not selected["converged"] or selected["centroid_z_m"] is None:
+        raise RuntimeError(
+            "the directly measured plus 3000 A free target is unavailable"
+        )
+    target = _run_capped_iteration(
+        "direct_three_kiloampere_target",
+        prepared,
+        state,
+        direction,
+        target_centroid_z_m=float(selected["centroid_z_m"]),
+        free_current_reference_a=TARGET_REFERENCE_CURRENT_A,
+        payload=payload,
+        persist=persist,
+    )
+    _adjudicate(payload)
     persist()
     _write_figure(figure, target)
     report = _report_text(payload, receipt, figure)
@@ -613,12 +622,20 @@ def main() -> None:
     parser.add_argument("--receipt", type=Path, required=True)
     parser.add_argument("--figure", type=Path, required=True)
     parser.add_argument("--report", type=Path, action="append", required=True)
+    parser.add_argument("--adjudicate-existing", action="store_true")
     args = parser.parse_args()
-    payload = measure(
-        args.receipt.resolve(),
-        args.figure.resolve(),
-        tuple(path.resolve() for path in args.report),
-    )
+    receipt = args.receipt.resolve()
+    figure = args.figure.resolve()
+    reports = tuple(path.resolve() for path in args.report)
+    if args.adjudicate_existing:
+        payload = _adjudicate(json.loads(receipt.read_text(encoding="utf-8")))
+        payload["adjudication_revision"] = _revision()
+        _write_json(receipt, payload)
+        report = _report_text(payload, receipt, figure)
+        for report_path in reports:
+            report_path.write_text(report, encoding="utf-8")
+    else:
+        payload = measure(receipt, figure, reports)
     print(json.dumps(payload, indent=2))
     if not payload["passed"]:
         raise SystemExit(1)

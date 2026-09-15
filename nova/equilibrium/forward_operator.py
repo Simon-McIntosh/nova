@@ -1889,9 +1889,11 @@ class ForwardFluxOperator:
             requested_class,
             private_wall_node_mask,
         )
-        masks = saddle_qualified_domains(
-            result.masks, self._private_flux_saddle_admitted(result.state)
-        )
+        masks = result.masks
+        if isinstance(masks, DomainMasks):
+            masks = saddle_qualified_domains(
+                masks, self._private_flux_saddle_admitted(result.state)
+            )
         same_axis = jnp.all(jnp.equal(initial.state.axis, result.state.axis))
         admitted = result.axis_admitted & (~initial.axis_admitted | same_axis)
         return masks, result.state, result.connected | masks.core, admitted

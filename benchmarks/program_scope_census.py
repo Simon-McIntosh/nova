@@ -425,19 +425,17 @@ def _replication_targets() -> dict[str, dict[str, Any]]:
     """Return call-path sentinels that occur once per traced map copy."""
     return {
         "current-moment path": {
-            "function": (
-                "ForwardFluxOperator.normalised_current_moments_and_observation"
-            ),
+            "function": "ForwardFluxOperator.normalised_current_moments",
             "sentinel": _source_line(
-                ForwardFluxOperator.normalised_current_moments_and_observation,
-                "partition = self._support_partition",
+                ForwardFluxOperator.normalised_current_moments,
+                "moments = self.cell_current_moments",
             ),
         },
         "topology read": {
             "function": "ForwardFluxOperator._fixed_design_read",
             "sentinel": _source_line(
                 ForwardFluxOperator._fixed_design_read,
-                "initial = self._fixed_design_topology.read_qualification",
+                "grid_flux, _wall_flux = self._fixed_design_topology.split_flux_map",
             ),
         },
     }

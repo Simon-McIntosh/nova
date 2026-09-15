@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T13:15:15",
+  "updated": "2026-09-15T13:17:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4739,6 +4739,15 @@
       {
         "id": "s19h-fsa-shimgate-l",
         "harness": "codex-luna",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-msc-cacheentry-s",
+        "harness": "codex",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -164705,6 +164714,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2554
+    "_version": 2555
   }
 }

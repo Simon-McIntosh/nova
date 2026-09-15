@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="59">
+<meta name="plan-version" content="60">
 <meta name="plan-impl" content="0.78">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -264,6 +264,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260914T160220568583-msc-solve-profile-kernel-count" data-who="s19i-msc-solve-profile" data-when="2026-09-15T00:14:22.645Z">
     <div class="r-comment-body"><p>One whole-cell solve at 300 cells: 2,057,009 device kernel launches of 1,444 distinct programs, 3.36 s of kernel wall, 4.13 s of launch gap, 9.98 s traced wall (41 percent gap, 34 percent kernels, the rest host), 99.96 percent of kernel wall inside scan or while bodies, 423,284 compiled HLO instructions, a 434 MB serialized executable. At 1000 cells: at least 2,066,825 launches of 890 programs, 4.45 s kernels, 3.69 s gaps, 65.8 s traced wall, so the host carries about 58 s; the HLO text and executable exceeded the 2 GiB serialisation limit and are unavailable. Doubling the Newton budget leaves the StableHLO op count at 180,931, so the loops are scanned. Against a 1 ms target: two million launches are a 15 s floor at 7.6 microseconds each, and the host time between device calls is larger still at 1000 cells; both are the program inlining the topology read and the current-moment evaluation into every Newton body.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260914T192229213809-msc-compile-host-memory" data-who="s19i-msc-compile-memory" data-when="2026-09-15T00:58:23.170Z">
+    <div class="r-comment-body"><p>Compiling one whole-cell solve program: 300 cells 535 s (467 s backend), peak host RSS 48.8 GiB, executable 462 MB, 448,360 optimised instructions; 1000 cells 548 s, 62.8 GiB, executable proto 3.74 GiB (serialization failed above the 2 GiB limit), generated code 3.52 GiB; 2500 cells 711 s, 136.4 GiB, executable proto 19.2 GiB, generated code 19.0 GiB. The StableHLO instruction count is 254,873 at every rung while the generated code grows 0.44 to 3.5 to 19 GiB, quadratically in cells: the executable embeds the mesh-sized arrays (the interaction-matrix blocks, cells by targets) as constants, so the binary carries the interaction matrix and the compiler&#x27;s working set is the binary. The persistent cache retrieved only the 300-cell program (backend 467 s to 74 s); the 1000 and 2500 programs cannot be cached at all. The fix is the one already applied to the exterior: pass the kernel blocks and every other mesh-sized array as program arguments rather than closure constants.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

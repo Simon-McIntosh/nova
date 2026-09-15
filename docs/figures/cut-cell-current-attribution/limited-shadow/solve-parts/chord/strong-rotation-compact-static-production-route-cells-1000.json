@@ -59,8 +59,8 @@
   "cache": {
     "build_seconds": 0.0,
     "hit": true,
-    "load_seconds": 0.1902274927124381,
-    "lock_wait_seconds": 6.594695150852203e-06,
+    "load_seconds": 0.18832472432404757,
+    "lock_wait_seconds": 5.424022674560547e-06,
     "semantic_key": "0bf3ef24267cd3ec",
     "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
     "store_seconds": 0.0
@@ -77,7 +77,7 @@
   "fixture_exterior_cache": {
     "build_seconds": 0.0,
     "hit": true,
-    "lock_wait_seconds": 6.882473826408386e-06,
+    "lock_wait_seconds": 9.51625406742096e-06,
     "semantic_key": "5497cfea08d35b60",
     "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
   },
@@ -122,17 +122,17 @@
   },
   "lane": {
     "cpu_count": 8,
-    "elapsed_seconds": 598.2820553956553,
+    "elapsed_seconds": 590.0100235799327,
     "execution": "slurm",
     "exit_marker": "SOLOVEV_ROW_EXIT=0",
     "hostname": "98dci4-gpu-0003.iter.org",
     "jax_default_backend": "gpu",
-    "jax_platforms": null,
+    "jax_platforms": "cuda",
     "node": "98dci4-gpu-0003",
     "partition": "betelgeuse",
     "precision": "float64",
     "reservation": "gpu_0003_grpA",
-    "slurm_job_id": "1271297",
+    "slurm_job_id": "1271409",
     "threaded_settings": {
       "mkl_num_threads": null,
       "numexpr_num_threads": null,
@@ -48597,7 +48597,7 @@
       "stored_flux_samples_used": false,
       "supported_cell_count": 342
     },
-    "solve_wall_seconds": 560.5684267897159,
+    "solve_wall_seconds": 553.1812264341861,
     "target_current_a": 251245.90891804622,
     "target_current_argument": "Ip_closed_form",
     "terminal_fixed_point_residual": 2.912526675978791e-16,
@@ -48605,10 +48605,10 @@
     "termination": "converged"
   },
   "stage_wall_seconds": {
-    "accuracy_scoring": 1.2532083531841636,
-    "case_and_machine": 0.19337217789143324,
-    "figure_render": 0.36330462992191315,
-    "operator_and_seed": 35.46011040639132,
-    "production_solve": 560.5684267897159
+    "accuracy_scoring": 1.070584868080914,
+    "case_and_machine": 0.19238548539578915,
+    "figure_render": 0.3260466614738107,
+    "operator_and_seed": 35.21268159896135,
+    "production_solve": 553.1812264341861
   }
 }

@@ -59,8 +59,8 @@
   "cache": {
     "build_seconds": 0.0,
     "hit": true,
-    "load_seconds": 0.2042326470836997,
-    "lock_wait_seconds": 5.501322448253632e-06,
+    "load_seconds": 0.20626863557845354,
+    "lock_wait_seconds": 5.574896931648254e-06,
     "semantic_key": "6de211f6199b516b",
     "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
     "store_seconds": 0.0
@@ -71,13 +71,13 @@
   "figure": {
     "filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/moderate-rotation-conventional-static-production-route-cells-1000.png",
     "project_absolute_src": "/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/moderate-rotation-conventional-static-production-route-cells-1000.png",
-    "render_source": "persisted_part_receipt",
+    "render_source": "fresh_production_solve",
     "sha256": "456a7afef8c2fddf19260c996a88897e907aed2ad8b2abc3efd0fb6f958d98ad"
   },
   "fixture_exterior_cache": {
     "build_seconds": 0.0,
     "hit": true,
-    "lock_wait_seconds": 1.0196119546890259e-05,
+    "lock_wait_seconds": 9.065493941307068e-06,
     "semantic_key": "4cb11cd761cd8334",
     "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
   },
@@ -122,17 +122,17 @@
   },
   "lane": {
     "cpu_count": 8,
-    "elapsed_seconds": 608.7432742342353,
+    "elapsed_seconds": 600.1423019152135,
     "execution": "slurm",
     "exit_marker": "SOLOVEV_ROW_EXIT=0",
     "hostname": "98dci4-gpu-0003.iter.org",
     "jax_default_backend": "gpu",
-    "jax_platforms": null,
+    "jax_platforms": "cuda",
     "node": "98dci4-gpu-0003",
     "partition": "betelgeuse",
     "precision": "float64",
     "reservation": "gpu_0003_grpA",
-    "slurm_job_id": "1271221",
+    "slurm_job_id": "1271409",
     "threaded_settings": {
       "mkl_num_threads": null,
       "numexpr_num_threads": null,
@@ -48640,7 +48640,7 @@
       "stored_flux_samples_used": false,
       "supported_cell_count": 330
     },
-    "solve_wall_seconds": 559.9229492712766,
+    "solve_wall_seconds": 564.3392006568611,
     "target_current_a": 1624991.1778605897,
     "target_current_argument": "Ip_closed_form",
     "terminal_fixed_point_residual": 5.875220964438613e-16,
@@ -48648,10 +48648,10 @@
     "termination": "converged"
   },
   "stage_wall_seconds": {
-    "accuracy_scoring": 1.1831802427768707,
-    "case_and_machine": 0.20945068169385195,
-    "figure_render": 0.3151484187692404,
-    "operator_and_seed": 47.025912994518876,
-    "production_solve": 559.9229492712766
+    "accuracy_scoring": 1.0594690050929785,
+    "case_and_machine": 0.21003423631191254,
+    "figure_render": 0.36027128994464874,
+    "operator_and_seed": 34.145559534430504,
+    "production_solve": 564.3392006568611
   }
 }

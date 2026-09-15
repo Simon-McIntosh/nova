@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T15:50:45",
+  "updated": "2026-09-15T15:58:27",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4666,6 +4666,15 @@
       },
       {
         "id": "s19h-cca-abort-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-cca-abort-close-c2",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -166007,6 +166016,214 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T124717561490-msc-program-constant-census",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-program-constant-census",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1072,
+                "cached_input_tokens": 397422,
+                "input_tokens": 398526,
+                "output_tokens": 748,
+                "reasoning_output_tokens": 370,
+                "total_tokens": 399274,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "benchmarks/program_scope_census.py is extended (not replaced) so its optimised-HLO census at 300 and 1000 cells on CPU (all_debug, JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on the node, one foreground srun job under 59 minutes, compile only, receipts persisted per rung) also tables (1) every HLO constant literal above 1 KiB with its shape, dtype, byte size and the innermost nova frame that created it, grouped by seam: interaction-matrix kernel blocks, wall and sample blocks, moment geometry, flux-function amplitudes, target current, mesh connectivity and anything else, with the total captured bytes per group beside the 462 MB executable and the 0.44/3.5/19 GiB generated-code figures at 300/1000/2500 cells the plan records; (2) the copy count of the current-moment path and of the topology read in the optimised HLO (the plan records 83 replications and 1,042,334 solve instructions against 254,873 for one map application), attributed to the unrolled Python trip and Newton loops that produce them with the file and line of each loop; (3) which loops are already lax.scan or while_loop and which are Python-unrolled; (4) the per-call host work of the cached compiled-slice public entry in reduced_newton.py from a py-spy or cProfile of one CPU call, naming the reduced-coordinate and external-flux derivation cost the plan's cache-entry node must hoist; and the report docs/figures/millisecond-converged-solve/program-census/report.md ends with one table listing, per implement node of this section (mesh arrays as program arguments; flux functions and target current as traced arguments; program-size budget with scans; cache-entry overhead), the exact seams (file, function, line) it must change and the bytes or copies it removes, with a figure of captured bytes by group at both cell counts; no source file outside the benchmark changes",
+          "estimated_hours": null,
+          "goal": "Every captured constant, replicated block and unrolled loop in the compiled map and whole-cell solve programs named with its byte size, copy count and the source seam that bakes it, so the four implement nodes of this section start from a measured attack list instead of a search",
+          "id": "msc-program-constant-census",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T12:47:21Z",
+            "read_at": "2026-09-15T12:47:23Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 36.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T124717561490-msc-program-constant-census/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/program_scope_census.py",
+            "docs/figures/millisecond-converged-solve/program-census",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/program-census",
+            "docs/evidence/archive/millisecond-converged-solve-landed.html",
+            "docs/plans/millisecond-converged-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19h-msc-census-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T12:48:55Z",
+        "completed_at": "2026-09-15T13:48:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3589,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3589,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "bed7781c19b3c757c16640108e09aa14a606a185",
+        "commits": [
+          "4ac43e83f3cd05384eb63a726d2defb6e15aa620",
+          "023f1fc7248aac648f3f053c20a9f078032de714",
+          "33100da5be573f6376edb9d42017466e17e307a7",
+          "69b8ad4ba58894bd939be6d0d588d3d1271e8695",
+          "91c0f5824ac8ac2ee90f89f78e43f22be6454875",
+          "44fb0dfa268f6c921b67b90b5e3db90c22eb4b99",
+          "735f0b852c7e8d3d9cb74b0a261b5ffc33c54257"
+        ],
+        "changed_lines": {
+          "added": 30716,
+          "removed": 14,
+          "files": 8
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1271445: compile-only optimised-HLO census at 300 and 1000 cells with cached-entry cProfile; report-only jobs 1271466, 1271471, 1271482, 1271486, 1271489 exit 0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/millisecond-converged-solve/program-census/1000.json",
+          "log_digest": "sha256:0c1318fcdfa7d06c7971e61af9963a3030d2a987ddb7c04b2b635dd77e709f43"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T124717561490-msc-program-constant-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a51c-ffc1-7503-9701-ba3ce5aaa3dc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 60135808,
+            "cached_input_tokens_cumulative": 60135808,
+            "input_tokens": 60513391,
+            "input_tokens_cumulative": 60513391,
+            "output_tokens": 79728,
+            "output_tokens_cumulative": 79728,
+            "reasoning_output_tokens": 22934,
+            "reasoning_output_tokens_cumulative": 22934
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T13:48:44Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 41.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T13:48:44Z"
+            }
+          ],
+          "notional_cost_usd": 325.4389,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 60135808,
+          "cumulative_input_tokens": 120649199,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 102662
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-constant-census",
+          "session_id": "01a0a51c-ffc1-7503-9701-ba3ce5aaa3dc",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T13:48:44Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 218.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -166319,6 +166536,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2568
+    "_version": 2570
   }
 }

@@ -1893,7 +1893,7 @@ class ForwardFluxOperator:
         connected = result.connected
         if isinstance(masks, DomainMasks):
             masks = saddle_qualified_domains(
-                masks, self._private_flux_saddle_admitted(result.state)
+                masks, self._private_flux_saddle_present(result.state)
             )
             connected = connected | masks.core
         same_axis = jnp.all(jnp.equal(initial.state.axis, result.state.axis))
@@ -1901,14 +1901,17 @@ class ForwardFluxOperator:
         return masks, result.state, connected, admitted
 
     @staticmethod
-    def _private_flux_saddle_admitted(topology: TopologyState) -> jax.Array:
-        """Return whether a finite saddle owns the selected plasma boundary."""
+    def _private_flux_saddle_present(topology: TopologyState) -> jax.Array:
+        """Return whether the topology read found a finite qualified saddle.
+
+        Saddle presence, not ownership of the selected boundary, gives a
+        disconnected closed component physical private-flux meaning. A cold
+        diverted solve can select its limited boundary before class promotion
+        while already carrying the saddle that separates its private branch.
+        """
         x_point = getattr(topology, "x_point", jnp.full(2, jnp.nan))
-        finite_point = jnp.all(jnp.isfinite(x_point))
-        return (
-            getattr(topology, "boundary_is_xpoint", finite_point)
-            & finite_point
-            & jnp.isfinite(getattr(topology, "x_point_flux", 0.0))
+        return jnp.all(jnp.isfinite(x_point)) & jnp.isfinite(
+            getattr(topology, "x_point_flux", 0.0)
         )
 
     def _current(self, current) -> jax.Array:
@@ -2548,14 +2551,14 @@ class ForwardFluxOperator:
     ):
         """Build residual shadows from one already-completed topology read.
 
-        A limited class has no admitted saddle and therefore no private-flux
-        region: every physical grid carrier participates in the residual even
-        if the connectivity flood provisionally split wall-cut cells from the
-        axis component. Diverted reads retain private shadow only behind their
-        finite admitted saddle.
+        A read with no finite qualified saddle has no private-flux region:
+        every physical grid carrier participates in the residual even if the
+        connectivity flood provisionally split wall-cut cells from the axis
+        component. A finite saddle retains the private shadow even while a
+        cold diverted read still selects its limited boundary before promotion.
         """
         masks = saddle_qualified_domains(
-            masks, self._private_flux_saddle_admitted(topology)
+            masks, self._private_flux_saddle_present(topology)
         )
         reading = self._carrier_shadow_read(physical, masks)
         previous_wall_shadow = self._previous_wall_shadow(previous_shadow)

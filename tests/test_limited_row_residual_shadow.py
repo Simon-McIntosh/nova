@@ -1,4 +1,4 @@
-"""Private-flux shadows require a finite saddle-owned boundary."""
+"""Private-flux shadows require a finite qualified saddle candidate."""
 
 import jax.numpy as jnp
 import numpy as np
@@ -25,9 +25,9 @@ def _masks() -> DomainMasks:
     )
 
 
-def _topology(*, diverted: bool) -> TopologyState:
-    x_point = jnp.asarray([1.5, -0.4]) if diverted else jnp.full(2, jnp.nan)
-    x_flux = jnp.asarray(1.0) if diverted else jnp.asarray(jnp.nan)
+def _topology(*, saddle_present: bool, diverted: bool = False) -> TopologyState:
+    x_point = jnp.asarray([1.5, -0.4]) if saddle_present else jnp.full(2, jnp.nan)
+    x_flux = jnp.asarray(1.0) if saddle_present else jnp.asarray(jnp.nan)
     return TopologyState(
         axis=jnp.asarray([1.5, 0.0]),
         axis_flux=jnp.asarray(0.0),
@@ -43,9 +43,9 @@ def _topology(*, diverted: bool) -> TopologyState:
 
 def test_limited_class_relabels_disconnected_closed_carriers_as_core():
     """A wall-cut connectivity split cannot create private flux without a saddle."""
-    topology = _topology(diverted=False)
+    topology = _topology(saddle_present=False)
     qualified = saddle_qualified_domains(
-        _masks(), ForwardFluxOperator._private_flux_saddle_admitted(topology)
+        _masks(), ForwardFluxOperator._private_flux_saddle_present(topology)
     )
 
     np.testing.assert_array_equal(
@@ -57,9 +57,9 @@ def test_limited_class_relabels_disconnected_closed_carriers_as_core():
 
 def test_limited_class_maps_every_physical_carrier():
     """No limited physical carrier is copied through the residual unchanged."""
-    topology = _topology(diverted=False)
+    topology = _topology(saddle_present=False)
     qualified = saddle_qualified_domains(
-        _masks(), ForwardFluxOperator._private_flux_saddle_admitted(topology)
+        _masks(), ForwardFluxOperator._private_flux_saddle_present(topology)
     )
     trial = jnp.asarray([3.0, 5.0])
     mapped = jnp.asarray([7.0, 11.0])
@@ -75,10 +75,10 @@ def test_limited_class_maps_every_physical_carrier():
 
 
 def test_diverted_class_preserves_private_shadow_behind_finite_saddle():
-    """A finite saddle-owned boundary retains its disconnected closed branch."""
-    topology = _topology(diverted=True)
+    """A finite saddle retains its disconnected closed branch after promotion."""
+    topology = _topology(saddle_present=True, diverted=True)
     qualified = saddle_qualified_domains(
-        _masks(), ForwardFluxOperator._private_flux_saddle_admitted(topology)
+        _masks(), ForwardFluxOperator._private_flux_saddle_present(topology)
     )
     trial = jnp.asarray([3.0, 5.0])
     mapped = jnp.asarray([7.0, 11.0])
@@ -92,3 +92,16 @@ def test_diverted_class_preserves_private_shadow_behind_finite_saddle():
 
     np.testing.assert_array_equal(qualified.label, _masks().label)
     np.testing.assert_array_equal(result, np.asarray([7.0, 5.0]))
+
+
+def test_limited_selected_boundary_keeps_private_flux_when_saddle_is_present():
+    """A cold diverted read retains private flux before class promotion."""
+    topology = _topology(saddle_present=True, diverted=False)
+    assert not bool(topology.boundary_is_xpoint)
+
+    qualified = saddle_qualified_domains(
+        _masks(), ForwardFluxOperator._private_flux_saddle_present(topology)
+    )
+
+    np.testing.assert_array_equal(qualified.label, _masks().label)
+    assert bool(jnp.any(qualified.private_flux))

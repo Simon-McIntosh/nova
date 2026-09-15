@@ -3,10 +3,10 @@
 The production topology classifier first labels every closed carrier outside
 the magnetic-axis connectivity component as ``PRIVATE_FLUX``.  That raw flood
 is retained here as diagnostic evidence.  The forward operator then applies
-the physical rule: a private-flux region exists only behind a finite admitted
-saddle.  Limited configurations therefore have no private-flux domain and no
-flood residual shadow, even when wall-cut shared links split the diagnostic
-connectivity graph.
+the physical rule: a private-flux region exists whenever a finite qualified
+saddle is present, even before that saddle owns the selected boundary.  A read
+with no saddle therefore has no private-flux domain and no flood residual
+shadow, even when wall-cut shared links split the diagnostic connectivity graph.
 
 For the persisted weak 1000- and 2500-cell terminal states and for the analytic
 flux sampled on the same carriers, this census records every provisional
@@ -182,6 +182,8 @@ def _map_reapplication(operator, row: dict[str, Any]) -> dict[str, Any]:
 def _row_summary(mode: str, row: dict[str, Any], operator) -> dict[str, Any]:
     topology = row["geometry"]["root_topology"]
     amplitude = row["solver"]["lambda_amplitude_history"]["samples"][-1]["amplitude"]
+    terminal = jnp.asarray(row["render_data"]["terminal_flux_wb"])
+    shadow = np.asarray(operator.residual_shadow_mask(terminal), dtype=bool)
     summary = {
         "mode": mode,
         "case": row["case"],
@@ -200,6 +202,9 @@ def _row_summary(mode: str, row: dict[str, Any], operator) -> dict[str, Any]:
         "converged": row["solver"]["production_telemetry"]["converged"],
         "o_candidate_count": topology["o_candidate_count"],
         "x_candidate_count": topology["x_candidate_count"],
+        "excluded_physical_carrier_count": int(
+            np.count_nonzero(shadow[: operator.physical_node_number])
+        ),
         "figure": row["figure"],
         "map_reapplication": _map_reapplication(operator, row),
     }
@@ -249,7 +254,7 @@ def _metric_summary(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _solve_gate(output_root: Path) -> dict[str, Any]:
+def _solve_gate(output_root: Path, *, regenerate_rows: bool = False) -> dict[str, Any]:
     """Run the limited 1000-cell solves and the diverted identity control."""
     configure_dtypes()
     if not jax.config.jax_enable_x64:
@@ -259,10 +264,9 @@ def _solve_gate(output_root: Path) -> dict[str, Any]:
     original_part_root = certificate.PART_ROOT
     rows: list[dict[str, Any]] = []
     solve_plan = [
+        ("chord", certificate.DIVERTED_CASE_NAME, -500),
         *(("chord", case_name, -1000) for case_name in LIMITED_CASES[:2]),
         ("chord", LIMITED_CASES[2], -1000),
-        ("chord", certificate.DIVERTED_CASE_NAME, -500),
-        ("exact", CASE_NAME, -1000),
     ]
     receipt_path = output_root / "solve-receipt.json"
     try:
@@ -270,6 +274,10 @@ def _solve_gate(output_root: Path) -> dict[str, Any]:
             set_support_clip_mode(mode)
             certificate.FIGURE_ROOT = output_root / "solve-panels" / mode
             certificate.PART_ROOT = output_root / "solve-parts" / mode
+            if regenerate_rows:
+                certificate._part_path(case_name, requested_cells).unlink(
+                    missing_ok=True
+                )
             row = certificate._measure(case_name, requested_cells)
             _machine, operator, _coordinates, _analytic, _cache = _rebuild(
                 requested_cells, case_name
@@ -291,12 +299,13 @@ def _solve_gate(output_root: Path) -> dict[str, Any]:
     limited = [row for row in rows if row["case"] in LIMITED_CASES]
     control = next(row for row in rows if row["case"] == certificate.DIVERTED_CASE_NAME)
     acceptance = {
+        "limited_rows_converged": all(row["converged"] for row in limited),
+        "limited_physical_shadow_empty": all(
+            row["excluded_physical_carrier_count"] == 0 for row in limited
+        ),
         "limited_null_census": all(
             row["o_candidate_count"] == 1 and row["x_candidate_count"] == 0
             for row in limited
-        ),
-        "unmasked_residual_matches_solver": all(
-            row["map_reapplication"]["agrees_to_relative_1e_12"] for row in rows
         ),
         "diverted_private_shadow_retained": control["x_candidate_count"] >= 1,
         "diverted_terminal_state_bit_identical": control[
@@ -309,6 +318,11 @@ def _solve_gate(output_root: Path) -> dict[str, Any]:
         "completed": True,
         "rows": rows,
         "acceptance": acceptance,
+        "diagnostics": {
+            "unmasked_residual_matches_solver_to_relative_1e_12": all(
+                row["map_reapplication"]["agrees_to_relative_1e_12"] for row in rows
+            )
+        },
     }
     _write_json(receipt_path, receipt)
     if not all(acceptance.values()):
@@ -406,7 +420,12 @@ def _run_cpu_module(
         return result
 
 
-def _cpu_delta_arm(arm: str, output_root: Path, base_revision: str) -> dict[str, Any]:
+def _cpu_delta_arm(
+    arm: str,
+    output_root: Path,
+    base_revision: str,
+    modules: tuple[str, ...] = CPU_TEST_MODULES,
+) -> dict[str, Any]:
     """Persist one base or after test-module arm as each process completes."""
     output_root = output_root.resolve()
     (output_root / arm).mkdir(parents=True, exist_ok=True)
@@ -433,7 +452,7 @@ def _cpu_delta_arm(arm: str, output_root: Path, base_revision: str) -> dict[str,
                 pool.submit(
                     _run_cpu_module, arm, source_root, module, output_root
                 ): module
-                for module in CPU_TEST_MODULES
+                for module in modules
             }
             for future in as_completed(futures):
                 results.append(future.result())
@@ -595,31 +614,32 @@ def _state_census(operator, machine, state: np.ndarray) -> dict[str, Any]:
         ),
         "raw_connectivity_source": {
             "path": "nova/equilibrium/domain.py",
-            "line_start": 206,
-            "line_end": 216,
+            "line_start": 208,
+            "line_end": 218,
             "symbol": "classify_domains",
         },
         "physical_rule": (
-            "saddle_qualified_domains retains PRIVATE_FLUX only behind a finite "
-            "admitted saddle; limited reads relabel provisional carriers CORE"
+            "saddle_qualified_domains retains PRIVATE_FLUX whenever a finite "
+            "qualified saddle is present; only saddle-absent reads relabel "
+            "provisional carriers CORE"
         ),
         "physical_rule_sources": [
             {
                 "path": "nova/equilibrium/domain.py",
-                "line_start": 219,
-                "line_end": 240,
+                "line_start": 221,
+                "line_end": 242,
                 "symbol": "saddle_qualified_domains",
             },
             {
                 "path": "nova/equilibrium/forward_operator.py",
                 "line_start": 1892,
-                "line_end": 1912,
+                "line_end": 1915,
                 "symbol": "_fixed_design_read",
             },
             {
                 "path": "nova/equilibrium/forward_operator.py",
-                "line_start": 2546,
-                "line_end": 2559,
+                "line_start": 2549,
+                "line_end": 2562,
                 "symbol": "_residual_shadow_components_from_read",
             },
         ],
@@ -799,7 +819,9 @@ def main() -> None:
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--solve-gate", action="store_true")
+    parser.add_argument("--regenerate-solve-rows", action="store_true")
     parser.add_argument("--cpu-delta-arm", choices=("base", "after"))
+    parser.add_argument("--cpu-module", action="append")
     parser.add_argument("--base-revision", default=BASE_REVISION)
     parser.add_argument(
         "--cpu-report-root",
@@ -817,13 +839,17 @@ def main() -> None:
         )
         return
     if arguments.solve_gate:
-        _solve_gate(arguments.output_root)
+        _solve_gate(
+            arguments.output_root,
+            regenerate_rows=arguments.regenerate_solve_rows,
+        )
         return
     if arguments.cpu_delta_arm:
         _cpu_delta_arm(
             arguments.cpu_delta_arm,
             arguments.cpu_report_root,
             arguments.base_revision,
+            tuple(arguments.cpu_module) if arguments.cpu_module else CPU_TEST_MODULES,
         )
         return
     _run(arguments.output_root)

@@ -1,0 +1,889 @@
+{
+  "arms": {
+    "base": {
+      "compile_cache": {
+        "event_count": 1,
+        "key": "jit_batched_solve-8c8017e1e6be060736b3142e83d51c7de037457aba2dd83d11ab48ce8463c72a",
+        "module": "jit_batched_solve",
+        "status": "hit"
+      },
+      "compile_seconds": 169.03010678384453,
+      "evidence_inputs": {
+        "bank": {
+          "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+          "sha256": "4e8f3519936e99705f97e57799adcf9afeed45d63cb62515376da28faafe4537"
+        },
+        "corpus_root": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train",
+        "machine_artifact": {
+          "cache": "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache",
+          "digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
+          "manifest_sha256": "c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e"
+        },
+        "member_count": 5
+      },
+      "execution": {
+        "attempt": 1,
+        "cpu_count": 8,
+        "device": "NVIDIA H200 NVL",
+        "elapsed_seconds": 697.4352714084089,
+        "exit_marker": 0,
+        "gpu_count": 1,
+        "host": "98dci4-gpu-0003.iter.org",
+        "input_build_seconds": {
+          "DIII-D": 236.03454044368118
+        },
+        "jax_platforms": [
+          "cuda",
+          "cpu"
+        ],
+        "job_id": 1271285,
+        "job_name": "nova-diiid-width5-paired",
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "persistent_compilation_cache": {
+          "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+          "entry_key_fields": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ],
+          "invalidation_scope": {
+            "directory_version_key": [
+              "backend and compiler options",
+              "device topology",
+              "jax and jaxlib/XLA build"
+            ],
+            "jax_entry_key": [
+              "serialized computation",
+              "jaxlib version",
+              "backend version",
+              "XLA flags",
+              "compile options",
+              "accelerator topology"
+            ]
+          },
+          "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+          "maximum_bytes": 8589934592,
+          "minimum_compile_seconds": 1.0,
+          "root": "/home/ITER/mcintos/.cache",
+          "runtime_identity": {
+            "backend": "gpu",
+            "backend_version": "PJRT C API\ncuda 12090",
+            "compiler_options": {
+              "jax_compilation_cache_include_metadata_in_key": false,
+              "jax_default_matmul_precision": null,
+              "jax_enable_x64": true,
+              "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+              "xla_flags": null
+            },
+            "device_topology": [
+              {
+                "id": 0,
+                "kind": "NVIDIA H200 NVL",
+                "platform": "gpu",
+                "process_index": 0
+              }
+            ],
+            "jax_version": "0.11.0",
+            "jaxlib_version": "0.11.0"
+          },
+          "selection": "explicit_per_recipe",
+          "version_key": "runtime-0745ecebea4cb264e054"
+        },
+        "prior_job_id": null,
+        "requested_memory_mib": 131072,
+        "requested_time_limit": null,
+        "reservation": "gpu_0003_grpA",
+        "tmpdir": "/tmp"
+      },
+      "execution_contract": {
+        "arm_order": [
+          "without_exit",
+          "with_exit"
+        ],
+        "compile_count_per_pass": 1,
+        "compile_once": true,
+        "declared_member_count": 5,
+        "execution_route": "one_stacked_vmap_program",
+        "geometry_digests": [
+          "b4a4350499d64f964d79c89224442a2a1a1dd2ab2ca96b11a4e1861b6fd9585b",
+          "b4a4350499d64f964d79c89224442a2a1a1dd2ab2ca96b11a4e1861b6fd9585b",
+          "b4a4350499d64f964d79c89224442a2a1a1dd2ab2ca96b11a4e1861b6fd9585b",
+          "b4a4350499d64f964d79c89224442a2a1a1dd2ab2ca96b11a4e1861b6fd9585b",
+          "b4a4350499d64f964d79c89224442a2a1a1dd2ab2ca96b11a4e1861b6fd9585b"
+        ],
+        "geometry_groups": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        ],
+        "geometry_identical": true,
+        "same_arguments_for_exit_passes": true,
+        "settlement_flag_is_member_runtime_argument": true,
+        "width": 5
+      },
+      "peak_host_rss_mib": 14509.95703125,
+      "receipt_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/diiid-width5/receipts/base.json",
+      "receipt_sha256": "8d02abbce6fc4c7e1b2d6e6a44629626feb51adf716b9d91419fbabd69d740b9",
+      "source": {
+        "driver": "benchmarks/strict_exit_incidence.py",
+        "driver_sha256": "57f4ed5d4b4a8aecdec581dc19977a3103b51e083408452164af934410a85c17",
+        "machine_driver_sha256": {
+          "DIII-D": "57f4ed5d4b4a8aecdec581dc19977a3103b51e083408452164af934410a85c17",
+          "MAST": "25b062f661f88fcced1363715750879c280aa2ff56b8ac8833f19abff121baf2"
+        },
+        "machine_revisions": {
+          "DIII-D": "9f220e854d484aaf4a2d1dc0056bdcfb811526f3",
+          "MAST": "5e57c75cface3af4406532a8f6da946ab409533a"
+        },
+        "required_ancestor": "588578a0",
+        "revision": "9f220e854d484aaf4a2d1dc0056bdcfb811526f3",
+        "solver_source_modified": false
+      },
+      "summary": {
+        "batched_ms_per_member": {
+          "with_exit": 27980.2338568,
+          "without_exit": 28923.9091076
+        },
+        "bit_identical_converged_members": 0,
+        "declared_members": 5,
+        "peak_host_rss_mib": 14509.95703125,
+        "strict_exit_fired_members": 5,
+        "strict_exit_never_members": 0
+      }
+    },
+    "head": {
+      "compile_cache": {
+        "event_count": 1,
+        "key": "jit_batched_solve-51af2690cf372f864a7155dee27b03e9b68c2b047f4520148128541c0a63730f",
+        "module": "jit_batched_solve",
+        "status": "miss"
+      },
+      "compile_seconds": 1579.1886395560578,
+      "evidence_inputs": {
+        "bank": {
+          "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+          "sha256": "4e8f3519936e99705f97e57799adcf9afeed45d63cb62515376da28faafe4537"
+        },
+        "corpus_root": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train",
+        "machine_artifact": {
+          "cache": "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache",
+          "digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
+          "manifest_sha256": "c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e"
+        },
+        "member_count": 5
+      },
+      "execution": {
+        "attempt": 1,
+        "cpu_count": 8,
+        "device": "NVIDIA H200 NVL",
+        "elapsed_seconds": 2183.7544167926535,
+        "exit_marker": 0,
+        "gpu_count": 1,
+        "host": "98dci4-gpu-0003.iter.org",
+        "input_build_seconds": {
+          "DIII-D": 269.8234798433259
+        },
+        "jax_platforms": [
+          "cuda",
+          "cpu"
+        ],
+        "job_id": 1271285,
+        "job_name": "nova-diiid-width5-paired",
+        "node": "98dci4-gpu-0003",
+        "partition": "betelgeuse",
+        "persistent_compilation_cache": {
+          "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+          "entry_key_fields": [
+            "serialized computation",
+            "jaxlib version",
+            "backend version",
+            "XLA flags",
+            "compile options",
+            "accelerator topology"
+          ],
+          "invalidation_scope": {
+            "directory_version_key": [
+              "backend and compiler options",
+              "device topology",
+              "jax and jaxlib/XLA build"
+            ],
+            "jax_entry_key": [
+              "serialized computation",
+              "jaxlib version",
+              "backend version",
+              "XLA flags",
+              "compile options",
+              "accelerator topology"
+            ]
+          },
+          "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+          "maximum_bytes": 8589934592,
+          "minimum_compile_seconds": 1.0,
+          "root": "/home/ITER/mcintos/.cache",
+          "runtime_identity": {
+            "backend": "gpu",
+            "backend_version": "PJRT C API\ncuda 12090",
+            "compiler_options": {
+              "jax_compilation_cache_include_metadata_in_key": false,
+              "jax_default_matmul_precision": null,
+              "jax_enable_x64": true,
+              "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+              "xla_flags": null
+            },
+            "device_topology": [
+              {
+                "id": 0,
+                "kind": "NVIDIA H200 NVL",
+                "platform": "gpu",
+                "process_index": 0
+              }
+            ],
+            "jax_version": "0.11.0",
+            "jaxlib_version": "0.11.0"
+          },
+          "selection": "explicit_per_recipe",
+          "version_key": "runtime-0745ecebea4cb264e054"
+        },
+        "prior_job_id": null,
+        "requested_memory_mib": 131072,
+        "requested_time_limit": null,
+        "reservation": "gpu_0003_grpA",
+        "tmpdir": "/tmp"
+      },
+      "execution_contract": {
+        "arm_order": [
+          "without_exit",
+          "with_exit"
+        ],
+        "compile_count_per_pass": 1,
+        "compile_once": true,
+        "declared_member_count": 5,
+        "execution_route": "one_stacked_vmap_program",
+        "geometry_digests": [
+          "0996ce2e537f2597f9e6308ce64c7c1393307b6110c193cae013fa52681abd7a",
+          "0996ce2e537f2597f9e6308ce64c7c1393307b6110c193cae013fa52681abd7a",
+          "0996ce2e537f2597f9e6308ce64c7c1393307b6110c193cae013fa52681abd7a",
+          "0996ce2e537f2597f9e6308ce64c7c1393307b6110c193cae013fa52681abd7a",
+          "0996ce2e537f2597f9e6308ce64c7c1393307b6110c193cae013fa52681abd7a"
+        ],
+        "geometry_groups": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        ],
+        "geometry_identical": true,
+        "same_arguments_for_exit_passes": true,
+        "settlement_flag_is_member_runtime_argument": true,
+        "width": 5
+      },
+      "peak_host_rss_mib": 115293.890625,
+      "receipt_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/diiid-width5/receipts/head.json",
+      "receipt_sha256": "2f8b88504cbbe537fa5731041a0882a2521ecbfe87fd92e0d62b750af56c727b",
+      "source": {
+        "driver": "benchmarks/strict_exit_incidence.py",
+        "driver_sha256": "57f4ed5d4b4a8aecdec581dc19977a3103b51e083408452164af934410a85c17",
+        "machine_driver_sha256": {
+          "DIII-D": "57f4ed5d4b4a8aecdec581dc19977a3103b51e083408452164af934410a85c17",
+          "MAST": "25b062f661f88fcced1363715750879c280aa2ff56b8ac8833f19abff121baf2"
+        },
+        "machine_revisions": {
+          "DIII-D": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab",
+          "MAST": "5e57c75cface3af4406532a8f6da946ab409533a"
+        },
+        "required_ancestor": "588578a0",
+        "revision": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab",
+        "solver_source_modified": false
+      },
+      "summary": {
+        "batched_ms_per_member": {
+          "with_exit": 27945.0666902,
+          "without_exit": 31930.2026366
+        },
+        "bit_identical_converged_members": 0,
+        "declared_members": 5,
+        "peak_host_rss_mib": 115293.890625,
+        "strict_exit_fired_members": 5,
+        "strict_exit_never_members": 0
+      }
+    }
+  },
+  "configuration": {
+    "machine": "DIII-D",
+    "persistent_compilation_cache": true,
+    "requested_cpu_count": 8,
+    "requested_gpu_count": 1,
+    "requested_memory_gib": 128,
+    "requested_time_limit": "02:30:00",
+    "same_arguments_within_each_revision": true,
+    "single_h200_job": true,
+    "strict_exit_passes": [
+      "without_exit",
+      "with_exit"
+    ],
+    "tmpdir": "/tmp",
+    "width": 5
+  },
+  "execution": {
+    "base_compile_seconds": 169.03010678384453,
+    "device": "NVIDIA H200 NVL",
+    "head_compile_seconds": 1579.1886395560578,
+    "job_id": 1271285,
+    "node": "98dci4-gpu-0003",
+    "peak_host_rss_mib": 115293.890625,
+    "same_job_for_both_revisions": true,
+    "scheduler": {
+      "allocated_cpus": 8,
+      "allocated_resources": "billing=8,cpu=8,gres/gpu=1,mem=128G,node=1",
+      "elapsed": "00:48:40",
+      "exit_code": "0:0",
+      "job_id": 1271285,
+      "max_rss_gib": 112.09322357177734,
+      "max_rss_kib": 117538264,
+      "max_rss_mib": 114783.4609375,
+      "measurement_step": "1271285.0",
+      "node": "98dci4-gpu-0003",
+      "requested_memory": "128G",
+      "state": "COMPLETED"
+    }
+  },
+  "historical_reference": {
+    "comparison": {
+      "head_compile_seconds_delta": -185.81136044394225,
+      "qualification": "the historical 115.5 GiB figure is retained in its authored unit; the scheduler receipt also preserves raw KiB, MiB and GiB conversions",
+      "scheduler_peak_rss_gib_delta": -3.4067764282226562
+    },
+    "compile_seconds": 1765.0,
+    "peak_host_rss_gib": 115.5,
+    "qualification": "cold width-5 DIII-D compile before row persistence",
+    "recorded_at": "2026-09-09"
+  },
+  "measurement_state": "complete",
+  "members": [
+    {
+      "base": {
+        "identity": "d3d_shot_00000c4a7b.parquet frame 179",
+        "initial_state_sha256": "05aa45e5e56e510ce1a1e96af48418687627707c112a2f63368ce50f915decb1",
+        "state_authority": "production cold diverted seed for committed frame",
+        "strict_qualification": "fired",
+        "strict_qualification_firing_trip": 2,
+        "terminal_state_bit_identical_where_both_arms_converged": null,
+        "terminal_state_difference": {
+          "max_absolute_flux_difference": 1.10772502281975e-13,
+          "with_exit_converged": false,
+          "without_exit_converged": false
+        },
+        "with_exit": {
+          "batch_elapsed_ms": 139901.169284,
+          "batched_ms_per_member": 27980.2338568,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.21618145033060268,
+          "terminal_state_sha256": "22d7e98c5a7b71f61c62158b8cb79d5d4bca53ac7313484e8b1bc9304ae926fc",
+          "termination": "active_set_settled"
+        },
+        "without_exit": {
+          "batch_elapsed_ms": 144619.545538,
+          "batched_ms_per_member": 28923.9091076,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.21618145033060537,
+          "terminal_state_sha256": "764cb027b08ef8392e27348e1ff0b9675a75eb2d35c1c6b0fd8d301d5fb04edd",
+          "termination": "active_set_stagnated"
+        }
+      },
+      "base_against_head": {
+        "base_both_strict_passes_converged": false,
+        "head_both_strict_passes_converged": false,
+        "identity_assertion_eligible": false,
+        "qualification": "device-qualified difference retained; identity not asserted because at least one strict pass did not converge",
+        "terminal_residual_identity_asserted": false,
+        "terminal_residual_identity_passed": null,
+        "with_exit": {
+          "absolute_terminal_residual_difference": 0.10276747110910175,
+          "base_terminal_residual": 0.21618145033060268,
+          "head_terminal_residual": 0.31894892143970444,
+          "terminal_residual_identical": false,
+          "terminal_state_sha256_identical": false
+        },
+        "without_exit": {
+          "absolute_terminal_residual_difference": 0.10276747110909906,
+          "base_terminal_residual": 0.21618145033060537,
+          "head_terminal_residual": 0.31894892143970444,
+          "terminal_residual_identical": false,
+          "terminal_state_sha256_identical": false
+        }
+      },
+      "head": {
+        "identity": "d3d_shot_00000c4a7b.parquet frame 179",
+        "initial_state_sha256": "05aa45e5e56e510ce1a1e96af48418687627707c112a2f63368ce50f915decb1",
+        "state_authority": "production cold diverted seed for committed frame",
+        "strict_qualification": "fired",
+        "strict_qualification_firing_trip": 2,
+        "terminal_state_bit_identical_where_both_arms_converged": null,
+        "terminal_state_difference": {
+          "max_absolute_flux_difference": 0.0,
+          "with_exit_converged": false,
+          "without_exit_converged": false
+        },
+        "with_exit": {
+          "batch_elapsed_ms": 139725.333451,
+          "batched_ms_per_member": 27945.0666902,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.31894892143970444,
+          "terminal_state_sha256": "05386128731b30884d6469b0d81abc7fcf6c8eea1017ba4a1044f4493fe3f185",
+          "termination": "active_set_settled"
+        },
+        "without_exit": {
+          "batch_elapsed_ms": 159651.013183,
+          "batched_ms_per_member": 31930.2026366,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.31894892143970444,
+          "terminal_state_sha256": "05386128731b30884d6469b0d81abc7fcf6c8eea1017ba4a1044f4493fe3f185",
+          "termination": "active_set_stagnated"
+        }
+      },
+      "identity": "d3d_shot_00000c4a7b.parquet frame 179"
+    },
+    {
+      "base": {
+        "identity": "d3d_shot_0003ff34e7.parquet frame 44",
+        "initial_state_sha256": "abfcff1c4ec73ba8121b6f0b29b09fc187061f5fbe3883e7d2ca6547d1ac8b89",
+        "state_authority": "production cold diverted seed for committed frame",
+        "strict_qualification": "fired",
+        "strict_qualification_firing_trip": 2,
+        "terminal_state_bit_identical_where_both_arms_converged": null,
+        "terminal_state_difference": {
+          "max_absolute_flux_difference": 0.0,
+          "with_exit_converged": false,
+          "without_exit_converged": false
+        },
+        "with_exit": {
+          "batch_elapsed_ms": 139901.169284,
+          "batched_ms_per_member": 27980.2338568,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.4497723529118475,
+          "terminal_state_sha256": "4553c00fe1f417924b252bb5dcefeb70b1d32b389a0c646d5954e89b5f2aff3b",
+          "termination": "active_set_settled"
+        },
+        "without_exit": {
+          "batch_elapsed_ms": 144619.545538,
+          "batched_ms_per_member": 28923.9091076,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.4497723529118475,
+          "terminal_state_sha256": "4553c00fe1f417924b252bb5dcefeb70b1d32b389a0c646d5954e89b5f2aff3b",
+          "termination": "active_set_stagnated"
+        }
+      },
+      "base_against_head": {
+        "base_both_strict_passes_converged": false,
+        "head_both_strict_passes_converged": false,
+        "identity_assertion_eligible": false,
+        "qualification": "device-qualified difference retained; identity not asserted because at least one strict pass did not converge",
+        "terminal_residual_identity_asserted": false,
+        "terminal_residual_identity_passed": null,
+        "with_exit": {
+          "absolute_terminal_residual_difference": 0.00015244673734238212,
+          "base_terminal_residual": 0.4497723529118475,
+          "head_terminal_residual": 0.44992479964918985,
+          "terminal_residual_identical": false,
+          "terminal_state_sha256_identical": false
+        },
+        "without_exit": {
+          "absolute_terminal_residual_difference": 0.00015244673734238212,
+          "base_terminal_residual": 0.4497723529118475,
+          "head_terminal_residual": 0.44992479964918985,
+          "terminal_residual_identical": false,
+          "terminal_state_sha256_identical": false
+        }
+      },
+      "head": {
+        "identity": "d3d_shot_0003ff34e7.parquet frame 44",
+        "initial_state_sha256": "abfcff1c4ec73ba8121b6f0b29b09fc187061f5fbe3883e7d2ca6547d1ac8b89",
+        "state_authority": "production cold diverted seed for committed frame",
+        "strict_qualification": "fired",
+        "strict_qualification_firing_trip": 2,
+        "terminal_state_bit_identical_where_both_arms_converged": null,
+        "terminal_state_difference": {
+          "max_absolute_flux_difference": 0.0,
+          "with_exit_converged": false,
+          "without_exit_converged": false
+        },
+        "with_exit": {
+          "batch_elapsed_ms": 139725.333451,
+          "batched_ms_per_member": 27945.0666902,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.44992479964918985,
+          "terminal_state_sha256": "315b793f5d6cc4ca65fa0bb5119e06dcbbb99bb0c105edd983992ca36cfd036a",
+          "termination": "active_set_settled"
+        },
+        "without_exit": {
+          "batch_elapsed_ms": 159651.013183,
+          "batched_ms_per_member": 31930.2026366,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.44992479964918985,
+          "terminal_state_sha256": "315b793f5d6cc4ca65fa0bb5119e06dcbbb99bb0c105edd983992ca36cfd036a",
+          "termination": "active_set_stagnated"
+        }
+      },
+      "identity": "d3d_shot_0003ff34e7.parquet frame 44"
+    },
+    {
+      "base": {
+        "identity": "d3d_shot_001554e054.parquet frame 144",
+        "initial_state_sha256": "e56ff50628e4fd583b8eb2205602ff29f5399b200f27204390af731f8f12d75e",
+        "state_authority": "production cold diverted seed for committed frame",
+        "strict_qualification": "fired",
+        "strict_qualification_firing_trip": 3,
+        "terminal_state_bit_identical_where_both_arms_converged": null,
+        "terminal_state_difference": {
+          "max_absolute_flux_difference": 3.426148253993233e-13,
+          "with_exit_converged": false,
+          "without_exit_converged": false
+        },
+        "with_exit": {
+          "batch_elapsed_ms": 139901.169284,
+          "batched_ms_per_member": 27980.2338568,
+          "executed_trips": 3,
+          "no_op_trips": 13,
+          "terminal_residual": 0.04220289939481695,
+          "terminal_state_sha256": "5b4f862c573490cacfbf0dbf5ddf20be48c1660949b291c160b4b1225f128578",
+          "termination": "active_set_settled"
+        },
+        "without_exit": {
+          "batch_elapsed_ms": 144619.545538,
+          "batched_ms_per_member": 28923.9091076,
+          "executed_trips": 3,
+          "no_op_trips": 13,
+          "terminal_residual": 0.042202899394819145,
+          "terminal_state_sha256": "5cbbd1aa542c8dbf0fec292ec1e5f6068ad9588d9446529607caccf52d7e3afe",
+          "termination": "active_set_stagnated"
+        }
+      },
+      "base_against_head": {
+        "base_both_strict_passes_converged": false,
+        "head_both_strict_passes_converged": false,
+        "identity_assertion_eligible": false,
+        "qualification": "device-qualified difference retained; identity not asserted because at least one strict pass did not converge",
+        "terminal_residual_identity_asserted": false,
+        "terminal_residual_identity_passed": null,
+        "with_exit": {
+          "absolute_terminal_residual_difference": 1.3183898417423734e-15,
+          "base_terminal_residual": 0.04220289939481695,
+          "head_terminal_residual": 0.04220289939481827,
+          "terminal_residual_identical": false,
+          "terminal_state_sha256_identical": false
+        },
+        "without_exit": {
+          "absolute_terminal_residual_difference": 8.326672684688674e-17,
+          "base_terminal_residual": 0.042202899394819145,
+          "head_terminal_residual": 0.04220289939481906,
+          "terminal_residual_identical": false,
+          "terminal_state_sha256_identical": false
+        }
+      },
+      "head": {
+        "identity": "d3d_shot_001554e054.parquet frame 144",
+        "initial_state_sha256": "e56ff50628e4fd583b8eb2205602ff29f5399b200f27204390af731f8f12d75e",
+        "state_authority": "production cold diverted seed for committed frame",
+        "strict_qualification": "fired",
+        "strict_qualification_firing_trip": 3,
+        "terminal_state_bit_identical_where_both_arms_converged": null,
+        "terminal_state_difference": {
+          "max_absolute_flux_difference": 6.88338275267597e-14,
+          "with_exit_converged": false,
+          "without_exit_converged": false
+        },
+        "with_exit": {
+          "batch_elapsed_ms": 139725.333451,
+          "batched_ms_per_member": 27945.0666902,
+          "executed_trips": 3,
+          "no_op_trips": 13,
+          "terminal_residual": 0.04220289939481827,
+          "terminal_state_sha256": "c1513c3ed9954547a7483971449eab9a27a47b70090638a438ae5e73577041b3",
+          "termination": "active_set_settled"
+        },
+        "without_exit": {
+          "batch_elapsed_ms": 159651.013183,
+          "batched_ms_per_member": 31930.2026366,
+          "executed_trips": 3,
+          "no_op_trips": 13,
+          "terminal_residual": 0.04220289939481906,
+          "terminal_state_sha256": "eb07a48c7711e44770a71af1c16b4f6aa855c257183c3b2232390e1d33cbb880",
+          "termination": "active_set_stagnated"
+        }
+      },
+      "identity": "d3d_shot_001554e054.parquet frame 144"
+    },
+    {
+      "base": {
+        "identity": "d3d_shot_002495e835.parquet frame 146",
+        "initial_state_sha256": "9074959ae770e2a637a268b3b75a99edc4821d17ce7c8949968d5571bbf37117",
+        "state_authority": "production cold diverted seed for committed frame",
+        "strict_qualification": "fired",
+        "strict_qualification_firing_trip": 2,
+        "terminal_state_bit_identical_where_both_arms_converged": null,
+        "terminal_state_difference": {
+          "max_absolute_flux_difference": 0.0,
+          "with_exit_converged": false,
+          "without_exit_converged": false
+        },
+        "with_exit": {
+          "batch_elapsed_ms": 139901.169284,
+          "batched_ms_per_member": 27980.2338568,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.8548053508330012,
+          "terminal_state_sha256": "28cd3789bb8f8d3f2fdb9c82853518dba168d4cecb00438c5bf5e620fa87ead1",
+          "termination": "active_set_settled"
+        },
+        "without_exit": {
+          "batch_elapsed_ms": 144619.545538,
+          "batched_ms_per_member": 28923.9091076,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.8548053508330012,
+          "terminal_state_sha256": "28cd3789bb8f8d3f2fdb9c82853518dba168d4cecb00438c5bf5e620fa87ead1",
+          "termination": "active_set_stagnated"
+        }
+      },
+      "base_against_head": {
+        "base_both_strict_passes_converged": false,
+        "head_both_strict_passes_converged": false,
+        "identity_assertion_eligible": false,
+        "qualification": "device-qualified difference retained; identity not asserted because at least one strict pass did not converge",
+        "terminal_residual_identity_asserted": false,
+        "terminal_residual_identity_passed": null,
+        "with_exit": {
+          "absolute_terminal_residual_difference": 3.848935359873629e-06,
+          "base_terminal_residual": 0.8548053508330012,
+          "head_terminal_residual": 0.8548015018976414,
+          "terminal_residual_identical": false,
+          "terminal_state_sha256_identical": false
+        },
+        "without_exit": {
+          "absolute_terminal_residual_difference": 3.848935359873629e-06,
+          "base_terminal_residual": 0.8548053508330012,
+          "head_terminal_residual": 0.8548015018976414,
+          "terminal_residual_identical": false,
+          "terminal_state_sha256_identical": false
+        }
+      },
+      "head": {
+        "identity": "d3d_shot_002495e835.parquet frame 146",
+        "initial_state_sha256": "9074959ae770e2a637a268b3b75a99edc4821d17ce7c8949968d5571bbf37117",
+        "state_authority": "production cold diverted seed for committed frame",
+        "strict_qualification": "fired",
+        "strict_qualification_firing_trip": 2,
+        "terminal_state_bit_identical_where_both_arms_converged": null,
+        "terminal_state_difference": {
+          "max_absolute_flux_difference": 0.0,
+          "with_exit_converged": false,
+          "without_exit_converged": false
+        },
+        "with_exit": {
+          "batch_elapsed_ms": 139725.333451,
+          "batched_ms_per_member": 27945.0666902,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.8548015018976414,
+          "terminal_state_sha256": "c21045e506ea593e9de546bb54a0dcaa49699949f6f276e5b9ebba99e3a58353",
+          "termination": "active_set_settled"
+        },
+        "without_exit": {
+          "batch_elapsed_ms": 159651.013183,
+          "batched_ms_per_member": 31930.2026366,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.8548015018976414,
+          "terminal_state_sha256": "c21045e506ea593e9de546bb54a0dcaa49699949f6f276e5b9ebba99e3a58353",
+          "termination": "active_set_stagnated"
+        }
+      },
+      "identity": "d3d_shot_002495e835.parquet frame 146"
+    },
+    {
+      "base": {
+        "identity": "d3d_shot_0040ca9bdc.parquet frame 137",
+        "initial_state_sha256": "d46a1b080d0ee25754d89518626466affe289aa20fdcb42d7921a9f92dbe41fd",
+        "state_authority": "production cold diverted seed for committed frame",
+        "strict_qualification": "fired",
+        "strict_qualification_firing_trip": 2,
+        "terminal_state_bit_identical_where_both_arms_converged": null,
+        "terminal_state_difference": {
+          "max_absolute_flux_difference": 0.0,
+          "with_exit_converged": false,
+          "without_exit_converged": false
+        },
+        "with_exit": {
+          "batch_elapsed_ms": 139901.169284,
+          "batched_ms_per_member": 27980.2338568,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.21539421976016987,
+          "terminal_state_sha256": "6a4412f00cf27fbc86b25ddc968ec2f66f54a6cf2e1753ef9ce9ce7f88da7f3f",
+          "termination": "active_set_settled"
+        },
+        "without_exit": {
+          "batch_elapsed_ms": 144619.545538,
+          "batched_ms_per_member": 28923.9091076,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.21539421976016987,
+          "terminal_state_sha256": "6a4412f00cf27fbc86b25ddc968ec2f66f54a6cf2e1753ef9ce9ce7f88da7f3f",
+          "termination": "active_set_stagnated"
+        }
+      },
+      "base_against_head": {
+        "base_both_strict_passes_converged": false,
+        "head_both_strict_passes_converged": false,
+        "identity_assertion_eligible": false,
+        "qualification": "device-qualified difference retained; identity not asserted because at least one strict pass did not converge",
+        "terminal_residual_identity_asserted": false,
+        "terminal_residual_identity_passed": null,
+        "with_exit": {
+          "absolute_terminal_residual_difference": 1.0398409023198996e-05,
+          "base_terminal_residual": 0.21539421976016987,
+          "head_terminal_residual": 0.21538382135114667,
+          "terminal_residual_identical": false,
+          "terminal_state_sha256_identical": false
+        },
+        "without_exit": {
+          "absolute_terminal_residual_difference": 1.0398409023198996e-05,
+          "base_terminal_residual": 0.21539421976016987,
+          "head_terminal_residual": 0.21538382135114667,
+          "terminal_residual_identical": false,
+          "terminal_state_sha256_identical": false
+        }
+      },
+      "head": {
+        "identity": "d3d_shot_0040ca9bdc.parquet frame 137",
+        "initial_state_sha256": "d46a1b080d0ee25754d89518626466affe289aa20fdcb42d7921a9f92dbe41fd",
+        "state_authority": "production cold diverted seed for committed frame",
+        "strict_qualification": "fired",
+        "strict_qualification_firing_trip": 2,
+        "terminal_state_bit_identical_where_both_arms_converged": null,
+        "terminal_state_difference": {
+          "max_absolute_flux_difference": 0.0,
+          "with_exit_converged": false,
+          "without_exit_converged": false
+        },
+        "with_exit": {
+          "batch_elapsed_ms": 139725.333451,
+          "batched_ms_per_member": 27945.0666902,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.21538382135114667,
+          "terminal_state_sha256": "04c0470176e38d9f6767522fe7bcf58e0675cd4a4050c3a30e99dd3aaa0a92a3",
+          "termination": "active_set_settled"
+        },
+        "without_exit": {
+          "batch_elapsed_ms": 159651.013183,
+          "batched_ms_per_member": 31930.2026366,
+          "executed_trips": 2,
+          "no_op_trips": 14,
+          "terminal_residual": 0.21538382135114667,
+          "terminal_state_sha256": "04c0470176e38d9f6767522fe7bcf58e0675cd4a4050c3a30e99dd3aaa0a92a3",
+          "termination": "active_set_stagnated"
+        }
+      },
+      "identity": "d3d_shot_0040ca9bdc.parquet frame 137"
+    }
+  ],
+  "recorded_at": "2026-09-15T10:31:01.493518+00:00",
+  "row_persistence": {
+    "events": [
+      {
+        "arm": "head",
+        "identity": "d3d_shot_00000c4a7b.parquet frame 179",
+        "persisted_at": "2026-09-15T10:17:33.845353+00:00"
+      },
+      {
+        "arm": "head",
+        "identity": "d3d_shot_0003ff34e7.parquet frame 44",
+        "persisted_at": "2026-09-15T10:17:33.847490+00:00"
+      },
+      {
+        "arm": "head",
+        "identity": "d3d_shot_001554e054.parquet frame 144",
+        "persisted_at": "2026-09-15T10:17:33.848605+00:00"
+      },
+      {
+        "arm": "head",
+        "identity": "d3d_shot_002495e835.parquet frame 146",
+        "persisted_at": "2026-09-15T10:17:33.849431+00:00"
+      },
+      {
+        "arm": "head",
+        "identity": "d3d_shot_0040ca9bdc.parquet frame 137",
+        "persisted_at": "2026-09-15T10:17:33.850640+00:00"
+      },
+      {
+        "arm": "base",
+        "identity": "d3d_shot_00000c4a7b.parquet frame 179",
+        "persisted_at": "2026-09-15T10:29:23.355558+00:00"
+      },
+      {
+        "arm": "base",
+        "identity": "d3d_shot_0003ff34e7.parquet frame 44",
+        "persisted_at": "2026-09-15T10:29:23.357542+00:00"
+      },
+      {
+        "arm": "base",
+        "identity": "d3d_shot_001554e054.parquet frame 144",
+        "persisted_at": "2026-09-15T10:29:23.358698+00:00"
+      },
+      {
+        "arm": "base",
+        "identity": "d3d_shot_002495e835.parquet frame 146",
+        "persisted_at": "2026-09-15T10:29:23.360000+00:00"
+      },
+      {
+        "arm": "base",
+        "identity": "d3d_shot_0040ca9bdc.parquet frame 137",
+        "persisted_at": "2026-09-15T10:29:23.360987+00:00"
+      }
+    ],
+    "method": "atomic replacement after each newly admitted member row"
+  },
+  "schema": "nova.diiid-strict-exit-paired/1",
+  "source": {
+    "base_materialisation": "git archive with the current row-persistence instrument overlaid",
+    "base_revision": "9f220e854d484aaf4a2d1dc0056bdcfb811526f3",
+    "base_selection": "first parent of the merge that landed the unit-aware wall consumers",
+    "change_commit": "04cb76c48b76a34335f7ac1c10f6958e15e7cccc",
+    "head_revision": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab",
+    "landing_merge": "beeff98f09b2863f29e0ee71514634d49df8bf4d"
+  },
+  "verdict": {
+    "all_rows_persisted": true,
+    "base_member_count": 5,
+    "done_when_satisfied": true,
+    "head_member_count": 5,
+    "identity_assertion_passed": null,
+    "identity_eligible_member_count": 0,
+    "identity_failure_count": 0,
+    "identity_failure_members": [],
+    "measurement_complete": true,
+    "member_count": 5,
+    "qualification": "all five rows persisted for both revisions; no member converged in both strict passes at both revisions, so identity is not asserted and every base-head difference remains device-qualified",
+    "scientific_classification": "device_qualified_differences_no_identity_eligible_members"
+  }
+}

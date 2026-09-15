@@ -1,0 +1,140 @@
+{
+  "rungs": [
+    {
+      "requested": 500,
+      "realised": 550,
+      "production_private": 3,
+      "raster_collisions": 86,
+      "pass_counts": {
+        "production_hex": 15,
+        "raster": 54
+      },
+      "private": {
+        "a": 3,
+        "b": 0,
+        "c": 3,
+        "d": 4
+      },
+      "differing_cells": {
+        "a": 0,
+        "b": 3,
+        "c": 0,
+        "d": 3
+      },
+      "per_state_ms": {
+        "a": 0.5003749975003302,
+        "b": 0.057280296459794044,
+        "c": 0.02132076770067215,
+        "d": 0.01640856498852372
+      },
+      "per_state_pass_counts": {
+        "a": 15,
+        "b": 54,
+        "c": 10,
+        "d": 0
+      }
+    },
+    {
+      "requested": 750,
+      "realised": 814,
+      "production_private": 9,
+      "raster_collisions": 94,
+      "pass_counts": {
+        "production_hex": 15,
+        "raster": 69
+      },
+      "private": {
+        "a": 9,
+        "b": 9,
+        "c": 9,
+        "d": 4
+      },
+      "differing_cells": {
+        "a": 0,
+        "b": 0,
+        "c": 0,
+        "d": 5
+      },
+      "per_state_ms": {
+        "a": 0.7500144420191646,
+        "b": 0.07928942795842886,
+        "c": 0.025637855287641287,
+        "d": 0.015136261936277151
+      },
+      "per_state_pass_counts": {
+        "a": 15,
+        "b": 69,
+        "c": 10,
+        "d": 0
+      }
+    },
+    {
+      "requested": 1000,
+      "realised": 1074,
+      "production_private": 12,
+      "raster_collisions": 154,
+      "pass_counts": {
+        "production_hex": 19,
+        "raster": 76
+      },
+      "private": {
+        "a": 12,
+        "b": 0,
+        "c": 12,
+        "d": 7
+      },
+      "differing_cells": {
+        "a": 0,
+        "b": 12,
+        "c": 0,
+        "d": 5
+      },
+      "per_state_ms": {
+        "a": 0.9971833205781877,
+        "b": 0.021324725821614265,
+        "c": 0.020226521883159876,
+        "d": 0.009363808203488588
+      },
+      "per_state_pass_counts": {
+        "a": 19,
+        "b": 76,
+        "c": 11,
+        "d": 0
+      }
+    },
+    {
+      "requested": 2500,
+      "realised": 2616,
+      "production_private": 27,
+      "raster_collisions": 0,
+      "pass_counts": {
+        "production_hex": 28,
+        "raster": 198
+      },
+      "private": {
+        "a": 27,
+        "b": 1519,
+        "c": 27,
+        "d": 14
+      },
+      "differing_cells": {
+        "a": 0,
+        "b": 1492,
+        "c": 0,
+        "d": 13
+      },
+      "per_state_ms": {
+        "a": 2.8622522368095815,
+        "b": 0.04700251156464219,
+        "c": 0.04715437535196543,
+        "d": 0.006660935468971729
+      },
+      "per_state_pass_counts": {
+        "a": 28,
+        "b": 198,
+        "c": 12,
+        "d": 0
+      }
+    }
+  ]
+}

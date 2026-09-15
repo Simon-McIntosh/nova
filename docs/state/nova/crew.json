@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T09:05:32",
+  "updated": "2026-09-15T09:11:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -159771,6 +159771,265 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T043415946899-cca-limiter-oracle-rebase-and-gate",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-limiter-oracle-rebase-and-gate",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1501,
+                "cached_input_tokens": 935848,
+                "input_tokens": 937381,
+                "output_tokens": 5921,
+                "reasoning_output_tokens": 1078,
+                "total_tokens": 943302,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. Never open any receipt larger than one megabyte in an editor (load it with json). Commit before submitting any job; every SLURM job is sbatch detached from your shell with --output in the run directory, TMPDIR=/tmp exported in the submit environment and the payload, the root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python with PYTHONPATH at the worktree, never uv on a compute node; CPU work on all_debug (--time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu) in ONE job with cases sharded inside and parts persisted as each lands; any H200 job short and single (betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:30:00, nvidia-smi prologue exiting 3 below 40 GiB free, XLA_PYTHON_CLIENT_PREALLOCATE=false, JAX_PLATFORMS=cuda,cpu); the persistent compilation cache needs the enabling config flag as well as the directory. Write the manifest with the SLURM job number on the blockers line before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync. Facts at this base (the limiter node's worktree tip, two commits on nova/equilibrium/topology.py and tests/test_topology_limiter_contact.py over base 0f31e9bb): the arc-length extremum read reaches the polyline tangency to 1e-7 m and its nine new tests pass, and the only added test failure was tests/test_plasma_cell_topology_read.py::test_raster_fixture_labels_are_bitwise_equal_to_independent_oracle by one ULP, because that test's boundary oracle calls topology.wall(...) with the retired three-node blend the production selector no longer uses (the limiter node's report under docs/figures/cut-cell-current-attribution/limiter-subpanel and its probe_blend.py attribute the ULP to the retired blend at active weight 0.694 on that fixture). Deliver one commit that updates the oracle in that test to the delivered arc-length extremum read (or regenerates its stored fixture if the oracle is data), with a docstring stating the mechanism (the oracle called the retired selector blend), never a widened tolerance; then measure the delta gate of the held commits plus yours against base 0f31e9bb over every test module importing nova.equilibrium.topology, one module per fresh python process per arm (the CPU backend aborts after about fifty tests in one process on this surface; the per-module driver at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/quadrature-delta-3/run_ccad3.sh is the pattern), one all_debug job per arm if the module count needs it, junit per module, reporting per arm the module count, aborted modules, pass and fail totals with failure ids, and the added-failure set as the verdict. The pass is zero added failures; the report states it plainly with the ids.",
+          "estimated_hours": 3.0,
+          "goal": "Rebase the raster-oracle bit-identity test onto the delivered limiter contact read in its own commit and measure the per-module delta of the two held limiter commits against their base",
+          "id": "cca-limiter-oracle-rebase-and-gate",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-15T04:34:16Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T043415946899-cca-limiter-oracle-rebase-and-gate/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "tests/test_plasma_cell_topology_read.py",
+            "tests/data",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/limiter-oracle-rebase",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-limiter-oracle-rebase",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-15T04:34:28Z",
+        "completed_at": "2026-09-15T07:06:42.196Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 9119,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 9134,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "f8404c66f9cee2aee84ae449d3931750246f06a2",
+        "commits": [
+          "797ab08957e9466b9681a208af17be8db3c39195",
+          "f8404c66f9cee2aee84ae449d3931750246f06a2",
+          "945f1ae28f7375239aef49e0837403505ff7fb62"
+        ],
+        "changed_lines": {
+          "added": 300,
+          "removed": 4,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "submit_arms.sh: one module per fresh CPU process per arm, jobs 1271039 (base 0f31e9bb) and 1271040 (after 945f1ae2), rerun of three timed-out modules in 1271058",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/limiter-oracle-rebase/after/arm.jsonl",
+          "log_digest": "897693b489c8a1d87c61f3fd79447d828f501905a48ca48662bcb688a80ed9ca"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T043415946899-cca-limiter-oracle-rebase-and-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "5b6d60c5-0351-4ce0-b7d8-cd34abd6c75f",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T07:06:42.196Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: SLURM job 1271023 running on 98dci4-clu-3141 (all_debug; 00:59:00; 8 cpus; 64G); waiting for completion before the after_suite/failure_attribution verdict can be computed. Scheduled wait; not a fault - resume when the job lands.",
+              "elapsed_seconds": 309,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 3304,
+              "log_fresh": false,
+              "manifest_commits": [
+                "(none yet - read-only test role; no repo writes until the landing record at completion)"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "9c9160b88342f1eb74c39f5bd033f06f77eb9d99ef4c53096df7e4482074d1fd",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T033357673076-cca-quadrature-delta-after-arm/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T033357673076-cca-quadrature-delta-after-arm/manifest.md; resolve the blocker before resuming the run",
+              "node": "cca-quadrature-delta-after-arm",
+              "phase": "starting",
+              "plan": "cut-cell-current-attribution",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260915T033357673076-cca-quadrature-delta-after-arm",
+              "session": "s19-review",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260915T033357673076-cca-quadrature-delta-after-arm",
+                "session_id": "9c66979d-85a7-4291-a54c-7e8c150a59ba",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 3363,
+              "terminal_at": "2026-09-15T03:38:19Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-quadrature-delta-after-arm"
+            }
+          ]
+        },
+        "review": null,
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": [
+          {
+            "path": "docs/figures/cut-cell-current-attribution/limiter-subpanel/limiter-wall-contact-read.png",
+            "reason": "held limiter commits 797ab089 and f8404c66 of run r-20260914T152335508652 carried on this rebase and merged together at 0f872fd6"
+          },
+          {
+            "path": "docs/figures/cut-cell-current-attribution/limiter-subpanel/report.md",
+            "reason": "held limiter commits 797ab089 and f8404c66 of run r-20260914T152335508652 carried on this rebase and merged together at 0f872fd6"
+          },
+          {
+            "path": "nova/equilibrium/topology.py",
+            "reason": "held limiter commits 797ab089 and f8404c66 of run r-20260914T152335508652 carried on this rebase and merged together at 0f872fd6"
+          },
+          {
+            "path": "tests/test_topology_limiter_contact.py",
+            "reason": "held limiter commits 797ab089 and f8404c66 of run r-20260914T152335508652 carried on this rebase and merged together at 0f872fd6"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-limiter-oracle-rebase-and-gate",
+          "session_id": "5b6d60c5-0351-4ce0-b7d8-cd34abd6c75f",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T07:06:42.196Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 105.0,
+        "orientation_input_tokens": 3335468.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -160083,6 +160342,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2520
+    "_version": 2521
   }
 }

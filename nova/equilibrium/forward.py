@@ -1802,6 +1802,36 @@ class ForwardProfile:
         shadowed_map = self.operator.traced_flux_map_with_shadow(
             requested_class, target_current
         )
+        if (
+            target_current is not None
+            and getattr(shadowed_map, "_read_frozen_partition", None) is None
+            and (
+                not self.operator.use_linear_moments
+                or self.operator.moment_geometry is not None
+            )
+        ):
+
+            def read_partition(state, previous_shadow=None):
+                return self.operator._frozen_topology_partition(
+                    state, requested_class, previous_shadow
+                )
+
+            def map_partition(state, partition, external):
+                image = external + self.operator._internal_on_partition(
+                    state, partition, target_current
+                )
+                return self.operator._exclude_shadow_residual(
+                    state,
+                    image,
+                    requested_class,
+                    shadow=partition.residual_shadow,
+                )
+
+            shadowed_map._read_frozen_partition = read_partition
+            shadowed_map._map_frozen_partition = map_partition
+            shadowed_map._frozen_partition_shadow = lambda partition: (
+                partition.residual_shadow
+            )
 
         def shadow_mask(state):
             return self.operator.residual_shadow_mask(state, requested_class)

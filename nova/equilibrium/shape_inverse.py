@@ -1054,7 +1054,7 @@ def solve_shape_inverse(
             applied_round_delta,
             requested_class=requested_class,
             target_current=target_current,
-            forward_solve=forward_solve,
+            forward_solve=(forward_solve if iteration == placement_rounds else None),
         )
         accepted_fraction = fraction
         admissibility_trials += trials

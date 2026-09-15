@@ -372,6 +372,54 @@ def _row_names_from_kinds(kinds: tuple[str, ...]) -> list[str]:
     return names[: len(kinds)]
 
 
+def _turning_point_table(previous, commanded, achieved) -> list[dict[str, Any]]:
+    """Report commanded motion and achieved drift at every turning point."""
+    before = _points(previous)
+    target = _points(commanded)
+    after = _points(achieved)
+    rows = []
+    for name, prior, requested, result in zip(
+        ("outer", "upper", "inner", "lower"),
+        before,
+        target,
+        after,
+        strict=True,
+    ):
+        command_delta = requested - prior
+        achieved_delta = result - prior
+        command_magnitude = float(np.linalg.norm(command_delta))
+        is_commanded = command_magnitude > 1.0e-12
+        achieved_motion = (
+            float(np.dot(achieved_delta, command_delta) / command_magnitude)
+            if is_commanded
+            else 0.0
+        )
+        rows.append(
+            {
+                "turning_point": name,
+                "commanded": is_commanded,
+                "commanded_delta_m": command_delta.tolist(),
+                "commanded_motion_m": command_magnitude,
+                "achieved_delta_m": achieved_delta.tolist(),
+                "achieved_motion_m": achieved_motion,
+                "uncommanded_drift_m": (
+                    None if is_commanded else float(np.linalg.norm(achieved_delta))
+                ),
+            }
+        )
+    return rows
+
+
+def _maximum_uncommanded_drift(table: list[dict[str, Any]]) -> float:
+    """Return the largest drift among rows carrying no command."""
+    drift = [
+        row["uncommanded_drift_m"]
+        for row in table
+        if row["uncommanded_drift_m"] is not None
+    ]
+    return 0.0 if not drift else float(max(drift))
+
+
 def _boundary_point_rows(inverse, profile, flux) -> list[dict[str, Any]]:
     """Report each polygon target beside its prior and one-solve achieved point."""
     achieved = np.concatenate(
@@ -749,6 +797,7 @@ def _arm_receipt(
         current_step_reference=solver.reference_current,
         delta_regularisation=delta_regularisation_weight,
         delta_current_scale=DELTA_CURRENT_CEILING_A,
+        forward_solve=solver._forward_axis_referee(profile, previous.flux),
     )
     inverse_wall = perf_counter() - inverse_started
     solver.prescribed_current = inverse.currents
@@ -779,11 +828,13 @@ def _arm_receipt(
         "row_consistency_floor": inverse.consistency_floor.tolist(),
         "row_weight": inverse.row_weight.tolist(),
         "inverse_wall_s": inverse_wall,
+        "accepted_fraction": inverse.accepted_fraction,
+        "admissibility_trials": inverse.admissibility_trials,
     }
     _write(arm_path, persisted)
     forward_started = perf_counter()
     try:
-        equilibrium, trips, _program = solver._forward(
+        equilibrium, trips, _program = solver._forward_after_admission(
             profile, previous.flux, solver.prescribed_current
         )
     except Exception as error:
@@ -818,6 +869,7 @@ def _arm_receipt(
         raise
     error = turning_point_error(profile, target, equilibrium.flux)
     current_change = inverse.currents - seed_current
+    point_table = _turning_point_table(prior, target, achieved)
     round_receipt = {
         "index": 1,
         "coil_current_a": inverse.currents.tolist(),
@@ -842,6 +894,8 @@ def _arm_receipt(
         "uncapped_current_change_l2_a": float(np.linalg.norm(inverse.uncapped_delta)),
         "current_step_fraction": inverse.current_step_fraction,
         "current_step_limited": inverse.current_step_limited,
+        "accepted_fraction": inverse.accepted_fraction,
+        "admissibility_trials": inverse.admissibility_trials,
         "linear_row_prediction": inverse.linear_prediction.tolist(),
         "uncapped_linear_row_prediction": (
             inverse.response[:, inverse.free_circuits] @ inverse.uncapped_delta
@@ -866,6 +920,8 @@ def _arm_receipt(
         "commanded_change_against_consistency_floor": row_floor_table,
         "commanded_turning_points_m": _points(target).tolist(),
         "achieved_turning_points_m": _points(achieved).tolist(),
+        "turning_point_table": point_table,
+        "maximum_uncommanded_drift_m": _maximum_uncommanded_drift(point_table),
         "target_point_rows": _boundary_point_rows(inverse, profile, equilibrium.flux),
         "turning_point_error_m": error,
         "trips": int(trips),
@@ -882,6 +938,10 @@ def _arm_receipt(
         "achieved_turning_points_m": _points(achieved).tolist(),
         "null_turning_points_m": null_points.tolist(),
         "relative_turning_point_motion_m": (_points(achieved) - null_points).tolist(),
+        "turning_point_table": point_table,
+        "maximum_uncommanded_drift_m": _maximum_uncommanded_drift(point_table),
+        "accepted_fraction": inverse.accepted_fraction,
+        "admissibility_trials": inverse.admissibility_trials,
         "coil_current_by_circuit_a": {
             _circuit_label(index, circuit_names): float(current)
             for index, current in enumerate(solver.prescribed_current)
@@ -926,10 +986,11 @@ def _null_receipt(
         free_circuits=machine.drivable_circuits,
         delta_regularisation=delta_regularisation_weight,
         delta_current_scale=DELTA_CURRENT_CEILING_A,
+        forward_solve=solver._forward_axis_referee(machine.profile, previous.flux),
     )
     solver.prescribed_current = inverse.currents
     started = perf_counter()
-    equilibrium, trips, _program = solver._forward(
+    equilibrium, trips, _program = solver._forward_after_admission(
         machine.profile, previous.flux, solver.prescribed_current
     )
     wall = perf_counter() - started
@@ -937,6 +998,7 @@ def _null_receipt(
     achieved = achieved_target(machine.profile, equilibrium.flux)
     current_change = inverse.currents - seed_current
     turning_point_drift = _points(achieved) - _points(prior)
+    point_table = _turning_point_table(prior, target, achieved)
     payload = {
         "arm": "null-resolve",
         "status": "complete",
@@ -947,6 +1009,10 @@ def _null_receipt(
         "maximum_turning_point_drift_m": float(
             np.max(np.linalg.norm(turning_point_drift, axis=1))
         ),
+        "turning_point_table": point_table,
+        "maximum_uncommanded_drift_m": _maximum_uncommanded_drift(point_table),
+        "accepted_fraction": inverse.accepted_fraction,
+        "admissibility_trials": inverse.admissibility_trials,
         "coil_current_by_circuit_a": {
             _circuit_label(index, circuit_names): float(current)
             for index, current in enumerate(solver.prescribed_current)

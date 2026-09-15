@@ -346,12 +346,15 @@ def test_production_solver_runs_one_forward_after_the_inverse(monkeypatch, seed_
         gamma,
         current_step_fraction,
         current_step_reference,
+        forward_solve,
     ):
         assert free_circuits is None
         assert gamma == production.GAMMA
         assert current_step_fraction is None
         np.testing.assert_allclose(current_step_reference, [2.0, -3.0])
-        return SimpleNamespace(currents=np.asarray(prescribed_current) + 1.0)
+        currents = np.asarray(prescribed_current) + 1.0
+        forward_solve(currents)
+        return SimpleNamespace(currents=currents)
 
     monkeypatch.setattr(production, "solve_shape_inverse", inverse)
     monkeypatch.setattr(

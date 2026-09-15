@@ -174,7 +174,7 @@ def _analytic_polygon_moments(
         return -source / (MU_0 * radius)
 
     values = np.zeros(3)
-    for lower, upper in zip(breaks, breaks[1:], strict=True):
+    for lower, upper in zip(breaks, breaks[1:]):
         if upper <= lower:
             continue
 

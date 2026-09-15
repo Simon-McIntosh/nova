@@ -942,23 +942,29 @@ class ForwardProfile:
                 f"a(0)={lower_amplitude:.8g}, "
                 f"a(1)={upper_amplitude:.8g}"
             )
-        level_fraction = scipy.optimize.brentq(
-            current_error,
-            0.0,
-            1.0,
-            xtol=1.0e-6,
-            rtol=1.0e-12,
-            maxiter=32,
+        lower_fraction = 0.0
+        upper_fraction = 1.0
+        amplitude = lower_amplitude
+        level_fraction = lower_fraction
+        for _ in range(8):
+            level_fraction = lower_fraction - lower_error * (
+                upper_fraction - lower_fraction
+            ) / (upper_error - lower_error)
+            candidate_error = current_error(level_fraction)
+            booked_current = candidate_error + float(target_current)
+            amplitude = float(target_current) / booked_current
+            if np.isfinite(amplitude) and abs(amplitude - 1.0) <= 1.0e-2:
+                return shifted(level_fraction)
+            if candidate_error * lower_error > 0.0:
+                lower_fraction = level_fraction
+                lower_error = candidate_error
+            else:
+                upper_fraction = level_fraction
+                upper_error = candidate_error
+        raise ValueError(
+            "exact clip seed boundary solve missed unit amplitude: "
+            f"a={amplitude:.8g}, level_fraction={level_fraction:.8g}"
         )
-        result = shifted(level_fraction)
-        booked_current = current_error(level_fraction) + float(target_current)
-        amplitude = float(target_current) / booked_current
-        if not np.isfinite(amplitude) or abs(amplitude - 1.0) > 1.0e-2:
-            raise ValueError(
-                "exact clip seed boundary solve missed unit amplitude: "
-                f"a={amplitude:.8g}, level_fraction={level_fraction:.8g}"
-            )
-        return result
 
     def _saddle_geometry_seed(
         self,

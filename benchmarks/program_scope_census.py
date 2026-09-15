@@ -423,17 +423,32 @@ def _replication_targets() -> dict[str, dict[str, Any]]:
     """Return call-path sentinels that occur once per traced map copy."""
     return {
         "current-moment path": {
-            "function": "ForwardFluxOperator.normalised_current_moments",
-            "sentinel": _source_line(
-                ForwardFluxOperator.normalised_current_moments,
-                "moments = self.cell_current_moments",
+            "targets": (
+                {
+                    "function": "ForwardFluxOperator.normalised_current_moments",
+                    "sentinel": _source_line(
+                        ForwardFluxOperator.normalised_current_moments,
+                        "moments = self.cell_current_moments",
+                    ),
+                },
+                {
+                    "function": "ForwardFluxOperator._internal_on_partition",
+                    "sentinel": _source_line(
+                        ForwardFluxOperator._internal_on_partition,
+                        "target_current, jnp.sum(moments.cell_current)",
+                    ),
+                },
             ),
         },
         "topology read": {
-            "function": "ForwardFluxOperator._fixed_design_read",
-            "sentinel": _source_line(
-                ForwardFluxOperator._fixed_design_read,
-                "rescue_axis = self._independent_rescue_axis",
+            "targets": (
+                {
+                    "function": "ForwardFluxOperator._fixed_design_read",
+                    "sentinel": _source_line(
+                        ForwardFluxOperator._fixed_design_read,
+                        "result = self._fixed_design_topology.read_qualification",
+                    ),
+                },
             ),
         },
     }
@@ -446,19 +461,23 @@ def _replication_census(
     """Count independently traced copies of two dominant source paths."""
     result: dict[str, dict[str, Any]] = {}
     for label, target in _replication_targets().items():
+        target_functions = {item["function"] for item in target["targets"]}
+        sentinel_locations = {
+            (item["function"], item["sentinel"]["line"]) for item in target["targets"]
+        }
         sentinel_frames: dict[int, dict[str, Any]] = {}
         instruction_count = 0
         locations: set[tuple[Any, Any, Any]] = set()
         for record in records:
             matched = False
             for frame in _frame_chain(tables, record["meta"].get("stack_frame_id")):
-                if frame.get("function") != target["function"]:
+                if frame.get("function") not in target_functions:
                     continue
                 matched = True
                 locations.add(
                     (frame.get("file"), frame.get("function"), frame.get("line"))
                 )
-                if frame.get("line") == target["sentinel"]["line"]:
+                if (frame.get("function"), frame.get("line")) in sentinel_locations:
                     sentinel_frames[frame["frame_id"]] = frame
             if not matched:
                 continue
@@ -467,9 +486,11 @@ def _replication_census(
             locations, key=lambda item: tuple(str(value) for value in item)
         )
         result[label] = {
-            "target_function": target["function"],
-            "sentinel_line": target["sentinel"]["line"],
-            "source": target["sentinel"],
+            "target_function": target["targets"][0]["function"],
+            "target_functions": sorted(target_functions),
+            "sentinel_line": target["targets"][0]["sentinel"]["line"],
+            "source": target["targets"][0]["sentinel"],
+            "sources": [item["sentinel"] for item in target["targets"]],
             "copy_count": len(sentinel_frames),
             "instructions": instruction_count,
             "source_locations": [
@@ -1023,8 +1044,7 @@ def _loop_inventory() -> list[dict[str, Any]]:
         {
             **_source_line(
                 reduced_newton._compiled_slice_solver,
-                "return jax.lax.fori_loop(",
-                occurrence=1,
+                "carry = jax.lax.fori_loop(",
             ),
             "loop": "compiled active-set trips",
             "form": "jax.lax.fori_loop",
@@ -1118,6 +1138,26 @@ def _profile_cached_entry(
     }
 
 
+def _executable_size(comp) -> dict[str, Any]:
+    """Return executable byte measures without mistaking silence for zero."""
+    runtime = comp.runtime_executable()
+    generated = getattr(runtime, "size_of_generated_code_in_bytes", None)
+    if callable(generated):
+        generated = generated()
+    generated_bytes = int(generated) if generated is not None else None
+    serialized_bytes = None
+    serialization_error = None
+    try:
+        serialized_bytes = len(runtime.serialize())
+    except (MemoryError, RuntimeError, ValueError) as error:
+        serialization_error = f"{type(error).__name__}: {error}"
+    return {
+        "serialized_bytes": serialized_bytes,
+        "generated_code_bytes": generated_bytes,
+        "serialization_error": serialization_error,
+    }
+
+
 def _census_compiled(comp, label, run_dir, case_name, cells):
     text = comp.as_text()
     hlo_dir = run_dir / "hlo"
@@ -1129,6 +1169,7 @@ def _census_compiled(comp, label, run_dir, case_name, cells):
     census["cells"] = cells
     census["hlo_text_bytes"] = len(text)
     census["hlo_text_path"] = str(hlo_path)
+    census["executable"] = _executable_size(comp)
     length = len(text)
     return census, length
 
@@ -1151,6 +1192,7 @@ def _rung_receipt(entry: dict[str, Any]) -> dict[str, Any]:
                 "straight_line_instructions",
                 "replication",
                 "large_constants",
+                "executable",
             )
         },
         "map": {
@@ -1164,6 +1206,7 @@ def _rung_receipt(entry: dict[str, Any]) -> dict[str, Any]:
                 "straight_line_instructions",
                 "replication",
                 "large_constants",
+                "executable",
             )
         },
     }
@@ -1295,11 +1338,12 @@ def reanalyze(
         solve_text = solve_path.read_text(encoding="utf-8")
         map_text = map_path.read_text(encoding="utf-8")
         source_part = hlo_dir.parent / "parts" / f"{case_name}_{requested_cells}c.json"
-        compile_seconds = None
-        if source_part.exists():
-            compile_seconds = json.loads(source_part.read_text(encoding="utf-8")).get(
-                "compile_seconds"
-            )
+        source_entry = (
+            json.loads(source_part.read_text(encoding="utf-8"))
+            if source_part.exists()
+            else {}
+        )
+        compile_seconds = source_entry.get("compile_seconds")
         solve_census = _census_module(solve_text, cells=requested_cells)
         map_census = _census_module(map_text, cells=requested_cells)
         solve_census.update(
@@ -1318,6 +1362,15 @@ def reanalyze(
                 "hlo_text_path": str(map_path),
             }
         )
+        for label, census in (("solve", solve_census), ("map", map_census)):
+            source_executable = source_entry.get(label, {}).get("executable")
+            census["executable"] = source_executable or {
+                "serialized_bytes": None,
+                "generated_code_bytes": None,
+                "serialization_error": (
+                    "reanalyzed HLO has no persisted executable-size measurement"
+                ),
+            }
         for census in (solve_census, map_census):
             census["top30_instructions"] = _top(
                 census["attributed"], 30, "instructions"
@@ -1479,11 +1532,12 @@ def _render_svg(entry: dict[str, Any], path: Path) -> None:
 
 
 def _render_constant_svg(results: dict[int, dict[str, Any]], path: Path) -> None:
-    """Render grouped captured literal bytes at both measured cell counts."""
+    """Render grouped captured literal bytes at the measured cell counts."""
+    measured_cells = tuple(sorted(results))
     groups = sorted(
         {
             group
-            for cells in REQUIRED_CELLS
+            for cells in measured_cells
             for group in results[cells]["solve"]["large_constants"]["groups"]
         }
     )
@@ -1497,7 +1551,7 @@ def _render_constant_svg(results: dict[int, dict[str, Any]], path: Path) -> None
             results[cells]["solve"]["large_constants"]["groups"]
             .get(group, {})
             .get("captured_bytes", 0)
-            for cells in REQUIRED_CELLS
+            for cells in measured_cells
             for group in groups
         ),
         default=1,
@@ -1511,9 +1565,9 @@ def _render_constant_svg(results: dict[int, dict[str, Any]], path: Path) -> None
         '<text x="16" y="25" font-size="16" font-weight="bold" fill="#1a1a1a">'
         "Captured optimised-HLO literal bytes by source group</text>",
         '<text x="16" y="44" font-size="11" fill="#555">Only literals larger '
-        "than 1 KiB; linear bar scale, paired CPU compilations</text>",
+        "than 1 KiB; linear bar scale, CPU compilations</text>",
     ]
-    for legend_index, cells in enumerate(REQUIRED_CELLS):
+    for legend_index, cells in enumerate(measured_cells):
         x = 760 + legend_index * 130
         parts.append(
             f'<rect x="{x}" y="18" width="16" height="10" fill="{colors[cells]}"/>'
@@ -1525,7 +1579,7 @@ def _render_constant_svg(results: dict[int, dict[str, Any]], path: Path) -> None
             f'<text x="{label_x - 12}" y="{y + 24}" text-anchor="end" '
             f'fill="#222">{group}</text>'
         )
-        for offset, cells in enumerate(REQUIRED_CELLS):
+        for offset, cells in enumerate(measured_cells):
             value = (
                 results[cells]["solve"]["large_constants"]["groups"]
                 .get(group, {})
@@ -1568,6 +1622,42 @@ def _location(source: dict[str, Any] | None) -> str:
         pass
     function = source.get("function") or "unknown"
     return f"{path}:{source.get('line') or '?'} `{function}`"
+
+
+def _replication_count(program: dict[str, Any], path: str) -> int:
+    return int(program["replication"][path]["copy_count"])
+
+
+def build_rung_report(results: dict[int, dict[str, Any]]) -> str:
+    """Summarize an intentionally partial census without inventing missing rungs."""
+    lines = [
+        "# Program scope census",
+        "",
+        "This receipt contains only the requested compilation rungs. Missing cell "
+        "counts were not measured and are not inferred.",
+        "",
+        "| cells | compile seconds | solve / map instructions | executable bytes | "
+        "moment copies solve / map | topology copies solve / map |",
+        "|---:|---:|---:|---:|---:|---:|",
+    ]
+    for cells, row in sorted(results.items()):
+        solve = row["solve"]
+        mapped = row["map"]
+        executable = solve.get("executable", {})
+        serialized = executable.get("serialized_bytes")
+        serialized_display = (
+            f"{int(serialized):,}" if serialized is not None else "unavailable"
+        )
+        lines.append(
+            f"| {cells} | {float(row['compile_seconds']):.3f} | "
+            f"{int(solve['total_instructions']):,} / "
+            f"{int(mapped['total_instructions']):,} | {serialized_display} | "
+            f"{_replication_count(solve, 'current-moment path')} / "
+            f"{_replication_count(mapped, 'current-moment path')} | "
+            f"{_replication_count(solve, 'topology read')} / "
+            f"{_replication_count(mapped, 'topology read')} |"
+        )
+    return "\n".join(lines) + "\n"
 
 
 def build_report(
@@ -1669,10 +1759,11 @@ def build_report(
     for cells in REQUIRED_CELLS:
         for program in ("map", "solve"):
             for label, item in results[cells][program]["replication"].items():
-                source = item.get("source")
+                sources = item.get("sources", [item.get("source")])
+                source = "; ".join(_location(value) for value in sources if value)
                 ap(
                     f"| {cells} | {program} | {label} | {item['copy_count']:,} | "
-                    f"{item['instructions']:,} | {_location(source)} |"
+                    f"{item['instructions']:,} | {source} |"
                 )
     ap("")
     ap("## Loop inventory")
@@ -1870,10 +1961,8 @@ def build_report(
     traced_map_seam = _source_line(ForwardFluxOperator.traced_flux_map, "def ")
     profile_seam = _source_line(DomainProfile.pressure_gradient, "def ")
     moment_seam = _source_line(ForwardSource.current_moments, "def ")
-    compiled_loop = _source_line(
-        reduced_newton._compiled_slice_solver,
-        "return jax.lax.fori_loop(",
-        occurrence=1,
+    compiled_loop = next(
+        row for row in _loop_inventory() if row["loop"] == "compiled active-set trips"
     )
     public_entry = _source_line(reduced_newton.solve_reduced_newton_compiled, "def ")
     coordinate_seam = _source_line(reduced_newton.reduced_coordinates, "def ")
@@ -1958,6 +2047,13 @@ def main() -> None:
     )
     parser.add_argument("--host-profile-path", default=None)
     parser.add_argument(
+        "--cache-root",
+        default=None,
+        help=(
+            "persistent compilation cache root; use an empty directory for cold timing"
+        ),
+    )
+    parser.add_argument(
         "--profile-cached-entry",
         action="store_true",
         help="warm and cProfile one cache-hit public compiled-slice call",
@@ -1993,7 +2089,9 @@ def main() -> None:
         )
     else:
         configure_persistent_compilation_cache(
-            default_persistent_compilation_cache_root()
+            arguments.cache_root
+            if arguments.cache_root
+            else default_persistent_compilation_cache_root()
         )
         results, host_profile = measure(
             arguments.case,
@@ -2011,7 +2109,11 @@ def main() -> None:
             f"CENSUS_FIGURE {figure_dir / 'captured-bytes-by-group.svg'}",
             flush=True,
         )
-    report = build_report(results, host_profile)
+    report = (
+        build_report(results, host_profile)
+        if set(results) == set(REQUIRED_CELLS)
+        else build_rung_report(results)
+    )
     report_dir = Path(arguments.report_dir) if arguments.report_dir else run_dir
     report_dir.mkdir(parents=True, exist_ok=True)
     report_path = report_dir / "scope-census-index.md"

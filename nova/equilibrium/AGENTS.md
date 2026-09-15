@@ -162,6 +162,45 @@ Measurements of the root choice (node-local `/tmp` premise, cold-versus-warm
 compile wall across two allocations on the same host) live under
 `docs/figures/playable-forward-solve/compilation-cache/`.
 
+## Keep compiled solve programs proportional to one map
+
+Treat the optimized HLO and executable size as API constraints alongside the
+temporary-memory analysis.  The measured 300- and 1000-cell whole solves held
+654,832 and 662,331 optimized instructions against 9,908 and 10,024 for one
+map application: 66.1 times the map at both cell counts.  Their source
+sentinels found 120 traced current-moment paths and 8 topology reads in the
+solve against one of each in the map.  Run
+`benchmarks/solve_program_size_gate.py` beside the memory gate after changing a
+compiled solve boundary; its map control must see the known-present sentinels
+before an absent solve count can be believed.
+
+- A trip, Newton budget, or other fixed-capacity iteration is a
+  `jax.lax.scan`, `jax.lax.fori_loop`, or `jax.lax.while_loop` with fixed-shape
+  telemetry slots.  Never express it as a Python loop inside a traced program.
+  The measured production Newton and active-set budgets were already
+  `fori_loop` bodies, so rewriting their host-only Python counterparts cannot
+  reduce compiled size.  The rule is scan, never unroll; verify the optimized
+  HLO rather than inferring the form from source syntax.
+- A per-cell operation is vectorized over cells.  Do not trace a Python loop
+  once per cell, candidate, trip, or budget.  Residual, merit, shadow, and
+  Jacobian-vector-product paths share one traced operator body and carry their
+  varying states through loop operands.
+- Mesh-sized and interaction-matrix arrays are explicit program arguments,
+  never closure constants.  Capturing the interaction blocks grew generated
+  code from 0.44 GiB at 300 cells to 3.5 GiB at 1000 and 19 GiB at 2500 while
+  the pre-optimization instruction count stayed constant.  A cache key may
+  describe array shape and policy, but it must not close over the array values.
+- Flux-function coefficients and normalization scalars enter as traced,
+  fixed-shape arrays.  The profile evaluation rule may remain static; binding
+  the profile object or its coefficient values into the callable makes a new
+  program per slice.  Coil centroids may likewise be traced positions when the
+  measured cost is negligible.  Do not differentiate through conductor or
+  plasma-cell geometry.
+- One solve program contains one traced current-moment path and one traced
+  topology-read path.  Repeated dynamic evaluations return to those shared
+  loop bodies; a second source copy in optimized HLO is a failed size gate even
+  when the terminal state and temporary-memory gate pass.
+
 ## Debug-lane handling for cache-sensitive reduced-state tests
 
 Run a named `tests/test_reduced_newton.py` case in one `all_debug` allocation

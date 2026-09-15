@@ -48,8 +48,15 @@ def test_measure_uses_the_current_quadrature_node_owner(monkeypatch, tmp_path):
         }
 
     monkeypatch.setattr(memory_scaling.certificate, "_compile_solve_memory", compiled)
-    receipt = memory_scaling.measure(tmp_path / "receipt.json", tmp_path, [110])
+    part_root = tmp_path / "parts"
+    receipt = memory_scaling.measure(
+        tmp_path / "receipt.json", tmp_path, [110], part_root=part_root
+    )
     assert receipt["completed"] is True
+    part = memory_scaling.json.loads(
+        (part_root / "requested-110.json").read_text(encoding="utf-8")
+    )
+    assert part["row"] == receipt["rows"][0]
 
 
 class _ConstantCurrentProfile:

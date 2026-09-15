@@ -106,13 +106,29 @@ def _scaling(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def measure(output: Path, compiler_root: Path, requested_cells: list[int]) -> dict:
-    """Compile exact-clip rungs and persist each completed memory receipt."""
+def measure(
+    output: Path,
+    compiler_root: Path,
+    requested_cells: list[int],
+    *,
+    part_root: Path | None = None,
+) -> dict:
+    """Compile exact-clip rungs and persist each result before continuing.
+
+    Every rung receives an immutable, independently readable part receipt in
+    addition to the cumulative receipt.  A later compilation failure therefore
+    cannot obscure which earlier executable and memory analysis actually
+    landed.
+    """
     configure_dtypes()
     if not hasattr(certificate.observation, "_UNIT_NODE"):
         certificate.observation._UNIT_NODE = clip_quadrature._UNIT_NODE
     original_mode = support_clip_mode()
     rows: list[dict[str, Any]] = []
+    source_revision = certificate._source_revision()
+    lane = certificate._lane()
+    if part_root is None:
+        part_root = output.parent / f"{output.stem}-parts"
     try:
         set_support_clip_mode("exact")
         for requested in requested_cells:
@@ -123,11 +139,20 @@ def measure(output: Path, compiler_root: Path, requested_cells: list[int]) -> di
                 compiler_artifact_root=compiler_root,
             )
             row["pairwise_predicate_candidates"] = _pairwise_predicates(row)
+            _atomic_json(
+                part_root / f"requested-{abs(requested)}.json",
+                {
+                    "schema": SCHEMA,
+                    "source_revision": source_revision,
+                    "lane": lane,
+                    "row": row,
+                },
+            )
             rows.append(row)
             receipt = {
                 "schema": SCHEMA,
-                "source_revision": certificate._source_revision(),
-                "lane": certificate._lane(),
+                "source_revision": source_revision,
+                "lane": lane,
                 "rows": rows,
                 "scaling": _scaling(rows),
                 "completed": len(rows) == len(requested_cells),
@@ -150,13 +175,19 @@ def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--compiler-root", type=Path, required=True)
+    parser.add_argument("--part-root", type=Path)
     parser.add_argument("--cells", type=int, nargs="+", default=[110, 300, 500])
     return parser.parse_args()
 
 
 def main() -> None:
     arguments = _parse()
-    receipt = measure(arguments.output, arguments.compiler_root, arguments.cells)
+    receipt = measure(
+        arguments.output,
+        arguments.compiler_root,
+        arguments.cells,
+        part_root=arguments.part_root,
+    )
     print(
         json.dumps(
             {

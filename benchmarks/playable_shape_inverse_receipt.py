@@ -428,6 +428,7 @@ def _boundary_point_rows(inverse, profile, flux) -> list[dict[str, Any]]:
             boundary_polygon(profile, flux),
         )
     )
+    boundary_row_count = inverse.previous_flux_points.shape[0]
     return [
         {
             "index": index,
@@ -440,10 +441,10 @@ def _boundary_point_rows(inverse, profile, flux) -> list[dict[str, Any]]:
         for index, (previous, commanded, actual, floor, weight) in enumerate(
             zip(
                 inverse.previous_flux_points,
-                inverse.flux_points,
+                inverse.flux_points[:boundary_row_count],
                 achieved,
-                inverse.consistency_floor[: inverse.flux_points.shape[0]],
-                inverse.row_weight[: inverse.flux_points.shape[0]],
+                inverse.consistency_floor[:boundary_row_count],
+                inverse.row_weight[:boundary_row_count],
                 strict=True,
             )
         )
@@ -823,6 +824,9 @@ def _arm_receipt(
         "maximum_absolute_active_current_change_a": float(
             np.max(np.abs(inverse.delta))
         ),
+        "within_twenty_ka_ceiling": bool(
+            np.max(np.abs(inverse.delta)) <= DELTA_CURRENT_CEILING_A
+        ),
         "current_change_l2_a": float(np.linalg.norm(inverse.delta)),
         "commanded_change_against_consistency_floor": row_floor_table,
         "row_consistency_floor": inverse.consistency_floor.tolist(),
@@ -942,6 +946,9 @@ def _arm_receipt(
         "maximum_uncommanded_drift_m": _maximum_uncommanded_drift(point_table),
         "accepted_fraction": inverse.accepted_fraction,
         "admissibility_trials": inverse.admissibility_trials,
+        "within_twenty_ka_ceiling": bool(
+            np.max(np.abs(inverse.delta)) <= DELTA_CURRENT_CEILING_A
+        ),
         "coil_current_by_circuit_a": {
             _circuit_label(index, circuit_names): float(current)
             for index, current in enumerate(solver.prescribed_current)
@@ -1022,6 +1029,9 @@ def _null_receipt(
             for index, delta in enumerate(current_change)
         },
         "maximum_absolute_current_change_a": float(np.max(np.abs(current_change))),
+        "within_twenty_ka_ceiling": bool(
+            np.max(np.abs(inverse.delta)) <= DELTA_CURRENT_CEILING_A
+        ),
         "delta_regularisation_weight": inverse.delta_regularisation,
         "delta_current_scale_a": inverse.delta_current_scale.tolist(),
         "delta_regularisation_sweep": delta_regularisation_sweep,
@@ -1032,6 +1042,7 @@ def _null_receipt(
         "trips": int(trips),
         "wall_s": float(wall),
         "converged": bool(np.asarray(equilibrium.fixed_point.converged)),
+        "qualified_axis": True,
     }
     return payload, equilibrium
 

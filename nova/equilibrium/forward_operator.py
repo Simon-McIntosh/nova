@@ -370,67 +370,17 @@ def _polished_level_root(chord, normal, lower, upper, evaluator):
 
 @jax.custom_jvp
 def _implicit_level_root(chord, normal, lower, upper, evaluator):
-    """Polish the primal root while exposing its implicit derivative."""
+    """Polish the primal root with its exact bounded-iteration derivative."""
     return _polished_level_root(chord, normal, lower, upper, evaluator)
 
 
 @_implicit_level_root.defjvp
 def _implicit_level_root_jvp(primals, tangents):
-    chord, normal, lower, upper, evaluator = primals
-    chord_tangent, normal_tangent, lower_tangent, upper_tangent, evaluator_tangent = (
-        tangents
-    )
-    root = _polished_level_root(chord, normal, lower, upper, evaluator)
-
-    def residual_at_fixed_root(carried_chord, carried_normal, carried_evaluator):
-        point = carried_chord + root[..., None] * carried_normal[:, None, :]
-        return carried_evaluator(point)
-
-    _value, partial_tangent = jax.jvp(
-        residual_at_fixed_root,
-        (chord, normal, evaluator),
-        (chord_tangent, normal_tangent, evaluator_tangent),
-    )
-
-    def residual_at_root(candidate):
-        point = chord + candidate[..., None] * normal[:, None, :]
-        return evaluator(point)
-
-    root_value, root_derivative = jax.jvp(
-        residual_at_root,
-        (root,),
-        (jnp.ones_like(root),),
-    )
-    derivative_is_valid = jnp.abs(root_derivative) > jnp.finfo(root.dtype).tiny
-    safe_derivative = jnp.where(derivative_is_valid, root_derivative, 1.0)
-    implicit_tangent = jnp.where(
-        derivative_is_valid,
-        -partial_tangent / safe_derivative,
-        0.0,
-    )
-    candidate = root - root_value / safe_derivative
-    tangent = jnp.where(
-        candidate < lower,
-        lower_tangent,
-        jnp.where(candidate > upper, upper_tangent, implicit_tangent),
-    )
-    tangent = jnp.where(
-        candidate == lower,
-        0.5 * (implicit_tangent + lower_tangent),
-        tangent,
-    )
-    tangent = jnp.where(
-        candidate == upper,
-        0.5 * (implicit_tangent + upper_tangent),
-        tangent,
-    )
-    tangent = tangent.at[:, 0].set(0.0)
-    tangent = tangent.at[:, -1].set(0.0)
-    return root, tangent
+    return jax.jvp(jax.checkpoint(_polished_level_root), primals, tangents)
 
 
 def _implicit_traced_level_arc(start, end, evaluator, inside_vertex):
-    """Trace the original arc with one implicit derivative per polished root."""
+    """Trace the original arc without retaining polish work between tangents."""
     parameter = jnp.linspace(
         0.0,
         1.0,

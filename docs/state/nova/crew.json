@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T10:37:25",
+  "updated": "2026-09-15T10:54:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -162362,6 +162362,208 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T055602091466-cca-newton-krylov-iteration-count",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-newton-krylov-iteration-count",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 7153,
+                "cached_input_tokens": 552579,
+                "input_tokens": 559764,
+                "output_tokens": 379,
+                "reasoning_output_tokens": 148,
+                "total_tokens": 560143,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "tests/test_two_class_recovery.py::test_cold_seed_receipts_keep_one_fixed_branch_axis_under_vmap passes in one fresh all_debug CPU process (JAX_PLATFORMS=cpu, the root venv python run directly, never uv on the node); the module's failure set at head equals the base set minus that one id with zero added failures, both sets listed by id in the report; _iteration_count in nova/equilibrium/forward.py reads the step count from the field the newton_krylov route populates or derives it from the receipt, never a default guess",
+          "estimated_hours": null,
+          "goal": "The newton_krylov portfolio route reports its iteration count without a KeyError when options carry no newton_steps",
+          "id": "cca-newton-krylov-iteration-count",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-15T05:56:02Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T055602091466-cca-newton-krylov-iteration-count/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward.py",
+            "tests/test_two_class_recovery.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/iteration-count",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-cca-itercount-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-15T05:56:21Z",
+        "completed_at": "2026-09-15T08:44:40.052Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 10084,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 10099,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "0f872fd69bc1a3766fbb1610ee3412fca647887e",
+        "commits": [
+          "df288d3bb76f5a7c60e76a3ccdfeb4d8e91c58c5",
+          "413393e5be9b38b59133cff71418205f5037c509"
+        ],
+        "changed_lines": {
+          "added": 42,
+          "removed": 2,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug JAX_PLATFORMS=cpu pytest tests/test_two_class_recovery.py -m 'not slow' (job 1271183): the KeyError is gone, 1 failed on the masked assertion",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/iteration-count/cca-newton-krylov-iteration-count-gate-nonslow.log",
+          "log_digest": "0cc3efef2d6ce1967fdb33b4257a78c84ede27cff7c844e4ae48ca7686d72fd7"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T055602091466-cca-newton-krylov-iteration-count/manifest.md",
+        "scope_changed": false,
+        "session_id": "08934435-1067-489b-a76f-1f1cd5222cea",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 8449827,
+            "input_tokens_cumulative": 8449827,
+            "output_tokens": 75828,
+            "output_tokens_cumulative": 75828,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T08:44:40.052Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 8615630,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 200000",
+          "elapsed_seconds": 10095.354,
+          "generated_tokens": 81452,
+          "generation_seconds": 9790.769,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 82.3,
+          "machine_seconds": 304.585,
+          "peak_input_tokens": 164503,
+          "tokens_per_second": 8.32,
+          "wall_tokens_per_second": 8.07
+        },
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-newton-krylov-iteration-count",
+          "session_id": "08934435-1067-489b-a76f-1f1cd5222cea",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T08:44:40.052Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 66.0,
+        "orientation_input_tokens": 3043713.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -162674,6 +162876,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2542
+    "_version": 2543
   }
 }

@@ -31,6 +31,7 @@ never interpret a capped, unsettled label field as a component result.
 
 from __future__ import annotations
 
+from functools import partial
 import math
 
 import jax
@@ -40,6 +41,8 @@ import jax.numpy as jnp
 __all__ = [
     "label_parallel_connected_components",
     "label_parallel_connected_components_with_steps",
+    "label_parallel_graph_components",
+    "label_parallel_graph_components_with_steps",
 ]
 
 
@@ -68,6 +71,114 @@ def _neighbour_table(shape: tuple[int, int]) -> tuple[jax.Array, jax.Array]:
         axis=-1,
     ).reshape((-1, 4))
     return neighbours, valid & (neighbours != index.reshape((-1, 1)))
+
+
+@partial(jax.jit, static_argnums=(3,))
+def label_parallel_graph_components_with_steps(
+    confined: jax.Array,
+    neighbours: jax.Array,
+    neighbour_admissible: jax.Array,
+    n_iter: int,
+) -> tuple[jax.Array, jax.Array, jax.Array]:
+    """Return exact labels over an explicit centre-first neighbour list.
+
+    ``neighbours`` is a two-dimensional integer table whose first column is a
+    centre vertex and whose remaining columns are its neighbours.
+    ``neighbour_admissible`` has the same shape and masks graph links; column
+    zero is padding and does not create an edge. The vertices themselves have
+    the fixed shape of ``confined``.
+
+    Each round hooks the current parent of every vertex toward the smallest
+    grandparent visible on an admissible edge, then pointer-jumps every parent.
+    A hook crosses a real foreground edge and a jump follows existing tree
+    edges, so parents never cross connected components. Parent indices decrease,
+    leaving the minimum-index vertex as the immutable root. At the fixed point
+    every edge endpoint has that same root, making the result bit-identical to
+    canonical minimum-label propagation.
+
+    ``n_iter`` remains the caller's static upper bound, while the compiled pass
+    needs at most ``ceil(log2(cell_count)) + 2`` hook-and-compress trips. The
+    returned ``settled`` flag is false if a smaller caller cap prevents the
+    confirming trip.
+    """
+    if neighbours.ndim != 2:
+        raise ValueError("neighbours must be a two-dimensional table")
+    if neighbours.shape != neighbour_admissible.shape:
+        raise ValueError("neighbours and neighbour_admissible must have equal shape")
+
+    cell_count = confined.size
+    trip_limit = min(max(n_iter, 0), math.ceil(math.log2(max(cell_count, 1))) + 2)
+    foreground = confined.reshape(-1)
+    centre = neighbours[:, :1]
+    adjacent = neighbours[:, 1:]
+    edge_valid = neighbour_admissible[:, 1:] & foreground[centre] & foreground[adjacent]
+    vertex = jnp.arange(cell_count, dtype=jnp.int32)
+    sentinel = jnp.asarray(cell_count, dtype=jnp.int32)
+
+    def advance(parents):
+        grandparents = parents[parents]
+        edge_minimum = jnp.where(
+            edge_valid,
+            jnp.minimum(grandparents[centre], grandparents[adjacent]),
+            sentinel,
+        )
+        neighbour_minimum = jnp.full(cell_count, sentinel, dtype=jnp.int32)
+        neighbour_minimum = neighbour_minimum.at[centre].min(
+            jnp.min(edge_minimum, axis=1, keepdims=True)
+        )
+        neighbour_minimum = neighbour_minimum.at[adjacent].min(edge_minimum)
+        hook = foreground & (neighbour_minimum < grandparents)
+
+        root_candidate = jnp.where(hook, neighbour_minimum, sentinel)
+        hooked = parents.at[parents].min(root_candidate)
+        hooked = jnp.where(hook, jnp.minimum(hooked, neighbour_minimum), hooked)
+        hooked = jnp.minimum(hooked, grandparents)
+        hooked = jnp.where(foreground, hooked, vertex)
+        return hooked[hooked]
+
+    def body(_trip, state):
+        parents, steps = state
+        next_parents = advance(parents)
+        changed = jnp.any(next_parents != parents)
+        return next_parents, steps + changed.astype(jnp.int32)
+
+    parents, steps = jax.lax.fori_loop(
+        0,
+        trip_limit,
+        body,
+        (
+            vertex,
+            jnp.asarray(0, dtype=jnp.int32),
+        ),
+    )
+
+    def jump(_trip, current):
+        return current[current]
+
+    roots = jax.lax.fori_loop(
+        0,
+        math.ceil(math.log2(max(cell_count, 1))),
+        jump,
+        parents,
+    )
+    roots = roots[roots]
+    labels = jnp.where(foreground, roots + 1, 0).reshape(confined.shape)
+    settled = ~jnp.any(advance(parents) != parents)
+    return labels, steps, settled
+
+
+@partial(jax.jit, static_argnums=(3,))
+def label_parallel_graph_components(
+    confined: jax.Array,
+    neighbours: jax.Array,
+    neighbour_admissible: jax.Array,
+    n_iter: int,
+) -> jax.Array:
+    """Return canonical labels over an explicit centre-first neighbour list."""
+    labels, _steps, _settled = label_parallel_graph_components_with_steps(
+        confined, neighbours, neighbour_admissible, n_iter
+    )
+    return labels
 
 
 @jax.jit

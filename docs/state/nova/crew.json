@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T23:37:58",
+  "updated": "2026-09-16T01:52:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4747,6 +4747,15 @@
       },
       {
         "id": "s19h-cca-shadow-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-cca-stiffness-s",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -167749,6 +167758,209 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T213758848069-cca-exact-clip-low-fixed-point-discriminator",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-exact-clip-low-fixed-point-discriminator",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3776,
+                "cached_input_tokens": 708691,
+                "input_tokens": 712499,
+                "output_tokens": 3162,
+                "reasoning_output_tokens": 1226,
+                "total_tokens": 715661,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "Facts to start from, all persisted: under the exact clip from the repaired seed (worktree cca-exact-clip-seed-books-target-current, parts under docs/figures/cut-cell-current-attribution/exact-clip-seed/parts, H200 job 1271708) weak 110 converges at 3.4e-13 with axis flux 49.9429 against analytic 49.9461, boundary flux 0.0019 Wb from the analytic zero and boundary-band psi rms 0.0024 Wb, an oracle match near the 3.6e-5 span floor; weak 300 converges at 2.1e-13 with axis flux 46.66 against 49.96, boundary flux -2.02 Wb and axis error 36 mm; moderate 110 and 300 and strong 110 all converge with axis flux 6 to 7 percent low and boundary level about 4 percent of span inside. The analytic-start probe (report under the s19-review worktree cca-oracle-start-newton-probe, docs/figures/cut-cell-current-attribution/oracle-start/report.md) found before the fixture was re-posed that the one-map difference under the exact clip lives entirely in participation, inactive cells 50 percent and cut cells 49 percent of the booked-minus-analytic current, whole cells 7e-16; the fixture is now posed from analytic clipped moments (decision q-cca-reference-posing locked 2026-09-14) so the analytic flux is a fixed point of the map to that floor. A benchmark benchmarks/exact_clip_low_state_discriminator.py runs, in ONE H200 job (one card, 8 cores, 128 GiB, TMPDIR=/tmp in submit environment and payload, PYTHONPATH the worktree, root venv python, persistent compilation cache, set_support_clip_mode exact, receipts persisted per arm as each lands) on weak 300 and, as the positive control, weak 110: arm A the production iteration started from the analytic flux itself, tabling the terminal residual, axis flux, boundary level and max solved-minus-analytic over span after 1, 2, 4 and the converged number of trips, so a drift away from the oracle names the map's fixed point as wrong and a stay names the seed basin; arm B the production iteration from the repaired seed as the 1271708 rows ran it (the reference low state); arm C the analytic flux translated rigidly by arm B's measured axis error, its boundary level read by the production limiter read and compared with arm B's terminal boundary level, so a match names the low state a displaced equilibrium; arm D at arm B's terminal state a per-cell census of booked current against the analytic current integrated over the same clipped polygon for whole, cut and inactive cells (the analytic-start probe's census reused), so the shortfall is located by cell class and the participation set at the terminal is compared with the participation set at the analytic flux (cells that changed class listed with R, Z and psi_norm); the report names which of the three readings the arms jointly support and the code seam it points at (participation in _profile_support and the confinement test, the limiter contact read, or the moment conversion of cut cells), with one figure per row of the arm A and arm B terminals over the analytic flux on shared levels and a difference panel in fractions of span, nova/AGENTS.md plotting rules obeyed; no source file changes; manifest in plain key: value lines, any waiting declaration with wait_probe as a JSON list such as [\"squeue\",\"-h\",\"-j\",\"1271708\"] and wait_terminal exit:0",
+          "estimated_hours": null,
+          "goal": "The exact-clip fixed point that sits six percent low in axis flux with its boundary four percent of span inside the analytic zero is discriminated between a second self-consistent state the seed selects, a displaced equilibrium, and a booking error in the cut and inactive cells, on the weak 110 and 300 rows where one matches the oracle and one does not",
+          "id": "cca-exact-clip-low-fixed-point-discriminator",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T21:37:59Z",
+            "read_at": "2026-09-15T21:38:00Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 62.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T213758848069-cca-exact-clip-low-fixed-point-discriminator/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/exact_clip_low_state_discriminator.py",
+            "docs/figures/cut-cell-current-attribution/exact-clip-low-state",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-low-state",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19h-cca-lowstate-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T21:38:16Z",
+        "completed_at": "2026-09-15T23:48:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7801,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "ee4f7773045c7c788bb6223699dbd0443477b313",
+        "commits": [
+          "fc3abf0c52396b984fb32d1acffcd58a421687f8",
+          "330040d25eb2af6676372e2b5f6a975f1b66feea"
+        ],
+        "changed_lines": {
+          "added": 3838,
+          "removed": 2,
+          "files": 15
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1271758: four arms on weak 110 and weak 300 under the exact clip, rows=2 completed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/cut-cell-current-attribution/exact-clip-low-state/receipt.json",
+          "log_digest": "sha256:9949ac473dcfc1c729c9495237652c546b6610efd0912752c76c96794e24daf0"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T213758848069-cca-exact-clip-low-fixed-point-discriminator/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a701-9fcd-78a1-bc82-a9b5ff901531",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5296768,
+            "cached_input_tokens_cumulative": 5296768,
+            "input_tokens": 5437581,
+            "input_tokens_cumulative": 5437581,
+            "output_tokens": 24305,
+            "output_tokens_cumulative": 24305,
+            "reasoning_output_tokens": 4848,
+            "reasoning_output_tokens_cumulative": 4848
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T23:48:17Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 66.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T23:48:17Z"
+            }
+          ],
+          "notional_cost_usd": 281.1944,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 5296768,
+          "cumulative_input_tokens": 10734349,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 29153
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-low-fixed-point-discriminator",
+          "session_id": "01a0a701-9fcd-78a1-bc82-a9b5ff901531",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T23:48:17Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 147.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -168061,6 +168273,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2582
+    "_version": 2584
   }
 }

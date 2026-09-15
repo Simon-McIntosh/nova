@@ -1,0 +1,57 @@
+{
+  "receipt": "synthetic outboard-midplane edge displacement",
+  "identity": "22086/43",
+  "status": "execution_failed_before_commands",
+  "measurement_complete": false,
+  "source": {
+    "revision": "80037ce8ab5dcdca11d008d77d6a08b2a285a7ee",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cank-edge-constraint-synthetic-target"
+  },
+  "scheduler": {
+    "job_id": "1271084",
+    "partition": "betelgeuse",
+    "reservation": "gpu_0003_grpA",
+    "node": "98dci4-gpu-0003",
+    "gpu_count": 1,
+    "allocated_cpus": 8,
+    "requested_memory": "128G",
+    "elapsed": "00:00:39",
+    "state": "FAILED",
+    "exit_code": "1:0",
+    "time_limit": "00:45:00",
+    "submit_tmpdir": "/tmp",
+    "payload_tmpdir": "/tmp",
+    "python": "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+    "pythonpath": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cank-edge-constraint-synthetic-target"
+  },
+  "requested_commands_mm": [
+    5.0,
+    10.0,
+    20.0
+  ],
+  "commands": [],
+  "failure": {
+    "stage": "free_equilibrium_construction",
+    "exception_type": "AttributeError",
+    "message": "module 'benchmarks.settled_mask_stall' has no attribute 'FIXED_POINT_CRITERION'",
+    "failing_expression": "settled.FIXED_POINT_CRITERION",
+    "command_rows_persisted": 0,
+    "contour_figure_written": false,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/edge-constraint/h200.log",
+    "log_sha256": "10ebc5f3e64d73977f6106364b152e5e4d0ae512441a072bb065893bd61fe378"
+  },
+  "remediation": {
+    "revision": "054a4366",
+    "change": "Import the canonical fixed-point criterion directly at all three solve call sites.",
+    "verified_by": "Focused CPU import and direct-reference contract passed after the repair.",
+    "accelerator_rerun_performed": false
+  },
+  "verdict": {
+    "status": "fail",
+    "reasons": [
+      "The authorized H200 job stopped before the converged free MAST equilibrium was constructed.",
+      "No 5, 10, or 20 mm command row exists, so displacement recovery, merit monotonicity, compensating current, overshoot, direct free reference, trip count, and contour evidence are absent.",
+      "The repaired driver was not rerun because the authorization allowed one H200 job."
+    ]
+  }
+}

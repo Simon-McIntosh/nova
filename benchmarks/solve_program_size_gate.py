@@ -318,16 +318,21 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
         )
 
     options = request.policy.kernel_options()
+
+    def baseline_solve(initial, exterior):
+        return fixed_point.newton_krylov(
+            mapped,
+            initial,
+            shadow_mask_fn=shadow_mask,
+            promoted_shadow_mask_fn=promoted_shadow_mask,
+            shadowed_map_fn=shadowed,
+            map_arguments=(exterior,),
+            **options,
+        )
+
+    baseline_program = jax.jit(baseline_solve)
     baseline_started = time.perf_counter()
-    baseline = fixed_point.newton_krylov(
-        mapped,
-        state,
-        shadow_mask_fn=shadow_mask,
-        promoted_shadow_mask_fn=promoted_shadow_mask,
-        shadowed_map_fn=shadowed,
-        map_arguments=(external,),
-        **options,
-    )
+    baseline = baseline_program(state, external)
     jax.block_until_ready(baseline.state)
     baseline_seconds = time.perf_counter() - baseline_started
     candidate_program = profile._accelerated_history_program(

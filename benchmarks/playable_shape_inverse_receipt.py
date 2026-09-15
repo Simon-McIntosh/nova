@@ -298,6 +298,7 @@ def _delta_regularisation_sweep(
             prescribed_current=seed,
             free_circuits=free,
             gamma=gamma_factor,
+            picard_rounds=0,
             delta_regularisation=weight,
             delta_current_scale=DELTA_CURRENT_CEILING_A,
         )
@@ -349,6 +350,7 @@ def _delta_regularisation_sweep(
                 else DELTA_REGULARISATION_WEIGHTS[-1]
             ),
             "selection": selection,
+            "placement_picard_rounds": 0,
             "admission_boundary": (
                 "The weight curve selects a 20 kA-compliant proposal and does "
                 "not encode a map-only admission boundary. The selected step's "

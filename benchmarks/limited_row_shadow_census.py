@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import contextmanager
 import hashlib
 import json
 import os
@@ -138,7 +139,46 @@ def _part_path(requested_cells: int) -> Path:
     )
 
 
-def _rebuild(requested_cells: int, case_name: str = CASE_NAME):
+def _whole_cell_fixture_exterior(case, _analytic, _machine, operator, state):
+    """Build the explicit whole-cell fixture used by the diverted control."""
+    moments = certificate.oracle_fixture.whole_cell_current_moments(
+        case, operator, state
+    )
+    coefficients = operator.coupling_current_moments(moments)
+    internal = certificate.oracle_fixture._internal_flux_image(operator, coefficients)
+    return (
+        moments,
+        np.asarray(state, dtype=np.float64) - internal,
+        {
+            "store": None,
+            "semantic_key": "explicit-whole-cell-control",
+            "hit": False,
+            "lock_wait_seconds": 0.0,
+            "build_seconds": 0.0,
+        },
+    )
+
+
+@contextmanager
+def _certificate_fixture(whole_cell_control: bool):
+    """Select the fixture construction declared by one solve-gate row."""
+    original = certificate.oracle_fixture.cached_fixture_exterior
+    if whole_cell_control:
+        certificate.oracle_fixture.cached_fixture_exterior = (
+            _whole_cell_fixture_exterior
+        )
+    try:
+        yield
+    finally:
+        certificate.oracle_fixture.cached_fixture_exterior = original
+
+
+def _rebuild(
+    requested_cells: int,
+    case_name: str = CASE_NAME,
+    *,
+    whole_cell_control: bool = False,
+):
     carrier_case, source_case, exact = certificate._case(case_name)
     machine = certificate._case_machine(case_name, carrier_case, exact, requested_cells)
     coordinates = np.vstack(
@@ -146,10 +186,13 @@ def _rebuild(requested_cells: int, case_name: str = CASE_NAME):
     )
     analytic = certificate._exact_state(case_name, exact, coordinates)
     empty = certificate.oracle_fixture.forward_operator(source_case, machine)
-    _physical, exterior, exterior_cache = (
-        certificate.oracle_fixture.cached_fixture_exterior(
-            source_case, exact, machine, empty, analytic
-        )
+    fixture = (
+        _whole_cell_fixture_exterior
+        if whole_cell_control
+        else certificate.oracle_fixture.cached_fixture_exterior
+    )
+    _physical, exterior, exterior_cache = fixture(
+        source_case, exact, machine, empty, analytic
     )
     operator = certificate.oracle_fixture.forward_operator(
         source_case, machine, exterior
@@ -278,9 +321,13 @@ def _solve_gate(output_root: Path, *, regenerate_rows: bool = False) -> dict[str
                 certificate._part_path(case_name, requested_cells).unlink(
                     missing_ok=True
                 )
-            row = certificate._measure(case_name, requested_cells)
+            whole_cell_control = case_name == certificate.DIVERTED_CASE_NAME
+            with _certificate_fixture(whole_cell_control):
+                row = certificate._measure(case_name, requested_cells)
             _machine, operator, _coordinates, _analytic, _cache = _rebuild(
-                requested_cells, case_name
+                requested_cells,
+                case_name,
+                whole_cell_control=whole_cell_control,
             )
             rows.append(_row_summary(mode, row, operator))
             _write_json(

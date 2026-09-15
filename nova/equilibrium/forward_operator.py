@@ -137,12 +137,12 @@ def _cell_banked_current_moments(
     """Integrate cut supports independently and scatter them beside whole cells.
 
     The high-capacity exact polygons occupy only the compact cut-cell bank. A
-    one-cell vectorized integration receives that cell's polynomial directly,
-    so differentiation never forms the all-carried-cells by all-cut-cells
-    boolean and polynomial arrays produced when a scan closes over the complete
-    field. Whole cells retain the existing 24-vertex integration, and the cut
-    cell calculation is unchanged before its result is scattered to the
-    original carrier index.
+    sequential fixed-capacity scan gives the integrator one cell's support and
+    polynomial at a time, so differentiation retains neither all-cell pairwise
+    predicates nor one high-order quadrature workspace per carried cell. Whole
+    cells retain the existing 24-vertex integration, and each cut-cell
+    calculation is unchanged before its result is scattered to the original
+    carrier index.
     """
     selected = jnp.asarray(selection, dtype=bool)
     boundary = selected & jnp.asarray(support.boundary, dtype=bool)
@@ -187,19 +187,26 @@ def _cell_banked_current_moments(
         )
         return jax.tree.map(lambda value: value[0], moments)
 
-    cut_moments = jax.vmap(integrate_one)(compact_support, compact_field, active)
+    def integrate_and_scatter(carried, rows):
+        one_support, one_field, live, index = rows
+        cut_moments = integrate_one(one_support, one_field, live)
 
-    def scatter(whole_value, cut_value):
-        combined = whole_value.at[cut_index].add(
-            jnp.where(active, cut_value, jnp.zeros((), dtype=cut_value.dtype))
-        )
-        return jnp.where(cut_count > capacity, jnp.nan, combined)
+        def scatter_one(carried_value, cut_value):
+            contribution = jnp.where(
+                live, cut_value, jnp.zeros((), dtype=cut_value.dtype)
+            )
+            return carried_value.at[index].add(contribution)
 
+        updated = jax.tree.map(scatter_one, carried, cut_moments)
+        return updated, None
+
+    combined, _ = jax.lax.scan(
+        integrate_and_scatter,
+        whole_moments,
+        (compact_support, compact_field, active, cut_index),
+    )
     return ClippedCurrentMoments(
-        *(
-            scatter(whole_value, cut_value)
-            for whole_value, cut_value in zip(whole_moments, cut_moments, strict=True)
-        )
+        *(jnp.where(cut_count > capacity, jnp.nan, value) for value in combined)
     )
 
 

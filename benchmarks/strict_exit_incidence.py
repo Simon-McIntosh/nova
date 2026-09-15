@@ -109,6 +109,7 @@ TRIP_LIMIT = 16
 CENSUS_PROJECTION_MS_PER_SLICE = 1.163
 FULL_TRIP_BASELINE_MS_PER_MEMBER = 415.60787488197093
 SETTLED_REASON = int(FixedPointTerminationReason.ACTIVE_SET_SETTLED)
+CONVERGED_REASON = int(FixedPointTerminationReason.CONVERGED)
 
 
 @dataclass(frozen=True)
@@ -863,6 +864,78 @@ def _arm_row(result: Any) -> dict[str, Any]:
     }
 
 
+def _arm_converged(arm: dict[str, Any]) -> bool:
+    return arm["termination"] == _termination_name(CONVERGED_REASON)
+
+
+def _terminal_state_difference(
+    control: dict[str, Any],
+    exited: dict[str, Any],
+    control_flux: Any,
+    exited_flux: Any,
+) -> dict[str, Any]:
+    difference = np.asarray(control_flux, dtype=np.float64) - np.asarray(
+        exited_flux, dtype=np.float64
+    )
+    return {
+        "max_absolute_flux_difference": float(np.max(np.abs(difference))),
+        "without_exit_converged": _arm_converged(control),
+        "with_exit_converged": _arm_converged(exited),
+    }
+
+
+def _strict_exit_member_row(
+    identity: str,
+    initial_state_sha256: str,
+    state_authority: str,
+    control: dict[str, Any],
+    exited: dict[str, Any],
+    control_flux: Any,
+    exited_flux: Any,
+    *,
+    control_payload: dict[str, Any] | None = None,
+    exited_payload: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Persist both passes before any cross-arm identity assertion."""
+    fired = exited["termination"] == _termination_name(SETTLED_REASON)
+    both_converged = _arm_converged(control) and _arm_converged(exited)
+    bit_identical = (
+        control["terminal_state_sha256"] == exited["terminal_state_sha256"]
+        if both_converged
+        else None
+    )
+    return {
+        "identity": identity,
+        "state_authority": state_authority,
+        "initial_state_sha256": initial_state_sha256,
+        "strict_qualification_firing_trip": (
+            exited["executed_trips"] if fired else None
+        ),
+        "strict_qualification": "fired" if fired else "never",
+        "terminal_state_difference": _terminal_state_difference(
+            control, exited, control_flux, exited_flux
+        ),
+        "terminal_state_bit_identical_where_both_arms_converged": bit_identical,
+        "without_exit": {**control, **(control_payload or {})},
+        "with_exit": {**exited, **(exited_payload or {})},
+    }
+
+
+def _assert_cross_arm_identity(rows: list[dict[str, Any]]) -> None:
+    """Refuse identity changes only over members converged in both passes."""
+    for row in rows:
+        difference = row["terminal_state_difference"]
+        if not (
+            difference["without_exit_converged"] and difference["with_exit_converged"]
+        ):
+            continue
+        if row["terminal_state_bit_identical_where_both_arms_converged"]:
+            continue
+        raise RuntimeError(
+            f"strict exit changed terminal state bits for {row['identity']}"
+        )
+
+
 def _time_arm(
     compiled: Callable,
     state: jax.Array,
@@ -872,7 +945,7 @@ def _time_arm(
     machine: str,
     member_number: int,
     arm_name: str,
-) -> tuple[dict[str, Any], dict[str, Any]]:
+) -> tuple[dict[str, Any], dict[str, Any], jax.Array]:
     flag = jnp.asarray(settlement)
     started = time.perf_counter_ns()
     result = compiled(state, flag)
@@ -898,12 +971,16 @@ def _time_arm(
             f"rss_mib={_PeakRssSampler._current_mib():.3f}",
             flush=True,
         )
-    return _arm_row(result), {
-        "first_compiled_solve_ms": first_solve_ms,
-        "samples_compile_warm_ms": samples,
-        "compile_warm_solve_ms": float(np.mean(samples)),
-        "compile_warm_p95_ms": float(np.percentile(samples, 95)),
-    }
+    return (
+        _arm_row(result),
+        {
+            "first_compiled_solve_ms": first_solve_ms,
+            "samples_compile_warm_ms": samples,
+            "compile_warm_solve_ms": float(np.mean(samples)),
+            "compile_warm_p95_ms": float(np.percentile(samples, 95)),
+        },
+        result.flux,
+    )
 
 
 def _distribution(values: list[float]) -> dict[str, Any]:
@@ -1002,7 +1079,7 @@ def _partial_member(
         },
         "exit_saving_ms": without_exit_ms - with_exit_ms,
         "exit_saving_fraction": saving_fraction,
-        "terminal_state_bit_identical_where_exit_fired": None,
+        "terminal_state_bit_identical_where_both_arms_converged": None,
         "host_memory": {
             "rss_after_compile_mib": compile_rss_mib,
             "member_peak_rss_mib": member_peak_rss_mib,
@@ -1038,7 +1115,7 @@ def _partial_machine(rows: list[dict[str, Any]], declared: int) -> dict[str, Any
             "semantic_result_members": 0,
             "strict_exit_fired_members": None,
             "strict_exit_never_members": None,
-            "bit_identical_fired_members": None,
+            "bit_identical_converged_members": None,
             "timing": {
                 "without_exit_ms": _distribution(without),
                 "with_exit_ms": _distribution(with_exit),
@@ -1423,39 +1500,27 @@ def _measure_batched_machine(
         )
         control = _arm_row(without_exit)
         exited = _arm_row(with_exit)
-        fired = exited["termination"] == _termination_name(SETTLED_REASON)
-        bit_identical = (
-            control["terminal_state_sha256"] == exited["terminal_state_sha256"]
-            if fired
-            else None
-        )
-        if fired and not bit_identical:
-            raise RuntimeError(
-                f"strict exit changed terminal state bits for {member.identity}"
-            )
         rows.append(
-            {
-                "identity": member.identity,
-                "state_authority": member.state_authority,
-                "initial_state_sha256": _array_sha256(member.state),
-                "strict_qualification_firing_trip": (
-                    exited["executed_trips"] if fired else None
-                ),
-                "strict_qualification": "fired" if fired else "never",
-                "without_exit": {
-                    **control,
+            _strict_exit_member_row(
+                member.identity,
+                _array_sha256(member.state),
+                member.state_authority,
+                control,
+                exited,
+                without_exit.flux,
+                with_exit.flux,
+                control_payload={
                     "batch_elapsed_ms": arm_timings["without_exit"],
                     "batched_ms_per_member": arm_timings["without_exit"] / batch.width,
                 },
-                "with_exit": {
-                    **exited,
+                exited_payload={
                     "batch_elapsed_ms": arm_timings["with_exit"],
                     "batched_ms_per_member": arm_timings["with_exit"] / batch.width,
                 },
-                "terminal_state_bit_identical_where_exit_fired": bit_identical,
-            }
+            )
         )
 
+    _assert_cross_arm_identity(rows)
     _batch_stage_count(stages, f"{name}_BATCH_COMPLETE")
     del member_data, arm_results
     if batch.stacked is not None:
@@ -1494,8 +1559,8 @@ def _measure_batched_machine(
             "strict_exit_never_members": sum(
                 row["strict_qualification"] == "never" for row in rows
             ),
-            "bit_identical_fired_members": sum(
-                row["terminal_state_bit_identical_where_exit_fired"] is True
+            "bit_identical_converged_members": sum(
+                row["terminal_state_bit_identical_where_both_arms_converged"] is True
                 for row in rows
             ),
             "batched_ms_per_member": {
@@ -1526,7 +1591,7 @@ def _measure_machine(members: list[Member], repeats: int, name: str) -> dict[str
                 f"rss_mib={_PeakRssSampler._current_mib():.3f}",
                 flush=True,
             )
-            control, control_timing = _time_arm(
+            control, control_timing, control_flux = _time_arm(
                 compiled,
                 state,
                 settlement=False,
@@ -1535,7 +1600,7 @@ def _measure_machine(members: list[Member], repeats: int, name: str) -> dict[str
                 member_number=member_number,
                 arm_name="WITHOUT_EXIT",
             )
-            exited, exited_timing = _time_arm(
+            exited, exited_timing, exited_flux = _time_arm(
                 compiled,
                 state,
                 settlement=True,
@@ -1545,16 +1610,17 @@ def _measure_machine(members: list[Member], repeats: int, name: str) -> dict[str
                 arm_name="WITH_EXIT",
             )
         memory = sampler.receipt()
-        fired = exited["termination"] == _termination_name(SETTLED_REASON)
-        bit_identical = (
-            control["terminal_state_sha256"] == exited["terminal_state_sha256"]
-            if fired
-            else None
+        row = _strict_exit_member_row(
+            member.identity,
+            _array_sha256(member.state),
+            member.state_authority,
+            control,
+            exited,
+            control_flux,
+            exited_flux,
+            control_payload={"timing": control_timing},
+            exited_payload={"timing": exited_timing},
         )
-        if fired and not bit_identical:
-            raise RuntimeError(
-                f"strict exit changed terminal state bits for {member.identity}"
-            )
         del compiled, state
         gc.collect()
         jax.clear_caches()
@@ -1566,26 +1632,14 @@ def _measure_machine(members: list[Member], repeats: int, name: str) -> dict[str
             f"rss_mib={released_rss_mib:.3f}",
             flush=True,
         )
-        rows.append(
-            {
-                "identity": member.identity,
-                "state_authority": member.state_authority,
-                "initial_state_sha256": _array_sha256(member.state),
-                "compile_seconds": compile_seconds,
-                "strict_qualification_firing_trip": (
-                    exited["executed_trips"] if fired else None
-                ),
-                "strict_qualification": "fired" if fired else "never",
-                "with_exit": {**exited, "timing": exited_timing},
-                "without_exit": {**control, "timing": control_timing},
-                "terminal_state_bit_identical_where_exit_fired": bit_identical,
-                "host_memory": {
-                    **memory,
-                    "released_rss_mib": released_rss_mib,
-                },
-            }
-        )
+        row["compile_seconds"] = compile_seconds
+        row["host_memory"] = {
+            **memory,
+            "released_rss_mib": released_rss_mib,
+        }
+        rows.append(row)
 
+    _assert_cross_arm_identity(rows)
     timing = {
         "without_exit_ms": _distribution(
             [row["without_exit"]["timing"]["compile_warm_solve_ms"] for row in rows]
@@ -1631,8 +1685,8 @@ def _measure_machine(members: list[Member], repeats: int, name: str) -> dict[str
             "strict_exit_never_members": sum(
                 row["strict_qualification"] == "never" for row in rows
             ),
-            "bit_identical_fired_members": sum(
-                row["terminal_state_bit_identical_where_exit_fired"] is True
+            "bit_identical_converged_members": sum(
+                row["terminal_state_bit_identical_where_both_arms_converged"] is True
                 for row in rows
             ),
             "saved_executed_trips": saved_trips,

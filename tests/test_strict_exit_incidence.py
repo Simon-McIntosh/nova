@@ -13,6 +13,16 @@ from nova.equilibrium.solve_request import SampledFluxFunction
 from nova.equilibrium.source import DomainProfile, ForwardSource
 
 
+def _converged_arm(executed_trips: int, terminal_residual: float, state_sha: str):
+    return {
+        "executed_trips": executed_trips,
+        "no_op_trips": incidence.TRIP_LIMIT - executed_trips,
+        "terminal_residual": terminal_residual,
+        "termination": incidence._termination_name(incidence.CONVERGED_REASON),
+        "terminal_state_sha256": state_sha,
+    }
+
+
 def test_batched_self_check_requires_explicit_batched_mode():
     with pytest.raises(ValueError, match="--self-check requires --batched"):
         incidence._validate_arguments(batched=False, self_check=True)
@@ -130,3 +140,76 @@ def test_diiid_transport_supplies_content_addressed_artifact_evidence(
     )
     assert evidence["wall_coordinate_sha256"] == coordinate_digest
     assert evidence["cache"] == str(tmp_path)
+
+
+def test_batch_rows_persist_before_cross_arm_identity_assertion():
+    control_one = _converged_arm(4, 1.0e-12, "state-a")
+    exited_one = dict(control_one)
+    control_two = _converged_arm(incidence.TRIP_LIMIT, 2.0e-10, "state-b")
+    exited_two = {
+        "executed_trips": 6,
+        "no_op_trips": incidence.TRIP_LIMIT - 6,
+        "terminal_residual": 3.0e-5,
+        "termination": incidence._termination_name(incidence.SETTLED_REASON),
+        "terminal_state_sha256": "state-c",
+    }
+
+    rows = [
+        incidence._strict_exit_member_row(
+            "member one",
+            "initial-one",
+            "state",
+            control_one,
+            exited_one,
+            incidence.jnp.asarray([0.5, 1.0, 2.0]),
+            incidence.jnp.asarray([0.5, 1.0, 2.0]),
+        ),
+        incidence._strict_exit_member_row(
+            "member two",
+            "initial-two",
+            "state",
+            control_two,
+            exited_two,
+            incidence.jnp.asarray([0.5, 1.0, 3.0]),
+            incidence.jnp.asarray([0.5, 1.0, 2.5]),
+        ),
+    ]
+
+    incidence._assert_cross_arm_identity(rows)
+
+    assert [row["identity"] for row in rows] == ["member one", "member two"]
+    for row in rows:
+        assert row["without_exit"]["termination"]
+        assert row["with_exit"]["termination"]
+        assert row["terminal_state_difference"]
+    member_one, member_two = rows
+    assert member_one["terminal_state_difference"] == {
+        "max_absolute_flux_difference": 0.0,
+        "without_exit_converged": True,
+        "with_exit_converged": True,
+    }
+    assert member_one["terminal_state_bit_identical_where_both_arms_converged"] is True
+    difference_two = member_two["terminal_state_difference"]
+    assert difference_two["max_absolute_flux_difference"] == 0.5
+    assert member_two["terminal_state_difference"]["without_exit_converged"] is True
+    assert member_two["terminal_state_difference"]["with_exit_converged"] is False
+    assert member_two["terminal_state_bit_identical_where_both_arms_converged"] is None
+
+
+def test_cross_arm_identity_refuses_a_both_converged_member_with_differing_state():
+    control = _converged_arm(4, 1.0e-12, "state-a")
+    exited = _converged_arm(4, 1.0e-12, "state-d")
+    rows = [
+        incidence._strict_exit_member_row(
+            "member one",
+            "initial-one",
+            "state",
+            control,
+            exited,
+            incidence.jnp.asarray([0.5, 1.0, 2.0]),
+            incidence.jnp.asarray([0.5, 1.1, 2.0]),
+        )
+    ]
+
+    with pytest.raises(RuntimeError, match="changed terminal state bits"):
+        incidence._assert_cross_arm_identity(rows)

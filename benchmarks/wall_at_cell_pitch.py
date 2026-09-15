@@ -584,6 +584,9 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
                 for row in group
                 if row["sampling_label"] is not None
             }
+            if "one" not in labelled:
+                lines.append(f"| {case} | {cells} | n/a | n/a | n/a |")
+                continue
             lines.append(
                 f"| {case} | {cells} | {labelled['one']} | "
                 f"{labelled['half']} | {labelled['quarter']} |"
@@ -597,6 +600,20 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
             if isinstance(entry, list):
                 lines.append(f"- {case} {cells}: reached at {entry[0]} wall nodes.")
                 continue
+            group = [
+                row
+                for row in rows
+                if row["case"] == case and abs(row["requested_cells"]) == cells
+            ]
+            sampled = any(
+                row["sampling_label"] is not None for row in group
+            )
+            caveat = (
+                ""
+                if sampled
+                else " (one-point slope from the 121-node baseline; the "
+                "finer samplings did not land in this run)"
+            )
             build = entry["estimated_build_seconds"]
             build_text = "n/a (cached)" if build is None else f"~{build:.0f} s build"
             lines.append(
@@ -608,7 +625,7 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
                 f"{entry['estimated_wall_matrix_bytes'] / 1e6:.1f} MB wall "
                 f"family), so the polyline sagitta does not reach the "
                 f"target at any practical count and requires a curved wall "
-                f"representation."
+                f"representation.{caveat}"
             )
     lines.append("")
     path.parent.mkdir(parents=True, exist_ok=True)

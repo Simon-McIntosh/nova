@@ -2732,23 +2732,6 @@ class ForwardFluxOperator:
             )
         return self.current_moment_image(moments)
 
-    def _solver_internal_map(self, requested_class=None, target_current=None):
-        """Return the internal map with exact-clip work rematerialized.
-
-        Exact support construction and quadrature are pure functions of the
-        trial flux. Rematerializing that work for each Krylov action preserves
-        the primal and tangent values while preventing ``jax.linearize`` from
-        retaining every spline-chain and moment workspace across the bounded
-        Newton and Krylov histories. The compact chord path stays unchanged.
-        """
-
-        def internal(psi):
-            return self.internal(psi, requested_class, target_current)
-
-        if _SUPPORT_CLIP_MODE == "chord":
-            return internal
-        return jax.checkpoint(internal)
-
     def current_moment_image(self, moments: CellCurrentMoments) -> jax.Array:
         """Return flux from an explicitly supplied cell-current moment image."""
         physical = jnp.r_[self.grid.internal(moments), self.wall.internal(moments)]
@@ -2825,11 +2808,9 @@ class ForwardFluxOperator:
     ) -> Callable[[jax.Array, jax.Array], jax.Array]:
         """Return a fixed-point map taking the exterior flux as traced data."""
 
-        internal = self._solver_internal_map(requested_class, target_current)
-
         def mapped(psi: jax.Array, external: jax.Array) -> jax.Array:
             """Return one map evaluation at an explicitly supplied exterior."""
-            image = external + internal(psi)
+            image = external + self.internal(psi, requested_class, target_current)
             return self._exclude_shadow_residual(psi, image, requested_class)
 
         return mapped
@@ -2868,10 +2849,8 @@ class ForwardFluxOperator:
     ) -> Callable[[jax.Array, jax.Array, jax.Array], jax.Array]:
         """Return a shadowed map taking the exterior flux as traced data."""
 
-        internal = self._solver_internal_map(requested_class, target_current)
-
         def mapped(psi: jax.Array, shadow: jax.Array, external: jax.Array) -> jax.Array:
-            image = external + internal(psi)
+            image = external + self.internal(psi, requested_class, target_current)
             return self._exclude_shadow_residual(
                 psi, image, requested_class, shadow=shadow
             )

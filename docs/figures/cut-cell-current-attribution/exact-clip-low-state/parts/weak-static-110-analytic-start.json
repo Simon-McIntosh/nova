@@ -1,0 +1,211 @@
+{
+  "arm": "A",
+  "completed": true,
+  "initial": {
+    "axis_flux_wb": 49.94611545553129,
+    "axis_rz_m": [
+      6.18487689585388,
+      -1.354472090042691e-14
+    ],
+    "boundary_level_wb": 1.1345091532888318e-15,
+    "converged": false,
+    "max_solved_minus_analytic_over_span": 0.0,
+    "normalisation_amplitude": 1.0000129045802642,
+    "rms_solved_minus_analytic_over_span": 0.0,
+    "state_sha256_binary64": "d2c980a88374751bb6e4af9305ae9ad39bc0f19bb7f954654c08d6fa8862f8f2",
+    "terminal_residual": null,
+    "trip_count": 0
+  },
+  "mechanism": "production iteration started at analytic flux",
+  "snapshots": {
+    "1": {
+      "active_set_mask_differences": [
+        0
+      ],
+      "active_set_residuals": [
+        3.6662460690220676e-13
+      ],
+      "axis_flux_wb": 49.94288712058313,
+      "axis_rz_m": [
+        6.184868307675414,
+        1.3688844696657654e-07
+      ],
+      "boundary_level_wb": -0.0018776984312791189,
+      "configured_active_set_steps": 1,
+      "converged": true,
+      "max_solved_minus_analytic_over_span": 0.00011347770015487788,
+      "normalisation_amplitude": 0.9999339686745358,
+      "rms_solved_minus_analytic_over_span": 4.696451629279965e-05,
+      "solve_wall_seconds": 492.489921791479,
+      "state_sha256_binary64": "5cd230402bfd8678591985b7cdadf4eeaf0d81a9a32433fd2c54c94d6705fc9b",
+      "terminal_residual": 3.6662460690220676e-13,
+      "termination": "converged",
+      "trip_count": 1
+    },
+    "2": {
+      "active_set_mask_differences": [
+        0,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "active_set_residuals": [
+        3.6662460690220676e-13,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "axis_flux_wb": 49.94288712058313,
+      "axis_rz_m": [
+        6.184868307675414,
+        1.3688844696657654e-07
+      ],
+      "boundary_level_wb": -0.0018776984312791189,
+      "configured_active_set_steps": 16,
+      "converged": true,
+      "max_solved_minus_analytic_over_span": 0.00011347770015487788,
+      "normalisation_amplitude": 0.9999339686745358,
+      "rms_solved_minus_analytic_over_span": 4.696451629279965e-05,
+      "snapshot_rule": "production converged or terminated after 1 trips, so the state at trip 2 is the terminal state",
+      "solve_wall_seconds": 1153.559906178154,
+      "state_sha256_binary64": "5cd230402bfd8678591985b7cdadf4eeaf0d81a9a32433fd2c54c94d6705fc9b",
+      "terminal_residual": 3.6662460690220676e-13,
+      "termination": "converged",
+      "trip_count": 1
+    },
+    "4": {
+      "active_set_mask_differences": [
+        0,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "active_set_residuals": [
+        3.6662460690220676e-13,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "axis_flux_wb": 49.94288712058313,
+      "axis_rz_m": [
+        6.184868307675414,
+        1.3688844696657654e-07
+      ],
+      "boundary_level_wb": -0.0018776984312791189,
+      "configured_active_set_steps": 16,
+      "converged": true,
+      "max_solved_minus_analytic_over_span": 0.00011347770015487788,
+      "normalisation_amplitude": 0.9999339686745358,
+      "rms_solved_minus_analytic_over_span": 4.696451629279965e-05,
+      "snapshot_rule": "production converged or terminated after 1 trips, so the state at trip 4 is the terminal state",
+      "solve_wall_seconds": 1153.559906178154,
+      "state_sha256_binary64": "5cd230402bfd8678591985b7cdadf4eeaf0d81a9a32433fd2c54c94d6705fc9b",
+      "terminal_residual": 3.6662460690220676e-13,
+      "termination": "converged",
+      "trip_count": 1
+    }
+  },
+  "terminal": {
+    "active_set_mask_differences": [
+      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ],
+    "active_set_residuals": [
+      3.6662460690220676e-13,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "axis_flux_wb": 49.94288712058313,
+    "axis_rz_m": [
+      6.184868307675414,
+      1.3688844696657654e-07
+    ],
+    "boundary_level_wb": -0.0018776984312791189,
+    "configured_active_set_steps": 16,
+    "converged": true,
+    "max_solved_minus_analytic_over_span": 0.00011347770015487788,
+    "normalisation_amplitude": 0.9999339686745358,
+    "rms_solved_minus_analytic_over_span": 4.696451629279965e-05,
+    "solve_wall_seconds": 1153.559906178154,
+    "state_sha256_binary64": "5cd230402bfd8678591985b7cdadf4eeaf0d81a9a32433fd2c54c94d6705fc9b",
+    "terminal_residual": 3.6662460690220676e-13,
+    "termination": "converged",
+    "trip_count": 1
+  },
+  "terminal_state_sha256_binary64": "5cd230402bfd8678591985b7cdadf4eeaf0d81a9a32433fd2c54c94d6705fc9b"
+}

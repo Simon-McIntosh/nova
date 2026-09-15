@@ -1,0 +1,83 @@
+{
+  "arm": "B",
+  "completed": true,
+  "mechanism": "production iteration from current-aligned cold seed",
+  "seed": {
+    "anchor_available": true,
+    "anchor_m": [
+      7.801395788445413,
+      -5.030887232068844e-11
+    ],
+    "branch_index": 0,
+    "construction": "current_centroid_disc",
+    "current_centroid_m": [
+      6.063530173332898,
+      0.0
+    ],
+    "current_target_provenance": {
+      "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+      "current_centroid_m": [
+        6.063530173332898,
+        0.0
+      ],
+      "declared_current_a": 16314773.311828371,
+      "quadrature_current_a": 16314773.311828367,
+      "quadrature_nodes": 512,
+      "quadrature_relative_closure": 2.2833846522164315e-16
+    },
+    "declared_axis_m": [
+      6.063530173332898,
+      0.0
+    ],
+    "declared_boundary_m": [
+      7.801395788445413,
+      -5.030887232068844e-11
+    ],
+    "factory": "profile.cold_seed_portfolio",
+    "plasma_current_a": 16314773.311828371,
+    "requested_class": "limited",
+    "seed_radius_m": 1.564079053601776,
+    "state_sha256_binary64": "ab870ee275e46db47781d158c37006d9d3dc1b3caa208fa663ea7b2972e950f4",
+    "stored_flux_samples_used": false,
+    "supported_cell_count": 36
+  },
+  "source_part": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-seed-books-target-current/docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/weak-rotation-reactor-static-production-route-reduced.json",
+  "source_part_sha256": "132da5d169d239f3d9da2af91bbb5d389615097e203c515b4cee096f68d1fdef",
+  "source_terminal": {
+    "axis_error_m": 0.015131692325351172,
+    "boundary_flux_error_wb": 0.0018776984508596557,
+    "psi_norms": {
+      "two_pitch_boundary_band": {
+        "component_count": 103,
+        "finite_component_count": 103,
+        "measurement_status": "finite",
+        "rms": 0.002364301348552008,
+        "sup": 0.005667770324377042,
+        "support_cells": 103
+      },
+      "whole_domain": {
+        "component_count": 135,
+        "finite_component_count": 135,
+        "measurement_status": "finite",
+        "rms": 0.0023456951608948435,
+        "sup": 0.005667770324377042,
+        "support_cells": 135
+      }
+    }
+  },
+  "terminal": {
+    "axis_flux_wb": 49.942887120561956,
+    "axis_rz_m": [
+      6.184868307675268,
+      1.368883532082421e-07
+    ],
+    "boundary_level_wb": -0.0018776984508585212,
+    "converged": true,
+    "max_solved_minus_analytic_over_span": 0.0001134777003713782,
+    "normalisation_amplitude": 0.9999339686741854,
+    "rms_solved_minus_analytic_over_span": 4.696451644939825e-05,
+    "state_sha256_binary64": "7829f15bbd3e836d4dc9fc96ce3a39d9ebceda3c63af716c30b2156459e8c02c",
+    "terminal_residual": 3.419964981783324e-13,
+    "trip_count": 2
+  }
+}

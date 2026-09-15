@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T09:39:35",
+  "updated": "2026-09-15T09:56:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -160694,6 +160694,202 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T073834096193-pfs-float32-scorecard-comparison-site",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-float32-scorecard-comparison-site",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 536,
+                "cached_input_tokens": 703044,
+                "input_tokens": 703612,
+                "output_tokens": 573,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 704185,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "Report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/float32-scorecard/report.md names the file and line of the eight-element geometric comparison observed failing at 9.5e-7 relative (actual 200.000191 against 200.0), states the dtype of each side at that line read from the checkout-root current-constrained scorecard committed at a0aee18c, reproduces the failure in one fresh all_debug CPU process with the log beside the report, and decides which side is wrong: either the scorecard must hold float64 spatial arrays (then the receipt is the defect, to be regenerated under x64, named as the follow-on) or float32 storage is deliberate (then the comparison must read at stored precision); no tolerance is widened and no source file is changed",
+          "estimated_hours": null,
+          "goal": "The gate that compares a float32 scorecard array against a float64 expectation is named with its file and line and the defective side decided",
+          "id": "pfs-float32-scorecard-comparison-site",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T07:38:37Z",
+            "read_at": "2026-09-15T07:38:38Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 24.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T073834096193-pfs-float32-scorecard-comparison-site/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/float32-scorecard",
+            "docs/evidence/archive/playable-forward-solve-landed.html",
+            "docs/plans/playable-forward-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-pfs-f32-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T07:39:43Z",
+        "completed_at": "2026-09-15T07:52:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 775,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 775,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "e7a86135774f2d8d451d6e7b733f8d2022a1e506",
+        "commits": [
+          "1f60d76f82afd5ae9fc397f82d545904f6fcf9e3",
+          "393a257a3e5ff9f511909178e95ccc305b3175f3"
+        ],
+        "changed_lines": {
+          "added": 10,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu python -m pytest tests/test_dimension_general_conditioning.py on all_debug job 1271146",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/float32-scorecard/current-gate-1271146.log",
+          "log_digest": "281c1bc2e51afc658ae4f0c97eab822d1da3c06e1192613d7c299d98a851af54"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T073834096193-pfs-float32-scorecard-comparison-site/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a401-f135-7380-8620-246ed9c4222c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12660224,
+            "cached_input_tokens_cumulative": 12660224,
+            "input_tokens": 12964045,
+            "input_tokens_cumulative": 12964045,
+            "output_tokens": 28409,
+            "output_tokens_cumulative": 28409,
+            "reasoning_output_tokens": 10409,
+            "reasoning_output_tokens_cumulative": 10409
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T07:52:38Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 25.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T07:52:38Z"
+            }
+          ],
+          "notional_cost_usd": 2.6269,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 12660224,
+          "cumulative_input_tokens": 25624269,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 38818
+        },
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-float32-scorecard-comparison-site",
+          "session_id": "01a0a401-f135-7380-8620-246ed9c4222c",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T07:52:38Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 59.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -161006,6 +161202,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2530
+    "_version": 2531
   }
 }

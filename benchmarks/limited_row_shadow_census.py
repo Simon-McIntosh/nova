@@ -591,15 +591,38 @@ def _state_census(operator, machine, state: np.ndarray) -> dict[str, Any]:
         )
     return {
         "raw_connectivity_rule": (
-            "classify_domains marks closed and disconnected carriers PRIVATE_FLUX; "
-            "nova/equilibrium/domain.py:206-212 classify_domains"
+            "classify_domains marks closed and disconnected carriers PRIVATE_FLUX"
         ),
+        "raw_connectivity_source": {
+            "path": "nova/equilibrium/domain.py",
+            "line_start": 206,
+            "line_end": 216,
+            "symbol": "classify_domains",
+        },
         "physical_rule": (
             "saddle_qualified_domains retains PRIVATE_FLUX only behind a finite "
-            "admitted saddle; limited reads relabel provisional carriers CORE at "
-            "nova/equilibrium/domain.py:219-240 and apply the rule to the forward "
-            "read at nova/equilibrium/forward_operator.py:1892-1905"
+            "admitted saddle; limited reads relabel provisional carriers CORE"
         ),
+        "physical_rule_sources": [
+            {
+                "path": "nova/equilibrium/domain.py",
+                "line_start": 219,
+                "line_end": 240,
+                "symbol": "saddle_qualified_domains",
+            },
+            {
+                "path": "nova/equilibrium/forward_operator.py",
+                "line_start": 1892,
+                "line_end": 1912,
+                "symbol": "_fixed_design_read",
+            },
+            {
+                "path": "nova/equilibrium/forward_operator.py",
+                "line_start": 2546,
+                "line_end": 2559,
+                "symbol": "_residual_shadow_components_from_read",
+            },
+        ],
         "topology": topology_record,
         "raw_private_count": int(np.count_nonzero(raw_private)),
         "raw_private_carriers": private_rows,

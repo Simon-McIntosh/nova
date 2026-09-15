@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T10:05:23",
+  "updated": "2026-09-15T10:08:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -161352,6 +161352,205 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T074137466016-pfs-efit-centroid-offset-attribution",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-efit-centroid-offset-attribution",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2427,
+                "cached_input_tokens": 708613,
+                "input_tokens": 711042,
+                "output_tokens": 52,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 711094,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "Report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/centroid-offset/report.md tabulates, for the seven rows of the convention-split receipt (mean offset -4.234 cm, spread 6.582 mm), the difference between EFIT's published current_centrd_r and the centroid derived from EFIT's stored current density under each candidate in order (a different weighting over the same grid, a different support or truncation at the boundary, a fitted rather than integrated moment, a different treatment of the outermost cells), states which candidate accounts for the spread and how much of it, or states it is unattributed with the correlation against plasma current, elongation and the solenoid current, and recommends the correction's form (constant or not); separately states whether row 24 (active_set_settled at residual 1.16e-3) needs a converged rerun before use; computation on all_debug CPU with logs beside the report; no solver repair and no tolerance change",
+          "estimated_hours": null,
+          "goal": "The 6.6 mm discharge variation in EFIT's own centroid offset attributed to a candidate or reported unattributed with its correlations",
+          "id": "pfs-efit-centroid-offset-attribution",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T07:41:41Z",
+            "read_at": "2026-09-15T07:41:43Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 24.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T074137466016-pfs-efit-centroid-offset-attribution/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/efit_centroid_offset_attribution.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/centroid-offset",
+            "docs/evidence/archive/playable-forward-solve-landed.html",
+            "docs/plans/playable-forward-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-pfs-centroid-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T07:42:36Z",
+        "completed_at": "2026-09-15T07:59:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1026,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1026,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "1962aacd87763a2b5b6257c583acb4b45c6b3245",
+        "commits": [
+          "8e5e4728e5ca0a83a808611942efcfebd6fd5e98",
+          "86e14b83ded5014d851c8cea1521334dbe5dbc34",
+          "decff059044e06190bdcda8197613594da1698ba"
+        ],
+        "changed_lines": {
+          "added": 503,
+          "removed": 2,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/efit_centroid_offset_attribution.py on all_debug CPU, job 1271162 exit 0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/centroid-offset/receipt.json",
+          "log_digest": "4ffd8be258d4f4720665c57add45e5fa325c31a910d85adc32a6877142579bd6"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T074137466016-pfs-efit-centroid-offset-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a404-8feb-7d41-8989-292e8407925c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15631616,
+            "cached_input_tokens_cumulative": 15631616,
+            "input_tokens": 15944519,
+            "input_tokens_cumulative": 15944519,
+            "output_tokens": 39731,
+            "output_tokens_cumulative": 39731,
+            "reasoning_output_tokens": 9180,
+            "reasoning_output_tokens_cumulative": 9180
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T07:59:42Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 25.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T07:59:42Z"
+            }
+          ],
+          "notional_cost_usd": 3.5126,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 15631616,
+          "cumulative_input_tokens": 31576135,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 48911
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-efit-centroid-offset-attribution",
+          "session_id": "01a0a404-8feb-7d41-8989-292e8407925c",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T07:59:42Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 74.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -161664,6 +161863,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2533
+    "_version": 2534
   }
 }

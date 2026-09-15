@@ -382,15 +382,15 @@ def legacy_renderer_diagnostic(
     intersection_over_union: list[float] = []
     centroid_error_pitch: list[float] = []
     area_ratio: list[float] = []
+    skipped_cells: list[int] = []
     for cell in selected_cells:
         distance2 = np.sum((coordinate - coordinate[cell]) ** 2, axis=1)
         neighbour = np.flatnonzero(
             (distance2 > 1.0e-9) & (distance2 <= (1.05 * pitch) ** 2)
         )
         if len(neighbour) == 0:
-            raise RuntimeError(
-                f"legacy renderer found no neighbour for cell {int(cell)}"
-            )
+            skipped_cells.append(int(cell))
+            continue
         old = Polygon(_legacy_hexagon(coordinate[cell], coordinate[neighbour], pitch))
         own = Polygon(polygons[int(cell)])
         legacy.append(old)
@@ -413,18 +413,24 @@ def legacy_renderer_diagnostic(
 
     legacy_pairs, legacy_overlap = overlap_pairs(legacy)
     authored_pairs, authored_overlap = overlap_pairs(authored)
+
+    def reduced(values: list[float], operation: Any) -> float | None:
+        return float(operation(values)) if values else None
+
     return {
         "selected_cells": int(len(selected_cells)),
+        "compared_cells": int(len(authored)),
+        "skipped_cells_without_inferred_pitch_neighbour": skipped_cells,
         "legacy_overlap_pairs": legacy_pairs,
         "legacy_overlap_area_pitch2": legacy_overlap,
         "authored_overlap_pairs": authored_pairs,
         "authored_overlap_area_pitch2": authored_overlap,
-        "intersection_over_union_min": float(np.min(intersection_over_union)),
-        "intersection_over_union_median": float(np.median(intersection_over_union)),
-        "centroid_error_pitch_max": float(np.max(centroid_error_pitch)),
-        "centroid_error_pitch_median": float(np.median(centroid_error_pitch)),
-        "area_ratio_min": float(np.min(area_ratio)),
-        "area_ratio_max": float(np.max(area_ratio)),
+        "intersection_over_union_min": reduced(intersection_over_union, np.min),
+        "intersection_over_union_median": reduced(intersection_over_union, np.median),
+        "centroid_error_pitch_max": reduced(centroid_error_pitch, np.max),
+        "centroid_error_pitch_median": reduced(centroid_error_pitch, np.median),
+        "area_ratio_min": reduced(area_ratio, np.min),
+        "area_ratio_max": reduced(area_ratio, np.max),
     }
 
 

@@ -548,6 +548,38 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
     <figure><img src="/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/diverted-single-null-production-route-cells-500.png" alt="Single-null 500 solved and analytic line contours with both null sets and wall"><figcaption>Single-null whole-cell 500 control: terminal residual 2.42e-17, converged, terminal flux bit-identical to the committed state; one O candidate, one saddle and the private region retained.</figcaption></figure>
   </div>
 </section>
+<section id="exact-clip-memory-scaling">
+  <h2>Exact-clip solve memory: all-cell pair reproduced and replaced</h2>
+  <p><strong>Reproduction.</strong> One foreground <code>all_debug</code> CPU job
+  (<code>1271480</code>, eight cores, 256 GiB, <code>JAX_PLATFORMS=cpu</code>,
+  <code>TMPDIR=/tmp</code> in submission and payload) compiled the production exact-clip
+  solve without executing it. XLA reported 25.465671, 51.807054 and 70.405273 GiB of
+  temporaries at 135, 342 and 555 realised cells. Every rung contains nine
+  <code>pred[cells,cells]</code> signatures, whose bytes grow with exponent exactly 2.0.
+  Optimized HLO places the family inside
+  <code>jvp(compact_clipped_current_moments)/while</code>: the cut-cell scan closed over
+  the complete per-cell flux polynomial, so its differentiation carried one row for
+  every cut-bank entry against every carried cell. The authored producer is
+  <code>ForwardFluxOperator.support_current_moments</code> in
+  <code>nova/equilibrium/forward_operator.py</code>.</p>
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/exact-clip-memory/base-memory-scaling.svg"
+         alt="Exact-clip XLA temporary memory at 135, 342 and 555 realised cells, all above the 20 GiB gate">
+    <figcaption>The complete base receipt is
+    <code>docs/figures/cut-cell-current-attribution/exact-clip-memory/base-memory.json</code>;
+    optimized HLO and the qualifying-array census are adjacent under
+    <code>base-hlo/</code>. Total temporary growth is obscured by the fixed compiled-solve
+    floor, while the identified <code>pred[cells,cells]</code> family itself is exactly
+    quadratic.</figcaption>
+  </figure>
+  <p><strong>Implementation.</strong> Commit <code>826358aa</code> gives each compact cut
+  polygon only its own flux polynomial and vectorizes that one-cell integration before
+  scattering the three current moments back to the original carrier. Whole cells keep
+  the existing 24-vertex path, the production whole-cell route is not rerouted, overflow
+  remains fail-closed, and a mixed whole/cut synthetic control is bit-identical to the
+  former result. The post-change compiled-memory and 1000-cell H200 solve gates remain
+  required before this node can be promoted.</p>
+</section>
 </main>
 </body>
 </html>

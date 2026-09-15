@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="49">
+<meta name="plan-version" content="50">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
 <meta name="plan-impl" content="0.9">
@@ -216,6 +216,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260908T145026573996-dvf-frame144-two-field-gate-2" data-who="dvf-frame144-t" data-when="2026-09-08T16:00:54Z">
     <div class="r-comment-body"><p>The node's headline is a diagnosis that redirects the section rather than a receipt. Its lowering probe proves the eleven-row gate is blocked by a compiled-in constant, not by compute: the four lowered variants share one constant-normalised digest while their raw digests differ, and substituting one row's target current into the other changes that row's program, so the structure is identical across frames and only the target current varies it. Every row is therefore a cache miss by construction, each paying about twelve minutes of cold compile, and no lane or partitioning could fix that. The owning repair is the traced-current work on millisecond-converged-solve, and the eleven-row gate should be rerun by a fresh node once it lands. Landed here: commit d3ac6b1d makes the single-shot gate configure dtypes and raise unless extended precision is enabled, before preparation or row execution, and record it in the receipt, so the gate can no longer run silently in single precision. The eleven-row allocation timed out at 59:28 with one completed row and is recorded as explicitly partial with no aggregate and no frame-144 verdict, which is the honest state rather than a claimed one. The two single-precision warnings I asked about are test-only and answered: two synthetic terminal-diagnostic tests construct arrays before the dtype configuration runs, while the production path is now fail-closed, so they do not touch what the gate depends on. One launch refinement worth carrying: the payload exported the temporary directory correctly, but the scheduler consults the inherited login-node value before the payload starts, so it must also be set in the submit environment.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260915T060427028606-dvf-target-current-digest-probe-at-main" data-who="s19h-dvf-probe-c" data-when="2026-09-15T08:46:16.777Z">
+    <div class="r-comment-body"><p>Verdict target-current-baked at main 0f872fd6: lowering the gate solve for 21978/35 and 21983/35 and each with the other row&#x27;s target current gives four distinct raw StableHLO digests sharing one constant-normalised digest, so the target current is still compiled in as a constant and every gate row is a cache miss by construction; the traced-exterior fix (a37c5c00) did not reach it; the eleven-frame gate and the EFIT cache-hit half wait on the target current becoming a traced argument, folded into the flux-function argument node; merged 6ce044bd</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

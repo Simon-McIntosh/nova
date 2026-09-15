@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="62">
+<meta name="plan-version" content="63">
 <meta name="plan-impl" content="0.78">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -277,6 +277,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260914T192229213809-msc-compile-host-memory" data-who="s19i-msc-compile-memory" data-when="2026-09-15T00:58:23.170Z">
     <div class="r-comment-body"><p>Compiling one whole-cell solve program: 300 cells 535 s (467 s backend), peak host RSS 48.8 GiB, executable 462 MB, 448,360 optimised instructions; 1000 cells 548 s, 62.8 GiB, executable proto 3.74 GiB (serialization failed above the 2 GiB limit), generated code 3.52 GiB; 2500 cells 711 s, 136.4 GiB, executable proto 19.2 GiB, generated code 19.0 GiB. The StableHLO instruction count is 254,873 at every rung while the generated code grows 0.44 to 3.5 to 19 GiB, quadratically in cells: the executable embeds the mesh-sized arrays (the interaction-matrix blocks, cells by targets) as constants, so the binary carries the interaction matrix and the compiler's working set is the binary. The persistent cache retrieved only the 300-cell program (backend 467 s to 74 s); the 1000 and 2500 programs cannot be cached at all. The fix is the one already applied to the exterior: pass the kernel blocks and every other mesh-sized array as program arguments rather than closure constants.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-flux-function-representation-study-2026-09-15" data-who="lead" data-when="2026-09-15">
+    <div class="r-comment-body"><p>Lead, 2026-09-15, on f-msc-flux-functions-as-program-arguments: the work must include a study of how the flux functions are represented in the code. Today ForwardSource (nova/equilibrium/source.py) exposes pressure_gradient and current_moments and observation.py evaluates gradient_tail on a fixed trapezoidal node set of PROFILE_NODES = 257 in normalised flux. The study answers whether the functions are points on a one-dimensional profile with piecewise interpolation or a parametrised curve supporting higher-order interpolation, what order the interpolation carries, how the coefficient count sets the argument size, and which fixed-shape representation (a fixed-order polynomial basis, a B-spline in normalised flux, or the node set) gives higher-order interpolation with coefficients that are differentiable and cheap to pass per slice. The argument change follows the study. The recompile audit node (msc-profile-coefficients-recompile-audit) supplies the digest difference and the closure inventory as its input.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

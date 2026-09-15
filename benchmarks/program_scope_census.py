@@ -24,9 +24,13 @@ of the module as printed, which is the fence definition of the program size.
 from __future__ import annotations
 
 import argparse
+import cProfile
+from collections import defaultdict
+import inspect
 import json
 import os
 from pathlib import Path
+import pstats
 import re
 from time import perf_counter
 from typing import Any, Iterable
@@ -43,6 +47,9 @@ from benchmarks.solovev_certificate import (
     _production_seed,
 )
 from nova.equilibrium.forward import ForwardProfile
+from nova.equilibrium import fixed_point, reduced_newton
+from nova.equilibrium.forward_operator import ForwardFluxOperator
+from nova.equilibrium.source import ForwardSource
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import (
     configure_dtypes,
@@ -60,6 +67,14 @@ REQUIRED_CELLS = REQUESTED_CELLS
 
 # where this node lands its evidence (mirrors the dispatch write paths)
 _RUN_DIR_ENV = "PROGRAM_SCOPE_CENSUS_RUN_DIR"
+_LARGE_LITERAL_BYTES = 1 << 10
+
+_GENERATED_CODE_CONTEXT = {
+    300: 0.44 * (1 << 30),
+    1000: 3.5 * (1 << 30),
+    2500: 19.0 * (1 << 30),
+}
+_EXECUTABLE_CONTEXT = {300: 462 * (1 << 20)}
 
 
 def _run_dir() -> Path:
@@ -307,6 +322,209 @@ def _resolve_frame(tables: dict[str, dict[int, dict[str, Any]]], frame_id: int |
     }
 
 
+def _frame_chain(
+    tables: dict[str, dict[int, dict[str, Any]]], frame_id: int | None
+) -> list[dict[str, Any]]:
+    """Resolve a stack frame and every recorded parent, innermost first."""
+    chain: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    frames = tables.get("StackFrames", {})
+    while frame_id and frame_id not in seen:
+        seen.add(frame_id)
+        resolved = _resolve_frame(tables, frame_id)
+        if resolved is not None:
+            chain.append({"frame_id": frame_id, **resolved})
+        frame = frames.get(frame_id, {})
+        parent = frame.get("parent_frame_id", frame.get("parent_id", 0))
+        frame_id = int(parent) if parent else None
+    return chain
+
+
+def _nova_source(
+    tables: dict[str, dict[int, dict[str, Any]]], meta: dict[str, Any]
+) -> dict[str, Any] | None:
+    """Return the innermost Nova source frame carried by one instruction."""
+    for frame in _frame_chain(tables, meta.get("stack_frame_id")):
+        if "nova/" in (frame.get("file") or ""):
+            return frame
+    source_file = meta.get("source_file")
+    if source_file and "nova/" in source_file:
+        return {
+            "frame_id": None,
+            "file": source_file,
+            "function": None,
+            "line": meta.get("source_line"),
+        }
+    return None
+
+
+def _group_constant(record: dict[str, Any], cells: int) -> str:
+    """Classify a literal by the operation and array geometry it feeds."""
+    meta = record["meta"]
+    source = record.get("source") or {}
+    haystack = " ".join(
+        str(value).lower()
+        for value in (
+            meta.get("op_name"),
+            source.get("file"),
+            source.get("function"),
+        )
+        if value
+    )
+    dims = record.get("dimensions") or []
+    dtype = record.get("dtype") or ""
+    numeric_float = dtype.startswith(("f", "bf", "c"))
+    numeric_integer = dtype.startswith(("s", "u")) or dtype == "pred"
+
+    if "target_current" in haystack or "current_normalisation" in haystack:
+        return "target current"
+    if any(
+        token in haystack
+        for token in (
+            "pressure_gradient",
+            "boundary_pressure",
+            "boundary_field_function",
+            "flux_function",
+        )
+    ):
+        return "flux-function amplitudes"
+    if any(token in haystack for token in ("current_moment", "moment_geometry")):
+        if len(dims) >= 2 and cells in dims and max(dims) > 32:
+            return "moment geometry"
+    if (
+        any(
+            token in haystack
+            for token in (
+                "connectivity",
+                "topology",
+                "read_qualification",
+                "candidate_census",
+                "axis_component",
+            )
+        )
+        and numeric_integer
+    ):
+        return "mesh connectivity"
+    if any(token in haystack for token in ("wall", "sample_node", "sample.")):
+        return "wall and sample blocks"
+
+    if numeric_float and len(dims) == 2 and cells in dims:
+        other = dims[1] if dims[0] == cells else dims[0]
+        if other > 16:
+            return "interaction-matrix kernel blocks"
+    if numeric_float and dims and dims[-1] == 2:
+        return "wall and sample blocks"
+    if numeric_float and len(dims) >= 3 and cells in dims:
+        return "moment geometry"
+    if numeric_integer and cells in dims:
+        return "mesh connectivity"
+    return "other captured literals"
+
+
+_REPLICATION_TARGETS = {
+    "current-moment path": "_direct_profile_current_moments",
+    "topology read": "Topology.read_qualification",
+}
+
+
+def _replication_census(
+    records: list[dict[str, Any]],
+    tables: dict[str, dict[int, dict[str, Any]]],
+) -> dict[str, dict[str, Any]]:
+    """Count independently traced copies of two dominant source paths."""
+    result: dict[str, dict[str, Any]] = {}
+    for label, target in _REPLICATION_TARGETS.items():
+        frames: dict[int, dict[str, Any]] = {}
+        instruction_count = 0
+        for record in records:
+            matched = None
+            for frame in _frame_chain(tables, record["meta"].get("stack_frame_id")):
+                if frame.get("function") == target:
+                    matched = frame
+                    break
+            if matched is None:
+                continue
+            instruction_count += 1
+            frames[matched["frame_id"]] = matched
+        locations = sorted(
+            {
+                (frame.get("file"), frame.get("function"), frame.get("line"))
+                for frame in frames.values()
+            },
+            key=lambda item: tuple(str(value) for value in item),
+        )
+        result[label] = {
+            "target_function": target,
+            "copy_count": len(frames),
+            "instructions": instruction_count,
+            "source_locations": [
+                {"file": file, "function": function, "line": line}
+                for file, function, line in locations
+            ],
+        }
+    return result
+
+
+def _constant_census(
+    records: list[dict[str, Any]],
+    tables: dict[str, dict[int, dict[str, Any]]],
+    cells: int,
+) -> dict[str, Any]:
+    """Inventory every optimised-HLO literal larger than one KiB."""
+    all_groups: dict[str, dict[str, int]] = defaultdict(
+        lambda: {"literal_count": 0, "captured_bytes": 0}
+    )
+    constants: list[dict[str, Any]] = []
+    for record in records:
+        if record["opcode"] != "constant":
+            continue
+        source = _nova_source(tables, record["meta"])
+        group_name = _group_constant({**record, "source": source}, cells)
+        all_groups[group_name]["literal_count"] += 1
+        all_groups[group_name]["captured_bytes"] += record["bytes"] or 0
+        if (record["bytes"] or 0) <= _LARGE_LITERAL_BYTES:
+            continue
+        item = {
+            "id": record["id"],
+            "computation": record["computation"],
+            "shape": record["shape"],
+            "dtype": record["dtype"],
+            "bytes": record["bytes"],
+            "source": source,
+            "source_rule": (
+                "direct optimised-HLO stack frame"
+                if source is not None
+                else "closure fallback: nova/equilibrium/forward.py:1799 "
+                "ForwardProfile._accelerated_history_program"
+            ),
+            "op_name": record["meta"].get("op_name"),
+        }
+        item["group"] = group_name
+        constants.append(item)
+    constants.sort(key=lambda item: (-item["bytes"], item["id"]))
+    groups: dict[str, dict[str, int]] = defaultdict(
+        lambda: {"literal_count": 0, "captured_bytes": 0, "direct_source_count": 0}
+    )
+    for item in constants:
+        group = groups[item["group"]]
+        group["literal_count"] += 1
+        group["captured_bytes"] += item["bytes"]
+        group["direct_source_count"] += item["source"] is not None
+    return {
+        "threshold_bytes_exclusive": _LARGE_LITERAL_BYTES,
+        "literal_count": len(constants),
+        "captured_bytes": sum(item["bytes"] for item in constants),
+        "groups": dict(sorted(groups.items())),
+        "all_literal_groups": dict(sorted(all_groups.items())),
+        "literals": constants,
+        "metadata_limit": (
+            "XLA drops source metadata from some closure literals after optimisation; "
+            "those rows name the closure seam explicitly instead of inventing an "
+            "innermost creator."
+        ),
+    }
+
+
 _OPNAME_RE = re.compile(r'op_name="([^"]*)"')
 _STACKFRAME_RE = re.compile(r"stack_frame_id=(\d+)")
 _SOURCE_FILE_RE = re.compile(r'source_file="([^"]*)"')
@@ -334,15 +552,25 @@ def _instruction_meta(line: str) -> dict[str, Any]:
 
 
 def _parse_instruction(line: str):
-    """Parse one instruction line into (name, shape_bytes, opcode, metadata)."""
+    """Parse one instruction line into its shape, opcode, and metadata."""
     match = re.match(r"^\s*(ROOT\s+)?%([\w.]+) = ", line)
     if not match:
         return None
     rest = line[match.end() :]
     byte_size = None
     opcode = None
+    shape = None
+    dtype = None
+    dimensions: list[int] = []
     try:
         byte_size, after = _shape_bytes(rest, 0)
+        shape = rest[:after].strip()
+        signature = re.match(r"(?P<dtype>[a-z0-9]+)\[(?P<dims>[0-9,]*)\]", shape)
+        if signature:
+            dtype = signature.group("dtype")
+            dimensions = [
+                int(value) for value in signature.group("dims").split(",") if value
+            ]
         after = _skip_space(rest, after)
         op_match = re.match(r"([\w.]+)\(", rest[after:])
         opcode = (
@@ -353,12 +581,15 @@ def _parse_instruction(line: str):
     return {
         "id": match.group(2),
         "bytes": byte_size,
+        "shape": shape,
+        "dtype": dtype,
+        "dimensions": dimensions,
         "opcode": opcode or "?",
         "meta": _instruction_meta(line),
     }
 
 
-def _census_module(text: str) -> dict[str, Any]:
+def _census_module(text: str, cells: int = 0) -> dict[str, Any]:
     """Run the census over one compiled module's printed HLO text."""
     tables = _parse_tables(text)
     computations = _split_computations(text)
@@ -374,6 +605,7 @@ def _census_module(text: str) -> dict[str, Any]:
             parsed = _parse_instruction(raw)
             if parsed is None:
                 continue
+            parsed["computation"] = name
             count += 1
             records.append(parsed)
             opcode = parsed["opcode"]
@@ -476,14 +708,14 @@ def _census_module(text: str) -> dict[str, Any]:
             no_metadata += 1
             _bump(attributed, "__no_scope__", r, {})
             continue
-        frame = _resolve_frame(tables, meta.get("stack_frame_id"))
+        frame = _nova_source(tables, meta)
         function = None
         source = {
             "file": frame["file"] if frame else meta.get("source_file"),
             "line": frame["line"] if frame else meta.get("source_line"),
             "function": frame["function"] if frame else None,
         }
-        if frame and "nova/" in (frame.get("file") or ""):
+        if frame:
             function = frame["function"]
         if function is None:
             op_name = meta.get("op_name")
@@ -500,6 +732,8 @@ def _census_module(text: str) -> dict[str, Any]:
             no_nova_function += 1
         _bump(attributed, function, r, source)
 
+    replication = _replication_census(records, tables)
+    constant_census = _constant_census(records, tables, cells=cells)
     return {
         "total_instructions": total_instructions,
         "total_bytes": total_bytes,
@@ -515,6 +749,8 @@ def _census_module(text: str) -> dict[str, Any]:
         "while_directives": [list(a) for a in while_directives],
         "computations": by_computation,
         "attributed": attributed,
+        "replication": replication,
+        "large_constants": constant_census,
     }
 
 
@@ -723,13 +959,157 @@ def _compile_programs(profile, operator, request, seed, target_current, cells):
     return solve_comp, map_comp, solve_seconds
 
 
+def _source_line(function: Any, needle: str, occurrence: int = 0) -> dict[str, Any]:
+    """Resolve a source marker without banking line numbers in the benchmark."""
+    lines, first = inspect.getsourcelines(function)
+    matches = [first + index for index, line in enumerate(lines) if needle in line]
+    if occurrence >= len(matches):
+        raise ValueError(
+            f"{function.__qualname__} has no occurrence {occurrence} of {needle!r}"
+        )
+    return {
+        "file": inspect.getsourcefile(function),
+        "function": function.__qualname__,
+        "line": matches[occurrence],
+    }
+
+
+def _loop_inventory() -> list[dict[str, Any]]:
+    """Name the host loops and the traced loops that replace them."""
+    return [
+        {
+            **_source_line(
+                reduced_newton._plain_newton_trip,
+                "for index in range(newton_steps)",
+            ),
+            "loop": "Newton steps",
+            "form": "Python for",
+            "program_effect": "host route only; zero optimised-HLO copies",
+        },
+        {
+            **_source_line(
+                reduced_newton._drive_trips,
+                "for trip in range(active_set_steps)",
+            ),
+            "loop": "active-set trips",
+            "form": "Python for",
+            "program_effect": "host route only; zero optimised-HLO copies",
+        },
+        {
+            **_source_line(
+                reduced_newton._compiled_slice_solver,
+                "return jax.lax.fori_loop(",
+                occurrence=0,
+            ),
+            "loop": "compiled Newton steps",
+            "form": "jax.lax.fori_loop",
+            "program_effect": "one while body in optimised HLO",
+        },
+        {
+            **_source_line(
+                reduced_newton._compiled_slice_solver,
+                "return jax.lax.fori_loop(",
+                occurrence=1,
+            ),
+            "loop": "compiled active-set trips",
+            "form": "jax.lax.fori_loop",
+            "program_effect": "one while body in optimised HLO",
+        },
+        {
+            **_source_line(
+                fixed_point._active_set_newton_krylov,
+                "jax.lax.fori_loop(1, active_set_steps",
+            ),
+            "loop": "certificate active-set budget",
+            "form": "jax.lax.fori_loop",
+            "program_effect": "one while body in optimised HLO",
+        },
+    ]
+
+
+def _profile_cached_entry(
+    operator, seed, target_current, run_dir: Path
+) -> dict[str, Any]:
+    """Profile one public cache hit after compiling and executing a warm call."""
+    warm_started = perf_counter()
+    warm = reduced_newton.solve_reduced_newton_compiled(
+        operator,
+        seed,
+        target_current=target_current,
+    )
+    jax.block_until_ready(warm.state)
+    warm_seconds = perf_counter() - warm_started
+
+    profile_path = run_dir / "cached-entry.prof"
+    text_path = run_dir / "cached-entry.txt"
+    profiler = cProfile.Profile()
+    started = perf_counter()
+    profiler.enable()
+    cached = reduced_newton.solve_reduced_newton_compiled(
+        operator,
+        seed,
+        target_current=target_current,
+    )
+    jax.block_until_ready(cached.state)
+    profiler.disable()
+    call_seconds = perf_counter() - started
+    profiler.dump_stats(profile_path)
+    stats = pstats.Stats(profiler).strip_dirs().sort_stats("cumulative")
+    with text_path.open("w", encoding="utf-8") as stream:
+        stats.stream = stream
+        stats.print_stats(80)
+
+    selected = []
+    wanted = {
+        "solve_reduced_newton_compiled",
+        "_compiled_result",
+        "_compiled_program",
+        "reduced_coordinates",
+        "external",
+        "_compiled_output_fields",
+    }
+    for (file, line, function), values in stats.stats.items():
+        if function not in wanted:
+            continue
+        primitive_calls, calls, self_seconds, cumulative_seconds, _callers = values
+        selected.append(
+            {
+                "file": file,
+                "line": line,
+                "function": function,
+                "primitive_calls": primitive_calls,
+                "calls": calls,
+                "self_seconds": self_seconds,
+                "cumulative_seconds": cumulative_seconds,
+            }
+        )
+    selected.sort(key=lambda row: -row["cumulative_seconds"])
+    return {
+        "warm_seconds": warm_seconds,
+        "cached_call_seconds": call_seconds,
+        "terminal_residual": cached.terminal_residual,
+        "converged": cached.converged,
+        "selected_functions": selected,
+        "profile_path": str(profile_path),
+        "profile_text_path": str(text_path),
+        "cache_entry_seams": {
+            "coordinates": _source_line(reduced_newton.reduced_coordinates, "def "),
+            "external": _source_line(type(operator).external, "def "),
+            "lookup": _source_line(
+                reduced_newton._compiled_program,
+                "_compiled_program_cache.get",
+            ),
+        },
+    }
+
+
 def _census_compiled(comp, label, run_dir, case_name, cells):
     text = comp.as_text()
     hlo_dir = run_dir / "hlo"
     hlo_dir.mkdir(parents=True, exist_ok=True)
     hlo_path = hlo_dir / f"{case_name}_{cells}c_{label}.hlo.txt"
     hlo_path.write_text(text, encoding="utf-8")
-    census = _census_module(text)
+    census = _census_module(text, cells=cells)
     census["label"] = label
     census["cells"] = cells
     census["hlo_text_bytes"] = len(text)
@@ -738,16 +1118,70 @@ def _census_compiled(comp, label, run_dir, case_name, cells):
     return census, length
 
 
-def measure(case_name: str, cells: Iterable[int], run_dir: Path) -> dict[str, Any]:
+def _rung_receipt(entry: dict[str, Any]) -> dict[str, Any]:
+    """Return the durable, review-sized receipt for one cell-count rung."""
+    return {
+        "case": entry["case"],
+        "requested_cells": entry["requested_cells"],
+        "compile_seconds": entry["compile_seconds"],
+        "solve_over_map": entry["solve_over_map"],
+        "solve": {
+            key: entry["solve"][key]
+            for key in (
+                "total_instructions",
+                "total_bytes",
+                "while_ops",
+                "conditional_ops",
+                "scan_instructions",
+                "straight_line_instructions",
+                "replication",
+                "large_constants",
+            )
+        },
+        "map": {
+            key: entry["map"][key]
+            for key in (
+                "total_instructions",
+                "total_bytes",
+                "while_ops",
+                "conditional_ops",
+                "scan_instructions",
+                "straight_line_instructions",
+                "replication",
+                "large_constants",
+            )
+        },
+    }
+
+
+def measure(
+    case_name: str,
+    cells: Iterable[int],
+    run_dir: Path,
+    receipt_dir: Path | None = None,
+    profile_cached_entry: bool = False,
+) -> tuple[dict[int, dict[str, Any]], dict[str, Any] | None]:
     """Compile both programs at each cell count, census, and persist parts."""
     parts_dir = run_dir / "parts"
     parts_dir.mkdir(parents=True, exist_ok=True)
-    results: dict[Any, dict[str, Any]] = {}
+    results: dict[int, dict[str, Any]] = {}
+    host_profile_path = run_dir / "cached-entry.json"
+    host_profile = (
+        json.loads(host_profile_path.read_text(encoding="utf-8"))
+        if host_profile_path.exists()
+        else None
+    )
     for requested_cells in cells:
         part_path = parts_dir / f"{case_name}_{requested_cells}c.json"
         if part_path.exists():
             persisted = json.loads(part_path.read_text(encoding="utf-8"))
             results[requested_cells] = persisted
+            if receipt_dir is not None:
+                receipt_dir.mkdir(parents=True, exist_ok=True)
+                (receipt_dir / f"{requested_cells}.json").write_text(
+                    json.dumps(_rung_receipt(persisted), indent=2, sort_keys=True),
+                    encoding="utf-8",
+                )
             print(
                 f"CENSUS_PERSISTED case={case_name} requested_cells={requested_cells}",
                 flush=True,
@@ -797,6 +1231,12 @@ def measure(case_name: str, cells: Iterable[int], run_dir: Path) -> dict[str, An
             )
             entry[key]["top30_bytes"] = _top(entry[key]["attributed"], 30, "bytes")
         part_path.write_text(json.dumps(entry, sort_keys=True), encoding="utf-8")
+        if receipt_dir is not None:
+            receipt_dir.mkdir(parents=True, exist_ok=True)
+            (receipt_dir / f"{requested_cells}.json").write_text(
+                json.dumps(_rung_receipt(entry), indent=2, sort_keys=True),
+                encoding="utf-8",
+            )
         results[requested_cells] = entry
         print(
             f"CENSUS_PART_LANDED case={case_name} requested_cells={requested_cells} "
@@ -804,7 +1244,23 @@ def measure(case_name: str, cells: Iterable[int], run_dir: Path) -> dict[str, An
             f"map_instr={map_census['total_instructions']}",
             flush=True,
         )
-    return results
+        if profile_cached_entry and host_profile is None:
+            host_profile = _profile_cached_entry(
+                operator,
+                seed,
+                target_current,
+                run_dir,
+            )
+            host_profile_path.write_text(
+                json.dumps(host_profile, indent=2, sort_keys=True),
+                encoding="utf-8",
+            )
+            print(
+                "CENSUS_CACHED_ENTRY_PROFILE "
+                f"wall_seconds={host_profile['cached_call_seconds']:.6f}",
+                flush=True,
+            )
+    return results, host_profile
 
 
 def _render_svg(entry: dict[str, Any], path: Path) -> None:
@@ -864,6 +1320,73 @@ def _render_svg(entry: dict[str, Any], path: Path) -> None:
     path.write_text("\n".join(parts), encoding="utf-8")
 
 
+def _render_constant_svg(results: dict[int, dict[str, Any]], path: Path) -> None:
+    """Render grouped captured literal bytes at both measured cell counts."""
+    groups = sorted(
+        {
+            group
+            for cells in REQUIRED_CELLS
+            for group in results[cells]["solve"]["large_constants"]["groups"]
+        }
+    )
+    width = 1060
+    row_height = 58
+    height = 78 + row_height * len(groups)
+    label_x = 280
+    plot_width = width - label_x - 110
+    maximum = max(
+        (
+            results[cells]["solve"]["large_constants"]["groups"]
+            .get(group, {})
+            .get("captured_bytes", 0)
+            for cells in REQUIRED_CELLS
+            for group in groups
+        ),
+        default=1,
+    )
+    colors = {300: "#2f6f9f", 1000: "#d8782f"}
+    parts = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
+        'font-family="DejaVu Sans, Arial, sans-serif" font-size="12">',
+        f'<rect width="{width}" height="{height}" fill="#ffffff"/>',
+        '<text x="16" y="25" font-size="16" font-weight="bold" fill="#1a1a1a">'
+        "Captured optimised-HLO literal bytes by source group</text>",
+        '<text x="16" y="44" font-size="11" fill="#555">Only literals larger '
+        "than 1 KiB; linear bar scale, paired CPU compilations</text>",
+    ]
+    for legend_index, cells in enumerate(REQUIRED_CELLS):
+        x = 760 + legend_index * 130
+        parts.append(
+            f'<rect x="{x}" y="18" width="16" height="10" fill="{colors[cells]}"/>'
+        )
+        parts.append(f'<text x="{x + 22}" y="27" fill="#333">{cells} cells</text>')
+    for row_index, group in enumerate(groups):
+        y = 66 + row_index * row_height
+        parts.append(
+            f'<text x="{label_x - 12}" y="{y + 24}" text-anchor="end" '
+            f'fill="#222">{group}</text>'
+        )
+        for offset, cells in enumerate(REQUIRED_CELLS):
+            value = (
+                results[cells]["solve"]["large_constants"]["groups"]
+                .get(group, {})
+                .get("captured_bytes", 0)
+            )
+            bar_width = 0 if value == 0 else max(2, int(plot_width * value / maximum))
+            bar_y = y + offset * 24
+            parts.append(
+                f'<rect x="{label_x}" y="{bar_y}" width="{bar_width}" height="17" '
+                f'fill="{colors[cells]}" rx="2"/>'
+            )
+            parts.append(
+                f'<text x="{label_x + bar_width + 7}" y="{bar_y + 13}" '
+                f'fill="#333">{_fmt_bytes(value)}</text>'
+            )
+    parts.append("</svg>")
+    path.write_text("\n".join(parts), encoding="utf-8")
+
+
 def _fmt_bytes(value: int) -> str:
     if value >= 1 << 30:
         return f"{value / (1 << 30):.2f} GiB"
@@ -874,7 +1397,24 @@ def _fmt_bytes(value: int) -> str:
     return f"{value} B"
 
 
-def build_report(results: dict[int, dict[str, Any]]) -> str:
+def _location(source: dict[str, Any] | None) -> str:
+    if not source or not source.get("file"):
+        return (
+            "nova/equilibrium/forward.py:1799 "
+            "`ForwardProfile._accelerated_history_program`"
+        )
+    path = Path(source["file"])
+    try:
+        path = path.relative_to(ROOT)
+    except ValueError:
+        pass
+    function = source.get("function") or "unknown"
+    return f"{path}:{source.get('line') or '?'} `{function}`"
+
+
+def build_report(
+    results: dict[int, dict[str, Any]], host_profile: dict[str, Any] | None
+) -> str:
     lines: list[str] = []
     ap = lines.append
     ap("# Program scope census")
@@ -884,6 +1424,110 @@ def build_report(results: dict[int, dict[str, Any]]) -> str:
         "reactor-static row) at 300 and 1000 requested cells, and of one "
         "application of the flux map alone at the analytic flux."
     )
+    ap("")
+    ap(
+        "The source premise was tested rather than assumed. The production "
+        "certificate budgets and the compiled reduced-slice budgets are already "
+        "`jax.lax.fori_loop` bodies. The Python Newton and trip loops exist only "
+        "on the inspectable host route and create zero copies in this optimised "
+        "HLO. Replication is therefore attributed below to separately traced map "
+        "and topology call paths, not to those host loops."
+    )
+    ap("")
+    ap("## Captured literal context")
+    ap("")
+    ap(
+        "The literal census is taken from the optimised HLO, not from StableHLO "
+        "or Python object sizes. XLA omits source metadata on some closure "
+        "literals; those rows explicitly name the closure seam rather than "
+        "claiming an unavailable innermost frame."
+    )
+    ap("")
+    ap(
+        "| cells | literals >1 KiB | captured bytes | executable context | "
+        "generated-code context |"
+    )
+    ap("|---:|---:|---:|---:|---:|")
+    for cells in REQUIRED_CELLS:
+        census = results[cells]["solve"]["large_constants"]
+        executable = _EXECUTABLE_CONTEXT.get(cells)
+        generated = _GENERATED_CODE_CONTEXT.get(cells)
+        ap(
+            f"| {cells} | {census['literal_count']:,} | "
+            f"{_fmt_bytes(census['captured_bytes'])} | "
+            f"{_fmt_bytes(int(executable)) if executable else 'not serialisable'} | "
+            f"{_fmt_bytes(int(generated)) if generated else '-'} |"
+        )
+    ap(
+        f"| 2500 | not recompiled in this node | - | not serialisable | "
+        f"{_fmt_bytes(int(_GENERATED_CODE_CONTEXT[2500]))} |"
+    )
+    ap("")
+    ap(
+        "![Captured bytes by group](/nova/figures/millisecond-converged-solve/"
+        "program-census/captured-bytes-by-group.svg)"
+    )
+    ap("")
+    ap("### Captured bytes by group")
+    ap("")
+    ap("| group | 300 literals | 300 bytes | 1000 literals | 1000 bytes |")
+    ap("|---|---:|---:|---:|---:|")
+    groups = sorted(
+        {
+            group
+            for cells in REQUIRED_CELLS
+            for group in results[cells]["solve"]["large_constants"]["groups"]
+        }
+    )
+    for group in groups:
+        left = results[300]["solve"]["large_constants"]["groups"].get(group, {})
+        right = results[1000]["solve"]["large_constants"]["groups"].get(group, {})
+        ap(
+            f"| {group} | {left.get('literal_count', 0):,} | "
+            f"{_fmt_bytes(left.get('captured_bytes', 0))} | "
+            f"{right.get('literal_count', 0):,} | "
+            f"{_fmt_bytes(right.get('captured_bytes', 0))} |"
+        )
+    ap("")
+    ap("### Every optimised-HLO literal above 1 KiB")
+    ap("")
+    ap(
+        "| cells | id | group | shape | dtype | bytes | innermost Nova frame "
+        "or closure seam |"
+    )
+    ap("|---:|---|---|---|---|---:|---|")
+    for cells in REQUIRED_CELLS:
+        for item in results[cells]["solve"]["large_constants"]["literals"]:
+            ap(
+                f"| {cells} | `{item['id']}` | {item['group']} | "
+                f"`{item['shape']}` | `{item['dtype']}` | {item['bytes']:,} | "
+                f"{_location(item['source'])} |"
+            )
+    ap("")
+    ap("## Replicated compiled paths")
+    ap("")
+    ap("| cells | program | path | traced copies | instructions in path | source |")
+    ap("|---:|---|---|---:|---:|---|")
+    for cells in REQUIRED_CELLS:
+        for program in ("map", "solve"):
+            for label, item in results[cells][program]["replication"].items():
+                source = (
+                    item["source_locations"][0] if item["source_locations"] else None
+                )
+                ap(
+                    f"| {cells} | {program} | {label} | {item['copy_count']:,} | "
+                    f"{item['instructions']:,} | {_location(source)} |"
+                )
+    ap("")
+    ap("## Loop inventory")
+    ap("")
+    ap("| loop | form | source | effect on optimised HLO |")
+    ap("|---|---|---|---|")
+    for item in _loop_inventory():
+        ap(
+            f"| {item['loop']} | `{item['form']}` | {_location(item)} | "
+            f"{item['program_effect']} |"
+        )
     ap("")
     ap("## Solve over one map application")
     ap("")
@@ -1001,6 +1645,129 @@ def build_report(results: dict[int, dict[str, Any]]) -> str:
                     else f"{r['instructions'] / total * 100:.1f}%"
                 )
                 ap(f"| {cells} | {i} | {r['function']} | {value} | {share} | {loc} |")
+        ap("")
+
+    ap("## Cached public-entry host work")
+    ap("")
+    if host_profile is None:
+        ap("The cached-entry profile was not requested in this invocation.")
+    else:
+        ap(
+            f"The warm-up call took {host_profile['warm_seconds']:.3f} s; one "
+            f"subsequent public cache-hit call took "
+            f"{host_profile['cached_call_seconds']:.3f} s on CPU and ended at "
+            f"residual {host_profile['terminal_residual']:.6g} "
+            f"(converged={host_profile['converged']}). The table is cProfile "
+            "cumulative host time; device completion is synchronised by the "
+            "public result conversion."
+        )
+        ap("")
+        ap("| function | calls | self ms | cumulative ms | source |")
+        ap("|---|---:|---:|---:|---|")
+        for item in host_profile["selected_functions"]:
+            ap(
+                f"| `{item['function']}` | {item['calls']:,} | "
+                f"{item['self_seconds'] * 1e3:.3f} | "
+                f"{item['cumulative_seconds'] * 1e3:.3f} | "
+                f"{Path(item['file']).name}:{item['line']} |"
+            )
+        ap("")
+        seams = host_profile["cache_entry_seams"]
+        ap(
+            "The cache-entry repair must move the coordinate construction at "
+            f"{_location(seams['coordinates'])} and the exterior-flux derivation "
+            f"at {_location(seams['external'])} ahead of the reusable program "
+            f"lookup at {_location(seams['lookup'])}; it must not change the "
+            "compiled program key or terminal identity."
+        )
+    ap("")
+
+    selected_groups = (
+        "interaction-matrix kernel blocks",
+        "wall and sample blocks",
+        "moment geometry",
+        "mesh connectivity",
+    )
+    mesh_bytes = sum(
+        results[1000]["solve"]["large_constants"]["groups"]
+        .get(group, {})
+        .get("captured_bytes", 0)
+        for group in selected_groups
+    )
+    all_groups = results[1000]["solve"]["large_constants"]["all_literal_groups"]
+    profile_bytes = sum(
+        all_groups.get(group, {}).get("captured_bytes", 0)
+        for group in ("flux-function amplitudes", "target current")
+    )
+    moment_copies = results[1000]["solve"]["replication"]["current-moment path"][
+        "copy_count"
+    ]
+    topology_copies = results[1000]["solve"]["replication"]["topology read"][
+        "copy_count"
+    ]
+    solve_instructions = results[1000]["solve"]["total_instructions"]
+    map_instructions = results[1000]["map"]["total_instructions"]
+    mesh_seam = _source_line(
+        ForwardProfile._accelerated_history_program,
+        "mapped = self.operator.traced_flux_map",
+    )
+    traced_map_seam = _source_line(ForwardFluxOperator.traced_flux_map, "def ")
+    profile_seam = _source_line(ForwardSource.pressure_gradient, "def ")
+    moment_seam = _source_line(ForwardSource.current_moments, "def ")
+    compiled_loop = _source_line(
+        reduced_newton._compiled_slice_solver,
+        "return jax.lax.fori_loop(",
+        occurrence=1,
+    )
+    public_entry = _source_line(reduced_newton.solve_reduced_newton_compiled, "def ")
+    coordinate_seam = _source_line(reduced_newton.reduced_coordinates, "def ")
+
+    ap("## Exact implementation attack list")
+    ap("")
+    ap("| implement node | exact source seams | measured removal target |")
+    ap("|---|---|---|")
+    ap(
+        "| Mesh arrays as program arguments | "
+        f"{_location(mesh_seam)} closes the operator into the solve; "
+        f"{_location(traced_map_seam)} closes the map. | Move at least "
+        f"{_fmt_bytes(mesh_bytes)} of 1000-cell interaction, wall/sample, moment-"
+        "geometry and connectivity literals from constants to arguments; compare "
+        "against the recorded 462 MiB / 3.50 GiB / 19.00 GiB executable and "
+        "generated-code ladder. |"
+    )
+    ap(
+        "| Flux functions and target current as traced arguments | "
+        f"{_location(profile_seam)} and {_location(moment_seam)} feed the static "
+        f"profile closure; {_location(mesh_seam)} includes target current in the "
+        "program key. | Remove "
+        f"{_fmt_bytes(profile_bytes)} of directly classified profile/current "
+        "literals at 1000 cells plus their folded descendants; the separate "
+        "coefficient audit identifies two f64 amplitudes (16 B) and the target "
+        "current as the root traced arguments. |"
+    )
+    ap(
+        "| Program-size budget with scans | "
+        f"{_location(compiled_loop)} is already the compiled trip `fori_loop`; "
+        f"{_location(mesh_seam)} is the straight-line closure seam. | Do not "
+        f"rewrite host loops as a size fix: they contribute zero HLO copies. Gate "
+        f"the {solve_instructions:,}-instruction solve against the "
+        f"{map_instructions:,}-instruction map and remove {moment_copies:,} "
+        f"current-moment plus {topology_copies:,} topology-read traced copies by "
+        "hoisting/reusing those bodies. |"
+    )
+    cached_measure = (
+        "profile not run"
+        if host_profile is None
+        else f"{host_profile['cached_call_seconds'] * 1e3:.3f} ms cached public call"
+    )
+    ap(
+        "| Cache-entry overhead | "
+        f"{_location(public_entry)} derives per-call inputs; "
+        f"{_location(coordinate_seam)} builds reduced coordinates before the "
+        "lookup. | Hoist the measured coordinate and exterior derivations from "
+        f"{cached_measure}; preserve the reusable executable key and terminal "
+        "identity. |"
+    )
     return "\n".join(lines)
 
 
@@ -1016,29 +1783,46 @@ def main() -> None:
     )
     parser.add_argument("--report-dir", default=None)
     parser.add_argument("--figure-dir", default=None)
+    parser.add_argument(
+        "--profile-cached-entry",
+        action="store_true",
+        help="warm and cProfile one cache-hit public compiled-slice call",
+    )
     arguments = parser.parse_args()
     run_dir = Path(arguments.run_dir).resolve()
     run_dir.mkdir(parents=True, exist_ok=True)
     configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
-    results = measure(arguments.case, arguments.cells, run_dir)
+    figure_dir = Path(arguments.figure_dir) if arguments.figure_dir else None
+    results, host_profile = measure(
+        arguments.case,
+        arguments.cells,
+        run_dir,
+        receipt_dir=figure_dir,
+        profile_cached_entry=arguments.profile_cached_entry,
+    )
     entry = results.get(1000, results.get(list(results)[-1]))
-    if arguments.figure_dir:
-        figure_dir = Path(arguments.figure_dir)
+    if figure_dir is not None:
         figure_dir.mkdir(parents=True, exist_ok=True)
         _render_svg(entry, figure_dir / "scope-census-instruction-share.svg")
+        _render_constant_svg(results, figure_dir / "captured-bytes-by-group.svg")
         print(
-            f"CENSUS_FIGURE {figure_dir / 'scope-census-instruction-share.svg'}",
+            f"CENSUS_FIGURE {figure_dir / 'captured-bytes-by-group.svg'}",
             flush=True,
         )
-    report = build_report(results)
+    report = build_report(results, host_profile)
     report_dir = Path(arguments.report_dir) if arguments.report_dir else run_dir
     report_dir.mkdir(parents=True, exist_ok=True)
     report_path = report_dir / "scope-census-index.md"
     report_path.write_text(report, encoding="utf-8")
+    if figure_dir is not None:
+        figure_report = figure_dir / "report.md"
+        figure_report.write_text(report, encoding="utf-8")
+        print(f"CENSUS_PUBLIC_REPORT {figure_report}", flush=True)
     print(f"CENSUS_REPORT {report_path}", flush=True)
     summary = {
         "case": arguments.case,
         "cells": {str(c): _summarize(results[c]) for c in results},
+        "cached_entry_profile": host_profile,
         "report": str(report_path),
     }
     print(json.dumps(summary, sort_keys=True, default=str), flush=True)

@@ -204,16 +204,26 @@ def _edge_root_diagnostics(
 
         def append_root(fraction: float, kind: str) -> None:
             point = start + fraction * (end - start)
-            if any(
-                np.linalg.norm(point - np.asarray(row["coordinate_rz_m"])) <= 1.0e-12
-                for row in roots
-            ):
+            duplicate = next(
+                (
+                    row
+                    for row in roots
+                    if np.linalg.norm(point - np.asarray(row["coordinate_rz_m"]))
+                    <= 1.0e-12
+                ),
+                None,
+            )
+            if duplicate is not None:
+                if kind == "saddle-coincident":
+                    duplicate["kind"] = kind
+                    duplicate["multiplicity"] = 2
                 return
             roots.append(
                 {
                     "fraction": fraction,
                     "coordinate_rz_m": point,
                     "kind": kind,
+                    "multiplicity": 1,
                     "flux_residual_wb": float(
                         exact.flux(point[None, :])[0] - boundary_flux
                     ),
@@ -253,11 +263,69 @@ def _edge_root_diagnostics(
                 "saddle_distance_m": saddle_distance,
                 "saddle_fraction": saddle_fraction,
                 "saddle_on_edge": saddle_on_edge,
-                "root_count": len(roots),
+                "root_count": sum(int(root["multiplicity"]) for root in roots),
                 "roots": roots,
             }
         )
     return rows
+
+
+def _edge_root_arrays(
+    edge_rows: list[dict[str, Any]], polarity: float
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Pack exact edge roots and their following signs into fixed arrays."""
+    width = len(edge_rows)
+    events = []
+    for row in edge_rows:
+        edge = int(row["edge"])
+        for root in row["roots"]:
+            parameter = (edge + float(root["fraction"])) % width
+            coordinate = np.asarray(root["coordinate_rz_m"], dtype=np.float64)
+            duplicate = next(
+                (
+                    event
+                    for event in events
+                    if abs(float(event["parameter"]) - parameter) <= 1.0e-12
+                    and np.linalg.norm(np.asarray(event["coordinate"]) - coordinate)
+                    <= 1.0e-12
+                ),
+                None,
+            )
+            multiplicity = int(root.get("multiplicity", 1))
+            if duplicate is None:
+                events.append(
+                    {
+                        "parameter": parameter,
+                        "coordinate": coordinate,
+                        "multiplicity": multiplicity,
+                    }
+                )
+            else:
+                duplicate["multiplicity"] = max(
+                    int(duplicate["multiplicity"]), multiplicity
+                )
+    events.sort(key=lambda event: float(event["parameter"]))
+    expanded = []
+    positive = polarity * float(edge_rows[0]["endpoint_signed_flux_wb"][0]) > 0.0
+    for event in events:
+        for _copy in range(int(event["multiplicity"])):
+            positive = not positive
+            expanded.append((float(event["parameter"]), positive))
+    if len(expanded) != 4:
+        raise RuntimeError(f"expected four separatrix roots, found {len(expanded)}")
+
+    fractions = np.zeros((1, width, 2), dtype=np.float64)
+    counts = np.zeros((1, width), dtype=np.int32)
+    positive_after = np.zeros((1, width, 2), dtype=bool)
+    for parameter, following_positive in expanded:
+        edge = min(int(math.floor(parameter)), width - 1)
+        slot = int(counts[0, edge])
+        if slot >= 2:
+            raise RuntimeError(f"edge {edge} carries more than two separatrix roots")
+        fractions[0, edge, slot] = parameter - edge
+        positive_after[0, edge, slot] = following_positive
+        counts[0, edge] += 1
+    return fractions, counts, positive_after
 
 
 def _wedge_shape_diagnostics(wedges: Any, x_point: np.ndarray) -> dict[str, Any]:
@@ -481,16 +549,22 @@ def _measure_row(
             exact.flux(candidate_mesh.node_coordinates), dtype=np.float64
         )
         signed_flux = jnp.asarray(polarity * (node_flux - boundary_flux))
+        edge_rows = _edge_root_diagnostics(
+            exact, candidate_polygon, x_point, boundary_flux
+        )
+        root_fraction, root_count, root_positive_after = _edge_root_arrays(
+            edge_rows, polarity
+        )
         candidate_wedges = jax.jit(
             lambda values: candidate_mesh.traced_saddle_wedges(
                 values,
                 saddle_vertex=jnp.asarray(x_point),
                 core_reference=jnp.asarray(axis),
+                edge_root_fraction=jnp.asarray(root_fraction),
+                edge_root_count=jnp.asarray(root_count),
+                edge_root_positive_after=jnp.asarray(root_positive_after),
             )
         )(signed_flux)
-        edge_rows = _edge_root_diagnostics(
-            exact, candidate_polygon, x_point, boundary_flux
-        )
         candidate_row = candidate | {
             "selected": candidate_cell == cell,
             "centroid_rz_m": candidate_centre,

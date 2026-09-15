@@ -1370,6 +1370,218 @@ def _ordered_saddle_wedges(positive, negative, core_reference):
     )
 
 
+def _traced_saddle_wedges_from_edge_roots(
+    node_coordinates,
+    cell_nodes,
+    cell_vertex_count,
+    centroids,
+    support_capacity,
+    signed_flux,
+    saddle_vertex,
+    core_reference,
+    edge_root_fraction,
+    edge_root_count,
+    edge_root_positive_after,
+):
+    """Build four cyclic saddle wedges from at most two roots per cell edge."""
+    coordinates = jnp.asarray(node_coordinates)
+    nodes = jnp.asarray(cell_nodes)
+    count = jnp.asarray(cell_vertex_count)
+    centre = jnp.asarray(centroids)
+    flux = jnp.asarray(signed_flux)
+    fraction = jnp.asarray(edge_root_fraction, dtype=coordinates.dtype)
+    root_count = jnp.asarray(edge_root_count)
+    positive_after = jnp.asarray(edge_root_positive_after, dtype=bool)
+    cell_count, width = nodes.shape
+    expected_root_shape = (cell_count, width, 2)
+    if fraction.shape != expected_root_shape:
+        raise ValueError("edge_root_fraction must have shape (cells, edges, 2)")
+    if positive_after.shape != expected_root_shape:
+        raise ValueError("edge_root_positive_after must have shape (cells, edges, 2)")
+    if root_count.shape != (cell_count, width):
+        raise ValueError("edge_root_count must have shape (cells, edges)")
+    if flux.shape != (coordinates.shape[0],):
+        raise ValueError("signed_flux must carry one value per atomic node")
+
+    supplied_saddle = jnp.asarray(saddle_vertex, dtype=coordinates.dtype)
+    if supplied_saddle.shape == (2,):
+        supplied_saddle = jnp.broadcast_to(supplied_saddle, (cell_count, 2))
+    if supplied_saddle.shape != (cell_count, 2):
+        raise ValueError("saddle_vertex must have shape (2,) or (cells, 2)")
+    reference = jnp.asarray(core_reference, dtype=coordinates.dtype)
+    if reference.shape == (2,):
+        reference = jnp.broadcast_to(reference, (cell_count, 2))
+    if reference.shape != (cell_count, 2):
+        raise ValueError("core_reference must have shape (2,) or (cells, 2)")
+
+    edge_slot = jnp.arange(width)
+    root_slot = jnp.arange(2)
+    valid_edge = edge_slot[None, :] < count[:, None]
+    valid_root = valid_edge[..., None] & (
+        root_slot[None, None, :] < root_count[..., None]
+    )
+    following_edge = jnp.where(
+        edge_slot[None, :] + 1 < count[:, None], edge_slot[None, :] + 1, 0
+    )
+    following_nodes = jnp.take_along_axis(nodes, following_edge, axis=1)
+    start = coordinates[nodes]
+    end = coordinates[following_nodes]
+    root_coordinate = (
+        start[..., None, :] + fraction[..., None] * (end - start)[..., None, :]
+    )
+    perimeter = edge_slot[None, :, None] + fraction
+    packed_root, total_root_count = _pack_traced_vertices(
+        root_coordinate.reshape(cell_count, 2 * width, 2),
+        valid_root.reshape(cell_count, 2 * width),
+        4,
+    )
+    packed_parameter, _parameter_count = _pack_traced_vertices(
+        perimeter[..., None].reshape(cell_count, 2 * width, 1),
+        valid_root.reshape(cell_count, 2 * width),
+        4,
+    )
+    packed_parameter = packed_parameter[..., 0]
+    packed_positive_after = _pack_traced_values(
+        positive_after.reshape(cell_count, 2 * width),
+        valid_root.reshape(cell_count, 2 * width),
+        4,
+    )
+    saddle = total_root_count == 4
+
+    next_root = jnp.roll(packed_root, -1, axis=1)
+    next_parameter = jnp.roll(packed_parameter, -1, axis=1)
+    perimeter_length = count[:, None].astype(coordinates.dtype)
+    next_parameter = jnp.where(
+        next_parameter < packed_parameter,
+        next_parameter + perimeter_length,
+        next_parameter,
+    )
+    start_edge = jnp.floor(packed_parameter).astype(jnp.int32) % count[:, None]
+    boundary_slot = jnp.arange(width)
+    boundary_index = (start_edge[..., None] + 1 + boundary_slot[None, None, :]) % count[
+        :, None, None
+    ]
+    cell_index = jnp.arange(cell_count)[:, None, None]
+    boundary_node = nodes[cell_index, boundary_index]
+    boundary_vertex = coordinates[boundary_node]
+    boundary_parameter = boundary_index.astype(coordinates.dtype)
+    boundary_parameter = jnp.where(
+        boundary_parameter <= packed_parameter[..., None],
+        boundary_parameter + perimeter_length[..., None],
+        boundary_parameter,
+    )
+    between_roots = (boundary_parameter > packed_parameter[..., None]) & (
+        boundary_parameter < next_parameter[..., None]
+    )
+
+    saddle_candidate = jnp.broadcast_to(
+        supplied_saddle[:, None, None, :], (cell_count, 4, 1, 2)
+    )
+    cyclic_candidate = jnp.concatenate(
+        (
+            saddle_candidate,
+            packed_root[:, :, None, :],
+            boundary_vertex,
+            next_root[:, :, None, :],
+        ),
+        axis=2,
+    )
+    cyclic_valid = (
+        jnp.concatenate(
+            (
+                jnp.ones((cell_count, 4, 2), dtype=bool),
+                between_roots,
+                jnp.ones((cell_count, 4, 1), dtype=bool),
+            ),
+            axis=2,
+        )
+        & saddle[:, None, None]
+    )
+    flat_vertices, flat_count = _pack_traced_vertices(
+        cyclic_candidate.reshape(cell_count * 4, width + 3, 2),
+        cyclic_valid.reshape(cell_count * 4, width + 3),
+        support_capacity,
+    )
+    cyclic_vertices = flat_vertices.reshape(cell_count, 4, support_capacity, 2)
+    cyclic_count = flat_count.reshape(cell_count, 4)
+    flat_centre = jnp.broadcast_to(centre[:, None, :], (cell_count, 4, 2)).reshape(
+        cell_count * 4, 2
+    )
+    cyclic_area, cyclic_first, cyclic_second = _traced_polygon_moments(
+        flat_vertices,
+        flat_count,
+        flat_centre,
+    )
+    cyclic_area = cyclic_area.reshape(cell_count, 4)
+    cyclic_first = cyclic_first.reshape(cell_count, 4, 2)
+    cyclic_second = cyclic_second.reshape(cell_count, 4, 2, 2)
+    safe_area = jnp.where(cyclic_area > 0.0, cyclic_area, 1.0)
+    wedge_centroid = centre[:, None, :] + cyclic_first / safe_area[..., None]
+    core_direction = reference - supplied_saddle
+    core_score = jnp.einsum(
+        "nwi,ni->nw", wedge_centroid - supplied_saddle[:, None, :], core_direction
+    )
+    wedge_slot = jnp.arange(4)[None, :]
+    core_index = jnp.argmax(
+        jnp.where(packed_positive_after, core_score, -jnp.inf), axis=1
+    )
+    private_index = jnp.argmax(
+        jnp.where(
+            packed_positive_after & (wedge_slot != core_index[:, None]),
+            1,
+            0,
+        ),
+        axis=1,
+    )
+    negative_direction = wedge_centroid - supplied_saddle[:, None, :]
+    negative_cross = (
+        core_direction[:, None, 0] * negative_direction[..., 1]
+        - core_direction[:, None, 1] * negative_direction[..., 0]
+    )
+    first_sol = jnp.argmax(
+        jnp.where(~packed_positive_after, negative_cross, -jnp.inf), axis=1
+    )
+    second_sol = jnp.argmax(
+        jnp.where(
+            ~packed_positive_after & (wedge_slot != first_sol[:, None]),
+            1,
+            0,
+        ),
+        axis=1,
+    )
+    order = jnp.stack((core_index, private_index, first_sol, second_sol), axis=1)
+
+    def gather(value):
+        index = order[(...,) + (None,) * (value.ndim - 2)]
+        return jnp.take_along_axis(value, jnp.broadcast_to(index, value.shape), axis=1)
+
+    vertices = gather(cyclic_vertices)
+    vertex_count = gather(cyclic_count)
+    area = gather(cyclic_area)
+    first = gather(cyclic_first)
+    second = gather(cyclic_second)
+    live = jnp.arange(support_capacity)[None, None, :] < vertex_count[..., None]
+    selected = saddle[:, None]
+    vertices = jnp.where((selected[..., None] & live)[..., None], vertices, 0.0)
+    vertex_count = jnp.where(selected, vertex_count, 0)
+    full_area, _full_first, _full_second = _traced_polygon_moments(
+        start,
+        count,
+        centre,
+    )
+    return SaddleCellWedges(
+        support_vertices=vertices,
+        vertex_count=vertex_count,
+        centroids=centre,
+        area=jnp.where(selected, area, 0.0),
+        full_area=jnp.where(saddle, full_area, 0.0),
+        first_area_moment=jnp.where(selected[..., None], first, 0.0),
+        second_area_moment=jnp.where(selected[..., None, None], second, 0.0),
+        saddle=saddle,
+        saddle_vertex=jnp.where(saddle[:, None], supplied_saddle, 0.0),
+    )
+
+
 @dataclass(frozen=True)
 class ClippedSupports:
     """Fixed-shape supports and exact polygon moments for one flux map."""
@@ -1557,6 +1769,9 @@ class AtomicCellMesh:
         saddle_vertex,
         core_reference,
         participating_cell=None,
+        edge_root_fraction=None,
+        edge_root_count=None,
+        edge_root_positive_after=None,
     ) -> SaddleCellWedges:
         """Return the four branch-paired regions of every saddle cell.
 
@@ -1564,6 +1779,32 @@ class AtomicCellMesh:
         is normally the magnetic axis and distinguishes the core wedge from the
         same-sign private-flux wedge. All non-saddle cells are exact-zero rows.
         """
+        explicit_roots = edge_root_fraction is not None
+        if explicit_roots != (edge_root_count is not None) or explicit_roots != (
+            edge_root_positive_after is not None
+        ):
+            raise ValueError(
+                "edge root fractions, counts, and following signs must be supplied "
+                "together"
+            )
+        if explicit_roots:
+            if participating_cell is not None:
+                raise ValueError(
+                    "explicit saddle roots do not accept a separate participation mask"
+                )
+            return _traced_saddle_wedges_from_edge_roots(
+                self.node_coordinates,
+                self.cell_nodes,
+                self.cell_vertex_count,
+                self.centroids,
+                self.support_capacity,
+                signed_flux,
+                saddle_vertex,
+                core_reference,
+                edge_root_fraction,
+                edge_root_count,
+                edge_root_positive_after,
+            )
         positive = self.traced_clip(
             signed_flux,
             saddle_vertex=saddle_vertex,

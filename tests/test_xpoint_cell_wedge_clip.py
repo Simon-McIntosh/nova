@@ -122,6 +122,75 @@ def test_non_saddle_rows_and_padding_are_exact_zero_with_static_shapes():
     np.testing.assert_array_equal(ordinary.area, 0.0)
 
 
+def test_two_roots_on_one_edge_still_emit_four_wedges():
+    mesh, _signed_flux = _saddle_cell()
+    signed_flux = jnp.asarray([-1.0, 1.0, 1.0, 1.0])
+    fractions = np.zeros((1, 4, 2))
+    fractions[0, 0, 0] = 0.5
+    fractions[0, 2] = (0.25, 0.75)
+    fractions[0, 3, 0] = 0.5
+    counts = np.asarray([[1, 0, 2, 1]])
+    positive_after = np.zeros((1, 4, 2), dtype=bool)
+    positive_after[0, 0, 0] = True
+    positive_after[0, 2] = (False, True)
+
+    wedges = jax.jit(
+        lambda flux: mesh.traced_saddle_wedges(
+            flux,
+            saddle_vertex=jnp.zeros(2),
+            core_reference=jnp.ones(2),
+            edge_root_fraction=jnp.asarray(fractions),
+            edge_root_count=jnp.asarray(counts),
+            edge_root_positive_after=jnp.asarray(positive_after),
+        )
+    )(signed_flux)
+
+    assert bool(wedges.saddle[0])
+    assert np.all(np.asarray(wedges.vertex_count[0]) >= 3)
+    assert float(jnp.sum(wedges.area[0])) == pytest.approx(
+        float(wedges.full_area[0]), rel=0.0, abs=2.0e-15
+    )
+    for vertices, count in zip(
+        np.asarray(wedges.support_vertices[0]),
+        np.asarray(wedges.vertex_count[0]),
+        strict=True,
+    ):
+        np.testing.assert_array_equal(vertices[0], np.zeros(2))
+        np.testing.assert_array_equal(vertices[count:], 0.0)
+
+
+def test_edge_coincident_saddle_keeps_one_exact_zero_area_wedge():
+    mesh, _signed_flux = _saddle_cell()
+    saddle = jnp.asarray([0.0, 1.0])
+    fractions = np.zeros((1, 4, 2))
+    fractions[0, 0] = (0.25, 0.75)
+    fractions[0, 2] = (0.5, 0.5)
+    counts = np.asarray([[2, 0, 2, 0]])
+    positive_after = np.zeros((1, 4, 2), dtype=bool)
+    positive_after[0, 0] = (False, True)
+    positive_after[0, 2] = (False, True)
+
+    wedges = mesh.traced_saddle_wedges(
+        jnp.ones(4),
+        saddle_vertex=saddle,
+        core_reference=jnp.asarray([0.0, 0.0]),
+        edge_root_fraction=jnp.asarray(fractions),
+        edge_root_count=jnp.asarray(counts),
+        edge_root_positive_after=jnp.asarray(positive_after),
+    )
+
+    assert bool(wedges.saddle[0])
+    assert np.count_nonzero(np.asarray(wedges.area[0]) == 0.0) == 1
+    assert float(jnp.sum(wedges.area[0])) == pytest.approx(
+        float(wedges.full_area[0]), rel=0.0, abs=2.0e-15
+    )
+    zero_wedge = int(np.flatnonzero(np.asarray(wedges.area[0]) == 0.0)[0])
+    count = int(wedges.vertex_count[0, zero_wedge])
+    vertices = np.asarray(wedges.support_vertices[0, zero_wedge])
+    np.testing.assert_array_equal(vertices[0], saddle)
+    np.testing.assert_array_equal(vertices[count:], 0.0)
+
+
 def test_wedge_profile_count_refuses_an_incomplete_region_declaration():
     mesh, signed_flux = _saddle_cell()
     wedges = mesh.traced_saddle_wedges(

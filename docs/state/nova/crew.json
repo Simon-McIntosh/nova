@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T07:06:49",
+  "updated": "2026-09-15T07:09:28",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -159027,6 +159027,205 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T033357673076-cca-quadrature-delta-after-arm",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-quadrature-delta-after-arm",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1366,
+                "cached_input_tokens": 918728,
+                "input_tokens": 920126,
+                "output_tokens": 2923,
+                "reasoning_output_tokens": 652,
+                "total_tokens": 923049,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. No code change. Facts: the baseline arm at e2825a0d is complete under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/quadrature-delta-3/base (53 modules done, 329 passed, 10 failed, junit per module, arm.jsonl), produced by run_ccad3.sh in the same directory with one module per fresh python process; the after arm was never run there. Run ONE all_debug job (--time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python, sbatch detached from your shell, --output in the run directory) that runs ONLY the after arm at this base: the same module list (62 modules), one module per fresh process with -p no:cacheprovider -m 'not slow' -q --junitxml per module, a 300 s timeout per module, with the persistent compilation cache enabled per process by the JAX config flag as well as the directory (jax_enable_compilation_cache and jax_compilation_cache_dir, stated in the run script), modules ordered so the eight not run in the baseline window come last. Then compare junit results module by module against the baseline directory: report the after arm's module count, aborted or timed-out modules, pass and fail totals with failure ids, the added-failure set (after minus baseline over modules completed on both arms) as the verdict, the modules completed on one arm only, and the eight baseline modules that remain unmeasured. Write the manifest with the SLURM job number on the blockers line and end the turn; finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 2.0,
+          "goal": "Measure the after arm of the clip quadrature delta gate, one test module per fresh process at this base, and report the added failures against the completed baseline inventory",
+          "id": "cca-quadrature-delta-after-arm",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-15T03:33:58Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T033357673076-cca-quadrature-delta-after-arm/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/quadrature-delta-4",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "s19t-cca-quadrature-delta-4",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-15T03:34:08Z",
+        "completed_at": "2026-09-15T05:00:43.750Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 5186,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 5195,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "295f6d5571b15faef2ca265f9d2e91f4c7b0c867",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1271023: after arm at 295f6d55, one fresh pytest process per module over the 62 forward-operator importer modules with the persistent compilation cache enabled, 53 done, 3 zero-test aborts, 6 no-tests, 364 passed 11 failed, exit 0:0 in 56m37s; compared against the base arm at e2825a0d from job 1271013 (329 passed 10 failed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/quadrature-delta-4/ccad4-after-job-1271023.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T033357673076-cca-quadrature-delta-after-arm/manifest.md",
+        "scope_changed": false,
+        "session_id": "9c66979d-85a7-4291-a54c-7e8c150a59ba",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 4955307,
+            "input_tokens_cumulative": 4955307,
+            "output_tokens": 40837,
+            "output_tokens_cumulative": 40837,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T05:00:43.750Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 5122627,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 200000",
+          "elapsed_seconds": 1477.432,
+          "generated_tokens": 47921,
+          "generation_seconds": 1467.768,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 83.0,
+          "machine_seconds": 9.664,
+          "peak_input_tokens": 166020,
+          "tokens_per_second": 32.65,
+          "wall_tokens_per_second": 32.44
+        },
+        "follow_on_paths": [
+          "equilibrium/forward.py:2557"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "test role: the measurement lives in the report directory; the worker's landing-record commit 214f88ca was taken by the coordinator as a docs commit on main and its plan-HTML edit goes through the plan write path",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-quadrature-delta-after-arm",
+          "session_id": "9c66979d-85a7-4291-a54c-7e8c150a59ba",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T05:00:43.750Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 21.0,
+        "orientation_input_tokens": 985893.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -159339,6 +159538,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2502
+    "_version": 2503
   }
 }

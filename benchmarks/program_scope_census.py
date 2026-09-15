@@ -423,17 +423,32 @@ def _replication_targets() -> dict[str, dict[str, Any]]:
     """Return call-path sentinels that occur once per traced map copy."""
     return {
         "current-moment path": {
-            "function": "ForwardFluxOperator.normalised_current_moments",
-            "sentinel": _source_line(
-                ForwardFluxOperator.normalised_current_moments,
-                "moments = self.cell_current_moments",
+            "targets": (
+                {
+                    "function": "ForwardFluxOperator.normalised_current_moments",
+                    "sentinel": _source_line(
+                        ForwardFluxOperator.normalised_current_moments,
+                        "moments = self.cell_current_moments",
+                    ),
+                },
+                {
+                    "function": "ForwardFluxOperator._internal_on_partition",
+                    "sentinel": _source_line(
+                        ForwardFluxOperator._internal_on_partition,
+                        "target_current, jnp.sum(moments.cell_current)",
+                    ),
+                },
             ),
         },
         "topology read": {
-            "function": "ForwardFluxOperator._fixed_design_read",
-            "sentinel": _source_line(
-                ForwardFluxOperator._fixed_design_read,
-                "rescue_axis = self._independent_rescue_axis",
+            "targets": (
+                {
+                    "function": "ForwardFluxOperator._fixed_design_read",
+                    "sentinel": _source_line(
+                        ForwardFluxOperator._fixed_design_read,
+                        "result = self._fixed_design_topology.read_qualification",
+                    ),
+                },
             ),
         },
     }
@@ -446,19 +461,23 @@ def _replication_census(
     """Count independently traced copies of two dominant source paths."""
     result: dict[str, dict[str, Any]] = {}
     for label, target in _replication_targets().items():
+        target_functions = {item["function"] for item in target["targets"]}
+        sentinel_locations = {
+            (item["function"], item["sentinel"]["line"]) for item in target["targets"]
+        }
         sentinel_frames: dict[int, dict[str, Any]] = {}
         instruction_count = 0
         locations: set[tuple[Any, Any, Any]] = set()
         for record in records:
             matched = False
             for frame in _frame_chain(tables, record["meta"].get("stack_frame_id")):
-                if frame.get("function") != target["function"]:
+                if frame.get("function") not in target_functions:
                     continue
                 matched = True
                 locations.add(
                     (frame.get("file"), frame.get("function"), frame.get("line"))
                 )
-                if frame.get("line") == target["sentinel"]["line"]:
+                if (frame.get("function"), frame.get("line")) in sentinel_locations:
                     sentinel_frames[frame["frame_id"]] = frame
             if not matched:
                 continue
@@ -467,9 +486,11 @@ def _replication_census(
             locations, key=lambda item: tuple(str(value) for value in item)
         )
         result[label] = {
-            "target_function": target["function"],
-            "sentinel_line": target["sentinel"]["line"],
-            "source": target["sentinel"],
+            "target_function": target["targets"][0]["function"],
+            "target_functions": sorted(target_functions),
+            "sentinel_line": target["targets"][0]["sentinel"]["line"],
+            "source": target["targets"][0]["sentinel"],
+            "sources": [item["sentinel"] for item in target["targets"]],
             "copy_count": len(sentinel_frames),
             "instructions": instruction_count,
             "source_locations": [
@@ -1691,10 +1712,11 @@ def build_report(
     for cells in REQUIRED_CELLS:
         for program in ("map", "solve"):
             for label, item in results[cells][program]["replication"].items():
-                source = item.get("source")
+                sources = item.get("sources", [item.get("source")])
+                source = "; ".join(_location(value) for value in sources if value)
                 ap(
                     f"| {cells} | {program} | {label} | {item['copy_count']:,} | "
-                    f"{item['instructions']:,} | {_location(source)} |"
+                    f"{item['instructions']:,} | {source} |"
                 )
     ap("")
     ap("## Loop inventory")

@@ -50,7 +50,7 @@ def _effective_executable_bytes(program: dict[str, Any]) -> tuple[int, str]:
     if serialized is not None:
         return int(serialized), "serialized executable"
     generated = executable.get("generated_code_bytes")
-    if generated is not None:
+    if generated is not None and int(generated) > 0:
         return int(generated), "generated code fallback"
     error = executable.get("serialization_error")
     suffix = f": {error}" if error else ""
@@ -83,10 +83,19 @@ def evaluate_gate(
                 failures.append(
                     f"{cells}-cell solve {path!r} has {count} traced copies"
                 )
-        executable_bytes, executable_measure = _effective_executable_bytes(
-            after["solve"]
-        )
-        if cells == 1000 and executable_bytes > MAX_EXECUTABLE_BYTES:
+        try:
+            executable_bytes, executable_measure = _effective_executable_bytes(
+                after["solve"]
+            )
+        except ValueError as error:
+            executable_bytes = None
+            executable_measure = "unavailable"
+            failures.append(f"{cells}-cell solve {error}")
+        if (
+            cells == 1000
+            and executable_bytes is not None
+            and executable_bytes > MAX_EXECUTABLE_BYTES
+        ):
             failures.append(
                 f"1000-cell solve executable is {executable_bytes} bytes, "
                 f"limit {MAX_EXECUTABLE_BYTES}"
@@ -130,11 +139,16 @@ def _report(result: dict[str, Any]) -> str:
     for row in result["rows"]:
         before = row["before"]
         after = row["after"]
+        executable_bytes = after["executable_bytes"]
+        executable_display = (
+            f"{executable_bytes:,}" if executable_bytes is not None else "unavailable"
+        )
         lines.append(
             f"| {row['requested_cells']} | "
             f"{before['solve_instructions']:,}/{before['map_instructions']:,} | "
             f"{after['solve_instructions']:,}/{after['map_instructions']:,} | "
-            f"{after['instruction_ratio']:.2f} | {after['executable_bytes']:,} | "
+            f"{after['instruction_ratio']:.2f} | "
+            f"{executable_display} | "
             f"{after['operator_copies']['current-moment path']} | "
             f"{after['operator_copies']['topology read']} |"
         )

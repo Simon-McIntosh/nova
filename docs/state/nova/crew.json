@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T15:27:36",
+  "updated": "2026-09-15T15:29:30",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -165175,6 +165175,219 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T124349146249-pfs-constraint-multi-trip-target",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-constraint-multi-trip-target",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4196,
+                "cached_input_tokens": 388015,
+                "input_tokens": 392243,
+                "output_tokens": 3061,
+                "reasoning_output_tokens": 80,
+                "total_tokens": 395304,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "A benchmark benchmarks/constraint_multi_trip_target.py drives 27079 row 96 (the fixture and 1000 A trip cap of docs/figures/playable-forward-solve/constraint-globalisation/constraint-multi-trip.md) to a centroid displacement needing three to four caps, first measuring the free response at 3 kA and 4 kA (or scaling the banked 1 kA finite difference and stating that it is a linear extrapolation), in one all_debug CPU job (JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on the node, foreground srun under 59 minutes, receipt persisted after each trip); the receipt docs/figures/playable-forward-solve/constraint-globalisation/multi-trip-target.json records per trip the applied current change, the augmented constraint merit and the centroid error, and the report states whether the iteration converged to within 1 mm, whether the merit decreased monotonically across trips, that no trip applied more than the cap, that no accepted step overshot the target, that the total compensating current is within 10 percent of the free-solve value reaching that displacement, and the trip count; if the iteration cannot reach the target the report names which trip stopped lowering the merit and shows the merit sequence, and the termination reason is read as recorded (the termination-order repair is a separate live node; a budget exhaustion at a converged centroid is recorded as such, not corrected here); one SVG of merit and centroid error against trip; tests are not added and no source file under nova/ changes",
+          "estimated_hours": null,
+          "goal": "The constrained iteration proven to converge over several capped trips on a command that needs three to four caps, with the merit sequence, per-trip current and trip count recorded",
+          "id": "pfs-constraint-multi-trip-target",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T12:43:51Z",
+            "read_at": "2026-09-15T12:43:53Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 36.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T124349146249-pfs-constraint-multi-trip-target/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/constraint_multi_trip_target.py",
+            "docs/figures/playable-forward-solve/constraint-globalisation",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/multi-trip-target",
+            "docs/evidence/archive/playable-forward-solve-landed.html",
+            "docs/plans/playable-forward-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19h-pfs-multitrip-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T12:44:40Z",
+        "completed_at": "2026-09-15T13:19:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2071,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2071,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "e92a90a2209c6b3ad29b6778dabf2dd12bdd81fe",
+        "commits": [
+          "bb7ec4ac96f563ebd442049f48fea68177934f95",
+          "2983e5f1097f7226604d9ac03fafff2cf8a15014",
+          "f024b47646c4937a0f4066305de8ebf424082c06",
+          "7a97aecf30aa1b0088ecada86ea8c38cdc647ab1",
+          "e075595bdd2861d2dcf78f405703579fa2202dc6"
+        ],
+        "changed_lines": {
+          "added": 2816,
+          "removed": 0,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1271442 (measurement, 4 min) and 1271448 (re-adjudication): benchmarks/constraint_multi_trip_target.py on 27079 row 96 at a 1000 A cap toward the direct plus 3000 A centroid",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/playable-forward-solve/constraint-globalisation/multi-trip-target.json",
+          "log_digest": "sha256:05229d5414390ac88c7e93569a221aeb0b6b018ec69d496251ac1c2c76039ea3"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T124349146249-pfs-constraint-multi-trip-target/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a519-1bcf-77a3-8a81-65593905cfb9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13394944,
+            "cached_input_tokens_cumulative": 13394944,
+            "input_tokens": 13503341,
+            "input_tokens_cumulative": 13503341,
+            "output_tokens": 32880,
+            "output_tokens_cumulative": 32880,
+            "reasoning_output_tokens": 11290,
+            "reasoning_output_tokens_cumulative": 11290
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T13:19:11Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 39.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T13:19:11Z"
+            }
+          ],
+          "notional_cost_usd": 95.2094,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": {
+          "attempt": 4,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260908T132913057794-pfs-constraint-multi-trip-target",
+          "root_run_id": "r-20260908T132913057794-pfs-constraint-multi-trip-target"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 13394944,
+          "cumulative_input_tokens": 26898285,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 44170
+        },
+        "follow_on_paths": [
+          "nova/equilibrium"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 5,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-constraint-multi-trip-target",
+          "session_id": "01a0a519-1bcf-77a3-8a81-65593905cfb9",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T13:19:11Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 56.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -165487,6 +165700,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2562
+    "_version": 2563
   }
 }

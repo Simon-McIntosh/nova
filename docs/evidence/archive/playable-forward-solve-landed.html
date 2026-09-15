@@ -1612,6 +1612,25 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
 </table>
 <p><strong>Gate.</strong> The upper-point drift contracts from the banked 123.660 mm to 18.411 mm, all three commands remain below 20 kA, and elongation produces an achieved shape rather than <code>NoQualifiedAxisError</code> or a zero-fraction no-op. The three receipts and aggregate are under <code>docs/figures/playable-forward-solve/shape-inverse/</code>; the measurement log is <code>~/.config/reckon/crew/reports/nova/s19-handoff/shape-inverse/all-debug-three-command.log</code>. No H200 arm was run.</p>
 </section>
+<section id="an-arrived-final-trip-is-convergence">
+<h2>An iterate inside tolerance on its final permitted trip is convergence (2026-09-15)</h2>
+<p>Node <code>pfs-reduced-newton-termination-gate</code>; implementation commit <code>b74b9636</code>, real-receipt gate commit <code>7438b728</code>. The banked implementation was applied and reviewed on both execution routes: the host <code>_drive_trips</code> loop and the compiled slice solver inspect the terminal carry after the active-set budget. Only an exhaustion with a finite fixed-point residual inside tolerance is promoted to <code>converged</code>; a terminal iterate outside tolerance remains <code>active_set_iteration_budget_exhausted</code> with the residuals it stopped at.</p>
+<p><strong>Reproduction before repair.</strong> One fresh <code>all_debug</code> CPU process with <code>JAX_PLATFORMS=cpu</code> drove the measured MAST shot 27079 row 96 command, not an injected residual shadow. Job <code>1271352</code> reached the target after all eight permitted capped trips at centroid error <code>-1.734e-14 m</code>, with five nonzero applications of the 1000 A cap, but the receipt reported <code>active_set_iteration_budget_exhausted</code>. The failing assertion quotes that complete symptom in <code>reproduction-before.log</code>.</p>
+<p><strong>Post-repair gate.</strong> Job <code>1271355</code> ran both termination contracts in one fresh CPU process: 2 passed in 160.20 seconds. The same row-96 command now reports <code>converged</code> on trip eight. A one-trip command that genuinely cannot close remains exhausted, and its receipt carries a finite <code>terminal_residual</code> and a finite physical centroid residual larger than the row tolerance. No tolerance changed.</p>
+<table>
+<caption>Fresh-process adjacent-suite delta</caption>
+<thead><tr><th scope="col">Gate</th><th scope="col">Base <code>f4113338</code></th><th scope="col">After <code>7438b728</code></th><th scope="col">Added failures</th></tr></thead>
+<tbody>
+<tr><th scope="row"><code>test_reduced_newton.py -m 'not slow'</code></th><td>11 passed, 10 deselected, 0 failed, 2292.58 s</td><td>11 passed, 10 deselected, 0 failed, 2264.31 s</td><td>0</td></tr>
+<tr><th scope="row">Constraint third 1</th><td>7 passed, 0 failed, 1064.15 s</td><td>7 passed, 0 failed, 1055.30 s</td><td>0</td></tr>
+<tr><th scope="row">Constraint third 2</th><td>4 passed; 1 fatal cache-read abort; 2 unrun</td><td>4 passed; 1 fatal cache-read abort; 2 unrun</td><td>0</td></tr>
+<tr><th scope="row">Constraint third 3</th><td>6 passed, 0 failed, 672.32 s</td><td>6 passed, 0 failed, 660.55 s</td><td>0</td></tr>
+<tr><th scope="row">Combined observed result</th><td>28 passed; 1 abort; 2 unrun</td><td>28 passed; 1 abort; 2 unrun</td><td>0</td></tr>
+</tbody>
+</table>
+<p>The sole failure identifier on both revisions is <code>tests/test_reduced_newton_constraints.py::test_a_traced_target_decides_what_a_captured_one_decides</code>: <code>Fatal Python error: Aborted</code> while JAX read its persistent compilation cache. The baseline and after stack traces point to <code>jax/_src/compilation_cache.py:get_executable_and_time</code> and are identical in mechanism. This is the cross-module CPU cache-read abort owned by <code>cca-cpu-backend-abort-closing</code>, not a regression of the terminal-order change; it was not rerun here. SLURM jobs <code>1271370</code>, <code>1271371</code>, and <code>1271377</code> later show <code>TIMEOUT</code> because their 59-minute wrappers remained alive after pytest had written these complete logs; the logs, not the absent wrapper sentinels, are the test receipts.</p>
+<p>Logs: <code>~/.config/reckon/crew/reports/nova/s19-handoff/termination-order/reproduction-before.log</code>, <code>gate-after.log</code>, <code>test-reduced-baseline-f411.log</code>, <code>test-reduced-after.log</code>, and the paired <code>constraints-{baseline,after}-third{1,2,3}.log</code> files in the same directory.</p>
+</section>
 </main>
 </body>
 </html>

@@ -1368,6 +1368,22 @@ def _drive_trips(
             )
             break
 
+    # A budget that runs out while the terminal iterate already sits inside
+    # tolerance is convergence, not exhaustion: the loop kept spending trips
+    # only because the shadow did not settle, and reading that as a solver
+    # failure would turn an arrived iterate into a failure whatever else got
+    # recorded.  The convergence test therefore runs once more after the
+    # budget, and the mask equality that gates convergence inside the loop is
+    # not required here, because the stop happened only from running out of
+    # room.
+    if (
+        reason == FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED
+        and np.isfinite(terminal_residual)
+        and terminal_residual <= tolerance
+    ):
+        converged = True
+        reason = FixedPointTerminationReason.CONVERGED
+
     return {
         "state": state,
         "reduced": reduced,
@@ -1607,7 +1623,7 @@ def _compiled_slice_solver(
 
             return jax.lax.cond(active, run_trip, lambda value: value, carry)
 
-        return jax.lax.fori_loop(
+        carry = jax.lax.fori_loop(
             0,
             active_set_steps,
             outer_body,
@@ -1629,6 +1645,61 @@ def _compiled_slice_solver(
                 trip_rejected,
                 trip_maps,
             ),
+        )
+        (
+            state,
+            reduced,
+            shadow,
+            active,
+            converged,
+            reason,
+            terminal_residual,
+            iterations,
+            converged_trip,
+            leakage,
+            residuals,
+            differences,
+            trip_steps,
+            trip_builds,
+            trip_rejected,
+            trip_maps,
+        ) = carry
+        # The host route's terminal promotion, applied to the final carry: an
+        # iterate the budget outran while it sat inside tolerance is converged
+        # whatever the shadow did on its last trip.
+        promoted = (
+            jnp.isfinite(terminal_residual)
+            & (terminal_residual <= tolerance)
+            & (
+                reason
+                == int(
+                    FixedPointTerminationReason.ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED
+                )
+            )
+        )
+        converged = converged | promoted
+        reason = jnp.where(
+            promoted,
+            jnp.asarray(int(FixedPointTerminationReason.CONVERGED), dtype=reason.dtype),
+            reason,
+        )
+        return (
+            state,
+            reduced,
+            shadow,
+            active,
+            converged,
+            reason,
+            terminal_residual,
+            iterations,
+            converged_trip,
+            leakage,
+            residuals,
+            differences,
+            trip_steps,
+            trip_builds,
+            trip_rejected,
+            trip_maps,
         )
 
     return jax.jit(solve)

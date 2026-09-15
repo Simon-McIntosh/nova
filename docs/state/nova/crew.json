@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T12:59:29",
+  "updated": "2026-09-15T13:13:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -163893,6 +163893,193 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T060249909962-pfs-reduced-newton-converged-before-budget",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-reduced-newton-converged-before-budget",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3621,
+                "cached_input_tokens": 565319,
+                "input_tokens": 568972,
+                "output_tokens": 659,
+                "reasoning_output_tokens": 281,
+                "total_tokens": 569631,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "Two new tests in tests/test_reduced_newton_termination.py pass in one fresh all_debug CPU process (JAX_PLATFORMS=cpu, root venv python directly): a command that converges exactly on the last permitted trip returns a receipt whose termination reads converged, and a command that cannot converge returns active_set_iteration_budget_exhausted carrying the terminal constraint error it stopped at; tests/test_reduced_newton.py with -m 'not slow' and tests/test_reduced_newton_constraints.py split in thirds, each a fresh process, show zero added failures against the base ids",
+          "estimated_hours": null,
+          "goal": "The constrained reduced Newton loop reports converged for an iterate inside tolerance on its last permitted trip instead of budget exhaustion",
+          "id": "pfs-reduced-newton-converged-before-budget",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-15T06:02:51Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T060249909962-pfs-reduced-newton-converged-before-budget/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "tests/test_reduced_newton_termination.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/termination-order",
+            "docs/evidence/archive/playable-forward-solve-landed.html",
+            "docs/plans/playable-forward-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-pfs-budget-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-15T06:03:13Z",
+        "completed_at": "2026-09-15T11:08:18.505Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 18292,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 18305,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "0f872fd69bc1a3766fbb1610ee3412fca647887e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T060249909962-pfs-reduced-newton-converged-before-budget/manifest.md",
+        "scope_changed": false,
+        "session_id": "159f2d43-bc39-4d29-9efe-bf36cfb98320",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 0,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 0,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T11:08:18.505Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 0,
+          "detail": "generation and wall clock reported separately by the backend; no window resolved, so utilisation is unknown",
+          "elapsed_seconds": 0.103,
+          "generated_tokens": 0,
+          "generation_seconds": -4.078,
+          "machine_seconds": 4.181,
+          "wall_tokens_per_second": 0.0
+        },
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "the fix commit 914fd622 and the unfinished gate test stay banked under reports/termination-order/banked (patch, test module, probes) for a fresh node; nothing merges ungated",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-reduced-newton-converged-before-budget",
+          "session_id": "159f2d43-bc39-4d29-9efe-bf36cfb98320",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T11:08:18.505Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 209.0,
+        "orientation_input_tokens": 8945164.0,
+        "store_write": {
+          "status": "failed",
+          "error": "IntegrityError: UNIQUE constraint failed: runs.run_id"
+        }
       }
     ],
     "holds": [
@@ -164205,6 +164392,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2551
+    "_version": 2552
   }
 }

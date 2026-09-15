@@ -1,34 +1,60 @@
 {
   "accepted": true,
   "amplitude_bound": 0.01,
-  "amplitude_error": 0.009015804038969177,
-  "booked_current_at_unit_amplitude_a": 16168996.80512663,
+  "amplitude_error": 0.009015804038859931,
+  "booked_current_at_unit_amplitude_a": 16168996.80512838,
   "case": "weak-rotation-reactor-static",
-  "elapsed_seconds": 93.58633786812425,
+  "elapsed_seconds": 62.814892368391156,
   "historical_exact_clip": {
-    "amplitude_within_one_percent": false,
-    "case": "weak-rotation-reactor-static",
-    "converged": false,
-    "figure": {
-      "filesystem_path": "docs/figures/cut-cell-current-attribution/gate-c-resolve/weak-rotation-reactor-static-production-route-reduced.png",
-      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/gate-c-resolve/weak-rotation-reactor-static-production-route-reduced.png",
-      "render_source": "fresh_production_solve",
-      "sha256": "749fe8d43be031dcb67a8ba3cd2330b402508cd75a1861c521e402b32d1f91b0"
+    "committed_whole_cell": {
+      "amplitude_within_one_percent": false,
+      "case": "weak-rotation-reactor-static",
+      "converged": false,
+      "figure": {
+        "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-reduced.png",
+        "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-reduced.png",
+        "render_source": "fresh_production_solve",
+        "sha256": "1624f12aa9fee4ade39a5d0dc0f2aeff34af676a69eb2014ee2f8e920b5fd3f1"
+      },
+      "magnetic_axis_position_error_m": 0.0018460312639213298,
+      "qualification": "unqualified",
+      "qualification_bound": 1e-12,
+      "qualification_reason": "fixed_point_residual_outside_qualification_bound",
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "seed_amplitude": 0.9297775241954396,
+      "terminal_amplitude": 1.0497961485612264,
+      "terminal_fixed_point_residual": 0.007447526861632619,
+      "terminal_fixed_point_residual_status": "finite",
+      "termination": "active_set_settled",
+      "trip_count": 4,
+      "x_point_position_error_m": null
     },
-    "magnetic_axis_position_error_m": 0.17308373856179873,
-    "part": "docs/figures/cut-cell-current-attribution/gate-c-resolve/parts/weak-rotation-reactor-static-production-route-reduced.json",
-    "qualification": "unqualified",
-    "qualification_bound": 1e-12,
-    "qualification_reason": "fixed_point_residual_outside_qualification_bound",
-    "realised_cells": 135,
-    "requested_cells": -110,
-    "seed_amplitude": 2.054064094661525,
-    "terminal_amplitude": 2.0343183123606647,
-    "terminal_fixed_point_residual": 0.07521539121951618,
-    "terminal_fixed_point_residual_status": "finite",
-    "termination": "active_set_cycle_detected",
-    "trip_count": 2,
-    "x_point_position_error_m": null
+    "gate_c_exact_clip": {
+      "amplitude_within_one_percent": false,
+      "case": "weak-rotation-reactor-static",
+      "converged": false,
+      "figure": {
+        "filesystem_path": "docs/figures/cut-cell-current-attribution/gate-c-resolve/weak-rotation-reactor-static-production-route-reduced.png",
+        "project_absolute_src": "/nova/figures/cut-cell-current-attribution/gate-c-resolve/weak-rotation-reactor-static-production-route-reduced.png",
+        "render_source": "fresh_production_solve",
+        "sha256": "749fe8d43be031dcb67a8ba3cd2330b402508cd75a1861c521e402b32d1f91b0"
+      },
+      "magnetic_axis_position_error_m": 0.17308373856179873,
+      "part": "docs/figures/cut-cell-current-attribution/gate-c-resolve/parts/weak-rotation-reactor-static-production-route-reduced.json",
+      "qualification": "unqualified",
+      "qualification_bound": 1e-12,
+      "qualification_reason": "fixed_point_residual_outside_qualification_bound",
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "seed_amplitude": 2.054064094661525,
+      "terminal_amplitude": 2.0343183123606647,
+      "terminal_fixed_point_residual": 0.07521539121951618,
+      "terminal_fixed_point_residual_status": "finite",
+      "termination": "active_set_cycle_detected",
+      "trip_count": 2,
+      "x_point_position_error_m": null
+    }
   },
   "realised_cells": 135,
   "requested_cells": -110,
@@ -36,7 +62,7 @@
     "anchor_available": true,
     "anchor_m": [
       7.801395788445413,
-      -5.0310731825156e-11
+      -5.030887232068844e-11
     ],
     "branch_index": 0,
     "construction": "current_centroid_disc",
@@ -61,16 +87,59 @@
     ],
     "declared_boundary_m": [
       7.801395788445413,
-      -5.0310731825156e-11
+      -5.030887232068844e-11
     ],
     "factory": "profile.cold_seed_portfolio",
     "plasma_current_a": 16314773.311828371,
     "requested_class": "limited",
     "seed_radius_m": 1.564079053601776,
-    "state_sha256_binary64": "76b0f7f5682558775054fb2a622612cb3a12c84c9a230d2fa90ed536c1750ecb",
+    "state_sha256_binary64": "ab870ee275e46db47781d158c37006d9d3dc1b3caa208fa663ea7b2972e950f4",
     "stored_flux_samples_used": false,
     "supported_cell_count": 36
   },
-  "seed_amplitude": 1.0090158040389692,
+  "seed_amplitude": 1.00901580403886,
+  "solve": {
+    "analytic_boundary_flux_wb": 1.1345091532888318e-15,
+    "axis_error_in_pitch": 0.03246702484908948,
+    "axis_error_m": 0.015131692325351172,
+    "boundary_flux_error_wb": 0.0018776984508596557,
+    "boundary_flux_wb": -0.0018776984508585212,
+    "certificate_figure": {
+      "filesystem_path": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-production-route-reduced.png",
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-production-route-reduced.png",
+      "render_source": "fresh_production_solve",
+      "sha256": "cd3f2b8315dec566a70d77c581aab824c736d00fccff7a950ce66d2d02de928f"
+    },
+    "comparison_figure": {
+      "difference_levels": [
+        -0.00011328646058593758,
+        -7.595426668959091e-05,
+        -5.0924449387110785e-05,
+        -3.4142908073600085e-05,
+        -2.2891522358165343e-05,
+        -1.534789581323235e-05,
+        -1.0290180889162764e-05,
+        -6.899175236803355e-06,
+        6.899175236803355e-06,
+        1.0290180889162764e-05,
+        1.534789581323235e-05,
+        2.2891522358165343e-05,
+        3.4142908073600085e-05,
+        5.0924449387110785e-05,
+        7.595426668959091e-05,
+        0.00011328646058593758
+      ],
+      "difference_normalisation": "analytic flux span",
+      "filesystem_path": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-110-comparison.png",
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-110-comparison.png",
+      "sha256": "9d0371d87a79e559f7ea9b6412d720e470a54893c7cb261ec2045cfb6bfabcc5"
+    },
+    "converged": true,
+    "part": "docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/weak-rotation-reactor-static-production-route-reduced.json",
+    "seed_amplitude": 1.00901580403886,
+    "terminal_amplitude": 0.9999339686741854,
+    "terminal_residual": 3.419964981783324e-13,
+    "termination": "converged"
+  },
   "target_current_a": 16314773.311828371
 }

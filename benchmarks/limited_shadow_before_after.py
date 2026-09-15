@@ -247,8 +247,14 @@ def _render(figure_path: Path) -> dict[str, Any]:
         [[row["radius_m"], row["height_m"]] for row in weak_carriers],
         dtype=np.float64,
     )
-    figure, axes = plt.subplots(
-        len(ROWS), 3, figsize=(10.8, 11.0), constrained_layout=True
+    figure, axes = plt.subplots(len(ROWS), 3, figsize=(10.8, 12.2))
+    figure.subplots_adjust(
+        left=0.02,
+        right=0.99,
+        bottom=0.06,
+        top=0.88,
+        wspace=0.10,
+        hspace=0.18,
     )
     receipt_rows: list[dict[str, Any]] = []
     for row_index, (case, label) in enumerate(ROWS):
@@ -400,7 +406,7 @@ def _render(figure_path: Path) -> dict[str, Any]:
             ),
         ),
         loc="upper center",
-        bbox_to_anchor=(0.5, 0.958),
+        bbox_to_anchor=(0.5, 0.935),
         ncol=3,
         frameon=False,
         fontsize=8,

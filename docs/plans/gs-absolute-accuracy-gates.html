@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="45">
+<meta name="plan-version" content="46">
 <meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html,benchmarks/solovev_certificate.py,docs/figures/gs-absolute-accuracy/solovev-certificate.json,docs/figures/gs-absolute-accuracy/solovev/,benchmarks/efit_reproduction_gate.py,docs/figures/gs-absolute-accuracy/efit-reproduction.json,docs/figures/gs-absolute-accuracy/efit/,docs/figures/gs-absolute-accuracy/oracle-fixture-assembly.json,tests/test_polygon_analytic_batched_moments.py">
 <meta name="plan-commits" content="3dc4bb57,bf6dcdf9,9b0be0c8,6480a228,69a96bdf,873cfba6,6cecf64e,1f6f3e2c,ebb56768,ae9c0ed6,eca38a8e,5bb6850f,a3ae6bd4,f76e9142,adfff6dc,466b9d02,faec6877,d0a01760,7573d3e7,77a2cd32,6d03967f,dcc671db,b93f9b10,f7d9557b">
 <meta name="plan-impl" content="0.95">
@@ -184,6 +184,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260909T160346985581-gaa-certificate-artifact" data-who="s19i-gaa-artifact" data-when="2026-09-09T17:00:39Z">
     <div class="r-comment-body"><p>Certificate artifact landed: 16 line-contour poloidal panels (solved beside analytic on shared Wb levels, nulls, wall, residual and error captions) plus contour error maps for psi, gradient and Hessian, rendered from part receipts that now persist terminal and analytic flux so no future panel needs a solve; the one-job two-card regeneration with the warm cache reproduced all 16 residuals exactly in 23.5 minutes (107 to 141 s solve per row against 582 to 788 s cold); census pinned at 3 qualified, 13 unqualified with per-row converged flags and the declared platform and threads; the NaN-era receipt relabelled as superseded; the weak-rotation panel shows the error confined to three outboard cut cells</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s19h-s3-stage-anchor" data-who="reckon-ship s19-handoff" data-when="2026-09-15T10:10:00Z">
+    <div class="r-comment-body">Stage anchor: millisecond-converged-solve depends on this section alone (gs-absolute-accuracy-gates#s3), because only its certified millisecond measurement reports cost for certificate-passing solves; the certificate artifact and its pin are what that measurement consumes. This section's own remainder is the pointer followup above: the census re-runs and the pin update after the exact cut-cell participation and the joint qualification land on the plans that own them.</div>
 </div>
 </section>
 </main>

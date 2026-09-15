@@ -172,6 +172,30 @@
 <figure><img src="/nova/figures/diiid-vertical-force-balance/two-field-gate/frames/diiid-d3d_shot_001554e054-frame-144.png" alt="Frame 144 of the DIII-D gate: solved boundary against the EFIT label with the retained axis and X-point"><figcaption>Frame 144: the solved boundary against the EFIT label, axis and X-point retained while the boundary centroid drops.</figcaption></figure>
 <p>Receipt: <code>docs/figures/diiid-vertical-force-balance/two-field-gate/single_shot_gate_receipt.json</code> (sha256 521a3ffd). Report: <code>~/.config/reckon/crew/reports/nova/s19-labeller/frame144-two-field-gate.md</code>.</p>
 </section>
+<section id="target-current-digest-probe"><h2>§3 — The gate rows still compile one program per prescribed current (2026-09-15)</h2>
+<p>Node <code>dvf-target-current-digest-probe-at-main</code>. Driver <code>benchmarks/diiid_target_current_digest_probe.py</code>; receipt
+recorded at the worker worktree HEAD <code>0f872fd6</code>. The banked two-row gate solve — shot 21978
+slice 35 at 801493.25 A and shot 21983 slice 35 at 813718.375 A, one 33×33 lattice (1089 nodes), 37-node wall — and each row
+carrying the other row's target current was lowered to StableHLO under <code>jax.jit</code> on the all_debug CPU lane
+(<code>JAX_PLATFORMS=cpu</code>, x64 on, one job) and hashed both raw and after dense-constant normalisation.</p>
+<table>
+  <caption>Lowered-variant digests (raw / constant-normalised), all float64, input shape [1126]</caption>
+  <thead><tr><th scope="col">Variant</th><th scope="col">Current (A)</th><th scope="col">Raw sha256</th><th scope="col">Normalised sha256</th></tr></thead>
+  <tbody>
+    <tr><td>row_one</td><td>801493.25</td><td>a534ffee…</td><td>6d07cd8e…</td></tr>
+    <tr><td>row_two</td><td>813718.375</td><td>e43dc6c3…</td><td>6d07cd8e…</td></tr>
+    <tr><td>row_one + row_two current</td><td>813718.375</td><td>92d5596d…</td><td>6d07cd8e…</td></tr>
+    <tr><td>row_two + row_one current</td><td>801493.25</td><td>5b2c63cb…</td><td>6d07cd8e…</td></tr>
+  </tbody>
+</table>
+<p><strong>Verdict:</strong> <code>target-current-baked</code>. All four raw digests distinct; all four identical after constant
+normalisation; the target current alone changes each row's program (<code>target_current_alone_changes_row_one_program</code> and
+<code>..._row_two_program</code> both true). At main the gate's newton_krylov accelerated-history route still bakes the prescribed
+current: <code>_accelerated_history_program</code> in <code>nova/equilibrium/forward.py</code> puts <code>target_current</code> in the
+program cache key and closes it into the traced flux map, threading only the exterior flux as traced data via
+<code>map_arguments</code>. The eleven-row receipt is therefore still one distinct compile per row at this HEAD; the
+current-invariant compiled-slice programme (<code>millisecond-converged-solve</code> §2) does not serve this route. Receipt:
+<code>docs/figures/diiid-vertical-force-balance/two-field-gate/target-current-digest-probe.json</code>; MLIR and run log under
+<code>~/.config/reckon/crew/reports/nova/s19-handoff/digest-probe/</code>.</p>
+</section>
 </main>
-</body>
-</html>

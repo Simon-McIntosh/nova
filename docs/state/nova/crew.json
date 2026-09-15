@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T18:04:18",
+  "updated": "2026-09-15T20:40:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -167507,6 +167507,239 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T143058279890-msc-program-size-budget",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-program-size-budget",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2229,
+                "cached_input_tokens": 549956,
+                "input_tokens": 552217,
+                "output_tokens": 2824,
+                "reasoning_output_tokens": 764,
+                "total_tokens": 555041,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "Start from the census (docs/figures/millisecond-converged-solve/program-census/report.md, merged 1fd7c678): at 300 and 1000 cells the optimised solve HLO is 654,832 and 662,331 instructions against 9,908 and 10,024 for one map application (66 times), it carries 120 traced copies of forward_operator.py:2437 ForwardFluxOperator.normalised_current_moments and 8 of forward_operator.py:1879 _fixed_design_read against one each in the map, and the compiled Newton and trip loops (reduced_newton.py:1496 and :1610 _compiled_slice_solver, fixed_point.py:3837 _active_set_newton_krylov) are already fori_loop while the Python loops at reduced_newton.py:1127 and :1301 are host-only and contribute zero HLO copies, so rewriting loops is NOT the fix; the copies come from the bodies that re-trace the operator's moment path and read inside the solve (the Newton-Krylov step and its Jacobian-vector products, the shadow and promotion masks that forward.py:1764 _accelerated_history_program closes over, the residual and merit evaluations), and this node hoists or reuses those bodies so the optimised solve HLO carries one traced copy of each (counted by the census driver's sentinels, benchmarks/program_scope_census.py, rerun at 300 and 1000 cells on all_debug: JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on the node, one foreground srun under 59 minutes, receipts persisted per rung); an executable-size gate benchmarks/solve_program_size_gate.py beside the memory gate reports the solve executable bytes and optimised instruction count at 300 and 1000 cells before and after with the map figures as the floor; nova/equilibrium/forward_operator.py is owned by a live node and is NOT written here, every change lives in reduced_newton.py, fixed_point.py and forward.py; terminal states bit-identical on the committed 300-cell certificate rows and the twelve MAST bank members through the compiled slice route (one H200 job, one card, 8 cores, 128G, TMPDIR=/tmp in submit environment and payload, PYTHONPATH the worktree, root venv python, persistent compilation cache, rows persisted as each lands) with the per-trip compiled boundary wall tabled before and after beside the banked 46.1 ms; the guidance rule (scan, never unroll; mesh and matrix arrays as arguments; flux functions as traced arrays; one traced copy of the operator per program) written into nova/equilibrium/AGENTS.md citing the census figures; every test module importing the changed files passes one per fresh CPU process on all_debug against the base ids with zero added failures; manifest in plain key: value lines, any waiting declaration with wait_probe as a JSON list such as [\"squeue\",\"-h\",\"-j\",\"1271409\"] and wait_terminal exit:0",
+          "estimated_hours": null,
+          "goal": "The compiled solve program carries the current-moment path and the topology read once each instead of 120 and 8 traced copies, with an executable-size gate beside the memory gate and the scan-never-unroll rule written into the equilibrium guidance",
+          "id": "msc-program-size-budget",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T14:31:00Z",
+            "read_at": "2026-09-15T14:31:01Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 44.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T143058279890-msc-program-size-budget/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "nova/equilibrium/reduced_newton.py",
+            "nova/equilibrium/forward.py",
+            "nova/equilibrium/AGENTS.md",
+            "benchmarks/solve_program_size_gate.py",
+            "benchmarks/program_scope_census.py",
+            "tests/test_solve_program_size.py",
+            "docs/figures/millisecond-converged-solve/program-size",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/program-size",
+            "docs/evidence/archive/millisecond-converged-solve-landed.html",
+            "docs/plans/millisecond-converged-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-msc-progsize-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T14:31:38Z",
+        "completed_at": "2026-09-15T18:01:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 12616,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "7586ebb5ea225258aca6140d2ac1954d88869333",
+        "commits": [
+          "f01fece34e55e1c5032a3b0fb9b0398517ff0280",
+          "2a23f9c3201b938b24684037cb8cb1ddfddc86ac",
+          "695dadf5b740027cc359ccefb729db1772e6e186",
+          "1a06d4639180a0ff95c2c64ec0309279e8f15e96",
+          "1d62930b592924859ff209b6741dac8f0b50cea0",
+          "de7383f00328e5f39ebba1d2198b7d4d9181b996",
+          "ddd2d8bdd8d13e7e08811203baa4f66bc7f14a65",
+          "28bc0ca4dd6c388be0a1e12bd4476ea2ebb626a2",
+          "d5c6b851ed708feb0d87ebd9274f54d2a49c53a2",
+          "49a4e4e5079c4bdb4373a1cf930bdaeeceea816f",
+          "9e2f0b4bc93bc04e6f74a0a377f0afacad951977",
+          "d40737ec7b164835e7765710d18a61d9739cb932",
+          "8848bf6d2a82b0096bc576622d4300510d93cdc7",
+          "e78818232771dcf97d34050f1ac383a185401d83",
+          "300626b83decd1748ac9097de97a4803959ead8e",
+          "4e82bafb3abbd972096f84f306dfc8b28577e2fe",
+          "95ad77e342c8f01711ba46bb8322ba3fef741dab",
+          "41b25d30e6c1393a51d075c26a8a1cbb42dff93f",
+          "4dfd13ed31f71362ed723f8f560d5f24c5763ebe"
+        ],
+        "changed_lines": {
+          "added": 21075,
+          "removed": 34,
+          "files": 15
+        },
+        "tests_added": 13,
+        "gate": "failed",
+        "gate_check": {
+          "command": "H200 job 1271640 semantic gate on the frozen-partition interim: certificate identity 0 of 4 (single-null 500 differs by 2.2e-3 with a non-finite residual), MAST compiled-slice identity 12 of 12 at 0 ulp; all_debug job 1271595 size gate 654,832 to 203,078 instructions at 300 cells",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/millisecond-converged-solve/program-size/semantic/receipt.json",
+          "log_digest": "sha256:1ee0fed68f12a5e4bc4089a1ca6afd9e882879cc254230b47ad634b8ccbc286f"
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T143058279890-msc-program-size-budget/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a57b-0b26-7100-b850-4a22eebdfe54",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 79110528,
+            "cached_input_tokens_cumulative": 79110528,
+            "input_tokens": 79558961,
+            "input_tokens_cumulative": 79558961,
+            "output_tokens": 110979,
+            "output_tokens_cumulative": 110979,
+            "reasoning_output_tokens": 20986,
+            "reasoning_output_tokens_cumulative": 20986
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T18:01:54Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 54.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T18:01:54Z"
+            }
+          ],
+          "notional_cost_usd": 608.6761,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 79110528,
+          "cumulative_input_tokens": 158669489,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 131965
+        },
+        "follow_on_paths": [
+          "jax.export",
+          "Exported.call"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget",
+          "session_id": "01a0a57b-0b26-7100-b850-4a22eebdfe54",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T18:01:54Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "01a0a57b-0b26-7100-b850-4a22eebdfe54",
+          "source": "stream",
+          "reason": "the worker completed its node: the interim was measured, refused on the certificate identity, removed, and the instrument, tests, guidance and followup are committed; nothing remains for a resumed turn to do"
+        },
+        "watch_override": null,
+        "tool_steps": 95.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -167819,6 +168052,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2580
+    "_version": 2581
   }
 }

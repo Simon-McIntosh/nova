@@ -1557,9 +1557,9 @@ def _fmt_bytes(value: int) -> str:
 
 def _location(source: dict[str, Any] | None) -> str:
     if not source or not source.get("file"):
-        return (
-            "nova/equilibrium/forward.py:1799 "
-            "`ForwardProfile._accelerated_history_program`"
+        source = _source_line(
+            ForwardProfile._accelerated_history_program,
+            "mapped = self.operator.traced_flux_map",
         )
     path = Path(source["file"])
     try:
@@ -1911,11 +1911,18 @@ def build_report(
         f"current-moment plus {topology_copies:,} topology-read traced copies by "
         "hoisting/reusing those bodies. |"
     )
-    cached_measure = (
-        "profile not run"
-        if host_profile is None
-        else f"{host_profile['cached_call_seconds'] * 1e3:.3f} ms cached public call"
-    )
+    if host_profile is None:
+        cached_measure = "profile not run"
+    else:
+        by_function = {
+            item["function"]: item for item in host_profile["selected_functions"]
+        }
+        coordinate_ms = by_function["reduced_coordinates"]["cumulative_seconds"] * 1e3
+        external_ms = by_function["external"]["cumulative_seconds"] * 1e3
+        cached_measure = (
+            f"{coordinate_ms:.3f} ms coordinate and {external_ms:.3f} ms exterior "
+            "derivations"
+        )
     ap(
         "| Cache-entry overhead | "
         f"{_location(public_entry)} derives per-call inputs; "

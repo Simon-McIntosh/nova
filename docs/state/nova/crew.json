@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T15:39:00",
+  "updated": "2026-09-15T15:50:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -165814,6 +165814,199 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T101656128757-cca-cpu-backend-abort-closing",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-cpu-backend-abort-closing",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1749,
+                "cached_input_tokens": 136616,
+                "input_tokens": 138397,
+                "output_tokens": 483,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 138880,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "Report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/cpu-abort/closing.md records, from ONE all_debug job of at most 59 minutes per case with each case exit status appended to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/cpu-abort/closing_status.txt as it lands (JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on the node, foreground srun, PYTHONFAULTHANDLER=1): case A the pair tests/test_biotpolysection.py then tests/test_equilibrium_constraint_protocol.py in one fresh pytest process, which is the fifth module whose addition turned the passing four-module bracket (job 1271248, 17 passed) into the exit-134 prefix of job 1271081 (prefix_5_plus_protocol.log, last frame jax/_src/compilation_cache.py line 352 get_executable_and_time under compiler.py _cache_read from fixed_point.py line 3837); case B the same five-module prefix with the persistent compilation cache genuinely off through jax.config.update('jax_enable_compilation_cache', False) set before any jnp array in a conftest-free sitecustomize or a -p plugin, because the unset JAX_COMPILATION_CACHE_DIR of the bracket left nova's own default_forward_compilation_cache_root (nova/equilibrium/solve_request.py line 185) active and the bracket therefore never tested a cache-free process; case C the same prefix against a fresh empty cache directory named through that root; the report states for each case the exit status, the last Python frames, and the cache directory that was read, names the attribution (cache-read deserialisation, cache-write race between concurrent jobs sharing the root, or process-cumulative state independent of the cache) that the three exit statuses jointly support, and lists the source-level fix the attribution implies for a follow-on node; no source file is changed",
+          "estimated_hours": null,
+          "goal": "The cross-module CPU-backend abort attributed to the compilation-cache read path or refuted there, with the pairwise reproduction and a genuinely cache-free control recorded",
+          "id": "cca-cpu-backend-abort-closing",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-15T10:16:56Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": 20,
+            "binding_observed": false,
+            "detail": "",
+            "headroom": 2,
+            "mean_context": 57351,
+            "observed_at": "2026-09-15T10:16:36Z",
+            "state": "fresh",
+            "suggested_shelf_life_seconds": 120
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T101656128757-cca-cpu-backend-abort-closing/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/cpu-abort",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-cca-abort-close-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-15T10:17:15Z",
+        "completed_at": "2026-09-15T13:40:04.676Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 12151,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 12169,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "9ca9949abb3bcfaff87a6c053c0e4a298fd788be",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T101656128757-cca-cpu-backend-abort-closing/manifest.md",
+        "scope_changed": false,
+        "session_id": "04d4a1b9-7135-42e9-ba87-1a3cd4009468",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 700349,
+            "input_tokens_cumulative": 700349,
+            "output_tokens": 4860,
+            "output_tokens_cumulative": 4860,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T13:40:04.676Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 700349,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 200000",
+          "elapsed_seconds": 576.392,
+          "generated_tokens": 4860,
+          "generation_seconds": 574.763,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 62.0,
+          "machine_seconds": 1.629,
+          "peak_input_tokens": 124014,
+          "tokens_per_second": 8.46,
+          "wall_tokens_per_second": 8.43
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest process",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "measurement node; cases A and B landed as logs and closing_status.txt under reports/cpu-abort, no source change; case C and closing.md go to a fresh member",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-cpu-backend-abort-closing",
+          "session_id": "04d4a1b9-7135-42e9-ba87-1a3cd4009468",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T13:40:04.676Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 34.0,
+        "orientation_input_tokens": 1790233.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -166126,6 +166319,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2567
+    "_version": 2568
   }
 }

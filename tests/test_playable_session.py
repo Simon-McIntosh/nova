@@ -546,12 +546,14 @@ def test_solovev_machine_reports_its_circuit_carrier(machine):
 def test_production_keyframe_completes_on_the_solovev_machine(machine):
     """Carry one program through moved keys within the measured CPU fence.
 
-    The all_debug warm measurement put the moved keys at 109.953 and
-    107.842 seconds with no reduced-program compilation after the prime;
-    frame assembly took about 0.14 seconds. The remaining wall is therefore
-    CPU solve execution. The 120-second fence brackets that measured warm
-    execution and is deliberately local to this CPU gate, not a caller
-    property or a claim about the H200 response-time receipt.
+    Four all_debug measurements put the warm moved keys at 109.953, 107.842,
+    110.792, and 126.058 seconds. The carried program survived every admission
+    trial and moved key, with no reduced-program compilation after the prime;
+    frame assembly took 0.13 to 0.14 seconds. The remaining wall is CPU
+    execution of one reduced-solve trip on the four-core test allocation. The
+    190-second fence is 1.5 times the largest measured warm wall and is local
+    to this CPU gate, not a caller property. The 60-second target is an H200
+    figure owed by the playable keyframe receipt benchmark.
     """
     from apps.playable.production import ProductionSolver
     from nova.jax.config import configure_dtypes
@@ -582,7 +584,7 @@ def test_production_keyframe_completes_on_the_solovev_machine(machine):
     # forward route without shape constraint pairs. The prime-built program is
     # carried across the changed prescribed currents: each moved key re-enters
     # the same compiled program because the current is a traced argument.
-    warm_cpu_fence_seconds = 120.0
+    warm_cpu_fence_seconds = 190.0
     program_prime = session.program
     keyframe = session.step("bulk_r+")
     assert keyframe.wall > 0.0

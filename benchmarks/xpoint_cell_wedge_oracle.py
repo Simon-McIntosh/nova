@@ -349,7 +349,7 @@ def _measure_row(requested_cells: int, output: Path) -> dict[str, Any]:
     counts = np.asarray(wedges.vertex_count)[0]
     vertices = np.asarray(wedges.support_vertices)[0]
     exact_zero_padding = all(
-        np.array_equal(vertices[slot, count:], 0.0) for slot, count in enumerate(counts)
+        bool(np.all(vertices[slot, count:] == 0.0)) for slot, count in enumerate(counts)
     )
     saddle_inserted = all(
         np.array_equal(vertices[slot, 0], x_point) for slot in range(4)

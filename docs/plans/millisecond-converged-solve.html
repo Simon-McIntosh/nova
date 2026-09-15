@@ -18,17 +18,18 @@
 <meta name="plan-sprint" content="S19">
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-tags" content="h200,jax,throughput,timing,active-set,equilibrium">
-<meta name="plan-depends-on" content="solver-trip-orchestration,gs-absolute-accuracy-gates,batched-operator-boundary">
+<meta name="plan-depends-on" content="solver-trip-orchestration,gs-absolute-accuracy-gates#s3">
 <title>Millisecond converged solve | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="67">
+<meta name="plan-version" content="68">
 <meta name="plan-impl" content="0.78">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd,273ff747,7aef0963">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
+<meta name="plan-graph-handle" content="millisecond">
 </head>
 <body>
 <main class="plan-doc">
@@ -293,6 +294,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-s19h-flux-function-node-scope" data-who="reckon-ship s19-handoff" data-when="2026-09-15T08:59:00Z">
     <div class="r-comment-body">Scope for the flux-function argument node (f-msc-flux-functions-as-program-arguments), assembled from three landings today so the node is cut once with everything it must carry. (1) The recompile audit (7aef0963): the two gradient amplitudes, pressure and diamagnetic, are the varying inputs; two fixed-shape f64[1] traced arguments make one program per mesh, and the representation study the lead asked for (nodes on a fixed trapezoidal set against a fixed-order basis or B-spline in normalised flux, with the coefficient count setting the argument size) precedes the argument change. (2) The target-current digest probe on diiid-vertical-force-balance (6ce044bd): at main the target current is still a compiled-in constant (four distinct raw digests, one constant-normalised digest across the two gate rows), so target_current rides on the same traced-argument plumbing; the eleven-frame gate and the EFIT cache-hit half wait on it. (3) The Shafranov row refusal on constraint-augmented-newton-krylov (a95cb4d8): the ProfileAmplitude compensating unknown needs the derivative of the flux image with respect to the two amplitudes and a ForwardFluxOperator.profile_component_image; with the amplitudes traced that derivative is one JVP, so the node delivers profile_component_image as the amplitude tangent. Gate stays as the followup states (identical StableHLO digests for two profiles on one mesh and for two target currents, 0.0 s backend compile on the second, bit-identical committed rows) plus the digest probe rerun reading one-program-per-mesh. Files: source.py, forward.py, forward_operator.py, reduced_newton.py; dispatch after the limited-row shadow node releases forward_operator.py.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s19h-graph-endpoint-rewire" data-who="reckon-ship s19-handoff" data-when="2026-09-15T09:52:00Z">
+    <div class="r-comment-body">Lead approval 2026-09-15 11:50: the millisecond plan is the graph endpoint (plan-graph-handle millisecond) and its dependencies are re-wired to what each section needs. The certificate dependency is scoped to section 3 (gs-absolute-accuracy-gates#s3): only the certified measurement reports cost for certificate-passing solves; sections 1 and 2 never depended on it. The batched-operator-boundary dependency is removed: it was inverted at the seam, because that plan's one unfinished half, the EFIT gate rerun with the compilation cache hitting, waits on the traced target current, which is this plan's section 2 work; that half now lives here as part of the flux-function argument node (see the scope comment above) and the eleven-frame EFIT gate rerun is its measure. Section 2's four open followups therefore read ready and dispatch on codex in file order as the cut-cell shadow node releases forward_operator.py and the converged-before-budget node releases reduced_newton.py: mesh-sized arrays as program arguments, then flux functions and target current as traced arguments (with the profile-component image), then the program-size budget, with the cache-entry overhead node beside them. The topology read that is 95 percent of every 46 ms trip is the other lever and stays owned by null-identification-authority sections 4 and 5 behind the cut-cell wire.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

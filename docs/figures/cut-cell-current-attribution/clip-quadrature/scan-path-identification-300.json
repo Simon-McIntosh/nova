@@ -1,0 +1,112 @@
+{
+  "schema": "nova.compact-clip-scan-path-identification",
+  "source_revision": "be8987a1c564763eaf1e749c9d682f57db15a806",
+  "compiled_measurement": {
+    "job": "1270914",
+    "requested_cells": 300,
+    "realised_cells": 342,
+    "temporary_gib": 55.309830993413925,
+    "largest_array_gib": 0.6626687049865723,
+    "total_hlo_instructions": 1042334,
+    "hlo_while_operations": 2250
+  },
+  "scope_census": {
+    "compact_current": {
+      "scope": "compact_clipped_current_moments",
+      "text_occurrences": 92699,
+      "distinct_body_copies": 85,
+      "distinct_while_body_copies": 84
+    },
+    "current_scan_body": {
+      "scope": "compact_cut_current_scan_body",
+      "text_occurrences": 45118,
+      "distinct_body_copies": 83,
+      "distinct_while_body_copies": 83
+    },
+    "field_scan_body": {
+      "scope": "compact_cut_field_scan_body",
+      "text_occurrences": 0,
+      "distinct_body_copies": 0,
+      "distinct_while_body_copies": 0
+    }
+  },
+  "memory_ladder": [
+    {
+      "job": "1270518",
+      "change": "dense solve path",
+      "temporary_gib": 96.823,
+      "largest_array_gib": null
+    },
+    {
+      "job": "1270605",
+      "change": "compact current-moment quadrature",
+      "temporary_gib": 71.33315762132406,
+      "largest_array_gib": 5.35418701171875
+    },
+    {
+      "job": "1270914",
+      "change": "pre-gathered compact bank with explicit scan",
+      "temporary_gib": 55.309830993413925,
+      "largest_array_gib": 0.6626687049865723
+    }
+  ],
+  "moved_dense_producers": [
+    {
+      "consumer": "ForwardFluxOperator.support_current_moments",
+      "producer": "StencilMesh.sample_flux_field quadratic design on fixed-capacity clipped-support quadrature points",
+      "dense_shape": "f64[cells,196480,6]",
+      "replacement": "clipped_support_current_moments compact cut-cell bank"
+    },
+    {
+      "consumer": "ForwardFluxOperator._clipped_integral_measure",
+      "producer": "StencilMesh.sample_flux_field flux and gradient evaluations on fixed-capacity clipped-support quadrature points",
+      "dense_shape": "per-cell points and weights with 196480 quadrature nodes",
+      "replacement": "clipped_support_field_integrals compact cut-cell bank"
+    }
+  ],
+  "chain_capacity": {
+    "selected_samples_per_segment": 128,
+    "comparison_samples_per_segment": 64,
+    "weak_relative_change": 5.428e-06,
+    "single_null_relative_change": 0.0001798,
+    "target_relative_change": 1e-06,
+    "controlling_cell": 26,
+    "controlling_quantity": "vertical first moment",
+    "controlling_geometry": "analytic X-point cell, not a hull cell"
+  },
+  "traced_current_moment_route": [
+    "ForwardProfile.solve -> ForwardProfile._solve_accelerated",
+    "ForwardProfile._solve_accelerated -> fixed_point.newton_krylov",
+    "newton_krylov -> _active_set_newton_krylov",
+    "_active_set_newton_krylov reads shadowed_map_fn._read_frozen_partition and shadowed_map_fn._map_frozen_partition",
+    "read_partition -> ForwardFluxOperator._frozen_topology_partition",
+    "map_partition -> ForwardFluxOperator._internal_on_partition",
+    "_internal_on_partition -> _current_moments_on_partition",
+    "_current_moments_on_partition -> _partitioned_current_moments",
+    "_partitioned_current_moments -> ForwardSource.current_moments",
+    "ForwardSource.current_moments -> ForwardFluxOperator.support_current_moments",
+    "ForwardFluxOperator.support_current_moments -> clipped_support_current_moments",
+    "clipped_support_current_moments -> lax.scan(compact_cut_current_scan_body)"
+  ],
+  "gate": {
+    "largest_array_under_one_gib": true,
+    "temporary_budget_under_twenty_gib_at_2500": false,
+    "higher_cell_measurements_run": false,
+    "reason": "The 300-cell progression bar was not met, so 500 through 2500 cells were intentionally not compiled."
+  },
+  "delta_gate": {
+    "job": "1270925",
+    "baseline_revision": "e2825a0d3cc13573a1d890c4f2eddf6b9d7eb96a",
+    "worker_revision": "532b941952f3caadc8e5f3067586d55811ce9b8c",
+    "baseline_failure_ids": [],
+    "worker_failure_ids": [],
+    "added_failure_ids": [],
+    "added_failure_count": 0,
+    "verdict_by_failure_id_delta": "pass",
+    "baseline_exit_status": 134,
+    "worker_exit_status": 134,
+    "suites_completed": false,
+    "qualification": "Both pytest processes aborted before terminal summaries, so the zero is a failure-identifier delta, not an absolute-green suite."
+  },
+  "interpretation": "The reconcile's frozen-partition map reaches the compact scanned bank. All 83 distinct scan-body copies occur inside HLO while bodies, proving that bank entries are represented by scan loops rather than Python-loop unrolling. The 84 distinct outer compact-current while-body copies arise from repeated solver map evaluations outside the quadrature path. The remaining 55.309831 GiB of temporaries is therefore outside this node's quadrature ownership and is assigned to the program-size follow-up."
+}

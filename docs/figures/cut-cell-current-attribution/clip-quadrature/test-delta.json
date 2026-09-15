@@ -1,0 +1,25 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after": {
+    "completed": false,
+    "exit_status": 134,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-quadrature/test-delta-after-1270925.log",
+    "revision": "532b941952f3caadc8e5f3067586d55811ce9b8c"
+  },
+  "baseline": {
+    "completed": false,
+    "exit_status": 134,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-quadrature/test-delta-baseline-1270925.log",
+    "revision": "e2825a0d3cc13573a1d890c4f2eddf6b9d7eb96a"
+  },
+  "missing_requested_test": "tests/test_forward_profile_support_clip.py",
+  "passing": true,
+  "qualification": "Both pytest processes aborted before terminal summaries; this verdict compares emitted failure identifiers and is not an absolute-green suite claim.",
+  "schema": "nova.clip-quadrature-test-delta",
+  "verdict_by_failure_id_delta": "pass"
+}

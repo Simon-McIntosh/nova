@@ -1,0 +1,80 @@
+{
+  "schema": "nova.clip-quadrature-hlo-producers",
+  "source_revision": "bceb7852b4886c504cfbe2c506e634c3ba1564ca",
+  "slurm_job_id": "1270518",
+  "requested_cells": 300,
+  "realised_cells": 342,
+  "temporary_gib": 96.82296396791935,
+  "dimension": 196480,
+  "instruction_count": 14979,
+  "result_shapes": [
+    {"dtype": "f64", "shape": [342, 196480], "instruction_count": 10491},
+    {"dtype": "f64", "shape": [342, 196480, 2], "instruction_count": 2149},
+    {"dtype": "f64", "shape": [342, 196480, 1], "instruction_count": 960},
+    {"dtype": "f64", "shape": [342, 196480, 6], "instruction_count": 595},
+    {"dtype": "pred", "shape": [342, 196480], "instruction_count": 282},
+    {"dtype": "pred", "shape": [342, 196480, 2], "instruction_count": 260},
+    {"dtype": "f64", "shape": [342, 6, 196480], "instruction_count": 103},
+    {"dtype": "f64", "shape": [342, 2, 196480], "instruction_count": 75},
+    {"dtype": "f64", "shape": [342, 1, 196480], "instruction_count": 60},
+    {"dtype": "pred", "shape": [342, 2, 196480], "instruction_count": 4}
+  ],
+  "scope_proof": {
+    "support_flux_moment_quadrature_hlo_occurrences": 27196,
+    "direct_profile_current_moment_quadrature_hlo_occurrences": 23000,
+    "compact_clipped_current_moments_hlo_occurrences": 0,
+    "compact_clipped_field_integrals_hlo_occurrences": 0,
+    "stencil_sample_flux_field_hlo_occurrences": 0,
+    "dimension_instructions_with_both_dense_scopes": 9815,
+    "dimension_instructions_structurally_cloned_after_optimisation": 5164
+  },
+  "producer_chain": [
+    {
+      "source": "nova/equilibrium/forward_operator.py:2061-2066",
+      "symbol": "ForwardFluxOperator.support_current_moments",
+      "role": "dispatches every carried support to the dense stencil callback"
+    },
+    {
+      "source": "nova/equilibrium/source.py:644-649",
+      "symbol": "ForwardSource.current_moments",
+      "role": "invokes the supplied support-moment callback with the profile"
+    },
+    {
+      "source": "nova/equilibrium/stencil_mesh.py:208-216",
+      "symbol": "InteriorCurrentMomentStencil.support_flux_moments",
+      "role": "passes the full fixed-capacity support vertices for every ring cell"
+    },
+    {
+      "source": "nova/equilibrium/stencil_mesh.py:504-553",
+      "symbol": "_direct_profile_current_moments",
+      "role": "fans 3072 support slots into 3070 triangles and constructs 196480 Duffy points and weights for every cell"
+    },
+    {
+      "source": "nova/equilibrium/stencil_mesh.py:554-560",
+      "symbol": "_direct_profile_current_moments",
+      "role": "normalises all quadrature points and evaluates the six-column cell polynomial"
+    },
+    {
+      "source": "nova/equilibrium/stencil_mesh.py:436-446",
+      "symbol": "_quadratic_flux_design",
+      "role": "materialises the f64[cells,196480,6] quadratic design"
+    },
+    {
+      "source": "nova/equilibrium/source.py:311",
+      "symbol": "DomainProfile.current_density",
+      "role": "evaluates current density at every dense quadrature point"
+    },
+    {
+      "source": "nova/equilibrium/rotation.py:177,269",
+      "symbol": "IsothermalRotation.squared_radius_offset and RotatingDomainProfile.pressure_gradient",
+      "role": "produces rotating-profile point arrays in the weak rotating identification case"
+    },
+    {
+      "source": "nova/equilibrium/stencil_mesh.py:561-566",
+      "symbol": "_direct_profile_current_moments",
+      "role": "weights and reduces the dense current and first-moment point arrays"
+    }
+  ],
+  "compiled_route": "flux_map -> internal -> normalised_current_moments -> cell_current_moments -> _partitioned_current_moments -> ForwardSource.current_moments -> support_current_moments -> support_flux_moments -> _direct_profile_current_moments",
+  "conclusion": "The compiled solve does not call either compact helper or StencilMesh.sample_flux_field. Every 196480-point value originates in direct profile-current moment quadrature; unscoped parameter, tuple and transpose instructions are optimiser clones of that same scoped route."
+}

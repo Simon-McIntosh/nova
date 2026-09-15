@@ -68,12 +68,14 @@ from nova.equilibrium.separatrix_clip import (
 __all__ = [
     "RING_CONDITION_LIMIT",
     "CellCurrentMoments",
+    "FluxFieldPolynomial",
     "InteriorCurrentMomentStencil",
     "MomentGeometry",
     "PROFILE_DENSITY_POWERS",
     "SharedNodeFluxStencil",
     "StencilMesh",
     "fixed_profile_current_moments",
+    "flux_field_polynomial",
     "ring_condition",
 ]
 
@@ -108,6 +110,46 @@ class CellCurrentMoments(NamedTuple):
     vertical_moment: jax.Array
 
 
+class FluxFieldPolynomial(NamedTuple):
+    """Per-cell own-node quadratic with its physical coordinate transform."""
+
+    coefficient: jax.Array
+    centre: jax.Array
+    scale: jax.Array
+    active: jax.Array
+
+    def sample(self, points, cell_index=None):
+        """Evaluate values and physical gradients at per-cell point banks."""
+        query = jnp.asarray(points)
+        if cell_index is None:
+            cell = jnp.arange(query.shape[0])
+        else:
+            cell = jnp.asarray(cell_index, dtype=jnp.int32)
+        coefficient = self.coefficient[cell]
+        centre = self.centre[cell]
+        scale = self.scale[cell]
+        local = (query - centre[:, None, :]) / scale[:, None, :]
+        design = _quadratic_flux_design(local)
+        value = jnp.einsum("nqi,ni->nq", design, coefficient)
+        radial, vertical = local[..., 0], local[..., 1]
+        radial_gradient = (
+            coefficient[:, None, 1]
+            + 2.0 * coefficient[:, None, 3] * radial
+            + coefficient[:, None, 4] * vertical
+        ) / scale[:, None, 0]
+        vertical_gradient = (
+            coefficient[:, None, 2]
+            + coefficient[:, None, 4] * radial
+            + 2.0 * coefficient[:, None, 5] * vertical
+        ) / scale[:, None, 1]
+        live = self.active[cell, None]
+        return (
+            jnp.where(live, value, 0.0),
+            jnp.where(live, radial_gradient, 0.0),
+            jnp.where(live, vertical_gradient, 0.0),
+        )
+
+
 @dataclass(frozen=True)
 class InteriorCurrentMomentStencil:
     """Fixed own-node projection and exact-support moment geometry."""
@@ -139,6 +181,7 @@ class InteriorCurrentMomentStencil:
                     self, name, np.ascontiguousarray(value, dtype=np.intp)
                 )
 
+    @jax.named_scope("support_flux_moment_quadrature")
     def support_flux_moments(
         self,
         profile,
@@ -198,6 +241,7 @@ class InteriorCurrentMomentStencil:
             .set(coefficient)
         )
 
+    @jax.named_scope("stencil_sample_flux_field")
     def sample_flux_field(self, centroid_flux, sample_flux, points):
         """Evaluate the own-node quadratic and its gradient at fixed points."""
         if self.ring_centre is None or len(self.ring_centre) == 0:
@@ -402,6 +446,37 @@ def _quadratic_flux_design(local):
     )
 
 
+def flux_field_polynomial(
+    stencils: tuple[InteriorCurrentMomentStencil, ...],
+    centroid_flux,
+    sample_flux,
+) -> FluxFieldPolynomial:
+    """Assemble one compact own-node quadratic representation per mesh cell."""
+    if not stencils:
+        raise ValueError("at least one own-node stencil is required")
+    cell_count = stencils[0].cell_count
+    dtype = jnp.asarray(centroid_flux).dtype
+    coefficient = jnp.zeros((cell_count, 6), dtype=dtype)
+    centre = jnp.zeros((cell_count, 2), dtype=dtype)
+    scale = jnp.ones((cell_count, 2), dtype=dtype)
+    active = jnp.zeros(cell_count, dtype=bool)
+    for stencil in stencils:
+        if stencil.cell_count != cell_count:
+            raise ValueError("own-node stencils must share one cell count")
+        ring = jnp.asarray(stencil.ring_centre, dtype=jnp.int32)
+        coefficient = coefficient + stencil.flux_coefficients(
+            centroid_flux, sample_flux
+        )
+        centre = centre.at[ring].set(
+            jnp.asarray(stencil.ring_sampling_centre, dtype=dtype)
+        )
+        scale = scale.at[ring].set(
+            jnp.asarray(stencil.ring_coordinate_scale, dtype=dtype)
+        )
+        active = active.at[ring].set(True)
+    return FluxFieldPolynomial(coefficient, centre, scale, active)
+
+
 def fixed_profile_current_moments(
     profile,
     support_vertices,
@@ -425,6 +500,7 @@ def fixed_profile_current_moments(
     )
 
 
+@jax.named_scope("direct_profile_current_moment_quadrature")
 def _direct_profile_current_moments(
     profile,
     support_vertices,

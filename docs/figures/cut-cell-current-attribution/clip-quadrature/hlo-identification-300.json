@@ -1,0 +1,119 @@
+{
+  "artifacts": {
+    "dimension_instruction_jsonl_gzip": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-quadrature/hlo-identification-300/dimension-196480.jsonl.gz",
+    "lowered_debug_stablehlo_gzip": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-quadrature/hlo-identification-300/lowered-debug.stablehlo.txt.gz",
+    "optimised_hlo_gzip": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/clip-quadrature/hlo-identification-300/optimised.hlo.txt.gz"
+  },
+  "compact_helper_present": false,
+  "instruction_count": 14979,
+  "lane": {
+    "jax_enable_x64": true,
+    "platform": "gpu",
+    "slurm_job_id": "1270518",
+    "wall_seconds": 948.3992492994294
+  },
+  "memory_analysis": {
+    "alias_size_in_bytes": 0,
+    "argument_size_in_bytes": 12232,
+    "generated_code_size_in_bytes": 475426444,
+    "output_size_in_bytes": 12265,
+    "temp_size_in_bytes": 103962865936
+  },
+  "python_route": {
+    "compiled_map": [
+      {
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward.py",
+        "line": 649,
+        "line_count": 14,
+        "symbol": "ForwardProfile.flux_map"
+      },
+      {
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward_operator.py",
+        "line": 2652,
+        "line_count": 20,
+        "symbol": "ForwardFluxOperator.flux_map"
+      },
+      {
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward_operator.py",
+        "line": 2595,
+        "line_count": 9,
+        "symbol": "ForwardFluxOperator.internal"
+      },
+      {
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward_operator.py",
+        "line": 2375,
+        "line_count": 11,
+        "symbol": "ForwardFluxOperator.cell_current_moments"
+      },
+      {
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward_operator.py",
+        "line": 2281,
+        "line_count": 12,
+        "symbol": "ForwardFluxOperator._partitioned_current_moments"
+      },
+      {
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward_operator.py",
+        "line": 2046,
+        "line_count": 23,
+        "symbol": "ForwardFluxOperator.support_current_moments"
+      },
+      {
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/source_info_util.py",
+        "line": 184,
+        "line_count": 37,
+        "symbol": "InteriorCurrentMomentStencil.support_flux_moments"
+      },
+      {
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/stencil_mesh.py",
+        "line": 480,
+        "line_count": 21,
+        "symbol": "fixed_profile_current_moments"
+      },
+      {
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/source_info_util.py",
+        "line": 503,
+        "line_count": 69,
+        "symbol": "_direct_profile_current_moments"
+      },
+      {
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/stencil_mesh.py",
+        "line": 433,
+        "line_count": 14,
+        "symbol": "_quadratic_flux_design"
+      }
+    ],
+    "terminal_observation_only": [
+      {
+        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward_operator.py",
+        "line": 2307,
+        "line_count": 67,
+        "symbol": "ForwardFluxOperator._clipped_integral_measure"
+      },
+      {
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/source_info_util.py",
+        "line": 147,
+        "line_count": 91,
+        "symbol": "clipped_support_field_integrals"
+      },
+      {
+        "file": "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/source_info_util.py",
+        "line": 263,
+        "line_count": 87,
+        "symbol": "clipped_support_current_moments"
+      }
+    ]
+  },
+  "realised_cells": 342,
+  "requested_cells": 300,
+  "schema": "nova.clip-quadrature-hlo-identification",
+  "scope_counts": {
+    "compact_clipped_current_moments": 0,
+    "compact_clipped_field_integrals": 0,
+    "direct_profile_current_moment_quadrature": 23000,
+    "stencil_sample_flux_field": 0,
+    "support_flux_moment_quadrature": 27196
+  },
+  "source_revision": "bceb7852b4886c504cfbe2c506e634c3ba1564ca",
+  "target_dimension": 196480,
+  "temporary_gib": 96.82296396791935
+}

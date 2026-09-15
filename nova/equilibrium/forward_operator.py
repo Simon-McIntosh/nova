@@ -41,6 +41,11 @@ import numpy as np
 
 from nova.biot.null import Null2D
 from nova.biot.target import FluxTarget
+from nova.equilibrium.clip_quadrature import (
+    clipped_support_current_moments,
+    clipped_support_field_integrals,
+    cut_cell_bank_capacity,
+)
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.cell_partition import cell_partition_geometry
 from nova.equilibrium.connectivity_boundary import (
@@ -51,10 +56,7 @@ from nova.equilibrium.flux_surface_connectivity import (
     fit_tensor_spline,
     polish_stationary_points,
 )
-from nova.equilibrium.observation import (
-    ClippedIntegralMeasure,
-    clipped_support_quadrature,
-)
+from nova.equilibrium.observation import ClippedIntegralMeasure
 from nova.equilibrium.source import (
     SCALAR_CURRENT_AMPLITUDE_BAND,
     CurrentNormalisationError,
@@ -65,6 +67,7 @@ from nova.equilibrium.stencil_mesh import (
     CellCurrentMoments,
     MomentGeometry,
     StencilMesh,
+    flux_field_polynomial,
 )
 from nova.equilibrium.topology import (
     Topology,
@@ -2050,19 +2053,24 @@ class ForwardFluxOperator:
         """Evaluate every nonempty support through one moment callable."""
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
-        vectors = jnp.zeros(
-            (3, self.grid.node_number), dtype=jnp.asarray(centroid_flux).dtype
+        field = flux_field_polynomial(
+            self._support_moment_stencils, centroid_flux, sample_flux
         )
-        for stencil in self._support_moment_stencils:
-            vectors = vectors + jnp.stack(
-                stencil.support_flux_moments(
-                    profile,
-                    centroid_flux,
-                    sample_flux,
-                    support,
-                )
-            )
-        return CellCurrentMoments(*vectors)
+        ring_centres = np.concatenate(
+            [stencil.ring_centre for stencil in self._support_moment_stencils]
+        )
+        bank_capacity = cut_cell_bank_capacity(
+            self.moment_geometry.atomic_mesh.centroids, ring_centres
+        )
+        selected = field.active & (jnp.asarray(support.vertex_count) >= 3)
+        moments = clipped_support_current_moments(
+            support,
+            selected,
+            field,
+            profile,
+            cut_cell_capacity=bank_capacity,
+        )
+        return CellCurrentMoments(*moments)
 
     def support_flux_coefficients(self, centroid_flux, sample_flux) -> jax.Array:
         """Return one cell-local flux polynomial over either cell tiling."""
@@ -2304,31 +2312,43 @@ class ForwardFluxOperator:
     def _clipped_integral_measure(self, partition) -> ClippedIntegralMeasure:
         """Build the observation measure from one already-traced partition."""
         masks, topology, sample_psi_norm, profile_support = partition
+        field = flux_field_polynomial(
+            self._support_moment_stencils, masks.psi_norm, sample_psi_norm
+        )
+        ring_centres = np.concatenate(
+            [stencil.ring_centre for stencil in self._support_moment_stencils]
+        )
+        bank_capacity = cut_cell_bank_capacity(
+            self.moment_geometry.atomic_mesh.centroids, ring_centres
+        )
+
+        def compact_current_moments(profile, *_args):
+            return clipped_support_current_moments(
+                profile_support,
+                masks.profile_participation,
+                field,
+                profile,
+                cut_cell_capacity=bank_capacity,
+            )
+
         profile_moments = self.source.current_moments(
             masks,
-            self.support_current_moments,
+            compact_current_moments,
             profile_support,
             sample_flux=sample_psi_norm,
         )
         cell_current = jnp.where(
             masks.profile_participation, profile_moments.cell_current, 0.0
         )
-        points, weights = clipped_support_quadrature(profile_support, masks.core)
-        psi_norm, radial_gradient, vertical_gradient = self.sample_flux_field(
-            masks.psi_norm, sample_psi_norm, points
-        )
-        radius = points[..., 0]
-        pressure = self.source.core.pressure(
-            radius,
-            psi_norm,
+        field_integrals = clipped_support_field_integrals(
+            profile_support,
+            masks.core,
+            field,
+            self.source.core.pressure,
             self.source.boundary_pressure,
             topology.flux_span,
+            cut_cell_capacity=bank_capacity,
         )
-        total_flux_gradient_squared = topology.flux_span**2 * (
-            radial_gradient**2 + vertical_gradient**2
-        )
-        field_squared = total_flux_gradient_squared / (2.0 * jnp.pi * radius) ** 2
-        volume_weight = 2.0 * jnp.pi * radius * weights
         area = jnp.where(masks.core, profile_support.area, 0.0)
         centre_radius = profile_support.centroids[:, 0]
         radial_first = jnp.where(
@@ -2352,8 +2372,8 @@ class ForwardFluxOperator:
             volume=volume,
             radial_volume=radial_volume,
             cell_current=cell_current,
-            pressure_volume=jnp.sum(pressure * volume_weight, axis=1),
-            field_volume=jnp.sum(field_squared * volume_weight, axis=1),
+            pressure_volume=field_integrals.pressure_volume,
+            field_volume=field_integrals.field_volume,
             masks=masks,
         )
 

@@ -1,0 +1,309 @@
+{
+  "comparison": "maximum absolute cellwise change divided by the maximum absolute 128-sample value, independently for current and both first moments",
+  "lane": {
+    "jax_enable_x64": true,
+    "platform": "cpu",
+    "slurm_job_id": "1270397",
+    "wall_seconds": 432.97359960339963
+  },
+  "relative_target": 1e-06,
+  "rows": [
+    {
+      "case": "weak-rotation-reactor-static",
+      "first_sample_count_below_target": 128,
+      "machine_cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.22986264899373055,
+        "lock_wait_seconds": 5.498528480529785e-05,
+        "semantic_key": "ba79832d725530c4",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
+        "store_seconds": 0.0
+      },
+      "realised_cells": 1072,
+      "requested_cells": -1000,
+      "samples": {
+        "128": {
+          "aggregate_relative_change_by_field": {
+            "cell_current": 0.0,
+            "radial_first_moment": 0.0,
+            "vertical_first_moment": 0.0
+          },
+          "cut_cells": 131,
+          "included_cells": 954,
+          "maximum_relative_change": 0.0,
+          "maximum_relative_change_by_field": {
+            "cell_current": 0.0,
+            "radial_first_moment": 0.0,
+            "vertical_first_moment": 0.0
+          },
+          "maximum_vertex_count": 134,
+          "support_capacity": 2816,
+          "total_cell_current_a": 16314567.382681102,
+          "total_radial_first_moment_a_m": 8914.614458553506,
+          "total_vertical_first_moment_a_m": -220.72518679672112,
+          "wall_seconds": 74.93153784796596
+        },
+        "16": {
+          "aggregate_relative_change_by_field": {
+            "cell_current": 2.2043910532675384e-06,
+            "radial_first_moment": 1.8666687191137504e-05,
+            "vertical_first_moment": 0.0010956517743123285
+          },
+          "cut_cells": 131,
+          "included_cells": 954,
+          "maximum_relative_change": 0.00011400897790098055,
+          "maximum_relative_change_by_field": {
+            "cell_current": 6.605670272936659e-05,
+            "radial_first_moment": 8.410363458543902e-05,
+            "vertical_first_moment": 0.00011400897790098055
+          },
+          "maximum_vertex_count": 22,
+          "support_capacity": 352,
+          "total_cell_current_a": 16314531.418994725,
+          "total_radial_first_moment_a_m": 8914.448052233976,
+          "total_vertical_first_moment_a_m": -220.96702473927053,
+          "wall_seconds": 22.84017188847065
+        },
+        "32": {
+          "aggregate_relative_change_by_field": {
+            "cell_current": 5.248559721747263e-07,
+            "radial_first_moment": 4.444758912825065e-06,
+            "vertical_first_moment": 0.0002608753884597815
+          },
+          "cut_cells": 131,
+          "included_cells": 954,
+          "maximum_relative_change": 2.7141246448277164e-05,
+          "maximum_relative_change_by_field": {
+            "cell_current": 1.5727813382415875e-05,
+            "radial_first_moment": 2.002720350031667e-05,
+            "vertical_first_moment": 2.7141246448277164e-05
+          },
+          "maximum_vertex_count": 38,
+          "support_capacity": 704,
+          "total_cell_current_a": 16314558.819882976,
+          "total_radial_first_moment_a_m": 8914.574835241436,
+          "total_vertical_first_moment_a_m": -220.78276856556886,
+          "wall_seconds": 29.958023604005575
+        },
+        "4": {
+          "aggregate_relative_change_by_field": {
+            "cell_current": 3.579380362445935e-05,
+            "radial_first_moment": 0.0003026892679581963,
+            "vertical_first_moment": 0.017783224100823673
+          },
+          "cut_cells": 131,
+          "included_cells": 954,
+          "maximum_relative_change": 0.0018564012436884454,
+          "maximum_relative_change_by_field": {
+            "cell_current": 0.0010725981859442376,
+            "radial_first_moment": 0.0013622356345980384,
+            "vertical_first_moment": 0.0018564012436884454
+          },
+          "maximum_vertex_count": 10,
+          "support_capacity": 88,
+          "total_cell_current_a": 16313983.422259986,
+          "total_radial_first_moment_a_m": 8911.916100428914,
+          "total_vertical_first_moment_a_m": -224.65039225822306,
+          "wall_seconds": 17.142654145136476
+        },
+        "64": {
+          "aggregate_relative_change_by_field": {
+            "cell_current": 1.0497124241205323e-07,
+            "radial_first_moment": 8.889672619384247e-07,
+            "vertical_first_moment": 5.217537360017747e-05
+          },
+          "cut_cells": 131,
+          "included_cells": 954,
+          "maximum_relative_change": 5.428061874741268e-06,
+          "maximum_relative_change_by_field": {
+            "cell_current": 3.1455640273664e-06,
+            "radial_first_moment": 4.005567134207139e-06,
+            "vertical_first_moment": 5.428061874741268e-06
+          },
+          "maximum_vertex_count": 70,
+          "support_capacity": 1408,
+          "total_cell_current_a": 16314565.670120692,
+          "total_radial_first_moment_a_m": 8914.606533753096,
+          "total_vertical_first_moment_a_m": -220.73670321580448,
+          "wall_seconds": 44.80258327163756
+        },
+        "8": {
+          "aggregate_relative_change_by_field": {
+            "cell_current": 8.922469976270193e-06,
+            "radial_first_moment": 7.553458817392806e-05,
+            "vertical_first_moment": 0.004434378528954506
+          },
+          "cut_cells": 131,
+          "included_cells": 954,
+          "maximum_relative_change": 0.00046171979357087235,
+          "maximum_relative_change_by_field": {
+            "cell_current": 0.0002673705310699213,
+            "radial_first_moment": 0.0003402475501436547,
+            "vertical_first_moment": 0.00046171979357087235
+          },
+          "maximum_vertex_count": 14,
+          "support_capacity": 176,
+          "total_cell_current_a": 16314421.816443453,
+          "total_radial_first_moment_a_m": 8913.941096821647,
+          "total_vertical_first_moment_a_m": -221.70396582585136,
+          "wall_seconds": 19.181538050994277
+        }
+      }
+    },
+    {
+      "case": "diverted-single-null",
+      "first_sample_count_below_target": 128,
+      "machine_cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.1767670474946499,
+        "lock_wait_seconds": 1.1414289474487305e-05,
+        "semantic_key": "283239eb6efcd66e",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
+        "store_seconds": 0.0
+      },
+      "realised_cells": 1074,
+      "requested_cells": -1000,
+      "samples": {
+        "128": {
+          "aggregate_relative_change_by_field": {
+            "cell_current": 0.0,
+            "radial_first_moment": 0.0,
+            "vertical_first_moment": 0.0
+          },
+          "cut_cells": 119,
+          "included_cells": 652,
+          "maximum_relative_change": 0.0,
+          "maximum_relative_change_by_field": {
+            "cell_current": 0.0,
+            "radial_first_moment": 0.0,
+            "vertical_first_moment": 0.0
+          },
+          "maximum_vertex_count": 134,
+          "support_capacity": 2560,
+          "total_cell_current_a": 37174.273855266365,
+          "total_radial_first_moment_a_m": 0.1846527806629199,
+          "total_vertical_first_moment_a_m": 0.33175686122573844,
+          "wall_seconds": 71.1232480853796
+        },
+        "16": {
+          "aggregate_relative_change_by_field": {
+            "cell_current": 3.281962073242793e-06,
+            "radial_first_moment": 0.0017630981736095847,
+            "vertical_first_moment": 0.0020747042667415023
+          },
+          "cut_cells": 119,
+          "included_cells": 652,
+          "maximum_relative_change": 0.0020056499893890798,
+          "maximum_relative_change_by_field": {
+            "cell_current": 0.0004190165913659988,
+            "radial_first_moment": 0.0005344607151733836,
+            "vertical_first_moment": 0.0020056499893890798
+          },
+          "maximum_vertex_count": 22,
+          "support_capacity": 320,
+          "total_cell_current_a": 37174.15185070947,
+          "total_radial_first_moment_a_m": 0.18497834164325866,
+          "total_vertical_first_moment_a_m": 0.332445158601244,
+          "wall_seconds": 23.570013713091612
+        },
+        "32": {
+          "aggregate_relative_change_by_field": {
+            "cell_current": 8.044597564832975e-07,
+            "radial_first_moment": 0.0005875445104113119,
+            "vertical_first_moment": 0.0005536621556296338
+          },
+          "cut_cells": 119,
+          "included_cells": 652,
+          "maximum_relative_change": 0.0005362637044363384,
+          "maximum_relative_change_by_field": {
+            "cell_current": 0.00010928227602419355,
+            "radial_first_moment": 0.00018696234884017896,
+            "vertical_first_moment": 0.0005362637044363384
+          },
+          "maximum_vertex_count": 38,
+          "support_capacity": 640,
+          "total_cell_current_a": 37174.24395005907,
+          "total_radial_first_moment_a_m": 0.18476127239053053,
+          "total_vertical_first_moment_a_m": 0.3319405424446693,
+          "wall_seconds": 30.00031166896224
+        },
+        "4": {
+          "aggregate_relative_change_by_field": {
+            "cell_current": 6.99670984328479e-05,
+            "radial_first_moment": 0.09954619208767826,
+            "vertical_first_moment": 0.04825979457050961
+          },
+          "cut_cells": 119,
+          "included_cells": 652,
+          "maximum_relative_change": 0.04683077828486818,
+          "maximum_relative_change_by_field": {
+            "cell_current": 0.013691727050744042,
+            "radial_first_moment": 0.033913845972236775,
+            "vertical_first_moment": 0.04683077828486818
+          },
+          "maximum_vertex_count": 10,
+          "support_capacity": 80,
+          "total_cell_current_a": 37171.672879188365,
+          "total_radial_first_moment_a_m": 0.203034261836315,
+          "total_vertical_first_moment_a_m": 0.34776737919584977,
+          "wall_seconds": 18.332481833174825
+        },
+        "64": {
+          "aggregate_relative_change_by_field": {
+            "cell_current": 1.9633038814260026e-07,
+            "radial_first_moment": 0.00018967112821983908,
+            "vertical_first_moment": 0.00018451939568047473
+          },
+          "cut_cells": 119,
+          "included_cells": 652,
+          "maximum_relative_change": 0.00017980198537379994,
+          "maximum_relative_change_by_field": {
+            "cell_current": 3.649422649126645e-05,
+            "radial_first_moment": 6.30755959920231e-05,
+            "vertical_first_moment": 0.00017980198537379994
+          },
+          "maximum_vertex_count": 70,
+          "support_capacity": 1280,
+          "total_cell_current_a": 37174.26655682675,
+          "total_radial_first_moment_a_m": 0.18468780396415596,
+          "total_vertical_first_moment_a_m": 0.33181807680128417,
+          "wall_seconds": 43.509082939475775
+        },
+        "8": {
+          "aggregate_relative_change_by_field": {
+            "cell_current": 1.9654834909216604e-05,
+            "radial_first_moment": 0.027451904879143677,
+            "vertical_first_moment": 0.019253327535583165
+          },
+          "cut_cells": 119,
+          "included_cells": 652,
+          "maximum_relative_change": 0.01878825372097856,
+          "maximum_relative_change_by_field": {
+            "cell_current": 0.004327447977875922,
+            "radial_first_moment": 0.009393494780771791,
+            "vertical_first_moment": 0.01878825372097856
+          },
+          "maximum_vertex_count": 14,
+          "support_capacity": 160,
+          "total_cell_current_a": 37173.54320105087,
+          "total_radial_first_moment_a_m": 0.1897218512333465,
+          "total_vertical_first_moment_a_m": 0.3381442847370948,
+          "wall_seconds": 20.233845215290785
+        }
+      }
+    }
+  ],
+  "samples_per_segment": [
+    4,
+    8,
+    16,
+    32,
+    64,
+    128
+  ],
+  "schema": "nova.clip-quadrature-chain-capacity",
+  "selected_samples_per_segment": 128,
+  "selected_with_margin": 128
+}

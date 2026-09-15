@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T03:10:41",
+  "updated": "2026-09-15T05:33:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -158510,6 +158510,201 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T004922383745-cca-quadrature-delta-gate-per-module",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-quadrature-delta-gate-per-module",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 348,
+                "cached_input_tokens": 891294,
+                "input_tokens": 891674,
+                "output_tokens": 1717,
+                "reasoning_output_tokens": 172,
+                "total_tokens": 893391,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. No code change. Facts: three delta-gate runs over the sixty-odd test modules importing nova.equilibrium.observation, stencil_mesh, clip_quadrature or forward_operator died with SIGABRT (exit 134) in the JAX CPU backend on both the baseline (e2825a0d) and the after arm (this base) before the pytest summary, sequential arms and private caches included, and excluding the first aborting module only moved the abort later; the module list is at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/quadrature-delta-2/ and the driver run_ccad_delta.sh there, reuse both. Run ONE all_debug job (--time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python, sbatch detached from your shell, --output in the run directory) that, for each arm (baseline in a detached scratch worktree at e2825a0d, then after at this base), runs pytest once per test module in a fresh python process with -p no:cacheprovider -m 'not slow' -q --junitxml per module, each module with its own JAX_COMPILATION_CACHE_DIR under TMPDIR, a 300 s timeout per module, recording per module the exit status, pass and fail counts and failure ids from the junit file; a module whose process exits 134 or times out is recorded as aborted with the last thirty lines of its log and excluded from the failure-id comparison. Report per arm the module count, the aborted modules by name, the collected pass and fail totals, and the added-failure set (after minus baseline over modules that completed on both arms) as the verdict, plus the list of modules aborting on one arm only. Remove the scratch worktree when done. Write the manifest with the SLURM job number on the blockers line and end the turn; finish when resumed. Every uv command carries --no-sync and nothing runs uv sync; on the compute node do not invoke uv.",
+          "estimated_hours": 2.0,
+          "goal": "Measure the added test failures of the clip quadrature commits against their base with every test module run in its own fresh process so an abort loses one module and names it",
+          "id": "cca-quadrature-delta-gate-per-module",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-15T00:49:22Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T004922383745-cca-quadrature-delta-gate-per-module/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/quadrature-delta-3"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "s19t-cca-quadrature-delta-3",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-15T00:49:33Z",
+        "completed_at": "2026-09-15T03:30:28.072Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 9624,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 9655,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "295f6d5571b15faef2ca265f9d2e91f4c7b0c867",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "all_debug jobs 1270998 and 1271013: baseline arm at e2825a0d run one module per fresh process (53 of 61 modules in the window, zero aborts, 329 passed, 10 failed); the after arm was not run in either window because the driver repeated the base arm",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/quadrature-delta-3/ccad3-job-1270998.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T004922383745-cca-quadrature-delta-gate-per-module/manifest.md",
+        "scope_changed": false,
+        "session_id": "dcd30f63-db1e-4159-8f14-4166b437e6a3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 1121117,
+            "input_tokens_cumulative": 1121117,
+            "output_tokens": 13130,
+            "output_tokens_cumulative": 13130,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T03:30:28.072Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 1290586,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 200000",
+          "elapsed_seconds": 180.681,
+          "generated_tokens": 25007,
+          "generation_seconds": 159.073,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 84.1,
+          "machine_seconds": 21.608,
+          "peak_input_tokens": 168169,
+          "tokens_per_second": 157.2,
+          "wall_tokens_per_second": 138.4
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest summary",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "test role, read-only; deliverables are the per-module junit results and report under the reports directory",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-quadrature-delta-gate-per-module",
+          "session_id": "dcd30f63-db1e-4159-8f14-4166b437e6a3",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T03:30:28.072Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 37.0,
+        "orientation_input_tokens": 1717550.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -158822,6 +159017,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2494
+    "_version": 2495
   }
 }

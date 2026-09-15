@@ -49,7 +49,7 @@ from benchmarks.solovev_certificate import (
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium import fixed_point, reduced_newton
 from nova.equilibrium.forward_operator import ForwardFluxOperator
-from nova.equilibrium.source import ForwardSource
+from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import (
     configure_dtypes,
@@ -421,10 +421,26 @@ def _group_constant(record: dict[str, Any], cells: int) -> str:
     return "other captured literals"
 
 
-_REPLICATION_TARGETS = {
-    "current-moment path": "_direct_profile_current_moments",
-    "topology read": "Topology.read_qualification",
-}
+def _replication_targets() -> dict[str, dict[str, Any]]:
+    """Return call-path sentinels that occur once per traced map copy."""
+    return {
+        "current-moment path": {
+            "function": (
+                "ForwardFluxOperator.normalised_current_moments_and_observation"
+            ),
+            "sentinel": _source_line(
+                ForwardFluxOperator.normalised_current_moments_and_observation,
+                "partition = self._support_partition",
+            ),
+        },
+        "topology read": {
+            "function": "ForwardFluxOperator._fixed_design_read",
+            "sentinel": _source_line(
+                ForwardFluxOperator._fixed_design_read,
+                "initial = self._fixed_design_topology.read_qualification",
+            ),
+        },
+    }
 
 
 def _replication_census(
@@ -433,33 +449,36 @@ def _replication_census(
 ) -> dict[str, dict[str, Any]]:
     """Count independently traced copies of two dominant source paths."""
     result: dict[str, dict[str, Any]] = {}
-    for label, target in _REPLICATION_TARGETS.items():
-        frames: dict[int, dict[str, Any]] = {}
+    for label, target in _replication_targets().items():
+        sentinel_frames: dict[int, dict[str, Any]] = {}
         instruction_count = 0
+        locations: set[tuple[Any, Any, Any]] = set()
         for record in records:
-            matched = None
+            matched = False
             for frame in _frame_chain(tables, record["meta"].get("stack_frame_id")):
-                if frame.get("function") == target:
-                    matched = frame
-                    break
-            if matched is None:
+                if frame.get("function") != target["function"]:
+                    continue
+                matched = True
+                locations.add(
+                    (frame.get("file"), frame.get("function"), frame.get("line"))
+                )
+                if frame.get("line") == target["sentinel"]["line"]:
+                    sentinel_frames[frame["frame_id"]] = frame
+            if not matched:
                 continue
             instruction_count += 1
-            frames[matched["frame_id"]] = matched
-        locations = sorted(
-            {
-                (frame.get("file"), frame.get("function"), frame.get("line"))
-                for frame in frames.values()
-            },
-            key=lambda item: tuple(str(value) for value in item),
+        ordered_locations = sorted(
+            locations, key=lambda item: tuple(str(value) for value in item)
         )
         result[label] = {
-            "target_function": target,
-            "copy_count": len(frames),
+            "target_function": target["function"],
+            "sentinel_line": target["sentinel"]["line"],
+            "source": target["sentinel"],
+            "copy_count": len(sentinel_frames),
             "instructions": instruction_count,
             "source_locations": [
                 {"file": file, "function": function, "line": line}
-                for file, function, line in locations
+                for file, function, line in ordered_locations
             ],
         }
     return result
@@ -1263,6 +1282,86 @@ def measure(
     return results, host_profile
 
 
+def reanalyze(
+    case_name: str,
+    cells: Iterable[int],
+    hlo_dir: Path,
+    run_dir: Path,
+    receipt_dir: Path | None = None,
+) -> dict[int, dict[str, Any]]:
+    """Rebuild receipts from already persisted optimised-HLO text."""
+    parts_dir = run_dir / "parts"
+    parts_dir.mkdir(parents=True, exist_ok=True)
+    results: dict[int, dict[str, Any]] = {}
+    for requested_cells in cells:
+        solve_path = hlo_dir / f"{case_name}_{requested_cells}c_solve.hlo.txt"
+        map_path = hlo_dir / f"{case_name}_{requested_cells}c_map.hlo.txt"
+        solve_text = solve_path.read_text(encoding="utf-8")
+        map_text = map_path.read_text(encoding="utf-8")
+        source_part = hlo_dir.parent / "parts" / f"{case_name}_{requested_cells}c.json"
+        compile_seconds = None
+        if source_part.exists():
+            compile_seconds = json.loads(source_part.read_text(encoding="utf-8")).get(
+                "compile_seconds"
+            )
+        solve_census = _census_module(solve_text, cells=requested_cells)
+        map_census = _census_module(map_text, cells=requested_cells)
+        solve_census.update(
+            {
+                "label": "solve",
+                "cells": requested_cells,
+                "hlo_text_bytes": len(solve_text),
+                "hlo_text_path": str(solve_path),
+            }
+        )
+        map_census.update(
+            {
+                "label": "map",
+                "cells": requested_cells,
+                "hlo_text_bytes": len(map_text),
+                "hlo_text_path": str(map_path),
+            }
+        )
+        for census in (solve_census, map_census):
+            census["top30_instructions"] = _top(
+                census["attributed"], 30, "instructions"
+            )
+            census["top30_bytes"] = _top(census["attributed"], 30, "bytes")
+        entry = {
+            "case": case_name,
+            "requested_cells": requested_cells,
+            "compile_seconds": compile_seconds,
+            "hlo_text_bytes_solve": len(solve_text),
+            "hlo_text_bytes_map": len(map_text),
+            "solve": solve_census,
+            "map": map_census,
+            "solve_over_map": {
+                "instruction_ratio": solve_census["total_instructions"]
+                / map_census["total_instructions"],
+                "byte_ratio": solve_census["total_bytes"] / map_census["total_bytes"],
+                "solve_instructions": solve_census["total_instructions"],
+                "map_instructions": map_census["total_instructions"],
+                "solve_bytes": solve_census["total_bytes"],
+                "map_bytes": map_census["total_bytes"],
+            },
+        }
+        (parts_dir / f"{case_name}_{requested_cells}c.json").write_text(
+            json.dumps(entry, sort_keys=True), encoding="utf-8"
+        )
+        if receipt_dir is not None:
+            receipt_dir.mkdir(parents=True, exist_ok=True)
+            (receipt_dir / f"{requested_cells}.json").write_text(
+                json.dumps(_rung_receipt(entry), indent=2, sort_keys=True),
+                encoding="utf-8",
+            )
+        results[requested_cells] = entry
+        print(
+            f"CENSUS_REANALYZED case={case_name} requested_cells={requested_cells}",
+            flush=True,
+        )
+    return results
+
+
 def _render_svg(entry: dict[str, Any], path: Path) -> None:
     """Render a treemap-like horizontal bar chart of instruction share at 1000 cells."""
     rows = _top(entry["solve"]["attributed"], 25, "instructions")
@@ -1511,9 +1610,7 @@ def build_report(
     for cells in REQUIRED_CELLS:
         for program in ("map", "solve"):
             for label, item in results[cells][program]["replication"].items():
-                source = (
-                    item["source_locations"][0] if item["source_locations"] else None
-                )
+                source = item.get("source")
                 ap(
                     f"| {cells} | {program} | {label} | {item['copy_count']:,} | "
                     f"{item['instructions']:,} | {_location(source)} |"
@@ -1712,7 +1809,7 @@ def build_report(
         "mapped = self.operator.traced_flux_map",
     )
     traced_map_seam = _source_line(ForwardFluxOperator.traced_flux_map, "def ")
-    profile_seam = _source_line(ForwardSource.pressure_gradient, "def ")
+    profile_seam = _source_line(DomainProfile.pressure_gradient, "def ")
     moment_seam = _source_line(ForwardSource.current_moments, "def ")
     compiled_loop = _source_line(
         reduced_newton._compiled_slice_solver,
@@ -1784,6 +1881,12 @@ def main() -> None:
     parser.add_argument("--report-dir", default=None)
     parser.add_argument("--figure-dir", default=None)
     parser.add_argument(
+        "--reanalyze-hlo-dir",
+        default=None,
+        help="rebuild reports from persisted optimized-HLO text without compiling",
+    )
+    parser.add_argument("--host-profile-path", default=None)
+    parser.add_argument(
         "--profile-cached-entry",
         action="store_true",
         help="warm and cProfile one cache-hit public compiled-slice call",
@@ -1791,15 +1894,31 @@ def main() -> None:
     arguments = parser.parse_args()
     run_dir = Path(arguments.run_dir).resolve()
     run_dir.mkdir(parents=True, exist_ok=True)
-    configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
     figure_dir = Path(arguments.figure_dir) if arguments.figure_dir else None
-    results, host_profile = measure(
-        arguments.case,
-        arguments.cells,
-        run_dir,
-        receipt_dir=figure_dir,
-        profile_cached_entry=arguments.profile_cached_entry,
-    )
+    if arguments.reanalyze_hlo_dir:
+        results = reanalyze(
+            arguments.case,
+            arguments.cells,
+            Path(arguments.reanalyze_hlo_dir),
+            run_dir,
+            receipt_dir=figure_dir,
+        )
+        host_profile = (
+            json.loads(Path(arguments.host_profile_path).read_text(encoding="utf-8"))
+            if arguments.host_profile_path
+            else None
+        )
+    else:
+        configure_persistent_compilation_cache(
+            default_persistent_compilation_cache_root()
+        )
+        results, host_profile = measure(
+            arguments.case,
+            arguments.cells,
+            run_dir,
+            receipt_dir=figure_dir,
+            profile_cached_entry=arguments.profile_cached_entry,
+        )
     entry = results.get(1000, results.get(list(results)[-1]))
     if figure_dir is not None:
         figure_dir.mkdir(parents=True, exist_ok=True)

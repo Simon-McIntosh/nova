@@ -548,6 +548,58 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
     <figure><img src="/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/diverted-single-null-production-route-cells-500.png" alt="Single-null 500 solved and analytic line contours with both null sets and wall"><figcaption>Single-null whole-cell 500 control: terminal residual 2.42e-17, converged, terminal flux bit-identical to the committed state; one O candidate, one saddle and the private region retained.</figcaption></figure>
   </div>
 </section>
+
+<section id="limited-shadow-terminal-contours">
+  <h2>Limited-row terminal contours: shadowed beside unmasked</h2>
+
+  <p>The receipt-only renderer at <code>benchmarks/limited_shadow_before_after.py</code>
+  reads the three paired 1000-cell terminal states from
+  <code>docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows</code>
+  and <code>docs/figures/cut-cell-current-attribution/limited-shadow/solve-parts/chord</code>.
+  One <code>all_debug</code> CPU job (1271525, <code>JAX_PLATFORMS=cpu</code>,
+  root-environment Python, <code>TMPDIR=/tmp</code> in submission and payload) rendered
+  the comparison without constructing an operator or running a solve:
+  <code>solve_calls=0</code>. Every row uses one array of twelve analytic Wb levels
+  across the shadowed terminal, unmasked terminal and analytic columns; every panel
+  draws the wall and its admitted nulls, while the two terminal columns also show the
+  analytic null set in blue.</p>
+
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/limited-shadow/lfs-contours-before-after.png"
+         alt="Three Solovev rows comparing shadowed and unmasked terminal line contours with analytic contours on shared levels, walls, nulls and weak-row shadow carriers">
+    <figcaption>Weak, moderate and strong 1000-cell Solovev terminal fields before and
+    after the residual-shadow removal, beside the analytic field on the same physical
+    levels. Ochre self-closing outboard-midplane contours appear in the shadowed column
+    and are absent from the unmasked column. The weak shadowed panel marks all 64
+    persisted 1000-cell provisional-private carriers; solved axes are ochre or teal,
+    analytic axes are blue. The weak-2500 reproduction persisted only its 54-carrier
+    census and no terminal-flux array, so its conditional row is not drawn and no solve
+    was run to manufacture it.</figcaption>
+  </figure>
+
+  <table>
+    <caption>Terminal measures carried by the paired solve receipts</caption>
+    <thead><tr><th scope="col">Row</th><th scope="col">State</th><th scope="col">Residual</th><th scope="col">Axis error (pitch)</th><th scope="col">Boundary flux error (Wb)</th><th scope="col">Converged</th></tr></thead>
+    <tbody>
+      <tr><td>weak 1000</td><td>shadowed</td><td>1.99745e-3</td><td>0.71135</td><td>6.37535</td><td>no</td></tr>
+      <tr><td>weak 1000</td><td>unmasked</td><td>1.38774e-15</td><td>0.63549</td><td>4.95939</td><td>yes</td></tr>
+      <tr><td>moderate 1000</td><td>shadowed</td><td>4.37805e-3</td><td>0.71810</td><td>0.176938</td><td>no</td></tr>
+      <tr><td>moderate 1000</td><td>unmasked</td><td>5.87522e-16</td><td>0.64287</td><td>0.140971</td><td>yes</td></tr>
+      <tr><td>strong 1000</td><td>shadowed</td><td>2.95089e-3</td><td>0.74214</td><td>0.0146041</td><td>no</td></tr>
+      <tr><td>strong 1000</td><td>unmasked</td><td>2.91253e-16</td><td>0.64391</td><td>0.0118363</td><td>yes</td></tr>
+    </tbody>
+  </table>
+
+  <p>The machine-readable record is
+  <code>docs/figures/cut-cell-current-attribution/limited-shadow/lfs-contours-before-after-receipt.json</code>;
+  it pins both input hashes, every contour level, the metrics above, the 64-marker
+  positive control, the 54-carrier omission and the figure hash. The renderer and
+  publication artifact are commits <code>65ac8361</code>, <code>fc36a4fc</code>,
+  <code>02be6d34</code> and <code>68f6e2d7</code>. Jobs 1271516 and 1271524 are retained
+  as rejected instrument attempts: visual inspection caught respectively a collapsed
+  positive-polarity level range and annotation overlap before job 1271525 produced the
+  accepted figure.</p>
+</section>
 </main>
 </body>
 </html>

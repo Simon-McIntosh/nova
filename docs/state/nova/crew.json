@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T17:18:45",
+  "updated": "2026-09-15T17:22:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -166860,6 +166860,215 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T133936592157-pfs-playable-keyframe-fence-from-measurement",
+        "plan": "playable-forward-solve",
+        "section": "\u00a73",
+        "node": "pfs-playable-keyframe-fence-from-measurement",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4264,
+                "cached_input_tokens": 502755,
+                "input_tokens": 507021,
+                "output_tokens": 558,
+                "reasoning_output_tokens": 118,
+                "total_tokens": 507579,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "The banked patch /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/playable-cache/banked/0001-fix-playable-reuse-one-compiled-reduced-program-acro.patch (apps/playable/production.py holds one compiled reduced program across coil edits and enables the persistent compilation cache through nova.equilibrium.solve_request.default_forward_compilation_cache_root; tests/test_playable_session.py restated) is applied onto current main, where apps/playable/production.py already carries the bounded shape-inverse admitted-forward reuse seam (commit 33b7a186), and the two seams are reconciled by hand rather than by dropping either; the banked gate log /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/playable-cache/banked/all_debug_keyframe_gate_1271405.log (cold prime 48.2 s, keyframes 110.0 and 107.8 s at reused=True with one program carried across three keys, frame assembly 0.14 s) is read and the warm keyframe wall attributed between compile (must be zero on reuse, verified from JAX's compilation log lines), solve execution on CPU, and frame assembly, in one all_debug CPU job (JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on the node, foreground srun under 59 minutes) that re-runs tests/test_playable_session.py::test_production_keyframe_completes_on_the_solovev_machine cold then warm with the persistent cache; the fence is then set from the measured warm figure with the attribution written into the test docstring (a CPU-execution-bound solve is not a caller property), never widened without that attribution, and the H200 keyframe receipt rerun (benchmarks/playable_keyframe_receipt.py) is recorded as the follow-on; tests/test_playable_session.py and tests/test_shape_inverse.py pass one per fresh CPU process on all_debug with zero added failures against the base ids; landing record on the plan and evidence; manifest in plain key: value lines, any waiting declaration with wait_probe as a JSON list such as [\"squeue\",\"-h\",\"-j\",\"1271405\"] and wait_terminal exit:0",
+          "estimated_hours": null,
+          "goal": "The playable production solver's program reuse and persistent cache land on main with the keyframe fence set from the measured warm wall and its attribution, not widened to pass",
+          "id": "pfs-playable-keyframe-fence-from-measurement",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T13:39:38Z",
+            "read_at": "2026-09-15T13:39:40Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 40.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T133936592157-pfs-playable-keyframe-fence-from-measurement/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "apps/playable/production.py",
+            "tests/test_playable_session.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/playable-cache",
+            "docs/evidence/archive/playable-forward-solve-landed.html",
+            "docs/plans/playable-forward-solve.html",
+            "tests/test_shape_inverse.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-pfs-keyfence-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T13:40:32Z",
+        "completed_at": "2026-09-15T15:16:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5784,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5784,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "092763034b3b3d00f7e0dab561609bce24782dbe",
+        "commits": [
+          "56a25d047277e1a7c97eb04d922b3906e0055018",
+          "f605b7aa3a210fff50f0e27c1fecb265d1f91b33",
+          "1167aacdf806fe973c0169bcaa6e009ffae3b9f3",
+          "7b2f344dcfa53395c5f9f68ac98685f64f802e62",
+          "0dbe406178ac1b22a4ac63297cd6d14a2223c9a2"
+        ],
+        "changed_lines": {
+          "added": 96,
+          "removed": 25,
+          "files": 5
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug jobs 1271492 (baseline reused=False 215 s), 1271507 (repaired, reused=True 110.8 s, zero compile lines), 1271558 (test_playable_session 25/25, test_shape_inverse 16/17), 1271574 (restated reuse contract 1/1)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/playable-cache/after-default-cache.log",
+          "log_digest": "sha256:f3854380ad4f9d7cbb3cdfe4dcee2b65a02a193e7204e87ca1000a01807239f8"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T133936592157-pfs-playable-keyframe-fence-from-measurement/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a0a54c-4045-77c3-9cc1-f45777443503",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7102848,
+            "cached_input_tokens_cumulative": 7102848,
+            "input_tokens": 7153014,
+            "input_tokens_cumulative": 7153014,
+            "output_tokens": 16993,
+            "output_tokens_cumulative": 16993,
+            "reasoning_output_tokens": 4834,
+            "reasoning_output_tokens_cumulative": 4834
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T15:16:56Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 46.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T15:16:56Z"
+            }
+          ],
+          "notional_cost_usd": 217.1746,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 7102848,
+          "cumulative_input_tokens": 14255862,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 21827
+        },
+        "follow_on_paths": [
+          "benchmarks/playable_keyframe_receipt.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "runs tests",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-playable-keyframe-fence-from-measurement",
+          "session_id": "01a0a54c-4045-77c3-9cc1-f45777443503",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T15:16:56Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 92.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -167172,6 +167381,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2575
+    "_version": 2576
   }
 }

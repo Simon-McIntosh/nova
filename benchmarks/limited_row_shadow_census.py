@@ -19,11 +19,17 @@ as line contours with the wall and nulls.
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
+import tarfile
+import tempfile
+import time
 from typing import Any
+import xml.etree.ElementTree as ET
 
 import jax
 import jax.numpy as jnp
@@ -52,6 +58,61 @@ LIMITED_CASES = (
     "weak-rotation-reactor-static",
     "moderate-rotation-conventional-static",
     "strong-rotation-compact-static",
+)
+BASE_REVISION = "3082be61cb6dd4a4d9cae1889993717c4e63e58c"
+CPU_TEST_MODULES = (
+    "tests/test_analytic_oracle_fixture_exterior.py",
+    "tests/test_batched_labeller.py",
+    "tests/test_batched_operator_boundary.py",
+    "tests/test_census_polish_compaction.py",
+    "tests/test_cold_seed_portfolio_raster.py",
+    "tests/test_connectivity_boundary.py",
+    "tests/test_constraint_response_matrix.py",
+    "tests/test_domain_participation_continuity.py",
+    "tests/test_edge_constraint_demonstration.py",
+    "tests/test_equilibrium_constraint_protocol.py",
+    "tests/test_equilibrium_flux_surface_geometry.py",
+    "tests/test_equilibrium_forward.py",
+    "tests/test_equilibrium_forward_constrained.py",
+    "tests/test_equilibrium_forward_reference.py",
+    "tests/test_equilibrium_forward_solve.py",
+    "tests/test_equilibrium_rotation.py",
+    "tests/test_equilibrium_sol.py",
+    "tests/test_equilibrium_source.py",
+    "tests/test_equilibrium_stencil_mesh.py",
+    "tests/test_forward_census.py",
+    "tests/test_forward_constraints.py",
+    "tests/test_forward_moment_class.py",
+    "tests/test_forward_operator_axes.py",
+    "tests/test_forward_operator_domain.py",
+    "tests/test_forward_operator_tangent.py",
+    "tests/test_forward_secondary_null.py",
+    "tests/test_forward_support_clip_mode.py",
+    "tests/test_hex_flood_coil_nulls.py",
+    "tests/test_hex_flood_geometries.py",
+    "tests/test_hex_flood_sn_secondary.py",
+    "tests/test_hex_flood_snowflake.py",
+    "tests/test_jax_topology.py",
+    "tests/test_limited_row_residual_shadow.py",
+    "tests/test_observable_reduction_parity.py",
+    "tests/test_plasma_cell_flood_families.py",
+    "tests/test_plasma_cell_shadow_telemetry.py",
+    "tests/test_plasma_cell_topology_read.py",
+    "tests/test_prescribed_current_solve.py",
+    "tests/test_prescribed_current_traced.py",
+    "tests/test_recovery_frozen_partition.py",
+    "tests/test_reduced_newton_constraint_bounds.py",
+    "tests/test_reduced_newton_constraints.py",
+    "tests/test_shape_constraints.py",
+    "tests/test_sol_closure.py",
+    "tests/test_sol_support_selection.py",
+    "tests/test_stationary_point_admission.py",
+    "tests/test_structured_read_census_rows.py",
+    "tests/test_topology_domain_partition.py",
+    "tests/test_topology_o_qualification.py",
+    "tests/test_wall_anchor_shadow.py",
+    "tests/test_wall_height_exclusion.py",
+    "tests/test_wall_units_solver.py",
 )
 
 
@@ -121,7 +182,7 @@ def _map_reapplication(operator, row: dict[str, Any]) -> dict[str, Any]:
 def _row_summary(mode: str, row: dict[str, Any], operator) -> dict[str, Any]:
     topology = row["geometry"]["root_topology"]
     amplitude = row["solver"]["lambda_amplitude_history"]["samples"][-1]["amplitude"]
-    return {
+    summary = {
         "mode": mode,
         "case": row["case"],
         "requested_cells": row["requested_cells"],
@@ -141,6 +202,50 @@ def _row_summary(mode: str, row: dict[str, Any], operator) -> dict[str, Any]:
         "x_candidate_count": topology["x_candidate_count"],
         "figure": row["figure"],
         "map_reapplication": _map_reapplication(operator, row),
+    }
+    baseline = _baseline_part(row["case"], abs(row["requested_cells"]))
+    summary["before"] = _metric_summary(baseline)
+    summary["terminal_flux_bit_identical_to_before"] = bool(
+        np.array_equal(
+            np.asarray(row["render_data"]["terminal_flux_wb"], dtype=np.float64),
+            np.asarray(baseline["render_data"]["terminal_flux_wb"], dtype=np.float64),
+        )
+    )
+    return summary
+
+
+def _baseline_part(case_name: str, cells: int) -> dict[str, Any]:
+    if case_name in LIMITED_CASES and cells == 1000:
+        path = (
+            ROOT
+            / "docs/figures/cut-cell-current-attribution/wholecell-rows/parts/rows"
+            / f"{case_name}-production-route-cells-{cells}.json"
+        )
+    elif case_name == certificate.DIVERTED_CASE_NAME and cells == 500:
+        path = (
+            ROOT
+            / "docs/figures/gs-absolute-accuracy/solovev/production-route-parts"
+            / f"{case_name}-production-route-cells-{cells}.json"
+        )
+    else:
+        raise ValueError(f"no committed comparison row for {case_name} at {cells}")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _metric_summary(row: dict[str, Any]) -> dict[str, Any]:
+    amplitude = row["solver"]["lambda_amplitude_history"]["samples"][-1]["amplitude"]
+    telemetry = row["solver"]["production_telemetry"]
+    return {
+        "axis_error_in_pitch": (
+            row["geometry"]["magnetic_axis_position_error_m"]
+            / row["characteristic_pitch_m"]
+        ),
+        "terminal_residual": row["solver"]["terminal_fixed_point_residual"],
+        "boundary_flux_error_from_analytic_zero_wb": row["geometry"][
+            "boundary_flux_error_wb"
+        ],
+        "plasma_current_amplitude": amplitude,
+        "converged": telemetry["converged"],
     }
 
 
@@ -194,6 +299,9 @@ def _solve_gate(output_root: Path) -> dict[str, Any]:
             row["map_reapplication"]["agrees_to_relative_1e_12"] for row in rows
         ),
         "diverted_private_shadow_retained": control["x_candidate_count"] >= 1,
+        "diverted_terminal_state_bit_identical": control[
+            "terminal_flux_bit_identical_to_before"
+        ],
     }
     receipt = {
         "schema": "nova.limited-row-shadow-solve-gate",
@@ -209,6 +317,160 @@ def _solve_gate(output_root: Path) -> dict[str, Any]:
         "LIMITED_SHADOW_SOLVE_EXIT=0 " + json.dumps(acceptance, sort_keys=True),
         flush=True,
     )
+    return receipt
+
+
+def _junit_counts(path: Path) -> dict[str, int]:
+    root = ET.parse(path).getroot()
+    suites = [root] if root.tag == "testsuite" else list(root.findall("testsuite"))
+    return {
+        key: sum(int(suite.attrib.get(key, 0)) for suite in suites)
+        for key in ("tests", "failures", "errors", "skipped")
+    }
+
+
+def _run_cpu_module(
+    arm: str,
+    source_root: Path,
+    module: str,
+    output_root: Path,
+) -> dict[str, Any]:
+    """Run one importing test module in an isolated CPU process."""
+    module_path = source_root / module
+    stem = module_path.stem
+    log_path = output_root / arm / f"{stem}.log"
+    junit_path = output_root / arm / f"{stem}.junit.xml"
+    if not module_path.exists():
+        result = {"module": module, "status": "absent"}
+        _write_json(output_root / arm / f"{stem}.json", result)
+        return result
+    with tempfile.TemporaryDirectory(prefix=f"nova-limited-{arm}-{stem}-") as cache:
+        environment = os.environ.copy()
+        environment.update(
+            {
+                "TMPDIR": "/tmp",
+                "JAX_PLATFORMS": "cpu",
+                "JAX_ENABLE_X64": "1",
+                "JAX_ENABLE_COMPILATION_CACHE": "1",
+                "JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS": "0",
+                "JAX_COMPILATION_CACHE_DIR": cache,
+                "OMP_NUM_THREADS": "1",
+                "OPENBLAS_NUM_THREADS": "1",
+                "MKL_NUM_THREADS": "1",
+                "NUMEXPR_NUM_THREADS": "1",
+                "PYTHONPATH": str(source_root),
+                "XLA_FLAGS": (
+                    "--xla_cpu_multi_thread_eigen=false intra_op_parallelism_threads=1"
+                ),
+            }
+        )
+        started = time.monotonic()
+        with log_path.open("w", encoding="utf-8") as log:
+            try:
+                completed = subprocess.run(
+                    [
+                        "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+                        "-m",
+                        "pytest",
+                        "-p",
+                        "no:cacheprovider",
+                        "-m",
+                        "not slow",
+                        "-q",
+                        f"--junitxml={junit_path}",
+                        str(module_path),
+                    ],
+                    cwd=source_root,
+                    env=environment,
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    timeout=600,
+                    check=False,
+                )
+                exit_status = completed.returncode
+                status = "passed" if exit_status == 0 else "failed"
+            except subprocess.TimeoutExpired:
+                exit_status = 124
+                status = "timed_out"
+        result = {
+            "module": module,
+            "status": status,
+            "exit_status": exit_status,
+            "wall_seconds": time.monotonic() - started,
+            "log": str(log_path),
+            "junit": str(junit_path),
+        }
+        if junit_path.exists():
+            result["counts"] = _junit_counts(junit_path)
+        _write_json(output_root / arm / f"{stem}.json", result)
+        return result
+
+
+def _cpu_delta_arm(arm: str, output_root: Path, base_revision: str) -> dict[str, Any]:
+    """Persist one base or after test-module arm as each process completes."""
+    output_root = output_root.resolve()
+    (output_root / arm).mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="nova-limited-shadow-source-") as scratch:
+        if arm == "base":
+            archive = Path(scratch) / "source.tar"
+            subprocess.run(
+                ["git", "archive", "--format=tar", "-o", str(archive), base_revision],
+                cwd=ROOT,
+                check=True,
+            )
+            source_root = Path(scratch) / "base"
+            source_root.mkdir()
+            with tarfile.open(archive) as stream:
+                stream.extractall(source_root, filter="data")
+            revision = base_revision
+        else:
+            source_root = ROOT
+            revision = _source_revision()
+        results: list[dict[str, Any]] = []
+        receipt_path = output_root / arm / "arm-receipt.json"
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            futures = {
+                pool.submit(
+                    _run_cpu_module, arm, source_root, module, output_root
+                ): module
+                for module in CPU_TEST_MODULES
+            }
+            for future in as_completed(futures):
+                results.append(future.result())
+                results.sort(key=lambda item: item["module"])
+                _write_json(
+                    receipt_path,
+                    {
+                        "schema": "nova.test-module-delta-arm",
+                        "arm": arm,
+                        "revision": revision,
+                        "completed": False,
+                        "results": results,
+                    },
+                )
+    failure_ids = [
+        result["module"]
+        for result in results
+        if result["status"] not in {"passed", "absent"}
+    ]
+    receipt = {
+        "schema": "nova.test-module-delta-arm",
+        "arm": arm,
+        "revision": revision,
+        "completed": True,
+        "module_count": len(results),
+        "failure_count": len(failure_ids),
+        "failure_ids": failure_ids,
+        "results": results,
+    }
+    _write_json(receipt_path, receipt)
+    print(
+        "LIMITED_SHADOW_CPU_ARM_EXIT="
+        f"{int(bool(failure_ids))} arm={arm} failures={len(failure_ids)}",
+        flush=True,
+    )
+    if failure_ids:
+        raise RuntimeError(f"{arm} CPU module failures: {failure_ids}")
     return receipt
 
 
@@ -514,6 +776,16 @@ def main() -> None:
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--solve-gate", action="store_true")
+    parser.add_argument("--cpu-delta-arm", choices=("base", "after"))
+    parser.add_argument("--base-revision", default=BASE_REVISION)
+    parser.add_argument(
+        "--cpu-report-root",
+        type=Path,
+        default=Path(
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/"
+            "s19-handoff/limited-shadow/cpu-delta"
+        ),
+    )
     arguments = parser.parse_args()
     if arguments.dry_run:
         print(
@@ -523,6 +795,13 @@ def main() -> None:
         return
     if arguments.solve_gate:
         _solve_gate(arguments.output_root)
+        return
+    if arguments.cpu_delta_arm:
+        _cpu_delta_arm(
+            arguments.cpu_delta_arm,
+            arguments.cpu_report_root,
+            arguments.base_revision,
+        )
         return
     _run(arguments.output_root)
 

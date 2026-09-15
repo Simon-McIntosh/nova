@@ -1,5 +1,11 @@
 """Focused contracts for exact-clip memory attribution."""
 
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+
 import jax.numpy as jnp
 import numpy as np
 import pytest
@@ -9,6 +15,113 @@ from nova.equilibrium.clip_quadrature import clipped_support_current_moments
 from nova.equilibrium.forward_operator import _cell_banked_current_moments
 from nova.equilibrium.separatrix_clip import TracedClippedSupports
 from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
+
+
+MAIN_CHECKOUT = Path("/home/ITER/mcintos/Code/nova")
+WORKTREE = Path(__file__).resolve().parents[1]
+WHOLE_CELL_CONTROL = (
+    WORKTREE
+    / "docs/figures/cut-cell-current-attribution/limited-shadow/solve-parts/chord"
+    / "diverted-single-null-production-route-cells-500.json"
+)
+
+TERMINAL_DRIVER = """\
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+import jax
+import numpy as np
+
+from benchmarks import solovev_certificate as certificate
+from nova.equilibrium import clip_quadrature
+from nova.equilibrium.forward_operator import set_support_clip_mode
+from nova.jax.config import configure_dtypes
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("output", type=Path)
+    parser.add_argument("case")
+    parser.add_argument("requested_cells", type=int)
+    parser.add_argument("mode", choices=("chord", "exact", "whole_cell"))
+    arguments = parser.parse_args()
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    if not hasattr(certificate.observation, "_UNIT_NODE"):
+        certificate.observation._UNIT_NODE = clip_quadrature._UNIT_NODE
+    if arguments.mode == "whole_cell":
+        from benchmarks import limited_row_shadow_census
+
+        certificate.oracle_fixture.cached_fixture_exterior = (
+            limited_row_shadow_census._whole_cell_fixture_exterior
+        )
+        set_support_clip_mode("chord")
+    else:
+        set_support_clip_mode(arguments.mode)
+    profile, seed, request, dimensions = certificate._certificate_compile_problem(
+        arguments.case, arguments.requested_cells
+    )
+    solved = profile.solve(request).equilibrium
+    jax.block_until_ready(solved.flux)
+    np.savez(
+        arguments.output,
+        flux=np.asarray(solved.flux, dtype=np.float64),
+        residual=np.asarray(float(solved.fixed_point.residual), dtype=np.float64),
+        amplitude=np.asarray(float(solved.normalisation.amplitude), dtype=np.float64),
+        converged=np.asarray(bool(solved.fixed_point.converged)),
+        realised_cells=np.asarray(dimensions["realised_cells"], dtype=np.int64),
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+"""
+
+
+def _run_terminal_driver(
+    checkout: Path,
+    driver: Path,
+    output: Path,
+    case: str,
+    requested_cells: int,
+    mode: str,
+) -> None:
+    """Run one production solve in a fresh CPU process and require its receipt."""
+    if output.is_file():
+        _terminal_arrays(output)
+        return
+    environment = dict(os.environ)
+    environment["PYTHONPATH"] = str(checkout)
+    environment["JAX_PLATFORMS"] = "cpu"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(driver),
+            str(output),
+            case,
+            str(requested_cells),
+            mode,
+        ],
+        cwd=str(WORKTREE),
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=3500,
+    )
+    if result.returncode != 0 or not output.is_file():
+        raise AssertionError(
+            f"terminal driver failed against {checkout}:\nstdout:\n{result.stdout}"
+            f"\nstderr:\n{result.stderr}"
+        )
+
+
+def _terminal_arrays(path: Path) -> dict[str, np.ndarray]:
+    with np.load(path) as receipt:
+        return {name: np.asarray(receipt[name]) for name in receipt.files}
 
 
 def test_scaling_exponent_identifies_linear_and_pairwise_growth():
@@ -122,3 +235,66 @@ def test_cell_banked_current_moments_are_bit_identical():
     )
     for one, other in zip(expected, actual, strict=True):
         assert np.array_equal(np.asarray(one), np.asarray(other))
+
+
+@pytest.mark.slow
+def test_exact_clip_terminal_state_matches_reference_bit_for_bit(tmp_path):
+    """The weak 300-cell exact solve retains every terminal binary64 value."""
+    output_root = Path(os.environ.get("NOVA_EXACT_CLIP_IDENTITY_ROOT", tmp_path))
+    output_root.mkdir(parents=True, exist_ok=True)
+    driver = output_root / "terminal_driver.py"
+    driver.write_text(TERMINAL_DRIVER, encoding="utf-8")
+    reference_path = output_root / "weak-300-reference.npz"
+    current_path = output_root / "weak-300-scan-current.npz"
+    for checkout, output in (
+        (MAIN_CHECKOUT, reference_path),
+        (WORKTREE, current_path),
+    ):
+        _run_terminal_driver(
+            checkout,
+            driver,
+            output,
+            "weak-rotation-reactor-static",
+            -300,
+            "exact",
+        )
+    reference = _terminal_arrays(reference_path)
+    current = _terminal_arrays(current_path)
+    assert int(reference["realised_cells"]) == 342
+    assert reference["flux"].size > int(reference["realised_cells"])
+    assert reference.keys() == current.keys()
+    for name in reference:
+        np.testing.assert_array_equal(current[name], reference[name])
+
+
+@pytest.mark.slow
+def test_whole_cell_terminal_state_matches_committed_control(tmp_path):
+    """The single-null 500-cell chord solve retains its committed state."""
+    output_root = Path(os.environ.get("NOVA_EXACT_CLIP_IDENTITY_ROOT", tmp_path))
+    output_root.mkdir(parents=True, exist_ok=True)
+    driver = output_root / "terminal_driver.py"
+    driver.write_text(TERMINAL_DRIVER, encoding="utf-8")
+    reference_path = output_root / "single-null-500-base-cpu.npz"
+    current_path = output_root / "single-null-500-current-cpu.npz"
+    for checkout, output in (
+        (MAIN_CHECKOUT, reference_path),
+        (WORKTREE, current_path),
+    ):
+        _run_terminal_driver(
+            checkout,
+            driver,
+            output,
+            "diverted-single-null",
+            -500,
+            "whole_cell",
+        )
+    reference = _terminal_arrays(reference_path)
+    current = _terminal_arrays(current_path)
+    committed = json.loads(WHOLE_CELL_CONTROL.read_text(encoding="utf-8"))
+    committed_flux = np.asarray(
+        committed["render_data"]["terminal_flux_wb"], dtype=np.float64
+    )
+    assert current["flux"].size == committed_flux.size
+    assert reference.keys() == current.keys()
+    for name in reference:
+        np.testing.assert_array_equal(current[name], reference[name])

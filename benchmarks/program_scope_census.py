@@ -389,7 +389,7 @@ def _group_constant(record: dict[str, Any], cells: int) -> str:
     ):
         return "flux-function amplitudes"
     if any(token in haystack for token in ("current_moment", "moment_geometry")):
-        if len(dims) >= 2 and cells in dims and max(dims) > 32:
+        if len(dims) >= 3:
             return "moment geometry"
     if (
         any(
@@ -408,15 +408,13 @@ def _group_constant(record: dict[str, Any], cells: int) -> str:
     if any(token in haystack for token in ("wall", "sample_node", "sample.")):
         return "wall and sample blocks"
 
-    if numeric_float and len(dims) == 2 and cells in dims:
-        other = dims[1] if dims[0] == cells else dims[0]
-        if other > 16:
-            return "interaction-matrix kernel blocks"
     if numeric_float and dims and dims[-1] == 2:
         return "wall and sample blocks"
-    if numeric_float and len(dims) >= 3 and cells in dims:
+    if numeric_float and len(dims) == 2 and min(dims) > 16:
+        return "interaction-matrix kernel blocks"
+    if numeric_float and len(dims) >= 3:
         return "moment geometry"
-    if numeric_integer and cells in dims:
+    if numeric_integer and len(dims) >= 1:
         return "mesh connectivity"
     return "other captured literals"
 
@@ -1360,6 +1358,69 @@ def reanalyze(
     return results
 
 
+def reclassify(
+    case_name: str,
+    cells: Iterable[int],
+    parts_dir: Path,
+    receipt_dir: Path | None = None,
+) -> dict[int, dict[str, Any]]:
+    """Reclassify persisted literal rows after validating grouping rules."""
+    results: dict[int, dict[str, Any]] = {}
+    for requested_cells in cells:
+        part_path = parts_dir / f"{case_name}_{requested_cells}c.json"
+        entry = json.loads(part_path.read_text(encoding="utf-8"))
+        for program in ("solve", "map"):
+            census = entry[program]["large_constants"]
+            groups: dict[str, dict[str, int]] = defaultdict(
+                lambda: {
+                    "literal_count": 0,
+                    "captured_bytes": 0,
+                    "direct_source_count": 0,
+                }
+            )
+            for item in census["literals"]:
+                signature = re.match(
+                    r"(?P<dtype>[a-z0-9]+)\[(?P<dims>[0-9,]*)\]", item["shape"]
+                )
+                dimensions = (
+                    [
+                        int(value)
+                        for value in signature.group("dims").split(",")
+                        if value
+                    ]
+                    if signature
+                    else []
+                )
+                group = _group_constant(
+                    {
+                        "meta": {"op_name": item.get("op_name")},
+                        "source": item.get("source"),
+                        "dimensions": dimensions,
+                        "dtype": item["dtype"],
+                    },
+                    requested_cells,
+                )
+                item["group"] = group
+                grouped = groups[group]
+                grouped["literal_count"] += 1
+                grouped["captured_bytes"] += item["bytes"]
+                grouped["direct_source_count"] += item.get("source") is not None
+            census["groups"] = dict(sorted(groups.items()))
+        part_path.write_text(json.dumps(entry, sort_keys=True), encoding="utf-8")
+        if receipt_dir is not None:
+            receipt_dir.mkdir(parents=True, exist_ok=True)
+            (receipt_dir / f"{requested_cells}.json").write_text(
+                json.dumps(_rung_receipt(entry), indent=2, sort_keys=True),
+                encoding="utf-8",
+            )
+        results[requested_cells] = entry
+        print(
+            f"CENSUS_RECLASSIFIED case={case_name} requested_cells={requested_cells}",
+            flush=True,
+        )
+    return results
+
+
 def _render_svg(entry: dict[str, Any], path: Path) -> None:
     """Render a treemap-like horizontal bar chart of instruction share at 1000 cells."""
     rows = _top(entry["solve"]["attributed"], 25, "instructions")
@@ -1883,6 +1944,11 @@ def main() -> None:
         default=None,
         help="rebuild reports from persisted optimized-HLO text without compiling",
     )
+    parser.add_argument(
+        "--reclassify-parts-dir",
+        default=None,
+        help="rebuild literal groups and reports from persisted census parts",
+    )
     parser.add_argument("--host-profile-path", default=None)
     parser.add_argument(
         "--profile-cached-entry",
@@ -1893,7 +1959,19 @@ def main() -> None:
     run_dir = Path(arguments.run_dir).resolve()
     run_dir.mkdir(parents=True, exist_ok=True)
     figure_dir = Path(arguments.figure_dir) if arguments.figure_dir else None
-    if arguments.reanalyze_hlo_dir:
+    if arguments.reclassify_parts_dir:
+        results = reclassify(
+            arguments.case,
+            arguments.cells,
+            Path(arguments.reclassify_parts_dir),
+            receipt_dir=figure_dir,
+        )
+        host_profile = (
+            json.loads(Path(arguments.host_profile_path).read_text(encoding="utf-8"))
+            if arguments.host_profile_path
+            else None
+        )
+    elif arguments.reanalyze_hlo_dir:
         results = reanalyze(
             arguments.case,
             arguments.cells,

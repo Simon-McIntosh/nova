@@ -26,10 +26,10 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="87">
+<meta name="plan-version" content="88">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-commits" content="797ab089,f8404c66,945f1ae2">
-<meta name="plan-impl" content="0.4">
+<meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d">
+<meta name="plan-impl" content="0.45">
 </head>
 <body>
 <main class="plan-doc">
@@ -484,6 +484,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260915T060912451169-cca-xpoint-cell-wedge-clip-oracle" data-who="s19h-cca-xcell-s" data-when="2026-09-15T07:29:06Z">
     <div class="r-comment-body"><p>X-point cell partitioned into four branch-paired fixed-capacity wedges with the saddle as a clip vertex and two roots on one edge retained; oracle job 1271095 on the single-null case at 300, 1000, 2500 cells (110 reference): core-wedge current within 2.7e-14 relative of the analytic integral, private and common-SOL current exactly 0.0, saddle and padding exact; importer gate 46 baseline plus 6 new tests, zero added failures; merged abe49efb</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s19h-xpoint-wedge-oracle-landed" data-who="reckon-ship s19-handoff" data-when="2026-09-15T07:34:00Z">
+    <div class="r-comment-body">cca-xpoint-cell-wedge-clip-oracle landed (codex sol, 1 h 19 min, one NEEDS-HELP answered): twelve commits 770f3cf6 to d03c171d merged at abe49efb, promoted 335874fb with gate passed and 6 tests added. The first half of section 3 is on main: separatrix_clip.py partitions a saddle cell into the core, private-flux and two common-SOL wedges with the saddle as a clip vertex, edge roots paired by branch with two roots on one edge retained (f57409c8, the 300-cell diagnosis found the saddle 6.5 mm from an edge and two distinct roots on edge 2 with same-sign endpoints, which the endpoint-only clip had missed), fixed-capacity polygons with exact-zero padding and no data-dependent shape; clip_quadrature.py integrates per-wedge moments with each wedge's profile and refuses an incomplete profile set. Oracle job 1271095 on the Cerfon-Freidberg single-null case at 300, 1000 and 2500 cells with 110 as reference: core-wedge current within 2.7e-14 relative of the analytic wedge integral, private and common-SOL current exactly 0.0, saddle insertion and padding exact; the X-point cell is selected by strict point-in-polygon on the analytic saddle, never by the census. Receipt, parts and four line-contour panels under docs/figures/cut-cell-current-attribution/xpoint-cell/. Importer gate: 46 baseline tests plus 6 new pass one module per fresh CPU process, zero added failures. The diff is purely additive (no existing line removed), so production behaviour is unchanged until the second half wires the wedges into the profile support, the plasma-cell partition and the null census and re-solves the eight certificate rows with the four limited rows as the bit-identical control (f-cca-002 stays open for that half); it is sequenced behind the mesh-arrays argument node on millisecond-converged-solve because both edit forward_operator.py. impl 0.40 to 0.45.</div>
 </div>
 </section>
 

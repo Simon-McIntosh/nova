@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T15:36:57",
+  "updated": "2026-09-15T15:38:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -165590,6 +165590,221 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T072552445870-pfs-shape-inverse-bounded-step",
+        "plan": "playable-forward-solve",
+        "section": "\u00a72",
+        "node": "pfs-shape-inverse-bounded-step",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 542,
+                "cached_input_tokens": 679741,
+                "input_tokens": 680287,
+                "output_tokens": 30,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 680317,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "nova/equilibrium/shape_inverse.py includes every turning-point row in the least-squares residual with uncommanded rows targeted at their previous values, and after each inverse step verifies the forward solve admits an axis and contracts the current delta by line search until it does, recording the accepted fraction; tests/test_shape_inverse.py passes on all_debug CPU (JAX_PLATFORMS=cpu, root venv python directly) with the null invariant exact and the 20 kA ceiling kept; the three receipts (upper point plus 20 mm, elongation plus 5 percent, the third banked command) under docs/figures/playable-forward-solve/shape-inverse/ carry a table of commanded, achieved and uncommanded drift per command with the elongation command producing an achieved shape (no NoQualifiedAxisError) and the uncommanded drift on the upper-point command below the 124 mm of the banked receipt; no H200 arm",
+          "estimated_hours": null,
+          "goal": "The regularised inverse step holds uncommanded turning points and contracts to an admissible forward solve",
+          "id": "pfs-shape-inverse-bounded-step",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T07:25:54Z",
+            "read_at": "2026-09-15T07:25:55Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 24.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T072552445870-pfs-shape-inverse-bounded-step/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/shape_inverse.py",
+            "tests/test_shape_inverse.py",
+            "docs/figures/playable-forward-solve/shape-inverse",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/shape-inverse",
+            "docs/evidence/archive/playable-forward-solve-landed.html",
+            "docs/plans/playable-forward-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-pfs-shapeinv-t",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T07:26:21Z",
+        "completed_at": "2026-09-15T11:02:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 12990,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "6a2e4f6c0ae17a09d376cbc13d464cc4a63920c5",
+        "commits": [
+          "587efe3fcd7f29e371ac899c52bfb9592c7e3a54",
+          "9636a2d11a2d8f03e54463797145661c25b54d99",
+          "6d8c6f89262b253596bea79f3afa5ad936ec7653",
+          "642f4cfee4474d2d2190740c6c4d0f96e969cced",
+          "06d017e215bdca5383ac500dd47fdb1f2cbf6b75",
+          "c773dcc3d6964edecdc4842d00e0a02a553e2457",
+          "b5559a8c56ad4fb0638fa587e2382f2d95d7b5a4",
+          "8283e70815314eb08cf982382e19b8521225c145",
+          "f12658a8c64395eff4d57a664ddd3a9102c235ac"
+        ],
+        "changed_lines": {
+          "added": 51726,
+          "removed": 13932,
+          "files": 11
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu PYTHONPATH=worktree .venv/bin/python -m pytest -p no:cacheprovider tests/test_shape_inverse.py -vv on all_debug at f12658a8 (17 passed, base 14 passed); three-command nonlinear receipt job 1271308 exit 0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/shape-inverse/final-test-shape-inverse.log",
+          "log_digest": "sha256:f5ea20dc144556d33fcf13273848a18052ba6760474fa463b9ed63930f8fe70c"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T072552445870-pfs-shape-inverse-bounded-step/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a0a3f5-ade1-7d10-bcce-cf5d48d0f3ce",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 40289024,
+            "cached_input_tokens_cumulative": 40289024,
+            "input_tokens": 40529578,
+            "input_tokens_cumulative": 40529578,
+            "output_tokens": 56818,
+            "output_tokens_cumulative": 56818,
+            "reasoning_output_tokens": 8233,
+            "reasoning_output_tokens_cumulative": 8233
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T11:02:51Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 33.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T11:02:51Z"
+            }
+          ],
+          "notional_cost_usd": 340.8116,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 40289024,
+          "cumulative_input_tokens": 80818602,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 65051
+        },
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": [
+          {
+            "path": "apps/playable/production.py",
+            "reason": "the production caller must pass the completed nonlinear solve as the admission referee and reuse the admitting solve; scope widened on the worker's NEEDS-HELP"
+          },
+          {
+            "path": "benchmarks/playable_shape_inverse_receipt.py",
+            "reason": "the receipt benchmark is the only writer of the three required receipts and had to serialise accepted fractions and held-row tables; scope widened on the worker's NEEDS-HELP"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-shape-inverse-bounded-step",
+          "session_id": "01a0a3f5-ade1-7d10-bcce-cf5d48d0f3ce",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T11:02:51Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 163.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -165902,6 +166117,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2565
+    "_version": 2566
   }
 }

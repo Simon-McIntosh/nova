@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T10:33:09",
+  "updated": "2026-09-15T10:37:25",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -162160,6 +162160,208 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T055731786145-bob-strict-exit-rows-persist-before-assert",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a72",
+        "node": "bob-strict-exit-rows-persist-before-assert",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 7153,
+                "cached_input_tokens": 552579,
+                "input_tokens": 559764,
+                "output_tokens": 379,
+                "reasoning_output_tokens": 148,
+                "total_tokens": 560143,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "A new CPU test in tests/test_strict_exit_incidence.py drives the extraction on a synthetic two-member batch whose second member differs between the exit-on and exit-off arms, asserting that rows for both members are written for both passes with a per-member terminal_state_difference field (maximum absolute flux difference plus the converged flag of each arm), that no exception is raised, and that cross-arm identity is asserted only over members converged in both arms; the existing tests in tests/test_strict_exit_incidence.py pass in one fresh all_debug CPU process with zero added failures; no GPU job is submitted",
+          "estimated_hours": null,
+          "goal": "benchmarks/strict_exit_incidence.py persists every per-member row of both strict-exit passes before any cross-arm identity assertion",
+          "id": "bob-strict-exit-rows-persist-before-assert",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-15T05:57:32Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T055731786145-bob-strict-exit-rows-persist-before-assert/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/strict_exit_incidence.py",
+            "tests/test_strict_exit_incidence.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/strict-exit-persist",
+            "docs/evidence/archive/batched-operator-boundary-landed.html",
+            "docs/plans/batched-operator-boundary.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-bob-persist-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-15T05:57:53Z",
+        "completed_at": "2026-09-15T08:33:26.045Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 9318,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 9333,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "0f872fd69bc1a3766fbb1610ee3412fca647887e",
+        "commits": [
+          "b0878d5eb423c7cb8c3007a798724db5b9e328d5",
+          "61c9ed3e73a61af2da43ac6530fc01698d2cd0b5"
+        ],
+        "changed_lines": {
+          "added": 215,
+          "removed": 68,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider tests/test_strict_exit_incidence.py (8 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/strict-exit-persist/strict_exit_incidence_gate.log",
+          "log_digest": "9f10e470f0c52ef214c91ec33c2ff20436e3f24e5567f555923cf81680a758a2"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T055731786145-bob-strict-exit-rows-persist-before-assert/manifest.md",
+        "scope_changed": false,
+        "session_id": "35c0f703-fee1-4154-8024-c812caaf4b31",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 9042001,
+            "input_tokens_cumulative": 9042001,
+            "output_tokens": 72814,
+            "output_tokens_cumulative": 72814,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T08:33:26.045Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 9365405,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 200000",
+          "elapsed_seconds": 9329.579,
+          "generated_tokens": 86894,
+          "generation_seconds": 9242.898,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 82.4,
+          "machine_seconds": 86.681,
+          "peak_input_tokens": 164815,
+          "tokens_per_second": 9.4,
+          "wall_tokens_per_second": 9.31
+        },
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/bob-strict-exit-rows-persist-before-assert",
+          "session_id": "35c0f703-fee1-4154-8024-c812caaf4b31",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T08:33:26.045Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 86.0,
+        "orientation_input_tokens": 2284804.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -162472,6 +162674,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2541
+    "_version": 2542
   }
 }

@@ -28,6 +28,7 @@ __all__ = [
     "forward_branch_selection_input",
     "initial_traced_selection_state",
     "scan_forward_branch_selection",
+    "select_achieved_forward_branch",
     "select_forward_branch",
     "traced_select_forward_branch",
 ]
@@ -542,6 +543,48 @@ def _pair(values, name: str) -> tuple[Any, Any]:
     return pair[0], pair[1]
 
 
+def _forward_selection_receipt(
+    state: TracedSelectionState,
+    step: TracedSelectionStep,
+    availability: BranchAvailability,
+    admissibility: BranchAdmissibility,
+    residuals: tuple[float, float],
+    policy: SelectionPolicy,
+) -> SelectionReceipt:
+    """Build the host receipt from one traced core transition."""
+
+    selected_code = int(step.selected_class)
+    previous_code = int(step.previous_class)
+    pending_code = int(state.pending_class)
+    selected = None if selected_code == _NO_CLASS else TopologyClass(selected_code)
+    previous = None if previous_code == _NO_CLASS else TopologyClass(previous_code)
+    pending = None if pending_code == _NO_CLASS else TopologyClass(pending_code)
+    state_selected_code = int(state.selected_class)
+    next_history = SelectionHistory(
+        selected_class=(
+            None
+            if state_selected_code == _NO_CLASS
+            else TopologyClass(state_selected_code)
+        ),
+        pending_class=pending,
+        pending_count=int(state.pending_count),
+        sequence_index=int(state.sequence_index),
+        degrade_path_firings=int(state.degrade_path_firings),
+        two_qualified_selections=int(state.two_qualified_selections),
+    )
+    return SelectionReceipt(
+        selected_class=selected,
+        previous_class=previous,
+        switched=bool(step.switched),
+        reason=_REASON_VALUES[int(step.reason_code)],
+        availability=availability,
+        admissibility=admissibility,
+        residuals=residuals,
+        policy=policy,
+        next_history=next_history,
+    )
+
+
 def select_forward_branch(
     portfolio: ForwardPortfolio,
     history: SelectionHistory,
@@ -587,33 +630,52 @@ def select_forward_branch(
         jnp.asarray(int(policy.cold_start_class), dtype=jnp.int8),
         jnp.asarray(policy.persistence_threshold, dtype=jnp.int32),
     )
-    selected_code = int(step.selected_class)
-    previous_code = int(step.previous_class)
-    pending_code = int(state.pending_class)
-    selected = None if selected_code == _NO_CLASS else TopologyClass(selected_code)
-    previous = None if previous_code == _NO_CLASS else TopologyClass(previous_code)
-    pending = None if pending_code == _NO_CLASS else TopologyClass(pending_code)
-    state_selected_code = int(state.selected_class)
-    next_history = SelectionHistory(
-        selected_class=(
-            None
-            if state_selected_code == _NO_CLASS
-            else TopologyClass(state_selected_code)
-        ),
-        pending_class=pending,
-        pending_count=int(state.pending_count),
-        sequence_index=int(state.sequence_index),
-        degrade_path_firings=int(state.degrade_path_firings),
-        two_qualified_selections=int(state.two_qualified_selections),
+    return _forward_selection_receipt(
+        state, step, availability, admissibility, residuals, policy
     )
-    return SelectionReceipt(
-        selected_class=selected,
-        previous_class=previous,
-        switched=bool(step.switched),
-        reason=_REASON_VALUES[int(step.reason_code)],
-        availability=availability,
-        admissibility=admissibility,
-        residuals=residuals,
-        policy=policy,
-        next_history=next_history,
+
+
+def select_achieved_forward_branch(
+    achieved_class: TopologyClass,
+    qualified: bool,
+    history: SelectionHistory,
+    policy: SelectionPolicy,
+    admissibility: BranchAdmissibility | None = None,
+    residual: float = 0.0,
+) -> SelectionReceipt:
+    """Select from the single branch one forward solve achieved.
+
+    A sweep pins a seed to one topology class per sample, so only that
+    class's qualification and residual describe the solve.  Availability is
+    the achieved class's qualification and nothing else: the alternate branch
+    is never considered converged.  This is the direct host path for a
+    single-branch solve and replaces constructing a portfolio-shaped shim
+    whose second residual duplicated the first.
+    """
+
+    achieved = TopologyClass(achieved_class)
+    if admissibility is None:
+        admissibility = BranchAdmissibility()
+    limited = bool(qualified) and achieved is TopologyClass.LIMITED
+    diverted = bool(qualified) and achieved is TopologyClass.DIVERTED
+    availability = BranchAvailability(limited=limited, diverted=diverted)
+    residuals = (float(residual), float(residual))
+    evidence = TracedSelectionInput(
+        flux=jnp.zeros((2,), dtype=jnp.asarray(residuals).dtype),
+        availability=jnp.asarray((limited, diverted), dtype=bool),
+        admissibility=jnp.asarray(
+            (admissibility.limited, admissibility.diverted), dtype=bool
+        ),
+        residuals=jnp.asarray(residuals),
+        p_diverted=jnp.asarray(0.5),
+        class_margin=jnp.asarray(jnp.nan),
+    )
+    state, step = traced_select_forward_branch(
+        evidence,
+        _history_to_traced(history, evidence.availability, evidence.admissibility),
+        jnp.asarray(int(policy.cold_start_class), dtype=jnp.int8),
+        jnp.asarray(policy.persistence_threshold, dtype=jnp.int32),
+    )
+    return _forward_selection_receipt(
+        state, step, availability, admissibility, residuals, policy
     )

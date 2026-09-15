@@ -12,6 +12,7 @@ import numpy as np
 import pytest
 
 from nova.equilibrium import (
+    BranchAdmissibility,
     ExplicitSolveSeed,
     ForwardSolveReceipt,
     ForwardSolveRequest,
@@ -20,6 +21,7 @@ from nova.equilibrium import (
     SelectionPolicy,
     SelectionReason,
 )
+from nova.equilibrium.branch_selection import select_achieved_forward_branch
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.topology import TopologyClass
 from nova.transport.coupled_window import (
@@ -336,6 +338,74 @@ def test_equilibrium_sweep_consumes_interpolated_sources_and_returns_receipts(
         assert np.isfinite(float(equilibrium.conservation.relative_divergence_j))
     assert profile.source is source_before
     np.testing.assert_array_equal(converged.flux, flux_before)
+
+
+def _sweep_policy(cold_start_class: TopologyClass) -> SelectionPolicy:
+    """Return the declared-class cold start the sweep uses for a warm seed."""
+    return SelectionPolicy(cold_start_class=cold_start_class, persistence_threshold=1)
+
+
+def test_achieved_qualified_class_selects_sole_valid():
+    """A qualified achieved class is the only available branch."""
+    selection = select_achieved_forward_branch(
+        TopologyClass.LIMITED,
+        qualified=True,
+        history=SelectionHistory(),
+        policy=_sweep_policy(TopologyClass.DIVERTED),
+        residual=1.0e-9,
+    )
+    assert selection.selected_class is TopologyClass.LIMITED
+    assert selection.reason is SelectionReason.SOLE_VALID
+    assert selection.availability.limited
+    assert not selection.availability.diverted
+    assert selection.residuals == (1.0e-9, 1.0e-9)
+
+
+def test_unqualified_achieved_class_reports_no_valid_branch():
+    """A non-qualifying achieved class leaves every branch unavailable."""
+    selection = select_achieved_forward_branch(
+        TopologyClass.DIVERTED,
+        qualified=False,
+        history=SelectionHistory(),
+        policy=_sweep_policy(TopologyClass.DIVERTED),
+        residual=2.5e-4,
+    )
+    assert selection.selected_class is None
+    assert selection.reason is SelectionReason.NO_VALID_BRANCH
+    assert not selection.availability.diverted
+    assert not selection.availability.limited
+
+
+def test_achieved_selection_keeps_history_continuity_across_samples():
+    """A later qualified achieved class persists the previously selected one."""
+    policy = _sweep_policy(TopologyClass.LIMITED)
+    first = select_achieved_forward_branch(
+        TopologyClass.LIMITED, True, SelectionHistory(), policy, residual=1.0e-9
+    )
+    second = select_achieved_forward_branch(
+        TopologyClass.LIMITED, True, first.next_history, policy, residual=1.0e-9
+    )
+    assert first.selected_class is TopologyClass.LIMITED
+    assert second.selected_class is TopologyClass.LIMITED
+    assert second.previous_class is TopologyClass.LIMITED
+    assert second.reason is SelectionReason.HISTORY_CONTINUITY
+    assert not second.switched
+    assert second.next_history.sequence_index == first.next_history.sequence_index + 1
+
+
+def test_coreless_achieved_class_is_inadmissible_and_selects_nothing():
+    """A converged achieved class with no core cells stays unselectable."""
+    selection = select_achieved_forward_branch(
+        TopologyClass.DIVERTED,
+        qualified=True,
+        history=SelectionHistory(),
+        policy=_sweep_policy(TopologyClass.DIVERTED),
+        admissibility=BranchAdmissibility(limited=True, diverted=False),
+        residual=1.0e-9,
+    )
+    assert selection.admissibility.diverted is False
+    assert selection.selected_class is None
+    assert selection.reason is SelectionReason.NO_VALID_BRANCH
 
 
 def _exchange_waveform(time, radial_points, channel, value):

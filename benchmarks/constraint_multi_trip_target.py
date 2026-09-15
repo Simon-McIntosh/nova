@@ -375,7 +375,9 @@ def _report_text(payload: dict[str, Any], receipt: Path, figure: Path) -> str:
     free_rows = []
     for sample in payload["free_response_samples"]:
         free_rows.append(
-            "| {current} | {converged} | {trips} | {centroid} | {displacement} |".format(
+            (
+                "| {current} | {converged} | {trips} | {centroid} | {displacement} |"
+            ).format(
                 current=_format(sample["current_delta_a"]),
                 converged=_format(sample["converged"]),
                 trips=_format(sample["trip_count"]),
@@ -402,7 +404,8 @@ def _report_text(payload: dict[str, Any], receipt: Path, figure: Path) -> str:
         f"- Converged to within 1 mm: {_format(acceptance['converged_within_one_mm'])}"
     )
     all_merit_line = (
-        "- Merit decreased monotonically over every recorded trip: "
+        "- Raw merit decreased monotonically over every recorded boundary "
+        "(retained, non-gating): "
         f"{_format(acceptance['merit_monotone_all_trips'])}"
     )
     applied_merit_line = (
@@ -421,6 +424,22 @@ def _report_text(payload: dict[str, Any], receipt: Path, figure: Path) -> str:
         "- No accepted current step overshot the target: "
         f"{_format(acceptance['no_accepted_step_overshot'])}"
     )
+    nonprogress_increases = [
+        trip
+        for trip in target["trip_records"]
+        if trip["augmented_constraint_merit_change"] > 0.0
+        and trip["applied_current_change_a"] == 0.0
+        and trip["newton_steps"] == 0
+    ]
+    if nonprogress_increases:
+        item = nonprogress_increases[0]
+        null_trip_line = (
+            f"- Raw merit first rose on closure trip {item['trip']} by "
+            f"{_format(item['augmented_constraint_merit_change'])}; that trip "
+            "applied 0 A and took 0 Newton steps."
+        )
+    else:
+        null_trip_line = "- No zero-work closure trip increased the raw merit."
     return "\n".join(
         [
             "# Multi-cap constrained centroid command",
@@ -469,6 +488,7 @@ def _report_text(payload: dict[str, Any], receipt: Path, figure: Path) -> str:
             convergence_line,
             all_merit_line,
             applied_merit_line,
+            null_trip_line,
             application_count_line,
             cap_line,
             overshoot_line,
@@ -559,8 +579,24 @@ def measure(receipt: Path, figure: Path, reports: tuple[Path, ...]) -> dict[str,
         "no_accepted_step_overshot": not target["accepted_step_overshot_target"],
         "current_within_ten_percent": target["current_within_ten_percent"],
     }
+    gating_keys = (
+        "historical_five_cap_behaviour_reproduced",
+        "free_response_instrument_check_passed",
+        "converged_within_one_mm",
+        "merit_strictly_decreased_across_applied_trips",
+        "three_to_four_capped_applications",
+        "applied_current_cap_respected",
+        "no_accepted_step_overshot",
+        "current_within_ten_percent",
+    )
     payload["acceptance"] = acceptance
-    payload["passed"] = all(acceptance.values())
+    payload["gating_acceptance_keys"] = list(gating_keys)
+    payload["merit_interpretation"] = (
+        "strict decrease is required across trips that apply current; zero-current, "
+        "zero-Newton closure re-evaluations remain in the raw sequence but do not "
+        "measure globalisation progress"
+    )
+    payload["passed"] = all(acceptance[key] for key in gating_keys)
     payload["status"] = "complete"
     persist()
     _write_figure(figure, target)

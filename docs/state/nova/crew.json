@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T03:05:50",
+  "updated": "2026-09-15T03:10:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -158296,6 +158296,220 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T185929330315-cca-private-region-parallel-kernel",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a74",
+        "node": "cca-private-region-parallel-kernel",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 913,
+                "cached_input_tokens": 724135,
+                "input_tokens": 725080,
+                "output_tokens": 2950,
+                "reasoning_output_tokens": 770,
+                "total_tokens": 728030,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. Never open any receipt larger than one megabyte in an editor (load it with json). Commit the benchmark before submitting any job; every SLURM job is sbatch detached from your shell with --output in the run directory, TMPDIR=/tmp exported in the submit environment and the payload, the root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python with PYTHONPATH at the worktree, never uv on a compute node; CPU work on all_debug (--time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu) in ONE job with rungs sharded inside and parts persisted as each lands; the H200 timing in one short job (betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8 --mem=64G --time=00:20:00, nvidia-smi prologue exiting 3 below 40 GiB free, XLA_PYTHON_CLIENT_PREALLOCATE=false, JAX_PLATFORMS=cuda,cpu). Write the manifest with the job id before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync. No production code change. Facts at this base (main): the census kernel timing (docs/figures/cut-cell-current-attribution/census-kernel/report.md) found the production hex read's cost at 550, 1074 and 2616 realised cells (1.4, 4.9, 30 ms per state) is 70 to 92 percent private-region exclusion, a sequential per-representative axis-component flood fill scaling as cells to the power 1.82, while the census itself costs 0.05 ms; nova/equilibrium/connectivity_boundary.py carries flood_fill_core and _linear_flood_fill_core (line 642, the one-cell-per-pass reference) selected by use_doubling at _flood_fill (line 652), label_saddle_aware_hex_connected_components, and wall_height_shadow_mask (line 410); benchmarks/census_kernel_timing.py and benchmarks/topology_read_resolution_ladder.py load the cached oracle machines (110 to 2500 requested cells), evaluate the analytic flux at the carriers and run the production read. First establish from the code and one traced call which flood variant the production hex read actually executes and how many passes it runs per representative candidate. Then build one benchmark that, on the analytic single-null flux at 500, 750, 1000 and 2500 cells, computes the private-region cell mask (cells outside the separatrix and below the admitted X-point that the axis component cannot reach) four ways and compares each to the production mask cell by cell: (a) the production flood as executed; (b) the doubling flood_fill_core with the pass count set from the mesh diameter; (c) pointer-jumping connected components over the confined-cell adjacency seeded at the axis cell, log2(cells) fully vectorised passes with no per-candidate loop; (d) a saddle-wedge level test, a cell is private when its flux is on the open side of the X-point level and its centroid lies on the private side of both separatrix legs given by the saddle Hessian eigenvectors at the admitted X-point, O(cells) with no passes at all, and report where (d) disagrees with (a) and why (curved legs far from the saddle, or hull cells). Membership identity against the production mask is the positive control per rung (report the count of differing cells for each). Then time each as a jitted function vmapped over 16 states on the H200 at the four rungs, per-state cost beside the production 1.4, 4.9 and 30 ms. One SVG of per-state cost against cells for the four formulations and one poloidal panel at 1000 cells with the committed nova.media painters (line contours, wall, analytic nulls, private cells shaded by hatching not colour fill, disagreeing cells outlined). The report states which formulation reproduces the production mask exactly at every rung and its cost, and the scaling exponent of each.",
+          "estimated_hours": 3.0,
+          "goal": "Measure three parallel formulations of the private-region cell mask against the production flood fill on the analytic single-null flux, for membership identity and device cost per state",
+          "id": "cca-private-region-parallel-kernel",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-14T18:59:30Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T185929330315-cca-private-region-parallel-kernel/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/private_region_parallel_kernel.py",
+            "docs/figures/cut-cell-current-attribution/private-region",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/private-region"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-private-region",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-14T18:59:45Z",
+        "completed_at": "2026-09-15T01:08:06.773Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 22085,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 22101,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "0fe9e4961fb167b1c6a6bc94d8514024823149c1",
+        "commits": [
+          "d7cd10828b1542bfcd917b758ca91ca35574d4e6"
+        ],
+        "changed_lines": {
+          "added": 4324,
+          "removed": 0,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug and H200 jobs: four private-region mask formulations against the production flood on the analytic single-null flux at 550, 814, 1074 and 2616 cells, membership compared cell by cell and per-state cost timed vmapped over 16 states; receipt persisted",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/private-region/receipt.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T185929330315-cca-private-region-parallel-kernel/manifest.md",
+        "scope_changed": false,
+        "session_id": "b37d3289-0d3f-4400-b2ca-aaaca1c57bc6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 35782096,
+            "input_tokens_cumulative": 35782096,
+            "output_tokens": 341348,
+            "output_tokens_cumulative": 341348,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T01:08:06.773Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 36935969,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 200000",
+          "elapsed_seconds": 22098.023,
+          "generated_tokens": 381862,
+          "generation_seconds": 20768.606,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 82.8,
+          "machine_seconds": 1329.417,
+          "peak_input_tokens": 165651,
+          "tokens_per_second": 18.39,
+          "wall_tokens_per_second": 17.28
+        },
+        "follow_on_paths": [
+          "saddle-cut/private"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": [
+          {
+            "path": "benchmarks/private_region_figures.py",
+            "reason": "figure renderer split out of the benchmark, same deliverable"
+          },
+          {
+            "path": "benchmarks/private_region_results.json",
+            "reason": "the benchmark's results receipt committed beside it"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-private-region-parallel-kernel",
+          "session_id": "b37d3289-0d3f-4400-b2ca-aaaca1c57bc6",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T01:08:06.773Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 291.0,
+        "orientation_input_tokens": 9106527.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -158608,6 +158822,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2493
+    "_version": 2494
   }
 }

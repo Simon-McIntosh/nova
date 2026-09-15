@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="74">
+<meta name="plan-version" content="75">
 </head>
 <body>
 <main class="plan-doc">
@@ -439,6 +439,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260914T201408570872-cca-dual-stencil-census-2" data-who="s19i-cca-dual-stencil-2" data-when="2026-09-14T20:36:06.179Z">
     <div class="r-comment-body"><p>The vertex-centred dual stencil (vertex value, three surrounding centroids, three adjacent vertices) admits the analytic saddle at every rung from 233 realised cells and misses only at 132; where both admit, its saddle position error is 0.012, 0.0066, 0.0066, 0.0061, 0.014, 0.011, 0.0034 and 0.0022 pitch at 233 to 2616 cells against the cell-centred own-node quadratic's 0.049, 0.031, 0.034, 0.031, 0.010, 0.012, 0.027 and 0.016, three to eight times better on seven of eight rungs. The analytic X-point sits 0.016 to 0.30 pitch from the nearest cell edge on these meshes, so the saddle is a near-boundary case at most rungs, which is where the vertex-centred fit is centred and the cell-centred one extrapolates. On the axis the two are comparable (0.004 to 0.011 pitch). Neither reaches the two-ring cubic's 1e-3 pitch, so the dual stencil is the second candidate and the consistency check, not the polish.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260914T185929330315-cca-private-region-parallel-kernel" data-who="s19i-cca-private-region" data-when="2026-09-15T01:08:06.773Z">
+    <div class="r-comment-body"><p>Pointer-jumping connected components over the confined-cell adjacency seeded at the axis cell reproduces the production private-region mask exactly (zero differing cells) at every rung and costs 0.021, 0.026, 0.020 and 0.047 ms per state for a batch of 16 at 550, 814, 1074 and 2616 cells, against the production per-representative flood&#x27;s 0.50, 0.75, 1.00 and 2.86 ms in the same harness (scaling exponent 1.12): 24 to 61 times faster, flat in cells, with no per-candidate loop. The doubling flood matches at 814 but disagrees on 3, 12 and 1492 cells at the other rungs with its pass count set from the diameter; the saddle-wedge level test is fastest (0.007 to 0.016 ms) but disagrees on 3 to 13 cells where the separatrix legs curve away from the saddle&#x27;s eigenvectors. Pointer jumping is the replacement for the exclusion stage that carried 70 to 92 percent of the production read.</p></div>
 </div>
 </section>
 

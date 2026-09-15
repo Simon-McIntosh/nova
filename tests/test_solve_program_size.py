@@ -2,7 +2,7 @@ from copy import deepcopy
 
 import pytest
 
-from benchmarks.program_scope_census import _executable_size
+from benchmarks.program_scope_census import _executable_size, _loop_inventory, reanalyze
 from benchmarks.solve_program_size_gate import (
     MAX_EXECUTABLE_BYTES,
     evaluate_gate,
@@ -91,8 +91,28 @@ def test_gate_requires_an_executable_measure():
     candidate = deepcopy(baseline)
     del candidate[1000]["solve"]["executable"]
 
-    with pytest.raises(ValueError, match="missing executable-size measurement"):
-        evaluate_gate(baseline, candidate)
+    result = evaluate_gate(baseline, candidate)
+
+    assert result["passed"] is False
+    assert any(
+        "1000-cell solve missing executable-size measurement" in failure
+        for failure in result["failures"]
+    )
+
+
+def test_gate_refuses_zero_generated_code_as_an_absent_measure():
+    baseline = _receipts()
+    candidate = deepcopy(baseline)
+    candidate[1000]["solve"]["executable"] = {
+        "serialized_bytes": None,
+        "generated_code_bytes": 0,
+        "serialization_error": "serialization refused",
+    }
+
+    result = evaluate_gate(baseline, candidate)
+
+    assert result["passed"] is False
+    assert any("serialization refused" in failure for failure in result["failures"])
 
 
 @pytest.mark.parametrize("generated_as_method", [False, True])
@@ -118,3 +138,55 @@ def test_executable_size_accepts_runtime_method_or_property(generated_as_method)
         "serialization_error": None,
     }
 
+
+def test_loop_inventory_finds_both_compiled_slice_budgets():
+    compiled = [row for row in _loop_inventory() if row["form"] == "jax.lax.fori_loop"]
+
+    assert {row["loop"] for row in compiled} >= {
+        "compiled Newton steps",
+        "compiled active-set trips",
+    }
+
+
+def test_reanalysis_preserves_executable_measurement(tmp_path, monkeypatch):
+    import json
+
+    from benchmarks import program_scope_census
+
+    case = "case"
+    hlo_dir = tmp_path / "hlo"
+    hlo_dir.mkdir()
+    (hlo_dir / f"{case}_300c_solve.hlo.txt").write_text("solve")
+    (hlo_dir / f"{case}_300c_map.hlo.txt").write_text("map")
+    parts_dir = tmp_path / "parts"
+    parts_dir.mkdir()
+    executable = {
+        "serialized_bytes": 123,
+        "generated_code_bytes": 0,
+        "serialization_error": None,
+    }
+    (parts_dir / f"{case}_300c.json").write_text(
+        json.dumps(
+            {
+                "compile_seconds": 4.5,
+                "solve": {"executable": executable},
+                "map": {"executable": executable},
+            }
+        )
+    )
+
+    census = {
+        "attributed": [],
+        "total_instructions": 1,
+        "total_bytes": 1,
+    }
+    monkeypatch.setattr(
+        program_scope_census, "_census_module", lambda *_a, **_k: census.copy()
+    )
+    monkeypatch.setattr(program_scope_census, "_top", lambda *_a, **_k: [])
+
+    results = reanalyze(case, [300], hlo_dir, tmp_path / "run")
+
+    assert results[300]["compile_seconds"] == 4.5
+    assert results[300]["solve"]["executable"] == executable
+    assert results[300]["map"]["executable"] == executable

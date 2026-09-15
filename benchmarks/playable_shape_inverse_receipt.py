@@ -29,6 +29,7 @@ from benchmarks.efit_forward_parity_slice import (
 )
 from benchmarks.label_seed_residual_field import _persisted_response_cache
 from nova.equilibrium.shape_inverse import (
+    NoAdmissibleShapeStepError,
     achieved_target,
     boundary_polygon,
     shape_response_matrix,
@@ -348,6 +349,11 @@ def _delta_regularisation_sweep(
                 else DELTA_REGULARISATION_WEIGHTS[-1]
             ),
             "selection": selection,
+            "admission_boundary": (
+                "The weight curve selects a 20 kA-compliant proposal and does "
+                "not encode a map-only admission boundary. The selected step's "
+                "completed nonlinear line search is the admission authority."
+            ),
         },
         selected_inverse,
     )
@@ -376,23 +382,23 @@ def _turning_point_table(previous, commanded, achieved) -> list[dict[str, Any]]:
     """Report commanded motion and achieved drift at every turning point."""
     before = _points(previous)
     target = _points(commanded)
-    after = _points(achieved)
+    after = None if achieved is None else _points(achieved)
     rows = []
-    for name, prior, requested, result in zip(
-        ("outer", "upper", "inner", "lower"),
-        before,
-        target,
-        after,
-        strict=True,
+    for index, (name, prior, requested) in enumerate(
+        zip(("outer", "upper", "inner", "lower"), before, target, strict=True)
     ):
         command_delta = requested - prior
-        achieved_delta = result - prior
         command_magnitude = float(np.linalg.norm(command_delta))
         is_commanded = command_magnitude > 1.0e-12
+        achieved_delta = None if after is None else after[index] - prior
         achieved_motion = (
-            float(np.dot(achieved_delta, command_delta) / command_magnitude)
-            if is_commanded
-            else 0.0
+            None
+            if achieved_delta is None
+            else (
+                float(np.dot(achieved_delta, command_delta) / command_magnitude)
+                if is_commanded
+                else 0.0
+            )
         )
         rows.append(
             {
@@ -400,10 +406,14 @@ def _turning_point_table(previous, commanded, achieved) -> list[dict[str, Any]]:
                 "commanded": is_commanded,
                 "commanded_delta_m": command_delta.tolist(),
                 "commanded_motion_m": command_magnitude,
-                "achieved_delta_m": achieved_delta.tolist(),
+                "achieved_delta_m": (
+                    None if achieved_delta is None else achieved_delta.tolist()
+                ),
                 "achieved_motion_m": achieved_motion,
                 "uncommanded_drift_m": (
-                    None if is_commanded else float(np.linalg.norm(achieved_delta))
+                    None
+                    if is_commanded or achieved_delta is None
+                    else float(np.linalg.norm(achieved_delta))
                 ),
             }
         )
@@ -786,23 +796,63 @@ def _arm_receipt(
     profile = machine.profile
     seed_current = np.asarray(solver.prescribed_current).copy()
     prior = achieved_target(profile, previous.flux)
+    arm_path = directory / f"{name}.json"
     inverse_started = perf_counter()
-    inverse = solve_shape_inverse(
-        profile,
-        target,
-        previous.flux,
-        prescribed_current=solver.prescribed_current,
-        free_circuits=machine.drivable_circuits,
-        gamma=gamma_factor,
-        current_step_fraction=solver.current_step_fraction,
-        current_step_reference=solver.reference_current,
-        delta_regularisation=delta_regularisation_weight,
-        delta_current_scale=DELTA_CURRENT_CEILING_A,
-        forward_solve=solver._forward_axis_referee(profile, previous.flux),
-    )
+    try:
+        inverse = solve_shape_inverse(
+            profile,
+            target,
+            previous.flux,
+            prescribed_current=solver.prescribed_current,
+            free_circuits=machine.drivable_circuits,
+            gamma=gamma_factor,
+            current_step_fraction=solver.current_step_fraction,
+            current_step_reference=solver.reference_current,
+            delta_regularisation=delta_regularisation_weight,
+            delta_current_scale=DELTA_CURRENT_CEILING_A,
+            forward_solve=solver._forward_axis_referee(profile, previous.flux),
+        )
+    except NoAdmissibleShapeStepError as error:
+        inverse_wall = perf_counter() - inverse_started
+        maximum_change = float(np.max(np.abs(error.proposed_delta)))
+        refusal_sequence = [
+            {
+                "fraction": fraction,
+                "maximum_absolute_current_change_a": fraction * maximum_change,
+                "refusal": "NoQualifiedAxisError",
+            }
+            for fraction in error.refusal_sequence
+        ]
+        payload = {
+            "arm": name,
+            "status": "forward_refused_all_nonzero_fractions",
+            "achieved_shape_status": "refused",
+            "runtime": runtime,
+            "previous_turning_points_m": _points(prior).tolist(),
+            "commanded_turning_points_m": _points(target).tolist(),
+            "achieved_turning_points_m": None,
+            "turning_point_table": _turning_point_table(prior, target, None),
+            "maximum_uncommanded_drift_m": None,
+            "accepted_fraction": None,
+            "admissibility_trials": len(refusal_sequence),
+            "admission_refusal_sequence": refusal_sequence,
+            "smallest_refused_fraction": error.refusal_sequence[-1],
+            "zero_fraction_admitted": False,
+            "gamma_factor_per_ampere": gamma_factor,
+            "delta_regularisation_weight": delta_regularisation_weight,
+            "delta_current_scale_a": DELTA_CURRENT_CEILING_A,
+            "delta_regularisation_sweep": delta_regularisation_sweep,
+            "maximum_absolute_active_current_change_a": maximum_change,
+            "within_twenty_ka_ceiling": bool(maximum_change <= DELTA_CURRENT_CEILING_A),
+            "commanded_change_against_consistency_floor": row_floor_table,
+            "inverse_wall_s": inverse_wall,
+            "converged": None,
+            "qualified_axis": False,
+        }
+        _write_command_receipt(arm_path, payload)
+        return payload, None
     inverse_wall = perf_counter() - inverse_started
     solver.prescribed_current = inverse.currents
-    arm_path = directory / f"{name}.json"
     persisted = {
         "arm": name,
         "status": "prescribed_currents_persisted",
@@ -936,6 +986,7 @@ def _arm_receipt(
     payload = {
         "arm": name,
         "status": "complete",
+        "achieved_shape_status": "achieved",
         "runtime": runtime,
         "previous_turning_points_m": _points(prior).tolist(),
         "commanded_turning_points_m": _points(target).tolist(),
@@ -1009,6 +1060,7 @@ def _null_receipt(
     payload = {
         "arm": "null-resolve",
         "status": "complete",
+        "achieved_shape_status": "achieved",
         "previous_turning_points_m": _points(prior).tolist(),
         "commanded_turning_points_m": _points(target).tolist(),
         "achieved_turning_points_m": _points(achieved).tolist(),
@@ -1054,43 +1106,65 @@ def _draw(arms: list[dict[str, Any]], path: Path) -> None:
     for row, arm in enumerate(arms):
         previous = np.asarray(arm["previous_turning_points_m"])
         commanded = np.asarray(arm["commanded_turning_points_m"])
-        achieved = np.asarray(arm["achieved_turning_points_m"])
+        achieved_points = arm["achieved_turning_points_m"]
+        achieved = None if achieved_points is None else np.asarray(achieved_points)
         shape_axis = axes[row, 0]
-        for points, marker, label in (
-            (previous, "o", "previous"),
-            (commanded, "x", "commanded"),
-            (achieved, "+", "achieved"),
-        ):
+        shapes = [(previous, "o", "previous"), (commanded, "x", "commanded")]
+        if achieved is not None:
+            shapes.append((achieved, "+", "achieved"))
+        for points, marker, label in shapes:
             closed = np.vstack((points, points[0]))
             shape_axis.plot(closed[:, 0], closed[:, 1], alpha=0.65)
             shape_axis.scatter(points[:, 0], points[:, 1], marker=marker, label=label)
-        for before, command, after in zip(previous, commanded, achieved, strict=True):
+        for index, (before, command) in enumerate(
+            zip(previous, commanded, strict=True)
+        ):
             shape_axis.plot(
                 [before[0], command[0]], [before[1], command[1]], color="0.75"
             )
-            shape_axis.plot(
-                [command[0], after[0]],
-                [command[1], after[1]],
-                color="tab:red",
-                linestyle=":",
-            )
+            if achieved is not None:
+                after = achieved[index]
+                shape_axis.plot(
+                    [command[0], after[0]],
+                    [command[1], after[1]],
+                    color="tab:red",
+                    linestyle=":",
+                )
         shape_axis.set_aspect("equal")
-        shape_axis.set_title(
-            f"{arm['arm']}: error {1000 * arm['final_turning_point_error_m']:.2f} mm"
-        )
+        if achieved is None:
+            shape_axis.set_title(
+                f"{arm['arm']}: refused {arm['admissibility_trials']} fractions"
+            )
+        else:
+            shape_axis.set_title(
+                f"{arm['arm']}: error "
+                f"{1000 * arm['final_turning_point_error_m']:.2f} mm"
+            )
         shape_axis.set_xlabel("R / m")
         shape_axis.set_ylabel("Z / m")
         shape_axis.legend()
 
-        currents = arm["coil_current_by_circuit_a"]
         current_axis = axes[row, 1]
-        current_axis.bar(range(len(currents)), list(currents.values()))
-        current_axis.set_title(
-            f"{arm['round_count']} rounds, {arm['total_trips']} trips, "
-            f"{arm['total_wall_s']:.3f} s"
-        )
-        current_axis.set_xlabel("circuit index")
-        current_axis.set_ylabel("current / A")
+        if achieved is None:
+            trials = arm["admission_refusal_sequence"]
+            current_axis.plot(
+                [trial["fraction"] for trial in trials],
+                [trial["maximum_absolute_current_change_a"] for trial in trials],
+                marker="o",
+            )
+            current_axis.set_xscale("log", base=2)
+            current_axis.set_title("nonlinear refusal sequence")
+            current_axis.set_xlabel("proposed current fraction")
+            current_axis.set_ylabel("maximum current change / A")
+        else:
+            currents = arm["coil_current_by_circuit_a"]
+            current_axis.bar(range(len(currents)), list(currents.values()))
+            current_axis.set_title(
+                f"{arm['round_count']} rounds, {arm['total_trips']} trips, "
+                f"{arm['total_wall_s']:.3f} s"
+            )
+            current_axis.set_xlabel("circuit index")
+            current_axis.set_ylabel("current / A")
     figure.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=160)
@@ -1303,13 +1377,20 @@ def measure(
             runtime,
         )
         arms.append(arm)
-        print(
-            f"ARM-DONE {name} error_mm="
-            f"{1000 * arm['final_turning_point_error_m']:.6g} "
-            f"rounds={arm['round_count']} trips={arm['total_trips']} "
-            f"wall_s={arm['total_wall_s']:.6g}",
-            flush=True,
-        )
+        if arm["achieved_shape_status"] == "refused":
+            print(
+                f"ARM-REFUSED {name} trials={arm['admissibility_trials']} "
+                f"smallest_fraction={arm['smallest_refused_fraction']:.6g}",
+                flush=True,
+            )
+        else:
+            print(
+                f"ARM-DONE {name} error_mm="
+                f"{1000 * arm['final_turning_point_error_m']:.6g} "
+                f"rounds={arm['round_count']} trips={arm['total_trips']} "
+                f"wall_s={arm['total_wall_s']:.6g}",
+                flush=True,
+            )
     if command is not None:
         return arms[0]
     negative_control_path = directory / NEGATIVE_CONTROL

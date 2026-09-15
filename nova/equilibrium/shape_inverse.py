@@ -70,6 +70,19 @@ PICARD_ROUNDS = 3
 IsofluxReference = Literal["boundary", "reference_point"]
 
 
+class NoAdmissibleShapeStepError(ValueError):
+    """Every nonzero fraction of a proposed shape-current step was refused."""
+
+    def __init__(
+        self,
+        refusal_sequence: Sequence[float],
+        proposed_delta: np.ndarray,
+    ) -> None:
+        self.refusal_sequence = tuple(float(value) for value in refusal_sequence)
+        self.proposed_delta = np.asarray(proposed_delta, dtype=float).copy()
+        super().__init__("no axis-admissible current fraction remains")
+
+
 @dataclass(frozen=True)
 class ShapeInverseResult:
     """The currents the inverse step commands and the system it solved."""
@@ -503,6 +516,7 @@ def _admissible_delta(
     """Contract one current update until its forward state admits an axis."""
     fraction = 1.0
     trials = 0
+    refusals = []
     while fraction >= 2.0**-20:
         candidate = initial_current.copy()
         candidate[free] += fraction * delta
@@ -516,8 +530,9 @@ def _admissible_delta(
             forward_solve=forward_solve,
         ):
             return fraction * delta, fraction, trials
+        refusals.append(fraction)
         fraction *= 0.5
-    raise ValueError("no axis-admissible current fraction remains")
+    raise NoAdmissibleShapeStepError(refusals, delta)
 
 
 def _consistency_floor(
@@ -1046,16 +1061,23 @@ def solve_shape_inverse(
             current_step_fraction,
         )
         current_step_limited = current_step_limited or limited
-        applied_round_delta, fraction, trials = _admissible_delta(
-            profile,
-            state,
-            initial_current,
-            free,
-            applied_round_delta,
-            requested_class=requested_class,
-            target_current=target_current,
-            forward_solve=(forward_solve if iteration == placement_rounds else None),
-        )
+        final_without_referee = iteration == placement_rounds and forward_solve is None
+        if final_without_referee:
+            fraction = 1.0
+            trials = 0
+        else:
+            applied_round_delta, fraction, trials = _admissible_delta(
+                profile,
+                state,
+                initial_current,
+                free,
+                applied_round_delta,
+                requested_class=requested_class,
+                target_current=target_current,
+                forward_solve=(
+                    forward_solve if iteration == placement_rounds else None
+                ),
+            )
         accepted_fraction = fraction
         admissibility_trials += trials
         current[free] = initial_current[free] + applied_round_delta
@@ -1135,6 +1157,7 @@ __all__ = [
     "FIELD_WEIGHT",
     "GAMMA",
     "PICARD_ROUNDS",
+    "NoAdmissibleShapeStepError",
     "ShapeInverseResult",
     "achieved_target",
     "boundary_polygon",

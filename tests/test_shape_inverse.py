@@ -13,6 +13,7 @@ import pytest
 from apps.playable.shape import PlasmaShape, move_bounding_box
 from nova.equilibrium.shape_inverse import (
     GAMMA,
+    NoAdmissibleShapeStepError,
     _admissible_delta,
     _cap_current_delta,
     achieved_target,
@@ -126,6 +127,33 @@ def test_axis_admissibility_contracts_the_current_delta():
     np.testing.assert_allclose(delta, [3.0])
     assert fraction == 0.25
     assert trials == 3
+
+
+def test_axis_admissibility_records_every_nonzero_refusal():
+    """An exhausted nonlinear referee reports each trial and never accepts zero."""
+
+    class Operator:
+        @staticmethod
+        def read(_flux, requested_class=None):
+            del requested_class
+            raise NoQualifiedAxisError("refused trial")
+
+    profile = SimpleNamespace(operator=Operator())
+    with pytest.raises(NoAdmissibleShapeStepError) as caught:
+        _admissible_delta(
+            profile,
+            jnp.zeros(1),
+            np.asarray([0.0]),
+            np.asarray([0]),
+            np.asarray([12.0]),
+            forward_solve=lambda current: jnp.asarray(current),
+        )
+
+    np.testing.assert_allclose(caught.value.proposed_delta, [12.0])
+    assert caught.value.refusal_sequence[0] == 1.0
+    assert caught.value.refusal_sequence[-1] == 2.0**-20
+    assert len(caught.value.refusal_sequence) == 21
+    assert 0.0 not in caught.value.refusal_sequence
 
 
 def test_response_matrix_matches_central_differences(machine, seed_target):

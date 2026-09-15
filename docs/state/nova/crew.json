@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T13:13:17",
+  "updated": "2026-09-15T13:15:15",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4802,6 +4802,15 @@
       {
         "id": "s19h-pfs-shapeinv-t",
         "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-pfs-termgate-s",
+        "harness": "codex",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -164080,6 +164089,310 @@
           "status": "failed",
           "error": "IntegrityError: UNIQUE constraint failed: runs.run_id"
         }
+      },
+      {
+        "run_id": "r-20260915T082752949902-fsa-transport-shim-delta-gate",
+        "plan": "forward-solve-api",
+        "section": "\u00a73",
+        "node": "fsa-transport-shim-delta-gate",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3429,
+                "cached_input_tokens": 815022,
+                "input_tokens": 818453,
+                "output_tokens": 431,
+                "reasoning_output_tokens": 65,
+                "total_tokens": 818884,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "Report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate/report.md lists, for every tests/test_transport_*.py module, the pass and fail counts and failure ids at a git archive of base 0f872fd6 and at fb402f8f (worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/fsa-transport-branch-selection-without-shim, PYTHONPATH set to it), one module per fresh python process inside ONE foreground srun on all_debug (--time=00:59:00, 4 CPUs, 64G, JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on the node, never a background task), with per-module logs beside the report and the added-failure set stated (expected empty); no source file is changed",
+          "estimated_hours": null,
+          "goal": "The per-module transport test delta between base 0f872fd6 and the shim-removal commit fb402f8f measured and recorded",
+          "id": "fsa-transport-shim-delta-gate",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T08:27:54Z",
+            "read_at": "2026-09-15T08:27:55Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 26.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T082752949902-fsa-transport-shim-delta-gate/manifest.md",
+          "plan": "forward-solve-api",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate",
+            "docs/evidence/archive/forward-solve-api-landed.html",
+            "docs/plans/forward-solve-api.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19h-fsa-shimgate-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T08:28:25Z",
+        "completed_at": "2026-09-15T11:07:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 9519,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "f420d52bc0bc207c387b2216df3be870e90bce0c",
+        "commits": [
+          "b2c6e9065226fbc6fb843e76d5a8458ba6975a4a",
+          "fd4521cc7355267476daeb300214f90cebd09cc1"
+        ],
+        "changed_lines": {
+          "added": 57,
+          "removed": 10,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "every tests/test_transport_*.py module one per fresh CPU process on all_debug at a git archive of base 0f872fd6 and at fb402f8f; jobs 1271211, 1271292, 1271339",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate/measurement-summary.json",
+          "log_digest": "sha256:5b69a46dd224d5a8f82161663035aac5cf4b18f1e98e3d32c1eac00ee33f4d46"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T082752949902-fsa-transport-shim-delta-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a42e-7f8c-75e0-bbcc-52fb38c44495",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 37284480,
+            "cached_input_tokens_cumulative": 37284480,
+            "input_tokens": 37750247,
+            "input_tokens_cumulative": 37750247,
+            "output_tokens": 38821,
+            "output_tokens_cumulative": 38821,
+            "reasoning_output_tokens": 10050,
+            "reasoning_output_tokens_cumulative": 10050
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T11:07:04Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 33.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T11:07:04Z"
+            }
+          ],
+          "notional_cost_usd": 11.102,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 5041,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 8341,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 453,
+              "log_fresh": true,
+              "manifest_commits": [
+                "96a0ddfd90c48a6ffa3bc033cba4f99a11da388b",
+                "353ecbdd92940539c54b1d041804bcf00ddfc6b0"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "52e95d058e98e22decdb793a8d1e675f7ea2c10e422d37e278e3999ea83b0812",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T060114136950-pfs-legacy-conditioning-checks-retarget/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan playable-forward-solve --section '\u00a78' --role review --spec-level exact --node review-of-pfs-legacy-conditioning-checks-retarget --goal 'attach an independent review to run r-20260915T060114136950-pfs-legacy-conditioning-checks-retarget' --done-when 'the review for r-20260915T060114136950-pfs-legacy-conditioning-checks-retarget parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260915T060114136950-pfs-legacy-conditioning-checks-retarget.json --time-budget 55m --session s19-handoff-20260915 --local",
+              "node": "pfs-legacy-conditioning-checks-retarget",
+              "phase": "starting",
+              "plan": "playable-forward-solve",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260915T060114136950-pfs-legacy-conditioning-checks-retarget",
+              "session": "s19-handoff-20260915",
+              "terminal_age_seconds": 542,
+              "terminal_at": "2026-09-15T08:19:11Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-legacy-conditioning-checks-retarget"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 2179,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 894,
+              "log_fresh": true,
+              "manifest_commits": [
+                "3b786c40",
+                "03066756",
+                "6a2b4428",
+                "fcc8f968"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "a23e495d4199b533276791268911547a2deb9f1ab50c702b05fa4b5fe9d16b40",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T073636283020-pfs-axis-flux-departure-projection/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan playable-forward-solve --section '\u00a78' --role review --spec-level exact --node review-of-pfs-axis-flux-departure-projection --goal 'attach an independent review to run r-20260915T073636283020-pfs-axis-flux-departure-projection' --done-when 'the review for r-20260915T073636283020-pfs-axis-flux-departure-projection parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260915T073636283020-pfs-axis-flux-departure-projection.json --time-budget 55m --session s19-handoff-20260915 --local",
+              "node": "pfs-axis-flux-departure-projection",
+              "phase": "starting",
+              "plan": "playable-forward-solve",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260915T073636283020-pfs-axis-flux-departure-projection",
+              "session": "s19-handoff-20260915",
+              "terminal_age_seconds": 937,
+              "terminal_at": "2026-09-15T08:12:37Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-axis-flux-departure-projection"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 37284480,
+          "cumulative_input_tokens": 75034727,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 48871
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/fsa-transport-shim-delta-gate",
+          "session_id": "01a0a42e-7f8c-75e0-bbcc-52fb38c44495",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T11:07:04Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 72.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -164392,6 +164705,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2552
+    "_version": 2554
   }
 }

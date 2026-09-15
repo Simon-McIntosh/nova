@@ -13,9 +13,9 @@
   },
   "analytic_moments": [
     [
-      39.349434938052866,
-      0.5431018946816852,
-      1.301594032372616
+      12.394305087667579,
+      0.9622662780763376,
+      -0.22328818805148146
     ],
     [
       0.0,
@@ -35,12 +35,12 @@
   ],
   "candidate_cells": [
     {
-      "cell": 5,
+      "cell": 9,
       "centroid_rz_m": [
-        1.5292083397583118,
-        -1.0566152705705434
+        1.4180122291353958,
+        -1.022978034837412
       ],
-      "characteristic_pitch_m": 0.09170987436549279,
+      "characteristic_pitch_m": 0.15145387287104764,
       "contains_contracted": true,
       "contains_expanded": true,
       "contains_strict": true,
@@ -49,174 +49,175 @@
         {
           "edge": 0,
           "end_rz_m": [
-            1.5007597881875883,
-            -1.10588960729278
+            1.3710309924608528,
+            -1.1043519237601385
           ],
           "endpoint_sign_change": true,
           "endpoint_signed_flux_wb": [
-            -1.9992020303949075e-05,
-            0.0001882729185640186
+            0.00014245587793700892,
+            -0.0005187142742089829
           ],
           "root_count": 1,
           "roots": [
             {
               "coordinate_rz_m": [
-                1.5545969674717433,
-                -1.10588960729278
+                1.432276628809834,
+                -1.1043519237601385
               ],
-              "flux_residual_wb": 0.0,
-              "fraction": 0.05377995870343613,
+              "flux_residual_wb": -4.4174370575882155e-18,
+              "fraction": 0.34819046193639613,
               "kind": "sign-change",
               "multiplicity": 1
             }
           ],
-          "saddle_distance_m": 0.08860960729278,
-          "saddle_fraction": 0.968922639031098,
+          "saddle_distance_m": 0.09481751507056199,
+          "saddle_fraction": -0.39946302872014,
           "saddle_on_edge": false,
           "start_rz_m": [
-            1.5576568913290354,
-            -1.10588960729278
+            1.4649934658099386,
+            -1.1043519237601385
           ]
         },
         {
           "edge": 1,
           "end_rz_m": [
-            1.4723112366168647,
-            -1.0566152705705434
+            1.32404975578631,
+            -1.022978034837412
           ],
           "endpoint_sign_change": false,
           "endpoint_signed_flux_wb": [
-            0.0001882729185640186,
-            5.782475208009863e-06
+            -0.0005187142742090182,
+            -0.0011837618990813066
           ],
           "root_count": 0,
           "roots": [],
-          "saddle_distance_m": 0.04960157558193326,
-          "saddle_fraction": 1.3331797374662484,
+          "saddle_distance_m": 0.15741571093060439,
+          "saddle_fraction": 0.10278565281277056,
           "saddle_on_edge": false,
           "start_rz_m": [
-            1.5007597881875883,
-            -1.10588960729278
+            1.3710309924608528,
+            -1.1043519237601385
           ]
         },
         {
           "edge": 2,
           "end_rz_m": [
-            1.5007597881875883,
-            -1.0073409338483068
+            1.371030992460853,
+            -0.9416041459146854
           ],
           "endpoint_sign_change": false,
           "endpoint_signed_flux_wb": [
-            5.782475208045202e-06,
-            1.726482624739914e-06
+            -0.0011837618990813066,
+            -0.0005577752050472958
           ],
-          "root_count": 2,
-          "roots": [
-            {
-              "coordinate_rz_m": [
-                1.4782059270670913,
-                -1.0464053672158597
-              ],
-              "flux_residual_wb": -1.3252311172764671e-17,
-              "fraction": 0.20720529252859518,
-              "kind": "sign-change",
-              "multiplicity": 1
-            },
-            {
-              "coordinate_rz_m": [
-                1.498720379408312,
-                -1.0108732934714155
-              ],
-              "flux_residual_wb": 0.0,
-              "fraction": 0.9283123861611579,
-              "kind": "sign-change",
-              "multiplicity": 1
-            }
-          ],
-          "saddle_distance_m": 0.006500849424666641,
-          "saddle_fraction": 0.8642570984351512,
+          "root_count": 0,
+          "roots": [],
+          "saddle_distance_m": 0.15171782322223137,
+          "saddle_fraction": 1.0022486815329121,
           "saddle_on_edge": false,
           "start_rz_m": [
-            1.4723112366168647,
-            -1.0566152705705434
+            1.32404975578631,
+            -1.022978034837412
           ]
         },
         {
           "edge": 3,
           "end_rz_m": [
-            1.5576568913290354,
-            -1.0073409338483068
+            1.4649934658099386,
+            -0.9416041459146856
           ],
           "endpoint_sign_change": true,
           "endpoint_signed_flux_wb": [
-            1.7264826247045745e-06,
-            -0.00011912526053526081
+            -0.0005577752050473135,
+            2.775314248104655e-05
           ],
           "root_count": 1,
           "roots": [
             {
               "coordinate_rz_m": [
-                1.5110225656274687,
-                -1.0073409338483068
+                1.4573415014633289,
+                -0.9416041459146856
               ],
               "flux_residual_wb": 0.0,
-              "fraction": 0.18037434022549503,
+              "fraction": 0.9185636129630023,
               "kind": "sign-change",
               "multiplicity": 1
             }
           ],
-          "saddle_distance_m": 0.009939066151693154,
-          "saddle_fraction": 0.031077360968902023,
+          "saddle_distance_m": 0.08447293145384902,
+          "saddle_fraction": 1.399463028720142,
           "saddle_on_edge": false,
           "start_rz_m": [
-            1.5007597881875883,
-            -1.0073409338483068
+            1.371030992460853,
+            -0.9416041459146854
           ]
         },
         {
           "edge": 4,
           "end_rz_m": [
-            1.586105442899759,
-            -1.0566152705705434
+            1.5119747024844816,
+            -1.022978034837412
           ],
-          "endpoint_sign_change": false,
+          "endpoint_sign_change": true,
           "endpoint_signed_flux_wb": [
-            -0.00011912526053529615,
-            -0.0003300489123271223
+            2.775314248111723e-05,
+            -3.65764963974865e-06
           ],
-          "root_count": 0,
-          "roots": [],
-          "saddle_distance_m": 0.05601767306070774,
-          "saddle_fraction": -0.33317973746624957,
+          "root_count": 1,
+          "roots": [
+            {
+              "coordinate_rz_m": [
+                1.5061976872519096,
+                -1.012971950938498
+              ],
+              "flux_residual_wb": -6.626155586382323e-18,
+              "fraction": 0.8770356925129141,
+              "kind": "sign-change",
+              "multiplicity": 1
+            }
+          ],
+          "saddle_distance_m": 0.005332066914848744,
+          "saddle_fraction": 0.8972143471872281,
           "saddle_on_edge": false,
           "start_rz_m": [
-            1.5576568913290354,
-            -1.0073409338483068
+            1.4649934658099386,
+            -0.9416041459146856
           ]
         },
         {
           "edge": 5,
           "end_rz_m": [
-            1.5576568913290354,
-            -1.10588960729278
+            1.4649934658099386,
+            -1.1043519237601385
           ],
-          "endpoint_sign_change": false,
+          "endpoint_sign_change": true,
           "endpoint_signed_flux_wb": [
-            -0.0003300489123271576,
-            -1.9992020303984413e-05
+            -3.6576496397839897e-06,
+            0.00014245587793700892
           ],
-          "root_count": 0,
-          "roots": [],
-          "saddle_distance_m": 0.09204782401980657,
-          "saddle_fraction": 0.13574290156484986,
+          "root_count": 1,
+          "roots": [
+            {
+              "coordinate_rz_m": [
+                1.508983089057497,
+                -1.0281596612895547
+              ],
+              "flux_residual_wb": -6.626155586382323e-18,
+              "fraction": 0.06367677053094158,
+              "kind": "sign-change",
+              "multiplicity": 1
+            }
+          ],
+          "saddle_distance_m": 0.011032125309235533,
+          "saddle_fraction": -0.0022486815329103116,
           "saddle_on_edge": false,
           "start_rz_m": [
-            1.586105442899759,
-            -1.0566152705705434
+            1.5119747024844816,
+            -1.022978034837412
           ]
         }
       ],
-      "nearest_edge_distance_m": 0.006500849424666641,
+      "nearest_edge_distance_m": 0.005332066914848744,
       "selected": true,
       "wedge_shape": {
         "saddle_row": true,
@@ -234,7 +235,7 @@
             ],
             "nonzero_padding_coordinates_rz_m": [],
             "nonzero_padding_slots": [],
-            "vertex_count": 5,
+            "vertex_count": 4,
             "wedge": 0
           },
           {
@@ -264,7 +265,7 @@
             ],
             "nonzero_padding_coordinates_rz_m": [],
             "nonzero_padding_slots": [],
-            "vertex_count": 3,
+            "vertex_count": 6,
             "wedge": 2
           },
           {
@@ -279,7 +280,7 @@
             ],
             "nonzero_padding_coordinates_rz_m": [],
             "nonzero_padding_slots": [],
-            "vertex_count": 6,
+            "vertex_count": 4,
             "wedge": 3
           }
         ]
@@ -291,23 +292,23 @@
     0.0
   ],
   "completed": true,
-  "core_current_relative_error": 3.611450771167084e-16,
+  "core_current_relative_error": 2.866408123465894e-16,
   "exact_zero_padding": true,
-  "figure_src": "/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-300.svg",
+  "figure_src": "/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-110.svg",
   "machine_cache": {
     "build_seconds": 0.0,
     "hit": true,
-    "load_seconds": 0.07319723069667816,
-    "lock_wait_seconds": 9.3020498752594e-06,
-    "semantic_key": "170918b0837562c5",
-    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_300.zarr",
+    "load_seconds": 0.12917477637529373,
+    "lock_wait_seconds": 1.80024653673172e-05,
+    "semantic_key": "0f57b1368c29a88a",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_110.zarr",
     "store_seconds": 0.0
   },
   "measured_moments": [
     [
-      39.34943493805285,
-      0.5431018946816856,
-      1.3015940323726172
+      12.394305087667583,
+      0.9622662780763379,
+      -0.22328818805148132
     ],
     [
       0.0,
@@ -328,8 +329,8 @@
   "observed_nulls": {
     "axis_admitted": true,
     "axis_rz_m": [
-      1.7844681007475904,
-      0.046746542734105535
+      1.7819753326239467,
+      0.046494278987530155
     ],
     "saddle_admitted": false,
     "saddle_rz_m": null
@@ -342,13 +343,13 @@
     "zero-sol",
     "zero-sol"
   ],
-  "realised_cells": 340,
-  "reference": false,
+  "realised_cells": 132,
+  "reference": true,
   "relative_moment_error": [
     [
-      3.611450771167084e-16,
-      6.13267806003069e-16,
-      8.52971815337369e-16
+      2.866408123465894e-16,
+      3.461275896037629e-16,
+      6.215191197043878e-16
     ],
     [
       0.0,
@@ -366,27 +367,27 @@
       0.0
     ]
   ],
-  "requested_cells": 300,
+  "requested_cells": 110,
   "saddle_case": "interior-four-crossing",
   "saddle_inserted_as_first_vertex": true,
   "schema": "nova.xpoint-cell-wedge-oracle-part",
   "source_revision": "8e8d8e9741b33368637dccb98972347de72d0e1b",
   "stage": "complete",
   "version": 1,
-  "wall_seconds": 6.516008650884032,
-  "wedge_area_closure_m2": -3.469446951953614e-18,
+  "wall_seconds": 9.177462365478277,
+  "wedge_area_closure_m2": 3.469446951953614e-18,
   "wedge_area_m2": [
-    0.0017400201262900048,
-    0.000248460838498669,
-    0.00013336136569977583,
-    0.00628885872564602
+    0.0005724342025275621,
+    0.004190000531809759,
+    0.0176398272429074,
+    0.0005360136303947417
   ],
   "wedge_vertex_capacity": 12,
   "wedge_vertex_count": [
-    5,
     4,
-    3,
-    6
+    4,
+    6,
+    4
   ],
-  "xpoint_cell": 5
+  "xpoint_cell": 9
 }

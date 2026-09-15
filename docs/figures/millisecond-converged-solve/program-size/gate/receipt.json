@@ -1,0 +1,64 @@
+{
+  "failures": [
+    "300-cell solve 'current-moment path' has 120 traced copies",
+    "300-cell solve 'topology read' has 2 traced copies",
+    "1000-cell solve 'current-moment path' has 120 traced copies",
+    "1000-cell solve 'topology read' has 2 traced copies",
+    "1000-cell solve executable size is absent: JaxRuntimeError: INTERNAL: Failed to serialize CpuAotCompilationResult."
+  ],
+  "passed": false,
+  "rows": [
+    {
+      "after": {
+        "executable_bytes": 436447170,
+        "executable_measure": "serialized executable",
+        "instruction_ratio": 20.450956696878148,
+        "map_instructions": 9930,
+        "map_operator_copies": {
+          "current-moment path": 1,
+          "topology read": 1
+        },
+        "operator_copies": {
+          "current-moment path": 120,
+          "topology read": 2
+        },
+        "solve_instructions": 203078
+      },
+      "before": {
+        "map_instructions": 9908,
+        "operator_copies": {
+          "current-moment path": 120,
+          "topology read": 8
+        },
+        "solve_instructions": 654832
+      },
+      "requested_cells": 300
+    },
+    {
+      "after": {
+        "executable_bytes": null,
+        "executable_measure": "unavailable",
+        "instruction_ratio": 20.35944654588891,
+        "map_instructions": 10046,
+        "map_operator_copies": {
+          "current-moment path": 1,
+          "topology read": 1
+        },
+        "operator_copies": {
+          "current-moment path": 120,
+          "topology read": 2
+        },
+        "solve_instructions": 204531
+      },
+      "before": {
+        "map_instructions": 10024,
+        "operator_copies": {
+          "current-moment path": 120,
+          "topology read": 8
+        },
+        "solve_instructions": 662331
+      },
+      "requested_cells": 1000
+    }
+  ]
+}

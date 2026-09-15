@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="690" font-family="DejaVu Sans, Arial, sans-serif" font-size="12">
+<rect width="980" height="690" fill="#ffffff"/>
+<text x="14" y="24" font-size="15" font-weight="bold" fill="#1a1a1a">Solve instruction share by function (1000 cells)</text>
+<text x="14" y="40" font-size="11" fill="#555">204531 instructions total</text>
+<rect x="300" y="56" width="660" height="18" fill="rgb(56,159,199)" rx="2"/>
+<text x="290" y="69" text-anchor="end" fill="#222">_quadrature_from_arrays</text>
+<text x="966" y="69" fill="#333">37,276  (18.2%)</text>
+<text x="972" y="69" text-anchor="end" fill="#777" font-size="10">clip_quadrature.py:91</text>
+<rect x="300" y="82" width="344" height="18" fill="rgb(39,169,216)" rx="2"/>
+<text x="290" y="95" text-anchor="end" fill="#222">clipped_support_current_moments</text>
+<text x="650" y="95" fill="#333">19,435  (9.5%)</text>
+<text x="972" y="95" text-anchor="end" fill="#777" font-size="10">clip_quadrature.py:414</text>
+<rect x="300" y="108" width="123" height="18" fill="rgb(26,176,229)" rx="2"/>
+<text x="290" y="121" text-anchor="end" fill="#222">FluxFieldPolynomial.sample</text>
+<text x="429" y="121" fill="#333">7,000  (3.4%)</text>
+<text x="972" y="121" text-anchor="end" fill="#777" font-size="10">stencil_mesh.py:145</text>
+<rect x="300" y="134" width="99" height="18" fill="rgb(25,177,230)" rx="2"/>
+<text x="290" y="147" text-anchor="end" fill="#222">_active_set_newton_krylov</text>
+<text x="405" y="147" fill="#333">5,625  (2.8%)</text>
+<text x="972" y="147" text-anchor="end" fill="#777" font-size="10">fixed_point.py:3837</text>
+<rect x="300" y="160" width="88" height="18" fill="rgb(24,178,231)" rx="2"/>
+<text x="290" y="173" text-anchor="end" fill="#222">_integrate_current_points</text>
+<text x="394" y="173" fill="#333">5,019  (2.5%)</text>
+<text x="972" y="173" text-anchor="end" fill="#777" font-size="10">clip_quadrature.py:279</text>
+<rect x="300" y="186" width="75" height="18" fill="rgb(24,178,231)" rx="2"/>
+<text x="290" y="199" text-anchor="end" fill="#222">reduce_sum</text>
+<text x="381" y="199" fill="#333">4,265  (2.1%)</text>
+<text x="972" y="199" text-anchor="end" fill="#777" font-size="10"></text>
+<rect x="300" y="212" width="60" height="18" fill="rgb(23,178,232)" rx="2"/>
+<text x="290" y="225" text-anchor="end" fill="#222">ForwardFluxOperator.current_nor...</text>
+<text x="366" y="225" fill="#333">3,415  (1.7%)</text>
+<text x="972" y="225" text-anchor="end" fill="#777" font-size="10">forward_operator.py:2444</text>
+<rect x="300" y="238" width="53" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="251" text-anchor="end" fill="#222">clipped_support_current_moments...</text>
+<text x="359" y="251" fill="#333">3,006  (1.5%)</text>
+<text x="972" y="251" text-anchor="end" fill="#777" font-size="10">clip_quadrature.py:422</text>
+<rect x="300" y="264" width="49" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="277" text-anchor="end" fill="#222">IsothermalRotation.centrifugal_...</text>
+<text x="355" y="277" fill="#333">2,799  (1.4%)</text>
+<text x="972" y="277" text-anchor="end" fill="#777" font-size="10">rotation.py:171</text>
+<rect x="300" y="290" width="42" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="303" text-anchor="end" fill="#222">clipped_support_current_moments...</text>
+<text x="348" y="303" fill="#333">2,404  (1.2%)</text>
+<text x="972" y="303" text-anchor="end" fill="#777" font-size="10">clip_quadrature.py:406</text>
+<rect x="300" y="316" width="41" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="329" text-anchor="end" fill="#222">_FixedDesignNull2D._compatibili...</text>
+<text x="347" y="329" fill="#333">2,367  (1.2%)</text>
+<text x="972" y="329" text-anchor="end" fill="#777" font-size="10">forward_operator.py:787</text>
+<rect x="300" y="342" width="40" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="355" text-anchor="end" fill="#222">ForwardFluxOperator.scaled_curr...</text>
+<text x="346" y="355" fill="#333">2,295  (1.1%)</text>
+<text x="972" y="355" text-anchor="end" fill="#777" font-size="10">forward_operator.py:2422</text>
+<rect x="300" y="368" width="37" height="18" fill="rgb(22,179,233)" rx="2"/>
+<text x="290" y="381" text-anchor="end" fill="#222">_traced_clip</text>
+<text x="343" y="381" fill="#333">2,107  (1.0%)</text>
+<text x="972" y="381" text-anchor="end" fill="#777" font-size="10">separatrix_clip.py:1216</text>
+<rect x="300" y="394" width="35" height="18" fill="rgb(21,179,234)" rx="2"/>
+<text x="290" y="407" text-anchor="end" fill="#222">FluxTarget.internal</text>
+<text x="341" y="407" fill="#333">2,016  (1.0%)</text>
+<text x="972" y="407" text-anchor="end" fill="#777" font-size="10">target.py:582</text>
+<rect x="300" y="420" width="33" height="18" fill="rgb(21,179,234)" rx="2"/>
+<text x="290" y="433" text-anchor="end" fill="#222">InteriorCurrentMomentStencil.fl...</text>
+<text x="339" y="433" fill="#333">1,892  (0.9%)</text>
+<text x="972" y="433" text-anchor="end" fill="#777" font-size="10">stencil_mesh.py:233</text>
+<rect x="300" y="446" width="32" height="18" fill="rgb(21,179,234)" rx="2"/>
+<text x="290" y="459" text-anchor="end" fill="#222">_smooth_relative_sup_merit</text>
+<text x="338" y="459" fill="#333">1,822  (0.9%)</text>
+<text x="972" y="459" text-anchor="end" fill="#777" font-size="10">fixed_point.py:875</text>
+<rect x="300" y="472" width="31" height="18" fill="rgb(21,179,234)" rx="2"/>
+<text x="290" y="485" text-anchor="end" fill="#222">ForwardFluxOperator.coupling_cu...</text>
+<text x="337" y="485" fill="#333">1,754  (0.9%)</text>
+<text x="972" y="485" text-anchor="end" fill="#777" font-size="10">forward_operator.py:2152</text>
+<rect x="300" y="498" width="29" height="18" fill="rgb(21,180,234)" rx="2"/>
+<text x="290" y="511" text-anchor="end" fill="#222">_rebuilt_model_promotion.<local...</text>
+<text x="335" y="511" fill="#333">1,666  (0.8%)</text>
+<text x="972" y="511" text-anchor="end" fill="#777" font-size="10">fixed_point.py:1284</text>
+<rect x="300" y="524" width="29" height="18" fill="rgb(21,180,234)" rx="2"/>
+<text x="290" y="537" text-anchor="end" fill="#222">Topology.boundary</text>
+<text x="335" y="537" fill="#333">1,659  (0.8%)</text>
+<text x="972" y="537" text-anchor="end" fill="#777" font-size="10">topology.py:635</text>
+<rect x="300" y="550" width="28" height="18" fill="rgb(21,180,234)" rx="2"/>
+<text x="290" y="563" text-anchor="end" fill="#222">_rebuilt_model_promotion</text>
+<text x="334" y="563" fill="#333">1,600  (0.8%)</text>
+<text x="972" y="563" text-anchor="end" fill="#777" font-size="10">fixed_point.py:1337</text>
+<rect x="300" y="576" width="25" height="18" fill="rgb(21,180,234)" rx="2"/>
+<text x="290" y="589" text-anchor="end" fill="#222">mul</text>
+<text x="331" y="589" fill="#333">1,468  (0.7%)</text>
+<text x="972" y="589" text-anchor="end" fill="#777" font-size="10"></text>
+<rect x="300" y="602" width="24" height="18" fill="rgb(21,180,234)" rx="2"/>
+<text x="290" y="615" text-anchor="end" fill="#222">RotatingDomainProfile.pressure_...</text>
+<text x="330" y="615" fill="#333">1,389  (0.7%)</text>
+<text x="972" y="615" text-anchor="end" fill="#777" font-size="10">rotation.py:272</text>
+<rect x="300" y="628" width="24" height="18" fill="rgb(21,180,234)" rx="2"/>
+<text x="290" y="641" text-anchor="end" fill="#222">reduce_window_sum</text>
+<text x="330" y="641" fill="#333">1,376  (0.7%)</text>
+<text x="972" y="641" text-anchor="end" fill="#777" font-size="10"></text>
+<rect x="300" y="654" width="23" height="18" fill="rgb(21,180,234)" rx="2"/>
+<text x="290" y="667" text-anchor="end" fill="#222">clipped_support_current_moments...</text>
+<text x="329" y="667" fill="#333">1,332  (0.7%)</text>
+<text x="972" y="667" text-anchor="end" fill="#777" font-size="10">clip_quadrature.py:395</text>
+<rect x="300" y="680" width="23" height="18" fill="rgb(21,180,234)" rx="2"/>
+<text x="290" y="693" text-anchor="end" fill="#222">Null2D.interpolate</text>
+<text x="329" y="693" fill="#333">1,322  (0.6%)</text>
+<text x="972" y="693" text-anchor="end" fill="#777" font-size="10">null.py:212</text>
+</svg>

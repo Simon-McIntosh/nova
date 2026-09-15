@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T11:27:31",
+  "updated": "2026-09-15T12:02:21",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4625,6 +4625,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-14"
+      },
+      {
+        "id": "s19h-bob-diiid-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
       },
       {
         "id": "s19h-bob-persist-c",
@@ -163163,6 +163172,252 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T083016854032-cca-cpu-backend-abort-bracket",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-cpu-backend-abort-bracket",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3584,
+                "cached_input_tokens": 819511,
+                "input_tokens": 823097,
+                "output_tokens": 275,
+                "reasoning_output_tokens": 145,
+                "total_tokens": 823372,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "Report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/cpu-abort/report.md states the jax, jaxlib and XLA versions, the smallest ordered module set between the passing two-module prefix and the aborting five-module prefix of job 1271081 (logs and run_abort_attribution.sh under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/cpu-abort/) that reproduces exit status 134 in one fresh pytest process on all_debug (JAX_PLATFORMS=cpu, root venv python directly, TMPDIR=/tmp) while each module of the set passes alone, whether the same set reproduces with the persistent compilation cache disabled, and the last Python frames the runner printed before the process ended; every measurement is one all_debug job of at most 59 minutes with its log beside the report and each case's exit status persisted as it lands; no source file is changed",
+          "estimated_hours": null,
+          "goal": "The cross-module CPU-backend abort on the forward-operator test surface narrowed to the smallest ordered module set with the runtime versions and last frames recorded",
+          "id": "cca-cpu-backend-abort-bracket",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-15T08:30:19Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": 29,
+            "binding_observed": false,
+            "detail": "",
+            "headroom": 14,
+            "mean_context": 73649,
+            "observed_at": "2026-09-15T08:29:50Z",
+            "state": "fresh",
+            "suggested_shelf_life_seconds": 120
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T083016854032-cca-cpu-backend-abort-bracket/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/cpu-abort",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-cca-abort-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-15T08:30:59Z",
+        "completed_at": "2026-09-15T09:31:11.218Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3598,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3612,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9d678c343dacca50235af6d43b8f94e88994bea5",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T083016854032-cca-cpu-backend-abort-bracket/manifest.md",
+        "scope_changed": false,
+        "session_id": "607d22d1-a399-4bac-9034-f85d36226093",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 4412596,
+            "input_tokens_cumulative": 4412596,
+            "output_tokens": 61986,
+            "output_tokens_cumulative": 61986,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T09:31:11.218Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 2179,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1049,
+              "log_fresh": false,
+              "manifest_commits": [
+                "3b786c40",
+                "03066756",
+                "6a2b4428",
+                "fcc8f968"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "a23e495d4199b533276791268911547a2deb9f1ab50c702b05fa4b5fe9d16b40",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T073636283020-pfs-axis-flux-departure-projection/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan playable-forward-solve --section '\u00a78' --role review --spec-level exact --node review-of-pfs-axis-flux-departure-projection --goal 'attach an independent review to run r-20260915T073636283020-pfs-axis-flux-departure-projection' --done-when 'the review for r-20260915T073636283020-pfs-axis-flux-departure-projection parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260915T073636283020-pfs-axis-flux-departure-projection.json --time-budget 55m --session s19-handoff-20260915 --local",
+              "node": "pfs-axis-flux-departure-projection",
+              "phase": "starting",
+              "plan": "playable-forward-solve",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260915T073636283020-pfs-axis-flux-departure-projection",
+              "session": "s19-handoff-20260915",
+              "terminal_age_seconds": 1092,
+              "terminal_at": "2026-09-15T08:12:37Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-axis-flux-departure-projection"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 4412596,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 200000",
+          "elapsed_seconds": 3608.845,
+          "generated_tokens": 61986,
+          "generation_seconds": 2653.771,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 83.0,
+          "machine_seconds": 955.074,
+          "peak_input_tokens": 166021,
+          "tokens_per_second": 23.36,
+          "wall_tokens_per_second": 17.18
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest process",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-cpu-backend-abort-bracket",
+          "session_id": "607d22d1-a399-4bac-9034-f85d36226093",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T09:31:11.218Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 40.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -163475,6 +163730,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2546
+    "_version": 2548
   }
 }

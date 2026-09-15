@@ -1,0 +1,82 @@
+{
+  "candidate": "internal current distribution shape mismatch",
+  "candidate_definition": "normalized L2 difference between Nova and EFIT p-prime plus FF-prime source profiles on the same 26 flux levels",
+  "candidate_units": "normalized profile RMS",
+  "diagnostics": {
+    "candidate_distribution": {
+      "maximum": 0.27727630761061745,
+      "median": 0.27510456732693356,
+      "minimum": 0.2532824727416439,
+      "p10": 0.2742574651136985,
+      "p90": 0.275594724894727,
+      "standard_deviation": 0.0005931867337348401
+    },
+    "comparison": "normalized L2 difference between Nova and EFIT p-prime plus FF-prime source profiles on the 26 face levels",
+    "profile_levels": [
+      0.0,
+      0.0398,
+      0.0796,
+      0.1194,
+      0.1592,
+      0.199,
+      0.2388,
+      0.2786,
+      0.3184,
+      0.3582,
+      0.398,
+      0.4378,
+      0.4776,
+      0.5174000000000001,
+      0.5572,
+      0.597,
+      0.6368,
+      0.6766000000000001,
+      0.7164,
+      0.7562,
+      0.796,
+      0.8358000000000001,
+      0.8756,
+      0.9154,
+      0.9552,
+      0.995
+    ]
+  },
+  "paired_projection": {
+    "exposure_arm_candidate_on_solenoid": {
+      "n": 43017,
+      "r_squared": 0.059721019286758326,
+      "slope": -9.603125952192824e-06,
+      "slope_se": 1.8372464614577635e-07,
+      "t_statistic": -52.26912204567928
+    },
+    "fraction_of_fitted_slope": 0.02984950925261419,
+    "marginal_ratio_on_candidate": {
+      "n": 43017,
+      "r_squared": 0.06409128194457425,
+      "slope": 126.34805435228874,
+      "slope_se": 2.3279618670647255,
+      "t_statistic": 54.27410824026862
+    },
+    "outcome_arm_ratio_on_candidate_with_solenoid_fixed": {
+      "candidate_coefficient_per_unit": 42.96068186773372,
+      "n": 43017,
+      "partial_r_squared_given_solenoid": 0.013841950581038575,
+      "r_squared": 0.5036247368088569,
+      "solenoid_coefficient_per_kA": -0.01340867001861612
+    },
+    "projected_slope_per_kA": -0.0004125568389679334,
+    "total_ratio_slope": {
+      "n": 43017,
+      "r_squared": 0.49665749472551135,
+      "slope": -0.013821226857584001,
+      "slope_se": 6.708724201892464e-05,
+      "t_statistic": -206.01870700967513
+    }
+  },
+  "population": {
+    "definition": "the same diverted finite/profile-qualified census rows as the landed solenoid-span attribution",
+    "rows": 43017
+  },
+  "source_revision": "6a2b4428d4204d56b3b2558602deed43b3d2fad1",
+  "x64_enabled": true
+}

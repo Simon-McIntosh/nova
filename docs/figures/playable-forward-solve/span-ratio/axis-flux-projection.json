@@ -1,0 +1,34 @@
+{
+  "arms": {
+    "axis_flux": "axis-flux-arm.json",
+    "internal_current_distribution": "current-distribution-arm.json"
+  },
+  "axis_flux_diagnosis": {
+    "interpretation": "Axis-flux departure is the dominant measured carrier. The profile-amplitude normalization arm accounts for 0.54 percent and the internal source-profile shape arm accounts for 2.98 percent, so neither explains the axis trend; seed or another solve-state dependence remains the unmeasured candidate.",
+    "most_of_slope": true,
+    "unqualified_axis_normalisation_mechanism": "not established by this projection; the axis read and normalization guard require a separate identity check"
+  },
+  "fraction_of_fitted_slope": {
+    "axis_flux": 1.0202015269927556,
+    "internal_current_distribution": 0.02984950925261419
+  },
+  "fraction_sum": 1.0500510362453697,
+  "landed_arm_comparison": {
+    "boundary_flux": -0.028100221805004894,
+    "conductor_source": 9.120140100808764e-05,
+    "profile_amplitude": 0.005366139139493892,
+    "source": "the landed fourth-channel paired-projection summary"
+  },
+  "population_rows": 43017,
+  "receipt": "paired axis-flux and internal-current projection",
+  "remainder_fraction": -0.05005103624536966,
+  "source_revision": "6a2b4428d4204d56b3b2558602deed43b3d2fad1",
+  "total_ratio_slope": {
+    "n": 43017,
+    "r_squared": 0.49665749472551135,
+    "slope": -0.013821226857584001,
+    "slope_se": 6.708724201892464e-05,
+    "t_statistic": -206.01870700967513
+  },
+  "x64_enabled": true
+}

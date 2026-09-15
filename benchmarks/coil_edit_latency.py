@@ -107,7 +107,17 @@ def _response_cache(carrier_path: Path) -> tuple[dict[str, Any], dict[str, Any]]
     }, metadata
 
 
+_SCHEDULER_CACHE: dict[str, Any] | None = None
+
+
 def _scheduler() -> dict[str, Any]:
+    global _SCHEDULER_CACHE
+    if _SCHEDULER_CACHE is None:
+        _SCHEDULER_CACHE = _read_scheduler()
+    return _SCHEDULER_CACHE
+
+
+def _read_scheduler() -> dict[str, Any]:
     job_id = os.environ.get("SLURM_JOB_ID")
     accepted_time = None
     if job_id:
@@ -143,8 +153,11 @@ def _require_measurement_host() -> None:
         raise RuntimeError("the betelgeuse partition is required")
     if os.environ.get("SLURM_JOB_RESERVATION") != "gpu_0003_grpA":
         raise RuntimeError("the gpu_0003_grpA reservation is required")
-    if os.environ.get("SLURM_CPUS_PER_TASK") != "1":
-        raise RuntimeError("the measurement requires exactly one requested CPU")
+    if os.environ.get("SLURM_CPUS_PER_TASK") != "8":
+        raise RuntimeError("the measurement requires exactly eight requested CPUs")
+    requested_mib = os.environ.get("SLURM_MEM_PER_NODE")
+    if requested_mib not in ("128G", "131072"):
+        raise RuntimeError("the measurement requires a 128 GiB memory allocation")
     if os.environ.get("JAX_PLATFORMS") != "cuda,cpu":
         raise RuntimeError("JAX_PLATFORMS=cuda,cpu must be set in the job body")
     if os.environ.get("TMPDIR") != "/tmp":
@@ -435,9 +448,32 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
         mixed_seed.state, reference_masks, reference_topology
     )
     reference_lcfs_count = int(np.asarray(reference_labelled.lcfs_vertex_count))
+    # The receiver-grid separatrix of the base frame (fraction 0) is the
+    # reference every edited raster is displaced against; it is built through
+    # the same integral-state and raster path the per-edit receipt uses.
+    reference_moments, _reference_support, reference_masks, reference_topology, _ = (
+        profile._integral_state(
+            mixed_seed.state, TopologyClass.DIVERTED, target_current
+        )
+    )
+    reference_raster = profile._raster_flux(
+        reference_moments,
+        reference_masks,
+        reference_topology,
+        current=jnp.asarray(base_current),
+        prescribed_current=jnp.asarray(base_current),
+    )
+    reference_raster_vertex_count = int(
+        np.asarray(reference_raster.separatrix_vertex_count)
+    )
+    reference_raster_separatrix = np.asarray(reference_raster.separatrix)[
+        :reference_raster_vertex_count
+    ]
     prepared = {
         "initial": mixed_seed.state,
         "reference_lcfs": np.asarray(reference_labelled.lcfs)[:reference_lcfs_count],
+        "reference_raster_separatrix": reference_raster_separatrix,
+        "reference_raster_separatrix_vertex_count": reference_raster_vertex_count,
         "prescribed_current": jnp.asarray(base_current),
         "target_current": target_current,
         "circuit_index": circuit_index,
@@ -457,6 +493,7 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
             "converged": True,
             "route": "converged corrected-bank mixed frame at the shot current",
             "reference_lcfs_vertex_count": reference_lcfs_count,
+            "reference_raster_separatrix_vertex_count": (reference_raster_vertex_count),
         },
         "reference": case["reference"],
         "policy": policy,
@@ -535,6 +572,269 @@ def _drain_receipt(equilibrium: Any) -> None:
         jax.block_until_ready(equilibrium.labelled_flux.strike_points)
 
 
+def _terminal_raster_document(terminal: Any, profile: Any) -> dict[str, Any] | None:
+    """Describe the operator-held receiver grid target for the receipt."""
+    if terminal is None or terminal.raster_flux is None:
+        return None
+    return {
+        "shape": [int(value) for value in np.asarray(terminal.raster_flux.shape)],
+        "node_count": int(profile.lattice.node_count),
+        "source_quantities": "psi (Wb), psi_N, per-cell labels, separatrix",
+        "note": (
+            "the operator holds the rectangular receiver-grid target once "
+            "from construction; every edit evaluates it from the same coil "
+            "and cell currents at no extra compile"
+        ),
+    }
+
+
+def _receipt_document(
+    *,
+    prepared: dict[str, Any],
+    carrier: dict[str, Any],
+    rows: list[dict[str, Any]],
+    program_reused_from_edit: int | None,
+    cache_events: dict[str, float | int],
+    cache: Any,
+    solve_persistent_hits_start: int,
+    solve_persistent_misses_start: int,
+    solve_persistent_saved_start: float,
+    terminal_raster: dict[str, Any] | None,
+    measurement_state: str,
+    elapsed_seconds: float,
+    exit_marker: int | None,
+    figure: Path,
+) -> dict[str, Any]:
+    """Assemble the wire receipt over the edits recorded so far.
+
+    Writing this after each edit lands makes an expiry lose one row at the
+    most; the final call marks the measurement complete.
+    """
+    warm_ms = np.asarray(
+        [row["wall_milliseconds"] for row in rows[1:]], dtype=np.float64
+    )
+    if warm_ms.size:
+        median_warm_ms = float(np.median(warm_ms))
+        warm_min_ms = float(warm_ms.min())
+        warm_max_ms = float(warm_ms.max())
+    else:
+        median_warm_ms = None
+        warm_min_ms = None
+        warm_max_ms = None
+    all_cache_hits_after_first = all(
+        row["compilation_cache"] == "hit" for row in rows[1:]
+    )
+    one_program = program_reused_from_edit is not None and program_reused_from_edit == 0
+    all_converged = all(row["converged"] for row in rows)
+    latency_target_met = (
+        median_warm_ms is not None
+        and median_warm_ms < INTERACTIVE_LATENCY_TARGET_MILLISECONDS
+    )
+    latency_regime = (
+        "tens_of_milliseconds_or_better"
+        if latency_target_met
+        else "above_tens_of_milliseconds"
+    )
+    boundary_displacements = np.asarray(
+        [
+            (
+                row["boundary_displacement_m"]
+                if row["boundary_displacement_m"] is not None
+                else np.nan
+            )
+            for row in rows
+        ],
+        dtype=np.float64,
+    )
+    finite_displacements = boundary_displacements[np.isfinite(boundary_displacements)]
+    persistent_hits = int(cache_events["hits"]) - solve_persistent_hits_start
+    persistent_misses = int(cache_events["misses"]) - solve_persistent_misses_start
+    persistent_saved_seconds = (
+        float(cache_events["saved_seconds"]) - solve_persistent_saved_start
+    )
+    first_edit_compiled = bool(rows) and rows[0]["persistent_cache_miss_count"] >= 1
+    later_edits_add_no_misses = all(
+        row["persistent_cache_miss_count"] == 0 for row in rows[1:]
+    )
+    gates = {
+        "exactly_twenty_edits_recorded": len(rows) == 20,
+        "sweep_spans_plus_minus_twenty_percent": bool(
+            np.isclose(SWEEP_FRACTIONS[0], -0.20)
+            and np.isclose(SWEEP_FRACTIONS[-1], 0.20)
+        ),
+        "successive_edits_are_two_percent": bool(
+            np.allclose(np.diff(SWEEP_FRACTIONS), 0.02)
+        ),
+        "first_edit_compiles_program": first_edit_compiled,
+        "program_reused_to_the_end": one_program,
+        "all_later_edits_are_cache_hits": all_cache_hits_after_first,
+        "later_edits_add_no_compiles": later_edits_add_no_misses,
+        "all_edits_converged": all_converged,
+        "boundary_displacement_is_finite": bool(
+            np.all(np.isfinite(boundary_displacements))
+        ),
+        "raster_target_rides_once": terminal_raster is not None,
+        "median_warm_wall_meets_tens_of_milliseconds_target": latency_target_met,
+    }
+    passed = all(gates.values())
+    final_exit_marker = 0 if passed else 2
+    if measurement_state == "complete":
+        verdict = "PASS" if passed else "FAIL"
+        marker = final_exit_marker if exit_marker is None else exit_marker
+    else:
+        verdict = "PENDING"
+        marker = 0
+    circuit_index = int(prepared["circuit_index"])
+    return {
+        "schema": "nova.coil-edit-latency",
+        "measurement_state": measurement_state,
+        "verdict": verdict,
+        "gates": gates,
+        "interactive_path": {
+            "route": "compiled slice (reduced fixed point, one fixed-shape "
+            "program re-entered per edit)",
+            "solve_entry": "reduced_newton.solve_reduced_newton_compiled",
+            "prescribed_current": "traced 101-circuit vector, replacement semantics",
+            "raster_target": "operator-held receiver grid built once at construction",
+        },
+        "source_revision": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip(),
+        "forward_module": {
+            "path": "nova/equilibrium/forward.py",
+            "sha256": _sha256(ROOT / "nova/equilibrium/forward.py"),
+        },
+        "reduced_newton_module": {
+            "path": "nova/equilibrium/reduced_newton.py",
+            "sha256": _sha256(ROOT / "nova/equilibrium/reduced_newton.py"),
+        },
+        "driver": {
+            "path": str(Path(__file__).relative_to(ROOT)),
+            "sha256": _sha256(Path(__file__)),
+        },
+        "scheduler": _scheduler(),
+        "runtime": {
+            "host": platform.node(),
+            "python": platform.python_version(),
+            "jax": jax.__version__,
+            "device": jax.devices()[0].device_kind,
+            "platform": jax.devices()[0].platform,
+            "jax_platforms": os.environ.get("JAX_PLATFORMS"),
+            "tmpdir": os.environ.get("TMPDIR"),
+            "elapsed_seconds": elapsed_seconds,
+            "exit_marker": marker,
+        },
+        "persistent_compilation_cache": cache.receipt()
+        | {
+            "solve_hit_count": persistent_hits,
+            "solve_miss_count": persistent_misses,
+            "solve_compile_seconds_saved": persistent_saved_seconds,
+            "process_total_hit_count": int(cache_events["hits"]),
+            "process_total_miss_count": int(cache_events["misses"]),
+            "process_total_compile_seconds_saved": float(cache_events["saved_seconds"]),
+        },
+        "carrier": carrier,
+        "case": {
+            "machine": "MAST",
+            "shot": SHOT,
+            "slice_index": SLICE_INDEX,
+            "time_s": float(prepared["reference"]["time_s"]),
+            "seed_policy": (
+                "the converged corrected-bank mixed frame at the shot current "
+                "starts the sweep; each edit moves the position coil and "
+                "re-enters the once-built compiled slice program from the "
+                "preceding terminal flux"
+            ),
+            "seed_arm": prepared["mixed_seed"],
+            "sweep_seed": prepared["sweep_seed"],
+            "route": "compiled slice (reduced_newton compiled)",
+            "solver_policy": {
+                "tolerance": COMPILED_SLICE_TOLERANCE,
+                "newton_steps": COMPILED_SLICE_NEWTON_STEPS,
+                "active_set_steps": COMPILED_SLICE_ACTIVE_SET_STEPS,
+                "ladder_scoring": reduced_newton.LADDER_SCORING,
+                "trip_boundary": reduced_newton.TRIP_BOUNDARY,
+                "settled_exit": "production default unchanged",
+                "presettlement_incumbent_scoring": ("production default unchanged"),
+            },
+            "target_current_a": float(prepared["target_current"]),
+            "current_pin": True,
+            "stored_circuit_count": 101,
+            "coil_family": prepared["coil_mapping"]["family"],
+            "coil_circuit_index": circuit_index,
+            "boundary_coil_selection": {
+                "criterion": (
+                    "largest two-percent wall-flux response among P4/P5 circuits"
+                ),
+                "candidates": prepared["boundary_coil_candidates"],
+            },
+            "shot_coil_current_a": float(
+                np.asarray(prepared["prescribed_current"])[circuit_index]
+            ),
+            "edit_fraction_bounds": [
+                float(np.min(SWEEP_FRACTIONS)),
+                float(np.max(SWEEP_FRACTIONS)),
+            ],
+            "sweep_position_count": len(SWEEP_FRACTIONS),
+            "successive_edit_count": EDIT_COUNT,
+            "successive_edit_step_fraction": 0.02,
+        },
+        "compile": {
+            "program_built_first_edit": first_edit_compiled,
+            "program_reused_from_edit": (
+                0 if program_reused_from_edit is None else program_reused_from_edit
+            ),
+            "process_cache_hit_count_after_first": sum(
+                row["compilation_cache"] == "hit" for row in rows[1:]
+            ),
+            "persistent_cache_hit_count": persistent_hits,
+            "persistent_cache_miss_count": persistent_misses,
+            "later_edits_add_no_compiles": later_edits_add_no_misses,
+        },
+        "raster": terminal_raster,
+        "summary": {
+            "edit_count": len(rows),
+            "median_warm_wall_milliseconds": median_warm_ms,
+            "minimum_warm_wall_milliseconds": warm_min_ms,
+            "maximum_warm_wall_milliseconds": warm_max_ms,
+            "latency_regime": latency_regime,
+            "interactive_latency_target_milliseconds": (
+                INTERACTIVE_LATENCY_TARGET_MILLISECONDS
+            ),
+            "interactive_latency_target_verdict": (
+                "PASS" if latency_target_met else "FAIL"
+            ),
+            "latency_statement": (
+                f"Median warm per-edit wall is {median_warm_ms:.3f} ms "
+                f"against the below-{INTERACTIVE_LATENCY_TARGET_MILLISECONDS:.0f}-"
+                f"ms tens-of-milliseconds target: "
+                f"{'PASS' if latency_target_met else 'FAIL'}."
+                if median_warm_ms is not None
+                else "no warm per-edit wall yet"
+            ),
+            "converged_edit_count": sum(row["converged"] for row in rows),
+            "failing_points": [
+                row["edit_index"] for row in rows if not row["converged"]
+            ],
+            "trip_count_minimum": (
+                min(row["trip_count"] for row in rows) if rows else None
+            ),
+            "trip_count_median": (
+                float(np.median([row["trip_count"] for row in rows])) if rows else None
+            ),
+            "trip_count_maximum": (
+                max(row["trip_count"] for row in rows) if rows else None
+            ),
+            "maximum_boundary_displacement_m": (
+                float(finite_displacements.max()) if finite_displacements.size else None
+            ),
+        },
+        "edits": rows,
+        "figure": str(figure.relative_to(ROOT)),
+        "raster_figure": str(DEFAULT_RASTER_FIGURE.relative_to(ROOT)),
+    }
+
+
 def run(
     output: Path,
     figure: Path,
@@ -572,9 +872,7 @@ def run(
         state = initial
         program = None
         program_reused_from_edit: int | None = None
-        _endpoint_masks, endpoint_topology = profile.operator.read(state)
-        reference_boundary = np.asarray(endpoint_topology.boundary)
-        reference_lcfs = prepared["reference_lcfs"]
+        reference_raster_separatrix = prepared["reference_raster_separatrix"]
         for index, (fraction, current) in enumerate(
             zip(EDIT_FRACTIONS, edit_vectors, strict=True)
         ):
@@ -630,24 +928,34 @@ def run(
                 labelled = equilibrium.labelled_flux
                 raster_flux = equilibrium.raster_flux
                 lcfs_count = int(np.asarray(labelled.lcfs_vertex_count))
-                lcfs = np.asarray(labelled.lcfs)[:lcfs_count]
-                boundary = np.asarray(equilibrium.topology.boundary)
-                if lcfs_count and len(reference_lcfs):
-                    distances = np.linalg.norm(
-                        lcfs[:, None, :] - reference_lcfs[None, :, :], axis=2
+                # The boundary column is the receiver-grid separatrix
+                # displacement: the symmetric-sup difference between the
+                # edited raster's separatrix and the base-frame reference
+                # separatrix read from the same fixed receiver grid.
+                if raster_flux is not None:
+                    separatrix_count = int(
+                        np.asarray(raster_flux.separatrix_vertex_count)
                     )
-                    boundary_displacement = float(
-                        max(
-                            np.max(np.min(distances, axis=0)),
-                            np.max(np.min(distances, axis=1)),
+                    separatrix = np.asarray(raster_flux.separatrix)[:separatrix_count]
+                    if separatrix_count and len(reference_raster_separatrix):
+                        distances = np.linalg.norm(
+                            separatrix[:, None, :]
+                            - reference_raster_separatrix[None, :, :],
+                            axis=2,
                         )
-                    )
-                    displacement_source = "lcfs_symmetric_sup"
+                        boundary_displacement = float(
+                            max(
+                                np.max(np.min(distances, axis=0)),
+                                np.max(np.min(distances, axis=1)),
+                            )
+                        )
+                        displacement_source = "receiver_grid_separatrix_symmetric_sup"
+                    else:
+                        boundary_displacement = None
+                        displacement_source = "receiver_grid_separatrix_unreadable"
                 else:
-                    boundary_displacement = float(
-                        np.linalg.norm(boundary - reference_boundary)
-                    )
-                    displacement_source = "binding_point"
+                    boundary_displacement = None
+                    displacement_source = "receiver_grid_separatrix_unreadable"
             else:
                 labelled = None
                 raster_flux = None
@@ -716,87 +1024,33 @@ def run(
                 f"boundary_mm={boundary_millimetres}",
                 flush=True,
             )
+            # The receipt persists per edit as it lands: an expiry or node loss
+            # loses at most one row, never the run.
+            landing = _receipt_document(
+                prepared=prepared,
+                carrier=carrier,
+                rows=rows,
+                program_reused_from_edit=program_reused_from_edit,
+                cache_events=cache_events,
+                cache=cache,
+                solve_persistent_hits_start=solve_persistent_hits_start,
+                solve_persistent_misses_start=solve_persistent_misses_start,
+                solve_persistent_saved_start=solve_persistent_saved_start,
+                terminal_raster=_terminal_raster_document(equilibrium, profile),
+                measurement_state="in_progress",
+                elapsed_seconds=time.perf_counter() - total_started,
+                exit_marker=None,
+                figure=figure,
+            )
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text(
+                json.dumps(landing, indent=2, sort_keys=True, allow_nan=False) + "\n",
+                encoding="utf-8",
+            )
 
-        warm_ms = np.asarray(
-            [row["wall_milliseconds"] for row in rows[1:]], dtype=np.float64
-        )
-        all_cache_hits_after_first = all(
-            row["compilation_cache"] == "hit" for row in rows[1:]
-        )
-        one_program = (
-            program_reused_from_edit is not None and program_reused_from_edit == 0
-        )
-        all_converged = all(row["converged"] for row in rows)
-        median_warm_ms = float(np.median(warm_ms))
-        latency_target_met = median_warm_ms < INTERACTIVE_LATENCY_TARGET_MILLISECONDS
-        latency_regime = (
-            "tens_of_milliseconds_or_better"
-            if latency_target_met
-            else "above_tens_of_milliseconds"
-        )
-        boundary_displacements = np.asarray(
-            [
-                (
-                    row["boundary_displacement_m"]
-                    if row["boundary_displacement_m"] is not None
-                    else np.nan
-                )
-                for row in rows
-            ],
-            dtype=np.float64,
-        )
-        finite_displacements = boundary_displacements[
-            np.isfinite(boundary_displacements)
-        ]
+        terminal_raster = _terminal_raster_document(equilibrium, profile)
         persistent_hits = int(cache_events["hits"]) - solve_persistent_hits_start
         persistent_misses = int(cache_events["misses"]) - solve_persistent_misses_start
-        persistent_saved_seconds = (
-            float(cache_events["saved_seconds"]) - solve_persistent_saved_start
-        )
-        first_edit_compiled = rows[0]["persistent_cache_miss_count"] >= 1
-        later_edits_add_no_misses = all(
-            row["persistent_cache_miss_count"] == 0 for row in rows[1:]
-        )
-        # The terminal raster flux through the once-built operator target.
-        terminal = equilibrium
-        terminal_raster = None
-        if terminal is not None and terminal.raster_flux is not None:
-            terminal_raster = {
-                "shape": [
-                    int(value) for value in np.asarray(terminal.raster_flux.shape)
-                ],
-                "node_count": int(profile.lattice.node_count),
-                "source_quantities": "psi (Wb), psi_N, per-cell labels, separatrix",
-                "note": (
-                    "the operator holds the rectangular receiver-grid target once "
-                    "from construction; every edit evaluates it from the same coil "
-                    "and cell currents at no extra compile"
-                ),
-            }
-        gates = {
-            "exactly_twenty_edits_recorded": len(rows) == 20,
-            "sweep_spans_plus_minus_twenty_percent": bool(
-                np.isclose(SWEEP_FRACTIONS[0], -0.20)
-                and np.isclose(SWEEP_FRACTIONS[-1], 0.20)
-            ),
-            "successive_edits_are_two_percent": bool(
-                np.allclose(np.diff(SWEEP_FRACTIONS), 0.02)
-            ),
-            "first_edit_compiles_program": first_edit_compiled,
-            "program_reused_to_the_end": one_program,
-            "all_later_edits_are_cache_hits": all_cache_hits_after_first,
-            "later_edits_add_no_compiles": later_edits_add_no_misses,
-            "all_edits_converged": all_converged,
-            "boundary_displacement_is_finite": bool(
-                np.all(np.isfinite(boundary_displacements))
-            ),
-            "raster_target_rides_once": (
-                terminal is not None and terminal.raster_flux is not None
-            ),
-            "median_warm_wall_meets_tens_of_milliseconds_target": latency_target_met,
-        }
-        passed = all(gates.values())
-        exit_marker = 0 if passed else 2
         _render(
             rows,
             figure,
@@ -807,161 +1061,32 @@ def run(
             persistent_cache_hits=persistent_hits,
             persistent_cache_misses=persistent_misses,
         )
-        if terminal is not None and terminal.raster_flux is not None:
-            _render_raster(terminal.raster_flux, DEFAULT_RASTER_FIGURE)
-        receipt = {
-            "schema": "nova.coil-edit-latency",
-            "measurement_state": "complete",
-            "verdict": "PASS" if passed else "FAIL",
-            "gates": gates,
-            "interactive_path": {
-                "route": "compiled slice (reduced fixed point, one fixed-shape "
-                "program re-entered per edit)",
-                "solve_entry": "reduced_newton.solve_reduced_newton_compiled",
-                "prescribed_current": "traced 101-circuit vector, replacement "
-                "semantics",
-                "raster_target": "operator-held receiver grid built once at "
-                "construction",
-            },
-            "source_revision": subprocess.check_output(
-                ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
-            ).strip(),
-            "forward_module": {
-                "path": "nova/equilibrium/forward.py",
-                "sha256": _sha256(ROOT / "nova/equilibrium/forward.py"),
-            },
-            "reduced_newton_module": {
-                "path": "nova/equilibrium/reduced_newton.py",
-                "sha256": _sha256(ROOT / "nova/equilibrium/reduced_newton.py"),
-            },
-            "driver": {
-                "path": str(Path(__file__).relative_to(ROOT)),
-                "sha256": _sha256(Path(__file__)),
-            },
-            "scheduler": _scheduler(),
-            "runtime": {
-                "host": platform.node(),
-                "python": platform.python_version(),
-                "jax": jax.__version__,
-                "device": jax.devices()[0].device_kind,
-                "platform": jax.devices()[0].platform,
-                "jax_platforms": os.environ.get("JAX_PLATFORMS"),
-                "tmpdir": os.environ.get("TMPDIR"),
-                "elapsed_seconds": time.perf_counter() - total_started,
-                "exit_marker": exit_marker,
-            },
-            "persistent_compilation_cache": cache.receipt()
-            | {
-                "solve_hit_count": persistent_hits,
-                "solve_miss_count": persistent_misses,
-                "solve_compile_seconds_saved": persistent_saved_seconds,
-                "process_total_hit_count": int(cache_events["hits"]),
-                "process_total_miss_count": int(cache_events["misses"]),
-                "process_total_compile_seconds_saved": float(
-                    cache_events["saved_seconds"]
-                ),
-            },
-            "carrier": carrier,
-            "case": {
-                "machine": "MAST",
-                "shot": SHOT,
-                "slice_index": SLICE_INDEX,
-                "time_s": float(prepared["reference"]["time_s"]),
-                "seed_policy": (
-                    "the converged corrected-bank mixed frame at the shot current "
-                    "starts the sweep; each edit moves the position coil and "
-                    "re-enters the once-built compiled slice program from the "
-                    "preceding terminal flux"
-                ),
-                "seed_arm": prepared["mixed_seed"],
-                "sweep_seed": prepared["sweep_seed"],
-                "route": "compiled slice (reduced_newton compiled)",
-                "solver_policy": {
-                    "tolerance": COMPILED_SLICE_TOLERANCE,
-                    "newton_steps": COMPILED_SLICE_NEWTON_STEPS,
-                    "active_set_steps": COMPILED_SLICE_ACTIVE_SET_STEPS,
-                    "ladder_scoring": reduced_newton.LADDER_SCORING,
-                    "trip_boundary": reduced_newton.TRIP_BOUNDARY,
-                    "settled_exit": "production default unchanged",
-                    "presettlement_incumbent_scoring": ("production default unchanged"),
-                },
-                "target_current_a": target_current,
-                "current_pin": True,
-                "stored_circuit_count": 101,
-                "coil_family": prepared["coil_mapping"]["family"],
-                "coil_circuit_index": circuit_index,
-                "boundary_coil_selection": {
-                    "criterion": (
-                        "largest two-percent wall-flux response among P4/P5 circuits"
-                    ),
-                    "candidates": prepared["boundary_coil_candidates"],
-                },
-                "shot_coil_current_a": float(np.asarray(base_current[circuit_index])),
-                "edit_fraction_bounds": [
-                    float(np.min(SWEEP_FRACTIONS)),
-                    float(np.max(SWEEP_FRACTIONS)),
-                ],
-                "sweep_position_count": len(SWEEP_FRACTIONS),
-                "successive_edit_count": EDIT_COUNT,
-                "successive_edit_step_fraction": 0.02,
-            },
-            "compile": {
-                "program_built_first_edit": first_edit_compiled,
-                "program_reused_from_edit": (
-                    0 if program_reused_from_edit is None else program_reused_from_edit
-                ),
-                "process_cache_hit_count_after_first": sum(
-                    row["compilation_cache"] == "hit" for row in rows[1:]
-                ),
-                "persistent_cache_hit_count": persistent_hits,
-                "persistent_cache_miss_count": persistent_misses,
-                "later_edits_add_no_compiles": later_edits_add_no_misses,
-            },
-            "raster": terminal_raster,
-            "summary": {
-                "edit_count": len(rows),
-                "median_warm_wall_milliseconds": median_warm_ms,
-                "minimum_warm_wall_milliseconds": float(warm_ms.min()),
-                "maximum_warm_wall_milliseconds": float(warm_ms.max()),
-                "latency_regime": latency_regime,
-                "interactive_latency_target_milliseconds": (
-                    INTERACTIVE_LATENCY_TARGET_MILLISECONDS
-                ),
-                "interactive_latency_target_verdict": (
-                    "PASS" if latency_target_met else "FAIL"
-                ),
-                "latency_statement": (
-                    f"Median warm per-edit wall is {median_warm_ms:.3f} ms "
-                    f"against the below-{INTERACTIVE_LATENCY_TARGET_MILLISECONDS:.0f}-"
-                    f"ms tens-of-milliseconds target: "
-                    f"{'PASS' if latency_target_met else 'FAIL'}."
-                ),
-                "converged_edit_count": sum(row["converged"] for row in rows),
-                "failing_points": [
-                    row["edit_index"] for row in rows if not row["converged"]
-                ],
-                "trip_count_minimum": min(row["trip_count"] for row in rows),
-                "trip_count_median": float(
-                    np.median([row["trip_count"] for row in rows])
-                ),
-                "trip_count_maximum": max(row["trip_count"] for row in rows),
-                "maximum_boundary_displacement_m": (
-                    float(finite_displacements.max())
-                    if finite_displacements.size
-                    else None
-                ),
-            },
-            "edits": rows,
-            "figure": str(figure.relative_to(ROOT)),
-            "raster_figure": str(DEFAULT_RASTER_FIGURE.relative_to(ROOT)),
-        }
+        if equilibrium is not None and equilibrium.raster_flux is not None:
+            _render_raster(equilibrium.raster_flux, DEFAULT_RASTER_FIGURE)
+        receipt = _receipt_document(
+            prepared=prepared,
+            carrier=carrier,
+            rows=rows,
+            program_reused_from_edit=program_reused_from_edit,
+            cache_events=cache_events,
+            cache=cache,
+            solve_persistent_hits_start=solve_persistent_hits_start,
+            solve_persistent_misses_start=solve_persistent_misses_start,
+            solve_persistent_saved_start=solve_persistent_saved_start,
+            terminal_raster=terminal_raster,
+            measurement_state="complete",
+            elapsed_seconds=time.perf_counter() - total_started,
+            exit_marker=None,
+            figure=figure,
+        )
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(
             json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n",
             encoding="utf-8",
         )
+        exit_marker = int(receipt["runtime"]["exit_marker"])
         print(f"EXIT_MARKER={exit_marker}", flush=True)
-        if not passed:
+        if exit_marker:
             raise SystemExit(exit_marker)
         return receipt
     finally:
@@ -1128,10 +1253,10 @@ def _probe(carrier_path: Path) -> dict[str, Any]:
 def _sbatch_script(arguments: argparse.Namespace) -> str:
     log_directory = arguments.log_directory.resolve()
     worktree = ROOT.resolve()
-    environment = Path("/home/ITER/mcintos/Code/nova/.venv")
+    interpreter = Path("/home/ITER/mcintos/Code/nova/.venv/bin/python")
     command = (
-        f"UV_PROJECT_ENVIRONMENT={environment} PYTHONPATH={worktree} "
-        "uv run --no-sync python benchmarks/coil_edit_latency.py run "
+        f"PYTHONPATH={worktree} {interpreter} "
+        "benchmarks/coil_edit_latency.py run "
         f"--carrier {arguments.carrier.resolve()} "
         f"--output {arguments.output.resolve()} "
         f"--figure {arguments.figure.resolve()}"
@@ -1142,8 +1267,8 @@ def _sbatch_script(arguments: argparse.Namespace) -> str:
 #SBATCH --reservation=gpu_0003_grpA
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
-#SBATCH --mem=64G
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=128G
 #SBATCH --gres=gpu:1
 #SBATCH --time=00:55:00
 #SBATCH --output={log_directory}/coil-edit-latency-%j.log
@@ -1160,12 +1285,18 @@ exit $result
 
 def _submit(arguments: argparse.Namespace) -> None:
     arguments.log_directory.mkdir(parents=True, exist_ok=True)
+    # Export TMPDIR in the submit environment as well as the payload:
+    # slurmstepd inherits the login-node value before the payload's own
+    # export runs, so point it at /tmp from the start.
+    submit_env = dict(os.environ)
+    submit_env["TMPDIR"] = "/tmp"
     completed = subprocess.run(
         ["sbatch", "--parsable"],
         input=_sbatch_script(arguments),
         check=True,
         capture_output=True,
         text=True,
+        env=submit_env,
     )
     print(completed.stdout.strip())
 

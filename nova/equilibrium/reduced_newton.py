@@ -1920,11 +1920,11 @@ class _RowArguments(NamedTuple):
 class ReducedProgram(NamedTuple):
     """One built reduced solve a later keyframe can re-enter.
 
-    The coordinates and the external flux travel with the kernels because
-    reuse is only meaningful while the layout holds: the amplitudes a later
-    solve carries are indices into the same cells, and the flux those
-    amplitudes reconstruct sits behind the same conductor state.  A caller
-    that changes either builds a new program rather than re-entering this one.
+    The coordinates travel with the kernels because the amplitudes a later
+    solve carries are indices into those exact cells.  The external flux is a
+    traced argument: an unchanged default is retained for a zero-preparation
+    warm entry, while an explicit or replaced conductor current derives a new
+    flux value without changing the compiled program.
     """
 
     coordinates: ReducedCoordinates
@@ -1943,6 +1943,10 @@ class ReducedProgram(NamedTuple):
     slice_solver: Callable[..., Any] | None = None
     slice_solvers: dict[tuple[Any, ...], Callable[..., Any]] | None = None
     cache_key: tuple[Any, ...] | None = None
+    entry_state: Any = None
+    entry_key: tuple[Any, ...] | None = None
+    default_current: Any = None
+    default_prescribed_current: Any = None
 
 
 def _compiled_argument_key(value: Any) -> tuple[tuple[int, ...], str, str] | None:
@@ -1983,6 +1987,67 @@ def _compiled_program_key(
         _compiled_argument_key(requested_class),
         row_count,
         row_signature,
+    )
+
+
+def _compiled_entry_key(
+    operator: Any,
+    state: jax.Array,
+    target_current: Any,
+    requested_class: Any,
+    row_count: int,
+    row_signature: tuple[tuple[str, str], ...],
+) -> tuple[Any, ...]:
+    """Return the cheap identity for re-entering an already built program.
+
+    The initial JAX array is immutable, so its object identity safely names the
+    reduced coordinates derived from it without synchronising those coordinates
+    back to the host.  Conductor currents are deliberately absent: exterior flux
+    is a traced argument and a same-shaped current edit reuses the same program.
+    """
+    return (
+        id(operator),
+        id(state),
+        _compiled_argument_key(target_current),
+        _compiled_argument_key(requested_class),
+        row_count,
+        row_signature,
+    )
+
+
+def _cached_compiled_program(
+    operator: Any,
+    state: jax.Array,
+    target_current: Any,
+    requested_class: Any,
+    row_count: int,
+    row_signature: tuple[tuple[str, str], ...],
+) -> ReducedProgram | None:
+    """Return a program whose immutable seed already supplied the coordinates."""
+    entry_key = _compiled_entry_key(
+        operator,
+        state,
+        target_current,
+        requested_class,
+        row_count,
+        row_signature,
+    )
+    for program in reversed(_compiled_program_cache.values()):
+        if program.entry_state is state and program.entry_key == entry_key:
+            if program.cache_key is not None:
+                _compiled_program_cache.move_to_end(program.cache_key)
+            return program
+    return None
+
+
+def _default_external_is_current(operator: Any, program: ReducedProgram) -> bool:
+    """Return whether the program carries this operator's unchanged defaults."""
+    prescribed = operator.prescribed_current_field
+    prescribed_current = None if prescribed is None else prescribed.current
+    return (
+        program.default_external
+        and program.default_current is operator.external_current
+        and program.default_prescribed_current is prescribed_current
     )
 
 
@@ -2814,6 +2879,7 @@ def _compiled_program(
     requested_class,
     target_current,
     external,
+    default_external,
     program,
     augmentation=None,
 ):
@@ -2834,6 +2900,25 @@ def _compiled_program(
     requested_shape = (
         None if requested_class is None else tuple(np.shape(requested_class))
     )
+    entry_key = _compiled_entry_key(
+        operator,
+        state,
+        target_current,
+        requested_class,
+        row_count,
+        row_signature,
+    )
+    prescribed = operator.prescribed_current_field
+    default_prescribed_current = None if prescribed is None else prescribed.current
+    if program is None:
+        program = _cached_compiled_program(
+            operator,
+            state,
+            target_current,
+            requested_class,
+            row_count,
+            row_signature,
+        )
     if program is None:
         coordinates = reduced_coordinates(
             operator,
@@ -2872,13 +2957,21 @@ def _compiled_program(
                     target_current_shape=target_shape,
                     requested_class_shape=requested_shape,
                     row_signature=row_signature,
-                    default_external=False,
+                    default_external=default_external,
                     cache_key=cache_key,
+                    entry_state=state,
+                    entry_key=entry_key,
+                    default_current=(
+                        operator.external_current if default_external else None
+                    ),
+                    default_prescribed_current=(
+                        default_prescribed_current if default_external else None
+                    ),
                 )
             )
         else:
             _compiled_program_cache.move_to_end(cache_key)
-    elif (
+    if (
         program.operator_identity != id(operator)
         or program.external_shape != tuple(external.shape)
         or program.target_current_shape != target_shape
@@ -2888,6 +2981,28 @@ def _compiled_program(
     ):
         raise ValueError(
             "the reduced program does not match this operator's static shapes"
+        )
+    default_current = operator.external_current if default_external else None
+    default_prescribed_current = (
+        default_prescribed_current if default_external else None
+    )
+    if (
+        program.external is not external
+        or program.entry_state is not state
+        or program.entry_key != entry_key
+        or program.default_external != default_external
+        or program.default_current is not default_current
+        or program.default_prescribed_current is not default_prescribed_current
+    ):
+        program = _remember_compiled_program(
+            program._replace(
+                external=external,
+                entry_state=state,
+                entry_key=entry_key,
+                default_external=default_external,
+                default_current=default_current,
+                default_prescribed_current=default_prescribed_current,
+            )
         )
     return program, program.kernels
 
@@ -2899,6 +3014,7 @@ def _compiled_result(
     requested_class,
     target_current,
     external,
+    default_external,
     program,
     augmentation,
     row_arguments,
@@ -2913,6 +3029,7 @@ def _compiled_result(
         requested_class=requested_class,
         target_current=target_current,
         external=external,
+        default_external=default_external,
         program=program,
         augmentation=augmentation,
     )
@@ -2982,13 +3099,30 @@ def solve_reduced_newton_compiled(
     del stream
     state = jnp.asarray(initial)
     target_value = None if target_current is None else jnp.asarray(target_current)
-    external = operator.external(current, prescribed_current)
+    if program is None:
+        program = _cached_compiled_program(
+            operator,
+            state,
+            target_value,
+            requested_class,
+            0,
+            (),
+        )
+    default_external = current is None and prescribed_current is None
+    external = (
+        program.external
+        if program is not None
+        and default_external
+        and _default_external_is_current(operator, program)
+        else operator.external(current, prescribed_current)
+    )
     fields, program = _compiled_result(
         operator,
         state,
         requested_class=requested_class,
         target_current=target_value,
         external=external,
+        default_external=default_external,
         program=program,
         augmentation=None,
         row_arguments=TRACED_ROWS,
@@ -3068,13 +3202,34 @@ def solve_constrained_reduced_newton_compiled(
         requested_class=requested_class,
         target_current=target_value,
     )
-    external = profile.operator.external(current, prescribed_current)
+    row_signature = tuple(
+        (type(pair.functional).__qualname__, type(pair.unknown).__qualname__)
+        for pair in augmentation.pairs
+    )
+    if program is None:
+        program = _cached_compiled_program(
+            profile.operator,
+            state,
+            target_value,
+            requested_class,
+            augmentation.row_count,
+            row_signature,
+        )
+    default_external = current is None and prescribed_current is None
+    external = (
+        program.external
+        if program is not None
+        and default_external
+        and _default_external_is_current(profile.operator, program)
+        else profile.operator.external(current, prescribed_current)
+    )
     fields, program = _compiled_result(
         profile.operator,
         state,
         requested_class=requested_class,
         target_current=target_value,
         external=external,
+        default_external=default_external,
         program=program,
         augmentation=augmentation,
         row_arguments=row_arguments,

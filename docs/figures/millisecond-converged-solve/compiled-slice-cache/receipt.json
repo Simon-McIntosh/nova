@@ -1,7 +1,7 @@
 {
   "acceptance": {
     "same_job_direct_wall_relative_tolerance": 0.1,
-    "terminal_flux_max_ulp": 4
+    "terminal_flux_max_ulp": 0
   },
   "assignment": {
     "cpu_count": 8,
@@ -11,15 +11,15 @@
       "cuda",
       "cpu"
     ],
-    "job_id": 1267844,
-    "job_name": "compiled-slice-paired",
+    "job_id": 1271496,
+    "job_name": "cache-entry-paired",
     "node": "98dci4-gpu-0003",
     "partition": "betelgeuse",
     "requested_memory_mib": 131072,
     "reservation": "gpu_0003_grpA",
     "tmpdir": "/tmp"
   },
-  "captured_at": "2026-09-09T13:51:20.718077+00:00",
+  "captured_at": "2026-09-15T13:53:41.554181+00:00",
   "correctness_diagnostic": {
     "backend_qualification": {
       "all_debug_cpu_x64": {
@@ -217,13 +217,13 @@
         "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
         "size_bytes": 645864,
         "stored_circuit_count": 101,
-        "warm_load_seconds": 0.004459060728549957
+        "warm_load_seconds": 0.005072030238807201
       },
       "loaded_from_persisted_carrier": true,
       "named_cache_only_check": {
         "command": [
           "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/mcs-compiled-slice-cache/benchmarks/mast_response_carrier_warm.py",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-cache-entry-overhead/benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -232,7 +232,7 @@
         ],
         "direct_green_operator_builder_entries": 0,
         "passes": true,
-        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.021017 direct_builders=0 verdict=PASS"
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.019849 direct_builders=0 verdict=PASS"
       }
     },
     "state_cache": {
@@ -241,183 +241,195 @@
         "schema_revision": 8,
         "selection_source_commit": "80706f89"
       },
-      "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/mcs-compiled-slice-cache/logs/exact-operand-cache.npz",
+      "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-cache-entry-overhead/logs/exact-operand-cache.npz",
       "sha256": "2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904"
     }
   },
-  "measurement_revision": "1c02ee56adcff55dfe16d23613820079b1654e94",
+  "measurement_revision": "3df8f0d5f9d2fd6b42922ff865d258ebca36d316",
   "members": [
     {
       "cached_direct_terminal_flux_ulp": 0,
-      "cold_public_wall_s": 10.951391692273319,
+      "cold_public_wall_s": 42.38305633328855,
       "compiled_host_terminal_flux_ulp": 0,
       "dispatch_reference_wall_s": 0.16604638658463955,
-      "dispatch_relative_error": 0.6775430014367049,
-      "dispatch_within_tolerance": false,
+      "dispatch_relative_error": 0.02805386753867102,
+      "dispatch_within_tolerance": true,
       "identity": "21978/35 pure",
       "same_cached_program": true,
-      "same_job_direct_wall_s": 0.14746117684990168,
+      "same_job_direct_wall_s": 0.1458597667515278,
       "slice_solver_count": 1,
       "terminal_flux_within_tolerance": true,
-      "warm_public_wall_s": 0.2473724652081728
+      "terminal_flux_zero_ulp": true,
+      "warm_public_wall_s": 0.1499516973271966
     },
     {
       "cached_direct_terminal_flux_ulp": 0,
-      "cold_public_wall_s": 0.26006271596997976,
+      "cold_public_wall_s": 0.26579606533050537,
       "compiled_host_terminal_flux_ulp": 0,
       "dispatch_reference_wall_s": 0.05064697377383709,
-      "dispatch_relative_error": 0.7044115413273597,
-      "dispatch_within_tolerance": false,
+      "dispatch_relative_error": 0.023431032875422923,
+      "dispatch_within_tolerance": true,
       "identity": "21978/35 mixed",
       "same_cached_program": true,
-      "same_job_direct_wall_s": 0.14501045364886522,
+      "same_job_direct_wall_s": 0.1438759993761778,
       "slice_solver_count": 1,
       "terminal_flux_within_tolerance": true,
-      "warm_public_wall_s": 0.24715749081224203
+      "terminal_flux_zero_ulp": true,
+      "warm_public_wall_s": 0.14724716264754534
     },
     {
       "cached_direct_terminal_flux_ulp": 0,
-      "cold_public_wall_s": 5.659685824997723,
+      "cold_public_wall_s": 19.045171912759542,
       "compiled_host_terminal_flux_ulp": 0,
       "dispatch_reference_wall_s": 0.05476085562258959,
-      "dispatch_relative_error": 0.6531384557493378,
-      "dispatch_within_tolerance": false,
+      "dispatch_relative_error": 0.020322732767407363,
+      "dispatch_within_tolerance": true,
       "identity": "21983/35 pure",
       "same_cached_program": true,
-      "same_job_direct_wall_s": 0.15183091070502996,
+      "same_job_direct_wall_s": 0.14917822647839785,
       "slice_solver_count": 1,
       "terminal_flux_within_tolerance": true,
-      "warm_public_wall_s": 0.25099751725792885
+      "terminal_flux_zero_ulp": true,
+      "warm_public_wall_s": 0.1522099357098341
     },
     {
       "cached_direct_terminal_flux_ulp": 0,
-      "cold_public_wall_s": 0.2589315753430128,
+      "cold_public_wall_s": 0.2650948613882065,
       "compiled_host_terminal_flux_ulp": 0,
       "dispatch_reference_wall_s": 0.060158408246934414,
-      "dispatch_relative_error": 0.6256929023819658,
-      "dispatch_within_tolerance": false,
+      "dispatch_relative_error": 0.017470335817832514,
+      "dispatch_within_tolerance": true,
       "identity": "21983/35 mixed",
       "same_cached_program": true,
-      "same_job_direct_wall_s": 0.15242340601980686,
+      "same_job_direct_wall_s": 0.15163026098161936,
       "slice_solver_count": 1,
       "terminal_flux_within_tolerance": true,
-      "warm_public_wall_s": 0.24779364932328463
+      "terminal_flux_zero_ulp": true,
+      "warm_public_wall_s": 0.15427929256111383
     },
     {
       "cached_direct_terminal_flux_ulp": 0,
-      "cold_public_wall_s": 5.380579014308751,
+      "cold_public_wall_s": 19.109488419257104,
       "compiled_host_terminal_flux_ulp": 0,
       "dispatch_reference_wall_s": 0.15231867879629135,
-      "dispatch_relative_error": 0.6440202216019376,
-      "dispatch_within_tolerance": false,
+      "dispatch_relative_error": 0.03792943693058948,
+      "dispatch_within_tolerance": true,
       "identity": "21985/51 pure",
       "same_cached_program": true,
-      "same_job_direct_wall_s": 0.15334747731685638,
+      "same_job_direct_wall_s": 0.15286036860197783,
       "slice_solver_count": 1,
       "terminal_flux_within_tolerance": true,
-      "warm_public_wall_s": 0.25210635364055634
+      "terminal_flux_zero_ulp": true,
+      "warm_public_wall_s": 0.1586582763120532
     },
     {
       "cached_direct_terminal_flux_ulp": 0,
-      "cold_public_wall_s": 0.3588047595694661,
+      "cold_public_wall_s": 0.37805281952023506,
       "compiled_host_terminal_flux_ulp": 0,
       "dispatch_reference_wall_s": 0.2515736473724246,
-      "dispatch_relative_error": 0.3916434810319013,
-      "dispatch_within_tolerance": false,
+      "dispatch_relative_error": 0.01650590525993307,
+      "dispatch_within_tolerance": true,
       "identity": "21985/51 mixed",
       "same_cached_program": true,
-      "same_job_direct_wall_s": 0.25312722846865654,
+      "same_job_direct_wall_s": 0.2547500655055046,
       "slice_solver_count": 1,
       "terminal_flux_within_tolerance": true,
-      "warm_public_wall_s": 0.35226285737007856
+      "terminal_flux_zero_ulp": true,
+      "warm_public_wall_s": 0.2589549459517002
     },
     {
       "cached_direct_terminal_flux_ulp": 0,
-      "cold_public_wall_s": 5.354519643820822,
+      "cold_public_wall_s": 20.353130321018398,
       "compiled_host_terminal_flux_ulp": 0,
       "dispatch_reference_wall_s": 0.15303998347371817,
-      "dispatch_relative_error": 0.5033740569562396,
-      "dispatch_within_tolerance": false,
+      "dispatch_relative_error": 0.0370170628832159,
+      "dispatch_within_tolerance": true,
       "identity": "21986/46 pure",
       "same_cached_program": true,
-      "same_job_direct_wall_s": 0.19957375898957253,
+      "same_job_direct_wall_s": 0.20319432951509953,
       "slice_solver_count": 1,
       "terminal_flux_within_tolerance": true,
-      "warm_public_wall_s": 0.30003401171416044
+      "terminal_flux_zero_ulp": true,
+      "warm_public_wall_s": 0.21071598678827286
     },
     {
       "cached_direct_terminal_flux_ulp": 0,
-      "cold_public_wall_s": 5.422239334322512,
+      "cold_public_wall_s": 19.435222950764,
       "compiled_host_terminal_flux_ulp": 0,
       "dispatch_reference_wall_s": 0.16088185599073768,
-      "dispatch_relative_error": 0.38659457113986384,
-      "dispatch_within_tolerance": false,
+      "dispatch_relative_error": 0.011530235695765782,
+      "dispatch_within_tolerance": true,
       "identity": "21986/46 mixed",
       "same_cached_program": true,
-      "same_job_direct_wall_s": 0.25260671600699425,
+      "same_job_direct_wall_s": 0.2552119819447398,
       "slice_solver_count": 1,
       "terminal_flux_within_tolerance": true,
-      "warm_public_wall_s": 0.35026310104876757
+      "terminal_flux_zero_ulp": true,
+      "warm_public_wall_s": 0.2581546362489462
     },
     {
       "cached_direct_terminal_flux_ulp": 0,
-      "cold_public_wall_s": 5.346794068813324,
+      "cold_public_wall_s": 22.16062097158283,
       "compiled_host_terminal_flux_ulp": 0,
       "dispatch_reference_wall_s": 0.05726295802742243,
-      "dispatch_relative_error": 0.6481546143816718,
-      "dispatch_within_tolerance": false,
+      "dispatch_relative_error": 0.040176824548091974,
+      "dispatch_within_tolerance": true,
       "identity": "21989/55 pure",
       "same_cached_program": true,
-      "same_job_direct_wall_s": 0.1517314650118351,
+      "same_job_direct_wall_s": 0.1583005404099822,
       "slice_solver_count": 1,
       "terminal_flux_within_tolerance": true,
-      "warm_public_wall_s": 0.2500769142061472
+      "terminal_flux_zero_ulp": true,
+      "warm_public_wall_s": 0.1646605534479022
     },
     {
       "cached_direct_terminal_flux_ulp": 0,
-      "cold_public_wall_s": 6.592302685603499,
+      "cold_public_wall_s": 20.630593582987785,
       "compiled_host_terminal_flux_ulp": 0,
       "dispatch_reference_wall_s": 0.10838781483471394,
-      "dispatch_relative_error": 0.6460785004644651,
-      "dispatch_within_tolerance": false,
+      "dispatch_relative_error": 0.028163204489360036,
+      "dispatch_within_tolerance": true,
       "identity": "21989/55 mixed",
       "same_cached_program": true,
-      "same_job_direct_wall_s": 0.15313737839460373,
+      "same_job_direct_wall_s": 0.1562548065558076,
       "slice_solver_count": 1,
       "terminal_flux_within_tolerance": true,
-      "warm_public_wall_s": 0.2520761461928487
+      "terminal_flux_zero_ulp": true,
+      "warm_public_wall_s": 0.1606554426252842
     },
     {
       "cached_direct_terminal_flux_ulp": 0,
-      "cold_public_wall_s": 5.258378063328564,
+      "cold_public_wall_s": 21.201301432214677,
       "compiled_host_terminal_flux_ulp": 0,
       "dispatch_reference_wall_s": 0.06366639817133546,
-      "dispatch_relative_error": 0.6839039397780212,
-      "dispatch_within_tolerance": false,
+      "dispatch_relative_error": 0.012256245813996806,
+      "dispatch_within_tolerance": true,
       "identity": "22086/43 pure",
       "same_cached_program": true,
-      "same_job_direct_wall_s": 0.14575341064482927,
+      "same_job_direct_wall_s": 0.1503998041152954,
       "slice_solver_count": 1,
       "terminal_flux_within_tolerance": true,
-      "warm_public_wall_s": 0.2454347424209118
+      "terminal_flux_zero_ulp": true,
+      "warm_public_wall_s": 0.15224314108490944
     },
     {
       "cached_direct_terminal_flux_ulp": 0,
-      "cold_public_wall_s": 0.25010938942432404,
+      "cold_public_wall_s": 0.2890864461660385,
       "compiled_host_terminal_flux_ulp": 0,
       "dispatch_reference_wall_s": 0.050577943213284016,
-      "dispatch_relative_error": 0.7230270189016244,
-      "dispatch_within_tolerance": false,
+      "dispatch_relative_error": 0.004827769745456291,
+      "dispatch_within_tolerance": true,
       "identity": "22086/43 mixed",
       "same_cached_program": true,
-      "same_job_direct_wall_s": 0.14440709073096514,
+      "same_job_direct_wall_s": 0.15164691768586636,
       "slice_solver_count": 1,
       "terminal_flux_within_tolerance": true,
-      "warm_public_wall_s": 0.24881731905043125
+      "terminal_flux_zero_ulp": true,
+      "warm_public_wall_s": 0.15237903408706188
     }
   ],
   "persistent_compilation_cache": {
-    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/compiled-slice-cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+    "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
     "entry_key_fields": [
       "serialized computation",
       "jaxlib version",
@@ -444,7 +456,7 @@
     "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
     "maximum_bytes": 8589934592,
     "minimum_compile_seconds": 0.0,
-    "root": "/work/projects/imas_gpu/sophelio/jax-cache/compiled-slice-cache",
+    "root": "/home/ITER/mcintos/.cache",
     "runtime_identity": {
       "backend": "gpu",
       "backend_version": "PJRT C API\ncuda 12090",
@@ -475,15 +487,19 @@
   },
   "schema": "nova.compiled-slice-cache",
   "source": {
+    "direct_dispatch": "slice solver with state, shadow, and carried exterior already prepared",
     "dispatch_receipt": "docs/figures/millisecond-converged-solve/trip-quantum/width-one-compiled.json",
     "driver": "benchmarks/compiled_slice_cache_receipt.py",
-    "driver_sha256": "6565c6d5f7d7b3554068abf54e392b99015a904b8dc103bac9f672709f35daa4"
+    "driver_sha256": "6565c6d5f7d7b3554068abf54e392b99015a904b8dc103bac9f672709f35daa4",
+    "entry_driver": "docs/figures/millisecond-converged-solve/compiled-slice-cache/run_measurement.py",
+    "entry_driver_sha256": "9a15138e4d0391f3285171e8e600b2de09ed3b590c8d5d91eb59d42e159918d9"
   },
   "verdict": {
     "cached_program_reuse": true,
-    "dispatch_wall_within_tolerance": false,
+    "dispatch_wall_within_tolerance": true,
     "member_count": 12,
-    "terminal_flux_within_tolerance": true
+    "terminal_flux_within_tolerance": true,
+    "terminal_flux_zero_ulp": true
   },
   "withdrawn_keyed_lookup": {
     "approach": "pre-coordinate lookup keyed by conductor inputs",

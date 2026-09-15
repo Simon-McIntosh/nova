@@ -600,6 +600,67 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   positive-polarity level range and annotation overlap before job 1271525 produced the
   accepted figure.</p>
 </section>
+<section id="cpu-backend-abort-closing">
+  <h2>CPU test-lane backend abort: attributed to process-cumulative in-process compilation</h2>
+
+  <p><strong>Question.</strong> One pytest process over the forward-operator importers
+  (observation, stencil_mesh, clip_quadrature, forward_operator and the
+  constraint-protocol module) dies with SIGABRT (exit 134) inside the JAX CPU backend,
+  on both arms of the delta gate, before pytest can report — so no failure ids are
+  collected and every delta over this surface was unmeasured. The closing node
+  attributes it from three cache treatments of one fixed six-module prefix in
+  jax/jaxlib 0.11.0 (XLA client API 477, runtime pjrt_ifrt, python 3.14.2, pytest
+  9.1.1, JAX_PLATFORMS=cpu, x64 enabled, PYTHONFAULTHANDLER=1, one all_debug job
+  each).</p>
+
+  <table>
+    <thead><tr><th>case</th><th>cache treatment</th><th>job</th><th>rc</th><th>wall</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td>persistent cache ON, warm shared home cache</td><td>1271399</td><td>0</td><td>454 s</td><td>41 passed (pair 30 passed)</td></tr>
+      <tr><td>B</td><td>cache genuinely OFF (jax_enable_compilation_cache=False)</td><td>1271437</td><td>134</td><td>1956 s</td><td>SIGABRT at test 40/41</td></tr>
+      <tr><td>C</td><td>cache ON, fresh EMPTY root via NOVA_FORWARD_COMPILATION_CACHE_ROOT</td><td>1271526</td><td>134</td><td>2041 s</td><td>SIGABRT at test 40/41</td></tr>
+    </tbody>
+  </table>
+
+  <p>All three land on the same terminal forward-solve test,
+  <code>tests/test_equilibrium_constraint_protocol.py::test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows</code>
+  (41st in A and passes; 40th in B and C, where the process dies compiling it). The
+  crash frame tracks whether that Nth program is a cache hit or a compile: a cache
+  HIT load dies in <code>compilation_cache.py:352 get_executable_and_time</code>
+  under <code>compiler.py:768 _cache_read</code> (repro sites: the earlier
+  prefix_5 run, job 1271081, and the constraints base/after lanes,
+  <code>test_reduced_newton_constraints.py::test_a_traced_target_decides_what_a_captured_one_decides</code>,
+  which abort identically so the abort is not a regression of the changed lane's
+  code); a cache MISS or cache OFF dies in <code>compiler.py:350
+  backend_compile_and_load</code> under <code>compiler.py:729
+  _compile_and_write_cache</code> (cases B and C), the forward solves reached through
+  <code>jax/_src/lax/control_flow/loops.py</code> scan/fori_loop from
+  <code>nova/equilibrium/fixed_point.py</code>, with the C stack <code>raise &lt;-
+  abort &lt;- libjax_common.so</code>.</p>
+
+  <p><strong>Attribution.</strong> The on-disk persistent cache is neither the cause
+  nor a necessary condition. Cache-off (B) and fresh-empty-cache-on (C) both force
+  every program to compile in-process and both abort at the same terminal test; a
+  warm shared cache (A) makes the process LOAD most programs instead of compiling
+  them, so it never reaches the fatal state and the same test passes. The leading
+  candidate is process-cumulative in-process compilation — an XLA / LLVM CPU
+  resource exhausted after roughly fifty compiled large while_loop/fori_loop (pjit)
+  programs in one process — with the crash frame wherever the next big program is
+  materialised. The exit code 134 within a single aborting module is a property of
+  running the forward-operator surface in one process, not of any module's code.</p>
+
+  <p><strong>Fix it implies.</strong> Operational, not source: the standing gate
+  stays the per-module fresh-process lane (one forward-operator module per process,
+  so an abort costs one module, names it, and lets the others be measured); the
+  persistent cache stays ON for speed but is not a correctness guard against the
+  abort; and the upstream report to jax-ml/jax carries a minimal reproduction —
+  nova's terminal protocol forward-solve test run after the rest of the prefix in
+  one process, or a synthetic loop compiling roughly fifty large jit/while_loop
+  graphs in a fresh process until abort — documenting that the crash frame tracks
+  cache hit versus compile. No source file was changed by the closing node; the full
+  record with per-case last Python frames and versions is the closing record in the
+  s19-handoff cpu-abort report under <code>~/.config/reckon/crew/reports</code>.</p>
+</section>
 </main>
 </body>
 </html>

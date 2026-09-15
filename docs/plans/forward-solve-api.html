@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="55">
+<meta name="plan-version" content="56">
 <meta name="plan-impl" content="0.78">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
@@ -226,6 +226,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260910T052538012361-fsa-sol-ledger-current-census" data-who="s19i-fsa-solledger" data-when="2026-09-10T07:49:22.732Z">
     <div class="r-comment-body"><p>Landed at a49c9920 (merged to main). The 1072.71 A of common scrape-off-layer current (0.19576 percent of the 547973 A plasma current) is entirely whole-cell booking by centroid side: 844.30 A in the sixteen cells the fitted separatrix crosses whose centroids fall outside, 228.41 A in fifteen fully open cells carrying the edge-extrapolated profile. No cell is geometrically cut, because the committed profile support traces its clip at all-ones flux (nova/equilibrium/forward_operator.py _profile_support) and books each whole cell by its centroid's side of the separatrix (observation.py:558 current_ledger, domain.py open_field_line). The chord-versus-exact table could not be produced on main because the clip-mode switch exists only on the held stack. Receipt with 157 per-cell rows and one panel under docs/figures/forward-solve-api/sol-ledger-census.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260915T055939097234-fsa-transport-branch-selection-without-shim" data-who="s19h-fsa-shim-c" data-when="2026-09-15T08:12:08.068Z">
+    <div class="r-comment-body"><p>Direct branch selection select_achieved_forward_branch replaces the SimpleNamespace ForwardPortfolio shim in the transport sweep (fb402f8f, receipt-identical over a 576-case grid); the worker&#x27;s foreground gate step was cancelled when its turn ended and its clive session then exhausted (prompt too long on resume), so the per-module transport delta is measured by the separate node fsa-transport-shim-delta-gate before the commit merges; worktree clean and retained</p></div>
 </div>
 </section>
 </main>

@@ -63,6 +63,10 @@ from nova.equilibrium.flux_surface_connectivity import (
     polish_stationary_points,
 )
 from nova.equilibrium.observation import ClippedIntegralMeasure
+from nova.equilibrium.separatrix_clip import (
+    _SPLINE_BOUNDARY_SEGMENTS,
+    _traced_clip,
+)
 from nova.equilibrium.source import (
     SCALAR_CURRENT_AMPLITUDE_BAND,
     CurrentNormalisationError,
@@ -304,6 +308,154 @@ def _cell_banked_field_integrals(
     return ClippedFieldIntegrals(
         *(jnp.where(cut_count > capacity, jnp.nan, value) for value in combined)
     )
+
+
+class _ExactClipLevel(NamedTuple):
+    """Dynamic spline and local-polynomial values for exact support tracing."""
+
+    surface: object
+    local_coefficient: jax.Array
+    centre: jax.Array
+    scale: jax.Array
+
+    def __call__(self, points):
+        spline_level = -self.surface._patch_evaluation(
+            self.surface.level_set_coefficients,
+            points[..., 0],
+            points[..., 1],
+        ).value
+        local = (points - self.centre[:, None, :]) / self.scale[:, None, :]
+        radial, vertical = local[..., 0], local[..., 1]
+        coefficient = self.local_coefficient
+        local_level = (
+            coefficient[:, None, 0]
+            + coefficient[:, None, 1] * radial
+            + coefficient[:, None, 2] * vertical
+            + coefficient[:, None, 3] * radial**2
+            + coefficient[:, None, 4] * radial * vertical
+            + coefficient[:, None, 5] * vertical**2
+        )
+        return jnp.where(self.surface.fit_executed, spline_level, local_level)
+
+
+def _polished_level_root(chord, normal, lower, upper, evaluator):
+    """Return the existing fixed-budget normal root without changing arithmetic."""
+    root = jnp.zeros(chord.shape[:-1], dtype=chord.dtype)
+    difference_step = jnp.asarray(1.0e-5, dtype=chord.dtype)
+
+    def polish(_iteration, current):
+        point = chord + current[..., None] * normal[:, None, :]
+        offset = difference_step * normal[:, None, :]
+        value = evaluator(point)
+        derivative = (evaluator(point + offset) - evaluator(point - offset)) / (
+            2.0 * difference_step
+        )
+        safe_derivative = jnp.where(
+            jnp.abs(derivative) > jnp.finfo(chord.dtype).tiny,
+            derivative,
+            1.0,
+        )
+        candidate = jnp.clip(current - value / safe_derivative, lower, upper)
+        return jnp.where(
+            jnp.abs(derivative) > jnp.finfo(chord.dtype).tiny,
+            candidate,
+            current,
+        )
+
+    root = jax.lax.fori_loop(0, 12, polish, root)
+    root = root.at[:, 0].set(0.0)
+    root = root.at[:, -1].set(0.0)
+    return root
+
+
+@jax.custom_jvp
+def _implicit_level_root(chord, normal, lower, upper, evaluator):
+    """Polish the primal root while exposing its implicit derivative."""
+    return _polished_level_root(chord, normal, lower, upper, evaluator)
+
+
+@_implicit_level_root.defjvp
+def _implicit_level_root_jvp(primals, tangents):
+    chord, normal, lower, upper, evaluator = primals
+    chord_tangent, normal_tangent, lower_tangent, upper_tangent, evaluator_tangent = (
+        tangents
+    )
+    root = _polished_level_root(chord, normal, lower, upper, evaluator)
+
+    def residual_at_fixed_root(carried_chord, carried_normal, carried_evaluator):
+        point = carried_chord + root[..., None] * carried_normal[:, None, :]
+        return carried_evaluator(point)
+
+    _value, partial_tangent = jax.jvp(
+        residual_at_fixed_root,
+        (chord, normal, evaluator),
+        (chord_tangent, normal_tangent, evaluator_tangent),
+    )
+
+    def residual_at_root(candidate):
+        point = chord + candidate[..., None] * normal[:, None, :]
+        return evaluator(point)
+
+    _value, root_derivative = jax.jvp(
+        residual_at_root,
+        (root,),
+        (jnp.ones_like(root),),
+    )
+    derivative_is_valid = jnp.abs(root_derivative) > jnp.finfo(root.dtype).tiny
+    safe_derivative = jnp.where(derivative_is_valid, root_derivative, 1.0)
+    implicit_tangent = jnp.where(
+        derivative_is_valid,
+        -partial_tangent / safe_derivative,
+        0.0,
+    )
+    tangent = jnp.where(
+        root <= lower,
+        lower_tangent,
+        jnp.where(root >= upper, upper_tangent, implicit_tangent),
+    )
+    tangent = tangent.at[:, 0].set(0.0)
+    tangent = tangent.at[:, -1].set(0.0)
+    return root, tangent
+
+
+def _implicit_traced_level_arc(start, end, evaluator, inside_vertex):
+    """Trace the original arc with one implicit derivative per polished root."""
+    parameter = jnp.linspace(
+        0.0,
+        1.0,
+        _SPLINE_BOUNDARY_SEGMENTS + 1,
+        dtype=start.dtype,
+    )
+    chord = start[:, None, :] + parameter[None, :, None] * (end - start)[:, None, :]
+    delta = end - start
+    normal = jnp.stack((-delta[:, 1], delta[:, 0]), axis=1)
+    squared_length = jnp.sum(delta**2, axis=1)
+    safe_squared_length = jnp.maximum(squared_length, jnp.finfo(start.dtype).tiny)
+    chord_midpoint = 0.5 * (start + end)
+    inside_side = jnp.sum((inside_vertex - chord_midpoint) * normal, axis=1)
+    side = jnp.where(inside_side < 0.0, 1.0, -1.0)
+    local_extent = jnp.minimum(
+        jnp.linalg.norm(inside_vertex - chord_midpoint, axis=1)
+        / jnp.sqrt(safe_squared_length),
+        1.0,
+    )
+    signed_extent = side * jnp.maximum(local_extent, 32.0 * jnp.finfo(start.dtype).eps)
+    lower = jnp.minimum(signed_extent, 0.0)[:, None]
+    upper = jnp.maximum(signed_extent, 0.0)[:, None]
+    root = _implicit_level_root(chord, normal, lower, upper, evaluator)
+    return chord + root[..., None] * normal[:, None, :]
+
+
+_implicit_clip_globals = dict(_traced_clip.__globals__)
+_implicit_clip_globals["_traced_level_arc"] = _implicit_traced_level_arc
+_implicit_traced_clip = types.FunctionType(
+    _traced_clip.__code__,
+    _implicit_clip_globals,
+    name="_implicit_traced_clip",
+    argdefs=_traced_clip.__defaults__,
+    closure=_traced_clip.__closure__,
+)
+_implicit_traced_clip.__kwdefaults__ = _traced_clip.__kwdefaults__
 
 
 def _substitute_chord_cell_supports(exact, chord, cell_indices, participation):
@@ -2420,25 +2572,12 @@ class ForwardFluxOperator:
             regularization=1.0e-14,
         )
 
-        def curved_level(points):
-            spline_level = -surface._patch_evaluation(
-                surface.level_set_coefficients,
-                points[..., 0],
-                points[..., 1],
-            ).value
-            local = (points - self._support_curve_centre[:, None, :]) / (
-                self._support_curve_scale[:, None, :]
-            )
-            radial, vertical = local[..., 0], local[..., 1]
-            local_level = (
-                inside_coefficient[:, None, 0]
-                + inside_coefficient[:, None, 1] * radial
-                + inside_coefficient[:, None, 2] * vertical
-                + inside_coefficient[:, None, 3] * radial**2
-                + inside_coefficient[:, None, 4] * radial * vertical
-                + inside_coefficient[:, None, 5] * vertical**2
-            )
-            return jnp.where(surface.fit_executed, spline_level, local_level)
+        curved_level = _ExactClipLevel(
+            surface,
+            inside_coefficient,
+            self._support_curve_centre,
+            self._support_curve_scale,
+        )
 
         cell_vertices = jnp.asarray(atomic_mesh.node_coordinates)[
             jnp.asarray(atomic_mesh.cell_nodes)
@@ -2448,7 +2587,12 @@ class ForwardFluxOperator:
             curved_level(cell_vertices),
         )
         participation = masks.profile_participation | vertex_participation
-        traced_support = atomic_mesh.traced_clip(
+        traced_support = _implicit_traced_clip(
+            atomic_mesh.node_coordinates,
+            atomic_mesh.cell_nodes,
+            atomic_mesh.cell_vertex_count,
+            atomic_mesh.centroids,
+            atomic_mesh.support_capacity,
             inside_boundary,
             curve_evaluator=curved_level,
             participating_cell=participation,

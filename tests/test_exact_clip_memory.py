@@ -5,7 +5,9 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+from typing import NamedTuple
 
+import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
@@ -18,9 +20,12 @@ from nova.equilibrium.clip_quadrature import (
 from nova.equilibrium.forward_operator import (
     _cell_banked_current_moments,
     _cell_banked_field_integrals,
+    _implicit_level_root,
+    _implicit_traced_clip,
 )
-from nova.equilibrium.separatrix_clip import TracedClippedSupports
+from nova.equilibrium.separatrix_clip import AtomicCellMesh, TracedClippedSupports
 from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
+from nova.jax.config import configure_dtypes
 
 
 MAIN_CHECKOUT = Path("/home/ITER/mcintos/Code/nova")
@@ -395,6 +400,69 @@ def test_cell_banked_field_integrals_are_bit_identical():
     )
     for one, other in zip(expected, actual, strict=True):
         assert np.array_equal(np.asarray(one), np.asarray(other))
+
+
+class _LinearCurve(NamedTuple):
+    offset: jnp.ndarray
+
+    def __call__(self, points):
+        return self.offset - points[..., 0]
+
+
+def test_implicit_traced_clip_primal_is_bit_identical():
+    """The implicit root derivative leaves every primal support bit unchanged."""
+    mesh = AtomicCellMesh.from_cells(
+        (
+            np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]]),
+            np.asarray([[1.0, 0.0], [2.0, 0.0], [2.0, 1.0], [1.0, 1.0]]),
+        )
+    )
+    signed = jnp.asarray(0.5 - mesh.node_coordinates[:, 0])
+    participation = jnp.asarray([True, True])
+    curve = _LinearCurve(jnp.asarray(0.5))
+
+    expected = mesh.traced_clip(
+        signed,
+        curve_evaluator=curve,
+        participating_cell=participation,
+    )
+    actual = _implicit_traced_clip(
+        mesh.node_coordinates,
+        mesh.cell_nodes,
+        mesh.cell_vertex_count,
+        mesh.centroids,
+        mesh.support_capacity,
+        signed,
+        curve_evaluator=curve,
+        participating_cell=participation,
+    )
+    for one, other in zip(expected, actual, strict=True):
+        np.testing.assert_array_equal(np.asarray(one), np.asarray(other))
+
+
+def test_implicit_level_root_jvp_matches_central_difference():
+    """The polished root tangent is the derivative of its converged primal."""
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    chord = jnp.zeros((1, 3, 2), dtype=jnp.float64)
+    normal = jnp.asarray([[1.0, 0.0]], dtype=jnp.float64)
+    lower = jnp.full((1, 1), -1.0, dtype=jnp.float64)
+    upper = jnp.full((1, 1), 1.0, dtype=jnp.float64)
+
+    def root(offset):
+        return _implicit_level_root(
+            chord,
+            normal,
+            lower,
+            upper,
+            _LinearCurve(offset),
+        )[0, 1]
+
+    offset = jnp.asarray(0.25, dtype=jnp.float64)
+    _primal, tangent = jax.jvp(root, (offset,), (jnp.ones_like(offset),))
+    step = jnp.asarray(1.0e-6, dtype=jnp.float64)
+    central = (root(offset + step) - root(offset - step)) / (2.0 * step)
+    assert float(tangent) == pytest.approx(float(central), rel=1.0e-10)
 
 
 @pytest.mark.slow

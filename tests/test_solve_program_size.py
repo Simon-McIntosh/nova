@@ -15,6 +15,7 @@ from benchmarks.program_scope_census import (
 from benchmarks.solve_program_size_gate import (
     MAX_300_EXECUTABLE_BYTES,
     MAX_300_SOLVE_INSTRUCTIONS,
+    _write_json,
     evaluate_gate,
     write_semantic_report,
 )
@@ -382,3 +383,14 @@ def test_semantic_report_requires_all_twelve_bit_identical_mast_rows(tmp_path):
     assert len(result["mast_rows"]) == 12
     assert result["mast_rows"][0]["before_compiled_boundary_ms_per_trip"] == 40.0
     assert result["mast_rows"][0]["after_compiled_boundary_ms_per_trip"] == 30.0
+
+
+def test_semantic_receipt_preserves_nonfinite_refusal_as_null(tmp_path):
+    output = tmp_path / "receipt.json"
+
+    _write_json(output, {"residual": float("nan"), "finite": False})
+
+    assert json.loads(output.read_text(encoding="utf-8")) == {
+        "finite": False,
+        "residual": None,
+    }

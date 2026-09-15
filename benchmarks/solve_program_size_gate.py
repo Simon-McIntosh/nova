@@ -13,6 +13,7 @@ import argparse
 from datetime import UTC, datetime
 import hashlib
 import json
+import math
 from pathlib import Path
 import time
 from typing import Any
@@ -241,9 +242,18 @@ def _report(result: dict[str, Any]) -> str:
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    def strict(value):
+        if isinstance(value, dict):
+            return {key: strict(item) for key, item in value.items()}
+        if isinstance(value, list | tuple):
+            return [strict(item) for item in value]
+        if isinstance(value, float) and not math.isfinite(value):
+            return None
+        return value
+
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        json.dumps(strict(payload), indent=2, sort_keys=True, allow_nan=False) + "\n",
         encoding="utf-8",
     )
 
@@ -349,9 +359,16 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
     candidate_state = np.asarray(candidate.state, dtype=np.float64)
     baseline_hash = hashlib.sha256(baseline_state.tobytes()).hexdigest()
     candidate_hash = hashlib.sha256(candidate_state.tobytes()).hexdigest()
-    max_absolute_difference = float(
-        np.max(np.abs(candidate_state - baseline_state), initial=0.0)
+    baseline_state_finite = bool(np.all(np.isfinite(baseline_state)))
+    candidate_state_finite = bool(np.all(np.isfinite(candidate_state)))
+    difference = np.abs(candidate_state - baseline_state)
+    max_absolute_difference = (
+        float(np.max(difference, initial=0.0))
+        if bool(np.all(np.isfinite(difference)))
+        else None
     )
+    baseline_residual = float(baseline.residual)
+    candidate_residual = float(candidate.residual)
     return {
         "case": case_name,
         "requested_cells": requested_cells,
@@ -360,12 +377,20 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
         "candidate_seconds": candidate_seconds,
         "baseline_state_sha256_binary64": baseline_hash,
         "candidate_state_sha256_binary64": candidate_hash,
+        "baseline_state_finite": baseline_state_finite,
+        "candidate_state_finite": candidate_state_finite,
         "terminal_state_bit_identical": bool(
             np.array_equal(candidate_state, baseline_state)
         ),
         "maximum_absolute_state_difference": max_absolute_difference,
-        "baseline_terminal_residual": float(baseline.residual),
-        "candidate_terminal_residual": float(candidate.residual),
+        "baseline_terminal_residual": (
+            baseline_residual if math.isfinite(baseline_residual) else None
+        ),
+        "candidate_terminal_residual": (
+            candidate_residual if math.isfinite(candidate_residual) else None
+        ),
+        "baseline_terminal_residual_finite": math.isfinite(baseline_residual),
+        "candidate_terminal_residual_finite": math.isfinite(candidate_residual),
         "converged_equal": bool(
             np.asarray(candidate.converged).item()
             == np.asarray(baseline.converged).item()
@@ -417,6 +442,112 @@ def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str,
     return receipt
 
 
+def run_mast_identity(
+    output: Path, dispatch_path: Path, cache_root: Path | None
+) -> dict[str, Any]:
+    """Run the twelve MAST members through the current compiled-slice signature."""
+    import jax
+    import jax.numpy as jnp
+
+    from benchmarks.compiled_slice_cache_receipt import _host, _solve, _ulp_distance
+    from benchmarks.trip_quantum_width_one import (
+        _build_members,
+        _require_allocation,
+        _require_revision,
+    )
+    from nova.equilibrium import reduced_newton
+    from nova.equilibrium.topology import TopologyClass
+    from nova.jax.config import (
+        configure_dtypes,
+        configure_persistent_compilation_cache,
+        default_persistent_compilation_cache_root,
+    )
+
+    configure_dtypes()
+    dispatch = json.loads(dispatch_path.read_text(encoding="utf-8"))
+    references = {
+        str(row["identity"]): float(
+            row["compiled"]["program_dispatch_wall_per_solve_s"]
+        )
+        for row in dispatch["width_one"]["members"]
+    }
+    receipt: dict[str, Any] = {
+        "schema": "nova.solve-program-mast-identity",
+        "measurement_revision": _require_revision(),
+        "captured_at": datetime.now(UTC).isoformat(),
+        "assignment": _require_allocation(),
+        "persistent_compilation_cache": configure_persistent_compilation_cache(
+            cache_root or default_persistent_compilation_cache_root(),
+            minimum_compile_seconds=0.0,
+        ).receipt(),
+        "dispatch_reference": str(dispatch_path),
+        "members": [],
+        "verdict": None,
+    }
+    _write_json(output, receipt)
+    members, inputs = _build_members()
+    receipt["inputs"] = inputs
+    _write_json(output, receipt)
+    reduced_newton._compiled_program_cache.clear()
+    for number, member in enumerate(members, start=1):
+        print(f"MAST_START member={number} identity={member.identity}", flush=True)
+        cold_started = time.perf_counter()
+        first = _solve(member)
+        cold_seconds = time.perf_counter() - cold_started
+        state = jnp.asarray(member.state)
+        requested = jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8)
+        shadow = jnp.ravel(
+            jnp.asarray(
+                member.operator.residual_shadow_mask(state, requested), dtype=bool
+            )
+        )
+        external = member.operator.external()
+        jax.block_until_ready(first.program.slice_solver(state, shadow, external))
+        second = _solve(member)
+        direct_started = time.perf_counter()
+        direct = first.program.slice_solver(state, shadow, external)
+        jax.block_until_ready(direct)
+        direct_seconds = time.perf_counter() - direct_started
+        warm_started = time.perf_counter()
+        warm = _solve(member)
+        warm_seconds = time.perf_counter() - warm_started
+        host = _host(member)
+        trips = int(jax.device_get(direct)[7])
+        host_ulp = _ulp_distance(warm.state, host.state)
+        direct_ulp = _ulp_distance(warm.state, direct[0])
+        row = {
+            "identity": member.identity,
+            "trips": trips,
+            "cold_public_wall_s": cold_seconds,
+            "warm_public_wall_s": warm_seconds,
+            "dispatch_reference_wall_s": references[member.identity],
+            "same_job_direct_wall_s": direct_seconds,
+            "same_cached_program": second.program is first.program
+            and warm.program is first.program,
+            "compiled_host_terminal_flux_ulp": host_ulp,
+            "cached_direct_terminal_flux_ulp": direct_ulp,
+            "terminal_flux_bit_identical": host_ulp == 0 and direct_ulp == 0,
+        }
+        receipt["members"].append(row)
+        _write_json(output, receipt)
+        print(
+            f"MAST_DONE member={number} identity={member.identity} "
+            f"ulp={host_ulp} direct_s={direct_seconds:.6f}",
+            flush=True,
+        )
+    receipt["verdict"] = {
+        "member_count": len(receipt["members"]),
+        "cached_program_reuse": all(
+            row["same_cached_program"] for row in receipt["members"]
+        ),
+        "terminal_flux_bit_identical": all(
+            row["terminal_flux_bit_identical"] for row in receipt["members"]
+        ),
+    }
+    _write_json(output, receipt)
+    return receipt
+
+
 def write_semantic_report(
     certificate_path: Path,
     mast_path: Path,
@@ -427,14 +558,14 @@ def write_semantic_report(
     certificate = json.loads(certificate_path.read_text(encoding="utf-8"))
     mast = json.loads(mast_path.read_text(encoding="utf-8"))
     dispatch = json.loads(dispatch_path.read_text(encoding="utf-8"))
-    trip_counts = {
+    reference_trip_counts = {
         str(row["identity"]): int(row["compiled"]["program_dispatch_trips"])
         for row in dispatch["width_one"]["members"]
     }
     timing_rows = []
     for row in mast["members"]:
         identity = str(row["identity"])
-        trips = trip_counts[identity]
+        trips = int(row.get("trips", reference_trip_counts[identity]))
         timing_rows.append(
             {
                 "identity": identity,
@@ -513,6 +644,7 @@ def main() -> int:
     parser.add_argument("--candidate-dir", type=Path)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--certificate-output", type=Path)
+    parser.add_argument("--mast-output", type=Path)
     parser.add_argument("--cache-root", type=Path)
     parser.add_argument("--semantic-report", action="store_true")
     parser.add_argument("--certificate-receipt", type=Path)
@@ -532,6 +664,19 @@ def main() -> int:
             flush=True,
         )
         return 0 if result["passed"] else 1
+    if args.mast_output is not None:
+        if args.dispatch_receipt is None:
+            parser.error("MAST identity gate requires dispatch-receipt")
+        result = run_mast_identity(
+            args.mast_output, args.dispatch_receipt, args.cache_root
+        )
+        passed = (
+            result["verdict"]["member_count"] == 12
+            and result["verdict"]["cached_program_reuse"]
+            and result["verdict"]["terminal_flux_bit_identical"]
+        )
+        print(f"MAST_IDENTITY_GATE={'PASS' if passed else 'FAIL'}", flush=True)
+        return 0 if passed else 1
     if args.semantic_report:
         required = (
             args.certificate_receipt,

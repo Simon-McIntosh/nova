@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T17:37:57",
+  "updated": "2026-09-15T17:44:36",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4693,6 +4693,15 @@
       },
       {
         "id": "s19h-cca-clipmem-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-cca-clipseed-s",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -167390,6 +167399,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2577
+    "_version": 2578
   }
 }

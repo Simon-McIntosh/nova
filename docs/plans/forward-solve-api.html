@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="55">
+<meta name="plan-version" content="56">
 <meta name="plan-impl" content="0.78">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
@@ -199,6 +199,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T203715706706" data-who="coordinator" data-when="2026-09-04T20:36:00Z">
     <div class="r-comment-body"><p>Compilation-cache default made node-local: commit <code>938f5c51</code> merged at <code>32382c3b</code>. An unconfigured public solve now resolves its cache beneath TMPDIR (falling back to /tmp), scoped by user and host, with the runtime-versioned directory below that root; an explicitly named <code>jax_compilation_cache_dir</code> from a launcher or the environment is preserved; the receipt's resolved defaults record <code>compilation_cache_directory</code> while <code>compilation_cache_hit</code> stays an observation. Two simultaneous CPU processes compiling into the default location exit clean (4 new tests), the request, defaults and wiring suites plus the referees stay green (84). Attribution of the abort that motivated it: the stack dies at <code>executable.serialize()</code> before the cache file is written, and JAX 0.11.0's cache uses a file lock plus write_bytes rather than a no-clobber rename, so neither a GPFS rename failure nor a concurrent-writer race is supported by the evidence; a cheap two-writer GPFS reproduction did not abort. The native serialization abort remains unexplained and is recorded here as open; the node-local default removes the shared-directory exposure regardless.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260915T082752949902-fsa-transport-shim-delta-gate" data-who="fsa-transport-shim-delta-gate" data-when="2026-09-15T11:35:00+02:00">
+    <div class="r-comment-body"><p>Transport test delta gate did not complete in its single exact scheduler allocation. Job <code>1271211</code> on <code>all_debug</code> ran the base archive <code>0f872fd6</code> through seven modules: 35 passed, 0 failed and 1 xfailed; it reached <code>tests/test_transport_geometry_reference.py</code> at the 59-minute wall and exited <code>143</code> before a terminal receipt. The shim-removal revision <code>fb402f8f</code> was not run, so the added-failure set is <strong>NOT MEASURABLE</strong>, not assumed empty. Full per-module logs and JUnit receipts are under <code>~/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate/</code>; the next action is a fresh allocation with sufficient time or an exact plan-approved test selection.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260906T194721133352-fsa-agents-seam-guidance" data-who="fsa-docs-c" data-when="2026-09-06T20:13:45.445Z">
     <div class="r-comment-body"><p>Forward-solve seam wired into the guidance: seam section in nova/equilibrium/AGENTS.md (+35), new nova/transport/AGENTS.md (+45) for the coupled forward, two pointer rows in the root AGENTS.md; every named symbol verified present by the coordinator; the scout half of the section done-when is a separate node</p></div>

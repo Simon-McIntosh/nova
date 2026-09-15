@@ -247,6 +247,39 @@
 <figure><img src="/nova/figures/forward-solve-api/coil-edit-latency/coil-edit-latency.png" alt="Per-edit wall, trip counts, residual and displacement over twenty P4-upper edits"><figcaption>Per-edit wall, trips, residual and displacement across the twenty edits; every point after the first is a recompile.</figcaption></figure>
 <p>Receipt: <code>docs/figures/forward-solve-api/coil-edit-latency/coil-edit-latency.json</code>. Report: <code>~/.config/reckon/crew/reports/nova/forward-solve-api/coil-edit-latency.md</code>.</p>
 </section>
+  <section id="transport-shim-delta-gate">
+    <h2>§3 transport test delta gate: incomplete at the scheduler ceiling</h2>
+    <p><strong>Measurement:</strong> The single foreground <code>all_debug</code> allocation
+    (job <code>1271211</code>, <code>--time=00:59:00</code>, 4 CPUs, 64G, CPU JAX,
+    <code>TMPDIR=/tmp</code>) compared a git archive of base <code>0f872fd6</code> with
+    shim-removal commit <code>fb402f8f768af3b843964ad28a077be1c1ae2d5d</code> using one
+    fresh direct-Python process per <code>tests/test_transport_*.py</code> module. The
+    allocation exited <code>143</code> at its wall limit while starting the eighth base
+    module, <code>tests/test_transport_geometry_reference.py</code>; the after revision
+    was not reached.</p>
+    <table>
+      <caption>Completed base receipts; the after revision has no receipts</caption>
+      <thead><tr><th scope="col">Module</th><th scope="col">Base pass</th><th scope="col">Base fail</th><th scope="col">After pass/fail</th></tr></thead>
+      <tbody>
+        <tr><th scope="row"><code>test_transport_cocos.py</code></th><td>6</td><td>0</td><td>not run</td></tr>
+        <tr><th scope="row"><code>test_transport_coupled_window.py</code></th><td>12</td><td>0</td><td>not run</td></tr>
+        <tr><th scope="row"><code>test_transport_ensemble.py</code></th><td>6</td><td>0</td><td>not run</td></tr>
+        <tr><th scope="row"><code>test_transport_environment.py</code></th><td>1</td><td>0</td><td>not run</td></tr>
+        <tr><th scope="row"><code>test_transport_evolved_state.py</code></th><td>4 (1 xfailed)</td><td>0</td><td>not run</td></tr>
+        <tr><th scope="row"><code>test_transport_forward_seam.py</code></th><td>2</td><td>0</td><td>not run</td></tr>
+        <tr><th scope="row"><code>test_transport_geometry.py</code></th><td>4</td><td>0</td><td>not run</td></tr>
+        <tr><th scope="row"><code>test_transport_geometry_reference.py</code></th><td>incomplete</td><td>unavailable</td><td>not run</td></tr>
+        <tr><th scope="row">Remaining three modules</th><td>not run</td><td>unavailable</td><td>not run</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Result:</strong> The seven completed base modules contain 35 passes, zero
+    failures and one expected xfail. Failure IDs are therefore absent from those base
+    receipts. The after-side counts and the added-failure set are
+    <strong>NOT MEASURABLE</strong>, not an empty set, because the scheduler ceiling
+    prevented the after-side processes from starting. Logs, JUnit receipts, the base
+    archive and the exact driver are retained at
+    <code>~/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate/</code>.</p>
+  </section>
 </main>
 </body>
 </html>

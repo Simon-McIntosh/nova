@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T10:01:43",
+  "updated": "2026-09-15T10:05:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -161085,6 +161085,273 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T043253209015-cca-zero-residual-check",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-zero-residual-check",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1501,
+                "cached_input_tokens": 935848,
+                "input_tokens": 937381,
+                "output_tokens": 5921,
+                "reasoning_output_tokens": 1078,
+                "total_tokens": 943302,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "53867a4c-f11b-48da-85bc-d43d6d8815dd",
+            "session_id": "s19-review"
+          },
+          "done_when": "Never read an image file. Never open any receipt larger than one megabyte in an editor (load it with json). Commit before submitting any job; every SLURM job is sbatch detached from your shell with --output in the run directory, TMPDIR=/tmp exported in the submit environment and the payload, the root venv python /home/ITER/mcintos/Code/nova/.venv/bin/python with PYTHONPATH at the worktree, never uv on a compute node; CPU work on all_debug (--time=00:59:00 --cpus-per-task=8 --mem=64G, JAX_PLATFORMS=cpu) in ONE job with cases sharded inside and parts persisted as each lands; any H200 job short and single (betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1 --cpus-per-task=8 --mem=128G --time=00:30:00, nvidia-smi prologue exiting 3 below 40 GiB free, XLA_PYTHON_CLIENT_PREALLOCATE=false, JAX_PLATFORMS=cuda,cpu); the persistent compilation cache needs the enabling config flag as well as the directory. Write the manifest with the SLURM job number on the blockers line before waiting, end the turn, finish when resumed. Every uv command carries --no-sync and nothing runs uv sync. No production code change. Facts at this base (main): the whole-cell control rows under the re-posed fixture (docs/figures/cut-cell-current-attribution/wholecell-rows, parts under parts/rows and parts/acceptance, load with json) include weak-rotation-reactor-static at 2500 cells whose solver receipt reads converged true, terminal_fixed_point_residual 0.0, qualification bound 0.0, two trips and ten Newton steps with all eleven promotions accepted, while the axis sits 0.104 m from the analytic axis and the moderate and strong rows at the same count read residuals 0.0020 and 0.00071 unconverged; on this operator an exactly zero relative residual has previously meant an empty identity (the residual measured in a norm the state does not enter), never convergence; the fixed-point residual scalar is defined in nova/equilibrium/fixed_point.py around line 855 as the maximum absolute map difference over the maximum absolute mapped state, and the qualification bound comes from the solve policy's convergence tolerance. Build one benchmark that reloads that row's terminal flux from its persisted part (or re-solves it identically in one H200 job if the terminal state is not persisted, stating which), rebuilds the operator with the re-posed exterior as the row did, applies the production map once at the terminal state and reports the residual by three definitions: the solver's own scalar, the rms and sup of map minus state over the residual carriers as a fraction of span, and the same restricted to the profile-owned cells; reports the residual mask or weights the solver applied (how many carriers enter the norm and how many are excluded), and traces the 0.0 qualification bound to the policy field and code line that set it. Compare with the moderate 2500 row treated identically. The report states whether the weak 2500 row is a fixed point of the map (residual by the independent definitions) or whether the solver's zero was an empty norm, and names the line responsible. CPU is acceptable for one map application at 2500 cells if the machine loads from cache within the allocation.",
+          "estimated_hours": 2.0,
+          "goal": "Measure one independent map application at the whole-cell weak 2500-cell terminal state that the solver reported as converged with an exactly zero residual, and trace the zero qualification bound to its source",
+          "id": "cca-zero-residual-check",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-15T04:32:53Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T043253209015-cca-zero-residual-check/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/zero_residual_check.py",
+            "docs/figures/cut-cell-current-attribution/zero-residual",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/zero-residual",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19i-cca-zero-residual",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-15T04:33:05Z",
+        "completed_at": "2026-09-15T07:55:55.245Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 12161,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 12170,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "fb80e97511ea48ca8ac107d4a87fce50792a6154",
+        "commits": [
+          "b68205243d23346335bc9cc275fc0311d2c8d4ba",
+          "02ba41e93bd75c0670047a261798addcf90deba8"
+        ],
+        "changed_lines": {
+          "added": 1311,
+          "removed": 0,
+          "files": 8
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "benchmarks/zero_residual_check.py, one all_debug CPU job, one production-map application per persisted 2500-cell terminal state",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/cut-cell-current-attribution/zero-residual/receipt.json",
+          "log_digest": "1cd99c00cab457e97dd3f3cef389ca302f0d11f2203146f2bbf6a408da5e65b0"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T043253209015-cca-zero-residual-check/manifest.md",
+        "scope_changed": false,
+        "session_id": "7283e7aa-136b-4d94-944f-1ba953f65607",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 21491247,
+            "input_tokens_cumulative": 21491247,
+            "output_tokens": 128982,
+            "output_tokens_cumulative": 128982,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T07:55:55.245Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: SLURM job 1271023 running on 98dci4-clu-3141 (all_debug; 00:59:00; 8 cpus; 64G); waiting for completion before the after_suite/failure_attribution verdict can be computed. Scheduled wait; not a fault - resume when the job lands.",
+              "elapsed_seconds": 309,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 3221,
+              "log_fresh": false,
+              "manifest_commits": [
+                "(none yet - read-only test role; no repo writes until the landing record at completion)"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "9c9160b88342f1eb74c39f5bd033f06f77eb9d99ef4c53096df7e4482074d1fd",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T033357673076-cca-quadrature-delta-after-arm/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T033357673076-cca-quadrature-delta-after-arm/manifest.md; resolve the blocker before resuming the run",
+              "node": "cca-quadrature-delta-after-arm",
+              "phase": "starting",
+              "plan": "cut-cell-current-attribution",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260915T033357673076-cca-quadrature-delta-after-arm",
+              "session": "s19-review",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260915T033357673076-cca-quadrature-delta-after-arm",
+                "session_id": "9c66979d-85a7-4291-a54c-7e8c150a59ba",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 3279,
+              "terminal_at": "2026-09-15T03:38:19Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-quadrature-delta-after-arm"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 21991531,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 200000",
+          "elapsed_seconds": 12167.159,
+          "generated_tokens": 150836,
+          "generation_seconds": 12006.012,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 83.2,
+          "machine_seconds": 161.147,
+          "peak_input_tokens": 166301,
+          "tokens_per_second": 12.56,
+          "wall_tokens_per_second": 12.4
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-zero-residual-check",
+          "session_id": "7283e7aa-136b-4d94-944f-1ba953f65607",
+          "session_source": "pointer",
+          "retained_at": "2026-09-15T07:55:55.245Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 183.0,
+        "orientation_input_tokens": 10952344.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -161397,6 +161664,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2532
+    "_version": 2533
   }
 }

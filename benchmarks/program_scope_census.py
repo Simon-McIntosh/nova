@@ -433,7 +433,7 @@ def _replication_targets() -> dict[str, dict[str, Any]]:
             "function": "ForwardFluxOperator._fixed_design_read",
             "sentinel": _source_line(
                 ForwardFluxOperator._fixed_design_read,
-                "grid_flux, _wall_flux = self._fixed_design_topology.split_flux_map",
+                "rescue_axis = self._independent_rescue_axis",
             ),
         },
     }

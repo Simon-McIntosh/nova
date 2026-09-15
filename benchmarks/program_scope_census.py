@@ -1122,6 +1122,8 @@ def _executable_size(comp) -> dict[str, Any]:
     """Return executable byte measures without mistaking silence for zero."""
     runtime = comp.runtime_executable()
     generated = getattr(runtime, "size_of_generated_code_in_bytes", None)
+    if callable(generated):
+        generated = generated()
     generated_bytes = int(generated) if generated is not None else None
     serialized_bytes = None
     serialization_error = None

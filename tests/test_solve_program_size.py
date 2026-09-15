@@ -2,6 +2,7 @@ from copy import deepcopy
 
 import pytest
 
+from benchmarks.program_scope_census import _executable_size
 from benchmarks.solve_program_size_gate import (
     MAX_EXECUTABLE_BYTES,
     evaluate_gate,
@@ -92,3 +93,28 @@ def test_gate_requires_an_executable_measure():
 
     with pytest.raises(ValueError, match="missing executable-size measurement"):
         evaluate_gate(baseline, candidate)
+
+
+@pytest.mark.parametrize("generated_as_method", [False, True])
+def test_executable_size_accepts_runtime_method_or_property(generated_as_method):
+    class Runtime:
+        def serialize(self):
+            return b"compiled"
+
+    runtime = Runtime()
+    if generated_as_method:
+        runtime.size_of_generated_code_in_bytes = lambda: 1234
+    else:
+        runtime.size_of_generated_code_in_bytes = 1234
+
+    class Compiled:
+        @staticmethod
+        def runtime_executable():
+            return runtime
+
+    assert _executable_size(Compiled()) == {
+        "serialized_bytes": 8,
+        "generated_code_bytes": 1234,
+        "serialization_error": None,
+    }
+

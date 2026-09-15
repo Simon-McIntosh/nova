@@ -437,6 +437,117 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   measurement and its parts stand as a characterisation of the fixture; no node follows.</p>
 </section>
 
+<section id="limited-shadow-root-cause">
+  <h2>Limited-row residual shadow: carrier root cause and terminal re-solves</h2>
+
+  <p><strong>Root cause.</strong> At revision <code>3082be61</code>, the persisted weak
+  2500-cell terminal state is limited (one O candidate, zero X candidates), yet the
+  connectivity flood labels 54 wall-cut, closed carriers <code>PRIVATE_FLUX</code>. The
+  residual then copies those 54 carriers through unchanged. They alone contain
+  44.1144374851 Wb of physical-map disagreement; the other 8955 carriers agree to
+  2.2737367544e-13 Wb. This is not a state-only artefact: the analytic flux sampled at
+  the same nodes also yields 40 provisional private carriers at 2500 cells and 39 at
+  1000 cells. The complete carrier census records index, R, Z, provisional domain,
+  normalised flux, connectivity component and wall-polygon distance in
+  <code>docs/figures/cut-cell-current-attribution/limited-shadow/receipt.json</code>.</p>
+
+  <p><strong>Physical rule and result.</strong> <code>classify_domains</code> at
+  <code>nova/equilibrium/domain.py:208-218</code> still exposes the raw diagnostic split.
+  <code>saddle_qualified_domains</code> at <code>domain.py:221-242</code>, applied by the
+  fixed-design read and finite-candidate predicate at
+  <code>forward_operator.py:1870-1915</code> and defended again by the residual-shadow
+  builder at <code>forward_operator.py:2549-2577</code>, states the physical rule:
+  connectivity disconnection is insufficient evidence for private flux. A finite
+  qualified saddle candidate inside the wall — finite <code>x_point</code> and finite
+  <code>x_point_flux</code> — retains the private labels regardless of which boundary
+  class the read currently selects. Only a read with no finite saddle relabels provisional
+  <code>PRIVATE_FLUX</code> carriers <code>CORE</code>. On weak terminal/analytic flux,
+  the provisional counts are 64/39 at 1000 cells and 54/40 at 2500, while every qualified
+  private count and flood-shadow count is zero. All four limited null censuses admit
+  exactly one extremum and zero saddles; the single-null control retains eight physical
+  private carriers behind its one admitted saddle.</p>
+
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/limited-shadow/limited-shadow-census.png"
+         alt="Weak limited terminal and analytic contours at 1000 and 2500 cells with provisional private carriers, wall, and nulls">
+    <figcaption>The diagnostic flood split is visible on both solved and analytic fields;
+    qualification removes it because neither limited field admits a saddle. Line contours
+    share levels within each row; the wall and both fields' admitted nulls are drawn.</figcaption>
+  </figure>
+
+  <h3>Terminal solve measurement</h3>
+  <p>Job 1271409 used one H200 card, eight cores, 128G, a 02:00:00 ceiling,
+  <code>TMPDIR=/tmp</code> in submission and payload, the root virtual-environment Python,
+  the worktree on <code>PYTHONPATH</code>, CUDA selected explicitly, and the persistent
+  compilation cache. It regenerated and persisted each row part as it landed: the
+  single-null whole-cell identity control first, then weak, moderate and strong at 1000
+  whole cells. The job completed in 41 minutes 14 seconds with exit status zero.</p>
+
+  <table>
+    <caption>Committed before state versus the re-solved whole-cell terminal state</caption>
+    <thead><tr><th scope="col">Row</th><th scope="col">State</th><th scope="col">Axis error (pitch)</th><th scope="col">Terminal residual</th><th scope="col">Boundary flux from analytic zero (Wb)</th><th scope="col">Plasma-current amplitude</th><th scope="col">Converged</th></tr></thead>
+    <tbody>
+      <tr><td>weak 1000 whole-cell</td><td>before</td><td>0.71135</td><td>1.99745e-3</td><td>6.37535</td><td>0.944158</td><td>no</td></tr>
+      <tr><td>weak 1000 whole-cell</td><td>after</td><td><strong>0.63549</strong></td><td><strong>1.38774e-15</strong></td><td>4.95939</td><td>0.896835</td><td>yes</td></tr>
+      <tr><td>moderate 1000 whole-cell</td><td>before</td><td>0.71810</td><td>4.37805e-3</td><td>0.176938</td><td>0.944276</td><td>no</td></tr>
+      <tr><td>moderate 1000 whole-cell</td><td>after</td><td><strong>0.64287</strong></td><td><strong>5.87522e-16</strong></td><td>0.140971</td><td>0.896695</td><td>yes</td></tr>
+      <tr><td>strong 1000 whole-cell</td><td>before</td><td>0.74214</td><td>2.95089e-3</td><td>0.0146041</td><td>0.939467</td><td>no</td></tr>
+      <tr><td>strong 1000 whole-cell</td><td>after</td><td><strong>0.64391</strong></td><td><strong>2.91253e-16</strong></td><td>0.0118363</td><td>0.894785</td><td>yes</td></tr>
+      <tr><td>single-null 500 whole-cell</td><td>committed control</td><td>0.02017</td><td>2.42301e-17</td><td>2.49028e-19</td><td>1.000000</td><td>yes</td></tr>
+      <tr><td>single-null 500 whole-cell</td><td>after</td><td><strong>0.02017</strong></td><td><strong>2.42301e-17</strong></td><td>2.49028e-19</td><td>1.000000</td><td>yes — terminal flux bit-identical</td></tr>
+      <tr><td>weak 1000 exact-clip</td><td>before whole-cell</td><td>0.71135</td><td>1.99745e-3</td><td>6.37535</td><td>0.944158</td><td>no</td></tr>
+      <tr><td>weak 1000 exact-clip</td><td>after</td><td colspan="5"><strong>not produced — 159.06 GiB allocation exceeds the required 128G job</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Interpretation.</strong> Emptying the nonphysical flood shadow removes the
+  self-closing outboard patch and makes all three limited rows fixed points of their
+  unmasked production map. It does not make whole-cell booking the analytic oracle.
+  Because the exterior was re-posed from analytically clipped moments, whole-cell booking
+  over-books the boundary cells and the solve compensates at about 0.895 amplitude; its
+  boundary level remains displaced from the analytic zero. Exact clip is the oracle-matched
+  representation in the already banked one-application measurement (weak 1000 floor
+  3.58e-5 of flux span), but no exact-clip <em>terminal</em> state is claimed here. The
+  128G attempt reported a 159.06 GiB <code>jit_bitwise_and</code> allocation after XLA
+  estimated a 159.23 GiB executable; ownership remains with the millisecond memory work
+  and this node did not retry it. The control instrument is now faithful: its explicit
+  whole-cell fixture reproduces the committed target current 61700.15021203842 A and
+  centroid exactly, and the resulting terminal flux is bit-identical.</p>
+
+  <table>
+    <caption>Independent one-application residual check at each persisted terminal state</caption>
+    <thead><tr><th scope="col">Row</th><th scope="col">Solver scalar</th><th scope="col">Unmasked reapplication</th><th scope="col">Literal relative gate</th></tr></thead>
+    <tbody>
+      <tr><td>weak 1000</td><td>1.38774e-15</td><td>1.38774e-15</td><td>pass, exact scalar equality</td></tr>
+      <tr><td>moderate 1000</td><td>5.87522e-16</td><td>1.37088e-15</td><td>fail, relative difference 1.3333</td></tr>
+      <tr><td>strong 1000</td><td>2.91253e-16</td><td>1.16501e-15</td><td>fail, relative difference 3.0</td></tr>
+      <tr><td>single-null 500</td><td>2.42301e-17</td><td>9.30435e-15</td><td>fail, relative difference 41.794</td></tr>
+    </tbody>
+  </table>
+
+  <p>The literal relative comparison above is retained as a diagnostic failure, not
+  rounded into a pass: weak is exactly equal, while the other three comparisons divide
+  different machine-floor values between 2.4e-17 and 9.3e-15. It does not change the
+  solve-gate receipt's five physical acceptances.</p>
+
+  <p><strong>CPU delta.</strong> Jobs 1271373 and 1271375 ran
+  <code>test_forward_operator_domain.py</code>, <code>test_hex_flood_coil_nulls.py</code>
+  and <code>test_stationary_point_admission.py</code>, one module per fresh CPU process on
+  <code>all_debug</code>. Both base 3082be61 and after c2043fe9 have the same two failing
+  module ids (three assertions in the first, two in the second); stationary-point admission
+  passes all nine tests on both arms, so the delta is zero added failures. Focused job
+  1271374 passes all four residual-shadow tests, including the guarded case in which a
+  finite saddle exists while a limited boundary is selected: its private region remains.
+  These importing tests can rewrite the tracked compensator-bound receipt; its content was
+  checked and restored to HEAD rather than included in this landing.</p>
+
+  <div class="r-grid r-grid-2">
+    <figure><img src="/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/weak-rotation-reactor-static-production-route-cells-1000.png" alt="Weak 1000 solved and analytic line contours with both null sets and wall"><figcaption>Weak whole-cell 1000: solved beside analytic on shared levels; terminal residual 1.39e-15, converged.</figcaption></figure>
+    <figure><img src="/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/moderate-rotation-conventional-static-production-route-cells-1000.png" alt="Moderate 1000 solved and analytic line contours with both null sets and wall"><figcaption>Moderate whole-cell 1000: terminal residual 5.88e-16, converged.</figcaption></figure>
+    <figure><img src="/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/strong-rotation-compact-static-production-route-cells-1000.png" alt="Strong 1000 solved and analytic line contours with both null sets and wall"><figcaption>Strong whole-cell 1000: terminal residual 2.91e-16, converged.</figcaption></figure>
+    <figure><img src="/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/diverted-single-null-production-route-cells-500.png" alt="Single-null 500 solved and analytic line contours with both null sets and wall"><figcaption>Single-null whole-cell 500 control: terminal residual 2.42e-17, converged, terminal flux bit-identical to the committed state; one O candidate, one saddle and the private region retained.</figcaption></figure>
+  </div>
+</section>
 </main>
 </body>
 </html>

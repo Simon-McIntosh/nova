@@ -14,7 +14,7 @@ HOST_WORKERS=
 INCLUDE_RASTER=0
 
 usage() {
-  echo "usage: $0 (--dry-run|--submit) --output-root DIR [--engine host|compiled] [--devices N] [--batch-per-device N] [--host-workers N] [--include-raster]"
+  echo "usage: $0 (--dry-run|--submit) --output-root DIR [--engine host|compiled|batched] [--devices N] [--batch-per-device N] [--host-workers N] [--include-raster]"
 }
 
 while (($#)); do
@@ -62,8 +62,8 @@ if [[ -z "${MODE}" || -z "${OUTPUT_ROOT}" ]]; then
   usage
   exit 2
 fi
-if [[ "${ENGINE}" != host && "${ENGINE}" != compiled ]]; then
-  echo "engine must be host or compiled" >&2
+if [[ "${ENGINE}" != host && "${ENGINE}" != compiled && "${ENGINE}" != batched ]]; then
+  echo "engine must be host, compiled or batched" >&2
   exit 2
 fi
 if ((DEVICES < 1 || BATCH_PER_DEVICE < 1)); then

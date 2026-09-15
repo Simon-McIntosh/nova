@@ -740,11 +740,21 @@ def _acceptance(slice_count: int, output: Path) -> dict[str, Any]:
     sequential_conditioned = np.asarray(
         [row["conditioned"] for row in reference["slice_results"]], dtype=bool
     )
+    sequential_completed = np.asarray(
+        [not bool(row["exception_classes"]) for row in reference["slice_results"]],
+        dtype=bool,
+    )
     conditioned_indices = np.flatnonzero(sequential_conditioned)
+    qualified_conditioned_indices = np.flatnonzero(
+        sequential_conditioned & sequential_completed
+    )
+    excluded_conditioned_indices = np.flatnonzero(
+        sequential_conditioned & ~sequential_completed
+    )
     free_error = np.abs(free_centroid[:, 1] - targets)
     achieved_error = np.abs(achieved_centroid[:, 1] - targets)
-    selected_free_error = free_error[conditioned_indices]
-    selected_achieved_error = achieved_error[conditioned_indices]
+    selected_free_error = free_error[qualified_conditioned_indices]
+    selected_achieved_error = achieved_error[qualified_conditioned_indices]
 
     converged_count = int(np.count_nonzero(converged_values))
     guard_count = int(np.count_nonzero(guard_values))
@@ -752,7 +762,7 @@ def _acceptance(slice_count: int, output: Path) -> dict[str, Any]:
     sequential_conditioned_executed = bool(
         np.all(conditioned_values[conditioned_indices])
     )
-    has_conditioned_rows = bool(conditioned_indices.size)
+    has_conditioned_rows = bool(qualified_conditioned_indices.size)
     finite = bool(
         has_conditioned_rows
         and np.all(np.isfinite(selected_free_error))
@@ -823,6 +833,20 @@ def _acceptance(slice_count: int, output: Path) -> dict[str, Any]:
         "under_half_centimetre": under_limit,
         "no_coincident_rows": no_coincident_rows,
         "no_worse_rows": no_worse_rows,
+        "excluded_conditioned_rows": [
+            {
+                "index": int(excluded_index),
+                "shot": int(evidence[excluded_index]["shot"]),
+                "row": int(evidence[excluded_index]["row"]),
+                "reference_exception_classes": list(
+                    reference["slice_results"][excluded_index]["exception_classes"]
+                ),
+                "reference_exceptions": reference["slice_results"][excluded_index][
+                    "exceptions"
+                ],
+            }
+            for excluded_index in map(int, excluded_conditioned_indices)
+        ],
     }
     receipt.update(
         {

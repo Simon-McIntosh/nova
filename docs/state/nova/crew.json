@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T15:29:30",
+  "updated": "2026-09-15T15:36:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4837,6 +4837,15 @@
       },
       {
         "id": "s19h-pfs-parcomp-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-pfs-parcompint-s",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -165388,6 +165397,199 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T101456578335-pfs-playable-persistent-cache-warm-keyframe-b",
+        "plan": "playable-forward-solve",
+        "section": "\u00a73",
+        "node": "pfs-playable-persistent-cache-warm-keyframe-b",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1749,
+                "cached_input_tokens": 136616,
+                "input_tokens": 138397,
+                "output_tokens": 483,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 138880,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "apps/playable/production.py holds one compiled reduced program across edits (the traced-current route of forward-solve-api section 5, node A) and enables the persistent compilation cache through nova.equilibrium.solve_request.default_forward_compilation_cache_root exactly as the benchmarks do; tests/test_playable_session.py::test_production_keyframe_completes_on_the_solovev_machine passes inside its 60 s fence on all_debug CPU (JAX_PLATFORMS=cpu, root venv python directly, TMPDIR=/tmp exported in the submit environment and the payload, cache warm from a first run in the same foreground srun job) with the measured warm keyframe wall stated in the report beside the 217.7 s cold figure; the fence is restated only from the measured warm figure, never widened to pass; the H200 keyframe receipt rerun (benchmarks/playable_keyframe_receipt.py) is recorded as the follow-on, not run here; the worker runs to completion of this done-when without stopping at a time fence, and a job that outlives one allocation is resubmitted from its persisted receipt",
+          "estimated_hours": null,
+          "goal": "The playable production solver reuses one compiled reduced program across coil edits with the persistent compilation cache enabled",
+          "id": "pfs-playable-persistent-cache-warm-keyframe-b",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-15T10:14:58Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": 22,
+            "binding_observed": false,
+            "detail": "",
+            "headroom": 2,
+            "mean_context": 70141,
+            "observed_at": "2026-09-15T10:14:36Z",
+            "state": "fresh",
+            "suggested_shelf_life_seconds": 120
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T101456578335-pfs-playable-persistent-cache-warm-keyframe-b/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "apps/playable/production.py",
+            "tests/test_playable_session.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/playable-cache",
+            "docs/evidence/archive/playable-forward-solve-landed.html",
+            "docs/plans/playable-forward-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-pfs-cache-c2",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-15T10:15:30Z",
+        "completed_at": "2026-09-15T13:35:10.656Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 11912,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 11980,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "9ca9949abb3bcfaff87a6c053c0e4a298fd788be",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T101456578335-pfs-playable-persistent-cache-warm-keyframe-b/manifest.md",
+        "scope_changed": false,
+        "session_id": "1a5b9b3a-8925-4ed2-95d1-846b677e0d8c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 0,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 0,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T13:35:10.656Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 0,
+          "detail": "generation and wall clock reported separately by the backend; no window resolved, so utilisation is unknown",
+          "elapsed_seconds": 0.298,
+          "generated_tokens": 0,
+          "generation_seconds": -1058.276,
+          "machine_seconds": 1058.574,
+          "wall_tokens_per_second": 0.0
+        },
+        "follow_on_paths": [
+          "benchmarks/playable_keyframe_receipt.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "the program-reuse commit 0b7b7008 is banked as a patch under reports/playable-cache/banked with the gate log; the fence decision and landing record go to a fresh node, nothing merges ungated",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-playable-persistent-cache-warm-keyframe-b",
+          "session_id": "1a5b9b3a-8925-4ed2-95d1-846b677e0d8c",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T13:35:10.656Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 62.0,
+        "orientation_input_tokens": 4321246.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -165700,6 +165902,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2563
+    "_version": 2565
   }
 }

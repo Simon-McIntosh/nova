@@ -43,6 +43,7 @@ from nova.biot.null import Null2D
 from nova.biot.target import FluxTarget
 from nova.equilibrium.clip_quadrature import (
     ClippedCurrentMoments,
+    ClippedFieldIntegrals,
     clipped_support_current_moments,
     clipped_support_field_integrals,
     cut_cell_bank_capacity,
@@ -126,6 +127,22 @@ def support_clip_mode() -> str:
 _CHORD_REVERTED_CELLS = (101, 102)
 
 
+def _compact_cell_indices(selection, capacity: int):
+    """Return selected carrier indices without an all-carrier pairwise mask.
+
+    Fixed-size ``nonzero`` lowers its padded selection through a predicate over
+    every carrier and every output slot. Selecting the largest boolean values
+    yields the same set of live indices with storage linear in the carrier and
+    declared bank sizes. Tied live indices may be reordered because every cell
+    is integrated independently and scattered back to its own carrier slot.
+    """
+    if capacity < 1:
+        raise ValueError("cut_cell_capacity must be positive")
+    selected = jnp.asarray(selection, dtype=bool)
+    values, indices = jax.lax.top_k(selected.astype(jnp.int32), capacity)
+    return indices, values.astype(bool), jnp.sum(selected, dtype=jnp.int32)
+
+
 def _cell_banked_current_moments(
     support,
     selection,
@@ -156,12 +173,8 @@ def _cell_banked_current_moments(
     )
 
     capacity = int(cut_cell_capacity)
-    if capacity < 1:
-        raise ValueError("cut_cell_capacity must be positive")
     cell_count = support.support_vertices.shape[0]
-    cut_count = jnp.sum(boundary, dtype=jnp.int32)
-    cut_index = jnp.nonzero(boundary, size=capacity, fill_value=0)[0]
-    active = jnp.arange(capacity, dtype=jnp.int32) < cut_count
+    cut_index, active, cut_count = _compact_cell_indices(boundary, capacity)
 
     def gather_rows(tree):
         def gather(value):
@@ -206,6 +219,89 @@ def _cell_banked_current_moments(
         (compact_support, compact_field, active, cut_index),
     )
     return ClippedCurrentMoments(
+        *(jnp.where(cut_count > capacity, jnp.nan, value) for value in combined)
+    )
+
+
+def _cell_banked_field_integrals(
+    support,
+    selection,
+    field,
+    pressure,
+    boundary_pressure,
+    flux_span,
+    *,
+    cut_cell_capacity: int,
+) -> ClippedFieldIntegrals:
+    """Integrate observable fields with one high-capacity cut cell at a time.
+
+    This is the observation counterpart of
+    :func:`_cell_banked_current_moments`. Whole cells retain the authored
+    low-capacity quadrature and each cut polygon retains the exact same rule;
+    only the independent cells' evaluation schedule changes.
+    """
+    selected = jnp.asarray(selection, dtype=bool)
+    boundary = selected & jnp.asarray(support.boundary, dtype=bool)
+    whole = selected & jnp.asarray(support.included, dtype=bool) & ~boundary
+    whole_integrals = clipped_support_field_integrals(
+        support,
+        whole,
+        field,
+        pressure,
+        boundary_pressure,
+        flux_span,
+        cut_cell_capacity=1,
+    )
+
+    capacity = int(cut_cell_capacity)
+    cell_count = support.support_vertices.shape[0]
+    cut_index, active, cut_count = _compact_cell_indices(boundary, capacity)
+
+    def gather_rows(tree):
+        def gather(value):
+            array = jnp.asarray(value)
+            if array.ndim and array.shape[0] == cell_count:
+                return array[cut_index]
+            return jnp.broadcast_to(array, (capacity,) + array.shape)
+
+        return jax.tree.map(gather, tree)
+
+    compact_support = gather_rows(support)
+    compact_field = gather_rows(field)
+
+    def integrate_one(one_support, one_field, live):
+        singleton_support = jax.tree.map(lambda value: value[None, ...], one_support)
+        singleton_field = jax.tree.map(lambda value: value[None, ...], one_field)
+        integrals = clipped_support_field_integrals(
+            singleton_support,
+            jnp.asarray([live]),
+            singleton_field,
+            pressure,
+            boundary_pressure,
+            flux_span,
+            cut_cell_capacity=1,
+        )
+        return jax.tree.map(lambda value: value[0], integrals)
+
+    def integrate_and_scatter(carried, rows):
+        one_support, one_field, live, index = rows
+        cut_integrals = integrate_one(one_support, one_field, live)
+
+        def scatter_one(carried_value, cut_value):
+            contribution = jnp.where(
+                live, cut_value, jnp.zeros((), dtype=cut_value.dtype)
+            )
+            return carried_value.at[index].add(contribution)
+
+        updated = jax.tree.map(scatter_one, carried, cut_integrals)
+        return updated, None
+
+    combined, _ = jax.lax.scan(
+        integrate_and_scatter,
+        whole_integrals,
+        (compact_support, compact_field, active, cut_index),
+    )
+    return ClippedFieldIntegrals(
         *(jnp.where(cut_count > capacity, jnp.nan, value) for value in combined)
     )
 
@@ -2438,7 +2534,12 @@ class ForwardFluxOperator:
         )
 
         def compact_current_moments(profile, *_args):
-            return clipped_support_current_moments(
+            moment_integrator = (
+                clipped_support_current_moments
+                if _SUPPORT_CLIP_MODE == "chord"
+                else _cell_banked_current_moments
+            )
+            return moment_integrator(
                 profile_support,
                 masks.profile_participation,
                 field,
@@ -2455,7 +2556,12 @@ class ForwardFluxOperator:
         cell_current = jnp.where(
             masks.profile_participation, profile_moments.cell_current, 0.0
         )
-        field_integrals = clipped_support_field_integrals(
+        field_integrator = (
+            clipped_support_field_integrals
+            if _SUPPORT_CLIP_MODE == "chord"
+            else _cell_banked_field_integrals
+        )
+        field_integrals = field_integrator(
             profile_support,
             masks.core,
             field,

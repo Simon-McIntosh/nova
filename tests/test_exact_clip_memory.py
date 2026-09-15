@@ -11,8 +11,14 @@ import numpy as np
 import pytest
 
 from benchmarks import exact_clip_memory_scaling as memory_scaling
-from nova.equilibrium.clip_quadrature import clipped_support_current_moments
-from nova.equilibrium.forward_operator import _cell_banked_current_moments
+from nova.equilibrium.clip_quadrature import (
+    clipped_support_current_moments,
+    clipped_support_field_integrals,
+)
+from nova.equilibrium.forward_operator import (
+    _cell_banked_current_moments,
+    _cell_banked_field_integrals,
+)
 from nova.equilibrium.separatrix_clip import TracedClippedSupports
 from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
 
@@ -315,6 +321,42 @@ def test_cell_banked_current_moments_are_bit_identical():
         selection,
         field,
         profile,
+        cut_cell_capacity=3,
+    )
+    for one, other in zip(expected, actual, strict=True):
+        assert np.array_equal(np.asarray(one), np.asarray(other))
+
+
+def test_cell_banked_field_integrals_are_bit_identical():
+    """Per-cell observation integration retains the existing field result."""
+    support = _three_cell_support()
+    field = FluxFieldPolynomial(
+        coefficient=jnp.zeros((3, 6)),
+        centre=jnp.asarray(support.centroids),
+        scale=jnp.ones((3, 2)),
+        active=jnp.ones(3, dtype=bool),
+    )
+    selection = jnp.asarray([True, True, False])
+
+    def pressure(radius, psi_norm, boundary_pressure, flux_span):
+        return radius + psi_norm + boundary_pressure + flux_span
+
+    expected = clipped_support_field_integrals(
+        support,
+        selection,
+        field,
+        pressure,
+        0.25,
+        2.0,
+        cut_cell_capacity=3,
+    )
+    actual = _cell_banked_field_integrals(
+        support,
+        selection,
+        field,
+        pressure,
+        0.25,
+        2.0,
         cut_cell_capacity=3,
     )
     for one, other in zip(expected, actual, strict=True):

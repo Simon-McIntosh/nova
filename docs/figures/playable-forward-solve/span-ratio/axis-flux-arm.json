@@ -1,0 +1,67 @@
+{
+  "candidate": "nova-minus-EFIT axis flux departure",
+  "candidate_definition": "Nova flux_surface_psi axis value minus 2pi-scaled EFIT psi_axis, divided by the EFIT axis-to-boundary flux span",
+  "candidate_units": "fraction of reference flux span",
+  "diagnostics": {
+    "axis_flux_delta_on_solenoid": {
+      "n": 43017,
+      "r_squared": 0.4505255119820487,
+      "slope": -0.004676422988297127,
+      "slope_se": 2.490106346668827e-05,
+      "t_statistic": -187.80013128969668
+    },
+    "candidate_distribution": {
+      "maximum": 5.354753908971835,
+      "median": -0.15698909685929505,
+      "minimum": -1.3424972866416323,
+      "p10": -0.5087147887312653,
+      "p90": 0.21119383342590636,
+      "standard_deviation": 0.2952053771174801
+    },
+    "reference_span_on_solenoid": {
+      "n": 43017,
+      "r_squared": 0.4813643780411543,
+      "slope": -0.004418510036815408,
+      "slope_se": 2.211363206066299e-05,
+      "t_statistic": -199.8093313976816
+    }
+  },
+  "paired_projection": {
+    "exposure_arm_candidate_on_solenoid": {
+      "n": 43017,
+      "r_squared": 0.5288412306162111,
+      "slope": -0.014221470572077543,
+      "slope_se": 6.472253650843349e-05,
+      "t_statistic": -219.72980880043932
+    },
+    "fraction_of_fitted_slope": 1.0202015269927556,
+    "marginal_ratio_on_candidate": {
+      "n": 43017,
+      "r_squared": 0.9571057583959334,
+      "slope": 0.981106628448345,
+      "slope_se": 0.001001441946811886,
+      "t_statistic": 979.6939618634119
+    },
+    "outcome_arm_ratio_on_candidate_with_solenoid_fixed": {
+      "candidate_coefficient_per_unit": 0.9914893592442754,
+      "n": 43017,
+      "partial_r_squared_given_solenoid": 0.9149709322993467,
+      "r_squared": 0.957201256042399,
+      "solenoid_coefficient_per_kA": 0.00027920988743649483
+    },
+    "projected_slope_per_kA": -0.014100436745020482,
+    "total_ratio_slope": {
+      "n": 43017,
+      "r_squared": 0.49665749472551135,
+      "slope": -0.013821226857584001,
+      "slope_se": 6.708724201892464e-05,
+      "t_statistic": -206.01870700967513
+    }
+  },
+  "population": {
+    "definition": "the same diverted finite/profile-qualified census rows as the landed solenoid-span attribution",
+    "rows": 43017
+  },
+  "source_revision": "6a2b4428d4204d56b3b2558602deed43b3d2fad1",
+  "x64_enabled": true
+}

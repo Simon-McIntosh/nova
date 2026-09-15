@@ -6,7 +6,8 @@ import pytest
 
 from benchmarks.program_scope_census import _executable_size, _loop_inventory, reanalyze
 from benchmarks.solve_program_size_gate import (
-    MAX_EXECUTABLE_BYTES,
+    MAX_300_EXECUTABLE_BYTES,
+    MAX_300_SOLVE_INSTRUCTIONS,
     evaluate_gate,
 )
 from nova.equilibrium import fixed_point
@@ -35,6 +36,7 @@ def _receipts():
     for cells, solve, mapped in ((300, 654_832, 9_908), (1000, 662_331, 10_024)):
         rows[cells] = {
             "requested_cells": cells,
+            "compile_seconds": 370.0 if cells == 300 else 386.0,
             "solve": _program(
                 solve,
                 120,
@@ -104,34 +106,72 @@ def test_accelerated_program_reuses_one_frozen_partition(monkeypatch):
     ).tolist() == [2.0]
 
 
-def test_gate_accepts_one_operator_body_and_the_executable_budget():
+def test_gate_accepts_the_measured_interim_reduction():
     baseline = _receipts()
     candidate = deepcopy(baseline)
-    for row in candidate.values():
-        row["solve"]["replication"]["current-moment path"]["copy_count"] = 1
-        row["solve"]["replication"]["topology read"]["copy_count"] = 1
-        row["solve"]["executable"]["serialized_bytes"] = MAX_EXECUTABLE_BYTES
+    for cells, row in candidate.items():
+        row["compile_seconds"] = 20.0 if cells == 300 else 70.0
+        row["solve"]["total_instructions"] = 203_078 if cells == 300 else 204_531
+        row["solve"]["replication"]["topology read"]["copy_count"] = 2
+    candidate[300]["solve"]["executable"]["serialized_bytes"] = 436_447_170
+    candidate[1000]["solve"]["executable"] = {
+        "serialized_bytes": None,
+        "generated_code_bytes": 0,
+        "serialization_error": "serialization refused",
+    }
 
     result = evaluate_gate(baseline, candidate)
 
     assert result["passed"] is True
     assert result["failures"] == []
+    assert result["findings"] == [
+        "1000-cell solve executable size is absent: serialization refused"
+    ]
     assert result["rows"][1]["before"]["operator_copies"] == {
         "current-moment path": 120,
         "topology read": 8,
     }
+    assert result["rows"][0]["after"]["operator_copies"] == {
+        "current-moment path": 120,
+        "topology read": 2,
+    }
 
 
-def test_gate_refuses_the_recorded_repetition_and_oversized_executable():
+def test_gate_refuses_a_solve_that_does_not_reduce_the_physical_measures():
     baseline = _receipts()
 
     result = evaluate_gate(baseline, deepcopy(baseline))
 
     assert result["passed"] is False
-    assert any("120 traced copies" in failure for failure in result["failures"])
-    assert any("8 traced copies" in failure for failure in result["failures"])
     assert any(
-        "1000-cell solve executable" in failure for failure in result["failures"]
+        "instructions did not shrink" in failure for failure in result["failures"]
+    )
+    assert any(
+        "compile time did not shrink" in failure for failure in result["failures"]
+    )
+    assert any("executable did not shrink" in failure for failure in result["failures"])
+
+
+def test_gate_refuses_the_300_cell_budgets():
+    baseline = _receipts()
+    candidate = deepcopy(baseline)
+    for cells, row in candidate.items():
+        row["compile_seconds"] /= 2
+        row["solve"]["total_instructions"] -= 1
+    candidate[300]["solve"]["total_instructions"] = MAX_300_SOLVE_INSTRUCTIONS + 1
+    candidate[300]["solve"]["executable"]["serialized_bytes"] = (
+        MAX_300_EXECUTABLE_BYTES + 1
+    )
+
+    result = evaluate_gate(baseline, candidate)
+
+    assert result["passed"] is False
+    assert any(
+        "instruction" in failure and "limit" in failure
+        for failure in result["failures"]
+    )
+    assert any(
+        "executable" in failure and "limit" in failure for failure in result["failures"]
     )
 
 
@@ -144,27 +184,36 @@ def test_gate_refuses_an_empty_map_sentinel_instead_of_reporting_absence():
 
     assert result["passed"] is False
     assert any(
-        "map sentinel 'topology read' saw 0" in item for item in result["failures"]
+        "map sentinel 'topology read' saw no known-present path" in item
+        for item in result["failures"]
     )
 
 
-def test_gate_requires_an_executable_measure():
+def test_gate_requires_the_300_cell_executable_measure():
     baseline = _receipts()
     candidate = deepcopy(baseline)
-    del candidate[1000]["solve"]["executable"]
+    for cells, row in candidate.items():
+        row["compile_seconds"] /= 2
+        row["solve"]["total_instructions"] -= 1
+    del candidate[300]["solve"]["executable"]
 
     result = evaluate_gate(baseline, candidate)
 
     assert result["passed"] is False
     assert any(
-        "1000-cell solve missing executable-size measurement" in failure
+        "300-cell solve missing executable-size measurement" in failure
         for failure in result["failures"]
     )
 
 
-def test_gate_refuses_zero_generated_code_as_an_absent_measure():
+def test_gate_records_the_1000_cell_serialisation_refusal_as_a_finding():
     baseline = _receipts()
     candidate = deepcopy(baseline)
+    for cells, row in candidate.items():
+        row["compile_seconds"] /= 2
+        row["solve"]["total_instructions"] -= 1
+    candidate[300]["solve"]["total_instructions"] = 200_000
+    candidate[300]["solve"]["executable"]["serialized_bytes"] = 430_000_000
     candidate[1000]["solve"]["executable"] = {
         "serialized_bytes": None,
         "generated_code_bytes": 0,
@@ -173,8 +222,9 @@ def test_gate_refuses_zero_generated_code_as_an_absent_measure():
 
     result = evaluate_gate(baseline, candidate)
 
-    assert result["passed"] is False
-    assert any("serialization refused" in failure for failure in result["failures"])
+    assert result["passed"] is True
+    assert result["failures"] == []
+    assert any("serialization refused" in finding for finding in result["findings"])
 
 
 @pytest.mark.parametrize("generated_as_method", [False, True])

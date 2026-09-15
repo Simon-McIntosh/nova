@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T15:21:31",
+  "updated": "2026-09-15T15:27:36",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -164969,6 +164969,212 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T124002147867-pfs-exact-parallel-connected-components",
+        "plan": "playable-forward-solve",
+        "section": "\u00a78",
+        "node": "pfs-exact-parallel-connected-components",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4196,
+                "cached_input_tokens": 388015,
+                "input_tokens": 392243,
+                "output_tokens": 3061,
+                "reasoning_output_tokens": 80,
+                "total_tokens": 395304,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "A new module nova/equilibrium/parallel_components.py (flux_surface_connectivity.py is owned by a live node and is not touched) implements a provably exact fixed-shape parallel connected-components pass over the confined mask (label as minimum reachable index by iterated hooking and pointer-jumping to a fixed point, with a proof in the docstring of why the fixed-point label equals the flood label for every cell and why the trip count bound is log2 of the cell count plus a constant), following the recommendation in the negative report of the earlier bounded pass at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/../playable/topology-parallel-pass.md whose two failed formulations (66-trip cap and paired pointer jumps) moved 51 of 3,195 double-null labels and are not repeated; gates, each persisted as it lands: tests/test_parallel_components.py asserts bit-identical labels against label_connected_components at the canonical n_iter on the stride-two MAST 22086/43 lattice, on the double-null domain fixture used by tests/test_jax_topology.py, and on random confined masks with holes and enclaves, and asserts the wall/X-point flux tie of the double-null fixture is unchanged to the last bit; the twelve MAST bank rows of benchmarks/bank_revision_reproduction.py classify identically through the new pass (a benchmark benchmarks/parallel_components_identity.py tables per-row label mismatch counts, all zero); one H200 job (one card, 8 cores, 128G, TMPDIR=/tmp in submit environment and payload, root venv python directly with PYTHONPATH the worktree) tables device wall per element at batch 1, 8, 16, 64 for the canonical kernel and the new pass, with parsed HLO trip counts, beside the 22.076 ms and 1.986 ms per element at batch 1 the negative report recorded; the receipt under docs/figures/playable-forward-solve/parallel-components/ with one figure of wall per element against batch for both kernels; no production caller is changed and no integration into the topology read happens here; the test module passes one per fresh CPU process on all_debug with zero added failures",
+          "estimated_hours": null,
+          "goal": "A fixed-shape parallel connected-components labelling whose result is bit-identical to the canonical fixed-point classifier on every bank row and on the double-null fixture, measured standalone against the canonical kernel",
+          "id": "pfs-exact-parallel-connected-components",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T12:40:06Z",
+            "read_at": "2026-09-15T12:40:07Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 36.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T124002147867-pfs-exact-parallel-connected-components/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/parallel_components.py",
+            "tests/test_parallel_components.py",
+            "benchmarks/parallel_components_identity.py",
+            "docs/figures/playable-forward-solve/parallel-components",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/parallel-components",
+            "docs/evidence/archive/playable-forward-solve-landed.html",
+            "docs/plans/playable-forward-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-pfs-parcomp-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T12:41:27Z",
+        "completed_at": "2026-09-15T13:18:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2196,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2196,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "e92a90a2209c6b3ad29b6778dabf2dd12bdd81fe",
+        "commits": [
+          "28c205c7ec9f2732719aece992a8ec9e0ef190ed",
+          "2982b6b692d668fbaa9b2bef7f432db336a15fc0",
+          "857b1d514685d02120ada895dcd3df5d2fd75eca"
+        ],
+        "changed_lines": {
+          "added": 924,
+          "removed": 0,
+          "files": 8
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1271441: four tests one per fresh CPU process; H200 job 1271446 (one card, 8 cores, 128G): twelve MAST bank rows and batches 1, 8, 16, 64 label mismatch zero",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/parallel-components/h200-identity.log",
+          "log_digest": "sha256:aaf36b2b1318d7b7a04ae54c7cadaf445d649eb133948cca133b9ea08a2a4486"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T124002147867-pfs-exact-parallel-connected-components/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a516-2bb1-7673-a7af-12e5b24e8ec6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5749632,
+            "cached_input_tokens_cumulative": 5749632,
+            "input_tokens": 5791147,
+            "input_tokens_cumulative": 5791147,
+            "output_tokens": 10885,
+            "output_tokens_cumulative": 10885,
+            "reasoning_output_tokens": 2753,
+            "reasoning_output_tokens_cumulative": 2753
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T13:18:03Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 39.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T13:18:03Z"
+            }
+          ],
+          "notional_cost_usd": 82.4043,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 5749632,
+          "cumulative_input_tokens": 11540779,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 13638
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-exact-parallel-connected-components",
+          "session_id": "01a0a516-2bb1-7673-a7af-12e5b24e8ec6",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T13:18:03Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 74.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -165281,6 +165487,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2561
+    "_version": 2562
   }
 }

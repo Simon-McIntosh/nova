@@ -7,9 +7,8 @@ the slope unexplained.  This benchmark measures the two remaining solve-side
 quantities with the same paired projection:
 
 * Nova minus EFIT magnetic-axis flux, divided by the EFIT reference span;
-* the shape difference between Nova's enclosed-current profile and an EFIT
-  cumulative current profile reconstructed from its stored current-density
-  map and flux map.
+* the shape difference between Nova's p-prime/FF-prime source profiles and the
+  corresponding EFIT profiles on the same normalized-flux levels.
 
 Each arm has an exposure fit against solenoid current and an outcome fit with
 solenoid current held fixed.  Their product is the portion of the ratio slope
@@ -256,71 +255,55 @@ def _axis_candidate(
     }
 
 
-def _efit_current_profile(group: zarr.Group, row: int) -> np.ndarray:
-    """Reconstruct EFIT enclosed current on the Nova profile levels."""
-    density = np.asarray(group["plasma_current_rz"], dtype=np.float64)[row]
-    flux = np.asarray(group["psirz"], dtype=np.float64)[row][:, ::2]
-    axis = float(np.asarray(group["psi_axis"], dtype=np.float64)[row])
-    boundary = float(np.asarray(group["psi_boundary"], dtype=np.float64)[row])
-    normalized = (flux - axis) / (boundary - axis)
-    radial = np.asarray(group["gridr"], dtype=np.float64)
-    vertical = np.asarray(group["gridz"], dtype=np.float64)
-    weights = (
-        density
-        * float(np.median(np.diff(radial)))
-        * float(np.median(np.diff(vertical)))
-    )
-    valid = np.isfinite(normalized) & np.isfinite(weights) & (normalized >= 0.0)
-    total = np.nansum(
-        np.where(valid & (normalized <= PROFILE_LEVELS[-1]), weights, 0.0)
-    )
-    if not np.isfinite(total) or abs(total) <= 0.0:
-        raise RuntimeError(
-            f"EFIT current profile has no finite enclosed total at row {row}"
-        )
-    values = np.asarray(
-        [
-            np.nansum(np.where(valid & (normalized <= level), weights, 0.0))
-            for level in PROFILE_LEVELS
-        ],
-        dtype=np.float64,
-    )
-    return values / values[-1]
-
-
 def _current_candidate(
     population: dict[str, np.ndarray],
 ) -> tuple[np.ndarray, dict[str, Any]]:
-    """Return normalized cumulative-current shape mismatch per row."""
+    """Return profile-source shape mismatch per row.
+
+    The forward source is set by p-prime and FF-prime.  Comparing those two
+    normalized profiles avoids duplicating the total-current normalization arm
+    while retaining the radial distribution that drives the internal current.
+    """
     candidate = np.empty(EXPECTED_ROWS, dtype=np.float64)
-    mismatch_count = 0
     for shot_number in np.unique(population["member"]):
         mask = population["member"] == shot_number
         group = zarr.open_group(str(STORE_ROOT / f"{shot_number}.zarr"), mode="r")[
             "efm"
         ]
         rows = population["row"][mask]
-        session = _session(int(shot_number), ("time", "Ip_profile"))
+        session = _session(int(shot_number), ("time", "p_prime_face", "ff_prime_face"))
         frames = _nearest_indices(session["time"], population["time"][mask])
-        nova = session["Ip_profile"][:, frames]
-        nova_total = nova[-1]
-        nova_shape = nova / nova_total[None, :]
+        nova_p = session["p_prime_face"][:, frames]
+        nova_ff = session["ff_prime_face"][:, frames]
+        efit_p_grid = np.linspace(0.0, 1.0, 65)
         for source_row in np.unique(rows):
             row_mask = rows == source_row
-            efit_shape = _efit_current_profile(group, int(source_row))
-            differences = nova_shape[:, row_mask].T - efit_shape[None, :]
-            values = np.sqrt(np.mean(differences[:, 1:] ** 2, axis=1))
-            candidate[mask][row_mask] = values
-            mismatch_count += int(np.sum(~np.isfinite(values)))
-    if mismatch_count or not np.all(np.isfinite(candidate)):
-        raise RuntimeError(
-            f"current-distribution candidate has {mismatch_count} non-finite rows"
-        )
+            efit_p = np.asarray(group["pprime"], dtype=np.float64)[int(source_row)]
+            efit_ff = np.asarray(group["ffprime"], dtype=np.float64)[int(source_row)]
+            efit_p = np.interp(PROFILE_LEVELS, efit_p_grid, efit_p)
+            efit_ff = np.interp(PROFILE_LEVELS, efit_p_grid, efit_ff)
+            nova_vectors = np.column_stack(
+                (nova_p[:, row_mask].T, nova_ff[:, row_mask].T)
+            )
+            efit_vector = np.concatenate((efit_p, efit_ff))
+            nova_scale = np.linalg.norm(nova_vectors, axis=1)
+            efit_scale = np.linalg.norm(efit_vector)
+            if not np.all(np.isfinite(nova_vectors)) or not np.isfinite(efit_scale):
+                raise RuntimeError(
+                    f"current source profile is non-finite at row {source_row}"
+                )
+            values = np.linalg.norm(
+                nova_vectors / nova_scale[:, None] - efit_vector[None, :] / efit_scale,
+                axis=1,
+            ) / np.sqrt(2.0 * PROFILE_LEVELS.size)
+            candidate[np.flatnonzero(mask)[row_mask]] = values
+    if not np.all(np.isfinite(candidate)):
+        raise RuntimeError("current-distribution candidate contains non-finite rows")
     return candidate, {
         "profile_levels": PROFILE_LEVELS.tolist(),
         "comparison": (
-            "RMS difference of normalized enclosed-current profiles, excluding "
-            "the axis point"
+            "normalized L2 difference between Nova and EFIT p-prime plus FF-prime "
+            "source profiles on the 26 face levels"
         ),
         "candidate_distribution": {
             "median": float(np.median(candidate)),
@@ -401,9 +384,8 @@ def main(argv: list[str] | None = None) -> None:
         current,
         population,
         (
-            "RMS difference between Nova's normalized enclosed-current profile and "
-            "EFIT's normalized cumulative plasma_current_rz profile on the same "
-            "26 flux levels"
+            "normalized L2 difference between Nova and EFIT p-prime plus FF-prime "
+            "source profiles on the same 26 flux levels"
         ),
         "normalized profile RMS",
         current_diagnostics,

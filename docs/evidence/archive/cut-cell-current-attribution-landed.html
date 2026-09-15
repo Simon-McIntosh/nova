@@ -12,6 +12,8 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Cut-cell current attribution — cumulative execution evidence">
 <meta name="plan-summary" content="Landing record of the cut-cell-current-attribution plan: the §1 root cause (whole-cell booking since 2026-08-27), the Gate A/B/C oracle gates, the reposed fixture exterior, the exact-clip quadrature memory findings, and the clipped-support quadrature per-module test-delta gate that closes §2 re-verification">
+<meta name="plan-modified" content="2026-09-15">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -420,6 +422,19 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   represented as a periodic spline with the tangency taken on the curve. Parts, receipts
   and the extrapolation table are under
   <code>~/.config/reckon/crew/reports/nova/s19-review/wall-pitch/</code>.</p>
+
+  <p><strong>Correction (lead ruling, 2026-09-15): the verdict above is withdrawn.</strong>
+  Machine descriptions never carry a curved wall; every first wall is straight segments,
+  so a periodic-spline wall is not a fix for anything the solver reads. The first-order
+  contact error measured here is the Solov'ev oracle fixture comparing two different
+  references: the analytic tangency is taken against the continuum limiter curve while
+  the machine the fixture builds samples that curve into a 121-node polyline. The 0.47
+  pitch at one panel per pitch is the distance between those two references, and it
+  vanishes when the oracle's contact reference is the flux extremum over the same polyline
+  the solver sees. The low-field-side error that matters on these rows is the current
+  allocation blowing up in the cells where the psi contours close near the outboard wall,
+  which is the shadowed-carrier defect recorded under the limited-shadow root cause. The
+  measurement and its parts stand as a characterisation of the fixture; no node follows.</p>
 </section>
 
 </main>

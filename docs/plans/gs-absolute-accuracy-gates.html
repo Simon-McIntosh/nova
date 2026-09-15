@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="44">
+<meta name="plan-version" content="45">
 <meta name="plan-artifacts" content="docs/research/forward-accuracy-reuse-map.html,benchmarks/solovev_certificate.py,docs/figures/gs-absolute-accuracy/solovev-certificate.json,docs/figures/gs-absolute-accuracy/solovev/,benchmarks/efit_reproduction_gate.py,docs/figures/gs-absolute-accuracy/efit-reproduction.json,docs/figures/gs-absolute-accuracy/efit/,docs/figures/gs-absolute-accuracy/oracle-fixture-assembly.json,tests/test_polygon_analytic_batched_moments.py">
 <meta name="plan-commits" content="3dc4bb57,bf6dcdf9,9b0be0c8,6480a228,69a96bdf,873cfba6,6cecf64e,1f6f3e2c,ebb56768,ae9c0ed6,eca38a8e,5bb6850f,a3ae6bd4,f76e9142,adfff6dc,466b9d02,faec6877,d0a01760,7573d3e7,77a2cd32,6d03967f,dcc671db,b93f9b10,f7d9557b">
 <meta name="plan-impl" content="0.95">
@@ -47,8 +47,10 @@
 <p class="landed-summary">Eleven-frame two-source gate banked (<code>docs/figures/gs-absolute-accuracy/efit-reproduction.json</code>, eleven figures under <code>docs/figures/gs-absolute-accuracy/efit/</code>, commits <code>873cfba6</code>, <code>6cecf64e</code>): <strong>FAIL 0/11 on convergence</strong>. All six MAST solve-label RMS fractions (0.0027–0.0088) sit <em>below</em> the 0.0116 label floor but no solve converges (residuals 6.8e-4 to 5.9e-3, the same up-down antisymmetric mode as the regression stall); all five DIII-D frames are nonconverged with large vertical-displacement differences (pre-existing per the banked forward-GS receipt, DIII-D magnitude normalisation to reconcile in §3). The gate's accuracy half is encouraging and unclaimable until the remedy ladder converges the solves. Cost finding: the compilation cache missed on all eleven frames (8493 s of 8988 s compiling) because frame data is closed into the traced program. Record: the §2 comment thread; the gate reruns unchanged once a remedy lands.</p>
 </section>
 
-<h2 id="s3">§3 — The certificate artifact and its pin</h2>
+<section id="s3">
+<h2>§3 — The certificate artifact and its pin</h2>
 <p>One evidence document assembles §1 and §2 into the per-machine accuracy certificate — figure-heavy per the standing mandate, one page a reader can trust without re-running anything — and a focused regression lane pins the certified numbers so drift fires a test rather than a memory. Done-when: the certificate lives under <code>docs/evidence/</code>, the pinning tests are green in the default lane, and the plan records what an accuracy re-certification costs (wall time and lanes) so it can be repeated per release.</p>
+</section>
 
 
 

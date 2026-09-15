@@ -343,7 +343,7 @@ def test_bulk_motion_translates_all_four_turning_points_rigidly(seed_target, par
 
 
 def test_production_solver_runs_one_forward_after_the_inverse(monkeypatch, seed_target):
-    """Placement Picard stays inside the inverse before one forward solve."""
+    """The supplied program serves the one admitting forward solve and result."""
     from apps.playable import production
 
     current_field = SimpleNamespace(current=np.asarray([2.0, -3.0]))
@@ -359,6 +359,8 @@ def test_production_solver_runs_one_forward_after_the_inverse(monkeypatch, seed_
     solver = production.ProductionSolver(machine)
     previous = SimpleNamespace(flux=np.zeros(3))
     forward_calls = []
+    carried_program = object()
+    admitted_program = object()
 
     monkeypatch.setattr(
         production, "achieved_target", lambda _profile, _flux: seed_target
@@ -390,6 +392,7 @@ def test_production_solver_runs_one_forward_after_the_inverse(monkeypatch, seed_
     )
 
     def forward(_profile, flux, prescribed_current):
+        assert solver._program_handle is carried_program
         forward_calls.append(np.asarray(prescribed_current).copy())
         return (
             SimpleNamespace(
@@ -397,7 +400,7 @@ def test_production_solver_runs_one_forward_after_the_inverse(monkeypatch, seed_
                 fixed_point=SimpleNamespace(active_set_iterations=2),
             ),
             2,
-            object(),
+            admitted_program,
         )
 
     solver._forward = forward
@@ -405,14 +408,15 @@ def test_production_solver_runs_one_forward_after_the_inverse(monkeypatch, seed_
         previous,
         PlasmaShape().apply("bulk_z", 0.01),
         action=("bulk_z", 0.01),
-        program=object(),
+        program=carried_program,
     )
     assert len(forward_calls) == 1
     np.testing.assert_allclose(forward_calls, [[3.0, -2.0]])
     assert len(solver.last_rounds) == 1
     assert solver.last_rounds[-1].turning_point_error == 0.01
     assert result.trips == 2
-    assert result.reused is False
+    assert result.reused is True
+    assert result.program is admitted_program
 
 
 def test_limited_fixture_linear_upper_authority_has_commanded_sign_and_gain(machine):

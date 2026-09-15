@@ -376,6 +376,52 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   <code>~/.config/reckon/crew/runs/r-20260915T055602091466-cca-newton-krylov-iteration-count/manifest.md</code>.</p>
 </section>
 
+<section id="wall-at-cell-pitch">
+  <h2 id="wall-at-cell-pitch-h">Wall contact resolved when the fixture wall is rebuilt at one panel per cell pitch</h2>
+
+  <p><strong>Node <code>cca-wall-at-cell-pitch</code>, benchmark
+  <code>benchmarks/wall_at_cell_pitch.py</code> (commits <code>2d327477</code>,
+  <code>840834b9</code>, <code>26461a6a</code>), figure and report at
+  <code>8a666b14</code>, 2026-09-15.</strong> With the production contact read at the
+  polyline tangency to sub-micron accuracy (three-node quadratic in arc length), the
+  remaining limited-row contact error is the sagitta of the fixture wall polyline
+  against the true limiter, first order in panel length. This node re-sampled the wall
+  at one, half and a quarter outboard panel per realised cell pitch (odd counts) beside
+  the fixed 121-node baseline, on the weak and moderate analytic rows at 1000 and 2500
+  requested cells, and recorded contact position error against the analytic outboard
+  tangency, level error in span, machine build wall time split (plasma and wall blocks),
+  interaction-matrix bytes and the wall panel length over pitch. Both cell counts ran
+  CPU on <code>all_debug</code> with the persistent compilation cache (jobs 1271206 and
+  1271237); the 2500 job was cut short by a serve restart after the weak group landed,
+  leaving the moderate 2500 group with its 121-node baseline only (13 of 16 rows),
+  noted per row and in the extrapolation caveat rather than re-measured.</p>
+
+  <div class="figure-grid">
+    <figure>
+      <img src="/nova/figures/cut-cell-current-attribution/wall-pitch/contact-error-vs-panel-pitch.svg" alt="Wall contact error against panel length over pitch for the weak and moderate rows at 1000 and 2500 cells">
+      <figcaption>Contact position error (in pitch) against wall panel length over realised
+      cell pitch on log-log axes. The open markers are the one, half and quarter-pitch
+      samplings; the level-filled markers are the fixed 121-node baselines. The light line
+      is the first-order reference slope the sagitta must follow.</figcaption>
+    </figure>
+  </div>
+
+  <p><strong>Verdict: the polyline sagitta is the contact error and needs a curved wall
+  representation at all practical counts.</strong> The measured error/pitch per panel/pitch
+  slope is 0.475 on every row, and the error falls linearly with panel length (first
+  order). One thousandth of the cell pitch — the position accuracy the clip needs — would
+  therefore require roughly 57 000 wall nodes at 1000 cells and 91 000 at 2500 (the
+  per-count figures: weak 1000 needs 57 275 at ~2950 s build, ~1.47 GB wall family; weak
+  2500 needs 90 561 at ~10 750 s build, ~5.67 GB; moderate 1000 needs 56 927 at ~2990 s,
+  ~1.46 GB; moderate 2500 needs 89 957 from the fixed baseline, ~5.66 GB). The contact
+  error falls with the panel over pitch — 0.474 of the pitch at one panel per pitch, 0.237
+  at half, 0.119 at a quarter — tracking the first-order slope to the resolution sampled,
+  so no practical polyline count reaches one thousandth of pitch and the wall must be
+  represented as a periodic spline with the tangency taken on the curve. Parts, receipts
+  and the extrapolation table are under
+  <code>~/.config/reckon/crew/reports/nova/s19-review/wall-pitch/</code>.</p>
+</section>
+
 </main>
 </body>
 </html>

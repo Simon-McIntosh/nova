@@ -332,7 +332,7 @@ def measure_stage(report_directory: Path, stage_cells: int) -> list[dict[str, An
     derived: dict[str, Any] = {}
     for case_name in CASE_NAMES:
         _carrier, _source, exact = certificate._case(case_name)
-        metrics = _wall_metrics(case_name, exact, stage_cells)
+        metrics = _wall_metrics(case_name, exact, -stage_cells)
         counts = _per_pitch_wall_counts(metrics)
         derived[case_name] = {**metrics, "counts": counts}
     derived_path = report_directory / f"derived-{stage_cells}.json"

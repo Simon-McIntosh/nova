@@ -524,51 +524,73 @@
 <p><strong>CPU gate.</strong> The focused cache file passes 3 of 3. Job <code>1271460</code> ran the referee set one test per fresh CPU process: the cache-policy and counter referees passed in 478.19 s and 317.60 s (log lines 181 and 201), then the 39-minute allocation expired while the nonconverged-result referee compiled. The only unfinished test was resubmitted alone, still as a fresh process inside one <code>all_debug</code> job with a 59-minute limit; job <code>1271523</code> passed it in 299.42 s and wrote its per-test sentinel. The focused cache tests and every referee therefore pass with zero added failures. Logs: <code>~/.config/reckon/crew/reports/nova/s19-handoff/cache-entry/</code>.</p>
 </section>
 <section id="program-size-gate-refusal">
-  <h2>The executable-size gate rejects the measured 120/2 candidate (2026-09-15)</h2>
+  <h2>The 69 percent program-size interim fails terminal identity (2026-09-15)</h2>
   <p><strong>Node:</strong> <code>msc-program-size-budget</code>. Commits
   <code>f01fece3</code>, <code>2a23f9c3</code>, <code>695dadf5</code>,
   <code>1a06d463</code>, <code>1d62930b</code>, <code>de7383f0</code>,
-  <code>ddd2d8bd</code>, <code>28bc0ca4</code> and <code>d5c6b851</code> add the
-  executable-size gate, make its runtime-size reading accept both a method and a
-  property, reject a zero-byte reading as absent evidence, inventory the already
-  compiled loop forms, preserve executable receipts during HLO reanalysis, write
-  the equilibrium compilation guidance, and persist the measured refusal. The
-  attempted solver wrapper was removed after it failed the gate; no solver change
-  is represented as landed.</p>
+  <code>ddd2d8bd</code>, <code>28bc0ca4</code>, <code>d5c6b851</code>,
+  <code>d40737ec</code>, <code>8848bf6d</code>, <code>e7881823</code>,
+  <code>300626b8</code>, <code>4e82bafb</code> and <code>95ad77e3</code> add the
+  executable-size and semantic gates, make runtime-size reading accept both a
+  method and a property, reject a zero-byte reading as absent evidence, inventory
+  the already compiled loop forms, preserve executable receipts during HLO
+  reanalysis, write the equilibrium compilation guidance, and retain every
+  refusal. The frozen-partition wrapper is absent at the final revision because
+  it failed terminal identity; no solver optimization is represented as landed.</p>
   <table>
-    <caption>Optimized CPU HLO and executable gate, baseline to rejected candidate</caption>
-    <thead><tr><th scope="col">Requested cells</th><th scope="col">Baseline solve/map instructions</th><th scope="col">Candidate solve/map instructions</th><th scope="col">Candidate solve/map ratio</th><th scope="col">Executable bytes</th><th scope="col">Moment copies</th><th scope="col">Topology reads</th></tr></thead>
+    <caption>Optimized CPU program measures, baseline to frozen-partition interim</caption>
+    <thead><tr><th scope="col">Requested cells</th><th scope="col">Solve/map instructions before</th><th scope="col">Solve/map instructions after</th><th scope="col">Compile seconds before/after</th><th scope="col">Executable bytes before/after</th><th scope="col">Solve copies before/after, moment/topology</th><th scope="col">Map positive control</th></tr></thead>
     <tbody>
-      <tr><th scope="row">300</th><td>654,832 / 9,908</td><td>203,078 / 9,930</td><td>20.45</td><td>436,447,170</td><td>120</td><td>2</td></tr>
-      <tr><th scope="row">1000</th><td>662,331 / 10,024</td><td>204,531 / 10,046</td><td>20.36</td><td>Unavailable: CPU serialization refused and generated-code size reported zero</td><td>120</td><td>2</td></tr>
+      <tr><th scope="row">300</th><td>654,832 / 9,908</td><td>203,078 / 9,930</td><td>370.224 / 60.083 cold</td><td>461,724,765 / 443,217,410</td><td>120/8 to 120/2</td><td>1/1</td></tr>
+      <tr><th scope="row">1000</th><td>662,331 / 10,024</td><td>204,531 / 10,046</td><td>386.402 / 69.721 captured</td><td>Unavailable: CPU serialization refused and generated-code size reported zero</td><td>120/8 to 120/2</td><td>1/1</td></tr>
     </tbody>
   </table>
-  <p><strong>Positive control and refusal.</strong> At both sizes the map program
+  <p><strong>Physical size gate and measured finding.</strong> At both sizes the map program
   contains exactly one current-moment sentinel and one topology-read sentinel, so
-  the solve counts are not an empty instrument. The executable gate then refuses
-  the candidate at both rungs: 120 current-moment copies and two topology reads,
-  plus no valid 1000-cell executable-size receipt. CPU job <code>1271562</code>
-  compiled and persisted both HLO rungs; job <code>1271573</code> reanalysed those
-  files with the corrected sentinels. The full receipts and refusal are under
+  the solve counts are not an empty instrument. Copy counts are metrics rather
+  than assertions because optimized HLO inlines nested JIT and exported calls.
+  The interim reduces instructions by about 69 percent and the 300-cell cold
+  compile by 83.8 percent; its 300-cell executable is 4.0 percent smaller. CPU
+  job <code>1271595</code> supplies the fresh-cache 300-cell timing. At 1000 cells
+  <code>CpuAotCompilationResult</code> refuses serialization and reports zero
+  generated-code bytes. That is retained as a measured finding rather than
+  converted into a zero, and it also means the persistent cache cannot hold this
+  executable. The full receipts are under
   <code>docs/figures/millisecond-converged-solve/program-size/</code>.</p>
   <figure>
     <img src="/nova/figures/millisecond-converged-solve/program-size/candidate/scope-census-instruction-share.svg"
          alt="Horizontal bars showing the largest source-attributed instruction groups in the rejected 1000-cell candidate">
     <figcaption>The candidate removes about 69 percent of the solve instructions,
-    but its remaining graph is still 20.36 times one map and retains all 120
-    current-moment traces, so instruction reduction alone does not satisfy the
-    structural gate.</figcaption>
+    while its remaining graph is 20.36 times one map and retains 120 current-moment
+    traces and two topology reads. Those counts describe the optimized graph; the
+    terminal-state table below decides whether the interim can land.</figcaption>
   </figure>
-  <p><strong>Required continuation.</strong> Nested JIT and exported StableHLO
-  calls were each checked with three call sites and optimized to three inlined
-  bodies, so they cannot provide the promised reuse boundary. The remaining
-  semantics-preserving design is one request-driven <code>lax</code> evaluator
-  state machine: residual, merit, acceptance, recovery, reconciliation and JVP
-  requests carry their continuation through one operator body. That rewrite must
-  reach one moment and one topology sentinel before the committed 300-cell and
-  twelve-member H200 identity/per-trip gates are informative. Because the
-  structural gate already refuses this candidate, those expensive semantic and
-  timing gates were not run. Focused instrument tests pass 9 of 9 on CPU.</p>
+  <table>
+    <caption>Final one-H200 semantic gate, job 1271640</caption>
+    <thead><tr><th scope="col">Certificate row</th><th scope="col">Cells</th><th scope="col">Baseline/candidate seconds</th><th scope="col">Maximum state difference</th><th scope="col">Candidate residual</th><th scope="col">Bit-identical</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">weak rotation</th><td>300</td><td>104.176 / 41.160</td><td>5.684341886080802e-14</td><td>1.3883107076090602e-15</td><td>no</td></tr>
+      <tr><th scope="row">moderate rotation</th><td>300</td><td>102.042 / 40.852</td><td>1.7763568394002505e-15</td><td>1.5670693008510843e-15</td><td>no</td></tr>
+      <tr><th scope="row">strong rotation</th><td>300</td><td>104.710 / 40.575</td><td>1.249000902703301e-16</td><td>1.1652030721208718e-15</td><td>no</td></tr>
+      <tr><th scope="row">diverted single null</th><td>500</td><td>164.327 / 46.692</td><td>0.0022199809164994903</td><td>non-finite</td><td>no</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Independent MAST gate.</strong> The compiled-slice route passes all
+  twelve bank members at zero ULP against the host route and reuses the cached
+  program on all twelve. Its after per-trip boundary is 45.078 to 55.068 ms with
+  a 49.991 ms mean, tabled member-by-member beside the prior compiled result and
+  the banked 46.1 ms in
+  <code>docs/figures/millisecond-converged-solve/program-size/semantic/report.md</code>.
+  This pass does not override the four certificate refusals.</p>
+  <p><strong>Required continuation.</strong> Three nested-JIT call sites were
+  directly lowered and optimized to three inlined bodies; the same three-call
+  experiment with <code>jax.export</code> <code>Exported.call</code> also optimized
+  to three inlined bodies. Neither supplies a reusable optimized-HLO boundary.
+  Followup <code>f-msc-single-evaluator-state-machine</code> therefore carries one
+  request-driven <code>lax</code> evaluator whose sole operator body serves
+  residual, merit, acceptance, recovery, reconciliation and JVP requests without
+  freezing the live topology semantics. Focused instrument tests pass 13 of 13
+  after the refused wrapper is removed.</p>
 </section>
 </main>
 </body>

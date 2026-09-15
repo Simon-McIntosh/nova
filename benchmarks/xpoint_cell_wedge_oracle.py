@@ -23,6 +23,7 @@ from matplotlib.path import Path as PlotPath
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import quad
+from scipy.optimize import brentq
 
 from benchmarks import topology_read_resolution_ladder as topology_ladder
 from nova.equilibrium.clip_quadrature import saddle_wedge_current_moments
@@ -48,6 +49,10 @@ COLOURS = {
     "private": "#7c3aed",
     "sol": "#dc2626",
 }
+
+
+def _part_path(output: Path, requested_cells: int) -> Path:
+    return output / "parts" / f"single-null-wedges-cells-{requested_cells}.json"
 
 
 class _FluxPlaceholder:
@@ -128,17 +133,158 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     )
 
 
-def _xpoint_cell(machine: Any, x_point: np.ndarray) -> int:
-    containing = [
-        index
-        for index, polygon in enumerate(machine.cell_polygons)
-        if PlotPath(np.asarray(polygon)).contains_point(x_point, radius=1.0e-12)
-    ]
+def _point_segment_distance(
+    point: np.ndarray, start: np.ndarray, end: np.ndarray
+) -> tuple[float, float]:
+    edge = end - start
+    fraction = float(np.dot(point - start, edge) / np.dot(edge, edge))
+    clipped = float(np.clip(fraction, 0.0, 1.0))
+    nearest = start + clipped * edge
+    return float(np.linalg.norm(point - nearest)), fraction
+
+
+def _candidate_cells(machine: Any, x_point: np.ndarray) -> list[dict[str, Any]]:
+    """Return point-in-polygon and nearest-edge facts for saddle candidates."""
+    rows = []
+    for index, item in enumerate(machine.cell_polygons):
+        polygon = np.asarray(item, dtype=np.float64)
+        distances = [
+            _point_segment_distance(x_point, first, second)[0]
+            for first, second in zip(polygon, np.roll(polygon, -1, axis=0), strict=True)
+        ]
+        path = PlotPath(polygon)
+        strict = bool(path.contains_point(x_point))
+        expanded = bool(path.contains_point(x_point, radius=1.0e-12))
+        contracted = bool(path.contains_point(x_point, radius=-1.0e-12))
+        if expanded or min(distances) <= 1.0e-12:
+            rows.append(
+                {
+                    "cell": index,
+                    "contains_strict": strict,
+                    "contains_expanded": expanded,
+                    "contains_contracted": contracted,
+                    "nearest_edge_distance_m": min(distances),
+                }
+            )
+    return rows
+
+
+def _xpoint_cell(machine: Any, x_point: np.ndarray) -> tuple[int, list[dict[str, Any]]]:
+    candidates = _candidate_cells(machine, x_point)
+    containing = [row["cell"] for row in candidates if row["contains_expanded"]]
     if len(containing) != 1:
         raise RuntimeError(
-            f"expected one cell containing the analytic saddle, found {containing}"
+            f"expected one polygon containing the analytic saddle, found {containing}"
         )
-    return containing[0]
+    return int(containing[0]), candidates
+
+
+def _edge_root_diagnostics(
+    exact: Any,
+    polygon: np.ndarray,
+    x_point: np.ndarray,
+    boundary_flux: float,
+) -> list[dict[str, Any]]:
+    """Resolve exact roots and saddle coincidences on every candidate edge."""
+    rows = []
+    flux_scale = max(
+        abs(float(exact.flux(exact.magnetic_axis[None, :])[0]) - boundary_flux),
+        1.0,
+    )
+    flux_tolerance = 256.0 * np.finfo(np.float64).eps * flux_scale
+    geometry_scale = max(float(np.max(np.abs(polygon))), 1.0)
+    edge_tolerance = 2048.0 * np.finfo(np.float64).eps * geometry_scale
+    for edge_index, (start, end) in enumerate(
+        zip(polygon, np.roll(polygon, -1, axis=0), strict=True)
+    ):
+        parameters = np.linspace(0.0, 1.0, 257)
+        points = start[None, :] + parameters[:, None] * (end - start)[None, :]
+        values = np.asarray(exact.flux(points), dtype=np.float64) - boundary_flux
+        roots: list[dict[str, Any]] = []
+
+        def append_root(fraction: float, kind: str) -> None:
+            point = start + fraction * (end - start)
+            if any(
+                np.linalg.norm(point - np.asarray(row["coordinate_rz_m"])) <= 1.0e-12
+                for row in roots
+            ):
+                return
+            roots.append(
+                {
+                    "fraction": fraction,
+                    "coordinate_rz_m": point,
+                    "kind": kind,
+                    "flux_residual_wb": float(
+                        exact.flux(point[None, :])[0] - boundary_flux
+                    ),
+                }
+            )
+
+        for slot in np.flatnonzero(np.abs(values) <= flux_tolerance):
+            append_root(float(parameters[slot]), "sample-zero")
+        for slot in np.flatnonzero(values[:-1] * values[1:] < 0.0):
+            lower = float(parameters[slot])
+            upper = float(parameters[slot + 1])
+            fraction = brentq(
+                lambda value: float(
+                    exact.flux((start + value * (end - start))[None, :])[0]
+                    - boundary_flux
+                ),
+                lower,
+                upper,
+                xtol=4.0 * np.finfo(np.float64).eps,
+                rtol=4.0 * np.finfo(np.float64).eps,
+            )
+            append_root(float(fraction), "sign-change")
+        saddle_distance, saddle_fraction = _point_segment_distance(x_point, start, end)
+        saddle_on_edge = bool(
+            saddle_distance <= edge_tolerance
+            and -edge_tolerance <= saddle_fraction <= 1.0 + edge_tolerance
+        )
+        if saddle_on_edge:
+            append_root(float(np.clip(saddle_fraction, 0.0, 1.0)), "saddle-coincident")
+        rows.append(
+            {
+                "edge": edge_index,
+                "start_rz_m": start,
+                "end_rz_m": end,
+                "endpoint_signed_flux_wb": [float(values[0]), float(values[-1])],
+                "endpoint_sign_change": bool((values[0] > 0.0) != (values[-1] > 0.0)),
+                "saddle_distance_m": saddle_distance,
+                "saddle_fraction": saddle_fraction,
+                "saddle_on_edge": saddle_on_edge,
+                "root_count": len(roots),
+                "roots": roots,
+            }
+        )
+    return rows
+
+
+def _wedge_shape_diagnostics(wedges: Any, x_point: np.ndarray) -> dict[str, Any]:
+    counts = np.asarray(wedges.vertex_count)[0]
+    vertices = np.asarray(wedges.support_vertices)[0]
+    rows = []
+    for slot, count in enumerate(counts):
+        padding = vertices[slot, count:]
+        nonzero = np.flatnonzero(np.any(padding != 0.0, axis=1)) + count
+        rows.append(
+            {
+                "wedge": slot,
+                "vertex_count": int(count),
+                "first_vertex_rz_m": vertices[slot, 0],
+                "first_vertex_delta_from_saddle_m": vertices[slot, 0] - x_point,
+                "first_vertex_exact_saddle": bool(
+                    np.array_equal(vertices[slot, 0], x_point)
+                ),
+                "nonzero_padding_slots": nonzero,
+                "nonzero_padding_coordinates_rz_m": vertices[slot, nonzero],
+            }
+        )
+    return {
+        "saddle_row": bool(np.asarray(wedges.saddle)[0]),
+        "vertex_capacity": int(vertices.shape[1]),
+        "wedges": rows,
+    }
 
 
 def _vertical_bounds(vertices: np.ndarray, radius: float) -> tuple[float, float]:
@@ -292,28 +438,104 @@ def _render_panel(
     return f"/nova/figures/cut-cell-current-attribution/xpoint-cell/{name}"
 
 
-def _measure_row(requested_cells: int, output: Path) -> dict[str, Any]:
+def _measure_row(
+    requested_cells: int,
+    output: Path,
+    allocation: dict[str, Any],
+    *,
+    diagnose_only: bool = False,
+) -> dict[str, Any]:
     started = perf_counter()
+    part_path = _part_path(output, requested_cells)
+    progress = {
+        "schema": "nova.xpoint-cell-wedge-oracle-part",
+        "version": 1,
+        "source_revision": _source_revision(),
+        "allocation": allocation,
+        "requested_cells": requested_cells,
+        "reference": requested_cells == REFERENCE_CELLS,
+        "completed": False,
+        "stage": "machine-load",
+    }
+    _write_json(part_path, progress)
     machine, operator, analytic = topology_ladder._machine_and_field(requested_cells)
     exact = topology_ladder.ANALYTIC
     x_point = np.asarray(exact.x_point, dtype=np.float64)
     axis = np.asarray(exact.magnetic_axis, dtype=np.float64)
-    cell = _xpoint_cell(machine, x_point)
-    polygon = np.asarray(machine.cell_polygons[cell], dtype=np.float64)
-    centre = np.asarray(machine.node[cell], dtype=np.float64)
-    mesh = AtomicCellMesh.from_cells([polygon], centroids=centre[None, :])
     boundary_flux = float(exact.flux(x_point[None, :])[0])
     axis_flux = float(exact.flux(axis[None, :])[0])
-    node_flux = np.asarray(exact.flux(mesh.node_coordinates), dtype=np.float64)
     polarity = math.copysign(1.0, axis_flux - boundary_flux)
-    signed_flux = jnp.asarray(polarity * (node_flux - boundary_flux))
-    wedges = jax.jit(
-        lambda values: mesh.traced_saddle_wedges(
-            values,
-            saddle_vertex=jnp.asarray(x_point),
-            core_reference=jnp.asarray(axis),
+    cell, candidates = _xpoint_cell(machine, x_point)
+    candidate_diagnostics = []
+    selected_geometry = None
+    for candidate in candidates:
+        candidate_cell = int(candidate["cell"])
+        candidate_polygon = np.asarray(
+            machine.cell_polygons[candidate_cell], dtype=np.float64
         )
-    )(signed_flux)
+        candidate_centre = np.asarray(machine.node[candidate_cell], dtype=np.float64)
+        candidate_mesh = AtomicCellMesh.from_cells(
+            [candidate_polygon], centroids=candidate_centre[None, :]
+        )
+        node_flux = np.asarray(
+            exact.flux(candidate_mesh.node_coordinates), dtype=np.float64
+        )
+        signed_flux = jnp.asarray(polarity * (node_flux - boundary_flux))
+        candidate_wedges = jax.jit(
+            lambda values: candidate_mesh.traced_saddle_wedges(
+                values,
+                saddle_vertex=jnp.asarray(x_point),
+                core_reference=jnp.asarray(axis),
+            )
+        )(signed_flux)
+        edge_rows = _edge_root_diagnostics(
+            exact, candidate_polygon, x_point, boundary_flux
+        )
+        candidate_row = candidate | {
+            "selected": candidate_cell == cell,
+            "centroid_rz_m": candidate_centre,
+            "characteristic_pitch_m": math.sqrt(
+                float(np.asarray(machine.area)[candidate_cell])
+            ),
+            "edge_root_count": int(sum(row["root_count"] for row in edge_rows)),
+            "edge_roots": edge_rows,
+            "wedge_shape": _wedge_shape_diagnostics(candidate_wedges, x_point),
+        }
+        candidate_diagnostics.append(candidate_row)
+        if candidate_cell == cell:
+            selected_geometry = (
+                candidate_polygon,
+                candidate_centre,
+                candidate_wedges,
+                candidate_row,
+            )
+    if selected_geometry is None:
+        raise RuntimeError("the selected X-point cell has no diagnostic row")
+    polygon, centre, wedges, selected_diagnostic = selected_geometry
+    saddle_case = (
+        "edge-coincident-degenerate-wedge"
+        if any(row["saddle_on_edge"] for row in selected_diagnostic["edge_roots"])
+        else "interior-four-crossing"
+    )
+    progress = progress | {
+        "realised_cells": len(machine.node),
+        "machine_cache": machine.cache,
+        "xpoint_cell": cell,
+        "saddle_case": saddle_case,
+        "candidate_cells": candidate_diagnostics,
+        "stage": "geometry-diagnosed",
+        "wall_seconds": perf_counter() - started,
+    }
+    _write_json(part_path, progress)
+    if diagnose_only:
+        diagnostic = progress | {
+            "diagnostic_completed": True,
+            "oracle_completed": False,
+            "completed": True,
+        }
+        _write_json(part_path, diagnostic)
+        return diagnostic
+
     profile = _AnalyticCurrentProfile(
         source_parameter=float(exact.source_parameter),
         flux_scale=float(exact.flux_scale_per_radian_wb),
@@ -365,12 +587,18 @@ def _measure_row(requested_cells: int, output: Path) -> dict[str, Any]:
     figure_src = _render_panel(
         output, requested_cells, machine, exact, polygon, wedges, observed
     )
-    return {
+    row = {
+        "schema": "nova.xpoint-cell-wedge-oracle-part",
+        "version": 1,
+        "source_revision": _source_revision(),
+        "allocation": allocation,
         "requested_cells": requested_cells,
         "reference": requested_cells == REFERENCE_CELLS,
         "realised_cells": len(machine.node),
         "machine_cache": machine.cache,
         "xpoint_cell": cell,
+        "saddle_case": saddle_case,
+        "candidate_cells": candidate_diagnostics,
         "wedge_vertex_capacity": int(wedges.support_vertices.shape[2]),
         "wedge_vertex_count": counts,
         "wedge_area_m2": np.asarray(wedges.area)[0],
@@ -387,39 +615,118 @@ def _measure_row(requested_cells: int, output: Path) -> dict[str, Any]:
         "observed_nulls": observed,
         "figure_src": figure_src,
         "wall_seconds": perf_counter() - started,
+        "oracle_completed": True,
+        "completed": True,
+        "stage": "complete",
     }
+    _write_json(part_path, row)
+    return row
 
 
-def run(output: Path) -> dict[str, Any]:
+def run(
+    output: Path,
+    requested_cells: tuple[int, ...] = REQUESTED_CELLS,
+    *,
+    diagnose_only: bool = False,
+) -> dict[str, Any]:
     output.mkdir(parents=True, exist_ok=True)
     allocation = _allocation()
-    rows = [_measure_row(cells, output) for cells in REQUESTED_CELLS]
-    tested = [row for row in rows if not row["reference"]]
     receipt = {
         "schema": "nova.xpoint-cell-wedge-oracle",
         "version": 1,
         "source_revision": _source_revision(),
         "allocation": allocation,
         "reference_requested_cells": REFERENCE_CELLS,
-        "tested_requested_cells": [row["requested_cells"] for row in tested],
+        "requested_cells": list(requested_cells),
+        "diagnose_only": diagnose_only,
         "core_current_relative_limit": CORE_CURRENT_RELATIVE_LIMIT,
-        "max_core_current_relative_error": max(
-            row["core_current_relative_error"] for row in tested
-        ),
-        "private_flux_current_exact_zero": all(
-            row["private_flux_current_a"] == 0.0 for row in tested
-        ),
-        "common_sol_current_exact_zero": all(
-            row["common_sol_current_a"] == [0.0, 0.0] for row in tested
-        ),
-        "all_saddles_inserted": all(
-            row["saddle_inserted_as_first_vertex"] for row in rows
-        ),
-        "all_padding_exact_zero": all(row["exact_zero_padding"] for row in rows),
-        "rows": rows,
-        "completed": True,
+        "rows": [],
+        "completed": False,
     }
-    _write_json(output / "receipt.json", receipt)
+    receipt_path = output / "receipt.json"
+    _write_json(receipt_path, receipt)
+    rows = []
+    for cells in requested_cells:
+        try:
+            row = _measure_row(
+                cells,
+                output,
+                allocation,
+                diagnose_only=diagnose_only,
+            )
+        except Exception as error:
+            part_path = _part_path(output, cells)
+            failed = (
+                json.loads(part_path.read_text(encoding="utf-8"))
+                if part_path.exists()
+                else {"requested_cells": cells}
+            )
+            failed.update(
+                {
+                    "completed": False,
+                    "error_type": type(error).__name__,
+                    "error": str(error),
+                }
+            )
+            _write_json(part_path, failed)
+            receipt.update(
+                {
+                    "rows": rows,
+                    "failed_requested_cells": cells,
+                    "error_type": type(error).__name__,
+                    "error": str(error),
+                }
+            )
+            _write_json(receipt_path, receipt)
+            raise
+        rows.append(row)
+        receipt["rows"] = rows
+        _write_json(receipt_path, receipt)
+
+    tested = [
+        row
+        for row in rows
+        if not row["reference"] and bool(row.get("oracle_completed"))
+    ]
+    receipt.update(
+        {
+            "tested_requested_cells": [row["requested_cells"] for row in tested],
+            "max_core_current_relative_error": (
+                max(row["core_current_relative_error"] for row in tested)
+                if tested
+                else None
+            ),
+            "private_flux_current_exact_zero": (
+                all(row["private_flux_current_a"] == 0.0 for row in tested)
+                if tested
+                else None
+            ),
+            "common_sol_current_exact_zero": (
+                all(row["common_sol_current_a"] == [0.0, 0.0] for row in tested)
+                if tested
+                else None
+            ),
+            "all_saddles_inserted": (
+                all(row["saddle_inserted_as_first_vertex"] for row in rows)
+                if not diagnose_only
+                else None
+            ),
+            "all_padding_exact_zero": (
+                all(row["exact_zero_padding"] for row in rows)
+                if not diagnose_only
+                else None
+            ),
+            "diagnostic_completed": diagnose_only,
+            "completed": True,
+        }
+    )
+    _write_json(receipt_path, receipt)
+    if diagnose_only:
+        print(
+            f"XPOINT_WEDGE_DIAGNOSTIC cells={list(requested_cells)} parts={len(rows)}",
+            flush=True,
+        )
+        return receipt
     print(
         "XPOINT_WEDGE_ORACLE "
         f"tested={receipt['tested_requested_cells']} "
@@ -434,8 +741,10 @@ def run(output: Path) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--cells", type=int, nargs="+", default=REQUESTED_CELLS)
+    parser.add_argument("--diagnose-only", action="store_true")
     args = parser.parse_args()
-    run(args.output)
+    run(args.output, tuple(args.cells), diagnose_only=args.diagnose_only)
     return 0
 
 

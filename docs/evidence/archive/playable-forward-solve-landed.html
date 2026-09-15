@@ -1612,6 +1612,26 @@ output of false_fun has type float64[665], so the shapes do not match.</pre>
 </table>
 <p><strong>Gate.</strong> The upper-point drift contracts from the banked 123.660 mm to 18.411 mm, all three commands remain below 20 kA, and elongation produces an achieved shape rather than <code>NoQualifiedAxisError</code> or a zero-fraction no-op. The three receipts and aggregate are under <code>docs/figures/playable-forward-solve/shape-inverse/</code>; the measurement log is <code>~/.config/reckon/crew/reports/nova/s19-handoff/shape-inverse/all-debug-three-command.log</code>. No H200 arm was run.</p>
 </section>
+<section id="constraint-multi-trip-target">
+  <h2>The constrained centroid reaches a directly measured three-cap target (2026-09-15)</h2>
+  <p><strong>Node:</strong> <code>pfs-constraint-multi-trip-target</code>. Commits <code>bb7ec4ac</code>, <code>2983e5f1</code>, <code>f024b476</code> and <code>7a97aecf</code> add the dedicated benchmark, preserve the raw and effective merit readings, support receipt-only re-adjudication, and publish the receipt, report and figure. No test or file under <code>nova/</code> changed.</p>
+  <p><strong>Reproduction before the new target.</strong> The earlier nonlinear command still needs five nonzero applications of the 1000 A cap on the current base: nine recorded trips, <code>4640.729275765453 A</code> total, terminal reason <code>converged</code>. This confirms that the three-cap linear extrapolation in the earlier estimate remains invalid rather than silently treating the historical evidence as current.</p>
+  <table>
+    <caption>Direct free-response controls on MAST 27079 row 96</caption>
+    <thead><tr><th scope="col">Applied current</th><th scope="col">Free-solve trips</th><th scope="col">Centroid displacement</th><th scope="col">Terminal residual</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">+3000 A</th><td>3</td><td>0.03569191341199428 m</td><td>8.078708168996772e-10</td></tr>
+      <tr><th scope="row">+4000 A</th><td>4</td><td>0.04461207342428739 m</td><td>5.990441986871841e-11</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Target and verdict.</strong> The command targets the centroid reached by the direct +3000 A free solve, not an extrapolation. It converges after five recorded trips carrying three nonzero cap applications, at exactly <code>3000 A</code> total against the <code>3000 A</code> free reference. The final centroid error is <code>-5.923159532295053e-10 m</code>, every application is at most 1000 A, and no accepted current step overshoots the target.</p>
+  <p><strong>Merit sequence.</strong> Across the three current-applying trips the augmented merit decreases strictly: <code>0.3220944657588584</code>, <code>0.3172745245786674</code>, <code>0.3143474636965356</code>, <code>0.3112527458836541</code>. The raw sequence retains two zero-current, zero-Newton closure re-evaluations at <code>0.3112525996625176</code> and <code>0.3112527477563987</code>; the second rises by <code>1.480938811027066e-7</code>. Per the plan's recorded interpretation, closure trips that apply no current and take no Newton step are visible but non-gating. The solver's final recorded termination is <code>converged</code>; the preceding one-trip calls record <code>active_set_iteration_budget_exhausted</code> unchanged.</p>
+  <figure>
+    <img src="/nova/figures/playable-forward-solve/constraint-globalisation/multi-trip-target.svg" alt="Augmented constraint merit and absolute centroid error over the five recorded trips">
+    <figcaption>The three effective capped applications lower merit and reach the direct +3000 A target; the two closure trips expose the raw zero-work re-evaluation rather than hiding it.</figcaption>
+  </figure>
+  <p><strong>Execution evidence.</strong> One <code>all_debug</code> CPU measurement allocation, job <code>1271442</code>, ran for 4 minutes 2 seconds with <code>JAX_PLATFORMS=cpu</code>, extended precision asserted, and the repository interpreter invoked directly. It wrote the complete measured receipt and SVG, then exited 1 because the first benchmark adjudicator incorrectly gated the raw zero-work merit rise. Commit <code>2983e5f1</code> corrected that gate without changing measured values; job <code>1271448</code> performed only receipt/report re-adjudication in 8 seconds and exited 0. Receipt: <code>docs/figures/playable-forward-solve/constraint-globalisation/multi-trip-target.json</code>. Report: <code>docs/figures/playable-forward-solve/constraint-globalisation/constraint-multi-trip.md</code>. Logs: <code>~/.config/reckon/crew/reports/nova/s19-handoff/multi-trip-target/measurement.log</code> and <code>adjudication.log</code>.</p>
+</section>
 </main>
 </body>
 </html>

@@ -172,6 +172,90 @@ def test_measure_uses_the_current_quadrature_node_owner(monkeypatch, tmp_path):
     assert part["row"] == receipt["rows"][0]
 
 
+class _MeasuredDevice:
+    def __init__(self, peak_bytes: int):
+        self.peak_bytes = peak_bytes
+
+    def __str__(self):
+        return "mock accelerator"
+
+    def memory_stats(self):
+        return {
+            "bytes_in_use": self.peak_bytes // 2,
+            "peak_bytes_in_use": self.peak_bytes,
+        }
+
+
+def _mock_production_solve(monkeypatch, peak_bytes: int) -> None:
+    monkeypatch.setattr(memory_scaling, "configure_dtypes", lambda: None)
+    monkeypatch.setattr(memory_scaling, "support_clip_mode", lambda: "chord")
+    monkeypatch.setattr(memory_scaling, "set_support_clip_mode", lambda _mode: None)
+    monkeypatch.setattr(
+        memory_scaling.jax, "devices", lambda: [_MeasuredDevice(peak_bytes)]
+    )
+    monkeypatch.setattr(memory_scaling.certificate, "_source_revision", lambda: "abc")
+    monkeypatch.setattr(
+        memory_scaling.certificate, "_lane", lambda: {"platform": "gpu"}
+    )
+
+    def measured(_case, requested_cells):
+        row = {
+            "realised_cells": 1065,
+            "solver": {"terminal_fixed_point_residual": 1.25e-8},
+            "figure": {
+                "project_absolute_src": (
+                    "/nova/figures/cut-cell-current-attribution/"
+                    "exact-clip-memory/solve-panels/weak.png"
+                ),
+                "sha256": "figure-digest",
+            },
+        }
+        path = memory_scaling.certificate._part_path(_case, requested_cells)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(row), encoding="utf-8")
+        figure = memory_scaling.certificate._figure_path(_case, requested_cells)
+        figure.parent.mkdir(parents=True, exist_ok=True)
+        figure.write_bytes(b"figure")
+        return row
+
+    monkeypatch.setattr(memory_scaling.certificate, "_measure", measured)
+
+
+def test_production_solve_persists_positive_allocator_peak(monkeypatch, tmp_path):
+    """The production receipt carries a peak from an allocator that saw work."""
+    _mock_production_solve(monkeypatch, 3 * 2**30)
+    original_figures = memory_scaling.certificate.FIGURE_ROOT
+    original_parts = memory_scaling.certificate.PART_ROOT
+    output = tmp_path / "solve.json"
+    receipt = memory_scaling.solve_and_measure(
+        output,
+        tmp_path / "panels",
+        tmp_path / "parts",
+        1000,
+    )
+    assert output.is_file()
+    assert receipt["allocator"]["peak_gib"] == 3.0
+    assert receipt["allocator"]["instrument_check"] == {
+        "byte_counter_count": 2,
+        "largest_observed_byte_counter": 3 * 2**30,
+        "positive_peak_bytes_in_use": True,
+    }
+    assert memory_scaling.certificate.FIGURE_ROOT == original_figures
+    assert memory_scaling.certificate.PART_ROOT == original_parts
+
+
+def test_production_solve_refuses_zero_allocator_report(monkeypatch, tmp_path):
+    """A uniformly zero allocator report cannot masquerade as low memory."""
+    _mock_production_solve(monkeypatch, 0)
+    with pytest.raises(RuntimeError, match="did not see the solve"):
+        memory_scaling.solve_and_measure(
+            tmp_path / "solve.json",
+            tmp_path / "panels",
+            tmp_path / "parts",
+            1000,
+        )
+
+
 class _ConstantCurrentProfile:
     def current_density(self, radius, psi_norm):
         return jnp.ones_like(radius) * 2.0 + 0.0 * psi_norm

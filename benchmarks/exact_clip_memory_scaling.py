@@ -18,6 +18,8 @@ from pathlib import Path
 import tempfile
 from typing import Any
 
+import jax
+
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import clip_quadrature
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
@@ -171,17 +173,126 @@ def measure(
     return json.loads(output.read_text(encoding="utf-8"))
 
 
+def solve_and_measure(
+    output: Path,
+    figure_root: Path,
+    part_root: Path,
+    requested_cells: int,
+) -> dict[str, Any]:
+    """Run one exact-clip production solve and persist its allocation peak.
+
+    The certificate driver owns the production ``profile.solve`` call and its
+    line-contour panel.  This wrapper only redirects those durable outputs and
+    reads the accelerator allocator after the terminal state is ready.  A
+    positive byte counter proves the allocator instrument saw the live solve;
+    an empty or uniformly zero report is rejected rather than presented as a
+    low-memory measurement.
+    """
+    configure_dtypes()
+    if not hasattr(certificate.observation, "_UNIT_NODE"):
+        certificate.observation._UNIT_NODE = clip_quadrature._UNIT_NODE
+    device = jax.devices()[0]
+    original_mode = support_clip_mode()
+    original_figure_root = certificate.FIGURE_ROOT
+    original_part_root = certificate.PART_ROOT
+    certificate.FIGURE_ROOT = figure_root
+    certificate.PART_ROOT = part_root
+    requested_cells = -abs(requested_cells)
+    try:
+        set_support_clip_mode("exact")
+        certificate._measure(
+            "weak-rotation-reactor-static",
+            requested_cells,
+        )
+        row_path = certificate._part_path(
+            "weak-rotation-reactor-static", requested_cells
+        )
+        figure_path = certificate._figure_path(
+            "weak-rotation-reactor-static", requested_cells
+        )
+        row = json.loads(row_path.read_text(encoding="utf-8"))
+        raw_stats = device.memory_stats() or {}
+    finally:
+        certificate.FIGURE_ROOT = original_figure_root
+        certificate.PART_ROOT = original_part_root
+        set_support_clip_mode(original_mode)
+
+    statistics = {
+        str(name): int(value) if isinstance(value, int | float) else str(value)
+        for name, value in raw_stats.items()
+    }
+    byte_counters = {
+        name: value
+        for name, value in statistics.items()
+        if "bytes" in name and isinstance(value, int)
+    }
+    observed_bytes = max(byte_counters.values(), default=0)
+    if observed_bytes <= 0:
+        raise RuntimeError("accelerator allocation counters did not see the solve")
+    peak_bytes = statistics.get("peak_bytes_in_use")
+    if not isinstance(peak_bytes, int) or peak_bytes <= 0:
+        raise RuntimeError("accelerator allocator did not report a positive peak")
+
+    receipt = {
+        "schema": "nova.exact-clip-production-solve",
+        "source_revision": certificate._source_revision(),
+        "lane": certificate._lane(),
+        "requested_cells": requested_cells,
+        "row_receipt": str(row_path),
+        "figure": {
+            "filesystem_path": str(figure_path),
+            "project_absolute_src": row["figure"]["project_absolute_src"],
+            "sha256": row["figure"]["sha256"],
+        },
+        "allocator": {
+            "device": str(device),
+            "statistics": statistics,
+            "instrument_check": {
+                "byte_counter_count": len(byte_counters),
+                "largest_observed_byte_counter": observed_bytes,
+                "positive_peak_bytes_in_use": True,
+            },
+            "peak_bytes_in_use": peak_bytes,
+            "peak_gib": peak_bytes / 2**30,
+        },
+        "row": row,
+    }
+    _atomic_json(output, receipt)
+    print(
+        "EXACT_CLIP_SOLVE "
+        f"requested={abs(requested_cells)} realised={row['realised_cells']} "
+        f"peak_gib={peak_bytes / 2**30:.6f} "
+        f"residual={row['solver']['terminal_fixed_point_residual']}",
+        flush=True,
+    )
+    return receipt
+
+
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--compiler-root", type=Path, required=True)
+    parser.add_argument("--compiler-root", type=Path)
     parser.add_argument("--part-root", type=Path)
+    parser.add_argument("--figure-root", type=Path)
+    parser.add_argument("--execute-solve", action="store_true")
     parser.add_argument("--cells", type=int, nargs="+", default=[110, 300, 500])
     return parser.parse_args()
 
 
 def main() -> None:
     arguments = _parse()
+    if arguments.execute_solve:
+        if len(arguments.cells) != 1:
+            raise ValueError("the production solve accepts exactly one cell count")
+        solve_and_measure(
+            arguments.output,
+            arguments.figure_root or arguments.output.parent / "solve-panels",
+            arguments.part_root or arguments.output.parent / "solve-parts",
+            arguments.cells[0],
+        )
+        return
+    if arguments.compiler_root is None:
+        raise ValueError("--compiler-root is required for memory analysis")
     receipt = measure(
         arguments.output,
         arguments.compiler_root,

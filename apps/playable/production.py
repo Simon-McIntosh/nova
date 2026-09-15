@@ -34,6 +34,8 @@ from nova.equilibrium.shape_inverse import (
     solve_shape_inverse,
     turning_point_error,
 )
+from nova.equilibrium.solve_request import default_forward_compilation_cache_root
+from nova.jax.config import configure_persistent_compilation_cache
 
 from apps.playable.session import SolveResult
 from apps.playable.shape import PlasmaShape, move_bounding_box
@@ -106,6 +108,10 @@ class ProductionSolver:
             raise ValueError("shape control needs a prescribed current field")
         self.prescribed_current = np.asarray(field_current.current, dtype=float).copy()
         self.reference_current = self.prescribed_current.copy()
+        # Each playable launch opts its own process into the shared per-host
+        # persistent compilation cache, so a program built by one allocation
+        # is served to the next on the same host rather than rebuilt.
+        configure_persistent_compilation_cache(default_forward_compilation_cache_root())
 
     def _flux(self, previous: ForwardEquilibrium | None) -> np.ndarray:
         """Return the warm-start flux, or the machine seed for the prime."""
@@ -116,11 +122,17 @@ class ProductionSolver:
         profile: ForwardProfile,
         flux: np.ndarray,
         prescribed_current: np.ndarray,
+        *,
+        program: object | None = None,
     ):
-        """Run the reduced route with prescribed currents and no shape rows."""
-        # A reduced program closes over the external flux associated with the
-        # currents it was compiled with. Reusing it after prescribed currents
-        # change would silently solve with the earlier current field.
+        """Run the reduced route with prescribed currents and no shape rows.
+
+        The carried program is handed into the solve, so a changed prescribed
+        current re-enters the compiled kernels: the external flux it drives is
+        recomputed each call and bound to the kernels as a traced argument, a
+        call rather than a recompile. Reuse is safe while the circuit layout
+        and operator stand, which is one session on one carrier.
+        """
         return solve_constrained_reduced_newton(
             profile,
             jnp.asarray(flux),
@@ -130,7 +142,7 @@ class ProductionSolver:
             tolerance=FIXED_POINT_RESIDUAL_TOLERANCE,
             newton_steps=NEWTON_STEPS,
             active_set_steps=ACTIVE_SET_STEPS,
-            program=None,
+            program=program,
         )
 
     @staticmethod
@@ -171,11 +183,16 @@ class ProductionSolver:
         )
 
     def _forward(
-        self, profile: ForwardProfile, flux: np.ndarray, prescribed_current: np.ndarray
+        self,
+        profile: ForwardProfile,
+        flux: np.ndarray,
+        prescribed_current: np.ndarray,
+        *,
+        program: object | None = None,
     ) -> tuple[ForwardEquilibrium, int, object | None]:
         """Run one unconstrained forward response on prescribed currents."""
         if self.route == "reduced_newton":
-            result = self._reduced(profile, flux, prescribed_current)
+            result = self._reduced(profile, flux, prescribed_current, program=program)
             return (
                 self._reduced_receipt(profile, result),
                 int(result.active_set_iterations),
@@ -198,19 +215,28 @@ class ProductionSolver:
             None,
         )
 
-    def _forward_axis_referee(self, profile: ForwardProfile, flux: np.ndarray):
-        """Return a nonlinear axis referee whose admitted result is reusable."""
+    def _forward_axis_referee(
+        self,
+        profile: ForwardProfile,
+        flux: np.ndarray,
+        *,
+        program: object | None = None,
+    ):
+        """Return a nonlinear axis referee whose program and result are reusable."""
         self._admitted_forward = None
+        program_handle = program
 
         def solve(prescribed_current: np.ndarray) -> ForwardEquilibrium:
-            equilibrium, trips, program = self._forward(
-                profile, flux, prescribed_current
+            nonlocal program_handle
+            equilibrium, trips, program_out = self._forward(
+                profile, flux, prescribed_current, program=program_handle
             )
+            program_handle = program_out
             self._admitted_forward = (
                 np.asarray(prescribed_current, dtype=float).copy(),
                 equilibrium,
                 trips,
-                program,
+                program_out,
             )
             return equilibrium
 
@@ -221,15 +247,21 @@ class ProductionSolver:
         profile: ForwardProfile,
         flux: np.ndarray,
         prescribed_current: np.ndarray,
+        *,
+        program: object | None = None,
     ) -> tuple[ForwardEquilibrium, int, object | None]:
         """Reuse the nonlinear solve that admitted these exact currents."""
         admitted = self._admitted_forward
         if admitted is not None and np.array_equal(admitted[0], prescribed_current):
             return admitted[1:]
-        return self._forward(profile, flux, prescribed_current)
+        return self._forward(profile, flux, prescribed_current, program=program)
 
     def solve_target(
-        self, previous: ForwardEquilibrium, target: object
+        self,
+        previous: ForwardEquilibrium,
+        target: object,
+        *,
+        program: object | None = None,
     ) -> tuple[ForwardEquilibrium, object | None]:
         """Drive one target through placement Picard and one forward solve."""
         profile = self.machine.profile
@@ -244,11 +276,11 @@ class ProductionSolver:
             gamma=self.inverse_gamma,
             current_step_fraction=self.current_step_fraction,
             current_step_reference=self.reference_current,
-            forward_solve=self._forward_axis_referee(profile, flux),
+            forward_solve=self._forward_axis_referee(profile, flux, program=program),
         )
         self.prescribed_current = inverse.currents
         equilibrium, round_trips, program_out = self._forward_after_admission(
-            profile, flux, self.prescribed_current
+            profile, flux, self.prescribed_current, program=program
         )
         error = turning_point_error(profile, target, equilibrium.flux)
         achieved = achieved_target(profile, equilibrium.flux)
@@ -279,14 +311,17 @@ class ProductionSolver:
         Picard inverse-forward rounds drive that fixed target. Each forward
         solve is unconstrained and therefore publishes no compensating-row
         records.
+
+        ``program`` is the compiled-program handle carried from the previous
+        solve. A prime builds it; each moved key and every admission trial
+        re-enters that same program with the changed current as a traced input.
         """
-        del program
         profile = self.machine.profile
         flux = self._flux(previous)
         started = perf_counter()
         if previous is None or action is None:
             equilibrium, trips, program_out = self._forward(
-                profile, flux, self.prescribed_current
+                profile, flux, self.prescribed_current, program=program
             )
             self.last_target = achieved_target(profile, equilibrium.flux)
             self.last_rounds = ()
@@ -303,11 +338,11 @@ class ProductionSolver:
         target = move_bounding_box(
             achieved_target(profile, flux), prior_shape, parameter, delta
         )
-        equilibrium, program_out = self.solve_target(previous, target)
+        equilibrium, program_out = self.solve_target(previous, target, program=program)
         return SolveResult(
             equilibrium,
             perf_counter() - started,
             sum(item.trips for item in self.last_rounds),
             program=program_out,
-            reused=False,
+            reused=program is not None,
         )

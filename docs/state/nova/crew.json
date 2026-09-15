@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T16:26:04",
+  "updated": "2026-09-15T16:29:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -166439,6 +166439,211 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T130940963818-msc-cache-entry-overhead",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-cache-entry-overhead",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2684,
+                "cached_input_tokens": 440809,
+                "input_tokens": 443495,
+                "output_tokens": 668,
+                "reasoning_output_tokens": 67,
+                "total_tokens": 444163,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "On the twelve MAST bank members in one H200 job with paired same-job arms, the cached public entry's per-call wall is within 10 percent of the same-job direct-dispatch wall on all twelve (was 1.39 to 1.72 times) and the terminal flux is 0 ulp against the host route on all twelve, by hoisting the reduced-coordinate and external-flux derivation to the caller side or memoising it under a key that does not change the compiled program (never keying the cache on conductor inputs, which cost 512 ulp); receipt docs/figures/millisecond-converged-solve/compiled-slice-cache/receipt.json regenerated; the focused cache test and the referees pass one per fresh CPU process with zero added failures",
+          "estimated_hours": null,
+          "goal": "The cached compiled-slice public entry costs no more than the direct dispatch it wraps while keeping compiled-versus-host identity",
+          "id": "msc-cache-entry-overhead",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T13:09:42Z",
+            "read_at": "2026-09-15T13:09:43Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 38.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T130940963818-msc-cache-entry-overhead/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/reduced_newton.py",
+            "tests/test_compiled_slice_cache.py",
+            "docs/figures/millisecond-converged-solve/compiled-slice-cache",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/cache-entry",
+            "docs/evidence/archive/millisecond-converged-solve-landed.html",
+            "docs/plans/millisecond-converged-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-msc-cacheentry-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T13:10:25Z",
+        "completed_at": "2026-09-15T14:22:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4341,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4341,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "cd58406374e2f2e5fd773d85f67fb11af278c131",
+        "commits": [
+          "3df8f0d5f9d2fd6b42922ff865d258ebca36d316",
+          "abdc68a081ffb857a9f2fa8163df319b5bda82e3",
+          "b11a52b7d8772617b8a6846e8d6913a79fb32cfd"
+        ],
+        "changed_lines": {
+          "added": 463,
+          "removed": 84,
+          "files": 6
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1271496 paired twelve-member public-entry against same-job direct dispatch; all_debug jobs 1271460 and 1271523 fresh-process referees of tests/test_reduced_newton.py; focused tests/test_compiled_slice_cache.py 3 passed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/millisecond-converged-solve/compiled-slice-cache/receipt.json",
+          "log_digest": "sha256:5a587ffa4568b649adf691cf9fd395a6e7d56702d64f1e368b48d2f1762398c4"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T130940963818-msc-cache-entry-overhead/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a530-ae78-74b3-b538-4399fdd1516f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10765056,
+            "cached_input_tokens_cumulative": 10765056,
+            "input_tokens": 10835405,
+            "input_tokens_cumulative": 10835405,
+            "output_tokens": 15915,
+            "output_tokens_cumulative": 15915,
+            "reasoning_output_tokens": 3440,
+            "reasoning_output_tokens_cumulative": 3440
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T14:22:46Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 43.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T14:22:46Z"
+            }
+          ],
+          "notional_cost_usd": 219.9897,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 10765056,
+          "cumulative_input_tokens": 21600461,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 19355
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-cache-entry-overhead",
+          "session_id": "01a0a530-ae78-74b3-b538-4399fdd1516f",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T14:22:46Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 112.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -166751,6 +166956,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2572
+    "_version": 2573
   }
 }

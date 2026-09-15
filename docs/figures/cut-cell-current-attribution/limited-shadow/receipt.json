@@ -17,8 +17,34 @@
         "all_physical_carriers_enter_residual": true,
         "flood_shadow_count": 0,
         "physical_rule": "saddle_qualified_domains retains PRIVATE_FLUX only behind a finite admitted saddle; limited reads relabel provisional carriers CORE",
+        "physical_rule_sources": [
+          {
+            "line_end": 240,
+            "line_start": 219,
+            "path": "nova/equilibrium/domain.py",
+            "symbol": "saddle_qualified_domains"
+          },
+          {
+            "line_end": 1912,
+            "line_start": 1892,
+            "path": "nova/equilibrium/forward_operator.py",
+            "symbol": "_fixed_design_read"
+          },
+          {
+            "line_end": 2559,
+            "line_start": 2546,
+            "path": "nova/equilibrium/forward_operator.py",
+            "symbol": "_residual_shadow_components_from_read"
+          }
+        ],
         "qualified_private_count": 0,
-        "raw_connectivity_rule": "classify_domains marks closed and disconnected carriers PRIVATE_FLUX; nova/equilibrium/domain.py classify_domains",
+        "raw_connectivity_rule": "classify_domains marks closed and disconnected carriers PRIVATE_FLUX",
+        "raw_connectivity_source": {
+          "line_end": 216,
+          "line_start": 206,
+          "path": "nova/equilibrium/domain.py",
+          "symbol": "classify_domains"
+        },
         "raw_private_carriers": [
           {
             "component_id": 672,
@@ -400,7 +426,7 @@
       "exterior_cache": {
         "build_seconds": 0.0,
         "hit": true,
-        "lock_wait_seconds": 2.1221116185188293e-05,
+        "lock_wait_seconds": 6.8675726652145386e-06,
         "semantic_key": "3fda50b362298dcf",
         "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
       },
@@ -411,8 +437,34 @@
         "all_physical_carriers_enter_residual": true,
         "flood_shadow_count": 0,
         "physical_rule": "saddle_qualified_domains retains PRIVATE_FLUX only behind a finite admitted saddle; limited reads relabel provisional carriers CORE",
+        "physical_rule_sources": [
+          {
+            "line_end": 240,
+            "line_start": 219,
+            "path": "nova/equilibrium/domain.py",
+            "symbol": "saddle_qualified_domains"
+          },
+          {
+            "line_end": 1912,
+            "line_start": 1892,
+            "path": "nova/equilibrium/forward_operator.py",
+            "symbol": "_fixed_design_read"
+          },
+          {
+            "line_end": 2559,
+            "line_start": 2546,
+            "path": "nova/equilibrium/forward_operator.py",
+            "symbol": "_residual_shadow_components_from_read"
+          }
+        ],
         "qualified_private_count": 0,
-        "raw_connectivity_rule": "classify_domains marks closed and disconnected carriers PRIVATE_FLUX; nova/equilibrium/domain.py classify_domains",
+        "raw_connectivity_rule": "classify_domains marks closed and disconnected carriers PRIVATE_FLUX",
+        "raw_connectivity_source": {
+          "line_end": 216,
+          "line_start": 206,
+          "path": "nova/equilibrium/domain.py",
+          "symbol": "classify_domains"
+        },
         "raw_private_carriers": [
           {
             "component_id": 3,
@@ -1022,8 +1074,34 @@
         "all_physical_carriers_enter_residual": true,
         "flood_shadow_count": 0,
         "physical_rule": "saddle_qualified_domains retains PRIVATE_FLUX only behind a finite admitted saddle; limited reads relabel provisional carriers CORE",
+        "physical_rule_sources": [
+          {
+            "line_end": 240,
+            "line_start": 219,
+            "path": "nova/equilibrium/domain.py",
+            "symbol": "saddle_qualified_domains"
+          },
+          {
+            "line_end": 1912,
+            "line_start": 1892,
+            "path": "nova/equilibrium/forward_operator.py",
+            "symbol": "_fixed_design_read"
+          },
+          {
+            "line_end": 2559,
+            "line_start": 2546,
+            "path": "nova/equilibrium/forward_operator.py",
+            "symbol": "_residual_shadow_components_from_read"
+          }
+        ],
         "qualified_private_count": 0,
-        "raw_connectivity_rule": "classify_domains marks closed and disconnected carriers PRIVATE_FLUX; nova/equilibrium/domain.py classify_domains",
+        "raw_connectivity_rule": "classify_domains marks closed and disconnected carriers PRIVATE_FLUX",
+        "raw_connectivity_source": {
+          "line_end": 216,
+          "line_start": 206,
+          "path": "nova/equilibrium/domain.py",
+          "symbol": "classify_domains"
+        },
         "raw_private_carriers": [
           {
             "component_id": 734,
@@ -1414,7 +1492,7 @@
       "exterior_cache": {
         "build_seconds": 0.0,
         "hit": true,
-        "lock_wait_seconds": 2.0284205675125122e-05,
+        "lock_wait_seconds": 8.40798020362854e-06,
         "semantic_key": "8f2a98c27aa3a475",
         "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
       },
@@ -1425,8 +1503,34 @@
         "all_physical_carriers_enter_residual": true,
         "flood_shadow_count": 0,
         "physical_rule": "saddle_qualified_domains retains PRIVATE_FLUX only behind a finite admitted saddle; limited reads relabel provisional carriers CORE",
+        "physical_rule_sources": [
+          {
+            "line_end": 240,
+            "line_start": 219,
+            "path": "nova/equilibrium/domain.py",
+            "symbol": "saddle_qualified_domains"
+          },
+          {
+            "line_end": 1912,
+            "line_start": 1892,
+            "path": "nova/equilibrium/forward_operator.py",
+            "symbol": "_fixed_design_read"
+          },
+          {
+            "line_end": 2559,
+            "line_start": 2546,
+            "path": "nova/equilibrium/forward_operator.py",
+            "symbol": "_residual_shadow_components_from_read"
+          }
+        ],
         "qualified_private_count": 0,
-        "raw_connectivity_rule": "classify_domains marks closed and disconnected carriers PRIVATE_FLUX; nova/equilibrium/domain.py classify_domains",
+        "raw_connectivity_rule": "classify_domains marks closed and disconnected carriers PRIVATE_FLUX",
+        "raw_connectivity_source": {
+          "line_end": 216,
+          "line_start": 206,
+          "path": "nova/equilibrium/domain.py",
+          "symbol": "classify_domains"
+        },
         "raw_private_carriers": [
           {
             "component_id": 663,
@@ -1943,5 +2047,5 @@
     }
   ],
   "schema": "nova.limited-row-shadow-census",
-  "source_revision": "d7e7ff0ba1e383ab8921c2fadb129f841db774f4"
+  "source_revision": "a1cc51d11b1c66f4ebbd757cdd8c2e41e0b879e6"
 }

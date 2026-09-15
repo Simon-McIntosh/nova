@@ -341,6 +341,109 @@
       terminal residual and converged flag for each state.</figcaption>
     </figure>
 </section>
+<section id="limited-shadow-root-cause">
+  <h2>Limited-row residual shadow: carrier root cause and terminal re-solves</h2>
+
+  <p><strong>Root cause.</strong> At revision <code>3082be61</code>, the persisted weak
+  2500-cell terminal state is limited (one O candidate, zero X candidates), yet the
+  connectivity flood labels 54 wall-cut, closed carriers <code>PRIVATE_FLUX</code>. The
+  residual then copies those 54 carriers through unchanged. They alone contain
+  44.1144374851 Wb of physical-map disagreement; the other 8955 carriers agree to
+  2.2737367544e-13 Wb. This is not a state-only artefact: the analytic flux sampled at
+  the same nodes also yields 40 provisional private carriers at 2500 cells and 39 at
+  1000 cells. The complete carrier census records index, R, Z, provisional domain,
+  normalised flux, connectivity component and wall-polygon distance in
+  <code>docs/figures/cut-cell-current-attribution/limited-shadow/receipt.json</code>.</p>
+
+  <p><strong>Physical rule and result.</strong> <code>classify_domains</code> at
+  <code>nova/equilibrium/domain.py:206-216</code> still exposes the raw diagnostic split.
+  <code>saddle_qualified_domains</code> at <code>domain.py:219-240</code>, applied by the
+  fixed-design read at <code>forward_operator.py:1892-1910</code> and defended again by
+  the residual-shadow builder at <code>forward_operator.py:2544-2557</code>, states the
+  physical rule: connectivity disconnection is insufficient evidence for private flux;
+  a private-flux region exists only behind a finite admitted saddle. Therefore a limited
+  class has no private-flux region and no physical grid carrier is copied through the
+  residual. Diverted reads retain the saddle-gated region. On weak terminal/analytic
+  flux, the provisional counts are 64/39 at 1000 cells and 54/40 at 2500, while every
+  qualified private count and flood-shadow count is zero. All four null censuses admit
+  exactly one extremum and zero saddles.</p>
+
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/limited-shadow/limited-shadow-census.png"
+         alt="Weak limited terminal and analytic contours at 1000 and 2500 cells with provisional private carriers, wall, and nulls">
+    <figcaption>The diagnostic flood split is visible on both solved and analytic fields;
+    qualification removes it because neither limited field admits a saddle. Line contours
+    share levels within each row; the wall and both fields' admitted nulls are drawn.</figcaption>
+  </figure>
+
+  <h3>Terminal solve measurement</h3>
+  <p>Jobs 1271221, 1271272 and 1271297 used one H200 card, eight cores, 128G,
+  <code>TMPDIR=/tmp</code> in submission and payload, the root virtual-environment Python,
+  the worktree on <code>PYTHONPATH</code>, and the persistent compilation cache. Each row
+  part was written immediately. The two weak/moderate rows from the first job were reused;
+  the controls-first resubmission then persisted strong and single-null before attempting
+  exact clip.</p>
+
+  <table>
+    <caption>Committed before state versus the re-solved whole-cell terminal state</caption>
+    <thead><tr><th scope="col">Row</th><th scope="col">State</th><th scope="col">Axis error (pitch)</th><th scope="col">Terminal residual</th><th scope="col">Boundary flux from analytic zero (Wb)</th><th scope="col">Plasma-current amplitude</th><th scope="col">Converged</th></tr></thead>
+    <tbody>
+      <tr><td>weak 1000 whole-cell</td><td>before</td><td>0.71135</td><td>1.99745e-3</td><td>6.37535</td><td>0.944158</td><td>no</td></tr>
+      <tr><td>weak 1000 whole-cell</td><td>after</td><td><strong>0.63549</strong></td><td><strong>1.38774e-15</strong></td><td>4.95939</td><td>0.896835</td><td>yes</td></tr>
+      <tr><td>moderate 1000 whole-cell</td><td>before</td><td>0.71810</td><td>4.37805e-3</td><td>0.176938</td><td>0.944276</td><td>no</td></tr>
+      <tr><td>moderate 1000 whole-cell</td><td>after</td><td><strong>0.64287</strong></td><td><strong>5.87522e-16</strong></td><td>0.140971</td><td>0.896695</td><td>yes</td></tr>
+      <tr><td>strong 1000 whole-cell</td><td>before</td><td>0.74214</td><td>2.95089e-3</td><td>0.0146041</td><td>0.939467</td><td>no</td></tr>
+      <tr><td>strong 1000 whole-cell</td><td>after</td><td><strong>0.64391</strong></td><td><strong>2.91253e-16</strong></td><td>0.0118363</td><td>0.894785</td><td>yes</td></tr>
+      <tr><td>single-null 500 whole-cell</td><td>committed control</td><td>0.02017</td><td>2.42301e-17</td><td>2.49028e-19</td><td>1.000000</td><td>yes</td></tr>
+      <tr><td>single-null 500 whole-cell</td><td>after</td><td><strong>9.09228</strong></td><td><strong>0.399503</strong></td><td>0.00101158</td><td>0.601154</td><td>no</td></tr>
+      <tr><td>weak 1000 exact-clip</td><td>before whole-cell</td><td>0.71135</td><td>1.99745e-3</td><td>6.37535</td><td>0.944158</td><td>no</td></tr>
+      <tr><td>weak 1000 exact-clip</td><td>after</td><td colspan="5"><strong>not produced — 159.06 GiB allocation exceeds the required 128G job</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Interpretation.</strong> Emptying the nonphysical flood shadow removes the
+  self-closing outboard patch and makes all three limited rows fixed points of their
+  unmasked production map. It does not make whole-cell booking the analytic oracle.
+  Because the exterior was re-posed from analytically clipped moments, whole-cell booking
+  over-books the boundary cells and the solve compensates at about 0.895 amplitude; its
+  boundary level remains displaced from the analytic zero. Exact clip is the oracle-matched
+  representation in the already banked one-application measurement (weak 1000 floor
+  3.58e-5 of flux span), but no exact-clip <em>terminal</em> state can be claimed here:
+  both authorized attempts failed allocating 159.06 GiB in <code>jit_bitwise_and</code>
+  after XLA estimated a 159.23 GiB executable. The single-null control is also an explicit
+  failure: it is not bit-identical and terminates on a limited branch despite two X
+  candidates. These two failures block promotion; neither is filtered out of this record.</p>
+
+  <table>
+    <caption>Independent one-application residual check at each persisted terminal state</caption>
+    <thead><tr><th scope="col">Row</th><th scope="col">Solver scalar</th><th scope="col">Unmasked reapplication</th><th scope="col">Literal relative gate</th></tr></thead>
+    <tbody>
+      <tr><td>weak 1000</td><td>1.38774e-15</td><td>1.38774e-15</td><td>pass, exact scalar equality</td></tr>
+      <tr><td>moderate 1000</td><td>5.87522e-16</td><td>1.59121e-15</td><td>fail, relative difference 1.7083</td></tr>
+      <tr><td>strong 1000</td><td>2.91253e-16</td><td>1.16501e-15</td><td>fail, relative difference 3.0</td></tr>
+      <tr><td>single-null 500</td><td>0.399503271535</td><td>0.399503271535</td><td>pass, 1.25e-15 relative</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>CPU delta.</strong> Jobs 1271274 and 1271341 ran all 52 importing modules,
+  one module per fresh CPU process. The base receipt has 13 failing or timed-out module
+  ids; the full after receipt has those same 13 plus
+  <code>test_forward_support_clip_mode.py</code> and the structural rescue fixture in
+  <code>test_stationary_point_admission.py</code>. The latter exposed an opaque test double
+  and was repaired without changing the production-mask branch; job 1271349 then passed
+  that entire module, 9 tests in 53.89 s. The remaining added id is a worktree integration
+  assertion which explicitly requires the changed current moments to be bit-identical to
+  the still-unmodified main checkout. It cannot pass before integration and is retained as
+  a separate merged-head verification requirement. Thus this worktree does not claim the
+  literal zero-added-failure gate, while no other importing module adds a failure.</p>
+
+  <div class="r-grid r-grid-2">
+    <figure><img src="/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/weak-rotation-reactor-static-production-route-cells-1000.png" alt="Weak 1000 solved and analytic line contours with both null sets and wall"><figcaption>Weak whole-cell 1000: solved beside analytic on shared levels; terminal residual 1.39e-15, converged.</figcaption></figure>
+    <figure><img src="/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/moderate-rotation-conventional-static-production-route-cells-1000.png" alt="Moderate 1000 solved and analytic line contours with both null sets and wall"><figcaption>Moderate whole-cell 1000: terminal residual 5.88e-16, converged.</figcaption></figure>
+    <figure><img src="/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/strong-rotation-compact-static-production-route-cells-1000.png" alt="Strong 1000 solved and analytic line contours with both null sets and wall"><figcaption>Strong whole-cell 1000: terminal residual 2.91e-16, converged.</figcaption></figure>
+    <figure><img src="/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/diverted-single-null-production-route-cells-500.png" alt="Single-null 500 solved and analytic line contours with both null sets and wall"><figcaption>Single-null whole-cell 500 negative control: terminal residual 0.3995, unconverged; the nonidentity is visible and retained.</figcaption></figure>
+  </div>
+</section>
 </main>
 </body>
 </html>

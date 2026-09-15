@@ -1,0 +1,157 @@
+{
+  "completed": false,
+  "failure": {
+    "allocation_gib": 159.06,
+    "executable": "jit_bitwise_and",
+    "job_ids": [
+      1271272,
+      1271297
+    ],
+    "message": "exact-clip weak 1000 cannot allocate in the required 128G H200 job",
+    "mode": "exact",
+    "requested_cells": -1000,
+    "requested_memory_gib": 128,
+    "row": "weak-rotation-reactor-static",
+    "xla_estimated_executable_gib": 159.23
+  },
+  "rows": [
+    {
+      "axis_error_in_pitch": 0.6354907524193386,
+      "axis_error_m": 0.09823145717400013,
+      "before": {
+        "axis_error_in_pitch": 0.711347755684744,
+        "boundary_flux_error_from_analytic_zero_wb": 6.375350798211028,
+        "converged": false,
+        "plasma_current_amplitude": 0.9441581806226234,
+        "terminal_residual": 0.0019974478439381254
+      },
+      "boundary_flux_error_from_analytic_zero_wb": 4.959386271046582,
+      "case": "weak-rotation-reactor-static",
+      "converged": true,
+      "figure": {
+        "filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/weak-rotation-reactor-static-production-route-cells-1000.png",
+        "project_absolute_src": "/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/weak-rotation-reactor-static-production-route-cells-1000.png",
+        "render_source": "persisted_part_receipt",
+        "sha256": "5cb9d903c14f31768ffb48f22e395e3036193279c27361e144d1bebfec9ae842"
+      },
+      "map_reapplication": {
+        "agrees_to_relative_1e_12": true,
+        "relative_difference": 0.0,
+        "solver_terminal_residual": 1.3877444620608284e-15,
+        "unmasked_one_application_residual": 1.3877444620608284e-15
+      },
+      "mode": "chord",
+      "o_candidate_count": 1,
+      "plasma_current_amplitude": 0.89683512222223,
+      "realised_cells": 1072,
+      "requested_cells": -1000,
+      "terminal_flux_bit_identical_to_before": false,
+      "terminal_residual": 1.3877444620608284e-15,
+      "x_candidate_count": 0
+    },
+    {
+      "axis_error_in_pitch": 0.6428709130383413,
+      "axis_error_m": 0.028023342549426986,
+      "before": {
+        "axis_error_in_pitch": 0.7181026180329936,
+        "boundary_flux_error_from_analytic_zero_wb": 0.17693778199154248,
+        "converged": false,
+        "plasma_current_amplitude": 0.9442757657171484,
+        "terminal_residual": 0.004378054224121926
+      },
+      "boundary_flux_error_from_analytic_zero_wb": 0.14097143383417196,
+      "case": "moderate-rotation-conventional-static",
+      "converged": true,
+      "figure": {
+        "filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/moderate-rotation-conventional-static-production-route-cells-1000.png",
+        "project_absolute_src": "/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/moderate-rotation-conventional-static-production-route-cells-1000.png",
+        "render_source": "persisted_part_receipt",
+        "sha256": "456a7afef8c2fddf19260c996a88897e907aed2ad8b2abc3efd0fb6f958d98ad"
+      },
+      "map_reapplication": {
+        "agrees_to_relative_1e_12": false,
+        "relative_difference": 1.7083333333333355,
+        "solver_terminal_residual": 5.875220964438613e-16,
+        "unmasked_one_application_residual": 1.5912056778687923e-15
+      },
+      "mode": "chord",
+      "o_candidate_count": 1,
+      "plasma_current_amplitude": 0.896695386981666,
+      "realised_cells": 1070,
+      "requested_cells": -1000,
+      "terminal_flux_bit_identical_to_before": false,
+      "terminal_residual": 5.875220964438613e-16,
+      "x_candidate_count": 0
+    },
+    {
+      "axis_error_in_pitch": 0.6439069356048096,
+      "axis_error_m": 0.011239430119536997,
+      "before": {
+        "axis_error_in_pitch": 0.7421442740097812,
+        "boundary_flux_error_from_analytic_zero_wb": 0.014604061289838826,
+        "converged": false,
+        "plasma_current_amplitude": 0.9394667565424566,
+        "terminal_residual": 0.002950889435680883
+      },
+      "boundary_flux_error_from_analytic_zero_wb": 0.011836338587142343,
+      "case": "strong-rotation-compact-static",
+      "converged": true,
+      "figure": {
+        "filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/strong-rotation-compact-static-production-route-cells-1000.png",
+        "project_absolute_src": "/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/strong-rotation-compact-static-production-route-cells-1000.png",
+        "render_source": "fresh_production_solve",
+        "sha256": "7624e4cdfef1b9ce5d8eb24dc79a226f5b0fea5eb27449e71e1454bb7ef89adb"
+      },
+      "map_reapplication": {
+        "agrees_to_relative_1e_12": false,
+        "relative_difference": 3.0,
+        "solver_terminal_residual": 2.912526675978791e-16,
+        "unmasked_one_application_residual": 1.1650106703915164e-15
+      },
+      "mode": "chord",
+      "o_candidate_count": 1,
+      "plasma_current_amplitude": 0.8947853617746595,
+      "realised_cells": 1069,
+      "requested_cells": -1000,
+      "terminal_flux_bit_identical_to_before": false,
+      "terminal_residual": 2.912526675978791e-16,
+      "x_candidate_count": 0
+    },
+    {
+      "axis_error_in_pitch": 9.092280162637259,
+      "axis_error_m": 0.6458988822359905,
+      "before": {
+        "axis_error_in_pitch": 0.020171742077015338,
+        "boundary_flux_error_from_analytic_zero_wb": 2.490276864927643e-19,
+        "converged": true,
+        "plasma_current_amplitude": 0.9999999999999998,
+        "terminal_residual": 2.4230081673565618e-17
+      },
+      "boundary_flux_error_from_analytic_zero_wb": 0.0010115831509045165,
+      "case": "diverted-single-null",
+      "converged": false,
+      "figure": {
+        "filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/diverted-single-null-production-route-cells-500.png",
+        "project_absolute_src": "/nova/figures/cut-cell-current-attribution/limited-shadow/solve-panels/chord/diverted-single-null-production-route-cells-500.png",
+        "render_source": "fresh_production_solve",
+        "sha256": "210f7f82a744256fb82bbae287215d0577b444653082ec0909300f985eac2f4c"
+      },
+      "map_reapplication": {
+        "agrees_to_relative_1e_12": true,
+        "relative_difference": 1.2505538669591026e-15,
+        "solver_terminal_residual": 0.3995032715353309,
+        "unmasked_one_application_residual": 0.3995032715353304
+      },
+      "mode": "chord",
+      "o_candidate_count": 2,
+      "plasma_current_amplitude": 0.6011543345207911,
+      "realised_cells": 550,
+      "requested_cells": -500,
+      "terminal_flux_bit_identical_to_before": false,
+      "terminal_residual": 0.3995032715353309,
+      "x_candidate_count": 2
+    }
+  ],
+  "schema": "nova.limited-row-shadow-solve-gate",
+  "source_revision": "eb99be2e5a5fe35bc009ad1b6ec025e10b396ee7"
+}

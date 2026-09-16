@@ -409,7 +409,7 @@ def _bound_refusal() -> dict[str, Any]:
     pair = centroid_constraint_pair(np.asarray((1.0, 0.0)), pitch=0.1)
     trial = np.asarray((1.01 * DEFAULT_FIELD_BOUND_T / DEFAULT_FIELD_SCALE_T, 0.0))
     try:
-        pair.unknown.physical_value(jnp.asarray(trial))
+        pair.unknown.require_within_bound(jnp.asarray(trial))
     except ValueError as error:
         return {
             "fired": True,

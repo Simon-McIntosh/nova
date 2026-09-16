@@ -65,4 +65,4 @@ def test_centroid_pair_maps_rows_to_bounded_field_directions() -> None:
     with np.testing.assert_raises_regex(
         ValueError, "exterior-field amplitude exceeds its declared finite bound"
     ):
-        pair.unknown.physical_value(jnp.asarray([1.0e6, 0.0]))
+        pair.unknown.require_within_bound(jnp.asarray([1.0e6, 0.0]))

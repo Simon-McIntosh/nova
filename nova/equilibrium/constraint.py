@@ -448,9 +448,10 @@ class BoundedExteriorFieldUnknown:
     ``direction`` selects one column-vector direction per constraint row from
     the operator's prescribed exterior-field response.  ``field_scale`` maps
     the dimensionless Newton unknown to tesla and ``field_bound`` gives the
-    largest admitted magnitude in tesla.  Concrete calls beyond the bound are
-    refused before the response is evaluated; traced solver calls are clipped
-    to the same interval so no compiled trial can apply an out-of-bound field.
+    largest admitted magnitude in tesla. Solver calls are clipped to that
+    interval so no trial can apply an out-of-bound field; callers that need to
+    qualify a proposed command use :meth:`require_within_bound` for an explicit
+    refusal before the response is evaluated.
     """
 
     direction: object
@@ -481,12 +482,17 @@ class BoundedExteriorFieldUnknown:
         return int(jnp.shape(self.field_scale)[-1])
 
     def physical_value(self, normalized: jax.Array) -> jax.Array:
-        """Return bounded field amplitudes in tesla."""
+        """Return field amplitudes clipped to the finite interval in tesla."""
+        value = jnp.asarray(self.field_scale) * normalized
+        return jnp.clip(value, -self.field_bound, self.field_bound)
+
+    def require_within_bound(self, normalized: jax.Array) -> jax.Array:
+        """Return a direct trial in tesla or refuse it before field evaluation."""
         value = jnp.asarray(self.field_scale) * normalized
         _require_within_bound_if_concrete(
             value, self.field_bound, "exterior-field amplitude"
         )
-        return jnp.clip(value, -self.field_bound, self.field_bound)
+        return value
 
     def flux_delta(
         self,

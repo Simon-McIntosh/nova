@@ -194,13 +194,14 @@ def test_bounded_exterior_field_unknown_routes_and_refuses() -> None:
 
     np.testing.assert_array_equal(delta, [1.0, 0.0])
     np.testing.assert_array_equal(unknown.physical_value(jnp.asarray([1.0])), [1.0])
+    np.testing.assert_array_equal(unknown.physical_value(jnp.asarray([2.5])), [2.0])
     np.testing.assert_array_equal(rebuilt.direction, unknown.direction)
     np.testing.assert_array_equal(rebuilt.field_scale, unknown.field_scale)
     np.testing.assert_array_equal(rebuilt.field_bound, unknown.field_bound)
     with np.testing.assert_raises_regex(
         ValueError, "exterior-field amplitude exceeds its declared finite bound"
     ):
-        unknown.physical_value(jnp.asarray([2.5]))
+        unknown.require_within_bound(jnp.asarray([2.5]))
 
 
 def test_residual_row_actions_match_central_differences() -> None:

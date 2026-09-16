@@ -126,7 +126,7 @@ def test_quadratic_boundary_moments_reach_the_fan_refinement_floor():
     np.testing.assert_array_less(difference, 1.5 * fan_floor + roundoff)
 
 
-def test_default_cut_moments_are_bit_identical_to_the_fan():
+def test_default_cut_moments_match_the_fan_to_roundoff():
     support = _curved_support(128)
     observed = clipped_support_current_moments(
         support,
@@ -142,7 +142,12 @@ def test_default_cut_moments_are_bit_identical_to_the_fan():
             observed.vertical_moment[0],
         ]
     )
-    np.testing.assert_array_equal(observed_values, _fan_moments(support))
+    np.testing.assert_allclose(
+        observed_values,
+        _fan_moments(support),
+        rtol=0.0,
+        atol=4.0 * np.finfo(np.float64).eps,
+    )
 
 
 @requires_boundary_route

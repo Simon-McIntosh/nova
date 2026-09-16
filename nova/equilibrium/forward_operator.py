@@ -2047,6 +2047,12 @@ class ForwardFluxOperator:
                     "direct sample target rows must match the moment sampling nodes"
                 )
             self._build_support_moment_stencils()
+            ring_centres = np.concatenate(
+                [stencil.ring_centre for stencil in self._support_moment_stencils]
+            )
+            self._cut_cell_bank_capacity = cut_cell_bank_capacity(
+                self.moment_geometry.atomic_mesh.centroids, ring_centres
+            )
         for name in self._dynamic_extra_names():
             setattr(self, name, jnp.asarray(getattr(self, name)))
 
@@ -2537,12 +2543,6 @@ class ForwardFluxOperator:
         field = flux_field_polynomial(
             self._support_moment_stencils, centroid_flux, sample_flux
         )
-        ring_centres = np.concatenate(
-            [stencil.ring_centre for stencil in self._support_moment_stencils]
-        )
-        bank_capacity = cut_cell_bank_capacity(
-            self.moment_geometry.atomic_mesh.centroids, ring_centres
-        )
         selected = field.active & (jnp.asarray(support.vertex_count) >= 3)
         moment_integrator = (
             clipped_support_current_moments
@@ -2554,7 +2554,7 @@ class ForwardFluxOperator:
             selected,
             field,
             profile,
-            cut_cell_capacity=bank_capacity,
+            cut_cell_capacity=self._cut_cell_bank_capacity,
         )
         return CellCurrentMoments(*moments)
 
@@ -2807,12 +2807,6 @@ class ForwardFluxOperator:
         field = flux_field_polynomial(
             self._support_moment_stencils, masks.psi_norm, sample_psi_norm
         )
-        ring_centres = np.concatenate(
-            [stencil.ring_centre for stencil in self._support_moment_stencils]
-        )
-        bank_capacity = cut_cell_bank_capacity(
-            self.moment_geometry.atomic_mesh.centroids, ring_centres
-        )
 
         def compact_current_moments(profile, *_args):
             moment_integrator = (
@@ -2825,7 +2819,7 @@ class ForwardFluxOperator:
                 masks.profile_participation,
                 field,
                 profile,
-                cut_cell_capacity=bank_capacity,
+                cut_cell_capacity=self._cut_cell_bank_capacity,
             )
 
         profile_moments = self.source.current_moments(
@@ -2849,7 +2843,7 @@ class ForwardFluxOperator:
             self.source.core.pressure,
             self.source.boundary_pressure,
             topology.flux_span,
-            cut_cell_capacity=bank_capacity,
+            cut_cell_capacity=self._cut_cell_bank_capacity,
         )
         area = jnp.where(masks.core, profile_support.area, 0.0)
         centre_radius = profile_support.centroids[:, 0]

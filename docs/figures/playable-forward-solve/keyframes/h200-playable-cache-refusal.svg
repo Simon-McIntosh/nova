@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 300" role="img" aria-labelledby="title desc">
+  <title id="title">H200 playable keyframe receipt stops at moved-frame assembly</title>
+  <desc id="desc">The persistent cache and MAST carrier load feed a completed prime, then the first vertical move solves but frame assembly refuses a surface that does not close inside the lattice, so no warm keyframe verdict exists.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#4b5563"/>
+    </marker>
+  </defs>
+  <rect width="980" height="300" fill="#ffffff"/>
+  <text x="28" y="34" font-family="sans-serif" font-size="20" fill="#111827">One-card H200 receipt: the measured sequence and refusal</text>
+  <line x1="194" y1="136" x2="254" y2="136" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="444" y1="136" x2="504" y2="136" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="694" y1="136" x2="754" y2="136" stroke="#4b5563" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="28" y="78" width="166" height="116" rx="8" fill="#eef2ff" stroke="#64748b"/>
+  <text x="44" y="106" font-family="sans-serif" font-size="15" fill="#111827">Runtime ready</text>
+  <text x="44" y="132" font-family="sans-serif" font-size="13" fill="#334155">H200 · 1 card</text>
+  <text x="44" y="153" font-family="sans-serif" font-size="13" fill="#334155">default cache root</text>
+  <text x="44" y="174" font-family="sans-serif" font-size="13" fill="#334155">MAST 22086/43</text>
+  <rect x="254" y="78" width="190" height="116" rx="8" fill="#ecfdf5" stroke="#15803d"/>
+  <text x="270" y="106" font-family="sans-serif" font-size="15" fill="#111827">Prime completed</text>
+  <text x="270" y="132" font-family="sans-serif" font-size="13" fill="#334155">151.230 s wall</text>
+  <text x="270" y="153" font-family="sans-serif" font-size="13" fill="#334155">4 trips</text>
+  <text x="270" y="174" font-family="sans-serif" font-size="13" fill="#334155">1.837 s frame assembly</text>
+  <rect x="504" y="78" width="190" height="116" rx="8" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="520" y="106" font-family="sans-serif" font-size="15" fill="#111827">First move</text>
+  <text x="520" y="132" font-family="sans-serif" font-size="13" fill="#334155">bulk_z+</text>
+  <text x="520" y="153" font-family="sans-serif" font-size="13" fill="#334155">solve returned</text>
+  <text x="520" y="174" font-family="sans-serif" font-size="13" fill="#334155">assembly began</text>
+  <rect x="754" y="64" width="198" height="144" rx="8" fill="#fef2f2" stroke="#b91c1c" stroke-width="2"/>
+  <text x="770" y="94" font-family="sans-serif" font-size="15" fill="#7f1d1d">Frame refused</text>
+  <text x="770" y="121" font-family="sans-serif" font-size="13" fill="#111827">SurfaceGeometryError</text>
+  <text x="770" y="145" font-family="sans-serif" font-size="12" fill="#334155">requested surface does not</text>
+  <text x="770" y="164" font-family="sans-serif" font-size="12" fill="#334155">close inside the lattice</text>
+  <text x="770" y="191" font-family="sans-serif" font-size="12" fill="#7f1d1d">No warm latency verdict</text>
+  <text x="28" y="250" font-family="sans-serif" font-size="13" fill="#334155">Job 1271962 · 7 min 46 s used of a 30 min ceiling · 2 CPU cores · 128 GiB · source 1a97c8d7</text>
+  <text x="28" y="274" font-family="sans-serif" font-size="13" fill="#334155">The negative receipt is the result: the current production chain cannot assemble its first moved playable frame.</text>
+</svg>

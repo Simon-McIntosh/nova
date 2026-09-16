@@ -537,6 +537,57 @@ def test_solovev_machine_reports_its_circuit_carrier(machine):
     assert len(radius) == 15 and len(height) == 15
 
 
+def test_keyframe_measurement_forwards_the_reusable_program():
+    """The timing seam must measure reuse rather than force a fresh build."""
+    from benchmarks.playable_keyframe_receipt import _run_reduced_with_program
+
+    expected_program = object()
+    calls = []
+
+    def reduced(profile, flux, prescribed_current, *, program):
+        calls.append((profile, flux, prescribed_current, program))
+        return "measured-result"
+
+    result = _run_reduced_with_program(
+        reduced,
+        "profile",
+        "flux",
+        "current",
+        program=expected_program,
+    )
+
+    assert result == "measured-result"
+    assert calls == [("profile", "flux", "current", expected_program)]
+
+
+def test_keyframe_measurement_failure_exits_nonzero(monkeypatch, tmp_path):
+    """A refused receipt must be a failed process, not only a printed label."""
+    import sys
+
+    from benchmarks import playable_keyframe_receipt
+
+    def refuse(**_kwargs):
+        raise RuntimeError("receipt refused")
+
+    monkeypatch.setattr(playable_keyframe_receipt, "measure", refuse)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "playable_keyframe_receipt.py",
+            "--output",
+            str(tmp_path / "receipt.json"),
+            "--figure",
+            str(tmp_path / "receipt.png"),
+        ],
+    )
+
+    with pytest.raises(SystemExit) as raised:
+        playable_keyframe_receipt.main()
+
+    assert raised.value.code == 1
+
+
 # --------------------------------------------------------------------------
 # one keyframe through the production protocol (slow, CPU)
 # --------------------------------------------------------------------------

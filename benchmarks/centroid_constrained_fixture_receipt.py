@@ -26,6 +26,7 @@ from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import ForwardProfile, fixed_point
 from nova.equilibrium.constraint import assemble_augmented_system
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
+from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.solve_request import default_forward_compilation_cache_root
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import (
@@ -237,7 +238,9 @@ def _solve(
         )
     else:
         observation = context["profile"].current_moment_observation(
-            jnp.asarray(state), target_current=context["target_current"]
+            jnp.asarray(state),
+            support=MomentIntegralSupport.ALL_DOMAIN,
+            target_current=context["target_current"],
         )
         observed = np.asarray(
             (observation.centroid_r, observation.centroid_z), dtype=np.float64
@@ -413,7 +416,9 @@ def measure_first_step(output_root: Path) -> dict[str, Any]:
     try:
         context = _context("weak-rotation-reactor-static", -110)
         observation = context["profile"].current_moment_observation(
-            jnp.asarray(context["seed"]), target_current=context["target_current"]
+            jnp.asarray(context["seed"]),
+            support=MomentIntegralSupport.ALL_DOMAIN,
+            target_current=context["target_current"],
         )
         observed = np.asarray(
             (observation.centroid_r, observation.centroid_z), dtype=np.float64

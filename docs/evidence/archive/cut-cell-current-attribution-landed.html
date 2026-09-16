@@ -1046,7 +1046,12 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   accepted log is
   <code>~/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-cost/h200-final.log</code>;
   the report and retained, hash-verified optimized-HLO assignments sit beside
-  it. Jobs 1271885 and 1271886 exposed benchmark-driver defects (a moved private
+  it. The persistent cache was configured and shared throughout the allocation,
+  but its writes were not admitted: the node could not resolve numeric group
+  89486, and the 1000-cell executable's 4.34 GB serialized form also exceeds
+  protobuf's 2 GiB message limit. Those warnings do not change the measured
+  in-process cold compile or the three warm executions, but no cross-process
+  cache-hit claim is made. Jobs 1271885 and 1271886 exposed benchmark-driver defects (a moved private
   import and strict JSON refusing padded NaN values); job 1271899 completed the
   300-cell measurement before a documentation-only HEAD advance tripped an
   over-broad revision guard. Those logs are preserved. The repaired writer

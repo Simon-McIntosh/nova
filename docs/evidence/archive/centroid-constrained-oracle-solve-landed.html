@@ -80,6 +80,35 @@
     <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row</code>;
     the diff digest is
     <code>4952e47108ff703d691b0d0b8604c18f25ba6b255d4f9233aa4abbc53de23217</code>.</p>
+
+    <h3>H200 scientific receipt attempt</h3>
+    <p>Fresh-process CPU gates passed twice after the unit test was narrowed to
+    direct contracts: job <code>1271990</code> returned 7 tests in 88.72 s and
+    2 tests in 5.06 s; after the bound-path repair, job <code>1272017</code>
+    returned the same 7 tests in 84.17 s and 2 tests in 4.74 s.</p>
+
+    <p>Cold H200 job <code>1271992</code> used one card on
+    <code>98dci4-gpu-0003</code>, two free cores measured at submission, 128 GiB,
+    <code>JAX_PLATFORMS=cuda,cpu</code>, and the declared reservation. Its first
+    <code>jit_while</code> compile took 6m43.015s, then an internal concrete trial
+    fired the eager bound refusal during active-set reconciliation. Commit
+    <code>7f83a9db</code> separated the direct refusal control from solver clipping;
+    the two module gates remained green.</p>
+
+    <p>Repaired H200 job <code>1272020</code> ran for its complete 3303-second
+    inner bound. The repaired <code>jit_scan</code> compile took 8m31.133s. One
+    row landed before the next case remained in compilation:</p>
+
+    <table>
+      <thead><tr><th>Row</th><th>Field amplitudes</th><th>Centroid error</th><th>Row residual</th><th>Terminal residual</th><th>Verdict</th></tr></thead>
+      <tbody><tr><td>Weak static, requested 110 / realised 135 cells</td><td>vertical 0.25 T (at bound); radial 3.47e-11 T</td><td>0.5663 pitches (0.2639 m radial, -0.00439 m vertical)</td><td>0.5662</td><td>1.001e-3</td><td>FAIL — nonconverged and off target</td></tr></tbody>
+    </table>
+
+    <p>The moderate row did not land before timeout; strong, single-null, the
+    displaced-seed positive and negative controls, final bound-refusal receipt,
+    and poloidal panels did not run. No amplitude-table or scientific pass is
+    inferred from the missing rows. The durable weak receipt is
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row/weak-rotation-reactor-static-cells-110.json</code>.</p>
   </section>
 </main>
 </body>

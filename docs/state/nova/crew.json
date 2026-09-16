@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T04:00:08",
+  "updated": "2026-09-16T07:55:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4708,6 +4708,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-15"
+      },
+      {
+        "id": "s19h-cca-exactcost-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
       },
       {
         "id": "s19h-cca-itercount-c",
@@ -168694,6 +168703,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2586
+    "_version": 2587
   }
 }

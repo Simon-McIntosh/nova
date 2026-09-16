@@ -14,6 +14,7 @@ from datetime import UTC, datetime
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import time
 from typing import Any
@@ -21,7 +22,7 @@ from typing import Any
 
 REQUIRED_CELLS = (300, 1000)
 BASELINE_300_EXECUTABLE_BYTES = 461_724_765
-MAX_300_EXECUTABLE_BYTES = 450_000_000
+MAX_300_EXECUTABLE_BYTES = 50_000_000
 MAX_300_SOLVE_INSTRUCTIONS = 210_000
 REPLICATION_PATHS = ("current-moment path", "topology read")
 CERTIFICATE_ROWS = (
@@ -319,11 +320,11 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
         requested_class, target_current
     )
 
-    def shadow_mask(value):
-        return profile.operator.residual_shadow_mask(value, requested_class)
+    def shadow_mask(value, operator):
+        return operator.residual_shadow_mask(value, requested_class)
 
-    def promoted_shadow_mask(value, previous):
-        return profile.operator.residual_shadow_mask(
+    def promoted_shadow_mask(value, previous, operator):
+        return operator.residual_shadow_mask(
             value, requested_class, previous_shadow=previous
         )
 
@@ -336,7 +337,8 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
             shadow_mask_fn=shadow_mask,
             promoted_shadow_mask_fn=promoted_shadow_mask,
             shadowed_map_fn=shadowed,
-            map_arguments=(exterior,),
+            map_arguments=(exterior, profile.operator),
+            callback_arguments=(profile.operator,),
             **options,
         )
 
@@ -352,7 +354,7 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
         **options,
     )
     candidate_started = time.perf_counter()
-    candidate = candidate_program(state, external)
+    candidate = candidate_program(state, external, profile.operator)
     jax.block_until_ready(candidate.state)
     candidate_seconds = time.perf_counter() - candidate_started
     baseline_state = np.asarray(baseline.state, dtype=np.float64)
@@ -400,7 +402,9 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
 
 def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str, Any]:
     """Persist the four certificate identity rows as each comparison lands."""
-    from benchmarks.trip_quantum_width_one import _require_allocation, _require_revision
+    import jax
+
+    from benchmarks.trip_quantum_width_one import _require_revision
     from nova.jax.config import (
         configure_dtypes,
         configure_persistent_compilation_cache,
@@ -408,11 +412,19 @@ def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str,
     )
 
     configure_dtypes()
+    if os.environ.get("SLURM_JOB_ID") is None:
+        raise RuntimeError("certificate identity requires a SLURM allocation")
     receipt: dict[str, Any] = {
         "schema": "nova.solve-program-certificate-identity",
         "measurement_revision": _require_revision(),
         "captured_at": datetime.now(UTC).isoformat(),
-        "assignment": _require_allocation(),
+        "assignment": {
+            "job_id": os.environ["SLURM_JOB_ID"],
+            "partition": os.environ.get("SLURM_JOB_PARTITION"),
+            "node": os.environ.get("SLURMD_NODENAME")
+            or os.environ.get("SLURM_JOB_NODELIST"),
+            "platform": jax.default_backend(),
+        },
         "persistent_compilation_cache": configure_persistent_compilation_cache(
             cache_root or default_persistent_compilation_cache_root(),
             minimum_compile_seconds=0.0,
@@ -439,6 +451,110 @@ def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str,
         for row in receipt["rows"]
     )
     _write_json(output, receipt)
+    return receipt
+
+
+def measure_300_program(output: Path, cache_root: Path | None) -> dict[str, Any]:
+    """Compile the explicit-operator certificate program and gate its byte size."""
+    import jax
+    import jax.numpy as jnp
+
+    from benchmarks.trip_quantum_width_one import _require_revision
+    from nova.jax.config import (
+        configure_dtypes,
+        configure_persistent_compilation_cache,
+        default_persistent_compilation_cache_root,
+    )
+
+    configure_dtypes()
+    if os.environ.get("SLURM_JOB_ID") is None:
+        raise RuntimeError("program-size measurement requires a SLURM allocation")
+    profile, seed, requested_class, target_current, request = _certificate_operands(
+        CERTIFICATE_ROWS[0][0], -300
+    )
+    external = profile.operator.external(request.current, request.prescribed_current)
+    program = profile._accelerated_history_program(
+        request.route,
+        requested_class=requested_class,
+        target_current=target_current,
+        **request.policy.kernel_options(),
+    )
+    receipt: dict[str, Any] = {
+        "schema": "nova.solve-program-size",
+        "measurement_revision": _require_revision(),
+        "captured_at": datetime.now(UTC).isoformat(),
+        "assignment": {
+            "job_id": os.environ["SLURM_JOB_ID"],
+            "partition": os.environ.get("SLURM_JOB_PARTITION"),
+            "node": os.environ.get("SLURMD_NODENAME")
+            or os.environ.get("SLURM_JOB_NODELIST"),
+            "platform": jax.default_backend(),
+        },
+        "requested_cells": 300,
+        "baseline_executable_bytes": BASELINE_300_EXECUTABLE_BYTES,
+        "limit_executable_bytes": MAX_300_EXECUTABLE_BYTES,
+        "completed": False,
+        "checkpoints": [],
+    }
+    _write_json(output, receipt)
+    cache = configure_persistent_compilation_cache(
+        cache_root or default_persistent_compilation_cache_root(),
+        minimum_compile_seconds=0.0,
+    )
+    started = time.perf_counter()
+    lowered = program.lower(
+        jnp.asarray(seed, dtype=jnp.float64), external, profile.operator
+    )
+    receipt["checkpoints"].append(
+        {
+            "name": "lowered",
+            "seconds": time.perf_counter() - started,
+            "stablehlo_sha256": hashlib.sha256(
+                lowered.as_text(dialect="stablehlo").encode()
+            ).hexdigest(),
+        }
+    )
+    receipt["persistent_compilation_cache"] = cache.receipt()
+    _write_json(output, receipt)
+    compile_started = time.perf_counter()
+    compiled = lowered.compile()
+    compile_seconds = time.perf_counter() - compile_started
+    runtime = compiled.runtime_executable()
+    serialized_bytes = None
+    serialization_error = None
+    try:
+        serialized_bytes = len(runtime.serialize())
+    except (MemoryError, RuntimeError, ValueError) as error:
+        serialization_error = f"{type(error).__name__}: {error}"
+    generated = getattr(runtime, "size_of_generated_code_in_bytes", None)
+    generated_code_bytes = generated() if callable(generated) else generated
+    generated_code_bytes = (
+        None if generated_code_bytes is None else int(generated_code_bytes)
+    )
+    effective_bytes = (
+        serialized_bytes if serialized_bytes is not None else generated_code_bytes
+    )
+    receipt.update(
+        {
+            "compile_seconds": compile_seconds,
+            "serialized_executable_bytes": serialized_bytes,
+            "generated_code_bytes": generated_code_bytes,
+            "serialization_error": serialization_error,
+            "effective_executable_bytes": effective_bytes,
+            "completed": True,
+            "passed": effective_bytes is not None
+            and effective_bytes < MAX_300_EXECUTABLE_BYTES,
+        }
+    )
+    _write_json(output, receipt)
+    print(
+        "SOLVE_PROGRAM_SIZE_300 "
+        f"effective_bytes={effective_bytes} "
+        f"generated_code_bytes={generated_code_bytes} "
+        f"compile_seconds={compile_seconds:.3f} "
+        f"verdict={'PASS' if receipt['passed'] else 'FAIL'}",
+        flush=True,
+    )
     return receipt
 
 
@@ -502,10 +618,12 @@ def run_mast_identity(
             )
         )
         external = member.operator.external()
-        jax.block_until_ready(first.program.slice_solver(state, shadow, external))
+        jax.block_until_ready(
+            first.program.slice_solver(state, shadow, external, member.operator)
+        )
         second = _solve(member)
         direct_started = time.perf_counter()
-        direct = first.program.slice_solver(state, shadow, external)
+        direct = first.program.slice_solver(state, shadow, external, member.operator)
         jax.block_until_ready(direct)
         direct_seconds = time.perf_counter() - direct_started
         warm_started = time.perf_counter()
@@ -644,6 +762,7 @@ def main() -> int:
     parser.add_argument("--candidate-dir", type=Path)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--certificate-output", type=Path)
+    parser.add_argument("--measure-300-output", type=Path)
     parser.add_argument("--mast-output", type=Path)
     parser.add_argument("--cache-root", type=Path)
     parser.add_argument("--semantic-report", action="store_true")
@@ -657,6 +776,9 @@ def main() -> int:
         help="recorded baseline executable bytes for the 300-cell comparison",
     )
     args = parser.parse_args()
+    if args.measure_300_output is not None:
+        result = measure_300_program(args.measure_300_output, args.cache_root)
+        return 0 if result["passed"] else 1
     if args.certificate_output is not None:
         result = run_certificate_identity(args.certificate_output, args.cache_root)
         print(

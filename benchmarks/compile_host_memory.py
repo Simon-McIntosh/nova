@@ -172,6 +172,7 @@ def _child(stage: str, cells: int, rung_dir: Path, cache_root: Path) -> int:
     lowered = program.lower(
         jnp.asarray(seed, dtype=jnp.float64),
         external,
+        profile.operator,
     )
     lower_seconds = perf_counter() - began
     stablehlo_sha256 = hashlib.sha256(

@@ -364,20 +364,23 @@ def test_persisted_mast_bank_has_six_profile_identities_for_twelve_arms():
     )
 
 
-def test_operator_pytree_contains_member_arrays_but_no_geometry_arrays():
+def test_operator_pytree_contains_mesh_arithmetic_arrays():
     configure_dtypes()
     operators, _member_data = _synthetic_profile_batch()
     operator = operators[0]
     leaves = jax.tree_util.tree_leaves(operator)
 
-    assert all(isinstance(value, jax.Array) for value in leaves)
+    assert all(isinstance(value, jax.Array | np.ndarray) for value in leaves)
     assert isinstance(operator.area, np.ndarray)
     assert isinstance(operator.inside_material, np.ndarray)
     assert isinstance(operator.grid.coordinate, np.ndarray)
     assert isinstance(operator.grid.null.stencil, np.ndarray)
     assert isinstance(operator.wall.coordinate, np.ndarray)
-    assert not any(value is operator.area for value in leaves)
-    assert not any(value is operator.inside_material for value in leaves)
+    assert any(value is operator.area for value in leaves)
+    assert any(value is operator.inside_material for value in leaves)
+    assert any(value is operator.grid.coordinate for value in leaves)
+    assert any(value is operator.grid.plasma_target for value in leaves)
+    assert any(value is operator.wall.plasma_target for value in leaves)
     scalar_values = [float(value) for value in leaves if value.shape == ()]
     assert float(operator.source.boundary_pressure) in scalar_values
     assert float(operator.source.boundary_field_function) in scalar_values
@@ -394,7 +397,6 @@ def test_equivalent_diiid_bank_operators_stack_into_one_program():
     original = members[0].profile.operator
     rebuilt = _operator_with_source(original, _rebuilt_diiid_source(original))
     assert original.geometry_identity == rebuilt.geometry_identity
-    assert original.geometry_identity.startswith("1a91f6e0")
     checked = stack_forward_operators((original, rebuilt))
 
     assert checked.geometry_identical

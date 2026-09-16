@@ -353,6 +353,20 @@ def _current_moments(operator, psi, requested_class, target_current):
     return moments
 
 
+class _OperatorArguments(NamedTuple):
+    """Numerical operator state carried beside one slice's exterior flux."""
+
+    external: jax.Array
+    operator: Any
+
+
+def _operator_arguments(value, default_external, default_operator):
+    """Resolve explicit operator operands while retaining the host-call API."""
+    if isinstance(value, _OperatorArguments):
+        return value.external, value.operator
+    return (default_external if value is None else value), default_operator
+
+
 def reduced_coordinates(
     operator,
     state,
@@ -494,9 +508,9 @@ def _reduced_kernels(
             return None
         return augmentation.arguments if rows is None else rows
 
-    def _image(moments, unknowns, bound, external_value):
+    def _image(moments, unknowns, bound, external_value, operator_value):
         """Return the flux image of one moment set and its compensation."""
-        image = external_value + operator.current_moment_image(moments)
+        image = external_value + operator_value.current_moment_image(moments)
         if augmentation is None:
             return image
         return image + augmentation.flux_delta(unknowns, bound.pairs)
@@ -548,9 +562,15 @@ def _reduced_kernels(
     ):
         """Return the flux one reduced state reconstructs behind the shadow."""
         amplitudes, unknowns = _split(reduced)
-        external_value = external if external_value is None else external_value
+        external_value, operator_value = _operator_arguments(
+            external_value, external, operator
+        )
         image = _image(
-            _scatter(coordinates, amplitudes), unknowns, _bound(rows), external_value
+            _scatter(coordinates, amplitudes),
+            unknowns,
+            _bound(rows),
+            external_value,
+            operator_value,
         )
         return jnp.where(shadow, base_state, image)
 
@@ -564,8 +584,11 @@ def _reduced_kernels(
         rows=None,
     ):
         """Return one write-then-read cycle of the reduced amplitudes."""
+        _external, operator_value = _operator_arguments(
+            external_value, external, operator
+        )
         moments = _current_moments(
-            operator,
+            operator_value,
             reconstruct(
                 reduced,
                 shadow,
@@ -602,6 +625,9 @@ def _reduced_kernels(
                 rows,
             )
         bound = _bound(rows)
+        _external, operator_value = _operator_arguments(
+            external_value, external, operator
+        )
         state = reconstruct(
             reduced,
             shadow,
@@ -612,7 +638,10 @@ def _reduced_kernels(
             rows,
         )
         moments = _current_moments(
-            operator, state, _requested(requested_value), _target(target_value)
+            operator_value,
+            state,
+            _requested(requested_value),
+            _target(target_value),
         )
         residual, _rows = _augment(
             amplitudes - _gather(coordinates, moments), state, unknowns, shadow, bound
@@ -631,7 +660,9 @@ def _reduced_kernels(
         """Return the production merit and relative residual in flux space."""
         amplitudes, unknowns = _split(reduced)
         bound = _bound(rows)
-        external_value = external if external_value is None else external_value
+        external_value, operator_value = _operator_arguments(
+            external_value, external, operator
+        )
         state = reconstruct(
             reduced,
             shadow,
@@ -642,9 +673,12 @@ def _reduced_kernels(
             rows,
         )
         moments = _current_moments(
-            operator, state, _requested(requested_value), _target(target_value)
+            operator_value,
+            state,
+            _requested(requested_value),
+            _target(target_value),
         )
-        image = _image(moments, unknowns, bound, external_value)
+        image = _image(moments, unknowns, bound, external_value, operator_value)
         mapped = jnp.where(shadow, state, image)
         scored = (
             None
@@ -691,8 +725,11 @@ def _reduced_kernels(
         rows=None,
     ):
         """Return the current the reduced map drives outside its support."""
+        _external, operator_value = _operator_arguments(
+            external_value, external, operator
+        )
         moments = _current_moments(
-            operator,
+            operator_value,
             reconstruct(
                 reduced,
                 shadow,
@@ -729,7 +766,9 @@ def _reduced_kernels(
         """
         amplitudes, unknowns = _split(reduced)
         bound = _bound(rows)
-        external_value = external if external_value is None else external_value
+        external_value, operator_value = _operator_arguments(
+            external_value, external, operator
+        )
         state = reconstruct(
             reduced,
             shadow,
@@ -740,9 +779,12 @@ def _reduced_kernels(
             rows,
         )
         moments = _current_moments(
-            operator, state, _requested(requested_value), _target(target_value)
+            operator_value,
+            state,
+            _requested(requested_value),
+            _target(target_value),
         )
-        image = _image(moments, unknowns, bound, external_value)
+        image = _image(moments, unknowns, bound, external_value, operator_value)
         mapped = jnp.where(shadow, state, image)
         residual, scored = _augment(
             amplitudes - _gather(coordinates, moments), state, unknowns, shadow, bound
@@ -841,7 +883,9 @@ def _reduced_kernels(
         amplitudes, unknowns = _split(reduced)
         del amplitudes
         bound = _bound(rows)
-        external_value = external if external_value is None else external_value
+        external_value, operator_value = _operator_arguments(
+            external_value, external, operator
+        )
         state = reconstruct(
             reduced,
             shadow,
@@ -852,17 +896,20 @@ def _reduced_kernels(
             rows,
         )
         moments = _current_moments(
-            operator, state, _requested(requested_value), _target(target_value)
+            operator_value,
+            state,
+            _requested(requested_value),
+            _target(target_value),
         )
         promoted = jnp.ravel(
             jnp.asarray(
-                operator.residual_shadow_mask(
+                operator_value.residual_shadow_mask(
                     state, _requested(requested_value), previous_shadow=shadow
                 ),
                 dtype=bool,
             )
         )
-        image = _image(moments, unknowns, bound, external_value)
+        image = _image(moments, unknowns, bound, external_value, operator_value)
         mapped = jnp.where(promoted, state, image)
         current = moments.cell_current
         retained = jnp.zeros_like(current).at[coordinates.cells].set(1.0)
@@ -888,11 +935,16 @@ def _reduced_kernels(
         state, external_value=None, target_value=None, requested_value=None
     ):
         """Return the reduced amplitudes one flux state drives."""
-        del external_value
+        _external, operator_value = _operator_arguments(
+            external_value, external, operator
+        )
         return _gather(
             coordinates,
             _current_moments(
-                operator, state, _requested(requested_value), _target(target_value)
+                operator_value,
+                state,
+                _requested(requested_value),
+                _target(target_value),
             ),
         )
 
@@ -1409,6 +1461,7 @@ def _drive_trips(
 def _compiled_slice_solver(
     kernels: dict[str, Callable[..., Any]],
     *,
+    operator: Any = None,
     tolerance: float,
     newton_steps: int,
     active_set_steps: int,
@@ -1527,8 +1580,10 @@ def _compiled_slice_solver(
         initial,
         shadow,
         external_value,
+        operator_value=operator,
     ):
-        reduced = kernels["initial_gather"](initial, external_value=external_value)
+        operator_arguments = _OperatorArguments(external_value, operator_value)
+        reduced = kernels["initial_gather"](initial, external_value=operator_arguments)
         if initial_unknown is not None:
             reduced = jnp.concatenate((reduced, initial_unknown))
         state = initial
@@ -1577,13 +1632,13 @@ def _compiled_slice_solver(
                     step_count,
                     builds,
                     rejected,
-                ) = trip_body(reduced, shadow, state, external_value)
+                ) = trip_body(reduced, shadow, state, operator_arguments)
                 del jacobian_active, trip_active
                 closed = kernels["boundary"](
                     solved_reduced,
                     shadow,
                     state,
-                    external_value=external_value,
+                    external_value=operator_arguments,
                 )
                 next_state, promoted, difference, observed, next_reduced, excluded = (
                     closed
@@ -1827,7 +1882,7 @@ def solve_reduced_newton(
             )
     coordinates = program.coordinates
     kernels = _bind_dynamic_arguments(
-        program.kernels, external, target_current_value, requested_class
+        program.kernels, external, operator, target_current_value, requested_class
     )
     fused = _validate_solve_policy(ladder_scoring, trip_boundary)
 
@@ -2085,6 +2140,7 @@ def _bind_rows(
 def _bind_dynamic_arguments(
     kernels: dict[str, Callable[..., Any]],
     external: jax.Array,
+    operator: Any,
     target_current: Any,
     requested_class: Any,
     *,
@@ -2096,7 +2152,14 @@ def _bind_dynamic_arguments(
         if name == "direction":
             bound[name] = kernel
             continue
-        value = partial(kernel, external_value=external) if bind_external else kernel
+        value = (
+            partial(
+                kernel,
+                external_value=_OperatorArguments(external, operator),
+            )
+            if bind_external
+            else kernel
+        )
         if target_current is not None:
             value = partial(value, target_value=target_current)
         if requested_class is not None:
@@ -2676,7 +2739,7 @@ def solve_constrained_reduced_newton(
         )
     coordinates = program.coordinates
     kernels = _bind_dynamic_arguments(
-        program.kernels, external, target_current_value, requested_class
+        program.kernels, external, operator, target_current_value, requested_class
     )
     kernels = _bind_rows(
         kernels,
@@ -3036,6 +3099,7 @@ def _compiled_result(
     kernels = _bind_dynamic_arguments(
         raw_kernels,
         external,
+        operator,
         target_current,
         requested_class,
         bind_external=False,
@@ -3061,6 +3125,7 @@ def _compiled_result(
     if solver is None:
         solver = _compiled_slice_solver(
             kernels,
+            operator=operator,
             tolerance=tolerance,
             newton_steps=newton_steps,
             active_set_steps=active_set_steps,
@@ -3076,7 +3141,7 @@ def _compiled_result(
     shadow = jnp.ravel(
         jnp.asarray(operator.residual_shadow_mask(initial, requested_class), dtype=bool)
     )
-    output = solver(initial, shadow, external)
+    output = solver(initial, shadow, external, operator)
     fields = _compiled_output_fields(output)
     return fields, program
 

@@ -1861,7 +1861,7 @@ class ForwardProfile:
             target_current=target_current,
             **options,
         )
-        history = program(initial_flux, external)
+        history = program(initial_flux, external, self.operator)
         return self._receipt(
             history.state,
             history,
@@ -1878,7 +1878,9 @@ class ForwardProfile:
         requested_class=None,
         target_current=None,
         **options,
-    ) -> Callable[[jax.Array, jax.Array], fixed_point.FixedPointResult]:
+    ) -> Callable[
+        [jax.Array, jax.Array, ForwardFluxOperator], fixed_point.FixedPointResult
+    ]:
         """Return one compiled history program for a static solve configuration.
 
         The callable is retained by the profile so repeated conductor states
@@ -1913,38 +1915,40 @@ class ForwardProfile:
             requested_class, target_current
         )
 
-        def shadow_mask(state):
-            return self.operator.residual_shadow_mask(state, requested_class)
+        def shadow_mask(state, operator):
+            return operator.residual_shadow_mask(state, requested_class)
 
-        def promoted_shadow_mask(state, previous):
-            return self.operator.residual_shadow_mask(
+        def promoted_shadow_mask(state, previous, operator):
+            return operator.residual_shadow_mask(
                 state, requested_class, previous_shadow=previous
             )
 
         if route == "newton_krylov":
 
-            def solve(initial_flux, external):
+            def solve(initial_flux, external, operator=self.operator):
                 return fixed_point.newton_krylov(
                     mapped,
                     initial_flux,
                     shadow_mask_fn=shadow_mask,
                     promoted_shadow_mask_fn=promoted_shadow_mask,
                     shadowed_map_fn=shadowed_map,
-                    map_arguments=(external,),
+                    map_arguments=(external, operator),
+                    callback_arguments=(operator,),
                     **{"newton_steps": self.newton_steps, **options},
                 )
 
         else:
             scheme = fixed_point.picard if route == "picard" else fixed_point.anderson
 
-            def solve(initial_flux, external):
+            def solve(initial_flux, external, operator=self.operator):
                 return scheme(
                     mapped,
                     initial_flux,
                     shadow_mask_fn=shadow_mask,
                     promoted_shadow_mask_fn=promoted_shadow_mask,
                     shadowed_map_fn=shadowed_map,
-                    map_arguments=(external,),
+                    map_arguments=(external, operator),
+                    callback_arguments=(operator,),
                     **{
                         "evaluations": self.evaluations,
                         "relaxation": self.relaxation,

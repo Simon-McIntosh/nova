@@ -72,11 +72,11 @@ def _maps(profile, requested_class, target_current):
     mapped = operator.traced_flux_map(requested_class, target_current)
     shadowed = operator.traced_flux_map_with_shadow(requested_class, target_current)
 
-    def shadow_mask(state):
-        return operator.residual_shadow_mask(state, requested_class)
+    def shadow_mask(state, active_operator=operator):
+        return active_operator.residual_shadow_mask(state, requested_class)
 
-    def promoted_shadow_mask(state, previous):
-        return operator.residual_shadow_mask(
+    def promoted_shadow_mask(state, previous, active_operator=operator):
+        return active_operator.residual_shadow_mask(
             state, requested_class, previous_shadow=previous
         )
 
@@ -94,7 +94,7 @@ def _lower_certificate_solve(row, external=None):
     )
     if external is None:
         external = profile.operator.external()
-    return program.lower(seed, external), external
+    return program.lower(seed, external, profile.operator), external
 
 
 def _digest(lowered) -> str:
@@ -134,7 +134,8 @@ def test_traced_exterior_preserves_the_certificate_terminal_state():
         shadow_mask_fn=shadow_mask,
         promoted_shadow_mask_fn=promoted_shadow_mask,
         shadowed_map_fn=shadowed,
-        map_arguments=(external,),
+        map_arguments=(external, operator),
+        callback_arguments=(operator,),
         **options,
     )
     bound = fixed_point.newton_krylov(
@@ -191,6 +192,6 @@ def test_compiled_slice_program_traces_conductor_exterior():
         jnp.asarray(operator.residual_shadow_mask(seed, requested_class), dtype=bool)
     )
     solver = first.program.slice_solver
-    first_hlo = solver.lower(seed, shadow, operator.external(first_current))
-    second_hlo = solver.lower(seed, shadow, operator.external(second_current))
+    first_hlo = solver.lower(seed, shadow, operator.external(first_current), operator)
+    second_hlo = solver.lower(seed, shadow, operator.external(second_current), operator)
     assert _digest(first_hlo) == _digest(second_hlo)

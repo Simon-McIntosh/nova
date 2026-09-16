@@ -66,6 +66,7 @@ from nova.equilibrium.observation import ClippedIntegralMeasure
 from nova.equilibrium.separatrix_clip import (
     _SPLINE_BOUNDARY_SEGMENTS,
     _traced_clip,
+    AtomicCellMesh,
 )
 from nova.equilibrium.source import (
     SCALAR_CURRENT_AMPLITUDE_BAND,
@@ -75,7 +76,9 @@ from nova.equilibrium.source import (
 )
 from nova.equilibrium.stencil_mesh import (
     CellCurrentMoments,
+    InteriorCurrentMomentStencil,
     MomentGeometry,
+    SharedNodeFluxStencil,
     StencilMesh,
     flux_field_polynomial,
 )
@@ -129,6 +132,194 @@ def support_clip_mode() -> str:
 #: The two boundary cells whose contaminated moments the discriminator
 #: reverts to their chord values to test the two-cell-destabilisation arm.
 _CHORD_REVERTED_CELLS = (101, 102)
+
+
+def _dataclass_without_init(cls, names, values):
+    """Rebuild immutable geometry around traced array leaves."""
+    instance = object.__new__(cls)
+    for name, value in zip(names, values, strict=True):
+        object.__setattr__(instance, name, value)
+    return instance
+
+
+def _flatten_atomic_mesh(mesh):
+    children = (
+        mesh.node_coordinates,
+        mesh.cell_nodes,
+        mesh.cell_vertex_count,
+        mesh.centroids,
+    )
+    auxiliary = (mesh.tolerance, mesh.support_capacity, mesh.contour_capacity)
+    return children, auxiliary
+
+
+def _unflatten_atomic_mesh(auxiliary, children):
+    return _dataclass_without_init(
+        AtomicCellMesh,
+        (
+            "node_coordinates",
+            "cell_nodes",
+            "cell_vertex_count",
+            "centroids",
+            "tolerance",
+            "support_capacity",
+            "contour_capacity",
+        ),
+        (*children, *auxiliary),
+    )
+
+
+def _flatten_shared_flux_stencil(stencil):
+    return (stencil.gather_index, stencil.weight), stencil.cell_count
+
+
+def _unflatten_shared_flux_stencil(cell_count, children):
+    return _dataclass_without_init(
+        SharedNodeFluxStencil,
+        ("gather_index", "weight", "cell_count"),
+        (*children, cell_count),
+    )
+
+
+def _flatten_interior_moment_stencil(stencil):
+    children = (
+        stencil.ring_centre,
+        stencil.ring_gather_index,
+        stencil.ring_flux_weight,
+        stencil.ring_coordinate_scale,
+        stencil.ring_sampling_centre,
+    )
+    return children, (stencil.cell_count, stencil.ring_sample_node_count)
+
+
+def _unflatten_interior_moment_stencil(auxiliary, children):
+    cell_count, sample_count = auxiliary
+    return _dataclass_without_init(
+        InteriorCurrentMomentStencil,
+        (
+            "cell_count",
+            "ring_centre",
+            "ring_gather_index",
+            "ring_flux_weight",
+            "ring_coordinate_scale",
+            "ring_sampling_centre",
+            "ring_sample_node_count",
+        ),
+        (cell_count, *children, sample_count),
+    )
+
+
+def _flatten_moment_geometry(geometry):
+    children = (
+        geometry.polygons,
+        geometry.atomic_mesh,
+        geometry.second_moment,
+        geometry.shared_flux_stencil,
+        geometry.sampling_vertices,
+        geometry.sample_node_coordinates,
+        geometry.cell_sample_nodes,
+        geometry.sample_vertex_count,
+    )
+    return children, None
+
+
+def _unflatten_moment_geometry(_auxiliary, children):
+    return _dataclass_without_init(
+        MomentGeometry,
+        (
+            "polygons",
+            "atomic_mesh",
+            "second_moment",
+            "shared_flux_stencil",
+            "sampling_vertices",
+            "sample_node_coordinates",
+            "cell_sample_nodes",
+            "sample_vertex_count",
+        ),
+        children,
+    )
+
+
+# These geometry containers are immutable host-built descriptions, but their
+# numerical arrays are operands of the forward arithmetic.  Registering those
+# arrays as leaves keeps construction on the host while preventing XLA from
+# copying a mesh-sized literal into every use of the operator.
+jax.tree_util.register_pytree_node(
+    AtomicCellMesh, _flatten_atomic_mesh, _unflatten_atomic_mesh
+)
+jax.tree_util.register_pytree_node(
+    SharedNodeFluxStencil,
+    _flatten_shared_flux_stencil,
+    _unflatten_shared_flux_stencil,
+)
+jax.tree_util.register_pytree_node(
+    InteriorCurrentMomentStencil,
+    _flatten_interior_moment_stencil,
+    _unflatten_interior_moment_stencil,
+)
+jax.tree_util.register_pytree_node(
+    MomentGeometry, _flatten_moment_geometry, _unflatten_moment_geometry
+)
+
+
+_DYNAMIC_OPERATOR_STATE_NAMES = (
+    "area",
+    "cell_average_stencil",
+    "cell_average_weight",
+    "inside_material",
+    "moment_geometry",
+    "wall_unit_offsets",
+    "wall_unit_closed",
+    "_wall_unit_vessel",
+    "_raster_radius",
+    "_raster_height",
+    "_material_centroid",
+    "topology",
+    "_fixed_design_topology",
+    "_wall_carrier_index",
+    "_wall_height_hysteresis",
+    "_x_qualification_distance",
+    "_support_moment_stencils",
+    "_support_curve_centre",
+    "_support_curve_scale",
+)
+
+_TOPOLOGY_STATE_NAMES = ("topology", "_fixed_design_topology")
+_TOPOLOGY_FIELD_NAMES = (
+    "grid",
+    "wall",
+    "connectivity_radius",
+    "connectivity_height",
+    "connectivity_rings",
+    "connectivity_shared_edges",
+    "connectivity_coordinate",
+    "connectivity_edge_gather",
+    "connectivity_edge_weight",
+    "polish_radial",
+    "polish_vertical",
+    "polish_gather",
+    "polish_valid",
+    "wall_unit_offsets",
+    "wall_unit_closed",
+    "wall_unit_vessel",
+)
+
+
+def _flatten_operator_state(name: str, value) -> tuple[object, ...]:
+    """Expose topology arrays without invoking its validating constructor."""
+    if name not in _TOPOLOGY_STATE_NAMES:
+        return (value,)
+    return tuple(getattr(value, field_name) for field_name in _TOPOLOGY_FIELD_NAMES)
+
+
+def _rebuild_operator_state(name: str, values: tuple[object, ...]):
+    """Rebuild traced topology data while retaining host construction only."""
+    if name not in _TOPOLOGY_STATE_NAMES:
+        return values[0]
+    topology = object.__new__(Topology)
+    for field_name, value in zip(_TOPOLOGY_FIELD_NAMES, values, strict=True):
+        setattr(topology, field_name, value)
+    return topology
 
 
 def _compact_cell_indices(selection, capacity: int):
@@ -1591,12 +1782,10 @@ class _OperatorPytreeAux:
     operator_type: type = field(compare=False, repr=False)
     source_layout: _SourceLayout = field(compare=False, repr=False)
     static_state: dict[str, object] = field(compare=False, repr=False)
-    grid_null: object = field(compare=False, repr=False)
-    wall_null: object = field(compare=False, repr=False)
-    sample_null: object | None = field(compare=False, repr=False)
+    dynamic_state_names: tuple[str, ...] = field(compare=False, repr=False)
+    dynamic_state_widths: tuple[int, ...] = field(compare=False, repr=False)
     dynamic_extra_names: tuple[str, ...] = field(compare=False, repr=False)
     prescribed: bool = field(compare=False, repr=False)
-    sample: bool = field(compare=False, repr=False)
 
     def __hash__(self) -> int:
         return hash(self.identity)
@@ -1896,8 +2085,15 @@ class ForwardFluxOperator:
                     "direct sample target rows must match the moment sampling nodes"
                 )
             self._build_support_moment_stencils()
+            ring_centres = np.concatenate(
+                [stencil.ring_centre for stencil in self._support_moment_stencils]
+            )
+            self._cut_cell_bank_capacity = cut_cell_bank_capacity(
+                self.moment_geometry.atomic_mesh.centroids, ring_centres
+            )
         for name in self._dynamic_extra_names():
             setattr(self, name, jnp.asarray(getattr(self, name)))
+        self._geometry_identity = self._compute_geometry_identity()
 
     def _dynamic_extra_names(self) -> tuple[str, ...]:
         """Return specialised member scalars that must enter the trace as data."""
@@ -1964,7 +2160,9 @@ class ForwardFluxOperator:
     @property
     def geometry_identity(self) -> str:
         """Return the digest of host geometry independent of member data."""
-        return self._compute_geometry_identity()
+        if "_geometry_identity" not in self.__dict__:
+            self._geometry_identity = self._compute_geometry_identity()
+        return self._geometry_identity
 
     def _batch_identity(self, source_layout: _SourceLayout | None = None) -> str:
         """Return the host-and-static identity required for pytree stacking."""
@@ -1980,9 +2178,17 @@ class ForwardFluxOperator:
         )
 
     def tree_flatten(self):
-        """Separate dynamic member arrays from immutable host geometry."""
+        """Separate traced arithmetic arrays from immutable host metadata."""
         source_layout, source_children = _SourceLayout.flatten(self.source)
         dynamic_extra_names = self._dynamic_extra_names()
+        dynamic_state_names = tuple(
+            name for name in _DYNAMIC_OPERATOR_STATE_NAMES if name in self.__dict__
+        )
+        dynamic_state_values = tuple(
+            _flatten_operator_state(name, getattr(self, name))
+            for name in dynamic_state_names
+        )
+        dynamic_state_widths = tuple(len(values) for values in dynamic_state_values)
         excluded = {
             "grid",
             "wall",
@@ -1990,13 +2196,13 @@ class ForwardFluxOperator:
             "source",
             "external_current",
             "prescribed_field",
+            *dynamic_state_names,
             *dynamic_extra_names,
         }
         static_state = {
             name: value for name, value in self.__dict__.items() if name not in excluded
         }
         prescribed = self.prescribed_field is not None
-        sample = self.sample is not None
         geometry_identity = self.geometry_identity
         identity = self._batch_identity(source_layout)
         aux = _OperatorPytreeAux(
@@ -2005,22 +2211,10 @@ class ForwardFluxOperator:
             operator_type=type(self),
             source_layout=source_layout,
             static_state=static_state,
-            grid_null=self.grid.null,
-            wall_null=self.wall.null,
-            sample_null=None if self.sample is None else self.sample.null,
+            dynamic_state_names=dynamic_state_names,
+            dynamic_state_widths=dynamic_state_widths,
             dynamic_extra_names=dynamic_extra_names,
             prescribed=prescribed,
-            sample=sample,
-        )
-        sample_children = (
-            (None, None, None, None)
-            if self.sample is None
-            else (
-                self.sample.source_target,
-                self.sample.plasma_target,
-                self.sample.plasma_target_r,
-                self.sample.plasma_target_z,
-            )
         )
         prescribed_children = (
             (None, None)
@@ -2028,18 +2222,13 @@ class ForwardFluxOperator:
             else (self.prescribed_field.response, self.prescribed_field.current)
         )
         children = (
-            self.grid.source_target,
-            self.grid.plasma_target,
-            self.grid.plasma_target_r,
-            self.grid.plasma_target_z,
-            self.wall.source_target,
-            self.wall.plasma_target,
-            self.wall.plasma_target_r,
-            self.wall.plasma_target_z,
-            *sample_children,
+            self.grid,
+            self.wall,
+            self.sample,
             self.external_current,
             *prescribed_children,
             *source_children,
+            *(value for values in dynamic_state_values for value in values),
             *(getattr(self, name) for name in dynamic_extra_names),
         )
         return children, aux
@@ -2049,54 +2238,31 @@ class ForwardFluxOperator:
         """Rebuild a traced member while reusing the first member's geometry."""
         del cls
         (
-            grid_source,
-            grid_plasma,
-            grid_plasma_r,
-            grid_plasma_z,
-            wall_source,
-            wall_plasma,
-            wall_plasma_r,
-            wall_plasma_z,
-            sample_source,
-            sample_plasma,
-            sample_plasma_r,
-            sample_plasma_z,
+            grid,
+            wall,
+            sample,
             external_current,
             prescribed_response,
             prescribed_current,
             *tail,
         ) = children
         extra_count = len(aux.dynamic_extra_names)
-        source_tail = tuple(tail[:-extra_count] if extra_count else tail)
+        dynamic_state_count = sum(aux.dynamic_state_widths)
+        # Source children precede the fixed operator-state leaves.  Their exact
+        # count is already encoded by the tail positions rather than recomputed
+        # from callable objects, which may themselves carry traced leaves.
+        source_count = len(tail) - dynamic_state_count - extra_count
+        source_tail = tuple(tail[:source_count])
+        dynamic_state_leaves = tuple(
+            tail[source_count : source_count + dynamic_state_count]
+        )
         extra_values = tuple(tail[-extra_count:] if extra_count else ())
         instance = object.__new__(aux.operator_type)
         for name, value in aux.static_state.items():
             setattr(instance, name, value)
-        instance.grid = FluxTarget(
-            grid_source,
-            grid_plasma,
-            aux.grid_null,
-            grid_plasma_r,
-            grid_plasma_z,
-        )
-        instance.wall = FluxTarget(
-            wall_source,
-            wall_plasma,
-            aux.wall_null,
-            wall_plasma_r,
-            wall_plasma_z,
-        )
-        instance.sample = (
-            FluxTarget(
-                sample_source,
-                sample_plasma,
-                aux.sample_null,
-                sample_plasma_r,
-                sample_plasma_z,
-            )
-            if aux.sample
-            else None
-        )
+        instance.grid = grid
+        instance.wall = wall
+        instance.sample = sample
         instance.source = aux.source_layout.rebuild(source_tail)
         instance.external_current = external_current
         if aux.prescribed:
@@ -2106,6 +2272,13 @@ class ForwardFluxOperator:
             instance.prescribed_field = prescribed_field
         else:
             instance.prescribed_field = None
+        offset = 0
+        for name, width in zip(
+            aux.dynamic_state_names, aux.dynamic_state_widths, strict=True
+        ):
+            values = dynamic_state_leaves[offset : offset + width]
+            setattr(instance, name, _rebuild_operator_state(name, values))
+            offset += width
         for name, value in zip(aux.dynamic_extra_names, extra_values, strict=True):
             setattr(instance, name, value)
         return instance
@@ -2420,12 +2593,6 @@ class ForwardFluxOperator:
         field = flux_field_polynomial(
             self._support_moment_stencils, centroid_flux, sample_flux
         )
-        ring_centres = np.concatenate(
-            [stencil.ring_centre for stencil in self._support_moment_stencils]
-        )
-        bank_capacity = cut_cell_bank_capacity(
-            self.moment_geometry.atomic_mesh.centroids, ring_centres
-        )
         selected = field.active & (jnp.asarray(support.vertex_count) >= 3)
         moment_integrator = (
             clipped_support_current_moments
@@ -2437,7 +2604,7 @@ class ForwardFluxOperator:
             selected,
             field,
             profile,
-            cut_cell_capacity=bank_capacity,
+            cut_cell_capacity=self._cut_cell_bank_capacity,
         )
         return CellCurrentMoments(*moments)
 
@@ -2690,12 +2857,6 @@ class ForwardFluxOperator:
         field = flux_field_polynomial(
             self._support_moment_stencils, masks.psi_norm, sample_psi_norm
         )
-        ring_centres = np.concatenate(
-            [stencil.ring_centre for stencil in self._support_moment_stencils]
-        )
-        bank_capacity = cut_cell_bank_capacity(
-            self.moment_geometry.atomic_mesh.centroids, ring_centres
-        )
 
         def compact_current_moments(profile, *_args):
             moment_integrator = (
@@ -2708,7 +2869,7 @@ class ForwardFluxOperator:
                 masks.profile_participation,
                 field,
                 profile,
-                cut_cell_capacity=bank_capacity,
+                cut_cell_capacity=self._cut_cell_bank_capacity,
             )
 
         profile_moments = self.source.current_moments(
@@ -2732,7 +2893,7 @@ class ForwardFluxOperator:
             self.source.core.pressure,
             self.source.boundary_pressure,
             topology.flux_span,
-            cut_cell_capacity=bank_capacity,
+            cut_cell_capacity=self._cut_cell_bank_capacity,
         )
         area = jnp.where(masks.core, profile_support.area, 0.0)
         centre_radius = profile_support.centroids[:, 0]
@@ -3067,7 +3228,7 @@ class ForwardFluxOperator:
 
         def mapped(psi: jax.Array) -> jax.Array:
             """Return the free-boundary flux map of one trial flux."""
-            return traced(psi, external)
+            return traced(psi, external, self)
 
         return mapped
 
@@ -3078,10 +3239,15 @@ class ForwardFluxOperator:
     ) -> Callable[[jax.Array, jax.Array], jax.Array]:
         """Return a fixed-point map taking the exterior flux as traced data."""
 
-        def mapped(psi: jax.Array, external: jax.Array) -> jax.Array:
+        def mapped(
+            psi: jax.Array,
+            external: jax.Array,
+            operator: ForwardFluxOperator | None = None,
+        ) -> jax.Array:
             """Return one map evaluation at an explicitly supplied exterior."""
-            image = external + self.internal(psi, requested_class, target_current)
-            return self._exclude_shadow_residual(psi, image, requested_class)
+            active = self if operator is None else operator
+            image = external + active.internal(psi, requested_class, target_current)
+            return active._exclude_shadow_residual(psi, image, requested_class)
 
         return mapped
 
@@ -3098,15 +3264,17 @@ class ForwardFluxOperator:
         traced = self.traced_flux_map_with_shadow(requested_class, target_current)
 
         def mapped(psi: jax.Array, shadow: jax.Array) -> jax.Array:
-            return traced(psi, shadow, external)
+            return traced(psi, shadow, external, self)
 
         partition_read = getattr(traced, "_read_frozen_partition", None)
         partitioned_map = getattr(traced, "_map_frozen_partition", None)
         partition_shadow = getattr(traced, "_frozen_partition_shadow", None)
         if partition_read is not None:
-            mapped._read_frozen_partition = partition_read
+            mapped._read_frozen_partition = lambda psi, previous_shadow=None: (
+                partition_read(psi, previous_shadow, external, self)
+            )
             mapped._map_frozen_partition = lambda psi, partition: partitioned_map(
-                psi, partition, external
+                psi, partition, external, self
             )
             mapped._frozen_partition_shadow = partition_shadow
 
@@ -3119,9 +3287,15 @@ class ForwardFluxOperator:
     ) -> Callable[[jax.Array, jax.Array, jax.Array], jax.Array]:
         """Return a shadowed map taking the exterior flux as traced data."""
 
-        def mapped(psi: jax.Array, shadow: jax.Array, external: jax.Array) -> jax.Array:
-            image = external + self.internal(psi, requested_class, target_current)
-            return self._exclude_shadow_residual(
+        def mapped(
+            psi: jax.Array,
+            shadow: jax.Array,
+            external: jax.Array,
+            operator: ForwardFluxOperator | None = None,
+        ) -> jax.Array:
+            active = self if operator is None else operator
+            image = external + active.internal(psi, requested_class, target_current)
+            return active._exclude_shadow_residual(
                 psi, image, requested_class, shadow=shadow
             )
 
@@ -3129,16 +3303,20 @@ class ForwardFluxOperator:
             not self.use_linear_moments or self.moment_geometry is not None
         ):
 
-            def read_partition(psi, previous_shadow=None):
-                return self._frozen_topology_partition(
+            def read_partition(
+                psi, previous_shadow=None, _external=None, operator=None
+            ):
+                active = self if operator is None else operator
+                return active._frozen_topology_partition(
                     psi, requested_class, previous_shadow
                 )
 
-            def map_partition(psi, partition, external):
-                image = external + self._internal_on_partition(
+            def map_partition(psi, partition, external, operator=None):
+                active = self if operator is None else operator
+                image = external + active._internal_on_partition(
                     psi, partition, target_current
                 )
-                return self._exclude_shadow_residual(
+                return active._exclude_shadow_residual(
                     psi,
                     image,
                     requested_class,

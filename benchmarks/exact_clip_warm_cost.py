@@ -71,7 +71,7 @@ def _strict(value: Any) -> Any:
     if isinstance(value, Path):
         return str(value)
     if isinstance(value, np.ndarray):
-        return value.tolist()
+        return _strict(value.tolist())
     if isinstance(value, np.generic):
         return value.item()
     if isinstance(value, float) and not np.isfinite(value):
@@ -465,6 +465,84 @@ def _production_worker(
     return receipt
 
 
+def _recover_production_receipt(
+    temporary: Path,
+    terminal_source: Path,
+    output: Path,
+) -> dict[str, Any]:
+    """Complete a measured receipt whose atomic write stopped on NaN padding."""
+    text = temporary.read_text(encoding="utf-8")
+    marker = '\n  "terminal": {'
+    if marker not in text:
+        raise RuntimeError("temporary receipt did not reach its terminal block")
+    prefix, terminal_fragment = text.split(marker, maxsplit=1)
+    payload = json.loads(prefix + '\n  "terminal": null\n}\n')
+    if payload.get("requested_cells") != 110:
+        raise RuntimeError("only the measured 110-cell receipt may be recovered")
+    if payload.get("completed") is not True:
+        raise RuntimeError("temporary receipt did not finish every timed stage")
+
+    iteration_match = re.search(r'"active_set_iterations":\s*(\d+)', terminal_fragment)
+    mask_match = re.search(
+        r'"active_set_mask_differences":\s*\[(.*?)\]',
+        terminal_fragment,
+        re.DOTALL,
+    )
+    residual_match = re.search(
+        r'"active_set_residuals":\s*\[(.*)', terminal_fragment, re.DOTALL
+    )
+    if iteration_match is None or mask_match is None or residual_match is None:
+        raise RuntimeError("temporary receipt terminal telemetry is incomplete")
+    trip_count = int(iteration_match.group(1))
+    masks = [int(value) for value in re.findall(r"-?\d+", mask_match.group(1))]
+    residuals = [
+        float(value)
+        for value in re.findall(
+            r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?",
+            residual_match.group(1),
+        )
+    ]
+    if len(residuals) != trip_count:
+        raise RuntimeError(
+            "temporary receipt did not retain every finite active-set residual"
+        )
+    terminal_record = json.loads(terminal_source.read_text(encoding="utf-8"))
+    state = np.ascontiguousarray(
+        np.asarray(terminal_record["render_data"]["terminal_flux_wb"]),
+        dtype="<f8",
+    )
+    if state.size != payload["dimensions"]["solve_state_size"]:
+        raise RuntimeError("banked terminal state does not match the timed executable")
+    padded_residuals = residuals + [None] * (len(masks) - len(residuals))
+    payload["terminal"] = {
+        "active_set_iterations": trip_count,
+        "active_set_mask_differences": masks,
+        "active_set_residuals": padded_residuals,
+        "converged": residuals[-1] <= 1.0e-12,
+        "residual": residuals[-1],
+        "state": state,
+        "state_sha256_binary64": hashlib.sha256(state.tobytes()).hexdigest(),
+        "state_provenance": {
+            "path": str(terminal_source),
+            "sha256": _sha256(terminal_source),
+            "scope": (
+                "banked qualified terminal used only for the moment-route "
+                "identity comparison; the timed terminal array was lost when "
+                "the original atomic receipt serialization refused NaN padding"
+            ),
+            "timed_terminal_state_persisted": False,
+        },
+    }
+    payload["recovery"] = {
+        "source_temporary": str(temporary),
+        "source_temporary_sha256": _sha256(temporary),
+        "repair": "recursive nonfinite normalization stores padded NaN as null",
+        "timings_and_allocator_reused_without_execution": True,
+    }
+    _atomic_json(output, payload)
+    return payload
+
+
 @contextmanager
 def _former_compact_integrator():
     original = forward_operator._cell_banked_current_moments
@@ -809,6 +887,11 @@ def _orchestrate(
     parts.mkdir(parents=True, exist_ok=True)
     for cells in REQUESTED_CELLS:
         part = parts / f"production-{cells}.json"
+        if part.exists():
+            persisted = json.loads(part.read_text(encoding="utf-8"))
+            if persisted.get("completed") is True:
+                print(f"EXACT_CLIP_COST_REUSE requested={cells}", flush=True)
+                continue
         dump = report_root / "xla" / f"production-{cells}"
         dump.mkdir(parents=True, exist_ok=True)
         subprocess.run(
@@ -857,6 +940,9 @@ def _orchestrate(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--worker", choices=("production", "moments"))
+    parser.add_argument("--recover-production", action="store_true")
+    parser.add_argument("--temporary", type=Path)
+    parser.add_argument("--terminal-source", type=Path)
     parser.add_argument("--cells", type=int)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--production-part", type=Path)
@@ -865,6 +951,17 @@ def main() -> None:
     parser.add_argument("--cache-root", type=Path)
     parser.add_argument("--dump-root", type=Path)
     arguments = parser.parse_args()
+    if arguments.recover_production:
+        if None in (arguments.temporary, arguments.terminal_source, arguments.output):
+            parser.error(
+                "receipt recovery requires temporary, terminal-source and output"
+            )
+        _recover_production_receipt(
+            arguments.temporary.resolve(),
+            arguments.terminal_source.resolve(),
+            arguments.output.resolve(),
+        )
+        return
     if arguments.worker == "production":
         if None in (
             arguments.cells,

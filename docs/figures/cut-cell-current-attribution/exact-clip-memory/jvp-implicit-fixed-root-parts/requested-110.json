@@ -1,0 +1,282 @@
+{
+  "lane": {
+    "execution": "slurm",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_default_backend": "gpu",
+    "jax_platforms": "cuda",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "precision": "float64",
+    "reservation": "gpu_0003_grpA",
+    "slurm_job_id": "1271834"
+  },
+  "row": {
+    "branch": {
+      "fixed_participating_cells": 25,
+      "fixed_shadowed_carriers": 0,
+      "packing_exact_zero_count": 0,
+      "packing_level_count": 2535,
+      "packing_minimum_absolute_level": 0.0050333276338209165
+    },
+    "directions": [
+      {
+        "clip_central_difference_l2": 0.5963293375414818,
+        "clip_error_l2": 0.5419741191199187,
+        "clip_error_linf": 0.0508026111233109,
+        "clip_tangent_l2": 0.24646882407849102,
+        "direction": "newton",
+        "finite_difference_rule": "cuberoot(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+        "finite_difference_step": 0.0011866460933032243,
+        "packing_level_jvp_relative_error": 7.547104732684173e-10,
+        "production_map_relative_error": 0.008022865811026663,
+        "relative_error": 0.9088503365511812,
+        "step_probes": [
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 0.25,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.008022832356707817,
+            "step": 0.00029666152332580607,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 1.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.008022865811026663,
+            "step": 0.0011866460933032243,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 4.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.008022917918408234,
+            "step": 0.004746584373212897,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 16.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.008023740209749696,
+            "step": 0.01898633749285159,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 64.0,
+            "opposed_probe_signs": 3,
+            "relative_error": 0.008036933382205435,
+            "step": 0.07594534997140635,
+            "upper_sign_changes": 3
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 256.0,
+            "opposed_probe_signs": 3,
+            "relative_error": 0.008251025866750483,
+            "step": 0.3037813998856254,
+            "upper_sign_changes": 3
+          }
+        ]
+      },
+      {
+        "clip_central_difference_l2": 0.24968501318853845,
+        "clip_error_l2": 0.23164246664489038,
+        "clip_error_linf": 0.02730029434004008,
+        "clip_tangent_l2": 0.0907934571263428,
+        "direction": "random-1",
+        "finite_difference_rule": "cuberoot(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+        "finite_difference_step": 0.0011866460933032243,
+        "packing_level_jvp_relative_error": 1.735871048995655e-09,
+        "production_map_relative_error": 0.008226911509051764,
+        "relative_error": 0.92773876848578,
+        "step_probes": [
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 0.25,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.008226878124380582,
+            "step": 0.00029666152332580607,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 1.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.008226911509051764,
+            "step": 0.0011866460933032243,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 4.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.008226912323008859,
+            "step": 0.004746584373212897,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 16.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.008227103753557369,
+            "step": 0.01898633749285159,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 64.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.008230174005920585,
+            "step": 0.07594534997140635,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 3,
+            "multiplier": 256.0,
+            "opposed_probe_signs": 3,
+            "relative_error": 0.008279782998711271,
+            "step": 0.3037813998856254,
+            "upper_sign_changes": 0
+          }
+        ]
+      },
+      {
+        "clip_central_difference_l2": 0.06793006712553047,
+        "clip_error_l2": 0.058083838497930446,
+        "clip_error_linf": 0.00718487305236136,
+        "clip_tangent_l2": 0.03547488153022188,
+        "direction": "random-2",
+        "finite_difference_rule": "cuberoot(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+        "finite_difference_step": 0.0011866460933032243,
+        "packing_level_jvp_relative_error": 1.1291966521595185e-09,
+        "production_map_relative_error": 0.007878178418478706,
+        "relative_error": 0.8550534535847754,
+        "step_probes": [
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 0.25,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.00787824036221256,
+            "step": 0.00029666152332580607,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 1.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.007878178418478706,
+            "step": 0.0011866460933032243,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 4.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.007878171270995315,
+            "step": 0.004746584373212897,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 16.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.00787817448068985,
+            "step": 0.01898633749285159,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 64.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.007878144739325627,
+            "step": 0.07594534997140635,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 256.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.007877648286471667,
+            "step": 0.3037813998856254,
+            "upper_sign_changes": 0
+          }
+        ]
+      },
+      {
+        "clip_central_difference_l2": 0.08713867517431324,
+        "clip_error_l2": 0.07345210556993817,
+        "clip_error_linf": 0.006024981031872494,
+        "clip_tangent_l2": 0.048461264009450326,
+        "direction": "random-3",
+        "finite_difference_rule": "cuberoot(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+        "finite_difference_step": 0.0011866460933032243,
+        "packing_level_jvp_relative_error": 1.1915020081030184e-09,
+        "production_map_relative_error": 0.008180943437384066,
+        "relative_error": 0.842933466947985,
+        "step_probes": [
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 0.25,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.008180975915077127,
+            "step": 0.00029666152332580607,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 1.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.008180943437384066,
+            "step": 0.0011866460933032243,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 4.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.008180955357610074,
+            "step": 0.004746584373212897,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 16.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.00818096178893772,
+            "step": 0.01898633749285159,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 64.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.00818107350231761,
+            "step": 0.07594534997140635,
+            "upper_sign_changes": 0
+          },
+          {
+            "lower_sign_changes": 0,
+            "multiplier": 256.0,
+            "opposed_probe_signs": 0,
+            "relative_error": 0.008182868791332822,
+            "step": 0.3037813998856254,
+            "upper_sign_changes": 0
+          }
+        ]
+      }
+    ],
+    "fixed_point_residual_l2": 57.71366833407397,
+    "gmres_info": 0,
+    "passed": false,
+    "realised_cells": 135,
+    "relative_error_bound": 1e-08,
+    "requested_cells": 110,
+    "terminal_state": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-memory/identity/weak-110-implicit-current.npz",
+    "terminal_state_size": 772
+  },
+  "schema": "nova.exact-clip-jvp-accuracy",
+  "source_revision": "617b657c19b2806ada1337318c62b0d459e562b5"
+}

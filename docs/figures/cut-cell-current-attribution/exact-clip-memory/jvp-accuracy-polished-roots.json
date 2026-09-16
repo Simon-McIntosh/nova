@@ -1,0 +1,555 @@
+{
+  "completed": true,
+  "lane": {
+    "execution": "slurm",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_default_backend": "gpu",
+    "jax_platforms": "cuda",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "precision": "float64",
+    "reservation": "gpu_0003_grpA",
+    "slurm_job_id": "1271836"
+  },
+  "passed": false,
+  "rows": [
+    {
+      "branch": {
+        "fixed_participating_cells": 25,
+        "fixed_shadowed_carriers": 0,
+        "packing_exact_zero_count": 0,
+        "packing_level_count": 2535,
+        "packing_minimum_absolute_level": 0.0050333276338209165,
+        "polished_cell_count": 19
+      },
+      "directions": [
+        {
+          "direction": "newton",
+          "finite_difference_rule": "cuberoot(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 0.0011866460933032243,
+          "packing_level_jvp_relative_error": 7.547104732684173e-10,
+          "polished_root_central_difference_l2": 0.2457710554727934,
+          "polished_root_error_l2": 0.007985528498779173,
+          "polished_root_error_linf": 0.0016846843948513344,
+          "polished_root_tangent_l2": 0.24646882407791,
+          "production_map_relative_error": 0.008022865811026663,
+          "relative_error": 0.03239975087581425,
+          "step_probes": [
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 0.25,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008022832356707817,
+              "step": 0.00029666152332580607,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 1.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008022865811026663,
+              "step": 0.0011866460933032243,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 4.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008022917918408234,
+              "step": 0.004746584373212897,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 16.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008023740209749696,
+              "step": 0.01898633749285159,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 64.0,
+              "opposed_probe_signs": 3,
+              "relative_error": 0.008036933382205435,
+              "step": 0.07594534997140635,
+              "upper_sign_changes": 3
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 256.0,
+              "opposed_probe_signs": 3,
+              "relative_error": 0.008251025866750483,
+              "step": 0.3037813998856254,
+              "upper_sign_changes": 3
+            }
+          ]
+        },
+        {
+          "direction": "random-1",
+          "finite_difference_rule": "cuberoot(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 0.0011866460933032243,
+          "packing_level_jvp_relative_error": 1.735871048995655e-09,
+          "polished_root_central_difference_l2": 0.0905673734072309,
+          "polished_root_error_l2": 0.00271880601348776,
+          "polished_root_error_linf": 0.0010018942300040732,
+          "polished_root_tangent_l2": 0.09079345712531536,
+          "production_map_relative_error": 0.008226911509051764,
+          "relative_error": 0.02994495528169169,
+          "step_probes": [
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 0.25,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008226878124380582,
+              "step": 0.00029666152332580607,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 1.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008226911509051764,
+              "step": 0.0011866460933032243,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 4.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008226912323008859,
+              "step": 0.004746584373212897,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 16.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008227103753557369,
+              "step": 0.01898633749285159,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 64.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008230174005920585,
+              "step": 0.07594534997140635,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 3,
+              "multiplier": 256.0,
+              "opposed_probe_signs": 3,
+              "relative_error": 0.008279782998711271,
+              "step": 0.3037813998856254,
+              "upper_sign_changes": 0
+            }
+          ]
+        },
+        {
+          "direction": "random-2",
+          "finite_difference_rule": "cuberoot(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 0.0011866460933032243,
+          "packing_level_jvp_relative_error": 1.1291966521595185e-09,
+          "polished_root_central_difference_l2": 0.03545073006206355,
+          "polished_root_error_l2": 0.0005042659671494966,
+          "polished_root_error_linf": 0.0002854452833830608,
+          "polished_root_tangent_l2": 0.0354748815300209,
+          "production_map_relative_error": 0.007878178418478706,
+          "relative_error": 0.01421473294344218,
+          "step_probes": [
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 0.25,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.00787824036221256,
+              "step": 0.00029666152332580607,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 1.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007878178418478706,
+              "step": 0.0011866460933032243,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 4.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007878171270995315,
+              "step": 0.004746584373212897,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 16.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.00787817448068985,
+              "step": 0.01898633749285159,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 64.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007878144739325627,
+              "step": 0.07594534997140635,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 256.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007877648286471667,
+              "step": 0.3037813998856254,
+              "upper_sign_changes": 0
+            }
+          ]
+        },
+        {
+          "direction": "random-3",
+          "finite_difference_rule": "cuberoot(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 0.0011866460933032243,
+          "packing_level_jvp_relative_error": 1.1915020081030184e-09,
+          "polished_root_central_difference_l2": 0.04816939197204246,
+          "polished_root_error_l2": 0.002252309913661041,
+          "polished_root_error_linf": 0.0008865840233005311,
+          "polished_root_tangent_l2": 0.048461264009403454,
+          "production_map_relative_error": 0.008180943437384066,
+          "relative_error": 0.04647649952390844,
+          "step_probes": [
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 0.25,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008180975915077127,
+              "step": 0.00029666152332580607,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 1.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008180943437384066,
+              "step": 0.0011866460933032243,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 4.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008180955357610074,
+              "step": 0.004746584373212897,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 16.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.00818096178893772,
+              "step": 0.01898633749285159,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 64.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.00818107350231761,
+              "step": 0.07594534997140635,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 256.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008182868791332822,
+              "step": 0.3037813998856254,
+              "upper_sign_changes": 0
+            }
+          ]
+        }
+      ],
+      "fixed_point_residual_l2": 57.71366833407397,
+      "gmres_info": 0,
+      "passed": false,
+      "realised_cells": 135,
+      "relative_error_bound": 1e-08,
+      "requested_cells": 110,
+      "terminal_state": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-memory/identity/weak-110-implicit-current.npz",
+      "terminal_state_size": 772
+    },
+    {
+      "branch": {
+        "fixed_participating_cells": 65,
+        "fixed_shadowed_carriers": 0,
+        "packing_exact_zero_count": 0,
+        "packing_level_count": 5029,
+        "packing_minimum_absolute_level": 0.0022867880505447746,
+        "polished_cell_count": 30
+      },
+      "directions": [
+        {
+          "direction": "newton",
+          "finite_difference_rule": "cuberoot(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 0.0010953025855869227,
+          "packing_level_jvp_relative_error": 4.0130838688303445e-10,
+          "polished_root_central_difference_l2": 0.2942253621787234,
+          "polished_root_error_l2": 0.03541164406891631,
+          "polished_root_error_linf": 0.003809734585884185,
+          "polished_root_tangent_l2": 0.3026673043762547,
+          "production_map_relative_error": 0.007876319476387832,
+          "relative_error": 0.11699857750374994,
+          "step_probes": [
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 0.25,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007876300755804143,
+              "step": 0.0002738256463967307,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 1.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007876319476387832,
+              "step": 0.0010953025855869227,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 4.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007876382516601622,
+              "step": 0.004381210342347691,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 1,
+              "multiplier": 16.0,
+              "opposed_probe_signs": 1,
+              "relative_error": 0.00787740022489019,
+              "step": 0.017524841369390764,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 1,
+              "multiplier": 64.0,
+              "opposed_probe_signs": 3,
+              "relative_error": 0.007893703734696462,
+              "step": 0.07009936547756306,
+              "upper_sign_changes": 2
+            },
+            {
+              "lower_sign_changes": 1,
+              "multiplier": 256.0,
+              "opposed_probe_signs": 6,
+              "relative_error": 0.008168501729213478,
+              "step": 0.2803974619102522,
+              "upper_sign_changes": 5
+            }
+          ]
+        },
+        {
+          "direction": "random-1",
+          "finite_difference_rule": "cuberoot(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 0.0010953025855869227,
+          "packing_level_jvp_relative_error": 7.715359070360479e-10,
+          "polished_root_central_difference_l2": 0.040760550856082725,
+          "polished_root_error_l2": 0.000281709234216982,
+          "polished_root_error_linf": 0.0001463291009256006,
+          "polished_root_tangent_l2": 0.04076616405936827,
+          "production_map_relative_error": 0.007913723199275727,
+          "relative_error": 0.00691036894731438,
+          "step_probes": [
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 0.25,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007913710526358642,
+              "step": 0.0002738256463967307,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 1.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007913723199275727,
+              "step": 0.0010953025855869227,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 4.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007913722329545509,
+              "step": 0.004381210342347691,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 16.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007913720039289689,
+              "step": 0.017524841369390764,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 64.0,
+              "opposed_probe_signs": 1,
+              "relative_error": 0.007913716083635917,
+              "step": 0.07009936547756306,
+              "upper_sign_changes": 1
+            },
+            {
+              "lower_sign_changes": 2,
+              "multiplier": 256.0,
+              "opposed_probe_signs": 3,
+              "relative_error": 0.007913629750469515,
+              "step": 0.2803974619102522,
+              "upper_sign_changes": 1
+            }
+          ]
+        },
+        {
+          "direction": "random-2",
+          "finite_difference_rule": "cuberoot(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 0.0010953025855869227,
+          "packing_level_jvp_relative_error": 9.107089344058684e-10,
+          "polished_root_central_difference_l2": 0.03552696631486204,
+          "polished_root_error_l2": 0.0003352162816469526,
+          "polished_root_error_linf": 0.00016359286913307508,
+          "polished_root_tangent_l2": 0.03553689430140547,
+          "production_map_relative_error": 0.008020673715251309,
+          "relative_error": 0.009432908762477168,
+          "step_probes": [
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 0.25,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.00802063492688894,
+              "step": 0.0002738256463967307,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 1.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008020673715251309,
+              "step": 0.0010953025855869227,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 4.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.00802068544910886,
+              "step": 0.004381210342347691,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 16.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.00802069519614328,
+              "step": 0.017524841369390764,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 64.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008020883033125188,
+              "step": 0.07009936547756306,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 2,
+              "multiplier": 256.0,
+              "opposed_probe_signs": 3,
+              "relative_error": 0.008023885684870348,
+              "step": 0.2803974619102522,
+              "upper_sign_changes": 1
+            }
+          ]
+        },
+        {
+          "direction": "random-3",
+          "finite_difference_rule": "cuberoot(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 0.0010953025855869227,
+          "packing_level_jvp_relative_error": 1.2970608575167626e-09,
+          "polished_root_central_difference_l2": 0.03953452497296497,
+          "polished_root_error_l2": 0.0007856719793640167,
+          "polished_root_error_linf": 0.000299536962285675,
+          "polished_root_tangent_l2": 0.03957709148694161,
+          "production_map_relative_error": 0.007886193524180136,
+          "relative_error": 0.01985168565565885,
+          "step_probes": [
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 0.25,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.00788618489053381,
+              "step": 0.0002738256463967307,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 1.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007886193524180136,
+              "step": 0.0010953025855869227,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 4.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007886212058384624,
+              "step": 0.004381210342347691,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 16.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007886217702443556,
+              "step": 0.017524841369390764,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 64.0,
+              "opposed_probe_signs": 1,
+              "relative_error": 0.007886317085952024,
+              "step": 0.07009936547756306,
+              "upper_sign_changes": 1
+            },
+            {
+              "lower_sign_changes": 2,
+              "multiplier": 256.0,
+              "opposed_probe_signs": 3,
+              "relative_error": 0.007887897235444693,
+              "step": 0.2803974619102522,
+              "upper_sign_changes": 1
+            }
+          ]
+        }
+      ],
+      "fixed_point_residual_l2": 76.5455090727822,
+      "gmres_info": 0,
+      "passed": false,
+      "realised_cells": 342,
+      "relative_error_bound": 1e-08,
+      "requested_cells": 300,
+      "terminal_state": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-memory/identity/weak-300-implicit-current.npz",
+      "terminal_state_size": 1529
+    }
+  ],
+  "schema": "nova.exact-clip-jvp-accuracy",
+  "source_revision": "617b657c19b2806ada1337318c62b0d459e562b5"
+}

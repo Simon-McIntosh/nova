@@ -537,7 +537,6 @@ def clipped_support_field_integrals(
                     weight,
                     field,
                     jnp.asarray([index], dtype=jnp.int32),
-                    carried_centroid[None, ...],
                     pressure,
                     boundary_pressure,
                     flux_span,

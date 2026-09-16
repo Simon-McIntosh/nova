@@ -63,6 +63,23 @@
 </table>
 <p><strong>Receipt.</strong> <a href="/nova/figures/batched-operator-boundary/exit-incidence/diiid-width5.json">Paired DIII-D width-five JSON</a> contains both full driver receipts, all ten persisted revision rows, per-member convergence flags and terminal-state differences, cache keys, compile seconds, per-member walls, raw scheduler units and the convergence-scoped comparison. The full job log and the archived source tree are under <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/diiid-width5</code>.</p>
 </section>
+<section id="the-twelve-row-drift-is-on-the-current-code-side">
+<h2>The twelve-row terminal-residual drift is on the current-code side</h2>
+<p><strong>Node.</strong> bob-residual-drift-attribution (run r-20260916T071438961102, codex-luna investigate, 15 min, read-only; promoted 64aca6f0). It answers the followup that asked which side moved when the operand-cache producer, rerun at the current operator revision, no longer reproduced the bank-exact cache.</p>
+<p><strong>Finding.</strong> The bank's data-authority producer revision is <code>fae50f15</code>; the H200 rerun (job 1265131) ran at <code>80acad9a</code> and produced cache <code>83f01684</code>, rejected against the accepted <code>2c291a84</code>. The producer script (<code>docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py</code>) and its <code>newton_krylov</code> request path are unchanged over the range, as are <code>source.py</code>, <code>observation.py</code>, <code>cell_partition.py</code>, <code>separatrix_clip.py</code> and <code>flux_surface_connectivity.py</code>, so neither a changed profile support nor a changed quadrature explains the movement. The best-supported mechanism is the operator representation change of <code>879a33ee</code>: the bank-era operator kept its arrays as closure-owned device values, the current operator converts geometry to host static state and carries coupling, source and current arrays as pytree leaves, a different operand partition and trace path. The contained-saddle read of <code>54e8911b</code> is ruled out by its own committed-operand replay (0 of 12 saddles, boundary fluxes or trip-one partitions changed).</p>
+<table>
+  <thead><tr><th>Identity</th><th>Arm</th><th>Bank residual</th><th>Recomputed</th><th>Drift</th></tr></thead>
+  <tbody>
+    <tr><td>21978/35</td><td>pure / mixed</td><td>3.86e-16 / 3.10e-16</td><td>2.20e-16 / 2.20e-16</td><td>1.65e-16 / 8.95e-17</td></tr>
+    <tr><td>21983/35</td><td>pure / mixed</td><td>2.3987e-4 / 2.4610e-4</td><td>2.3987e-4 / 3.7871e-4</td><td>4.82e-11 / 1.33e-4</td></tr>
+    <tr><td>21985/51</td><td>pure / mixed</td><td>6.6808e-4 / 6.5352e-4</td><td>6.6808e-4 / 6.5694e-4</td><td>8.03e-16 / 3.42e-6</td></tr>
+    <tr><td>21986/46</td><td>pure / mixed</td><td>1.35305e-3 / 1.34655e-3</td><td>1.35305e-3 / 1.34642e-3</td><td>4.94e-14 / 1.30e-7</td></tr>
+    <tr><td>21989/55</td><td>pure / mixed</td><td>7.3500e-4 / 7.3763e-4</td><td>7.3501e-4 / 7.3212e-4</td><td>1.48e-8 / 5.51e-6</td></tr>
+    <tr><td>22086/43</td><td>pure / mixed</td><td>3.58e-16 / 4.93e-16</td><td>3.36e-16 / 2.69e-16</td><td>2.24e-17 / 2.24e-16</td></tr>
+  </tbody>
+</table>
+<p>Signs and magnitudes vary across the twelve rows, so this is a changed numerical path rather than a rescaled scalar. <strong>Disposition.</strong> Attribution only: the accepted cache <code>2c291a84</code> stays the exact operand cache and <code>83f01684</code> stays rejected until the bank owner decides between reissuing the bank and repairing the current path; the paired old-tree against current-tree probe on the accepted operands that would show the first differing output is the measurement queued for the next free H200 card. Report: <code>~/.config/reckon/crew/reports/nova/s19-codex/bob-drift-attribution.md</code>.</p>
+</section>
 </main>
 </body>
 </html>

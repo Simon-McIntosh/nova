@@ -1,0 +1,145 @@
+{
+  "accepted": true,
+  "amplitude_bound": 0.01,
+  "amplitude_error": 0.009831909762516133,
+  "booked_current_at_unit_amplitude_a": 248799.7324001498,
+  "case": "strong-rotation-compact-static",
+  "elapsed_seconds": 33.75252150092274,
+  "historical_exact_clip": {
+    "committed_whole_cell": {
+      "amplitude_within_one_percent": false,
+      "case": "strong-rotation-compact-static",
+      "converged": false,
+      "figure": {
+        "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-reduced.png",
+        "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-reduced.png",
+        "render_source": "fresh_production_solve",
+        "sha256": "39b9954199a41a85c3e8a1550eec462a0cc384f54a53b753791737d73d43aed3"
+      },
+      "magnetic_axis_position_error_m": 0.0025629548500197214,
+      "qualification": "unqualified",
+      "qualification_bound": 1e-12,
+      "qualification_reason": "fixed_point_residual_outside_qualification_bound",
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "seed_amplitude": 0.9189410960224258,
+      "terminal_amplitude": 0.9957096469108309,
+      "terminal_fixed_point_residual": 0.013545021492433489,
+      "terminal_fixed_point_residual_status": "finite",
+      "termination": "active_set_settled",
+      "trip_count": 3,
+      "x_point_position_error_m": null
+    },
+    "gate_c_exact_clip": {
+      "amplitude_within_one_percent": false,
+      "case": "strong-rotation-compact-static",
+      "converged": false,
+      "figure": {
+        "filesystem_path": "docs/figures/cut-cell-current-attribution/gate-c-resolve/strong-rotation-compact-static-production-route-reduced.png",
+        "project_absolute_src": "/nova/figures/cut-cell-current-attribution/gate-c-resolve/strong-rotation-compact-static-production-route-reduced.png",
+        "render_source": "fresh_production_solve",
+        "sha256": "01f911b2b6ab1bcf703f651caab267e1ed694d8fa88326f9be03446502ac712d"
+      },
+      "magnetic_axis_position_error_m": 0.026698880167428794,
+      "part": "docs/figures/cut-cell-current-attribution/gate-c-resolve/parts/strong-rotation-compact-static-production-route-reduced.json",
+      "qualification": "unqualified",
+      "qualification_bound": 1e-12,
+      "qualification_reason": "fixed_point_residual_outside_qualification_bound",
+      "realised_cells": 135,
+      "requested_cells": -110,
+      "seed_amplitude": 1.9050666308609827,
+      "terminal_amplitude": 1.9448775026328564,
+      "terminal_fixed_point_residual": 0.03789925224503191,
+      "terminal_fixed_point_residual_status": "finite",
+      "termination": "active_set_cycle_detected",
+      "trip_count": 6,
+      "x_point_position_error_m": null
+    }
+  },
+  "realised_cells": 135,
+  "requested_cells": -110,
+  "seed": {
+    "anchor_available": true,
+    "anchor_m": [
+      1.0902999676767633,
+      0.005210856843976104
+    ],
+    "branch_index": 0,
+    "construction": "current_centroid_disc",
+    "current_centroid_m": [
+      0.8875010108629255,
+      0.0
+    ],
+    "current_target_provenance": {
+      "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+      "current_centroid_m": [
+        0.8875010108629255,
+        0.0
+      ],
+      "declared_current_a": 251245.90891804622,
+      "quadrature_current_a": 251245.90891804622,
+      "quadrature_nodes": 512,
+      "quadrature_relative_closure": 0.0
+    },
+    "declared_axis_m": [
+      0.8875010108629255,
+      0.0
+    ],
+    "declared_boundary_m": [
+      1.0902999676767633,
+      0.005210856843976104
+    ],
+    "factory": "profile.cold_seed_portfolio",
+    "plasma_current_a": 251245.90891804622,
+    "requested_class": "limited",
+    "seed_radius_m": 0.18257506240510613,
+    "state_sha256_binary64": "3f2ab62fb052250765ac7c760c4f193fb833397a401da0753346f3331d425b4b",
+    "stored_flux_samples_used": false,
+    "supported_cell_count": 39
+  },
+  "seed_amplitude": 1.0098319097625161,
+  "solve": {
+    "analytic_boundary_flux_wb": -1.9619315937483006e-16,
+    "axis_error_in_pitch": 0.07525274824004932,
+    "axis_error_m": 0.0039604744051028535,
+    "boundary_flux_error_wb": 0.004588527237021779,
+    "boundary_flux_wb": -0.004588527237021975,
+    "certificate_figure": {
+      "filesystem_path": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-production-route-reduced.png",
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-production-route-reduced.png",
+      "render_source": "fresh_production_solve",
+      "sha256": "7ebe6cd1da6919069d23ee0a999bce4312b6688d6d49d13d8d33dacd46fa8303"
+    },
+    "comparison_figure": {
+      "difference_levels": [
+        -0.07018272336679587,
+        -0.04907329079972414,
+        -0.03431311517121358,
+        -0.023992478465690883,
+        -0.016776064197446094,
+        -0.011730189957627144,
+        -0.00820200464319658,
+        -0.005735020524819066,
+        0.005735020524819066,
+        0.00820200464319658,
+        0.011730189957627144,
+        0.016776064197446094,
+        0.023992478465690883,
+        0.03431311517121358,
+        0.04907329079972414,
+        0.07018272336679587
+      ],
+      "difference_normalisation": "analytic flux span",
+      "filesystem_path": "docs/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-110-comparison.png",
+      "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-110-comparison.png",
+      "sha256": "e5156296a05dbdf31526d6d9e1487306d42941c087313d490cfaa3aaf00ac13f"
+    },
+    "converged": true,
+    "part": "docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/strong-rotation-compact-static-production-route-reduced.json",
+    "seed_amplitude": 1.0098319097625161,
+    "terminal_amplitude": 0.9651815446508347,
+    "terminal_residual": 6.711667497659967e-13,
+    "termination": "converged"
+  },
+  "target_current_a": 251245.90891804622
+}

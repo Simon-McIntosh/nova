@@ -118,7 +118,11 @@ from nova.equilibrium.constraint import (
 )
 from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.domain import PlasmaDomain
-from nova.equilibrium.forward_operator import ForwardFluxOperator, ForwardTopologyState
+from nova.equilibrium.forward_operator import (
+    ForwardFluxOperator,
+    ForwardTopologyState,
+    support_clip_mode,
+)
 from nova.equilibrium.flux_surface_connectivity import traced_spline_contour
 from nova.equilibrium.labels import LCFS_ANGLES
 from nova.equilibrium.reduced_newton import solve_constrained_reduced_newton
@@ -726,6 +730,11 @@ class ForwardProfile:
         neutral = self.operator.external(current) + self.operator.current_moment_image(
             coefficients
         )
+        neutral = self._clip_consistent_seed(
+            neutral,
+            float(plasma_current),
+            TopologyClass.LIMITED,
+        )
         requested = jnp.asarray(
             (int(TopologyClass.LIMITED), int(TopologyClass.DIVERTED)),
             dtype=jnp.int8,
@@ -847,6 +856,11 @@ class ForwardProfile:
         flux = self.operator.external(current) + self.operator.current_moment_image(
             coefficients
         )
+        flux = self._clip_consistent_seed(
+            flux,
+            float(prediction.plasma_current),
+            TopologyClass.LIMITED,
+        )
         return MomentSeed(
             flux=flux,
             cell_current=uniform,
@@ -854,6 +868,102 @@ class ForwardProfile:
             radius=float(radius),
             support=CurrentIntegralSupport.COMPACT_CENTROID_DISC,
             supported_cells=int(np.count_nonzero(cell_current)),
+        )
+
+    def _clip_consistent_seed(
+        self,
+        seed: jax.Array,
+        target_current: float,
+        requested_class: TopologyClass,
+    ) -> jax.Array:
+        r"""Choose the exact clip's seed boundary level at unit amplitude.
+
+        The profile amplitude for a trial seed is
+
+        .. math::
+
+           a(\delta) = I_{\mathrm{target}} /
+           \sum_i I_i(\psi_{\mathrm{seed}}, \psi_b + \delta),
+
+        where the sum is the operator's unscaled clipped current.  The grid
+        and direct-sample values define the seed field, while a uniform shift
+        of its wall values chooses the limited boundary level without moving
+        the wall extremum.  Bisection selects the level where ``a = 1`` before
+        the first nonlinear trip, so current normalisation does not double a
+        profile merely because the cold disc and exact clip began on different
+        supports.
+
+        Other clip modes return the input bit-for-bit.  Exact mode fails closed
+        when the axis-to-boundary interval does not bracket the declared
+        current, because silently accepting that seed would restore the
+        inconsistent state this construction excludes.
+        """
+
+        state = jnp.asarray(seed)
+        if support_clip_mode() != "exact":
+            return state
+        if not getattr(self.operator, "use_linear_moments", False):
+            return state
+
+        _masks, topology = self.operator.read(state, requested_class)
+        boundary_span = float(topology.flux_span)
+        if not np.isfinite(boundary_span) or boundary_span == 0.0:
+            raise ValueError("exact clip seed has no finite boundary-level span")
+        wall_start = int(self.operator.grid.node_number)
+        wall_stop = int(self.operator.physical_node_number)
+
+        def shifted(level_fraction: float) -> jax.Array:
+            return state.at[wall_start:wall_stop].add(
+                float(level_fraction) * boundary_span
+            )
+
+        def current_error(level_fraction: float) -> float:
+            moments = self.operator.cell_current_moments(
+                shifted(level_fraction), requested_class=requested_class
+            )
+            booked_current = float(jnp.sum(moments.cell_current))
+            return booked_current - float(target_current)
+
+        lower_error = current_error(0.0)
+        lower_amplitude = float(target_current) / (lower_error + float(target_current))
+        if np.isfinite(lower_amplitude) and abs(lower_amplitude - 1.0) <= 1.0e-2:
+            return state
+        upper_error = current_error(1.0)
+        if (
+            not np.isfinite(lower_error)
+            or not np.isfinite(upper_error)
+            or lower_error * upper_error > 0.0
+        ):
+            upper_amplitude = float(target_current) / (
+                upper_error + float(target_current)
+            )
+            raise ValueError(
+                "exact clip seed boundary level does not bracket unit amplitude: "
+                f"a(0)={lower_amplitude:.8g}, "
+                f"a(1)={upper_amplitude:.8g}"
+            )
+        lower_fraction = 0.0
+        upper_fraction = 1.0
+        amplitude = lower_amplitude
+        level_fraction = lower_fraction
+        for _ in range(8):
+            level_fraction = lower_fraction - lower_error * (
+                upper_fraction - lower_fraction
+            ) / (upper_error - lower_error)
+            candidate_error = current_error(level_fraction)
+            booked_current = candidate_error + float(target_current)
+            amplitude = float(target_current) / booked_current
+            if np.isfinite(amplitude) and abs(amplitude - 1.0) <= 1.0e-2:
+                return shifted(level_fraction)
+            if candidate_error * lower_error > 0.0:
+                lower_fraction = level_fraction
+                lower_error = candidate_error
+            else:
+                upper_fraction = level_fraction
+                upper_error = candidate_error
+        raise ValueError(
+            "exact clip seed boundary solve missed unit amplitude: "
+            f"a={amplitude:.8g}, level_fraction={level_fraction:.8g}"
         )
 
     def _saddle_geometry_seed(

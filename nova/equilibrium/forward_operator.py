@@ -29,7 +29,7 @@ direct pre-clip sample nodes.
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import InitVar, dataclass, field
+from dataclasses import InitVar, dataclass, field, fields, is_dataclass
 from functools import cached_property
 import hashlib
 import types
@@ -1579,6 +1579,21 @@ def _digest_callable_value(
         digest.update(f"{name}:{type(value).__qualname__}".encode("utf-8"))
         for item in sorted(value, key=repr):
             _digest_callable_value(digest, f"{name}.member", item, seen)
+        return
+    if is_dataclass(value) and not isinstance(value, type):
+        digest.update(
+            (
+                f"{name}:dataclass:{type(value).__module__}."
+                f"{type(value).__qualname__}"
+            ).encode("utf-8")
+        )
+        for definition in fields(value):
+            _digest_callable_value(
+                digest,
+                f"{name}.{definition.name}",
+                getattr(value, definition.name),
+                seen,
+            )
         return
     if isinstance(value, types.CodeType):
         digest.update(f"{name}:code".encode("utf-8"))

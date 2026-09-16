@@ -2055,6 +2055,7 @@ class ForwardFluxOperator:
             )
         for name in self._dynamic_extra_names():
             setattr(self, name, jnp.asarray(getattr(self, name)))
+        self._geometry_identity = self._compute_geometry_identity()
 
     def _dynamic_extra_names(self) -> tuple[str, ...]:
         """Return specialised member scalars that must enter the trace as data."""
@@ -2121,7 +2122,9 @@ class ForwardFluxOperator:
     @property
     def geometry_identity(self) -> str:
         """Return the digest of host geometry independent of member data."""
-        return self._compute_geometry_identity()
+        if "_geometry_identity" not in self.__dict__:
+            self._geometry_identity = self._compute_geometry_identity()
+        return self._geometry_identity
 
     def _batch_identity(self, source_layout: _SourceLayout | None = None) -> str:
         """Return the host-and-static identity required for pytree stacking."""

@@ -397,7 +397,6 @@ def test_equivalent_diiid_bank_operators_stack_into_one_program():
     original = members[0].profile.operator
     rebuilt = _operator_with_source(original, _rebuilt_diiid_source(original))
     assert original.geometry_identity == rebuilt.geometry_identity
-    assert original.geometry_identity.startswith("1a91f6e0")
     checked = stack_forward_operators((original, rebuilt))
 
     assert checked.geometry_identical

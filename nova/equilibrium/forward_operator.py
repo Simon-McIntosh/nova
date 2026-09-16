@@ -284,6 +284,43 @@ _DYNAMIC_OPERATOR_STATE_NAMES = (
     "_support_curve_scale",
 )
 
+_TOPOLOGY_STATE_NAMES = ("topology", "_fixed_design_topology")
+_TOPOLOGY_FIELD_NAMES = (
+    "grid",
+    "wall",
+    "connectivity_radius",
+    "connectivity_height",
+    "connectivity_rings",
+    "connectivity_shared_edges",
+    "connectivity_coordinate",
+    "connectivity_edge_gather",
+    "connectivity_edge_weight",
+    "polish_radial",
+    "polish_vertical",
+    "polish_gather",
+    "polish_valid",
+    "wall_unit_offsets",
+    "wall_unit_closed",
+    "wall_unit_vessel",
+)
+
+
+def _flatten_operator_state(name: str, value) -> tuple[object, ...]:
+    """Expose topology arrays without invoking its validating constructor."""
+    if name not in _TOPOLOGY_STATE_NAMES:
+        return (value,)
+    return tuple(getattr(value, field_name) for field_name in _TOPOLOGY_FIELD_NAMES)
+
+
+def _rebuild_operator_state(name: str, values: tuple[object, ...]):
+    """Rebuild traced topology data while retaining host construction only."""
+    if name not in _TOPOLOGY_STATE_NAMES:
+        return values[0]
+    topology = object.__new__(Topology)
+    for field_name, value in zip(_TOPOLOGY_FIELD_NAMES, values, strict=True):
+        setattr(topology, field_name, value)
+    return topology
+
 
 def _compact_cell_indices(selection, capacity: int):
     """Return selected carrier indices without an all-carrier pairwise mask.
@@ -1746,6 +1783,7 @@ class _OperatorPytreeAux:
     source_layout: _SourceLayout = field(compare=False, repr=False)
     static_state: dict[str, object] = field(compare=False, repr=False)
     dynamic_state_names: tuple[str, ...] = field(compare=False, repr=False)
+    dynamic_state_widths: tuple[int, ...] = field(compare=False, repr=False)
     dynamic_extra_names: tuple[str, ...] = field(compare=False, repr=False)
     prescribed: bool = field(compare=False, repr=False)
 
@@ -2146,6 +2184,11 @@ class ForwardFluxOperator:
         dynamic_state_names = tuple(
             name for name in _DYNAMIC_OPERATOR_STATE_NAMES if name in self.__dict__
         )
+        dynamic_state_values = tuple(
+            _flatten_operator_state(name, getattr(self, name))
+            for name in dynamic_state_names
+        )
+        dynamic_state_widths = tuple(len(values) for values in dynamic_state_values)
         excluded = {
             "grid",
             "wall",
@@ -2169,6 +2212,7 @@ class ForwardFluxOperator:
             source_layout=source_layout,
             static_state=static_state,
             dynamic_state_names=dynamic_state_names,
+            dynamic_state_widths=dynamic_state_widths,
             dynamic_extra_names=dynamic_extra_names,
             prescribed=prescribed,
         )
@@ -2184,7 +2228,7 @@ class ForwardFluxOperator:
             self.external_current,
             *prescribed_children,
             *source_children,
-            *(getattr(self, name) for name in dynamic_state_names),
+            *(value for values in dynamic_state_values for value in values),
             *(getattr(self, name) for name in dynamic_extra_names),
         )
         return children, aux
@@ -2203,13 +2247,13 @@ class ForwardFluxOperator:
             *tail,
         ) = children
         extra_count = len(aux.dynamic_extra_names)
-        dynamic_state_count = len(aux.dynamic_state_names)
+        dynamic_state_count = sum(aux.dynamic_state_widths)
         # Source children precede the fixed operator-state leaves.  Their exact
         # count is already encoded by the tail positions rather than recomputed
         # from callable objects, which may themselves carry traced leaves.
         source_count = len(tail) - dynamic_state_count - extra_count
         source_tail = tuple(tail[:source_count])
-        dynamic_state_values = tuple(
+        dynamic_state_leaves = tuple(
             tail[source_count : source_count + dynamic_state_count]
         )
         extra_values = tuple(tail[-extra_count:] if extra_count else ())
@@ -2228,10 +2272,13 @@ class ForwardFluxOperator:
             instance.prescribed_field = prescribed_field
         else:
             instance.prescribed_field = None
-        for name, value in zip(
-            aux.dynamic_state_names, dynamic_state_values, strict=True
+        offset = 0
+        for name, width in zip(
+            aux.dynamic_state_names, aux.dynamic_state_widths, strict=True
         ):
-            setattr(instance, name, value)
+            values = dynamic_state_leaves[offset : offset + width]
+            setattr(instance, name, _rebuild_operator_state(name, values))
+            offset += width
         for name, value in zip(aux.dynamic_extra_names, extra_values, strict=True):
             setattr(instance, name, value)
         return instance

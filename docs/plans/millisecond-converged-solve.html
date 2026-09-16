@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-16">
-<meta name="plan-version" content="73">
+<meta name="plan-version" content="74">
 <meta name="plan-impl" content="0.83">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd,273ff747,7aef0963">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -240,6 +240,9 @@
     <div class="r-comment-body"><p>Malformed node: the census needs one all_debug compile-and-dump job but the investigate role's read-only sandbox denies SLURM socket setup (srun: Operation not permitted), so no optimised HLO was produced; redispatched as msc-executable-remainder-census-2 on the local lane</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260916T085100280775-msc-compile-cost-evidence-record" data-who="s19c-compile-evidence-c" data-when="2026-09-16T10:02:16.443Z">
+    <div class="r-comment-body"><p>Stopped over budget with no artefact: the local lane emitted malformed tool calls throughout (input-validation errors on 25 to 50 percent of tool results, garbled paths, model markup in arguments) while about forty concurrent clive workers shared the serve; redispatched on codex-luna</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260916T090005602056-msc-executable-remainder-census-2" data-who="s19c-msc-remainder-c" data-when="2026-09-16T10:03:11.349Z">
     <div class="r-comment-body"><p>Stopped over budget with no artefact: the local lane emitted malformed tool calls throughout (input-validation errors on 25 to 50 percent of tool results, garbled paths, model markup in arguments) while about forty concurrent clive workers shared the serve; redispatched on codex-luna</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260904T163422200795" data-who="coordinator" data-when="2026-09-04T16:36:00Z">

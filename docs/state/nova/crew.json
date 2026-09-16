@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T12:04:57",
+  "updated": "2026-09-16T12:06:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4559,6 +4559,15 @@
       {
         "id": "s19c-compile-evidence-c",
         "harness": "clive",
+        "role": "documentation",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-compile-evidence-l",
+        "harness": "codex-luna",
         "role": "documentation",
         "session_id": null,
         "session_model": null,
@@ -170136,6 +170145,178 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T090005602056-msc-executable-remainder-census-2",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-executable-remainder-census-2",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1296,
+                "cached_input_tokens": 519558,
+                "input_tokens": 520886,
+                "output_tokens": 1690,
+                "reasoning_output_tokens": 319,
+                "total_tokens": 522576,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/msc-remainder-2/executable-remainder-census.md exists with a table whose rows sum to within 5 percent of 210159751 bytes, each row a kind with its byte count and its owning path:line seam, the three largest contributions named with the followup that owns their removal (f-msc-program-size-budget or f-msc-single-evaluator-state-machine), the optimised-HLO dump produced by one all_debug job under 30 minutes (srun from your worktree with JAX_PLATFORMS=cpu, XLA_FLAGS dump to a directory under the report path, the shared environment's interpreter run directly) whose command and log path are recorded, no tracked file modified, changed_paths opening with the word none because the report is the sole deliverable, every manifest scalar unquoted",
+          "estimated_hours": null,
+          "goal": "Attribute the 210159751-byte 300-cell solve executable that remains at main e695687e after the mesh-sized arrays became program arguments (receipt /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/mesh-arguments/receipts/size-300.json, generated-code 0 bytes): from the optimised HLO of that program, a table of the executable by kind, captured literals above 1 KiB with their innermost Nova frame beside generated code by the traced-copy multiplicity of the current-moment and topology-read bodies that the 2026-09-15 census at docs/figures/millisecond-converged-solve/program-census/report.md counted at 120 and 36, naming the seam that owns each of the three largest contributions",
+          "id": "msc-executable-remainder-census-2",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-16T09:00:06Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T090005602056-msc-executable-remainder-census-2/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/msc-remainder-2",
+            "docs/evidence/archive/millisecond-converged-solve-landed.html",
+            "docs/plans/millisecond-converged-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19c-msc-remainder-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-16T09:00:23Z",
+        "completed_at": "2026-09-16T10:03:11.349Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3733,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3768,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "02ba4702116b0fb791502fad16aa9c0a8f0ec62b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "none run; the worker never reached its gate",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T090005602056-msc-executable-remainder-census-2/stream.jsonl",
+          "log_digest": "sha256:a961e075c4b570e57cf04cd31b20a5347105413e9a256f4fb219079fe4d250c5"
+        },
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T090005602056-msc-executable-remainder-census-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "77c56eb9-4a5a-49e6-b184-42f42584b565",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-16T10:03:11.349Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": "stopped with no deliverable",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-executable-remainder-census-2",
+          "session_id": "77c56eb9-4a5a-49e6-b184-42f42584b565",
+          "session_source": "stream",
+          "retained_at": "2026-09-16T10:03:11.349Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 22.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -170448,6 +170629,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2611
+    "_version": 2613
   }
 }

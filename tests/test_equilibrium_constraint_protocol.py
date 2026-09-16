@@ -12,6 +12,7 @@ import numpy as np
 
 from nova.equilibrium import fixed_point
 from nova.equilibrium.constraint import (
+    BoundedExteriorFieldUnknown,
     CircuitCurrentUnknown,
     ConstraintBinding,
     ConstraintContext,
@@ -163,6 +164,38 @@ def test_linear_circuit_and_nonlinear_multiplier_rows_converge() -> None:
     assert all(bool(np.all(record.qualified)) for record in result.constraints)
     assert result.fixed_point.state.shape == (2,)
     assert result.fixed_point.row_jvp_projections.shape == (2,)
+
+
+def test_bounded_exterior_field_unknown_routes_and_refuses() -> None:
+    configure_dtypes()
+    profile = _profile()
+    unknown = BoundedExteriorFieldUnknown(
+        direction=jnp.asarray([1.0]),
+        field_scale=jnp.asarray([1.0]),
+        field_bound=jnp.asarray([2.0]),
+    )
+    pair = _pair(
+        _CoordinateFunctional(0),
+        unknown,
+        target=1.0,
+    )
+
+    result = profile._solve_augmented_constraints(
+        jnp.asarray([0.0, 0.0]),
+        None,
+        constraint_pairs=(pair,),
+        warmup=0,
+        gmres_iterations=4,
+        active_set_steps=2,
+        stop_on_active_set_settlement=False,
+    )
+
+    np.testing.assert_allclose(result.flux, [1.0, 0.0], rtol=0.0, atol=1.0e-8)
+    np.testing.assert_allclose(result.constraints[0].physical_unknown, [1.0])
+    with np.testing.assert_raises_regex(
+        ValueError, "exterior-field amplitude exceeds its declared finite bound"
+    ):
+        unknown.physical_value(jnp.asarray([2.5]))
 
 
 def test_residual_row_actions_match_central_differences() -> None:

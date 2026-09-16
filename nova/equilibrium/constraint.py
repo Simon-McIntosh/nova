@@ -427,6 +427,94 @@ class ConstraintMultiplier:
         return cls(*children)
 
 
+def _require_within_bound_if_concrete(value: object, bound: object, name: str) -> None:
+    """Reject a concrete physical command outside its declared finite interval."""
+    try:
+        concrete = np.asarray(value)
+        concrete_bound = np.asarray(bound)
+    except TypeError, jax.errors.TracerArrayConversionError:
+        return
+    if not np.all(np.isfinite(concrete)):
+        raise ValueError(f"{name} must be finite")
+    if np.any(np.abs(concrete) > concrete_bound):
+        raise ValueError(f"{name} exceeds its declared finite bound")
+
+
+@jax.tree_util.register_pytree_node_class
+@dataclass(frozen=True)
+class BoundedExteriorFieldUnknown:
+    """Bounded physical field amplitudes applied through an exterior response.
+
+    ``direction`` selects one column-vector direction per constraint row from
+    the operator's prescribed exterior-field response.  ``field_scale`` maps
+    the dimensionless Newton unknown to tesla and ``field_bound`` gives the
+    largest admitted magnitude in tesla.  Concrete calls beyond the bound are
+    refused before the response is evaluated; traced solver calls are clipped
+    to the same interval so no compiled trial can apply an out-of-bound field.
+    """
+
+    direction: object
+    field_scale: object
+    field_bound: object
+
+    def __post_init__(self) -> None:
+        direction = jnp.asarray(self.direction)
+        scale = jnp.atleast_1d(jnp.asarray(self.field_scale))
+        bound = jnp.atleast_1d(jnp.asarray(self.field_bound))
+        if direction.ndim == 1:
+            direction = direction[:, None]
+        if direction.ndim != 2 or direction.shape[1] != scale.shape[-1]:
+            raise ValueError(
+                "exterior-field directions must have shape (field_count, row_count)"
+            )
+        if bound.shape != scale.shape:
+            raise ValueError("exterior-field bounds must match the field scales")
+        object.__setattr__(self, "direction", direction)
+        object.__setattr__(self, "field_scale", scale)
+        object.__setattr__(self, "field_bound", bound)
+        _require_positive_if_concrete(scale, "exterior-field scale")
+        _require_positive_if_concrete(bound, "exterior-field bound")
+
+    @property
+    def row_count(self) -> int:
+        """Return one physical field amplitude per selected response direction."""
+        return int(jnp.shape(self.field_scale)[-1])
+
+    def physical_value(self, normalized: jax.Array) -> jax.Array:
+        """Return bounded field amplitudes in tesla."""
+        value = jnp.asarray(self.field_scale) * normalized
+        _require_within_bound_if_concrete(
+            value, self.field_bound, "exterior-field amplitude"
+        )
+        return jnp.clip(value, -self.field_bound, self.field_bound)
+
+    def flux_delta(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        functional: ConstraintFunctional[object],
+        payload: object,
+        normalized: jax.Array,
+    ) -> jax.Array:
+        """Apply the field through the operator's prescribed exterior slot."""
+        del context, functional, payload
+        field = profile.operator.prescribed_current_field
+        if field is None:
+            raise ValueError(
+                "an exterior-field constraint needs a prescribed exterior response"
+            )
+        field_delta = jnp.asarray(self.direction) @ self.physical_value(normalized)
+        return field.flux_delta(field_delta)
+
+    def tree_flatten(self):
+        return ((self.direction, self.field_scale, self.field_bound), None)
+
+    @classmethod
+    def tree_unflatten(cls, aux_data, children):
+        del aux_data
+        return cls(*children)
+
+
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class ProfileAmplitudeUnknown:
@@ -1538,6 +1626,7 @@ def constraint_records(
 
 __all__ = [
     "AugmentedConstraintSystem",
+    "BoundedExteriorFieldUnknown",
     "BoundingBoxRowKind",
     "BoundingBoxTarget",
     "CircuitCurrentUnknown",

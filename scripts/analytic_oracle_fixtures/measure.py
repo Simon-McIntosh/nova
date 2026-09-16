@@ -34,6 +34,7 @@ from nova.database.zarrstore import ZarrStore
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.forward_operator import (
     ForwardFluxOperator,
+    PrescribedCurrentField,
     set_support_clip_mode,
     support_clip_mode,
 )
@@ -63,6 +64,7 @@ OUTPUT = Path(__file__).resolve().parent
 FORBIDDEN_IMPORT_PREFIXES = ("h5py", "imas")
 FORBIDDEN_PATH_FRAGMENTS = (".geqdsk", ".npz", "/archive/", "stored_reference")
 EXTERIOR_CURRENT_PERTURBATION = 1.0e-4
+EXTERIOR_FIELD_COMPONENTS = ("vertical", "radial")
 ROUNDTRIP_COMPOSITION_FRACTIONS = {
     "23x35": 1.320394289e-2,
     "37x57": 3.819717157e-3,
@@ -692,6 +694,27 @@ def _target(
     )
 
 
+def uniform_exterior_field_response(
+    case: RotatingEquilibrium, machine: OracleMachine
+) -> np.ndarray:
+    """Return total-flux columns per tesla for rigid exterior-field increments.
+
+    The vertical column is the exact axisymmetric image of a uniform ``B_z``.
+    The radial column makes ``B_r`` uniform and carries the accompanying
+    divergence-free vertical component away from the geometric midplane.  The
+    vertical column's additive gauge is chosen at the analytic magnetic axis.
+    """
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    radius = coordinates[:, 0]
+    height = coordinates[:, 1]
+    reference_radius = float(np.asarray(case.magnetic_axis, dtype=np.float64)[0])
+    vertical = np.pi * (radius**2 - reference_radius**2)
+    radial = -2.0 * np.pi * radius * height
+    return np.column_stack((vertical, radial))
+
+
 def forward_operator(
     case: RotatingEquilibrium,
     machine: OracleMachine,
@@ -750,6 +773,10 @@ def forward_operator(
         area=jnp.asarray(machine.area),
         polarity=1,
         moment_geometry=machine.moment_geometry,
+        prescribed_current_field=PrescribedCurrentField(
+            response=jnp.asarray(uniform_exterior_field_response(case, machine)),
+            current=jnp.zeros(len(EXTERIOR_FIELD_COMPONENTS)),
+        ),
     )
 
 

@@ -423,12 +423,11 @@ def frame_assembly_inputs(
             )
 
             topology = equilibrium.topology
-            axis = np.asarray(topology.axis, dtype=float)
             internal_geometry = FluxSurfaceGeometry.internal_geometry(
                 profile.lattice,
                 np.asarray(equilibrium.flux),
                 source_field_function(profile.source, float(topology.flux_span)),
-                axis=(float(axis[0]), float(axis[1])),
+                axis=_internal_geometry_axis_seed(session, topology),
                 boundary_flux=float(topology.boundary_flux),
                 n_surface=11,
                 n_theta=64,
@@ -448,3 +447,38 @@ def frame_assembly_inputs(
         "internal_geometry": internal_geometry,
         "wall": session.wall,
     }
+
+
+def _internal_geometry_axis_seed(
+    session: PlayableSession, topology: object
+) -> tuple[float, float]:
+    """Seed a warm frame on the stationary-point component already displayed.
+
+    The terminal map can contain several elliptic stationary points. A warm
+    keyframe continues the surface component assembled for the preceding
+    frame, while :meth:`FluxSurfaceGeometry.internal_geometry` refines that
+    seed on the current map. The stored surface row is authoritative because
+    it records the component that was actually displayed; point channels are
+    the fallback for frames without internal geometry. The prime and a session
+    without a finite prior axis use the current topology read directly.
+    """
+    current = np.asarray(getattr(topology, "axis"), dtype=float)
+    previous_frame = getattr(session, "frame", None)
+    if previous_frame is not None:
+        surface_r = np.asarray(
+            getattr(previous_frame, "flux_surface_r", np.empty((0,))), dtype=float
+        ).reshape(-1)
+        surface_z = np.asarray(
+            getattr(previous_frame, "flux_surface_z", np.empty((0,))), dtype=float
+        ).reshape(-1)
+        if surface_r.size and surface_z.size:
+            previous_surface = np.asarray([surface_r[0], surface_z[0]], dtype=float)
+            if np.all(np.isfinite(previous_surface)):
+                return float(previous_surface[0]), float(previous_surface[1])
+        previous_point = np.asarray(
+            [previous_frame.magnetic_axis_r, previous_frame.magnetic_axis_z],
+            dtype=float,
+        )
+        if np.all(np.isfinite(previous_point)):
+            return float(previous_point[0]), float(previous_point[1])
+    return float(current[0]), float(current[1])

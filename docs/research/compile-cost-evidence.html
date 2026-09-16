@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="compile-cost-evidence">
+<meta name="plan-title" content="Forward-solve compile-cost evidence">
+<meta name="plan-summary" content="Measured forward-solve compilation walls, program sizes, instruction counts and cache outcomes across mesh and constraint families.">
+<meta name="plan-tags" content="equilibrium,timing,h200,jax,throughput">
+<meta name="plan-informs" content="millisecond-converged-solve,exact-clip-moment-quadrature,cut-cell-current-attribution">
+<meta name="plan-recorded-at" content="2026-09-16">
+<title>Forward-solve compile-cost evidence | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header>
+<p class="eyebrow">Compile evidence · measured through 2026-09-16</p>
+<h1>Forward-solve compile-cost evidence</h1>
+<p class="lede"><strong>Compilation is currently a first-order forward-solve cost.</strong> This record gathers the measured compile and lowering walls that are otherwise scattered across the millisecond solve, cut-cell, batched-operator and playable records. The table keeps the instrument's distinctions: a lower-only probe is not an executable compile, an unrecorded byte count is not inferred from HLO, and a cache refusal is not reported as a cache hit.</p>
+</header>
+
+<h2 id="s1">§1 — The measured ledger</h2>
+<p>The compile wall is the recorded cold or warm compilation interval when the receipt exposes one. “Lower-only” names a StableHLO probe that did not produce an executable. “Not recorded” is retained where the source receipt did not expose a value; “not serialisable” is the measured outcome when XLA or protobuf refused to materialise the executable. For the memory-ladder rows, the instruction count is StableHLO and the executable-size field is the serialized executable or proto described by the source comment. For the census rows, the count is optimized-HLO instructions and the byte field is the captured executable context reported by the census.</p>
+
+<figure>
+<img src="/nova/figures/compile-cost/compile-wall-by-cells.png" alt="Log-scaled compile wall against realised or requested cells for whole-cell closure, mesh arrays as arguments and exact-clip routes">
+<figcaption>Measured compile wall against mesh size. The whole-cell closure ladder remains above 500 seconds and reaches 711 seconds at 2,500 cells; the traced mesh-argument receipt is 337.367 seconds at 300 cells; the exact-clip route is above 1,000 seconds at every measured rung. Cache-hit rows are retained in the table because they answer a different operational question.</figcaption>
+</figure>
+
+<table>
+<caption>Forward-solve compile and lowering receipts. Job identifiers and source paths are retained per row.</caption>
+<thead>
+<tr>
+<th scope="col">Program</th>
+<th scope="col">Cells</th>
+<th scope="col">Platform and host</th>
+<th scope="col">Compile wall (s)</th>
+<th scope="col">StableHLO or HLO instructions</th>
+<th scope="col">Executable bytes</th>
+<th scope="col">Persistent-cache result</th>
+<th scope="col">Job</th>
+<th scope="col">Source path or plan comment</th>
+</tr>
+</thead>
+<tbody>
+<tr><th scope="row">whole-cell closure, cold rung</th><td>300</td><td>CPU / all_debug; host not recorded</td><td>535.000</td><td>254,873 StableHLO</td><td>462 MB</td><td>miss</td><td>not recorded</td><td><code>docs/plans/millisecond-converged-solve.html#c-run-r-20260914T192229213809-msc-compile-host-memory</code></td></tr>
+<tr><th scope="row">whole-cell closure, retrieved rung</th><td>300</td><td>CPU / all_debug; host not recorded</td><td>74.000 backend retrieval</td><td>254,873 StableHLO</td><td>462 MB</td><td>hit</td><td>not recorded</td><td><code>docs/plans/millisecond-converged-solve.html#c-run-r-20260914T192229213809-msc-compile-host-memory</code></td></tr>
+<tr><th scope="row">whole-cell closure, cold rung</th><td>1,000</td><td>CPU / all_debug; host not recorded</td><td>548.000</td><td>254,873 StableHLO</td><td>3.74 GiB proto; serialization refused</td><td>miss; cannot cache</td><td>not recorded</td><td><code>docs/plans/millisecond-converged-solve.html#c-run-r-20260914T192229213809-msc-compile-host-memory</code></td></tr>
+<tr><th scope="row">whole-cell closure, cold rung</th><td>2,500</td><td>CPU / all_debug; host not recorded</td><td>711.000</td><td>254,873 StableHLO</td><td>19.2 GiB proto; serialization refused</td><td>miss; cannot cache</td><td>not recorded</td><td><code>docs/plans/millisecond-converged-solve.html#c-run-r-20260914T192229213809-msc-compile-host-memory</code></td></tr>
+<tr><th scope="row">whole-cell certificate solve census</th><td>300</td><td>CPU / all_debug; host not recorded</td><td>370.224</td><td>654,832 optimized HLO</td><td>462.00 MiB context</td><td>miss</td><td>1271445</td><td><code>docs/figures/millisecond-converged-solve/program-census/300.json</code>; <code>docs/plans/millisecond-converged-solve.html#c-run-r-20260915T124717561490-msc-program-constant-census</code></td></tr>
+<tr><th scope="row">whole-cell certificate solve census</th><td>1,000</td><td>CPU / all_debug; host not recorded</td><td>386.402</td><td>662,331 optimized HLO</td><td>not serialisable; 323.89 GB HLO buffer total</td><td>miss; serialization unavailable</td><td>1271445</td><td><code>docs/figures/millisecond-converged-solve/program-census/1000.json</code>; <code>docs/plans/millisecond-converged-solve.html#c-run-r-20260915T124717561490-msc-program-constant-census</code></td></tr>
+<tr><th scope="row">mesh arrays as traced arguments</th><td>300</td><td>CPU / 98dci4-clu-3143; all_debug</td><td>337.367</td><td>not recorded</td><td>210,159,751</td><td>configured; hit/miss not recorded</td><td>1271977</td><td><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/mesh-arguments/receipts/size-300.json</code></td></tr>
+<tr><th scope="row">centroid row, unconstrained lower</th><td>not recorded</td><td>CPU / 98dci4-clu-3141; all_debug</td><td>45.246 lower-only</td><td>423,061 StableHLO</td><td>not produced</td><td>not applicable</td><td>1271974</td><td><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row/compile-unconstrained.json</code></td></tr>
+<tr><th scope="row">centroid row, constrained lower</th><td>not recorded</td><td>CPU / 98dci4-clu-3141; all_debug</td><td>147.213 lower-only</td><td>1,036,327 StableHLO</td><td>not produced</td><td>not applicable</td><td>1271974</td><td><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row/compile-constrained.json</code></td></tr>
+<tr><th scope="row">exact-clip fixed-point solve</th><td>110 requested / 135 realised</td><td>H200 NVL; host not recorded</td><td>1,029.443</td><td>not recorded</td><td>not recorded</td><td>no cross-process hit claim</td><td>1271922</td><td><code>docs/evidence/archive/cut-cell-current-attribution-landed.html#exact-clip-warm-cost-and-workspace</code></td></tr>
+<tr><th scope="row">exact-clip fixed-point solve</th><td>300 requested / 342 realised</td><td>H200 NVL; host not recorded</td><td>1,047.387</td><td>not recorded</td><td>not recorded</td><td>no cross-process hit claim</td><td>1271922</td><td><code>docs/evidence/archive/cut-cell-current-attribution-landed.html#exact-clip-warm-cost-and-workspace</code></td></tr>
+<tr><th scope="row">exact-clip fixed-point solve</th><td>1,000 requested / 1,072 realised</td><td>H200 NVL; host not recorded</td><td>1,074.164</td><td>not recorded</td><td>4.34 GB serialized form refused by 2 GiB limit</td><td>configured; writes not admitted</td><td>1271922</td><td><code>docs/evidence/archive/cut-cell-current-attribution-landed.html#exact-clip-warm-cost-and-workspace</code></td></tr>
+<tr><th scope="row">MAST batched strict-exit program</th><td>12 members</td><td>H200; host not recorded</td><td>77.200</td><td>not recorded</td><td>not recorded</td><td>hit</td><td>1268060</td><td><code>docs/plans/batched-operator-boundary.html#c-20260909T1928-mast-width12-measured</code></td></tr>
+<tr><th scope="row">DIII-D batched strict-exit, head</th><td>5 members</td><td>H200; host not recorded</td><td>1,579.189</td><td>not recorded</td><td>not recorded</td><td>miss</td><td>1271285</td><td><code>docs/evidence/archive/batched-operator-boundary-landed.html#diiid-width-five-paired-strict-exit-incidence</code></td></tr>
+<tr><th scope="row">DIII-D batched strict-exit, archived base</th><td>5 members</td><td>H200; host not recorded</td><td>169.030</td><td>not recorded</td><td>not recorded</td><td>hit</td><td>1271285</td><td><code>docs/evidence/archive/batched-operator-boundary-landed.html#diiid-width-five-paired-strict-exit-incidence</code></td></tr>
+<tr><th scope="row">playable reduced route, prime</th><td>one 22086/43 solve</td><td>H200 / 98dci4-gpu-0003</td><td>80.903</td><td>not recorded</td><td>not recorded</td><td>miss</td><td>1272001</td><td><code>docs/figures/playable-forward-solve/keyframes/h200-playable-axis-continuation-keyframes.json</code></td></tr>
+<tr><th scope="row">playable reduced route, first moved press</th><td>one 22086/43 solve</td><td>H200 / 98dci4-gpu-0003</td><td>4.085 cache-served compile total</td><td>not recorded</td><td>not recorded</td><td>hit; 100 events</td><td>1272001</td><td><code>docs/figures/playable-forward-solve/keyframes/h200-playable-axis-continuation-keyframes.json</code></td></tr>
+<tr><th scope="row">compiled-slice public entry</th><td>12 MAST members</td><td>H200 NVL / 98dci4-gpu-0003</td><td>0.000 backend compile after retained program</td><td>not recorded</td><td>not recorded</td><td>hit; 12 of 12 same program</td><td>1271496</td><td><code>docs/figures/millisecond-converged-solve/compiled-slice-cache/receipt.json</code></td></tr>
+<tr><th scope="row">flux-function profile re-lowering pair</th><td>300</td><td>CPU / 98dci4-clu-3141; all_debug</td><td>112.000 lower-only pair</td><td>186,085 to 182,460 graph ops</td><td>not produced</td><td>miss; no solve executed</td><td>1271055</td><td><code>docs/plans/millisecond-converged-solve.html#c-run-r-20260915T043005686679-msc-profile-coefficients-recompile-audit</code></td></tr>
+</tbody>
+</table>
+
+<p>The table contains more than the minimum twelve rows because a cache hit is not a cold compile, a constrained lower is not an executable, and a serialization refusal is itself an engineering result. In particular, the 300-cell memory-ladder receipt and the 300-cell constant census are not collapsed: the former measures compiler host memory, backend time and serialisation; the latter measures the optimized-HLO instruction and literal census. Likewise, the MAST width-twelve result is a batch compile-once measurement, whereas the playable prime and press are one-session program-reuse evidence.</p>
+
+<h2 id="s2">§2 — Mechanisms already measured</h2>
+<p><strong>Captured mesh literals.</strong> The closure-owned whole-cell program carries mesh-sized arrays as literals. At 300 cells, the constant census finds 856 literals above 1 KiB and 372.55 MiB of captured bytes, with 359.06 MiB in interaction matrices; at 1,000 cells it finds 889 literals and 2.94 GiB, with 2.89 GiB in interaction matrices. The host memory ladder sees the corresponding executable context grow from 462 MB at 300 cells to a 3.74 GiB proto at 1,000 and 19.2 GiB at 2,500. The evidence rows are the whole-cell closure rows and the two census rows above; the detailed literal inventory is <code>docs/figures/millisecond-converged-solve/program-census/report.md</code>.</p>
+<p><strong>Repeated traced copies.</strong> A known-present source sentinel, rather than an empty search, finds 120 traced copies of <code>ForwardFluxOperator.normalised_current_moments</code> and 36 copies of <code>ForwardFluxOperator._fixed_design_read</code> in both solve rungs. The older 83-copy premise does not reproduce at this revision. The Python Newton and trip loops are host-only and contribute zero optimized-HLO copies; the compiled budgets are already <code>jax.lax.fori_loop</code> bodies. This is the measured reason the follow-on targets one evaluator state machine and the two repeated bodies rather than rewriting host loops that are not in the executable. Evidence: <code>docs/figures/millisecond-converged-solve/program-census/report.md</code> and <code>docs/plans/millisecond-converged-solve.html#c-run-r-20260915T124717561490-msc-program-constant-census</code>.</p>
+<p><strong>Per-host cache identity.</strong> The persistent cache is explicitly selected per recipe, and its key includes the serialized computation, JAX/jaxlib and backend versions, compiler flags and options, and accelerator topology. The runtime identity also records the device topology, which is why a compiled program from one host or accelerator environment cannot be assumed to serve every <code>all_debug</code> node. The 300-cell size receipt names the CPU runtime and its cache directory; the compiled-slice receipt names the H200 runtime and records 12 of 12 same-program reuse with zero backend compile after the retained program. Evidence: <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/mesh-arguments/receipts/size-300.json</code> and <code>docs/figures/millisecond-converged-solve/compiled-slice-cache/receipt.json</code>.</p>
+<p><strong>Constraint-row lowering multiplier.</strong> The centroid probe quantifies the extra traced work from one centroid constraint: the unconstrained lower is 423,061 StableHLO instructions and 45.246 seconds, while the constrained lower is 1,036,327 instructions and 147.213 seconds. That is 2.45 times the instruction count and 3.25 times the lower wall before an executable or solve is produced. The receipt preserves both arms as lower-only, so no executable-size claim is attached to this comparison. Evidence: <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row/compile-unconstrained.json</code> and <code>compile-constrained.json</code>.</p>
+<p><strong>Two-gibibyte serialisation limit.</strong> The 1,000-cell whole-cell proto (3.74 GiB), the 2,500-cell proto (19.2 GiB), and the exact-clip 1,000-cell serialized form (4.34 GB) cross the 2 GiB serialization boundary. They therefore cannot contribute a normal persistent-cache hit even when the cache is configured. The exact-clip receipt is explicit that its in-process cold compile and warm executions remain valid while no cross-process cache-hit claim is made. Evidence: the memory-ladder comment above and <code>docs/evidence/archive/cut-cell-current-attribution-landed.html#exact-clip-warm-cost-and-workspace</code>.</p>
+
+<h2 id="s3">§3 — What the cost means for the millisecond solve</h2>
+<p>The measured walls are not one homogeneous benchmark. The 45.246- and 147.213-second centroid figures stop at lowering; the 74-second 300-cell cache retrieval is a warm backend retrieval; the 77.2-second MAST width-twelve row pays one warm batch compile; and the 1,029–1,074-second exact-clip rows are in-process cold compiles with warm fixed-point solves, not cache hits. The 1,579.189-second DIII-D head row is a real cold width-five compile, while its paired archived base is 169.030 seconds from a cache hit. Keeping these states side by side is the useful result: cache policy changes the wall, but it does not erase the graph and serialization mechanisms that set the cold cost.</p>
+<p>The lead's directive on 2026-09-16 is therefore explicit: <strong>an hour per compile is too much and must be addressed as the codebase stabilises.</strong> The present record already shows the repair direction: pass mesh-sized arrays and profile values as traced arguments, eliminate duplicated current-moment and topology bodies through one evaluator state machine, and preserve a cache key whose host and accelerator identity are stated rather than assumed. The codebase should be judged against the measured rows above, including the negative rows, until the same receipts show a material reduction in cold wall, executable size and host working set.</p>
+</main>
+</body>
+</html>

@@ -1,4 +1,4 @@
-"""Whether a change in the flux-function profile coefficients recompiles a solve.
+"""Whether flux-function profile coefficients remain solve-program operands.
 
 Lower the certificate solve program (no execution) on the weak 300-cell
 whole-cell row for the committed source profile and for a second ForwardSource
@@ -9,10 +9,9 @@ constants is the evidence that the flux functions are baked into the program
 as closure constants rather than passed as traced arguments, so every profile
 change recompiles.
 
-The benchmark also inventories, from the source, every array, scalar and
-Python callable the ForwardSource and the surrounding profile close over that
-the traced residual reads, and estimates the minimal fixed-shape coefficient
-argument set that would let one compiled program serve every profile of a mesh.
+The benchmark also inventories the explicit coefficient and normalisation
+arguments and records why a fixed-order polynomial is the higher-order
+per-slice representation beside the existing piecewise-linear sampled route.
 """
 
 from __future__ import annotations
@@ -24,6 +23,7 @@ import json
 import os
 from pathlib import Path
 import re
+import time
 
 import jax
 import jax.numpy as jnp
@@ -33,9 +33,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import reduced_newton
-from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.forward_operator import (
     PrescribedCurrentField,
     _CallableLayout,
@@ -44,7 +42,11 @@ from nova.equilibrium.forward_operator import (
     support_clip_mode,
 )
 from nova.equilibrium.rotation import RotatingDomainProfile
-from nova.equilibrium.source import DomainProfile, ForwardSource
+from nova.equilibrium.source import (
+    DomainProfile,
+    ForwardSource,
+    PolynomialFluxFunction,
+)
 from nova.jax.config import configure_dtypes
 from tests.test_forward_compile_identity import (
     CASES,
@@ -52,7 +54,12 @@ from tests.test_forward_compile_identity import (
     _certificate_row,
 )
 
-OUTPUT = Path(__file__).with_name("profile-coefficients-recompile.json")
+OUTPUT = Path(
+    os.environ.get(
+        "PROFILE_RECOMPILE_OUTPUT",
+        Path(__file__).with_name("profile-coefficients-recompile.json"),
+    )
+)
 RUN_DIRECTORY = Path(os.environ.get("HLO_RUN_DIRECTORY", OUTPUT.parent))
 RUN_LABEL = os.environ.get("SLURM_JOB_ID", "local")
 CASE = CASES[0]
@@ -219,11 +226,14 @@ def _scaled_source(
     p_gradient = _cell_contents(core.p_prime)
     f_gradient = _cell_contents(core.ff_prime)
 
-    def scaled_p_prime(psi_norm):
-        return jnp.full_like(jnp.asarray(psi_norm), pressure_scale * p_gradient)
-
-    def scaled_ff_prime(psi_norm):
-        return jnp.full_like(jnp.asarray(psi_norm), diamagnetic_scale * f_gradient)
+    scaled_p_prime = PolynomialFluxFunction(
+        jnp.asarray([pressure_scale * p_gradient], dtype=jnp.float64),
+        jnp.asarray(1.0, dtype=jnp.float64),
+    )
+    scaled_ff_prime = PolynomialFluxFunction(
+        jnp.asarray([diamagnetic_scale * f_gradient], dtype=jnp.float64),
+        jnp.asarray(1.0, dtype=jnp.float64),
+    )
 
     if type(core) is RotatingDomainProfile:
         scaled_core = RotatingDomainProfile(
@@ -249,20 +259,13 @@ def _scaled_source(
 def _scaled_row(fixture_row, scaled_source):
     """Return the same inputs with only the source's profile coefficients moved."""
     profile, seed, requested_class, target_current, _request = fixture_row
-    scaled_operator = dataclasses.replace(profile.operator, source=scaled_source)
-    scaled_profile = ForwardProfile(
-        scaled_operator,
-        profile.lattice,
-        newton_steps=certificate.recovery.NEWTON_STEPS,
-    )
-    scaled_request = certificate._certificate_solve_request(
-        scaled_profile,
-        seed,
-        target_current,
+    scaled_request = dataclasses.replace(
+        _request,
+        source_profile=scaled_source,
         carrier_identity=f"solovev:{CASE}:{REQUESTED_CELLS}:scaled-profile",
     )
     return (
-        scaled_profile,
+        profile,
         seed,
         requested_class,
         target_current,
@@ -272,13 +275,14 @@ def _scaled_row(fixture_row, scaled_source):
 
 def _lower_certificate(row, external):
     """Return one lowered certificate solve programme as an HLO text pair."""
-    program = row[0]._accelerated_history_program(
+    active = row[0]._with_source(row[4].source_profile)
+    program = active._accelerated_history_program(
         "newton_krylov",
         requested_class=row[2],
         target_current=row[3],
         **row[4].policy.kernel_options(),
     )
-    lowered = program.lower(row[1], external)
+    lowered = program.lower(row[1], external, active.operator, jnp.asarray(row[3]))
     return lowered, lowered.as_text(dialect="stablehlo")
 
 
@@ -302,6 +306,7 @@ def _compiled_slice_module(operator, seed, requested_class, target_current):
     kernels = reduced_newton._bind_dynamic_arguments(
         raw_kernels,
         external,
+        operator,
         jnp.asarray(target_current),
         requested_class,
         bind_external=False,
@@ -315,7 +320,14 @@ def _compiled_slice_module(operator, seed, requested_class, target_current):
     shadow = jnp.ravel(
         jnp.asarray(operator.residual_shadow_mask(seed, requested_class), dtype=bool)
     )
-    lowered = solver.lower(seed, shadow, external)
+    lowered = solver.lower(
+        seed,
+        shadow,
+        external,
+        operator,
+        jnp.asarray(target_current),
+        requested_class,
+    )
     return lowered, lowered.as_text(dialect="stablehlo")
 
 
@@ -343,21 +355,19 @@ def _inventory(fixture_source) -> dict[str, object]:
                 "nova/equilibrium/source.py:285; closure "
                 "scripts/analytic_oracle_fixtures/measure.py:161"
             ),
-            "classification": "Python callable, inlined at trace",
+            "classification": "static polynomial evaluator with traced leaves",
             "notes": (
-                "closes over the scalar pressure-gradient constant "
-                f"(measure.py:158) {_cell_contents(core.p_prime)}; "
-                "the gradient is a captured constant of the programme"
+                f"coefficients {tuple(core.p_prime.coefficients.shape)} and scalar "
+                "normalisation are explicit operator-pytree leaves"
             ),
         },
         {
             "slot": "core.ff_prime (flux function)",
             "definition": ("nova/equilibrium/source.py:286; closure measure.py:164"),
-            "classification": "Python callable, inlined at trace",
+            "classification": "static polynomial evaluator with traced leaves",
             "notes": (
-                "closes over the scalar diamagnetic-gradient constant "
-                f"(measure.py:159) {_cell_contents(core.ff_prime)}; "
-                "a captured constant of the programme"
+                f"coefficients {tuple(core.ff_prime.coefficients.shape)} and scalar "
+                "normalisation are explicit operator-pytree leaves"
             ),
         },
         {
@@ -452,40 +462,78 @@ def _minimal_argument_set(fixture_source, inventory) -> dict[str, object]:
     """Estimate the fixed-shape arrays one shared programme would need."""
     core = fixture_source.core
     _, source_children = _SourceLayout.flatten(fixture_source)
-    scalars = [
+    arguments = [
         {
-            "name": "pressure_gradient",
-            "shape": (1,),
-            "dtype": "f64",
-            "bytes": 8,
-            "definition": "measure.py:158",
+            "name": "pressure_coefficients",
+            "shape": tuple(core.p_prime.coefficients.shape),
+            "dtype": str(core.p_prime.coefficients.dtype),
+            "bytes": int(core.p_prime.coefficients.nbytes),
         },
         {
-            "name": "diamagnetic_gradient",
-            "shape": (1,),
-            "dtype": "f64",
-            "bytes": 8,
-            "definition": "measure.py:159",
+            "name": "pressure_normalisation",
+            "shape": (),
+            "dtype": str(core.p_prime.normalisation.dtype),
+            "bytes": int(core.p_prime.normalisation.nbytes),
+        },
+        {
+            "name": "diamagnetic_coefficients",
+            "shape": tuple(core.ff_prime.coefficients.shape),
+            "dtype": str(core.ff_prime.coefficients.dtype),
+            "bytes": int(core.ff_prime.coefficients.nbytes),
+        },
+        {
+            "name": "diamagnetic_normalisation",
+            "shape": (),
+            "dtype": str(core.ff_prime.normalisation.dtype),
+            "bytes": int(core.ff_prime.normalisation.nbytes),
         },
     ]
-    # Generic sampled profiles would carry one fixed node table per flux
-    # function; the analytic row carries none (callables over one scalar each).
-    node_tables = _CallableLayout.flatten(core.p_prime)[1]
-    node_tables += _CallableLayout.flatten(core.ff_prime)[1]
-    total_bytes = sum(item["bytes"] for item in scalars)
+    total_bytes = sum(item["bytes"] for item in arguments)
     return {
-        "minimal_argument_set": scalars,
-        "argument_count": len(scalars),
+        "minimal_argument_set": arguments,
+        "argument_count": len(arguments),
         "argument_bytes": total_bytes,
         "boundary_primitive_bytes": sum(
             np.asarray(child).nbytes for child in source_children
         ),
-        "notes": "the two flux-function gradients are the per-slice-varying "
-        "inputs; with them traced the programme structure becomes mesh-and-"
-        "policy fixed and every profile of the mesh shares one compiled "
-        "programme, mirroring the exterior fix (a37c5c00). The boundary "
-        "primitives and any sampled node tables (none here; see dynamic_leaves)"
-        " would ride as the next traced arguments.",
+        "notes": "the two fixed-shape coefficient vectors and their physical "
+        "normalisations vary per slice; evaluator code, basis order, mesh and "
+        "solve policy remain static",
+    }
+
+
+def _representation_study(fixture_source) -> dict[str, object]:
+    """Record the evaluated representation choice and its argument costs."""
+    pressure_count = int(fixture_source.core.p_prime.coefficients.size)
+    diamagnetic_count = int(fixture_source.core.ff_prime.coefficients.size)
+    return {
+        "selected": "fixed-order power basis",
+        "selected_orders": {
+            "pressure": pressure_count - 1,
+            "diamagnetic": diamagnetic_count - 1,
+        },
+        "alternatives": {
+            "sampled_nodes": {
+                "interpolation": "piecewise linear",
+                "coefficient_count": "one value per fixed node plus its coordinate",
+                "reading": "already represented by SampledFluxFunction; cheap and "
+                "traceable but not higher order",
+            },
+            "fixed_order_polynomial": {
+                "interpolation": "global power basis evaluated by Horner recurrence",
+                "coefficient_count": (
+                    "order plus one and one normalisation per function"
+                ),
+                "reading": "selected for analytic profile families: differentiable, "
+                "fixed shape and four small per-slice arguments",
+            },
+            "b_spline": {
+                "interpolation": "piecewise higher order",
+                "coefficient_count": "control coefficients plus a fixed knot policy",
+                "reading": "retained for a future local higher-order family; it adds "
+                "basis and knot semantics the constant analytic rows do not need",
+            },
+        },
     }
 
 
@@ -564,8 +612,8 @@ def _write_hlo_difference(fixture_text, scaled_text, fixture_debug, scaled_debug
 def _profile_figure(row, scaled_row) -> Path:
     """Plot the committed against the scaled flux functions over normalised flux."""
     domain = np.linspace(0.0, 1.0, 129)
-    source = row[0].source
-    scaled_source = scaled_row[0].source
+    source = row[4].source_profile
+    scaled_source = scaled_row[4].source_profile
     figure, axes = plt.subplots(1, 2, figsize=(9, 3.6))
     for axis, function, label in (
         (axes[0], "p_prime", "pressure gradient p'"),
@@ -584,8 +632,15 @@ def _profile_figure(row, scaled_row) -> Path:
         axis.legend()
     figure.tight_layout()
     repo_root = Path(__file__).resolve().parents[1]
-    directory = (
-        repo_root / "docs" / "figures" / "millisecond-converged-solve" / "profile-args"
+    directory = Path(
+        os.environ.get(
+            "PROFILE_RECOMPILE_FIGURE_DIRECTORY",
+            repo_root
+            / "docs"
+            / "figures"
+            / "millisecond-converged-solve"
+            / "flux-arguments",
+        )
     )
     directory.mkdir(parents=True, exist_ok=True)
     path = directory / "flux-functions.png"
@@ -601,13 +656,15 @@ def main() -> int:
     assert support_clip_mode() == "chord"
 
     print("STAGE load weak cached 300-cell certificate row", flush=True)
-    fixture_row = _certificate_row(CASE)
+    closure_row = _certificate_row(CASE)
+    fixture_source = _scaled_source(closure_row[0].source, 1.0, 1.0)
+    fixture_row = _scaled_row(closure_row, fixture_source)
     fixture_profile, seed, requested_class, target_current, _ = fixture_row
     external = fixture_profile.operator.external()
 
     print("STAGE build scaled-source profile", flush=True)
     scaled_source = _scaled_source(
-        fixture_profile.source, PRESSURE_SCALE, DIAMAGNETIC_SCALE
+        closure_row[0].source, PRESSURE_SCALE, DIAMAGNETIC_SCALE
     )
     scaled_row = _scaled_row(fixture_row, scaled_source)
 
@@ -624,13 +681,25 @@ def main() -> int:
         hashlib.sha256(fixture_text.encode()).hexdigest(),
         hashlib.sha256(scaled_text.encode()).hexdigest(),
     )
+    print("STAGE compile committed and scaled profile programs", flush=True)
+    compile_walls = []
+    for lowered in (fixture_lowered, scaled_lowered):
+        started = time.perf_counter()
+        lowered.compile()
+        compile_walls.append(time.perf_counter() - started)
 
     print("STAGE compiled-slice lowering, committed and scaled", flush=True)
+    fixture_operator = fixture_profile._with_source(
+        fixture_row[4].source_profile
+    ).operator
     slice_fixture, slice_fixture_text = _compiled_slice_module(
-        fixture_profile.operator, seed, requested_class, target_current
+        fixture_operator, seed, requested_class, target_current
     )
     slice_scaled, slice_scaled_text = _compiled_slice_module(
-        scaled_row[0].operator, seed, requested_class, target_current
+        scaled_row[0]._with_source(scaled_row[4].source_profile).operator,
+        seed,
+        requested_class,
+        target_current,
     )
     slice_digests = (
         hashlib.sha256(slice_fixture_text.encode()).hexdigest(),
@@ -638,13 +707,14 @@ def main() -> int:
     )
 
     print("STAGE inventory and minimal argument set", flush=True)
-    inventory = _inventory(fixture_profile.source)
-    minimal = _minimal_argument_set(fixture_profile.source, inventory)
+    argument_source = fixture_row[4].source_profile
+    inventory = _inventory(argument_source)
+    minimal = _minimal_argument_set(argument_source, inventory)
 
     print("STAGE profile figure", flush=True)
     figure_path = _profile_figure(fixture_row, scaled_row)
     figure_served = (
-        "/nova/figures/millisecond-converged-solve/profile-args/flux-functions.png"
+        "/nova/figures/millisecond-converged-solve/flux-arguments/flux-functions.png"
     )
 
     receipt = {
@@ -661,6 +731,8 @@ def main() -> int:
             "fixture_sha256": certificate_digests[0],
             "scaled_sha256": certificate_digests[1],
             "identical": certificate_digests[0] == certificate_digests[1],
+            "fixture_backend_compile_seconds": compile_walls[0],
+            "scaled_backend_compile_seconds": compile_walls[1],
         },
         "compiled_slice": {
             "fixture_sha256": slice_digests[0],
@@ -670,6 +742,7 @@ def main() -> int:
         "differing_constant_summary": census,
         "inventory": inventory,
         "minimal_argument_set": minimal,
+        "representation_study": _representation_study(argument_source),
     }
     OUTPUT.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
     print(f"STAGE receipt written {OUTPUT}", flush=True)

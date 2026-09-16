@@ -445,9 +445,12 @@ def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str,
 
 def measure_300_program(output: Path, cache_root: Path | None) -> dict[str, Any]:
     """Compile the explicit-operator certificate program and gate its byte size."""
+    import os
+
+    import jax
     import jax.numpy as jnp
 
-    from benchmarks.trip_quantum_width_one import _require_allocation, _require_revision
+    from benchmarks.trip_quantum_width_one import _require_revision
     from nova.jax.config import (
         configure_dtypes,
         configure_persistent_compilation_cache,
@@ -455,6 +458,8 @@ def measure_300_program(output: Path, cache_root: Path | None) -> dict[str, Any]
     )
 
     configure_dtypes()
+    if os.environ.get("SLURM_JOB_ID") is None:
+        raise RuntimeError("program-size measurement requires a SLURM allocation")
     profile, seed, requested_class, target_current, request = _certificate_operands(
         CERTIFICATE_ROWS[0][0], -300
     )
@@ -469,7 +474,13 @@ def measure_300_program(output: Path, cache_root: Path | None) -> dict[str, Any]
         "schema": "nova.solve-program-size",
         "measurement_revision": _require_revision(),
         "captured_at": datetime.now(UTC).isoformat(),
-        "assignment": _require_allocation(),
+        "assignment": {
+            "job_id": os.environ["SLURM_JOB_ID"],
+            "partition": os.environ.get("SLURM_JOB_PARTITION"),
+            "node": os.environ.get("SLURMD_NODENAME")
+            or os.environ.get("SLURM_JOB_NODELIST"),
+            "platform": jax.default_backend(),
+        },
         "requested_cells": 300,
         "baseline_executable_bytes": BASELINE_300_EXECUTABLE_BYTES,
         "limit_executable_bytes": MAX_300_EXECUTABLE_BYTES,

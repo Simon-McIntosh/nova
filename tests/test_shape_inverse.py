@@ -13,10 +13,14 @@ import pytest
 from apps.playable.shape import PlasmaShape, move_bounding_box
 import nova.equilibrium.shape_inverse as shape_inverse_module
 from nova.equilibrium.shape_inverse import (
+    CURRENT_STEP_CEILING_A,
     GAMMA,
     NoAdmissibleShapeStepError,
+    _achieved_over_commanded,
     _admissible_delta,
     _cap_current_delta,
+    _ceiling_current_delta,
+    _moves_toward_command,
     _refine_turning_point,
     _secant_refreshed_tangent,
     _turning_point_current_update,
@@ -159,6 +163,235 @@ def test_axis_admissibility_records_every_nonzero_refusal():
     assert caught.value.refusal_sequence[-1] == 2.0**-20
     assert len(caught.value.refusal_sequence) == 21
     assert 0.0 not in caught.value.refusal_sequence
+
+
+def test_current_ceiling_bounds_each_circuit_before_admission():
+    """A proposed step is clipped to the per-circuit ceiling per command."""
+    applied, limited = _ceiling_current_delta(
+        np.asarray([25_000.0, -60_000.0, 5.0]),
+        CURRENT_STEP_CEILING_A,
+    )
+
+    np.testing.assert_array_equal(applied, np.asarray([20_000.0, -20_000.0, 5.0]))
+    assert limited
+
+
+def test_ceiling_leaves_a_step_inside_the_limit_untouched():
+    """An unstated ceiling is no ceiling; a step inside the limit is unchanged."""
+    proposed = np.asarray([1.0e6, -2.0e6])
+    applied, limited = _ceiling_current_delta(proposed, None)
+    np.testing.assert_array_equal(applied, proposed)
+    assert not limited
+
+    inside, overflowed = _ceiling_current_delta(
+        np.asarray([19_999.0, -1.0]), CURRENT_STEP_CEILING_A
+    )
+    np.testing.assert_array_equal(inside, np.asarray([19_999.0, -1.0]))
+    assert not overflowed
+
+
+def test_command_direction_merit_reads_each_commanded_point():
+    """Motion projecting along the command passes; opposed motion fails."""
+    commanded = np.asarray([[0.0, 0.0], [0.0, 0.02], [0.0, 0.0], [0.0, -0.02]])
+    along = np.asarray([[0.0, 0.0], [0.001, 0.005], [0.0, 0.0], [0.0, -0.006]])
+    opposed = np.asarray([[0.0, 0.0], [0.0, -0.005], [0.0, 0.0], [0.0, -0.006]])
+    drift_only = np.asarray([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, -0.006]])
+
+    assert _moves_toward_command(commanded, along)
+    assert not _moves_toward_command(commanded, opposed)
+    assert _moves_toward_command(np.zeros((4, 2)), opposed)
+    assert not _moves_toward_command(commanded, drift_only)
+
+
+def test_response_gain_reads_the_delivered_share_of_the_intent():
+    """The gain is the delivered motion's projection onto the intended motion."""
+    intended = np.asarray([[0.0, 0.02], [0.0, 0.0], [0.0, 0.0], [0.0, -0.02]])
+
+    assert _achieved_over_commanded(intended, 0.5 * intended) == pytest.approx(0.5)
+    assert _achieved_over_commanded(intended, intended) == pytest.approx(1.0)
+    assert _achieved_over_commanded(np.zeros((4, 2)), intended) is None
+    assert _achieved_over_commanded(intended, np.zeros((4, 2))) is None
+    assert _achieved_over_commanded(intended, -intended) is None
+    assert _achieved_over_commanded(intended, 100.0 * intended) == 10.0
+
+
+def _turning_response_referee(scale: float):
+    """Return an axis-admitting referee whose trial flux carries its own fraction."""
+
+    def referee(current) -> jnp.ndarray:
+        return jnp.asarray(np.asarray(current, dtype=float) / scale)
+
+    return referee
+
+
+def _motion_profile() -> SimpleNamespace:
+    """Return a profile stub whose topology read admits every trial."""
+
+    class Operator:
+        @staticmethod
+        def read(_flux, requested_class=None):
+            del requested_class
+            return None, None
+
+    return SimpleNamespace(operator=Operator())
+
+
+def test_motion_merit_backtracks_a_step_that_opposes_the_command(monkeypatch):
+    """An axis-admissible step that drives the boundary backwards is halved."""
+    profile = _motion_profile()
+
+    def fake_achieved_target(_profile, flux):
+        fraction = float(np.asarray(flux)[0])
+        points = np.zeros((4, 2))
+        points[1, 1] = 0.02 * (fraction - 3.0 * fraction**2)
+        return SimpleNamespace(flux_points=points)
+
+    monkeypatch.setattr(shape_inverse_module, "achieved_target", fake_achieved_target)
+    commanded = np.zeros((4, 2))
+    commanded[1, 1] = 0.02
+    merit = shape_inverse_module._motion_merit(profile, commanded, np.zeros((4, 2)))
+
+    delta, fraction, trials = _admissible_delta(
+        profile,
+        jnp.zeros(1),
+        np.asarray([0.0]),
+        np.asarray([0]),
+        np.asarray([100.0]),
+        forward_solve=_turning_response_referee(100.0),
+        merit=merit,
+    )
+
+    assert fraction == 0.25
+    assert trials == 3
+    np.testing.assert_allclose(delta, [25.0])
+
+
+def test_motion_merit_accepts_the_step_that_advances_the_command(monkeypatch):
+    """The same search admits the first fraction whose motion is along the command."""
+    profile = _motion_profile()
+
+    def fake_achieved_target(_profile, flux):
+        fraction = float(np.asarray(flux)[0])
+        points = np.zeros((4, 2))
+        points[1, 1] = 0.02 * fraction
+        return SimpleNamespace(flux_points=points)
+
+    monkeypatch.setattr(shape_inverse_module, "achieved_target", fake_achieved_target)
+    commanded = np.zeros((4, 2))
+    commanded[1, 1] = 0.02
+    merit = shape_inverse_module._motion_merit(profile, commanded, np.zeros((4, 2)))
+
+    delta, fraction, trials = _admissible_delta(
+        profile,
+        jnp.zeros(1),
+        np.asarray([0.0]),
+        np.asarray([0]),
+        np.asarray([100.0]),
+        forward_solve=_turning_response_referee(100.0),
+        merit=merit,
+    )
+
+    assert fraction == 1.0
+    assert trials == 1
+    np.testing.assert_allclose(delta, [100.0])
+
+
+def test_motion_merit_refuses_every_fraction_of_an_opposing_step(monkeypatch):
+    """A step that never advances the command exhausts and reports its refusals."""
+    profile = _motion_profile()
+
+    def fake_achieved_target(_profile, flux):
+        fraction = float(np.asarray(flux)[0])
+        points = np.zeros((4, 2))
+        points[1, 1] = -0.02 * fraction
+        return SimpleNamespace(flux_points=points)
+
+    monkeypatch.setattr(shape_inverse_module, "achieved_target", fake_achieved_target)
+    commanded = np.zeros((4, 2))
+    commanded[1, 1] = 0.02
+    merit = shape_inverse_module._motion_merit(profile, commanded, np.zeros((4, 2)))
+
+    with pytest.raises(NoAdmissibleShapeStepError) as caught:
+        _admissible_delta(
+            profile,
+            jnp.zeros(1),
+            np.asarray([0.0]),
+            np.asarray([0]),
+            np.asarray([100.0]),
+            forward_solve=_turning_response_referee(100.0),
+            merit=merit,
+        )
+
+    assert caught.value.refusal_sequence[0] == 1.0
+    assert caught.value.refusal_sequence[-1] == 2.0**-20
+    assert len(caught.value.refusal_sequence) == 21
+
+
+def test_motion_merit_abstains_below_the_resolvable_step(monkeypatch):
+    """A step too small to resolve is admitted on topology, not judged on noise."""
+    profile = _motion_profile()
+
+    def fake_achieved_target(_profile, flux):
+        fraction = float(np.asarray(flux)[0])
+        points = np.zeros((4, 2))
+        points[1, 1] = -0.02 * fraction
+        return SimpleNamespace(flux_points=points)
+
+    monkeypatch.setattr(shape_inverse_module, "achieved_target", fake_achieved_target)
+    commanded = np.zeros((4, 2))
+    commanded[1, 1] = 0.02
+    merit = shape_inverse_module._motion_merit(profile, commanded, np.zeros((4, 2)))
+
+    delta, fraction, trials = _admissible_delta(
+        profile,
+        jnp.zeros(1),
+        np.asarray([0.0]),
+        np.asarray([0]),
+        np.asarray([10.0]),
+        forward_solve=_turning_response_referee(10.0),
+        merit=merit,
+        merit_floor_a=20_000.0 * shape_inverse_module.MERIT_RESOLVABLE_STEP_FRACTION,
+    )
+
+    assert fraction == 1.0
+    assert trials == 1
+    np.testing.assert_allclose(delta, [10.0])
+
+
+def test_stated_ceiling_bounds_the_admitted_placement_step(machine, seed_target):
+    """The 20 kA ceiling clips the placement step the inverse is allowed to command."""
+    current = np.asarray(machine.profile.operator.prescribed_current_field.current)
+    points = np.asarray(seed_target.flux_points).copy()
+    points[1, 1] += 0.02
+    target = replace(
+        seed_target,
+        flux_points=points,
+        radial_field_points=points[[0, 2]],
+        vertical_field_points=points[[1, 3]],
+    )
+
+    capped = solve_shape_inverse(
+        machine.profile,
+        target,
+        machine.seed,
+        prescribed_current=current,
+        picard_rounds=0,
+    )
+    uncapped = solve_shape_inverse(
+        machine.profile,
+        target,
+        machine.seed,
+        prescribed_current=current,
+        picard_rounds=0,
+        current_step_ceiling=None,
+    )
+
+    assert capped.current_step_ceiling == CURRENT_STEP_CEILING_A
+    assert capped.current_step_ceiling_limited
+    assert float(np.max(np.abs(capped.delta))) <= CURRENT_STEP_CEILING_A
+    assert not uncapped.current_step_ceiling_limited
+    np.testing.assert_allclose(uncapped.delta, capped.uncapped_delta)
+    assert float(np.max(np.abs(uncapped.delta))) > CURRENT_STEP_CEILING_A
 
 
 def test_turning_point_refinement_rejects_off_plasma_root(monkeypatch):
@@ -341,7 +574,11 @@ def test_current_step_cap_is_relative_to_each_seed_circuit():
 def test_dimensionless_delta_regularisation_uses_the_stated_current_scale(
     machine, seed_target
 ):
-    """A delta penalty applies to fractions of each caller-stated ceiling."""
+    """A delta penalty applies to fractions of each caller-stated current scale.
+
+    The actuator ceiling is switched off: this measures the regularisation
+    algebra against its own closed form, which a clipped step would obscure.
+    """
     current = np.asarray(machine.profile.operator.prescribed_current_field.current)
     points = np.asarray(seed_target.flux_points).copy()
     points[1, 1] += 0.02
@@ -351,7 +588,7 @@ def test_dimensionless_delta_regularisation_uses_the_stated_current_scale(
         radial_field_points=points[[0, 2]],
         vertical_field_points=points[[1, 3]],
     )
-    ceiling = 20_000.0
+    delta_scale = 20_000.0
     weight = 0.25
     free_circuits = np.arange(0, current.size, 2)
     solved = solve_shape_inverse(
@@ -363,11 +600,12 @@ def test_dimensionless_delta_regularisation_uses_the_stated_current_scale(
         picard_rounds=0,
         free_circuits=free_circuits,
         delta_regularisation=weight,
-        delta_current_scale=ceiling,
+        delta_current_scale=delta_scale,
+        current_step_ceiling=None,
     )
 
     matrix = solved.response[:, solved.free_circuits] * solved.row_weight[:, None]
-    scale = np.full(solved.free_circuits.size, ceiling)
+    scale = np.full(solved.free_circuits.size, delta_scale)
     rhs = solved.right_hand_side * solved.row_weight
     scaled_matrix = matrix * scale[np.newaxis, :]
     augmented_matrix = np.vstack((scaled_matrix, np.sqrt(weight) * np.eye(scale.size)))
@@ -384,7 +622,8 @@ def test_dimensionless_delta_regularisation_uses_the_stated_current_scale(
         picard_rounds=0,
         free_circuits=free_circuits,
         delta_regularisation=2.0 * weight,
-        delta_current_scale=ceiling,
+        delta_current_scale=delta_scale,
+        current_step_ceiling=None,
     )
 
     assert solved.delta_regularisation == weight
@@ -498,7 +737,11 @@ def test_production_solver_runs_one_forward_after_the_inverse(monkeypatch, seed_
 
 
 def test_limited_fixture_linear_upper_authority_has_commanded_sign_and_gain(machine):
-    """The limited fixture retains increasing linear upper-point authority."""
+    """The limited fixture retains increasing linear upper-point authority.
+
+    Without the actuator ceiling, so the measurement is the fixture's own
+    authority rather than the clip of the step the solver proposes on it.
+    """
     from apps.playable.production import ProductionSolver
 
     profile = machine.profile
@@ -521,7 +764,11 @@ def test_limited_fixture_linear_upper_authority_has_commanded_sign_and_gain(mach
             vertical_field_points=points[[1, 3]],
         )
         inverse = solve_shape_inverse(
-            profile, target, prime.flux, prescribed_current=current
+            profile,
+            target,
+            prime.flux,
+            prescribed_current=current,
+            current_step_ceiling=None,
         )
         upper_prediction.append(float(inverse.linear_prediction[1]))
         current_change.append(float(np.linalg.norm(inverse.delta)))

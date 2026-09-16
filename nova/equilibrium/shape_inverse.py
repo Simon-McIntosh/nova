@@ -71,6 +71,17 @@ PICARD_ROUNDS = 3
 TURNING_POINT_RELATIVE_TOLERANCE = 0.1
 #: Symmetric current perturbation used for the local turning-point tangent [A].
 TURNING_POINT_TANGENT_STEP_A = 100.0
+#: Largest current change one circuit may be commanded in a single shape step [A].
+CURRENT_STEP_CEILING_A = 20_000.0
+#: Bounds on the achieved-over-commanded gain an admitted step may set.
+RESPONSE_GAIN_BOUNDS = (0.1, 10.0)
+#: Step size, as a fraction of the current ceiling, below which the motion a
+#: step induces is not resolvable and the motion merit abstains rather than
+#: judge the step by noise. Measured on the carried MAST receipt: steps of 11
+#: and 17 A against a 20 kA ceiling (about 2**-11 of it) moved the commanded
+#: extrema by 1e-4 m against a 0.35 m residual, with the sign of the motion
+#: along the command reversing between consecutive steps.
+MERIT_RESOLVABLE_STEP_FRACTION = 2.0**-5
 
 IsofluxReference = Literal["boundary", "reference_point"]
 
@@ -102,6 +113,11 @@ class ShapeInverseIteration:
     admitted_delta: np.ndarray
     accepted_fraction: float
     admissibility_trials: int
+    proposed_ceiling_a: float | None = None
+    ceiling_limited: bool = False
+    backtracks: int = 0
+    achieved_motion: np.ndarray | None = None
+    response_gain: float | None = None
 
 
 @dataclass(frozen=True)
@@ -130,6 +146,9 @@ class ShapeInverseResult:
     picard_boundary_flux: np.ndarray
     current_step_fraction: float | None
     current_step_limited: bool
+    current_step_ceiling: float | None
+    current_step_ceiling_limited: bool
+    response_gain: float | None
     accepted_fraction: float
     admissibility_trials: int
     least_squares_residual: float
@@ -164,6 +183,88 @@ def _cap_current_delta(
     limit = fraction * np.abs(reference)
     capped = np.clip(update, -limit, limit)
     return capped, bool(np.any(capped != update))
+
+
+def _ceiling_current_delta(
+    delta: np.ndarray,
+    ceiling: float | None,
+) -> tuple[np.ndarray, bool]:
+    """Bound each circuit's proposed update by an absolute current ceiling."""
+    update = np.asarray(delta, dtype=float)
+    if ceiling is None:
+        return update.copy(), False
+    limit = abs(float(ceiling))
+    if not np.isfinite(limit) or limit <= 0.0:
+        raise ValueError("current_step_ceiling must be finite and positive")
+    capped = np.clip(update, -limit, limit)
+    return capped, bool(np.any(capped != update))
+
+
+def _moves_toward_command(
+    commanded_motion: np.ndarray,
+    achieved_motion: np.ndarray,
+) -> bool:
+    """Return whether every commanded turning point advanced along its command.
+
+    A step can be axis-admissible and still drive the boundary the wrong way:
+    a large current update whose induced motion opposes the command is
+    admissible in topology and inadmissible in physics. Each commanded
+    extremum must move with a positive component along its own command.
+    """
+    commanded = np.asarray(commanded_motion, dtype=float).reshape(-1, 2)
+    achieved = np.asarray(achieved_motion, dtype=float).reshape(-1, 2)
+    if commanded.shape != achieved.shape:
+        raise ValueError("commanded and achieved motion must share one shape")
+    norms = np.linalg.norm(commanded, axis=1)
+    active = norms > np.finfo(float).tiny
+    if not bool(np.any(active)):
+        return True
+    projections = np.einsum("ij,ij->i", achieved[active], commanded[active])
+    return bool(np.all(projections > 0.0))
+
+
+def _motion_merit(
+    profile: ForwardProfile,
+    commanded_motion: np.ndarray,
+    baseline_turning_points: np.ndarray,
+) -> Callable[[object], bool]:
+    """Return a trial predicate that requires motion along the command."""
+
+    def merit(trial: object) -> bool:
+        trial_flux = jnp.asarray(getattr(trial, "flux", trial))
+        achieved = np.asarray(
+            achieved_target(profile, trial_flux).flux_points, dtype=float
+        )[:4]
+        return _moves_toward_command(
+            commanded_motion,
+            achieved - baseline_turning_points,
+        )
+
+    return merit
+
+
+def _achieved_over_commanded(
+    commanded_motion: np.ndarray,
+    achieved_motion: np.ndarray,
+) -> float | None:
+    """Return the scalar gain an admitted step delivered against its intent.
+
+    The projection of the delivered motion onto the intended motion, divided
+    by the intended motion's squared magnitude, is the factor by which the
+    local response over- or under-predicts. Scaling the refreshed response by
+    it makes the next Newton correction compensate the measured shortfall
+    rather than repeat it.
+    """
+    intended = np.asarray(commanded_motion, dtype=float).reshape(-1)
+    delivered = np.asarray(achieved_motion, dtype=float).reshape(-1)
+    denominator = float(intended @ intended)
+    if not np.isfinite(denominator) or denominator <= np.finfo(float).tiny:
+        return None
+    gain = float(delivered @ intended) / denominator
+    if not np.isfinite(gain) or gain <= 0.0:
+        return None
+    low, high = RESPONSE_GAIN_BOUNDS
+    return float(np.clip(gain, low, high))
 
 
 def _delta_current_scale(
@@ -661,6 +762,29 @@ def _admits_axis(
     which keeps a direct inverse call self-contained while still refusing a trial
     state that has already lost its axis.
     """
+    return (
+        _trial_forward(
+            profile,
+            state,
+            current,
+            requested_class=requested_class,
+            target_current=target_current,
+            forward_solve=forward_solve,
+        )
+        is not None
+    )
+
+
+def _trial_forward(
+    profile: ForwardProfile,
+    state: jax.Array,
+    current: np.ndarray,
+    *,
+    requested_class=None,
+    target_current=None,
+    forward_solve: Callable[[np.ndarray], object] | None,
+) -> object | None:
+    """Return the trial forward state, or None when it carries no axis."""
     try:
         trial = (
             forward_solve(current)
@@ -674,8 +798,8 @@ def _admits_axis(
         trial_flux = jnp.asarray(getattr(trial, "flux", trial))
         profile.operator.read(trial_flux, requested_class=requested_class)
     except NoQualifiedAxisError:
-        return False
-    return True
+        return None
+    return trial
 
 
 def _admissible_delta(
@@ -688,8 +812,19 @@ def _admissible_delta(
     requested_class=None,
     target_current=None,
     forward_solve: Callable[[np.ndarray], object] | None = None,
+    merit: Callable[[object], bool] | None = None,
+    merit_floor_a: float | None = None,
 ) -> tuple[np.ndarray, float, int]:
-    """Contract one current update until its forward state admits an axis."""
+    """Contract one current update until its forward state is admissible.
+
+    Admission is by axis topology alone, or by axis topology *and* a ``merit``
+    predicate on the trial forward state when one is supplied. The same halving
+    then also backtracks a step whose achieved motion opposes the command, so a
+    step that keeps the axis while driving the boundary the wrong way is never
+    admitted. A step at or below ``merit_floor_a`` is admitted on topology
+    alone: motion that small is not resolvable, so the merit would be reading
+    the noise of the forward solve rather than the command.
+    """
     fraction = 1.0
     trials = 0
     refusals = []
@@ -697,17 +832,26 @@ def _admissible_delta(
         candidate = initial_current.copy()
         candidate[free] += fraction * delta
         trials += 1
-        if _admits_axis(
+        trial = _trial_forward(
             profile,
             state,
             candidate,
             requested_class=requested_class,
             target_current=target_current,
             forward_solve=forward_solve,
-        ):
-            return fraction * delta, fraction, trials
-        refusals.append(fraction)
-        fraction *= 0.5
+        )
+        if trial is None:
+            refusals.append(fraction)
+            fraction *= 0.5
+            continue
+        resolved = merit_floor_a is None or bool(
+            np.max(np.abs(fraction * delta)) >= merit_floor_a
+        )
+        if merit is not None and resolved and not merit(trial):
+            refusals.append(fraction)
+            fraction *= 0.5
+            continue
+        return fraction * delta, fraction, trials
     raise NoAdmissibleShapeStepError(refusals, delta)
 
 
@@ -1068,12 +1212,24 @@ def solve_shape_inverse(
     picard_rounds: int = PICARD_ROUNDS,
     current_step_fraction: float | None = None,
     current_step_reference=None,
+    current_step_ceiling: float | None = CURRENT_STEP_CEILING_A,
     delta_regularisation: float = 0.0,
     delta_current_scale=None,
     forward_solve: Callable[[np.ndarray], object] | None = None,
     turning_point_relative_tolerance: float = TURNING_POINT_RELATIVE_TOLERANCE,
 ) -> ShapeInverseResult:
     """Solve seed-anchored free-circuit changes against achieved shape.
+
+    Every proposed current step is first bounded by ``current_step_ceiling``
+    (a per-circuit absolute ceiling, 20 kA by default) and then sent through a
+    line search that halves it until the trial forward state both keeps its
+    axis and advances the achieved turning points along the command. The
+    motion test abstains below ``MERIT_RESOLVABLE_STEP_FRACTION`` of the
+    ceiling, where the induced motion is smaller than the forward solve can
+    resolve and the test would read noise. The step the search admits is
+    measured against the motion it was intended to deliver, and that
+    achieved-over-commanded gain scales the refreshed response so the next
+    correction compensates the measured shortfall.
 
     At each round, the coil coupling is solved for a current change about the
     fixed seed after the fixed-conductor, plasma and seed-current images
@@ -1196,6 +1352,8 @@ def solve_shape_inverse(
     picard_current_history = []
     picard_boundary_history = []
     current_step_limited = False
+    current_step_ceiling_limited = False
+    response_gain = None
     accepted_fraction = 1.0
     admissibility_trials = 0
     admitted_forward: dict[str, object] = {}
@@ -1220,6 +1378,16 @@ def solve_shape_inverse(
             achieved_target(profile, seed_state).flux_points, dtype=float
         )[:4]
         admitted_forward.clear()
+    placement_merit = (
+        _motion_merit(profile, commanded_motion, seed_achieved_turning_points)
+        if forward_solve is not None
+        else None
+    )
+    merit_floor_a = (
+        None
+        if current_step_ceiling is None
+        else MERIT_RESOLVABLE_STEP_FRACTION * abs(float(current_step_ceiling))
+    )
 
     for iteration in range(placement_rounds + 1):
         _masks, topology = profile.operator.read(state, requested_class=requested_class)
@@ -1272,6 +1440,11 @@ def solve_shape_inverse(
             current_step_fraction,
         )
         current_step_limited = current_step_limited or limited
+        applied_round_delta, ceiling_limited = _ceiling_current_delta(
+            applied_round_delta,
+            current_step_ceiling,
+        )
+        current_step_ceiling_limited = current_step_ceiling_limited or ceiling_limited
         final_without_referee = iteration == placement_rounds and (
             forward_solve is None or command_norm == 0.0
         )
@@ -1292,6 +1465,8 @@ def solve_shape_inverse(
                     if forward_solve is not None and iteration == placement_rounds
                     else None
                 ),
+                merit=placement_merit if iteration == placement_rounds else None,
+                merit_floor_a=merit_floor_a,
             )
         accepted_fraction = fraction
         admissibility_trials += trials
@@ -1325,7 +1500,14 @@ def solve_shape_inverse(
         physical_residual_norm = float(
             np.max(np.linalg.norm(physical_residual, axis=1))
         )
+        placement_gain = _achieved_over_commanded(
+            commanded_motion,
+            achieved_motion,
+        )
+        response_gain = placement_gain
         tangent = turning_point_response_matrix(profile, flux, free)
+        if placement_gain is not None:
+            tangent = tangent * placement_gain
         tangent = _secant_refreshed_tangent(
             tangent,
             current[free] - initial_current[free],
@@ -1344,14 +1526,23 @@ def solve_shape_inverse(
                 admitted_delta=np.asarray(applied_round_delta, dtype=float).copy(),
                 accepted_fraction=float(accepted_fraction),
                 admissibility_trials=int(trials),
+                proposed_ceiling_a=current_step_ceiling,
+                ceiling_limited=bool(ceiling_limited),
+                backtracks=int(max(0, trials - 1)),
+                achieved_motion=achieved_motion.copy(),
+                response_gain=placement_gain,
             )
         )
         converged = physical_residual_norm <= turning_point_tolerance
         maximum_iterations = max(1, picard_rounds)
         prior_current = initial_current[free].copy()
         prior_achieved = seed_achieved_turning_points.copy()
+        prior_intended = commanded_motion.copy()
         while not converged and len(iteration_history) < maximum_iterations:
             tangent = turning_point_response_matrix(profile, state, free)
+            gain_used = response_gain
+            if response_gain is not None:
+                tangent = tangent * response_gain
             tangent = _secant_refreshed_tangent(
                 tangent,
                 current[free] - prior_current,
@@ -1370,9 +1561,17 @@ def solve_shape_inverse(
                 current_step_fraction,
             )
             current_step_limited = current_step_limited or limited
+            capped_update, ceiling_limited = _ceiling_current_delta(
+                capped_update,
+                current_step_ceiling,
+            )
+            current_step_ceiling_limited = (
+                current_step_ceiling_limited or ceiling_limited
+            )
             base_current = current.copy()
             prior_current = current[free].copy()
             prior_achieved = achieved_turning_points.copy()
+            prior_intended = physical_residual.copy()
             admitted_forward.clear()
             admitted_update, fraction, trials = _admissible_delta(
                 profile,
@@ -1383,6 +1582,12 @@ def solve_shape_inverse(
                 requested_class=requested_class,
                 target_current=target_current,
                 forward_solve=capture_forward,
+                merit=_motion_merit(
+                    profile,
+                    physical_residual,
+                    achieved_turning_points,
+                ),
+                merit_floor_a=merit_floor_a,
             )
             current[free] += admitted_update
             last_uncapped_total = (
@@ -1406,6 +1611,10 @@ def solve_shape_inverse(
                 np.max(np.linalg.norm(physical_residual, axis=1))
             )
             tangent_singular_values = np.linalg.svd(tangent, compute_uv=False)
+            response_gain = _achieved_over_commanded(
+                prior_intended,
+                achieved_turning_points - prior_achieved,
+            )
             iteration_history.append(
                 ShapeInverseIteration(
                     commanded_turning_points=commanded_turning_points.copy(),
@@ -1418,6 +1627,11 @@ def solve_shape_inverse(
                     admitted_delta=np.asarray(admitted_update, dtype=float).copy(),
                     accepted_fraction=float(fraction),
                     admissibility_trials=int(trials),
+                    proposed_ceiling_a=current_step_ceiling,
+                    ceiling_limited=bool(ceiling_limited),
+                    backtracks=int(max(0, trials - 1)),
+                    achieved_motion=(achieved_turning_points - prior_achieved).copy(),
+                    response_gain=gain_used,
                 )
             )
             picard_current_history.append(current.copy())
@@ -1461,6 +1675,9 @@ def solve_shape_inverse(
         picard_boundary_flux=np.asarray(picard_boundary_history),
         current_step_fraction=current_step_fraction,
         current_step_limited=current_step_limited,
+        current_step_ceiling=current_step_ceiling,
+        current_step_ceiling_limited=current_step_ceiling_limited,
+        response_gain=response_gain,
         accepted_fraction=accepted_fraction,
         admissibility_trials=admissibility_trials,
         least_squares_residual=float(

@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-16">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -65,6 +65,11 @@
     <pre class="r-fu-prompt">/reckon-ship centroid-constrained-oracle-solve §2</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260916T070747822998-cco-bounded-uniform-field-unknown" data-who="s19c-cco-fieldunknown-s" data-when="2026-09-16T10:18:55Z">
+    <div class="r-comment-body"><p>Bounded exterior-field unknown, fixture response columns, centroid pair builder and receipt driver landed with green module gates (7 plus 2 in fresh processes) and merged at f13afe19, but the scientific gate failed: on weak 110 the row saturated its 0.25 T vertical-field bound with the centroid still 0.566 pitches off target, row residual 0.566, terminal residual 1.0e-3 and the terminal state read diverted with boundary flux 34.5 Wb from the analytic zero, so the row as built drives the fixture out of its basin rather than restraining it; the constrained program compiles in 8.5 min on the H200 and one job held one row; the row&#x27;s linear response is the next measurement</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

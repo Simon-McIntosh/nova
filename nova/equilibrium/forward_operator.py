@@ -73,6 +73,7 @@ from nova.equilibrium.source import (
     CurrentNormalisationError,
     DomainProfile,
     ForwardSource,
+    PolynomialFluxFunction,
 )
 from nova.equilibrium.stencil_mesh import (
     CellCurrentMoments,
@@ -1683,6 +1684,7 @@ class _SourceLayout:
     identity: str
     source_type: type = field(compare=False, repr=False)
     core_type: type | None = field(compare=False, repr=False)
+    core_static_state: dict[str, object] = field(compare=False, repr=False)
     pressure_layout: _CallableLayout | None = field(compare=False, repr=False)
     field_layout: _CallableLayout | None = field(compare=False, repr=False)
     pressure_leaf_count: int = field(compare=False, repr=False)
@@ -1699,7 +1701,9 @@ class _SourceLayout:
 
     @classmethod
     def flatten(cls, source: object) -> tuple[_SourceLayout, tuple[object, ...]]:
-        if type(source) is not ForwardSource or type(source.core) is not DomainProfile:
+        if type(source) is not ForwardSource or not isinstance(
+            source.core, DomainProfile
+        ):
             identity = (
                 f"static:{type(source).__module__}.{type(source).__qualname__}:"
                 f"{id(source)}"
@@ -1709,6 +1713,7 @@ class _SourceLayout:
                     identity=identity,
                     source_type=type(source),
                     core_type=None,
+                    core_static_state={},
                     pressure_layout=None,
                     field_layout=None,
                     pressure_leaf_count=0,
@@ -1721,12 +1726,25 @@ class _SourceLayout:
             )
         pressure_layout, pressure_leaves = _CallableLayout.flatten(source.core.p_prime)
         field_layout, field_leaves = _CallableLayout.flatten(source.core.ff_prime)
+        core_static_state = {
+            name: value
+            for name, value in source.core.__dict__.items()
+            if name not in ("p_prime", "ff_prime")
+        }
+        core_digest = hashlib.sha256()
+        _digest_callable_value(
+            core_digest,
+            "core_static_state",
+            core_static_state,
+            set(),
+        )
         identity = ":".join(
             (
                 f"{type(source).__module__}.{type(source).__qualname__}",
                 f"{type(source.core).__module__}.{type(source.core).__qualname__}",
                 pressure_layout.identity,
                 field_layout.identity,
+                core_digest.hexdigest(),
                 str(int(source.normalisation)),
                 f"common={id(source.common_sol)}",
                 f"private={id(source.private_flux)}",
@@ -1736,6 +1754,7 @@ class _SourceLayout:
             identity=identity,
             source_type=type(source),
             core_type=type(source.core),
+            core_static_state=core_static_state,
             pressure_layout=pressure_layout,
             field_layout=field_layout,
             pressure_leaf_count=len(pressure_leaves),
@@ -1759,6 +1778,8 @@ class _SourceLayout:
         pressure_leaves = tuple(profile_leaves[: self.pressure_leaf_count])
         field_leaves = tuple(profile_leaves[self.pressure_leaf_count :])
         core = object.__new__(self.core_type)
+        for name, value in self.core_static_state.items():
+            object.__setattr__(core, name, value)
         object.__setattr__(
             core, "p_prime", self.pressure_layout.rebuild(pressure_leaves)
         )
@@ -3199,6 +3220,56 @@ class ForwardFluxOperator:
                 psi, target_current, requested_class
             )
         return self.current_moment_image(moments)
+
+    def profile_component_image(
+        self,
+        psi,
+        *,
+        component: str,
+        amplitude,
+        requested_class=None,
+        target_current=None,
+    ) -> jax.Array:
+        """Return one profile component's flux-image amplitude tangent.
+
+        The source evaluator and coefficient order stay fixed.  The JVP varies
+        only the selected physical normalisation, so current normalisation and
+        every downstream moment operation contribute their exact derivative.
+        """
+        if component not in ("pressure_gradient", "ff_prime"):
+            raise ValueError("unknown profile-amplitude component")
+        field = "p_prime" if component == "pressure_gradient" else "ff_prime"
+        function = getattr(self.source.core, field)
+        if not isinstance(function, PolynomialFluxFunction):
+            raise TypeError(
+                "profile component tangents require PolynomialFluxFunction "
+                "coefficient arguments"
+            )
+
+        def image(scale):
+            varied_function = PolynomialFluxFunction.tree_unflatten(
+                None,
+                (
+                    function.coefficients,
+                    function.normalisation * (1.0 + scale),
+                ),
+            )
+            core = object.__new__(type(self.source.core))
+            for name, value in self.source.core.__dict__.items():
+                object.__setattr__(core, name, value)
+            object.__setattr__(core, field, varied_function)
+            source = object.__new__(type(self.source))
+            for name, value in self.source.__dict__.items():
+                object.__setattr__(source, name, value)
+            object.__setattr__(source, "core", core)
+            active = object.__new__(type(self))
+            active.__dict__ = self.__dict__.copy()
+            active.source = source
+            return active.internal(psi, requested_class, target_current)
+
+        zero = jnp.asarray(0.0, dtype=function.normalisation.dtype)
+        _base, tangent = jax.jvp(image, (zero,), (jnp.asarray(amplitude),))
+        return tangent
 
     def current_moment_image(self, moments: CellCurrentMoments) -> jax.Array:
         """Return flux from an explicitly supplied cell-current moment image."""

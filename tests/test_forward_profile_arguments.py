@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 import hashlib
 
 import jax
@@ -14,6 +15,7 @@ from nova.equilibrium.source import (
     PolynomialFluxFunction,
 )
 from nova.jax.config import configure_dtypes
+from tests.test_forward_compile_identity import CASES, _certificate_row
 from tests.test_forward_operator_arguments import _operator
 
 
@@ -107,3 +109,70 @@ def test_incompatible_profile_representation_is_refused() -> None:
     )
     with pytest.raises(ValueError, match="static flux-function representation"):
         operator.with_source(incompatible)
+
+
+def test_profile_component_image_is_the_normalisation_tangent() -> None:
+    """The pressure-amplitude JVP agrees on a qualified certificate state."""
+    from benchmarks.profile_coefficients_recompile_audit import (
+        _scaled_row,
+        _scaled_source,
+    )
+
+    closure_row = _certificate_row(CASES[0])
+    argument_source = _scaled_source(closure_row[0].source, 1.0, 1.0)
+    profile, state, requested_class, target_current, _request = _scaled_row(
+        closure_row, argument_source
+    )
+    operator = profile.operator
+    amplitude = jnp.asarray(0.25)
+
+    tangent = operator.profile_component_image(
+        state,
+        component="pressure_gradient",
+        amplitude=amplitude,
+        requested_class=requested_class,
+        target_current=target_current,
+    )
+
+    def source_at(scale):
+        function = argument_source.core.p_prime
+        varied = PolynomialFluxFunction(
+            function.coefficients,
+            function.normalisation * scale,
+        )
+        return replace(
+            argument_source, core=replace(argument_source.core, p_prime=varied)
+        )
+
+    def central_difference(step):
+        upper = operator.with_source(source_at(1.0 + step)).internal(
+            state, requested_class, target_current
+        )
+        lower = operator.with_source(source_at(1.0 - step)).internal(
+            state, requested_class, target_current
+        )
+        return amplitude * (upper - lower) / (2.0 * step), upper, lower
+
+    coarse, _coarse_upper, _coarse_lower = central_difference(1.0e-3)
+    fine, fine_upper, fine_lower = central_difference(5.0e-4)
+    error = jnp.max(jnp.abs(tangent - fine))
+    truncation = jnp.max(jnp.abs(coarse - fine))
+    image_scale = jnp.maximum(
+        jnp.max(jnp.abs(fine_upper)), jnp.max(jnp.abs(fine_lower))
+    )
+    roundoff = (
+        32.0 * jnp.finfo(state.dtype).eps * jnp.abs(amplitude) * image_scale / 5.0e-4
+    )
+    earned_tolerance = 2.0 * truncation + roundoff
+    figures = {
+        "maximum_tangent": float(jnp.max(jnp.abs(tangent))),
+        "maximum_error": float(error),
+        "truncation_estimate": float(truncation),
+        "roundoff_floor": float(roundoff),
+        "earned_tolerance": float(earned_tolerance),
+    }
+    print(f"PROFILE_COMPONENT_FIGURES {figures}")
+
+    assert jnp.all(jnp.isfinite(tangent))
+    assert jnp.max(jnp.abs(tangent)) > 0.0
+    assert error <= earned_tolerance, figures

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T13:10:06",
+  "updated": "2026-09-16T13:13:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4562,9 +4562,11 @@
         "id": "s19c-cco-response-l",
         "harness": "codex-luna",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0a9c3-f5b7-7233-8385-a4c08a841d87",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a0a9c3-f5b7-7233-8385-a4c08a841d87"
+        },
         "created": "2026-09-16"
       },
       {
@@ -171797,6 +171799,215 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T102915777338-cco-uniform-field-response-probe",
+        "plan": "centroid-constrained-oracle-solve",
+        "section": "\u00a72",
+        "node": "cco-uniform-field-response-probe",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1005,
+                "cached_input_tokens": 623865,
+                "input_tokens": 624902,
+                "output_tokens": 1507,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 626409,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "one H200 job (one card, explicit --mem 128G, cpus sized to the free cores on 98dci4-gpu-0003, the shared environment's interpreter run directly, JAX_PLATFORMS=cuda,cpu, the persistent compilation cache enabled, TMPDIR=/tmp exported outside and inside, one compiled map reused for every increment) persists a receipt under docs/figures/centroid-constrained-oracle-solve/field-response/ with eight rows (two components, four amplitudes) each carrying the centroid shift after one map and after four trips in metres and in pitches, the row's linear prediction, the ratio of measured to predicted, and the sign agreement, plus one poloidal panel per component at plus 10 mT drawn with the nova.media painters (line contours on shared levels, both null sets, the wall), with the receipt stating whether a uniform vertical field moves the centroid radially in the direction and at the magnitude the row assumes, tests/test_centroid_constrained_fixture.py green in one fresh all_debug CPU process with zero added failures against the base, logs under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/field-response, every job declared as a wait before blocking, every manifest scalar unquoted",
+          "estimated_hours": null,
+          "goal": "Measure the coil-less weak-110 fixture's centroid response to the two uniform field increments the centroid row assumes (the vertical and radial columns of scripts/analytic_oracle_fixtures/measure.py EXTERIOR_FIELD_COMPONENTS, driven through the fixture operator's one external slot with the cached exterior unchanged), on one compiled production map with no constraint row: increments of plus and minus 1 mT and 10 mT per component, current centroid shift after one map and after four trips beside the analytic centroid, tabled against the linear prediction the row's CurrentCentroidConstraint dual image gives for the same increments, reusing the translated-input machinery of benchmarks/fixture_positional_stiffness.py (_build_context, _operator_with_both_exteriors, _residual) rather than a new driver",
+          "id": "cco-uniform-field-response-probe",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-16T10:29:16Z",
+            "read_at": "2026-09-16T10:29:17Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 85.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T102915777338-cco-uniform-field-response-probe/manifest.md",
+          "plan": "centroid-constrained-oracle-solve",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/centroid_field_response_probe.py",
+            "scripts/analytic_oracle_fixtures/centroid_row.py",
+            "tests/test_centroid_constrained_fixture.py",
+            "docs/figures/centroid-constrained-oracle-solve/field-response",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/field-response",
+            "docs/evidence/archive/centroid-constrained-oracle-solve-landed.html",
+            "docs/plans/centroid-constrained-oracle-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19c-cco-response-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-16T10:29:46Z",
+        "completed_at": "2026-09-16T11:09:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2404,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2404,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "52071c8a99d414ddf2b630056ea459d3f84f8758",
+        "commits": [
+          "f424d55cfcd29ba78dcf5adeb6a1f1fb2c82ee2f",
+          "00412585dbf9e486ecf1f6a6c0e984c260cdfd74",
+          "14f2a3213164fa4c359f60802d64eb85e9dcee18",
+          "deb531971ad06efa2343f961c251e91b7afd4921"
+        ],
+        "changed_lines": {
+          "added": 3115,
+          "removed": 0,
+          "files": 14
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 field-response probe job 1272113 plus tests/test_centroid_constrained_fixture.py on all_debug (job 1272120)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/field-response/h200-1272113.log",
+          "log_digest": "sha256:8f9d28b4cde20ed3a66b907da95eed51270f0f813b4e4cc2ac51757f10cf82b5"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T102915777338-cco-uniform-field-response-probe/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a9c3-f5b7-7233-8385-a4c08a841d87",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 180224,
+            "cached_input_tokens_cumulative": 180224,
+            "input_tokens": 183049,
+            "input_tokens_cumulative": 183049,
+            "output_tokens": 310,
+            "output_tokens_cumulative": 310,
+            "reasoning_output_tokens": 99,
+            "reasoning_output_tokens_cumulative": 99
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-16T11:09:50Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 86.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-16T11:09:50Z"
+            }
+          ],
+          "notional_cost_usd": 2.5816,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 12162304,
+          "cumulative_input_tokens": 12391149,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 409,
+          "generation_seconds": 1556.445,
+          "machine_seconds": 846.317,
+          "tokens_per_second": 0.26
+        },
+        "follow_on_paths": [
+          "reverse/forward"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cco-uniform-field-response-probe",
+          "session_id": "01a0a9c3-f5b7-7233-8385-a4c08a841d87",
+          "session_source": "pointer",
+          "retained_at": "2026-09-16T11:09:50Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 88.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -172109,6 +172320,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2629
+    "_version": 2631
   }
 }

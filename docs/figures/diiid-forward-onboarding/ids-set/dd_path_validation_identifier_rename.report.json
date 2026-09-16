@@ -1,0 +1,35 @@
+{
+  "measurement": "DD path validation for the identifier leaves this node's writer does not author, at the manifest pin",
+  "tool": "mcp__imas-dd__check_dd_paths",
+  "manifest_dd_pin": "4.1.1",
+  "checked_dd_major": 4,
+  "summary": {
+    "checked": 7,
+    "found": 6,
+    "not_found": 1
+  },
+  "paths": [
+    {
+      "path": "pf_active/coil/identifier",
+      "verdict": "not_found",
+      "suggestion": "pf_active/coil/name",
+      "migration": {
+        "type": "renamed",
+        "target": "pf_active/coil/name",
+        "rename_version": "3.22.0",
+        "referenced_paths": [
+          "pf_active/coil/name",
+          "pf_active/circuit/name",
+          "pf_active/supply/name"
+        ]
+      }
+    },
+    {"path": "pf_active/coil/name", "verdict": "found", "type": "STR_0D"},
+    {"path": "pf_active/coil/element/turns_with_sign", "verdict": "found", "type": "FLT_0D", "units": "1"},
+    {"path": "pf_active/circuit/connections", "verdict": "found", "type": "INT_2D"},
+    {"path": "pf_active/supply/description", "verdict": "found", "type": "STR_0D"},
+    {"path": "pf_passive/loop/resistance", "verdict": "found", "type": "FLT_0D", "units": "ohm"},
+    {"path": "pf_passive/loop/element/geometry/outline/r", "verdict": "found", "type": "FLT_1D", "units": "m"}
+  ],
+  "note": "The identifier leaf was RENAMED to name at DD 3.22.0, so the writer's name/description authorship for coils, supplies and circuits is the identifier leaf carried under its post-rename name, not an omission. At DD 4.1.1 there is no separate identifier path to write; authoring identifier would create a field the DD does not declare."
+}

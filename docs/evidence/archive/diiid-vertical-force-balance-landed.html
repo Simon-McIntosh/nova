@@ -196,6 +196,51 @@ program cache key and closes it into the traced flux map, threading only the ext
 <code>map_arguments</code>. The eleven-row receipt is therefore still one distinct compile per row at this HEAD; the
 current-invariant compiled-slice programme (<code>millisecond-converged-solve</code> §2) does not serve this route. Receipt:
 <code>docs/figures/diiid-vertical-force-balance/two-field-gate/target-current-digest-probe.json</code>; MLIR and run log under
-<code>~/.config/reckon/crew/reports/nova/s19-handoff/digest-probe/</code>.</p>
+<code>~/.config/reckon/crew/reports/nova/s19-handoff/digest-probe/</code>  </p>
+</section>
+
+<section id="ohmic-circuits-and-passive-loops-verified-at-the-manifest-pin">
+<h2>§4 — The persisted ohmic circuits and 47 passive loops reproduce byte-for-byte at the manifest pin (2026-09-16)</h2>
+<p><strong>Base:</strong> <code>ef5504ea</code>, in the node's own worktree. The writer files
+(<code>nova/imas/diiid_description.py</code>, <code>nova/imas/diiid_passive.py</code>) were read at this base and carry
+no edit since the artifact's own authoring commits (<code>cb9c883b</code>, repaired at <code>700e8991</code>), so the
+measure here is a <strong>re-verification of already-landed behaviour</strong>, not a repair. The record is filed
+because §4's second clause — geometry against the netCDF description, each circuit's connection matrix against the
+recorded scales — had never been asserted on the committed artifact in one place.</p>
+<table>
+  <caption>Re-measured state of docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc</caption>
+  <thead><tr><th scope="col">Measurement</th><th scope="col">Value</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Data Dictionary pin</th><td>4.1.1, from <code>ids_properties.version_put.data_dictionary</code> on every opened IDS</td></tr>
+    <tr><th scope="row">Coils / circuits / supplies / passive loops</th><td>24 / 19 / 19 / 47</td></tr>
+    <tr><th scope="row">Ohmic coil names in the artifact</th><td><code>ECOILA, ECOILB, E567UP, E567DN, E89DN, E89UP</code></td></tr>
+    <tr><th scope="row">Ohmic coil elements and turns</th><td>4 to 7 outline elements each, every <code>turns_with_sign</code> 1.0 (one-turn bulk elements, matching the netCDF description)</td></tr>
+    <tr><th scope="row">Ohmic circuit connection matrix</th><td>shape (7, 43) = 7 rows against 19 supplies plus 24 coils, supply column 0 = the ECOILA supply, coil columns touched = {ECOILA, ECOILB, E567UP, E567DN, E89UP, E89DN}; every row sum 0 and |row| sum 2</td></tr>
+    <tr><th scope="row">Recorded drive gains</th><td>2.0, 1.0, 1.0, 1.0456947569496173, 1.0456240764323717, unchanged</td></tr>
+    <tr><th scope="row">Regeneration determinism</th><td>a fresh regeneration into a scratch directory is byte-identical to the committed artifact: sha256 <code>b2245fc2a62fe21de1b35569ad54398819bffeadaf3ed66d0b2cffef6da6b78e</code> both sides</td></tr>
+    <tr><th scope="row">Round trip through imas-python</th><td>exact equal, maximum absolute difference 0.0</td></tr>
+  </tbody>
+</table>
+<p><strong>Gates.</strong> Three imas module test files ran on the <code>all_debug</code> partition, each in its own
+fresh interpreter process against this base (one measurement = one SLURM job, sharded across files inside the
+allocation): <code>tests/imas/test_diiid_description.py</code> 7 passed,
+<code>tests/test_diiid_pf_active_circuits.py</code> 47 passed,
+<code>tests/imas/test_diiid_machine_ids.py</code> 4 passed — 58 passed, exit status 0. Logs and the reproducibility
+driver: <code>~/.config/reckon/crew/reports/nova/s19-local/pf-active/</code>
+(<code>gates-all-debug.log</code>, <code>regenerate-reproducibility.log</code>).</p>
+<p><strong>Data Dictionary paths.</strong> The 23 written <code>pf_active</code> and <code>pf_passive</code> paths are
+found at DD major 4 (<code>dd_path_validation.report.json</code>). The one leaf this writer deliberately does not
+author, <code>pf_active/coil/identifier</code>, is absent at DD 4 — and the tool's own migration record refines that
+fact: the leaf was <strong>renamed to <code>name</code> at DD 3.22.0</strong>. So writing <em>name</em> and
+<em>description</em> on coils, supplies and circuits is the identifier leaf carried under its post-rename name, not an
+omission; authoring <code>identifier</code> would create a field the Data Dictionary does not declare
+(<code>dd_path_validation_identifier_rename.report.json</code>).</p>
+<p><strong>Open tension, filed not repaired.</strong> <code>tests/imas/test_diiid_machine_ids.py</code> still declares
+<code>pf_passive</code> in its <code>declared_absent</code> list, and the published manifest's
+<code>unresolved_gaps</code> still reads a gap stating that the source entry has no pf_passive occurrence — both are true of the <em>source</em>
+netCDF entry, which carries no <code>pf_passive</code>, while the <em>published</em> artifact does carry the 47 loops
+from the passive description. Both statements are correct about their own subject and neither names it, which is the
+same shape as a stored verdict carrying no observation time. The wording is a followup, not a behaviour defect: no
+assertion in either file tests the artifact for absence.</p>
 </section>
 </main>

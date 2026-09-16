@@ -537,6 +537,29 @@ def test_solovev_machine_reports_its_circuit_carrier(machine):
     assert len(radius) == 15 and len(height) == 15
 
 
+def test_keyframe_measurement_forwards_the_reusable_program():
+    """The timing seam must measure reuse rather than force a fresh build."""
+    from benchmarks.playable_keyframe_receipt import _run_reduced_with_program
+
+    expected_program = object()
+    calls = []
+
+    def reduced(profile, flux, prescribed_current, *, program):
+        calls.append((profile, flux, prescribed_current, program))
+        return "measured-result"
+
+    result = _run_reduced_with_program(
+        reduced,
+        "profile",
+        "flux",
+        "current",
+        program=expected_program,
+    )
+
+    assert result == "measured-result"
+    assert calls == [("profile", "flux", "current", expected_program)]
+
+
 # --------------------------------------------------------------------------
 # one keyframe through the production protocol (slow, CPU)
 # --------------------------------------------------------------------------

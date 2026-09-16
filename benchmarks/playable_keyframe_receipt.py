@@ -234,6 +234,23 @@ def _stage_durations(marks: list[tuple[str, float]]) -> dict[str, float]:
     return durations
 
 
+def _run_reduced_with_program(
+    reduced,
+    profile,
+    flux,
+    prescribed_current,
+    *,
+    program,
+):
+    """Call the host reduced route without dropping its reusable program."""
+    return reduced(
+        profile,
+        flux,
+        prescribed_current,
+        program=program,
+    )
+
+
 def measure(
     *,
     output: Path,
@@ -417,7 +434,13 @@ def measure(
                     program=None,
                 )
             else:
-                result = _reduced(profile_, flux, commanded)
+                result = _run_reduced_with_program(
+                    _reduced,
+                    profile_,
+                    flux,
+                    commanded,
+                    program=program,
+                )
             # Drain the solve's tail device work (constraint records, the
             # prescribed-current fold) into this stage so it does not land on
             # the next press's first array conversion.

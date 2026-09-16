@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T09:33:52",
+  "updated": "2026-09-16T09:56:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -169066,6 +169066,221 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T055536290363-cca-exact-clip-warm-cost-and-workspace",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-exact-clip-warm-cost-and-workspace",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 6022,
+                "cached_input_tokens": 824490,
+                "input_tokens": 830544,
+                "output_tokens": 3373,
+                "reasoning_output_tokens": 463,
+                "total_tokens": 833917,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "Every exact-clip row so far shows about 1250 s of solve wall regardless of cell count (135, 341 and 1072 cells, one or two trips; receipts under docs/figures/cut-cell-current-attribution/exact-clip-seed/parts and the memory node's weak-1000 receipt), so that figure is compile and the warm execution wall is unmeasured; a benchmark benchmarks/exact_clip_warm_cost.py measures, in ONE H200 job (one card, 8 cores, 128 GiB, TMPDIR=/tmp in submit environment and payload, PYTHONPATH the worktree, root venv python, persistent compilation cache, set_support_clip_mode exact, receipts persisted per rung as each lands), on weak 110, 300 and 1000 cells from the repaired seed at the current main (which carries the implicit-root JVP once the memory node merges; state the base sha): the cold compile wall, then three warm solves from the same seed with the per-trip compiled boundary wall, the topology read wall, the clipped-moment and quadrature wall and the total solve wall per fixed point, using block_until_ready around each stage, beside the whole-cell route's 25 ms trip and about 130 ms one-trip solve; and the device memory attribution: the allocator peak and the largest single allocation per rung (the weak 1000 receipt shows peak 8.02 GiB with one 8.40 GB allocation), naming the array behind that allocation from the optimised HLO buffer assignment (expected the exact-clip quadrature workspace of about 196,480 points per cut cell evaluated over all cells at once), and measuring the alternative of a fixed-capacity lax.scan over cells for that workspace on the 110 and 300 rungs as a benchmark-local variant with bit-identical terminal moments asserted, reporting its peak and wall; the report states the warm fixed-point cost per trip at each cell count, its scaling exponent against cells, the fraction that is the clip, and the memory floor the scan variant reaches; one figure of wall per trip and peak bytes against cells for both routes; no production source change; manifest in plain key: value lines, any waiting declaration with wait_probe as a JSON list such as [\"squeue\",\"-h\",\"-j\",\"1271873\"] and wait_terminal exit:0",
+          "estimated_hours": null,
+          "goal": "The exact-clip production solve's warm execution wall per trip and its dominant device allocation measured and attributed at 110, 300 and 1000 cells, so the lead knows the fixed-point cost and the memory floor of this class of simulation",
+          "id": "cca-exact-clip-warm-cost-and-workspace",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-16T05:55:36Z",
+            "read_at": "2026-09-16T05:55:38Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 73.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T055536290363-cca-exact-clip-warm-cost-and-workspace/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/exact_clip_warm_cost.py",
+            "docs/figures/cut-cell-current-attribution/exact-clip-cost",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-cost",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19h-cca-exactcost-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-16T05:55:52Z",
+        "completed_at": "2026-09-16T07:53:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7077,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "1997ab0b040e60509b318228b20f72ebb1a8b6d0",
+        "commits": [
+          "e24fdebf3633b4c43192f8dff1cfe1faa621007f",
+          "84ddb5b40497c1a7a2d5af71c2d555fe06e8b393",
+          "29d03f6857be9914036304a2f08d27dfc6556e3e",
+          "c94dc2a1ae65f73311a15a3090d8a238b444c6da",
+          "220f5f79990585c3247bf87c63437ff4fb1918a1",
+          "0aade73d493a27f4f4e19fded7937eafaba93880",
+          "0720a96709c79bbfac4ffe272b01b1235f3e048c",
+          "61325fc6c5fb6fdd8cabb9a87e3fb6ce025ad740",
+          "bf16a327772b67d0e9dc63f05208d73d0f9c261f",
+          "54ea2f5a8db1ae0d70ea60eea599f0cc83321663",
+          "82a08e18d4e7797db2db6f869762c3b1dc6509f8"
+        ],
+        "changed_lines": {
+          "added": 17946,
+          "removed": 1,
+          "files": 10
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1271922 (with 110-cell receipt from job 1271886): cold compile, three warm exact-clip solves and XLA buffer assignment at 135, 342, 1072 cells; scan versus compact moment kernel bit-identity at 110 and 300",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/cut-cell-current-attribution/exact-clip-cost/receipt.json",
+          "log_digest": "sha256:640415d08c03a38da7e0743a9518e3b58c686d253564df816dac02898d9475d1"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T055536290363-cca-exact-clip-warm-cost-and-workspace/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a8c9-32ff-71a2-98ac-f07a92d7c6fe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 26579584,
+            "cached_input_tokens_cumulative": 26579584,
+            "input_tokens": 26801690,
+            "input_tokens_cumulative": 26801690,
+            "output_tokens": 49085,
+            "output_tokens_cumulative": 49085,
+            "reasoning_output_tokens": 11079,
+            "reasoning_output_tokens_cumulative": 11079
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-16T07:53:49Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 77.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-16T07:53:49Z"
+            }
+          ],
+          "notional_cost_usd": 305.883,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 26579584,
+          "cumulative_input_tokens": 53381274,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 60164
+        },
+        "follow_on_paths": [
+          "4.34",
+          "cold/warm"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace",
+          "session_id": "01a0a8c9-32ff-71a2-98ac-f07a92d7c6fe",
+          "session_source": "stream",
+          "retained_at": "2026-09-16T07:53:49Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 101.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -169378,6 +169593,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2598
+    "_version": 2599
   }
 }

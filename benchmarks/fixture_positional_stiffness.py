@@ -31,9 +31,7 @@ import numpy as np
 from benchmarks import oracle_start_newton_probe as oracle_probe
 from benchmarks import solovev_certificate as certificate
 from nova.biot.target import FluxTarget
-from nova.equilibrium import ExplicitSolveSeed, ForwardProfile
 from nova.equilibrium.forward_operator import set_support_clip_mode
-from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import (
     configure_dtypes,
@@ -43,7 +41,6 @@ from nova.jax.config import (
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from scripts.analytic_oracle_fixtures import measure as oracle_fixture
-from scripts.oracle_rebaseline import measure as recovery
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -212,11 +209,6 @@ def _build_context(case_name: str, requested_cells: int) -> dict[str, Any]:
     operator = _operator_with_both_exteriors(
         source_case, machine, analytic_clipped, whole_cell
     )
-    profile = ForwardProfile(
-        operator,
-        StencilMesh(machine.node, machine.stencil, machine.area),
-        newton_steps=recovery.NEWTON_STEPS,
-    )
     target_current, centroid, current_receipt = certificate._closed_form_current_target(
         case_name, source_case, operator, exact_moments
     )
@@ -238,7 +230,6 @@ def _build_context(case_name: str, requested_cells: int) -> dict[str, Any]:
         "analytic_topology": analytic_topology,
         "span": span,
         "operator": operator,
-        "profile": profile,
         "target_current": float(target_current),
         "current_centroid": np.asarray(centroid, dtype=np.float64),
         "current_receipt": current_receipt,
@@ -298,47 +289,6 @@ def _axis_displacement(
     }
 
 
-def _solve(
-    context: dict[str, Any], state: np.ndarray, current: np.ndarray, trips: int
-) -> tuple[np.ndarray, dict[str, Any]]:
-    request = certificate._certificate_solve_request(
-        context["profile"],
-        jnp.asarray(state),
-        context["target_current"],
-        carrier_identity=(
-            f"fixture-positional-stiffness:{context['case_name']}:"
-            f"{context['requested_cells']}"
-        ),
-    )
-    request = replace(
-        request,
-        seed_policy=ExplicitSolveSeed(jnp.asarray(state)),
-        current=jnp.asarray(current),
-        policy=replace(request.policy, active_set_steps=trips),
-    )
-    started = perf_counter()
-    solve_receipt = context["profile"].solve(request)
-    history = solve_receipt.equilibrium.fixed_point
-    terminal = np.asarray(
-        jax.block_until_ready(solve_receipt.equilibrium.flux), dtype=np.float64
-    )
-    return terminal, {
-        "requested_trip_limit": trips,
-        "executed_trips": int(history.active_set_iterations),
-        "terminal_residual": float(history.residual),
-        "converged": bool(history.converged),
-        "active_set_residuals": np.asarray(
-            history.active_set_residuals, dtype=np.float64
-        ),
-        "active_set_mask_differences": np.asarray(
-            history.active_set_mask_differences, dtype=np.int64
-        ),
-        "resolved_defaults": solve_receipt.resolved_defaults.to_dict(),
-        "wall_seconds": perf_counter() - started,
-        "state_sha256_binary64": _array_digest(terminal),
-    }
-
-
 def _measure_displacement(
     context: dict[str, Any],
     direction_name: str,
@@ -353,12 +303,12 @@ def _measure_displacement(
     input_topology = oracle_probe._topology(context["operator"], state)
     operator = context["operator"]
     external = operator.external(jnp.asarray(current))
+    production_map = jax.jit(
+        operator.traced_flux_map(REQUESTED_CLASS, context["target_current"])
+    )
+    map_started = perf_counter()
     mapped = np.asarray(
-        jax.block_until_ready(
-            operator.traced_flux_map(REQUESTED_CLASS, context["target_current"])(
-                jnp.asarray(state), external
-            )
-        ),
+        jax.block_until_ready(production_map(jnp.asarray(state), external)),
         dtype=np.float64,
     )
     mapped_topology = oracle_probe._topology(operator, mapped)
@@ -385,6 +335,7 @@ def _measure_displacement(
             "boundary_level_wb": mapped_topology["boundary_flux_wb"],
             "contact_rz_m": mapped_topology["wall_contact_rz_m"],
             "state_sha256_binary64": _array_digest(mapped),
+            "wall_seconds": perf_counter() - map_started,
         },
         "booking": {
             "target_current_a": context["target_current"],
@@ -398,14 +349,23 @@ def _measure_displacement(
     trip_state = state
     partial["iteration"] = {"trips": []}
     for trip in range(1, 5):
-        trip_state, trip_receipt = _solve(context, trip_state, current, 1)
+        trip_started = perf_counter()
+        previous_state = trip_state
+        trip_state = np.asarray(
+            jax.block_until_ready(
+                production_map(jnp.asarray(previous_state), external)
+            ),
+            dtype=np.float64,
+        )
         trip_topology = oracle_probe._topology(operator, trip_state)
         measured_trip = {
-            **trip_receipt,
             "trip": trip,
+            "residual_from_previous": _residual(trip_state, previous_state, context),
             "axis": _axis_displacement(trip_topology, context, direction),
             "boundary_level_wb": trip_topology["boundary_flux_wb"],
             "contact_rz_m": trip_topology["wall_contact_rz_m"],
+            "wall_seconds": perf_counter() - trip_started,
+            "state_sha256_binary64": _array_digest(trip_state),
         }
         partial["iteration"]["trips"].append(measured_trip)
         if trip == 1:

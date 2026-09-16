@@ -1668,6 +1668,44 @@ remains below the canonical wall at every measured batch after the twelve-row id
 <code>~/.config/reckon/crew/reports/nova/s19-handoff/parallel-components/cpu-fresh-processes.log</code> and
 <code>~/.config/reckon/crew/reports/nova/s19-handoff/parallel-components/h200-identity.log</code>.</p>
 </section>
+<section id="parallel-components-identity-reference">
+<h2>The parallel component identity gate compares against a non-routed authority (2026-09-17)</h2>
+<p><strong>Defect.</strong> The identity receipt above takes its expectation from the production entry point
+<code>flux_surface_connectivity.label_connected_components</code>. That entry point hands any caller cap at or above its schedule limit to the
+fixed-shape parallel pass, and both the test helper and the benchmark call it with a cap of one per cell, so both operands of the comparison
+were the same computation. The compiled trip schedules state it directly: the routed arm carries known trip counts <code>[13, 11]</code>,
+the pass under test <code>[13, 11]</code>, and the masked segment propagation it replaced <code>[1089]</code>. The benchmark's two timing arms were
+the same self-comparison, so neither its mismatch count nor its speed ratio compared the pass with anything independent of itself.</p>
+<p><strong>Repair.</strong> Commit <code>e3568a5a</code> adds <code>label_connected_components_fixed_point</code>, which runs the masked segment
+propagation for a caller-capped number of iterations and never routes. Commit <code>4c81f0c6</code> points the test helper's expectation at it
+beside the host flood, adds the twelve-row MAST identity test, and adds a positive control; commit <code>7d347c0c</code> does the same for the
+benchmark and records the trip schedules of all three arms in the receipt.</p>
+<p><strong>Positive control.</strong> The benchmark seeds one label defect in the first bank row and requires the comparison to detect it; the
+job log reports <code>CONTROL {"detected_mismatches": 1, "seeded_vertices": 1}</code>, and the uncorrupted comparison of that same row is zero.
+The test file carries its own control, requiring a two-cell defect to be counted as exactly two against the compared-cell count. A comparison
+that cannot fail on a changed label is not a gate, so the gate is shown able to fail on input it is given.</p>
+<table>
+<caption>CPU wall per element on one all_debug allocation; every row and batch has zero label mismatches</caption>
+<thead><tr><th scope="col">Batch</th><th scope="col">Non-routed segment propagation</th><th scope="col">Parallel hook and compress</th><th scope="col">Ratio</th></tr></thead>
+<tbody>
+<tr><th scope="row">1</th><td>18.0728 ms</td><td>0.15290 ms</td><td>118.2×</td></tr>
+<tr><th scope="row">8</th><td>16.4720 ms</td><td>0.16633 ms</td><td>99.0×</td></tr>
+<tr><th scope="row">16</th><td>18.4983 ms</td><td>0.14897 ms</td><td>124.2×</td></tr>
+<tr><th scope="row">64</th><td>12.3353 ms</td><td>0.10676 ms</td><td>115.5×</td></tr>
+</tbody>
+</table>
+<p><strong>CPU gate.</strong> Job <code>1272448</code> ran <code>tests/test_parallel_components.py</code> in a fresh process on
+<code>all_debug</code> with <code>JAX_PLATFORMS=cpu</code>: eight tests passed in 23.10 s, including the twelve bank rows against the non-routed
+authority and the double-null fixture, each compared on the number of differing cells against the compared-cell count. Job
+<code>1272449</code> ran the benchmark in a second allocation and refused nothing: twelve rows with zero mismatches, component counts one
+through five, 4–6 active trips against the reference's 1089, and zero mismatches at batches 1, 8, 16 and 64.</p>
+<figure><img src="/nova/figures/playable-forward-solve/parallel-components/parallel-components-wall-cpu.png"
+alt="CPU wall per element against batch for the non-routed segment propagation and the exact parallel component classifier"><figcaption>The
+exact parallel pass on CPU against the non-routed propagation it must reproduce, at the batches the CPU gate measured.</figcaption></figure>
+<p><strong>Deferred.</strong> The paired one-card accelerator timing is deferred to a follow-on node; this node's evidence covers the CPU
+standalone kernel wall only. Receipts: <code>~/.config/reckon/crew/reports/nova/s19-local/parallel-components/cpu-receipt.json</code>,
+<code>cpu-rows.md</code>, <code>cpu-wall.png</code>, <code>test_cpu_fast.log</code>, and the two job logs under <code>jobs/</code>.</p>
+</section>
 <section id="constraint-multi-trip-target">
   <h2>The constrained centroid reaches a directly measured three-cap target (2026-09-15)</h2>
   <p><strong>Node:</strong> <code>pfs-constraint-multi-trip-target</code>. Commits <code>bb7ec4ac</code>, <code>2983e5f1</code>, <code>f024b476</code> and <code>7a97aecf</code> add the dedicated benchmark, preserve the raw and effective merit readings, support receipt-only re-adjudication, and publish the receipt, report and figure. No test or file under <code>nova/</code> changed.</p>

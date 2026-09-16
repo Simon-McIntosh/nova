@@ -227,6 +227,18 @@
     and device wall per element falls from 21.0335 to 0.3676 ms at batch 1 and from 0.64383 to 0.006073 ms at batch 64. Full record:
     <a href="/nova/evidence/archive/playable-forward-solve-landed#exact-parallel-components">exact parallel components</a>.</p>
 
+  <p><strong>Parallel component identity is compared against a non-routed authority.</strong> The receipt above reads its expectation from
+    <code>flux_surface_connectivity.label_connected_components</code>, which hands any sufficient caller cap to the fixed-shape parallel pass, so
+    both its identity arms and both its timing arms were the same computation: the routed arm and the pass under test both compile to known trip
+    counts <code>[13, 11]</code> while the masked segment propagation they replace compiles to <code>[1089]</code>. Commits <code>e3568a5a</code>,
+    <code>4c81f0c6</code> and <code>7d347c0c</code> add a non-routed fixed-point authority, point the test helper and the benchmark at it beside the
+    host flood, add a twelve-row MAST identity test with the double-null fixture, and add positive controls that seed label defects and refuse when
+    they go undetected. <code>all_debug</code> jobs <code>1272448</code> and <code>1272449</code> ran one gate each on CPU: eight tests passed in a
+    fresh process and the benchmark reported twelve rows with zero mismatches, 4–6 active trips against the reference's 1089, and zero mismatches at
+    batches 1, 8, 16 and 64, with the CPU wall per element falling from 18.0728 to 0.15290 ms at batch 1. The paired one-card accelerator timing is
+    deferred to a follow-on node. Full record:
+    <a href="/nova/evidence/archive/playable-forward-solve-landed#parallel-components-identity-reference">parallel component identity reference</a>.</p>
+
   
 
   <section data-reckon="followups" id="followups" class="r-followups">

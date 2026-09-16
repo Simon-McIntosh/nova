@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T12:22:30",
+  "updated": "2026-09-16T12:23:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -170544,6 +170544,179 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T092756558940-pfs-press-host-remainder-attribution",
+        "plan": "playable-forward-solve",
+        "section": "\u00a73",
+        "node": "pfs-press-host-remainder-attribution",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3163,
+                "cached_input_tokens": 563862,
+                "input_tokens": 567027,
+                "output_tokens": 1925,
+                "reasoning_output_tokens": 458,
+                "total_tokens": 568952,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "one H200 job (one card, explicit --mem 128G, cpus sized to the free cores on 98dci4-gpu-0003, the shared environment's interpreter run directly with JAX_PLATFORMS=cuda,cpu and the production persistent cache, TMPDIR=/tmp exported outside and inside) reruns the prime plus one bulk_z+ press through benchmarks/playable_keyframe_receipt.py and the receipt's stage rows for the moved press sum to within 5 percent of its wall, the largest stage is named with its path:line and the count of forward solves it ran, tests/test_playable_session.py passes in one fresh all_debug CPU process with zero added failures against the base, the receipt JSON and one stage-breakdown figure land under docs/figures/playable-forward-solve/keyframes/ with logs under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/press-remainder, and no file under nova/equilibrium/ is modified",
+          "estimated_hours": null,
+          "goal": "Attribute the 246.8 s of host time in the first moved 22086/43 bulk_z+ press that H200 job 1272001 left outside every clocked stage (receipt docs/figures/playable-forward-solve/keyframes/h200-playable-axis-continuation-keyframes.json: press wall 250.86 s against 0.79 s solve, 0.19 s receipt, 0.13 s assembly, 100 cache-served compiles in 4.1 s), by extending the press stage clock in apps/playable/production.py solve_target and apps/playable/session.py step to every host call the press makes (shape steering target construction, solve_shape_inverse with each admission referee solve it triggers, program binding, forward receipt, frame assembly, channel push) so the receipt tables a complete stage breakdown of one press",
+          "id": "pfs-press-host-remainder-attribution",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-16T09:27:58Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T092756558940-pfs-press-host-remainder-attribution/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "apps/playable/production.py",
+            "apps/playable/session.py",
+            "benchmarks/playable_keyframe_receipt.py",
+            "tests/test_playable_session.py",
+            "docs/figures/playable-forward-solve/keyframes",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/press-remainder",
+            "docs/evidence/archive/playable-forward-solve-landed.html",
+            "docs/plans/playable-forward-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19c-pfs-remainder-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-16T09:28:33Z",
+        "completed_at": "2026-09-16T10:18:57.393Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2774,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3024,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "3c403b78a3b53eb2c43c58d147b65a4496771d02",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "none run",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T092756558940-pfs-press-host-remainder-attribution/stream.jsonl",
+          "log_digest": "sha256:58f7df6a06621df37903c2950affc5be73d896bba0730e03afbf1f65cda053ec"
+        },
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T092756558940-pfs-press-host-remainder-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "784ef3ce-4dce-44a9-a1a2-37c9a4961b7b",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-16T10:18:57.393Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": "stopped with no deliverable",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/pfs-press-host-remainder-attribution",
+          "session_id": "784ef3ce-4dce-44a9-a1a2-37c9a4961b7b",
+          "session_source": "stream",
+          "retained_at": "2026-09-16T10:18:57.393Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 15.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -170856,6 +171029,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2616
+    "_version": 2617
   }
 }

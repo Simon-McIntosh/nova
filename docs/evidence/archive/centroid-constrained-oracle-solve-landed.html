@@ -45,6 +45,41 @@
     persist the four 110-cell amplitudes plus the displaced weak-row controls
     under <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row</code>.
     This checkpoint records no scientific pass until those receipts exist.</p>
+
+    <h3>Bounded compile probe</h3>
+    <p>CPU job <code>1271974</code> ran both weak-110 exact-clip compile arms in
+    one <code>all_debug</code> allocation with <code>JAX_PLATFORMS=cpu</code>, four
+    CPUs, 64 GiB, and the supported per-host cache from
+    <code>default_forward_compilation_cache_root</code>. The job completed in
+    1021 seconds, while each backend compile was independently censored so one
+    slow arm could not consume the other arm's evidence.</p>
+
+    <table>
+      <thead><tr><th>Arm</th><th>Construction</th><th>Lowering</th><th>StableHLO instructions</th><th>StableHLO size</th><th>Backend compile</th></tr></thead>
+      <tbody>
+        <tr><td>Unconstrained</td><td>90.865 s</td><td>45.246 s</td><td>423,061</td><td>76 MiB</td><td>&gt;223.89 s; exit 124</td></tr>
+        <tr><td>Centroid pair imposed</td><td>80.152 s</td><td>147.213 s</td><td>1,036,327</td><td>173 MiB</td><td>&gt;432.63 s; exit 124</td></tr>
+      </tbody>
+    </table>
+
+    <p>The constrained-to-unconstrained ratios are <strong>3.254× lowering
+    wall</strong> and <strong>2.449× StableHLO instructions</strong>. The
+    predeclared greater-than-three-times backend-compile test is not decidable:
+    both walls are right-censored, so their lower bounds cannot establish that
+    ratio. The operation census shows broad program replication rather than one
+    isolated clip primitive: <code>stablehlo.while</code> grows from 991 to
+    2,205, constants from 80,980 to 200,564, broadcasts from 116,893 to 302,917,
+    and gathers from 9,746 to 31,072.</p>
+
+    <p><strong>Verdict: blocked, cause not attributed to the bounded mapping.</strong>
+    The control itself does not compile inside its six-minute arm, while the
+    row-augmented program is materially larger and also misses its eleven-minute
+    arm. Downstream module tests and scientific receipts remain held because the
+    probe is not sane. The full lowerings, operation census, and compressed
+    35 MiB unified diff are under
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row</code>;
+    the diff digest is
+    <code>4952e47108ff703d691b0d0b8604c18f25ba6b255d4f9233aa4abbc53de23217</code>.</p>
   </section>
 </main>
 </body>

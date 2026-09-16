@@ -9,6 +9,8 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+from nova.equilibrium.separatrix_clip import padded_polynomial_current_moments
+
 if TYPE_CHECKING:
     from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
 
@@ -19,6 +21,7 @@ __all__ = [
     "clipped_support_current_moments",
     "clipped_support_field_integrals",
     "clipped_support_quadrature",
+    "cut_cell_moment_evaluation_bound",
     "cut_cell_bank_capacity",
     "saddle_wedge_current_moments",
 ]
@@ -29,6 +32,25 @@ _UNIT_NODE = 0.5 * (_GAUSS_NODE + 1.0)
 _UNIT_WEIGHT = 0.5 * _GAUSS_WEIGHT
 _WHOLE_CELL_VERTEX_CAPACITY = 24
 _ROW_CROSSING_CAPACITY = 4
+_SPLINE_ARC_SEGMENTS = 128
+_MAX_CURVED_ARCS = _WHOLE_CELL_VERTEX_CAPACITY // 2
+_QUADRATIC_POWERS = ((0, 0), (1, 0), (0, 1), (2, 0), (1, 1), (0, 2))
+_QUADRATIC_SAMPLE_LOCAL = np.asarray(
+    ((0.0, 0.0), (0.5, 0.0), (-0.5, 0.0), (0.0, 0.5), (0.0, -0.5), (0.5, 0.5)),
+    dtype=np.float64,
+)
+_QUADRATIC_SAMPLE_DESIGN = np.stack(
+    [
+        _QUADRATIC_SAMPLE_LOCAL[:, 0] ** radial
+        * _QUADRATIC_SAMPLE_LOCAL[:, 1] ** vertical
+        for radial, vertical in _QUADRATIC_POWERS
+    ],
+    axis=1,
+)
+_QUADRATIC_SAMPLE_INVERSE = np.linalg.inv(_QUADRATIC_SAMPLE_DESIGN)
+_BOUNDARY_NODE, _BOUNDARY_WEIGHT = np.polynomial.legendre.leggauss(5)
+_BOUNDARY_NODE = 0.5 * (_BOUNDARY_NODE + 1.0)
+_BOUNDARY_WEIGHT = 0.5 * _BOUNDARY_WEIGHT
 
 
 class ClippedFieldIntegrals(NamedTuple):
@@ -58,6 +80,245 @@ class _QuadratureSupport(NamedTuple):
     support_vertices: jax.Array
     vertex_count: jax.Array
     centroids: jax.Array
+
+
+def cut_cell_moment_evaluation_bound() -> int:
+    """Return the fixed live point bound for one curved cut-cell reduction."""
+    return len(_QUADRATIC_SAMPLE_LOCAL) + len(_BOUNDARY_NODE) * _MAX_CURVED_ARCS
+
+
+def _quadratic_sample_field(field, cell_index):
+    """Sample one cell field on the unisolvent quadratic point set."""
+    cell = jnp.asarray(cell_index, dtype=jnp.int32)
+    centre = jnp.asarray(field.centre)[cell]
+    scale = jnp.asarray(field.scale)[cell]
+    local = jnp.asarray(_QUADRATIC_SAMPLE_LOCAL, dtype=centre.dtype)
+    points = centre[:, None, :] + scale[:, None, :] * local[None, :, :]
+    value, radial_gradient, vertical_gradient = field.sample(points, cell)
+    return points, value, radial_gradient, vertical_gradient, centre, scale
+
+
+def _quadratic_coefficients(values):
+    """Interpolate sampled values onto the complete local quadratic basis."""
+    inverse = jnp.asarray(_QUADRATIC_SAMPLE_INVERSE, dtype=jnp.asarray(values).dtype)
+    return jnp.einsum("ij,nj->ni", inverse, jnp.asarray(values))
+
+
+def _compact_chord_polygon(vertices, count):
+    """Collapse every sampled level arc to its chord and retain its sagitta.
+
+    The exact clip expands one curved base edge into 128 ordered line segments.
+    Dense runs are recognised by their scale relative to the cell's straight
+    edges. Their endpoints form the chord polygon; the midpoint is retained as
+    the sagitta sample used by the quadratic boundary correction.
+    """
+    point = jnp.asarray(vertices)
+    vertex_count = jnp.asarray(count)
+    cell_count, capacity, _coordinate = point.shape
+    slot = jnp.arange(capacity)
+    valid = slot[None, :] < vertex_count[:, None]
+    following_slot = jnp.where(
+        slot[None, :] + 1 < vertex_count[:, None], slot[None, :] + 1, 0
+    )
+    following = jnp.take_along_axis(point, following_slot[..., None], axis=1)
+    edge_length = jnp.linalg.norm(following - point, axis=2)
+    longest = jnp.max(jnp.where(valid, edge_length, 0.0), axis=1)
+    sampled = (
+        valid
+        & (vertex_count[:, None] > _WHOLE_CELL_VERTEX_CAPACITY)
+        & (edge_length < longest[:, None] / 16.0)
+    )
+    previous_sampled = jnp.roll(sampled, 1, axis=1)
+    arc_start = sampled & ~previous_sampled
+    interior = sampled & previous_sampled
+    keep = valid & ~interior
+    rank = jnp.cumsum(keep, axis=1) - 1
+    safe_rank = jnp.where(keep, rank, 0)
+    cell = jnp.broadcast_to(jnp.arange(cell_count)[:, None], safe_rank.shape)
+    safe_destination = jnp.minimum(safe_rank, _WHOLE_CELL_VERTEX_CAPACITY - 1)
+    chord = jnp.zeros((cell_count, _WHOLE_CELL_VERTEX_CAPACITY, 2), dtype=point.dtype)
+    chord = chord.at[cell, safe_destination].add(
+        jnp.where(
+            keep[..., None] & (rank[..., None] < _WHOLE_CELL_VERTEX_CAPACITY),
+            point,
+            0.0,
+        )
+    )
+    chord_count = jnp.sum(keep, axis=1)
+
+    retained_arc_capacity = min(_MAX_CURVED_ARCS, capacity)
+    arc_value, arc_index = jax.lax.top_k(
+        arc_start.astype(jnp.int32), retained_arc_capacity
+    )
+    arc_active = arc_value.astype(bool)
+    middle_index = (arc_index + _SPLINE_ARC_SEGMENTS // 2) % jnp.maximum(
+        vertex_count[:, None], 1
+    )
+    end_index = (arc_index + _SPLINE_ARC_SEGMENTS) % jnp.maximum(
+        vertex_count[:, None], 1
+    )
+    arc_first = jnp.take_along_axis(point, arc_index[..., None], axis=1)
+    arc_middle = jnp.take_along_axis(point, middle_index[..., None], axis=1)
+    arc_last = jnp.take_along_axis(point, end_index[..., None], axis=1)
+    sampled_edges = jnp.sum(sampled, axis=1)
+    arc_count = jnp.sum(arc_start, axis=1)
+    expanded = vertex_count > _WHOLE_CELL_VERTEX_CAPACITY
+    supported = (
+        (chord_count <= _WHOLE_CELL_VERTEX_CAPACITY)
+        & (arc_count <= _MAX_CURVED_ARCS)
+        & (~expanded | (sampled_edges == arc_count * _SPLINE_ARC_SEGMENTS))
+    )
+    return (
+        chord,
+        jnp.minimum(chord_count, _WHOLE_CELL_VERTEX_CAPACITY),
+        arc_first,
+        arc_middle,
+        arc_last,
+        arc_active,
+        supported,
+    )
+
+
+def _polynomial_antiderivative(local, coefficients, radial_shift, vertical_shift):
+    """Evaluate the radial antiderivative of a shifted density monomial."""
+    radial = local[..., 0]
+    vertical = local[..., 1]
+    value = jnp.zeros(radial.shape, dtype=radial.dtype)
+    for column, (radial_power, vertical_power) in enumerate(_QUADRATIC_POWERS):
+        exponent = radial_power + radial_shift + 1
+        value = value + (
+            coefficients[:, :, None, column]
+            * radial**exponent
+            * vertical ** (vertical_power + vertical_shift)
+            / exponent
+        )
+    return value
+
+
+def _quadratic_arc_correction(
+    first,
+    middle,
+    last,
+    active,
+    polynomial_centre,
+    coordinate_scale,
+    coefficients,
+):
+    """Return density moments between each chord and its quadratic arc."""
+    centre = jnp.asarray(polynomial_centre)
+    scale = jnp.asarray(coordinate_scale)
+    start = (jnp.asarray(first) - centre[:, None, :]) / scale[:, None, :]
+    sagitta = (jnp.asarray(middle) - centre[:, None, :]) / scale[:, None, :]
+    end = (jnp.asarray(last) - centre[:, None, :]) / scale[:, None, :]
+    control = 2.0 * sagitta - 0.5 * (start + end)
+    node = jnp.asarray(_BOUNDARY_NODE, dtype=start.dtype)[None, None, :, None]
+    weight = jnp.asarray(_BOUNDARY_WEIGHT, dtype=start.dtype)[None, None, :]
+    curve = (
+        (1.0 - node) ** 2 * start[:, :, None, :]
+        + 2.0 * (1.0 - node) * node * control[:, :, None, :]
+        + node**2 * end[:, :, None, :]
+    )
+    curve_derivative = (
+        2.0 * (1.0 - node) * (control - start)[:, :, None, :]
+        + 2.0 * node * (end - control)[:, :, None, :]
+    )
+    chord = start[:, :, None, :] + node * (end - start)[:, :, None, :]
+    chord_derivative = jnp.broadcast_to(
+        (end - start)[:, :, None, :], curve_derivative.shape
+    )
+    coefficient = jnp.broadcast_to(
+        jnp.asarray(coefficients)[:, None, :],
+        (start.shape[0], start.shape[1], len(_QUADRATIC_POWERS)),
+    )
+
+    def correction(radial_shift, vertical_shift):
+        curve_value = _polynomial_antiderivative(
+            curve, coefficient, radial_shift, vertical_shift
+        )
+        chord_value = _polynomial_antiderivative(
+            chord, coefficient, radial_shift, vertical_shift
+        )
+        line_integral = jnp.sum(
+            weight
+            * (
+                curve_value * curve_derivative[..., 1]
+                - chord_value * chord_derivative[..., 1]
+            ),
+            axis=2,
+        )
+        return jnp.sum(jnp.where(active, line_integral, 0.0), axis=1)
+
+    area_scale = scale[:, 0] * scale[:, 1]
+    return (
+        area_scale * correction(0, 0),
+        jnp.stack(
+            (
+                area_scale * scale[:, 0] * correction(1, 0),
+                area_scale * scale[:, 1] * correction(0, 1),
+            ),
+            axis=1,
+        ),
+    )
+
+
+def _boundary_polynomial_moments(
+    vertices,
+    count,
+    polynomial_centre,
+    coordinate_scale,
+    coefficients,
+    moment_centres,
+) -> ClippedCurrentMoments:
+    """Integrate a local quadratic over chord-plus-sagitta cut polygons."""
+    (
+        chord,
+        chord_count,
+        arc_first,
+        arc_middle,
+        arc_last,
+        arc_active,
+        supported,
+    ) = _compact_chord_polygon(vertices, count)
+    current, first = padded_polynomial_current_moments(
+        chord,
+        chord_count,
+        polynomial_centre,
+        coordinate_scale,
+        coefficients,
+        _QUADRATIC_POWERS,
+    )
+    slot = jnp.arange(chord.shape[1])
+    following_slot = jnp.where(
+        slot[None, :] + 1 < chord_count[:, None], slot[None, :] + 1, 0
+    )
+    following = jnp.take_along_axis(chord, following_slot[..., None], axis=1)
+    local = chord - jnp.asarray(polynomial_centre)[:, None, :]
+    following_local = following - jnp.asarray(polynomial_centre)[:, None, :]
+    cross = (
+        local[..., 0] * following_local[..., 1]
+        - following_local[..., 0] * local[..., 1]
+    )
+    valid = slot[None, :] < chord_count[:, None]
+    orientation = jnp.where(
+        jnp.sum(jnp.where(valid, cross, 0.0), axis=1) < 0.0, -1.0, 1.0
+    )
+    arc_current, arc_first_moment = _quadratic_arc_correction(
+        arc_first,
+        arc_middle,
+        arc_last,
+        arc_active,
+        polynomial_centre,
+        coordinate_scale,
+        coefficients,
+    )
+    current = current + orientation * arc_current
+    first = first + orientation[:, None] * arc_first_moment
+    first = first + current[:, None] * (
+        jnp.asarray(polynomial_centre) - jnp.asarray(moment_centres)
+    )
+    current = jnp.where(supported, current, jnp.nan)
+    first = jnp.where(supported[:, None], first, jnp.nan)
+    return ClippedCurrentMoments(current, first[:, 0], first[:, 1])
 
 
 def cut_cell_bank_capacity(coordinates: np.ndarray, ring_centres: np.ndarray) -> int:
@@ -154,6 +415,54 @@ def _integrate_points(
     )
 
 
+def _integrate_field_polynomial(
+    vertices,
+    count,
+    field: FluxFieldPolynomial,
+    cell_index,
+    centroids,
+    pressure: Callable,
+    boundary_pressure,
+    flux_span,
+) -> ClippedFieldIntegrals:
+    """Integrate quadratic volume-density images over curved cut polygons."""
+    (
+        points,
+        psi_norm,
+        radial_gradient,
+        vertical_gradient,
+        polynomial_centre,
+        coordinate_scale,
+    ) = _quadratic_sample_field(field, cell_index)
+    radius = points[..., 0]
+    pressure_value = pressure(radius, psi_norm, boundary_pressure, flux_span)
+    gradient_squared = flux_span**2 * (radial_gradient**2 + vertical_gradient**2)
+    field_squared = gradient_squared / (2.0 * jnp.pi * radius) ** 2
+    volume_weight = 2.0 * jnp.pi * radius
+    pressure_coefficients = _quadratic_coefficients(pressure_value * volume_weight)
+    field_coefficients = _quadratic_coefficients(field_squared * volume_weight)
+    pressure_moments = _boundary_polynomial_moments(
+        vertices,
+        count,
+        polynomial_centre,
+        coordinate_scale,
+        pressure_coefficients,
+        centroids,
+    )
+    field_moments = _boundary_polynomial_moments(
+        vertices,
+        count,
+        polynomial_centre,
+        coordinate_scale,
+        field_coefficients,
+        centroids,
+    )
+    return ClippedFieldIntegrals(
+        pressure_volume=pressure_moments.cell_current,
+        field_volume=field_moments.cell_current,
+    )
+
+
 @jax.named_scope("compact_clipped_field_integrals")
 def clipped_support_field_integrals(
     support,
@@ -211,17 +520,12 @@ def clipped_support_field_integrals(
 
         def integrate(operand):
             index, carried_vertices, carried_count, carried_centroid = operand
-            point, weight = _quadrature_from_arrays(
+            value = _integrate_field_polynomial(
                 carried_vertices[None, ...],
                 carried_count[None],
-                carried_centroid[None, ...],
-                jnp.ones(1, dtype=bool),
-            )
-            value = _integrate_points(
-                point,
-                weight,
                 field,
                 jnp.asarray([index], dtype=jnp.int32),
+                carried_centroid[None, ...],
                 pressure,
                 boundary_pressure,
                 flux_span,
@@ -277,6 +581,30 @@ def _integrate_current_points(
         cell_current=jnp.sum(weighted, axis=1),
         radial_moment=first[:, 0],
         vertical_moment=first[:, 1],
+    )
+
+
+def _integrate_current_polynomial(
+    vertices,
+    count,
+    field: FluxFieldPolynomial,
+    cell_index,
+    moment_centres,
+    profile,
+) -> ClippedCurrentMoments:
+    """Integrate a profile's quadratic density image over curved cut polygons."""
+    points, psi_norm, _radial, _vertical, polynomial_centre, coordinate_scale = (
+        _quadratic_sample_field(field, cell_index)
+    )
+    density = profile.current_density(points[..., 0], psi_norm)
+    coefficients = _quadratic_coefficients(density)
+    return _boundary_polynomial_moments(
+        vertices,
+        count,
+        polynomial_centre,
+        coordinate_scale,
+        coefficients,
+        moment_centres,
     )
 
 
@@ -382,15 +710,9 @@ def clipped_support_current_moments(
 
         def integrate(operand):
             index, carried_vertices, carried_count, carried_centroid = operand
-            point, weight = _quadrature_from_arrays(
+            value = _integrate_current_polynomial(
                 carried_vertices[None, ...],
                 carried_count[None],
-                carried_centroid[None, ...],
-                jnp.ones(1, dtype=bool),
-            )
-            value = _integrate_current_points(
-                point,
-                weight,
                 field,
                 jnp.asarray([index], dtype=jnp.int32),
                 carried_centroid[None, ...],

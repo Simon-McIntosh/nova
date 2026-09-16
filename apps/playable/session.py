@@ -44,6 +44,8 @@ class KeyframeReceipt(NamedTuple):
     trips: int  # active-set trips spent by the solve
     reused: bool  # whether the solve re-entered a carried compiled program
     frame_assembly_wall: float = 0.0  # seconds spent assembling SteeringFrame
+    press_wall: float = 0.0  # seconds from command construction through bookkeeping
+    stage_walls: dict[str, float] = {}
 
 
 class SolveResult(NamedTuple):
@@ -54,6 +56,7 @@ class SolveResult(NamedTuple):
     trips: int
     program: object | None = None  # the compiled program a chain re-enters
     reused: bool = False  # whether a carried program was re-entered this solve
+    stage_walls: dict[str, float] = {}
 
 
 @runtime_checkable
@@ -134,6 +137,7 @@ class PlayableSession:
     #: measurable session evidence.
     frame_assembly_walls: list[float] = field(default_factory=list)
     frame_assembly_routes: list[str] = field(default_factory=list)
+    _press_started: float | None = field(init=False, default=None, repr=False)
 
     def __setattr__(self, name: str, value: object) -> None:
         """Reset decoder history at decoder and base-observation boundaries."""
@@ -192,9 +196,11 @@ class PlayableSession:
         solve is handed back in and the one the solve returns is stored, so
         the second press onwards re-enters one program.
         """
+        press_started = perf_counter()
         if key is None:
             action = None
             commanded = self.shape
+            command_wall = 0.0
         else:
             try:
                 action = self.keys[key]
@@ -203,13 +209,24 @@ class PlayableSession:
                     f"unknown key {key!r}; bound keys: {sorted(self.keys)}"
                 ) from error
             parameter, delta = action
+            command_started = perf_counter()
             commanded = self.shape.apply(parameter, delta)
+            command_wall = perf_counter() - command_started
+        self._press_started = press_started
+        solve_started = perf_counter()
         result = self.solver(
             self.equilibrium, commanded, action=action, program=self.program
         )
+        solve_call_wall = perf_counter() - solve_started
         from nova.equilibrium.solve_request import ForwardSolveReceipt
         from nova.equilibrium.steering_frames import SteeringAction, assemble_frame
 
+        stage_walls = dict(result.stage_walls)
+        if not stage_walls:
+            stage_walls["solver"] = solve_call_wall
+        elif solve_call_wall > sum(stage_walls.values()):
+            stage_walls["solver_overhead"] = solve_call_wall - sum(stage_walls.values())
+        receipt_started = perf_counter()
         if isinstance(result.equilibrium, ForwardSolveReceipt):
             solve_receipt = result.equilibrium
             equilibrium = solve_receipt.terminal_state
@@ -229,6 +246,7 @@ class PlayableSession:
             if not isinstance(solve_receipt, ForwardSolveReceipt):
                 raise TypeError("a frame builder must return a ForwardSolveReceipt")
             assembly_route = "frame-builder"
+        stage_walls["forward_receipt"] = perf_counter() - receipt_started
 
         parameter, delta = (None, 0.0) if action is None else action
         steering_action = SteeringAction(
@@ -253,7 +271,14 @@ class PlayableSession:
             trips=int(frame.trip_count),
             reused=result.reused,
             frame_assembly_wall=assembly_wall,
+            press_wall=perf_counter() - press_started,
+            stage_walls={
+                "shape_command": command_wall,
+                **stage_walls,
+                "frame_assembly": assembly_wall,
+            },
         )
+        bookkeeping_started = perf_counter()
         self.equilibrium = equilibrium
         self.program = result.program
         self.shape = commanded
@@ -263,6 +288,16 @@ class PlayableSession:
         self.frame_assembly_routes.append(assembly_route)
         if self.recording:
             self.recorded_frames.append(frame)
+        stage_walls["session_bookkeeping"] = perf_counter() - bookkeeping_started
+        receipt = receipt._replace(
+            press_wall=perf_counter() - press_started,
+            stage_walls={
+                "shape_command": command_wall,
+                **stage_walls,
+                "frame_assembly": assembly_wall,
+            },
+        )
+        self.receipts[-1] = receipt
         return receipt
 
     def write_recording(
@@ -296,6 +331,7 @@ def frame_push(
     geometry, because those polygons are deliberately not part of the
     machine-independent frame contract.
     """
+    started = perf_counter()
     frame = session.current_frame() if frame is None else frame
     points = np.asarray(frame.action.commanded_control_points, dtype=float).T
     x_points = np.column_stack((frame.x_point_r, frame.x_point_z))
@@ -320,7 +356,7 @@ def frame_push(
             loop = np.vstack((loop, loop[:1]))
         contour_lines.append(loop)
     compensation = np.asarray(frame.compensating_current, dtype=float).reshape(-1)
-    return {
+    channels = {
         "separatrix": {
             "x": separatrix[:, 0],
             "z": separatrix[:, 1],
@@ -346,6 +382,21 @@ def frame_push(
             "trips": [int(frame.trip_count)],
         },
     }
+    if session.receipts:
+        receipt = session.receipts[-1]
+        stage_walls = dict(receipt.stage_walls)
+        stage_walls["channel_push"] = perf_counter() - started
+        press_started = session._press_started
+        press_wall = (
+            receipt.press_wall
+            if press_started is None
+            else perf_counter() - press_started
+        )
+        session.receipts[-1] = receipt._replace(
+            press_wall=press_wall,
+            stage_walls=stage_walls,
+        )
+    return channels
 
 
 def equilibrium_frame_receipt(

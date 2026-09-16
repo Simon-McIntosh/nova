@@ -223,6 +223,25 @@ def test_receipt_row_carries_wall_and_trips():
     assert row["trips"][0] == StubSolver.trips
 
 
+def test_receipt_tracks_the_complete_press_stage_breakdown():
+    """The session records every host stage, including the channel reduction."""
+    session = _stub_session()
+    session.step("bulk_z+")
+    partial = session.receipts[-1]
+    assert {
+        "shape_command",
+        "solver",
+        "forward_receipt",
+        "frame_assembly",
+    } <= partial.stage_walls.keys()
+
+    frame_push(session)
+    receipt = session.receipts[-1]
+    assert "channel_push" in receipt.stage_walls
+    assert receipt.press_wall > 0.0
+    assert sum(receipt.stage_walls.values()) <= receipt.press_wall * 1.05
+
+
 def _assert_push_equal(expected, actual):
     """Require every renderer column to survive a frame-store round trip."""
     assert actual.keys() == expected.keys()

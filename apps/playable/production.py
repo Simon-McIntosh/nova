@@ -96,6 +96,12 @@ class ProductionSolver:
         tuple[np.ndarray, ForwardEquilibrium, int, object | None] | None
     ) = field(init=False, default=None, repr=False)
     _program_handle: object | None = field(init=False, default=None, repr=False)
+    last_stage_walls: dict[str, float] = field(
+        init=False, default_factory=dict, repr=False
+    )
+    last_stage_counts: dict[str, int] = field(
+        init=False, default_factory=dict, repr=False
+    )
 
     def __post_init__(self) -> None:
         """Validate the route and start from the carrier's own currents."""
@@ -117,6 +123,13 @@ class ProductionSolver:
     def _flux(self, previous: ForwardEquilibrium | None) -> np.ndarray:
         """Return the warm-start flux, or the machine seed for the prime."""
         return np.asarray(previous.flux) if previous is not None else self.machine.seed
+
+    def _record_stage(self, name: str, started: float) -> None:
+        """Accumulate one exclusive host stage and its invocation count."""
+        self.last_stage_walls[name] = self.last_stage_walls.get(name, 0.0) + (
+            perf_counter() - started
+        )
+        self.last_stage_counts[name] = self.last_stage_counts.get(name, 0) + 1
 
     def _reduced(
         self,
@@ -225,8 +238,13 @@ class ProductionSolver:
         self._admitted_forward = None
 
         def solve(prescribed_current: np.ndarray) -> ForwardEquilibrium:
+            started = perf_counter()
             equilibrium, trips, program_out = self._forward(
                 profile, flux, prescribed_current
+            )
+            self._record_stage("admission_referee", started)
+            self.last_stage_counts["forward_solve"] = (
+                self.last_stage_counts.get("forward_solve", 0) + 1
             )
             self._admitted_forward = (
                 np.asarray(prescribed_current, dtype=float).copy(),
@@ -248,7 +266,13 @@ class ProductionSolver:
         admitted = self._admitted_forward
         if admitted is not None and np.array_equal(admitted[0], prescribed_current):
             return admitted[1:]
-        return self._forward(profile, flux, prescribed_current)
+        started = perf_counter()
+        result = self._forward(profile, flux, prescribed_current)
+        self._record_stage("admitted_forward", started)
+        self.last_stage_counts["forward_solve"] = (
+            self.last_stage_counts.get("forward_solve", 0) + 1
+        )
+        return result
 
     def solve_target(
         self,
@@ -259,6 +283,7 @@ class ProductionSolver:
         profile = self.machine.profile
         flux = np.asarray(previous.flux)
         round_started = perf_counter()
+        inverse_started = perf_counter()
         inverse = solve_shape_inverse(
             profile,
             target,
@@ -270,12 +295,23 @@ class ProductionSolver:
             current_step_reference=self.reference_current,
             forward_solve=self._forward_axis_referee(profile, flux),
         )
+        inverse_wall = perf_counter() - inverse_started
+        referee_wall = self.last_stage_walls.get("admission_referee", 0.0)
+        self.last_stage_walls["shape_inverse"] = max(0.0, inverse_wall - referee_wall)
+        self.last_stage_counts["shape_inverse"] = 1
         self.prescribed_current = inverse.currents
         equilibrium, round_trips, program_out = self._forward_after_admission(
             profile, flux, self.prescribed_current
         )
+        observation_started = perf_counter()
         error = turning_point_error(profile, target, equilibrium.flux)
         achieved = achieved_target(profile, equilibrium.flux)
+        self.last_stage_walls["target_observation"] = (
+            self.last_stage_walls.get("target_observation", 0.0)
+            + perf_counter()
+            - observation_started
+        )
+        self.last_stage_counts["target_observation"] = 1
         self.last_target = target
         self.last_rounds = (
             InverseRoundReceipt(
@@ -308,15 +344,25 @@ class ProductionSolver:
         solve. A prime builds it; each moved key and every admission trial
         re-enters that same program with the changed current as a traced input.
         """
+        self.last_stage_walls = {}
+        self.last_stage_counts = {}
+        binding_started = perf_counter()
         self._program_handle = program
+        self._record_stage("program_binding", binding_started)
         profile = self.machine.profile
         flux = self._flux(previous)
         started = perf_counter()
         if previous is None or action is None:
+            forward_started = perf_counter()
             equilibrium, trips, program_out = self._forward(
                 profile, flux, self.prescribed_current
             )
+            self._record_stage("forward_solve", forward_started)
+            self.last_stage_counts["forward_solve"] = 1
+            target_started = perf_counter()
             self.last_target = achieved_target(profile, equilibrium.flux)
+            self._record_stage("target_observation", target_started)
+            self.last_stage_counts["target_observation"] = 1
             self.last_rounds = ()
             return SolveResult(
                 equilibrium,
@@ -324,13 +370,16 @@ class ProductionSolver:
                 trips,
                 program=program_out,
                 reused=False,
+                stage_walls=dict(self.last_stage_walls),
             )
 
         parameter, delta = action
+        target_started = perf_counter()
         prior_shape = commanded.apply(parameter, -delta)
         target = move_bounding_box(
             achieved_target(profile, flux), prior_shape, parameter, delta
         )
+        self._record_stage("shape_target", target_started)
         equilibrium, program_out = self.solve_target(previous, target)
         return SolveResult(
             equilibrium,
@@ -338,4 +387,5 @@ class ProductionSolver:
             sum(item.trips for item in self.last_rounds),
             program=program_out,
             reused=program is not None,
+            stage_walls=dict(self.last_stage_walls),
         )

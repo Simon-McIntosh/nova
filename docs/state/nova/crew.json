@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T10:43:57",
+  "updated": "2026-09-16T11:03:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4557,7 +4557,25 @@
         "created": "2026-09-16"
       },
       {
+        "id": "s19c-compile-evidence-c",
+        "harness": "clive",
+        "role": "documentation",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
+      },
+      {
         "id": "s19c-ecq-moments-s",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-msc-fluxargs-s",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -4574,6 +4592,24 @@
         "sessions": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a0a8fb-8acc-7582-9a62-0e74a76b156c"
         },
+        "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-msc-remainder-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-msc-remainder-l",
+        "harness": "codex-luna",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-16"
       },
       {
@@ -169509,6 +169545,198 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T084500367528-msc-executable-remainder-census",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-executable-remainder-census",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2765,
+                "cached_input_tokens": 491153,
+                "input_tokens": 493920,
+                "output_tokens": 1724,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 495644,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/msc-remainder/executable-remainder-census.md exists with a table whose rows sum to within 5 percent of 210159751 bytes, each row a kind with its byte count and its owning path:line seam, the three largest contributions named with the followup that owns their removal (f-msc-program-size-budget or f-msc-single-evaluator-state-machine), the dump produced by one all_debug job under 30 minutes whose command and log path are recorded, changed_paths opening with the word none because the report is the sole deliverable, every manifest scalar unquoted, orientation_worktree the assigned worktree",
+          "estimated_hours": null,
+          "goal": "Attribute the 210159751-byte 300-cell solve executable that remains at main e695687e after the mesh-sized arrays became program arguments (receipt /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/mesh-arguments/receipts/size-300.json, generated-code 0 bytes): from the optimised HLO of that program, a table of the executable by kind, captured literals above 1 KiB with their innermost Nova frame beside generated code by the traced-copy multiplicity of the current-moment and topology-read bodies that the 2026-09-15 census at docs/figures/millisecond-converged-solve/program-census/report.md counted at 120 and 36, naming the seam that owns each of the three largest contributions",
+          "id": "msc-executable-remainder-census",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-16T08:45:00Z",
+            "read_at": "2026-09-16T08:45:02Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 80.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T084500367528-msc-executable-remainder-census/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/msc-remainder"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "s19c-msc-remainder-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-16T08:45:15Z",
+        "completed_at": "2026-09-16T08:59:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 831,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 831,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "aa446e8f0b1bb8cd13cd7d4cdb056313b93a8f5a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "srun all_debug optimised-HLO dump",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/msc-remainder/dump-job.log",
+          "log_digest": "sha256:85ddeda8ed143a9dbf7e19835aafda3e8afbd4c80ed8c004f5784ee36cf58941"
+        },
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T084500367528-msc-executable-remainder-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a964-4732-7b11-888c-b92b19e03e79",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7179520,
+            "cached_input_tokens_cumulative": 7179520,
+            "input_tokens": 7471301,
+            "input_tokens_cumulative": 7471301,
+            "output_tokens": 30930,
+            "output_tokens_cumulative": 30930,
+            "reasoning_output_tokens": 13312,
+            "reasoning_output_tokens_cumulative": 13312
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-16T08:59:06Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 81.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-16T08:59:06Z"
+            }
+          ],
+          "notional_cost_usd": 1.5314,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 7179520,
+          "cumulative_input_tokens": 14650821,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 44242
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": "investigate-only node; no repository output",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-executable-remainder-census",
+          "session_id": "01a0a964-4732-7b11-888c-b92b19e03e79",
+          "session_source": "stream",
+          "retained_at": "2026-09-16T08:59:06Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "01a0a964-4732-7b11-888c-b92b19e03e79",
+          "source": "stream",
+          "reason": "the node cannot succeed in this role's sandbox; a resume would meet the same refusal"
+        },
+        "watch_override": null,
+        "tool_steps": 95.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -169821,6 +170049,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2603
+    "_version": 2608
   }
 }

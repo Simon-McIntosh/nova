@@ -6,6 +6,7 @@ import argparse
 from datetime import UTC, datetime
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import socket
@@ -297,8 +298,22 @@ def edge_order_study() -> dict[str, Any]:
     degree five in the edge parameter, so a Gauss rule is exact on it once
     2 * order - 1 reaches five. This checks the claim directly on the model's
     own monomials rather than on the reduced moments.
+
+    The reference is the monomial's antiderivative in closed form. A sampled rule
+    cannot serve as it: its own truncation sits near 1e-6 on these integrands,
+    which floors the measured defect above the exactness threshold and makes
+    every order read as inexact.
     """
-    parameter = np.linspace(0.0, 1.0, 2001)
+
+    def exact_line_integral(exponent: int, vertical_power: int) -> float:
+        """Integrate t**exponent * (1 - 2 t)**vertical_power along the unit edge."""
+        return float(
+            sum(
+                math.comb(vertical_power, term) * (-2.0) ** term / (exponent + term + 1)
+                for term in range(vertical_power + 1)
+            )
+        )
+
     result: dict[str, Any] = {}
     for order in (1, 2, 3, 4):
         nodes, weights = np.polynomial.legendre.leggauss(order)
@@ -307,14 +322,19 @@ def edge_order_study() -> dict[str, Any]:
         defect = 0.0
         for radial_power, vertical_power in _DENSITY_POWERS:
             exponent = radial_power + 1
-            integrand = parameter**exponent * (1.0 - 2.0 * parameter) ** vertical_power
             quadrature = np.sum(
                 weights * nodes**exponent * (1.0 - 2.0 * nodes) ** vertical_power
             )
-            exact = float(np.trapezoid(integrand, parameter))
+            exact = exact_line_integral(exponent, vertical_power)
             defect = max(defect, abs(quadrature - exact) / max(abs(exact), 1e-300))
         result[str(order)] = defect
-    lowest = next(order for order in (1, 2, 3, 4) if result[str(order)] <= 1e-12)
+    exact_orders = [order for order in (1, 2, 3, 4) if result[str(order)] <= 1e-12]
+    if not exact_orders:
+        raise ValueError(
+            "no tested per-edge Gauss order is exact on the model "
+            f"antiderivative: {result}"
+        )
+    lowest = exact_orders[0]
     return {
         "relative_line_integral_defect_by_order": result,
         "lowest_order_exact_on_the_model_antiderivative": lowest,

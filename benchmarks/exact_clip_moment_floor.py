@@ -48,7 +48,7 @@ CELL_REQUESTS = (-110, -300, -1000)
 MOMENT_NAMES = ("current", "radial", "vertical")
 FAN_ORDER = 8
 REFINED_FAN_ORDER = 16
-FAN_POINTS_PER_CUT_CELL = 196_480
+PLAN_FAN_POINTS_PER_CUT_CELL = 196_480
 
 
 def _jsonable(value: Any) -> Any:
@@ -340,14 +340,10 @@ def discriminate() -> dict[str, Any]:
     ) / np.maximum(exact_fan_norm, np.finfo(np.float64).tiny)
     capacity = int(np.asarray(support.support_vertices).shape[1])
     fan_points = (capacity - 2) * FAN_ORDER**2
-    if fan_points != FAN_POINTS_PER_CUT_CELL:
-        raise RuntimeError(
-            f"fan allocation changed: measured {fan_points}, expected "
-            f"{FAN_POINTS_PER_CUT_CELL}"
-        )
     cut_vertex_count = np.asarray(support.vertex_count, dtype=np.intp)[boundary]
     live_points = (cut_vertex_count - 2) * FAN_ORDER**2
     padding_points = fan_points - live_points
+    plan_padding_points = PLAN_FAN_POINTS_PER_CUT_CELL - live_points
     census = []
     for vertex_count in np.unique(cut_vertex_count):
         selected = cut_vertex_count == vertex_count
@@ -357,6 +353,9 @@ def discriminate() -> dict[str, Any]:
                 "cut_cells": int(np.count_nonzero(selected)),
                 "live_evaluations_per_cut_cell": int(live_points[selected][0]),
                 "exact_zero_padding_per_cut_cell": int(padding_points[selected][0]),
+                "plan_reference_zero_padding_per_cut_cell": int(
+                    plan_padding_points[selected][0]
+                ),
             }
         )
     payload = {
@@ -385,10 +384,15 @@ def discriminate() -> dict[str, Any]:
             ),
         },
         "fan_allocation": {
-            "fixed_evaluations_per_cut_cell": fan_points,
+            "plan_reference_fixed_evaluations_per_cut_cell": (
+                PLAN_FAN_POINTS_PER_CUT_CELL
+            ),
+            "actual_weak_support_capacity": capacity,
+            "actual_fixed_evaluations_per_cut_cell": fan_points,
             "census": census,
             "total_live_evaluations": int(np.sum(live_points)),
             "total_exact_zero_padding": int(np.sum(padding_points)),
+            "plan_reference_total_exact_zero_padding": int(np.sum(plan_padding_points)),
             "live_fraction": float(
                 np.sum(live_points) / (fan_points * len(live_points))
             ),

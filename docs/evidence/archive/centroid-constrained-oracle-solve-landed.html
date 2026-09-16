@@ -109,6 +109,60 @@
     and poloidal panels did not run. No amplitude-table or scientific pass is
     inferred from the missing rows. The durable weak receipt is
     <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row/weak-rotation-reactor-static-cells-110.json</code>.</p>
+
+    <h3 id="uniform-field-response">Uniform-field response probe</h3>
+    <p><strong>Implementation, commit <code>14f2a321</code>; H200 job <code>1272113</code>.</strong>
+    The new driver reuses <code>fixture_positional_stiffness._build_context</code>
+    and <code>_operator_with_both_exteriors</code>, compiles one production map,
+    and passes the resulting mapped exterior as a runtime argument for every
+    increment. The analytic-clipped exterior remains the selected ordinary
+    exterior column throughout; only the prescribed two-column field slot is
+    changed. The job used one card on <code>98dci4-gpu-0003</code>, eight CPUs,
+    128 GiB, <code>JAX_PLATFORMS=cuda,cpu</code>, exact clipping, and the
+    persistent compilation-cache configuration. JAX emitted warnings that the
+    runtime cache directory could not create its atime entries, so cache
+    configuration is recorded but cache-entry persistence is not claimed.</p>
+
+    <p>The receipt has all eight required signed rows and both required panels:
+    <code>/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cco-uniform-field-response-probe/docs/figures/centroid-constrained-oracle-solve/field-response/receipt.json</code>.
+    It preserves per-row centroid shifts after one map and four trips in metres
+    and pitches, the row’s directional dual prediction, measured-to-predicted
+    ratios, sign flags, state digests, and the unchanged baseline exterior
+    digest. The prediction uses a 1 microtesla central directional difference
+    of <code>CurrentCentroidConstraint</code> along each prescribed response
+    column; materializing the full reverse/forward Jacobians was separately
+    attempted on <code>all_debug</code> job <code>1272109</code> and was
+    OOM-killed, so no full-Jacobian evidence is inferred.</p>
+
+    <table>
+      <thead><tr><th>Field</th><th>Amplitude</th><th>One-map target shift [m]</th><th>One-map prediction [m]</th><th>Ratio</th><th>Four-trip target shift [m]</th><th>Sign</th></tr></thead>
+      <tbody>
+        <tr><td>vertical → radial centroid</td><td>-10 mT</td><td>-2.229677e-2</td><td>-1.627789e-2</td><td>1.3698</td><td>-6.076766e-2</td><td>agree</td></tr>
+        <tr><td>vertical → radial centroid</td><td>-1 mT</td><td>-7.741494e-3</td><td>-1.627789e-3</td><td>4.7558</td><td>-1.273890e-2</td><td>agree</td></tr>
+        <tr><td>vertical → radial centroid</td><td>+1 mT</td><td>-4.485917e-3</td><td>+1.627789e-3</td><td>-2.7558</td><td>+6.931217e-4</td><td>disagree at one map</td></tr>
+        <tr><td>vertical → radial centroid</td><td>+10 mT</td><td>+1.018758e-2</td><td>+1.627789e-2</td><td>0.6259</td><td>+6.206651e-2</td><td>agree</td></tr>
+        <tr><td>radial → vertical centroid</td><td>-10 mT</td><td>+4.925191e-2</td><td>+4.916664e-2</td><td>1.0017</td><td>+3.272643e-1</td><td>agree</td></tr>
+        <tr><td>radial → vertical centroid</td><td>-1 mT</td><td>+4.916455e-3</td><td>+4.916664e-3</td><td>1.0000</td><td>+3.362320e-2</td><td>agree</td></tr>
+        <tr><td>radial → vertical centroid</td><td>+1 mT</td><td>-4.916455e-3</td><td>-4.916664e-3</td><td>1.0000</td><td>-3.362320e-2</td><td>agree</td></tr>
+        <tr><td>radial → vertical centroid</td><td>+10 mT</td><td>-4.925191e-2</td><td>-4.916664e-2</td><td>1.0017</td><td>-3.272643e-1</td><td>agree</td></tr>
+      </tbody>
+    </table>
+
+    <p>The analytic target is <code>(6.063530173, 0.0) m</code>, while the
+    normalized current centroid of the sampled analytic state is
+    <code>(6.057402296, 6.8e-13) m</code>; the <code>-6.127877e-3 m</code>
+    radial baseline is retained in the receipt and explains why the +1 mT
+    vertical one-map result has the wrong sign relative to the local row
+    prediction. At +10 mT both intended directions have the expected sign.
+    The radial response is quantitatively local-linear; the vertical response
+    is directionally correct but crosses the discrete baseline at small positive
+    amplitude. Four trips agree in sign for all eight rows but amplify the
+    nonlinear displacement, so this probe confirms the field-direction mapping
+    and diagnoses the bounded-row failure without claiming that the constrained
+    solve is repaired.</p>
+
+    <p><img src="/nova/figures/centroid-constrained-oracle-solve/field-response/panels/vertical-plus-10mt.png" alt="Vertical plus 10 mT response with analytic and mapped contours, nulls and wall.">
+    <img src="/nova/figures/centroid-constrained-oracle-solve/field-response/panels/radial-plus-10mt.png" alt="Radial plus 10 mT response with analytic and mapped contours, nulls and wall."></p>
   </section>
 </main>
 </body>

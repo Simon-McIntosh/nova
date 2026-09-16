@@ -129,7 +129,8 @@ def _stderr_tee(path: Path):
 def _write(receipt: dict[str, Any], output: Path) -> None:
     """Persist the receipt so far, creating its directory once."""
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    serialized = json.dumps(receipt, indent=2)
+    output.write_text(serialized.rstrip("\n") + "\n", encoding="utf-8")
 
 
 def _draw(receipt: dict[str, Any], figure: Path) -> None:

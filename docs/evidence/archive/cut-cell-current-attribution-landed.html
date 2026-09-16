@@ -594,7 +594,7 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
       <tr><td>Weak 110 JVP, Newton plus three random directions</td><td>H200 job 1271792</td><td>relative errors 8.022804e-3, 8.223342e-3, 7.876643e-3 and 8.177483e-3</td><td>FAIL — bound 1e-8</td></tr>
       <tr><td>Weak 300 JVP, Newton plus three random directions</td><td>H200 job 1271792</td><td>relative errors 7.876236e-3, 7.911160e-3, 8.015141e-3 and 7.888358e-3</td><td>FAIL — bound 1e-8</td></tr>
       <tr><td>Weak exact 300 terminal identity</td><td>H200 job 1271821</td><td>all 1,529 flux values differ; maximum 1.350884e-10 Wb; residual 0.03633683774282267 against 0.036336837742911895</td><td>FAIL — not bit-identical</td></tr>
-      <tr><td>Single-null whole-cell 500 control</td><td>H200 job 1271821</td><td>2,089 of 2,226 flux values differ against the CPU reference; maximum 1.118897e-16 Wb</td><td>FAIL — device-mixed identity guard correctly refuses</td></tr>
+      <tr><td>Single-null whole-cell 500 control</td><td>H200 job 1271821</td><td>2,089 of 2,226 flux values differ against the CPU reference, maximum 1.118897e-16 Wb; the CUDA base reference also differs, maximum 5.551115e-17 Wb</td><td>FAIL — not bit-identical on either comparison</td></tr>
     </tbody>
   </table>
 

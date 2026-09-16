@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 430" role="img" aria-labelledby="title desc">
+  <title id="title">Forward operator arrays cross one traced argument boundary</title>
+  <desc id="desc">Host-built mesh arrays are flattened into the operator pytree, passed through the jitted map and fixed-point loop, and reused by the compiled slice without becoming executable constants.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#294860"/>
+    </marker>
+    <style>
+      .title { font: 700 24px system-ui, sans-serif; fill: #172b3a; }
+      .label { font: 700 17px system-ui, sans-serif; fill: #172b3a; }
+      .text { font: 14px system-ui, sans-serif; fill: #29404f; }
+      .small { font: 13px system-ui, sans-serif; fill: #29404f; }
+      .box { fill: #f7fafc; stroke: #294860; stroke-width: 1.5; rx: 10; }
+      .operand { fill: #e8f4f2; stroke: #18766d; stroke-width: 1.5; rx: 8; }
+      .program { fill: #fff6df; stroke: #a66300; stroke-width: 1.5; rx: 10; }
+      .arrow { fill: none; stroke: #294860; stroke-width: 2; marker-end: url(#arrow); }
+      .dash { fill: none; stroke: #18766d; stroke-width: 2; stroke-dasharray: 6 5; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <text class="title" x="40" y="42">Arithmetic stays compiled; mesh values stay operands</text>
+
+  <rect class="box" x="40" y="80" width="245" height="300"/>
+  <text class="label" x="60" y="112">Host construction</text>
+  <text class="text" x="60" y="140">coordinates and topology</text>
+  <text class="text" x="60" y="164">coupling kernel blocks</text>
+  <text class="text" x="60" y="188">wall and sample blocks</text>
+  <text class="text" x="60" y="212">moment geometry</text>
+  <text class="text" x="60" y="236">source and conductor arrays</text>
+  <path class="arrow" d="M162 265 L162 305"/>
+  <rect class="operand" x="65" y="308" width="195" height="48"/>
+  <text class="label" x="91" y="338">operator pytree</text>
+
+  <path class="arrow" d="M285 230 L350 230"/>
+
+  <rect class="operand" x="350" y="80" width="270" height="300"/>
+  <text class="label" x="373" y="112">One explicit call argument</text>
+  <text class="small" x="373" y="142">grid / wall / sample targets</text>
+  <text class="small" x="373" y="166">topology and null-fit arrays</text>
+  <text class="small" x="373" y="190">cell and support stencils</text>
+  <text class="small" x="373" y="214">atomic moment geometry</text>
+  <text class="small" x="373" y="238">profile and current leaves</text>
+  <line x1="373" y1="260" x2="596" y2="260" stroke="#18766d" stroke-width="1"/>
+  <text class="text" x="373" y="292">same pytree value enters:</text>
+  <text class="small" x="390" y="320">map arguments</text>
+  <text class="small" x="390" y="344">shadow callbacks</text>
+  <text class="small" x="390" y="368">compiled slice kernels</text>
+
+  <path class="dash" d="M620 155 L700 155"/>
+  <path class="dash" d="M620 230 L700 230"/>
+  <path class="dash" d="M620 305 L700 305"/>
+
+  <rect class="program" x="700" y="102" width="365" height="76"/>
+  <text class="label" x="725" y="132">Jitted forward map</text>
+  <text class="small" x="725" y="156">operator, state, exterior → mapped state</text>
+
+  <rect class="program" x="700" y="192" width="365" height="76"/>
+  <text class="label" x="725" y="222">Fixed-point iterations</text>
+  <text class="small" x="725" y="246">operator remains a loop operand</text>
+
+  <rect class="program" x="700" y="282" width="365" height="76"/>
+  <text class="label" x="725" y="312">Compiled slice</text>
+  <text class="small" x="725" y="336">arithmetic executable; no mesh literal bank</text>
+
+  <text class="small" x="710" y="395">Changing values reuses the program; changing shapes selects a new one.</text>
+</svg>

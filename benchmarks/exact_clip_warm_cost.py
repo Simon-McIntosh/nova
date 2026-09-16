@@ -56,6 +56,11 @@ REFERENCE_CELLS = (110, 300)
 REPEATS = 3
 CASE = "weak-rotation-reactor-static"
 SCHEMA = "nova.exact-clip-warm-cost"
+PRODUCTION_INPUT_PATHS = (
+    "nova/equilibrium",
+    "benchmarks/solovev_certificate.py",
+    "scripts/analytic_oracle_fixtures/measure.py",
+)
 _ALLOCATION = re.compile(r"^allocation (?P<index>\d+): size (?P<size>\d+)(?P<tail>.*)$")
 _VALUE = re.compile(
     r"^ value: <(?P<identity>[^>]+)> \(size=(?P<size>\d+),offset=(?P<offset>\d+)\): "
@@ -146,13 +151,29 @@ def _require_promoted_source() -> dict[str, Any]:
     production_revision = _revision(PRODUCTION_ROOT)
     expected_revision = os.environ.get("EXACT_CLIP_PRODUCTION_REVISION")
     if expected_revision is not None and production_revision != expected_revision:
-        raise RuntimeError(
-            "production source revision moved after submission: "
-            f"expected {expected_revision}, observed {production_revision}"
+        comparison = subprocess.run(
+            [
+                "git",
+                "diff",
+                "--quiet",
+                f"{expected_revision}..{production_revision}",
+                "--",
+                *PRODUCTION_INPUT_PATHS,
+            ],
+            cwd=PRODUCTION_ROOT,
+            check=False,
         )
+        if comparison.returncode != 0:
+            raise RuntimeError(
+                "production measurement inputs moved after submission: "
+                f"expected {expected_revision}, observed {production_revision}, "
+                f"git diff exit {comparison.returncode}"
+            )
     return {
         "production_root": str(PRODUCTION_ROOT),
         "production_revision": production_revision,
+        "production_base_revision": expected_revision or production_revision,
+        "production_input_paths": list(PRODUCTION_INPUT_PATHS),
         "benchmark_root": str(ROOT),
         "benchmark_revision": _revision(ROOT),
         "implicit_root_derivative_present": implicit,

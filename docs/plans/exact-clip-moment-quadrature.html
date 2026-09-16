@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-16">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
@@ -54,14 +54,14 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="arc-representation" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="arc-representation" data-choice="spline-gauss" data-by="lead" data-when="2026-09-16T19:17:36+00:00">
     <p class="r-dec-q">How is the traced level arc represented inside the polygon-exact moment integral: as its chord (first order), as chord plus sagitta (second order, matching the coupling), or by the spline itself with a per-edge Gauss rule?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="chord">chord</button>
       <button class="r-opt" data-value="chord-plus-sagitta">chord plus sagitta</button>
-      <button class="r-opt" data-value="spline-gauss">spline with per-edge Gauss</button>
+      <button class="r-opt chosen" data-value="spline-gauss">spline with per-edge Gauss</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead 2026-09-16 (1c): the traced level arc enters the moment integral as the clip&#x27;s own sampled arc, each of its fixed 128 segments a straight edge carrying a per-edge Gauss rule, so the region integrated is exactly the region the clip books. Evidence: with pointwise density this reproduces the fan to the last bit on weak 110, while chord plus sagitta with the same density moves the first moments by 2.5e-3 and the frozen image by 1.0e-4 of span, larger than the coupling&#x27;s own second-order image error (1.2e-4 to 3.2e-5 of span), and the density model contributes only 1e-6. Two conditions from the lead: the shape is fixed (the arc sample count, the straight-edge capacity and the per-edge node count are compile-time constants, padding exact-zero, no data-dependent branching), and the accuracy budget is sized relative to the other error sources on the same row rather than set absolutely: the moments and frozen image must agree with the fan to within one tenth of the smallest other error term measured on that row (the second-order coupling image error, 3.2e-5 of span at 300 cells, sets 3e-6 of span there), stated per row in the receipt with the error terms it is measured against; the per-edge Gauss order is the lowest that meets that budget, and the evaluation-point bound is the fixed edge count times that order, expected under 500.</p>
     </div>
 </section>
 

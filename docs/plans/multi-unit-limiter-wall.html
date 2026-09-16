@@ -24,8 +24,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-impl" content="0.88">
-<meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="20">
+<meta name="plan-modified" content="2026-09-16">
+<meta name="plan-version" content="21">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;}">
 </head>
@@ -166,6 +166,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260909T201444769551" data-who="s19-review coordinator" data-when="">
     <div class="r-comment-body">Landed at 04cb76c4 (fd258054, 1facf3ba, 04cb76c4; merged to main 2026-09-09). The forward operator and its consumers keep per-unit identity and packed wall axes instead of joining units into one ring; legacy consumers are retained; tests/test_wall_units_solver.py added. Merged on the paired identity measurement r-20260909T172331856886: twelve of twelve MAST width-12 exit-off terminal residuals bit-identical to the batched main artifact (one H200 job, compile 473 s from the persistent cache, solve 858 s), and four of four Solovev -110 CPU x64 rows within the documented 3.9e-8 CPU-versus-H200 drift (largest difference 5.3e-15, on the diverted case whose CPU residual rounded to exactly 0.0 and needs a non-empty identity check downstream). DIII-D gate-frame identity is deferred, so the done-when is met on MAST and Solovev only. The ledger row for the implementing run r-20260909T142603591396 was reconciled earlier as gate failed with no commits and cannot be amended; this comment and the paired run's row are the record of the three commits. The section's rule that solver changes return to the lead before merging was not observed: the coordinator merged on the identity evidence to keep the sprint moving, and the lead may reverse the merge.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s19c-lead-confirms-04cb76c4" data-who="reckon-ship s19-codex" data-when="2026-09-16T12:05:00Z">
+    <div class="r-comment-body">Lead decision 2026-09-16 (4a): the merged unit-aware solver change (fd258054, 1facf3ba, 04cb76c4) is CONFIRMED on the identity evidence (12 of 12 MAST width-12 terminals bit-identical; 4 of 4 Solovev -110 CPU rows within the documented CPU-to-H200 drift), closing the third item of f-20260909T201444769610. Two conditions stay as nodes, the first two items of that followup: assert a non-empty identity set on the Solovev diverted row whose CPU residual reads exactly 0.0 before its 5.3e-15 difference is read as within drift, and record the DIII-D gate-frame identity or its device-qualified difference (the 2026-09-15 width-five pair had zero both-converged members, so nothing is claimed there yet). Both queue for the next dispatch window; the followup stays open as their pointer.</div>
 </div>
 </section>
 </main>

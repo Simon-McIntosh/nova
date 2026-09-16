@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-16">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -47,14 +47,14 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="compensating-unknown" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="compensating-unknown" data-choice="uniform-field-increment" data-by="lead" data-when="2026-09-16T19:18:27+00:00">
     <p class="r-dec-q">What compensates the centroid row on the coil-less fixture: a uniform exterior field increment per direction, a rigid translation of the fixture exterior, or a Lagrange multiplier on the position with no field change?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="uniform-field-increment">uniform field increment</button>
+      <button class="r-opt chosen" data-value="uniform-field-increment">uniform field increment</button>
       <button class="r-opt" data-value="exterior-translation">exterior translation</button>
       <button class="r-opt" data-value="position-multiplier">position multiplier</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead 2026-09-16 (2a), with one condition: the increment must be solenoidal. Measured: the row&#x27;s directional prediction matches the fixture response to 0.004 percent at 1 mT and 0.17 percent at 10 mT in both components (field-response probe, H200 job 1272113), so the actuator is right in direction and scale. How the columns are generated today (scripts/analytic_oracle_fixtures/measure.py uniform_exterior_field_response): as analytic total-flux images, not ghost coils. Both are flux functions and therefore divergence-free by construction, but they are not both vacuum fields: the vertical column pi (R squared minus R0 squared) is the exact image of a uniform Bz (solenoidal and curl-free); the radial column minus 2 pi R Z makes Br uniform with the accompanying Bz equal to minus Br Z over R, which is divergence-free but has nonzero toroidal curl, so it corresponds to a distributed toroidal current filling the domain, a field no external coil can produce. Implementation route locked with the option: generate both increments as vacuum fields, either the analytic vacuum pair (uniform Bz for the radial row; Phi proportional to R squared Z, whose Br is proportional to R, for the vertical row) or, preferably, a symmetric and an antisymmetric ghost coil pair placed outside the wall and imaged through the existing Biot machinery, which makes the compensating unknown a CircuitCurrentUnknown on the fixture, the same code path as a real machine and no fixture-specific branch. The bound is imposed as a fail-closed refusal after damped step control on the row, never as a clip inside the traced map (a clipped unknown has zero tangent at its bound, which is how the first receipt saturated at 0.25 T); the successor node measures the first Newton step before anything else.</p>
     </div>
 </section>
 

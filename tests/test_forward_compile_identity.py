@@ -94,7 +94,15 @@ def _lower_certificate_solve(row, external=None):
     )
     if external is None:
         external = profile.operator.external()
-    return program.lower(seed, external, profile.operator), external
+    return (
+        program.lower(
+            seed,
+            external,
+            profile.operator,
+            jnp.asarray(target_current),
+        ),
+        external,
+    )
 
 
 def _digest(lowered) -> str:
@@ -134,7 +142,7 @@ def test_traced_exterior_preserves_the_certificate_terminal_state():
         shadow_mask_fn=shadow_mask,
         promoted_shadow_mask_fn=promoted_shadow_mask,
         shadowed_map_fn=shadowed,
-        map_arguments=(external, operator),
+        map_arguments=(external, operator, jnp.asarray(target_current)),
         callback_arguments=(operator,),
         **options,
     )
@@ -192,6 +200,29 @@ def test_compiled_slice_program_traces_conductor_exterior():
         jnp.asarray(operator.residual_shadow_mask(seed, requested_class), dtype=bool)
     )
     solver = first.program.slice_solver
-    first_hlo = solver.lower(seed, shadow, operator.external(first_current), operator)
-    second_hlo = solver.lower(seed, shadow, operator.external(second_current), operator)
+    first_hlo = solver.lower(
+        seed,
+        shadow,
+        operator.external(first_current),
+        operator,
+        jnp.asarray(target_current),
+        requested_class,
+    )
+    second_hlo = solver.lower(
+        seed,
+        shadow,
+        operator.external(second_current),
+        operator,
+        jnp.asarray(target_current),
+        requested_class,
+    )
+    edited_target_hlo = solver.lower(
+        seed,
+        shadow,
+        operator.external(first_current),
+        operator,
+        jnp.asarray(0.8 * target_current),
+        requested_class,
+    )
     assert _digest(first_hlo) == _digest(second_hlo)
+    assert _digest(first_hlo) == _digest(edited_target_hlo)

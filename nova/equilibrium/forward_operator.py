@@ -2177,6 +2177,43 @@ class ForwardFluxOperator:
             )
         )
 
+    @property
+    def program_identity(self) -> str:
+        """Return the mesh and static evaluator identity of one solve program."""
+        return self._batch_identity()
+
+    def with_source(self, source: ForwardSource) -> ForwardFluxOperator:
+        """Return this mesh with compatible flux-function arguments replaced.
+
+        The callable representation and every coefficient shape are static
+        program properties.  Their numerical leaves are per-slice operands, so
+        replacing them does not rebuild geometry or select another executable.
+        """
+        current_layout, current_leaves = _SourceLayout.flatten(self.source)
+        source_layout, source_leaves = _SourceLayout.flatten(source)
+        if current_layout != source_layout:
+            raise ValueError(
+                "request source_profile must use this profile's static "
+                "flux-function representation"
+            )
+        current_signature = tuple(
+            (tuple(np.shape(value)), np.asarray(value).dtype.str)
+            for value in current_leaves
+        )
+        source_signature = tuple(
+            (tuple(np.shape(value)), np.asarray(value).dtype.str)
+            for value in source_leaves
+        )
+        if source_signature != current_signature:
+            raise ValueError(
+                "request source_profile coefficient and normalisation arguments "
+                "must match this profile's shapes and dtypes"
+            )
+        instance = object.__new__(type(self))
+        instance.__dict__ = self.__dict__.copy()
+        instance.source = source
+        return instance
+
     def tree_flatten(self):
         """Separate traced arithmetic arrays from immutable host metadata."""
         source_layout, source_children = _SourceLayout.flatten(self.source)
@@ -3228,7 +3265,7 @@ class ForwardFluxOperator:
 
         def mapped(psi: jax.Array) -> jax.Array:
             """Return the free-boundary flux map of one trial flux."""
-            return traced(psi, external, self)
+            return traced(psi, external, self, target_current)
 
         return mapped
 
@@ -3243,10 +3280,12 @@ class ForwardFluxOperator:
             psi: jax.Array,
             external: jax.Array,
             operator: ForwardFluxOperator | None = None,
+            target_value=None,
         ) -> jax.Array:
             """Return one map evaluation at an explicitly supplied exterior."""
             active = self if operator is None else operator
-            image = external + active.internal(psi, requested_class, target_current)
+            active_target = target_value if target_current is not None else None
+            image = external + active.internal(psi, requested_class, active_target)
             return active._exclude_shadow_residual(psi, image, requested_class)
 
         return mapped
@@ -3264,7 +3303,7 @@ class ForwardFluxOperator:
         traced = self.traced_flux_map_with_shadow(requested_class, target_current)
 
         def mapped(psi: jax.Array, shadow: jax.Array) -> jax.Array:
-            return traced(psi, shadow, external, self)
+            return traced(psi, shadow, external, self, target_current)
 
         partition_read = getattr(traced, "_read_frozen_partition", None)
         partitioned_map = getattr(traced, "_map_frozen_partition", None)
@@ -3292,9 +3331,11 @@ class ForwardFluxOperator:
             shadow: jax.Array,
             external: jax.Array,
             operator: ForwardFluxOperator | None = None,
+            target_value=None,
         ) -> jax.Array:
             active = self if operator is None else operator
-            image = external + active.internal(psi, requested_class, target_current)
+            active_target = target_value if target_current is not None else None
+            image = external + active.internal(psi, requested_class, active_target)
             return active._exclude_shadow_residual(
                 psi, image, requested_class, shadow=shadow
             )

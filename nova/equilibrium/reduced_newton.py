@@ -358,6 +358,8 @@ class _OperatorArguments(NamedTuple):
 
     external: jax.Array
     operator: Any
+    target_current: Any = None
+    requested_class: Any = None
 
 
 def _operator_arguments(value, default_external, default_operator):
@@ -488,13 +490,25 @@ def _reduced_kernels(
     normalise_current = target_current is not None
     trace_requested_class = requested_class is not None
 
-    def _target(target_value):
+    def _target(target_value, external_value):
         """Return the dynamic target when this program normalises current."""
-        return target_value if normalise_current else None
+        if not normalise_current:
+            return None
+        if target_value is not None:
+            return target_value
+        if isinstance(external_value, _OperatorArguments):
+            return external_value.target_current
+        return target_current
 
-    def _requested(requested_value):
+    def _requested(requested_value, external_value):
         """Return the per-slice topology class when this route traces it."""
-        return requested_value if trace_requested_class else requested_class
+        if not trace_requested_class:
+            return requested_class
+        if requested_value is not None:
+            return requested_value
+        if isinstance(external_value, _OperatorArguments):
+            return external_value.requested_class
+        return requested_class
 
     def _bound(rows):
         """Return the constraint data this call evaluates its rows against.
@@ -598,8 +612,8 @@ def _reduced_kernels(
                 requested_value,
                 rows,
             ),
-            _requested(requested_value),
-            _target(target_value),
+            _requested(requested_value, external_value),
+            _target(target_value, external_value),
         )
         return _gather(coordinates, moments)
 
@@ -640,8 +654,8 @@ def _reduced_kernels(
         moments = _current_moments(
             operator_value,
             state,
-            _requested(requested_value),
-            _target(target_value),
+            _requested(requested_value, external_value),
+            _target(target_value, external_value),
         )
         residual, _rows = _augment(
             amplitudes - _gather(coordinates, moments), state, unknowns, shadow, bound
@@ -675,8 +689,8 @@ def _reduced_kernels(
         moments = _current_moments(
             operator_value,
             state,
-            _requested(requested_value),
-            _target(target_value),
+            _requested(requested_value, external_value),
+            _target(target_value, external_value),
         )
         image = _image(moments, unknowns, bound, external_value, operator_value)
         mapped = jnp.where(shadow, state, image)
@@ -739,8 +753,8 @@ def _reduced_kernels(
                 requested_value,
                 rows,
             ),
-            _requested(requested_value),
-            _target(target_value),
+            _requested(requested_value, external_value),
+            _target(target_value, external_value),
         )
         current = moments.cell_current
         retained = jnp.zeros_like(current).at[coordinates.cells].set(1.0)
@@ -781,8 +795,8 @@ def _reduced_kernels(
         moments = _current_moments(
             operator_value,
             state,
-            _requested(requested_value),
-            _target(target_value),
+            _requested(requested_value, external_value),
+            _target(target_value, external_value),
         )
         image = _image(moments, unknowns, bound, external_value, operator_value)
         mapped = jnp.where(shadow, state, image)
@@ -898,13 +912,15 @@ def _reduced_kernels(
         moments = _current_moments(
             operator_value,
             state,
-            _requested(requested_value),
-            _target(target_value),
+            _requested(requested_value, external_value),
+            _target(target_value, external_value),
         )
         promoted = jnp.ravel(
             jnp.asarray(
                 operator_value.residual_shadow_mask(
-                    state, _requested(requested_value), previous_shadow=shadow
+                    state,
+                    _requested(requested_value, external_value),
+                    previous_shadow=shadow,
                 ),
                 dtype=bool,
             )
@@ -943,8 +959,8 @@ def _reduced_kernels(
             _current_moments(
                 operator_value,
                 state,
-                _requested(requested_value),
-                _target(target_value),
+                _requested(requested_value, external_value),
+                _target(target_value, external_value),
             ),
         )
 
@@ -1581,8 +1597,15 @@ def _compiled_slice_solver(
         shadow,
         external_value,
         operator_value=operator,
+        target_value=None,
+        requested_value=None,
     ):
-        operator_arguments = _OperatorArguments(external_value, operator_value)
+        operator_arguments = _OperatorArguments(
+            external_value,
+            operator_value,
+            target_value,
+            requested_value,
+        )
         reduced = kernels["initial_gather"](initial, external_value=operator_arguments)
         if initial_unknown is not None:
             reduced = jnp.concatenate((reduced, initial_unknown))
@@ -1851,7 +1874,7 @@ def solve_reduced_newton(
                 target_current_value,
             ),
             row_count=0,
-            operator_identity=id(operator),
+            operator_identity=_operator_program_identity(operator),
             external_shape=tuple(external.shape),
             target_current_shape=(
                 None
@@ -1871,7 +1894,7 @@ def solve_reduced_newton(
             None if requested_class is None else tuple(np.shape(requested_class))
         )
         if (
-            program.operator_identity != id(operator)
+            program.operator_identity != _operator_program_identity(operator)
             or program.external_shape != tuple(external.shape)
             or program.target_current_shape != expected_target_shape
             or program.requested_class_shape != expected_requested_shape
@@ -1986,7 +2009,7 @@ class ReducedProgram(NamedTuple):
     external: jax.Array
     kernels: dict[str, Callable[..., Any]]
     row_count: int
-    operator_identity: int = 0
+    operator_identity: Any = None
     external_shape: tuple[int, ...] = ()
     target_current_shape: tuple[int, ...] | None = None
     requested_class_shape: tuple[int, ...] | None = None
@@ -2024,6 +2047,11 @@ def _compiled_argument_layout(value: Any) -> tuple[tuple[int, ...], str] | None:
     return tuple(array.shape), array.dtype.str
 
 
+def _operator_program_identity(operator: Any) -> Any:
+    """Return reusable static identity, falling back for minimal test operators."""
+    return getattr(operator, "program_identity", id(operator))
+
+
 def _compiled_program_key(
     operator: Any,
     coordinates: ReducedCoordinates,
@@ -2035,10 +2063,10 @@ def _compiled_program_key(
 ) -> tuple[Any, ...]:
     """Return the static layout and captured-data identity of one program."""
     return (
-        id(operator),
+        _operator_program_identity(operator),
         tuple(np.asarray(coordinates.cells, dtype=np.intp)),
         _compiled_argument_layout(external),
-        _compiled_argument_key(target_current),
+        _compiled_argument_layout(target_current),
         _compiled_argument_key(requested_class),
         row_count,
         row_signature,
@@ -2061,9 +2089,9 @@ def _compiled_entry_key(
     is a traced argument and a same-shaped current edit reuses the same program.
     """
     return (
-        id(operator),
+        _operator_program_identity(operator),
         id(state),
-        _compiled_argument_key(target_current),
+        _compiled_argument_layout(target_current),
         _compiled_argument_key(requested_class),
         row_count,
         row_signature,
@@ -2148,6 +2176,12 @@ def _bind_dynamic_arguments(
 ) -> dict[str, Callable[..., Any]]:
     """Bind per-slice field leaves as regular traced kernel arguments."""
     bound = {}
+    arguments = _OperatorArguments(
+        external,
+        operator,
+        target_current,
+        requested_class,
+    )
     for name, kernel in kernels.items():
         if name == "direction":
             bound[name] = kernel
@@ -2155,15 +2189,11 @@ def _bind_dynamic_arguments(
         value = (
             partial(
                 kernel,
-                external_value=_OperatorArguments(external, operator),
+                external_value=arguments,
             )
             if bind_external
             else kernel
         )
-        if target_current is not None:
-            value = partial(value, target_value=target_current)
-        if requested_class is not None:
-            value = partial(value, requested_value=requested_class)
         bound[name] = value
     return bound
 
@@ -2388,7 +2418,10 @@ def _linearized_fixed_point_response(
             target_value,
         )
     else:
-        if program.operator_identity != id(operator) or program.row_count != 0:
+        if (
+            program.operator_identity != _operator_program_identity(operator)
+            or program.row_count != 0
+        ):
             raise ValueError("the linearized response needs this free solve's program")
         coordinates = program.coordinates
         kernels = program.kernels
@@ -2711,7 +2744,7 @@ def solve_constrained_reduced_newton(
                 augmentation=augmentation,
             ),
             row_count=0 if augmentation is None else augmentation.row_count,
-            operator_identity=id(operator),
+            operator_identity=_operator_program_identity(operator),
             external_shape=tuple(external.shape),
             target_current_shape=(
                 None
@@ -2725,7 +2758,7 @@ def solve_constrained_reduced_newton(
             default_external=default_external,
         )
     elif (
-        program.operator_identity != id(operator)
+        program.operator_identity != _operator_program_identity(operator)
         or program.external_shape != tuple(external.shape)
         or program.target_current_shape
         != (None if target_current_value is None else tuple(target_current_value.shape))
@@ -3015,7 +3048,7 @@ def _compiled_program(
                         augmentation=augmentation,
                     ),
                     row_count=row_count,
-                    operator_identity=id(operator),
+                    operator_identity=_operator_program_identity(operator),
                     external_shape=tuple(external.shape),
                     target_current_shape=target_shape,
                     requested_class_shape=requested_shape,
@@ -3035,7 +3068,7 @@ def _compiled_program(
         else:
             _compiled_program_cache.move_to_end(cache_key)
     if (
-        program.operator_identity != id(operator)
+        program.operator_identity != _operator_program_identity(operator)
         or program.external_shape != tuple(external.shape)
         or program.target_current_shape != target_shape
         or program.requested_class_shape != requested_shape
@@ -3141,7 +3174,14 @@ def _compiled_result(
     shadow = jnp.ravel(
         jnp.asarray(operator.residual_shadow_mask(initial, requested_class), dtype=bool)
     )
-    output = solver(initial, shadow, external, operator)
+    output = solver(
+        initial,
+        shadow,
+        external,
+        operator,
+        target_current,
+        requested_class,
+    )
     fields = _compiled_output_fields(output)
     return fields, program
 

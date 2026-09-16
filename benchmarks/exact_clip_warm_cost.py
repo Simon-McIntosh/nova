@@ -143,9 +143,16 @@ def _require_promoted_source() -> dict[str, Any]:
             "promoted exact-clip source is absent: the implicit-root derivative "
             "and cell-banked scan are both required"
         )
+    production_revision = _revision(PRODUCTION_ROOT)
+    expected_revision = os.environ.get("EXACT_CLIP_PRODUCTION_REVISION")
+    if expected_revision is not None and production_revision != expected_revision:
+        raise RuntimeError(
+            "production source revision moved after submission: "
+            f"expected {expected_revision}, observed {production_revision}"
+        )
     return {
         "production_root": str(PRODUCTION_ROOT),
-        "production_revision": _revision(PRODUCTION_ROOT),
+        "production_revision": production_revision,
         "benchmark_root": str(ROOT),
         "benchmark_revision": _revision(ROOT),
         "implicit_root_derivative_present": implicit,

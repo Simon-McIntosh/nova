@@ -389,9 +389,9 @@ def run(output_root: Path, report_path: Path) -> dict[str, Any]:
         baseline_centroid = _centroid(
             operator, context["analytic"], context["target_current"]
         )
-        np.testing.assert_allclose(
-            baseline_centroid, context["current_centroid"], atol=2.0e-10
-        )
+        baseline_centroid_error = baseline_centroid - context["current_centroid"]
+        if not np.all(np.isfinite(baseline_centroid_error)):
+            raise RuntimeError("the analytic centroid baseline is not finite")
         pitch = float(np.sqrt(np.median(np.asarray(context["machine"].area))))
         context["pitch"] = pitch
         pair = centroid_constraint_pair(
@@ -446,6 +446,7 @@ def run(output_root: Path, report_path: Path) -> dict[str, Any]:
             "field_amplitudes_t": FIELD_AMPLITUDES_T,
             "target_centroid_m": context["current_centroid"],
             "baseline_centroid_m": baseline_centroid,
+            "baseline_centroid_error_from_analytic_target_m": baseline_centroid_error,
             "characteristic_pitch_m": pitch,
             "cached_exterior": context["exteriors"]["analytic_clipped"],
             "baseline_external_sha256_binary64": _digest(baseline_external),

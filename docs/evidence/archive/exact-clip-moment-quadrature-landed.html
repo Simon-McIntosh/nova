@@ -10,8 +10,8 @@
   <meta name="plan-summary" content="Boundary-moment implementation and its retained weak-row refusal">
   <meta name="plan-evidence-for" content="exact-clip-moment-quadrature">
   <meta name="plan-verifies" content="exact-clip-moment-quadrature#s2">
-  <meta name="plan-commits" content="e916b3f9,1f885217,5fea2b5b">
-  <meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/focused-tests.log,/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/weak-110.log">
+  <meta name="plan-commits" content="e916b3f9,1f885217,5fea2b5b,a9d8061e,f221d583">
+  <meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/focused-tests.log,/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/layout-focused-tests.log,/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/weak-110-rerun.log,/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/parts/weak-rotation-reactor-static-110.json">
   <meta name="plan-recorded-at" content="2026-09-16">
   <meta name="plan-verdict" content="blocked">
   <meta name="plan-environment" content="all_debug, JAX_PLATFORMS=cpu, binary64">
@@ -25,7 +25,7 @@
     <header>
       <p class="eyebrow">Execution evidence</p>
       <h1>Exact-clip moment quadrature</h1>
-      <p class="lead">The boundary reduction and fail-closed tests landed; the analytic-row comparison is blocked by six refused real cut cells.</p>
+      <p class="lead">The boundary reduction and fixed-layout repair landed; the analytic-row comparison is blocked by moment and image errors far above the fan floor.</p>
     </header>
     <section id="s2-boundary-reduction">
       <h2>Polygon-exact density moments</h2>
@@ -37,9 +37,11 @@
           <tr><td>Focused CPU tests</td><td>4 passed in 16.49 s; malformed sampled arc and cut-bank overflow both produced non-finite refusals</td><td><code>focused-tests.log</code>, job <code>1271928</code></td></tr>
           <tr><td>Weak 110 comparison attempt 1</td><td>Blocked before receipt serialization because the reduction returned non-finite cut moments</td><td><code>weak-110.log</code>, job <code>1271932</code></td></tr>
           <tr><td>Weak 110 comparison attempt 2</td><td>Refusal localized to cells 35, 36, 54, 101, 102, and 128, with live vertex counts 131–132</td><td><code>weak-110.log</code>, job <code>1271933</code></td></tr>
+          <tr><td>Fixed-layout repair</td><td>5 tests passed in 43.69 s; the six formerly refused cells resolved to one arc and chord counts 4–5</td><td><code>layout-focused-tests.log</code>, job <code>1271941</code></td></tr>
+          <tr><td>Authorized weak 110 rerun</td><td>No refused cells; relative moment differences were 1.54e-4, 2.54e-3, and 2.12e-3 against fan floors 2.92e-16, 5.11e-15, and 5.06e-15. The frozen-current image changed 1.02e-4 of span against a 1.52e-15 floor.</td><td><code>weak-110-rerun.log</code> and <code>parts/weak-rotation-reactor-static-110.json</code>, job <code>1271943</code></td></tr>
         </tbody>
       </table>
-      <p><strong>Retained blocker.</strong> The clip's projected spline chains do not always satisfy the first edge-length run classifier even though their counts have the expected one-arc shape. No fan floor, frozen-current image delta, twelve-row receipt, or comparison figure is claimed. The next implementation pass must derive arc membership from the clip's fixed expansion layout or carry its marker explicitly, then rerun the same weak-row probe before opening the full matrix.</p>
+      <p><strong>Retained blocker.</strong> The fixed layout is now resolved: for representative cell 35, the live count is 131, arc edges are slots 0–127, sagitta is slot 64, the arc endpoint is slot 128, and the chord polygon keeps slots 0, 128, 129, and 130. The fail-closed layout guard refused no weak-row cells. The remaining failure is numerical: a six-sample quadratic density does not reproduce the retained fan to its own refinement floor, and its frozen-current flux image is likewise changed above that floor. Under the one-rerun fence no further density-order repair or full twelve-row matrix was attempted; no comparison figure is claimed.</p>
     </section>
   </main>
 </body>

@@ -132,23 +132,40 @@ def _centroid(operator: Any, state: np.ndarray, target_current: float) -> np.nda
     return np.sum(current[:, None] * coordinates, axis=0) / total
 
 
-def _dual_prediction(
+def _directional_constraint_response(
     context: dict[str, Any],
+    profile: ForwardProfile,
     pair: Any,
-    dual_image: np.ndarray,
     field_index: int,
-    amplitude_t: float,
 ) -> np.ndarray:
     response = np.asarray(context["operator"].prescribed_current_field.response)
-    field_flux = response[:, field_index] * amplitude_t
-    return np.sum(dual_image * field_flux[:, None], axis=0)
+    step_t = 1.0e-6
+    base_context = ConstraintContext(
+        jnp.asarray(context["analytic"]),
+        jnp.asarray(REQUESTED_CLASS),
+        jnp.asarray(context["target_current"]),
+        None,
+    )
+    perturbation = response[:, field_index] * step_t
+
+    def observed(state: np.ndarray) -> np.ndarray:
+        value = pair.functional.observed(
+            profile, base_context._replace(flux=jnp.asarray(state)), None
+        )
+        return np.asarray(jax.block_until_ready(value), dtype=np.float64)
+
+    return (
+        observed(context["analytic"] + perturbation)
+        - observed(context["analytic"] - perturbation)
+    ) / (2.0 * step_t)
 
 
 def _measure_row(
     context: dict[str, Any],
     production_map: Any,
+    profile: ForwardProfile,
     pair: Any,
-    dual_image: np.ndarray,
+    directional_response: np.ndarray,
     component: str,
     amplitude_t: float,
     baseline_external: jax.Array,
@@ -160,7 +177,7 @@ def _measure_row(
     external = context["operator"].external(prescribed_current=jnp.asarray(prescribed))
     state = np.asarray(context["analytic"], dtype=np.float64)
     target = context["current_centroid"]
-    prediction = _dual_prediction(context, pair, dual_image, field_index, amplitude_t)
+    prediction = directional_response[:, field_index] * amplitude_t
     row = {
         "component": component,
         "field_amplitude_t": amplitude_t,
@@ -408,19 +425,10 @@ def run(output_root: Path, report_path: Path) -> dict[str, Any]:
             ),
             newton_steps=certificate.recovery.NEWTON_STEPS,
         )
-        constraint_context = ConstraintContext(
-            jnp.asarray(context["analytic"]),
-            jnp.asarray(REQUESTED_CLASS),
-            jnp.asarray(context["target_current"]),
-            None,
-        )
-        dual_image = np.asarray(
-            jax.block_until_ready(
-                pair.functional.dual_flux_image(
-                    profile,
-                    constraint_context,
-                    pair.binding.payload,
-                )
+        directional_response = np.column_stack(
+            tuple(
+                _directional_constraint_response(context, profile, pair, index)
+                for index in range(len(EXTERIOR_FIELD_COMPONENTS))
             )
         )
         production_map = jax.jit(
@@ -457,7 +465,11 @@ def run(output_root: Path, report_path: Path) -> dict[str, Any]:
             "response_sha256_binary64": _digest(
                 operator.prescribed_current_field.response
             ),
-            "dual_image_sha256_binary64": _digest(dual_image),
+            "constraint_response_sha256_binary64": _digest(directional_response),
+            "prediction_method": (
+                "central directional difference of CurrentCentroidConstraint "
+                "along each prescribed exterior response column at 1 microtesla"
+            ),
             "rows": [],
             "panels": [],
             "completed": False,
@@ -469,8 +481,9 @@ def run(output_root: Path, report_path: Path) -> dict[str, Any]:
                 row, one_map_state = _measure_row(
                     context,
                     production_map,
+                    profile,
                     pair,
-                    dual_image,
+                    directional_response,
                     component,
                     float(amplitude_t),
                     baseline_external,

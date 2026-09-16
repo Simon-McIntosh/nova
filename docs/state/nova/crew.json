@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T11:27:01",
+  "updated": "2026-09-16T12:04:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4626,6 +4626,15 @@
       {
         "id": "s19c-pfs-elong-s",
         "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-pfs-remainder-c",
+        "harness": "clive",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -169957,6 +169966,176 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T085100280775-msc-compile-cost-evidence-record",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-compile-cost-evidence-record",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4708,
+                "cached_input_tokens": 504930,
+                "input_tokens": 509640,
+                "output_tokens": 2023,
+                "reasoning_output_tokens": 618,
+                "total_tokens": 511663,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the document exists, passes reckon audit-doc with no errors, its table has at least twelve rows each citing a receipt path or plan comment id that exists on main or under /home/ITER/mcintos/.config/reckon/crew/reports/nova (sources to read: /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/mesh-arguments/receipts/size-300.json; /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row/compile-constrained.json and compile-unconstrained.json; docs/figures/millisecond-converged-solve/program-census/report.md and 300.json; the compile host memory ladder rows quoted in the f-msc-mesh-arrays-as-program-arguments followup of docs/plans/millisecond-converged-solve.html; the cut-cell-current-attribution exact-clip warm cost record in docs/evidence/archive/cut-cell-current-attribution-landed.html; the batched-operator-boundary DIII-D width-five and MAST width-twelve compile figures in docs/evidence/archive/batched-operator-boundary-landed.html; the playable keyframe prime in docs/figures/playable-forward-solve/keyframes/h200-playable-cache-keyframes.json; the compiled-slice cache receipt docs/figures/millisecond-converged-solve/compiled-slice-cache/receipt.json), the figure PNG is force-added and committed with the document, no source file outside docs/ is modified, changed_paths lists the two docs paths, every manifest scalar unquoted",
+          "estimated_hours": null,
+          "goal": "Author docs/research/compile-cost-evidence.html, a reckon research document (copy the meta shape of docs/research/forward-accuracy-northstar.html, reckon-type research, plan-informs millisecond-converged-solve, exact-clip-moment-quadrature, cut-cell-current-attribution) that gathers every measured forward-solve compile cost in this repository into one table with columns program, cells, platform and host, compile wall seconds, StableHLO or HLO instruction count, executable bytes, persistent-cache hit or miss, job id and source path, drawn from the receipts and records named in the done-when, with one matplotlib figure of compile wall against cells per program family under docs/figures/compile-cost/ embedded by project-absolute src, a section naming the mechanisms already measured (captured mesh literals, the 120 current-moment and 36 topology-read traced copies, the per-host cache key that keeps all_debug nodes from sharing programs, the constraint-row lowering multiplier, the 2 GiB serialisation limit) each with its evidence row, and a closing section stating the lead's 2026-09-16 directive that an hour per compile is too much and must be addressed as the codebase stabilises",
+          "id": "msc-compile-cost-evidence-record",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-16T08:51:00Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T085100280775-msc-compile-cost-evidence-record/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/research/compile-cost-evidence.html",
+            "docs/figures/compile-cost",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/compile-evidence",
+            "docs/evidence/archive/millisecond-converged-solve-landed.html",
+            "docs/plans/millisecond-converged-solve.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "s19c-compile-evidence-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-16T08:51:17Z",
+        "completed_at": "2026-09-16T10:02:16.443Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4181,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4259,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "02ba4702116b0fb791502fad16aa9c0a8f0ec62b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "none run; the worker never reached its gate",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T085100280775-msc-compile-cost-evidence-record/stream.jsonl",
+          "log_digest": "sha256:b33eb0f363a8c5cc2243db6efbad2a65765cdd3eb3dfe5cb213466ed02774865"
+        },
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T085100280775-msc-compile-cost-evidence-record/manifest.md",
+        "scope_changed": false,
+        "session_id": "2b17789c-9c1a-4f6f-afe8-4c50a866916e",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-16T10:02:16.443Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": "stopped with no deliverable",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-compile-cost-evidence-record",
+          "session_id": "2b17789c-9c1a-4f6f-afe8-4c50a866916e",
+          "session_source": "stream",
+          "retained_at": "2026-09-16T10:02:16.443Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 25.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -170269,6 +170448,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2609
+    "_version": 2611
   }
 }

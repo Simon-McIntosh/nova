@@ -9,6 +9,8 @@ import numpy as np
 
 from scripts.analytic_oracle_fixtures.centroid_row import (
     DEFAULT_FIELD_BOUND_T,
+    DEFAULT_FIELD_SCALE_T,
+    DEFAULT_STEP_LIMIT,
     centroid_constraint_pair,
     exterior_field_identity,
 )
@@ -66,3 +68,23 @@ def test_centroid_pair_maps_rows_to_bounded_field_directions() -> None:
         ValueError, "exterior-field amplitude exceeds its declared finite bound"
     ):
         pair.unknown.require_within_bound(jnp.asarray([1.0e6, 0.0]))
+
+
+def test_centroid_pair_step_control_caps_and_records_refusal() -> None:
+    pair = centroid_constraint_pair(
+        jnp.asarray([1.4, 0.0]),
+        pitch=0.05,
+    )
+    np.testing.assert_allclose(pair.unknown.step_limit, DEFAULT_STEP_LIMIT)
+
+    # a row residual asking for more than the cap is damped, not clipped:
+    # the per-trip change lands exactly on the cap and the tangent survives
+    step, refused = pair.unknown.damped_step(jnp.zeros(2), jnp.asarray([10.0, 0.0]))
+    np.testing.assert_allclose(step[0], -DEFAULT_STEP_LIMIT, rtol=0.0, atol=0.0)
+    assert not bool(np.asarray(refused).any())
+
+    # a physical field past the declared bound is refused and the step holds
+    over_bound = jnp.full(2, 2.0 * DEFAULT_FIELD_BOUND_T / DEFAULT_FIELD_SCALE_T)
+    step, refused = pair.unknown.damped_step(over_bound, jnp.zeros(2))
+    np.testing.assert_array_equal(step, np.zeros(2))
+    assert bool(np.asarray(refused).all())

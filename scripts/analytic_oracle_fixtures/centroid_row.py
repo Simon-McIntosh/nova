@@ -18,6 +18,7 @@ from scripts.analytic_oracle_fixtures.measure import EXTERIOR_FIELD_COMPONENTS
 
 DEFAULT_FIELD_SCALE_T = 1.0e-3
 DEFAULT_FIELD_BOUND_T = 2.5e-1
+DEFAULT_STEP_LIMIT = 1.0
 CENTROID_COMPONENTS = ("centroid_r", "centroid_z")
 
 
@@ -41,6 +42,7 @@ def centroid_constraint_pair(
     components: Sequence[str] = CENTROID_COMPONENTS,
     field_scale_t: float = DEFAULT_FIELD_SCALE_T,
     field_bound_t: float = DEFAULT_FIELD_BOUND_T,
+    step_limit: float = DEFAULT_STEP_LIMIT,
     initial_field_t=None,
 ) -> ConstraintPair:
     """Bind analytic centroid targets to bounded uniform exterior fields."""
@@ -67,6 +69,7 @@ def centroid_constraint_pair(
             direction=_field_direction(selected),
             field_scale=field_scale,
             field_bound=jnp.full(rows, float(field_bound_t)),
+            step_limit=jnp.full(rows, float(step_limit)),
         ),
         binding=ConstraintBinding(
             target=target_value,
@@ -87,4 +90,6 @@ def exterior_field_identity() -> dict[str, object]:
         "centroid_z_compensator": "uniform radial field",
         "field_scale_t": DEFAULT_FIELD_SCALE_T,
         "field_bound_t": DEFAULT_FIELD_BOUND_T,
+        "step_limit": DEFAULT_STEP_LIMIT,
+        "bound_route": "damped step control with a recorded refusal",
     }

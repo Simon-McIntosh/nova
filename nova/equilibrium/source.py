@@ -62,6 +62,7 @@ __all__ = [
     "ForwardSource",
     "NormalisationPolicy",
     "NormalisationRecord",
+    "PolynomialFluxFunction",
     "CurrentNormalisationError",
     "SCALAR_CURRENT_AMPLITUDE_BAND",
     "RotationClosure",
@@ -271,6 +272,60 @@ def _validate_flux_function(value, name: str) -> Callable:
             "a force-balanced source"
         )
     raise TypeError(f"{name} must be a callable flux function of normalised flux")
+
+
+@jax.tree_util.register_pytree_node_class
+@dataclass(frozen=True)
+class PolynomialFluxFunction:
+    """Fixed-order differentiable flux function with explicit program data.
+
+    ``coefficients`` are ordered by ascending power of normalised poloidal
+    flux.  ``normalisation`` carries the physical scale separately, so two
+    profiles with the same coefficient count share one static evaluator while
+    both the shape coefficients and their SI scale cross the compiled-program
+    boundary as traced scalar arrays.  A constant analytic profile therefore
+    carries one coefficient and one normalisation scalar; higher-order profile
+    families retain the same call interface without sampling or interpolation.
+    """
+
+    coefficients: jax.Array
+    normalisation: jax.Array = 1.0
+
+    def __post_init__(self) -> None:
+        coefficients = jnp.asarray(self.coefficients)
+        normalisation = jnp.asarray(self.normalisation, dtype=coefficients.dtype)
+        if coefficients.ndim != 1 or coefficients.size < 1:
+            raise ValueError("polynomial coefficients must be a nonempty vector")
+        if normalisation.shape != ():
+            raise ValueError("flux-function normalisation must be scalar")
+        if not isinstance(coefficients, jax.core.Tracer):
+            if not bool(jnp.all(jnp.isfinite(coefficients))):
+                raise ValueError("polynomial coefficients must be finite")
+            if not bool(jnp.isfinite(normalisation)):
+                raise ValueError("flux-function normalisation must be finite")
+        object.__setattr__(self, "coefficients", coefficients)
+        object.__setattr__(self, "normalisation", normalisation)
+
+    def __call__(self, psi_norm: jax.Array) -> jax.Array:
+        """Evaluate the fixed-order power basis by Horner recurrence."""
+        coordinate = jnp.asarray(psi_norm)
+        value = jnp.zeros_like(coordinate, dtype=self.coefficients.dtype)
+        for coefficient in self.coefficients[::-1]:
+            value = value * coordinate + coefficient
+        return self.normalisation * value
+
+    def tree_flatten(self):
+        """Expose coefficient and normalisation arrays as program operands."""
+        return (self.coefficients, self.normalisation), None
+
+    @classmethod
+    def tree_unflatten(cls, auxiliary, children):
+        """Rebuild the static evaluator around traced argument leaves."""
+        del auxiliary
+        instance = object.__new__(cls)
+        object.__setattr__(instance, "coefficients", children[0])
+        object.__setattr__(instance, "normalisation", children[1])
+        return instance
 
 
 @dataclass(frozen=True)

@@ -655,6 +655,15 @@ class ForwardProfile:
         """Return the immutable source state the solve consumes."""
         return self.operator.source
 
+    def _with_source(self, source: ForwardSource) -> ForwardProfile:
+        """Bind per-slice source arguments while retaining compiled programs."""
+        if source is self.source:
+            return self
+        active = object.__new__(type(self))
+        active.__dict__ = self.__dict__.copy()
+        active.operator = self.operator.with_source(source)
+        return active
+
     def flux_map(
         self,
         current=None,
@@ -1861,7 +1870,12 @@ class ForwardProfile:
             target_current=target_current,
             **options,
         )
-        history = program(initial_flux, external, self.operator)
+        history = program(
+            initial_flux,
+            external,
+            self.operator,
+            None if target_current is None else jnp.asarray(target_current),
+        )
         return self._receipt(
             history.state,
             history,
@@ -1879,7 +1893,8 @@ class ForwardProfile:
         target_current=None,
         **options,
     ) -> Callable[
-        [jax.Array, jax.Array, ForwardFluxOperator], fixed_point.FixedPointResult
+        [jax.Array, jax.Array, ForwardFluxOperator, jax.Array | None],
+        fixed_point.FixedPointResult,
     ]:
         """Return one compiled history program for a static solve configuration.
 
@@ -1898,10 +1913,16 @@ class ForwardProfile:
                 return repr(value)
             return tuple(array.shape), str(array.dtype), array.tobytes()
 
+        def argument_layout(value):
+            if value is None:
+                return None
+            array = np.asarray(value)
+            return tuple(array.shape), str(array.dtype)
+
         key = (
             route,
             static_value(requested_class),
-            static_value(target_current),
+            argument_layout(target_current),
             tuple(
                 (name, static_value(value)) for name, value in sorted(options.items())
             ),
@@ -1925,14 +1946,19 @@ class ForwardProfile:
 
         if route == "newton_krylov":
 
-            def solve(initial_flux, external, operator=self.operator):
+            def solve(
+                initial_flux,
+                external,
+                operator=self.operator,
+                target_value=target_current,
+            ):
                 return fixed_point.newton_krylov(
                     mapped,
                     initial_flux,
                     shadow_mask_fn=shadow_mask,
                     promoted_shadow_mask_fn=promoted_shadow_mask,
                     shadowed_map_fn=shadowed_map,
-                    map_arguments=(external, operator),
+                    map_arguments=(external, operator, target_value),
                     callback_arguments=(operator,),
                     **{"newton_steps": self.newton_steps, **options},
                 )
@@ -1940,14 +1966,19 @@ class ForwardProfile:
         else:
             scheme = fixed_point.picard if route == "picard" else fixed_point.anderson
 
-            def solve(initial_flux, external, operator=self.operator):
+            def solve(
+                initial_flux,
+                external,
+                operator=self.operator,
+                target_value=target_current,
+            ):
                 return scheme(
                     mapped,
                     initial_flux,
                     shadow_mask_fn=shadow_mask,
                     promoted_shadow_mask_fn=promoted_shadow_mask,
                     shadowed_map_fn=shadowed_map,
-                    map_arguments=(external, operator),
+                    map_arguments=(external, operator, target_value),
                     callback_arguments=(operator,),
                     **{
                         "evaluations": self.evaluations,
@@ -2424,9 +2455,7 @@ class ForwardProfile:
         self, request: ForwardSolveRequest
     ) -> ForwardSolveReceipt:
         """Resolve one typed request whose constraint targets remain fixed."""
-
-        if request.source_profile is not self.source:
-            raise ValueError("request source_profile must be this profile's source")
+        active = self._with_source(request.source_profile)
         if request.constraint_pairs and request.route not in _CONSTRAINABLE:
             raise ValueError(
                 "augmented constraints require a route carrying a compensating "
@@ -2443,8 +2472,8 @@ class ForwardProfile:
                 "typed host_krylov requests need an explicitly declared host policy"
             )
 
-        initial_flux = request.seed_policy.resolve(self, current=request.current)
-        cache_key = self._request_compilation_cache_key(request, initial_flux)
+        initial_flux = request.seed_policy.resolve(active, current=request.current)
+        cache_key = active._request_compilation_cache_key(request, initial_flux)
         compilation_cache_hit = (
             policy.compilation_cache and cache_key in self._request_compilation_cache
         )
@@ -2452,7 +2481,7 @@ class ForwardProfile:
             policy.compilation_cache
         )
         started = time.perf_counter()
-        equilibrium = self.solve(
+        equilibrium = active.solve(
             initial_flux,
             route=request.route,
             current=request.current,
@@ -2507,7 +2536,7 @@ class ForwardProfile:
             jnp.atleast_1d(amplitude) if amplitude is not None else jnp.empty((0,))
         )
         topology = getattr(equilibrium, "topology", None)
-        polish_receipt = self._terminal_polish_receipt(equilibrium)
+        polish_receipt = active._terminal_polish_receipt(equilibrium)
         return ForwardSolveReceipt(
             terminal_state=equilibrium,
             qualified=qualified,
@@ -2557,7 +2586,7 @@ class ForwardProfile:
             for pair in request.constraint_pairs
         )
         return (
-            id(self.operator),
+            self.operator.program_identity,
             request.route,
             request.policy,
             array_signature(initial_flux),

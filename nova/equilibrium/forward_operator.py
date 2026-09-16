@@ -29,7 +29,7 @@ direct pre-clip sample nodes.
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import InitVar, dataclass, field
+from dataclasses import InitVar, dataclass, field, fields, is_dataclass
 from functools import cached_property
 import hashlib
 import types
@@ -73,6 +73,7 @@ from nova.equilibrium.source import (
     CurrentNormalisationError,
     DomainProfile,
     ForwardSource,
+    PolynomialFluxFunction,
 )
 from nova.equilibrium.stencil_mesh import (
     CellCurrentMoments,
@@ -1579,6 +1580,20 @@ def _digest_callable_value(
         for item in sorted(value, key=repr):
             _digest_callable_value(digest, f"{name}.member", item, seen)
         return
+    if is_dataclass(value) and not isinstance(value, type):
+        digest.update(
+            (
+                f"{name}:dataclass:{type(value).__module__}.{type(value).__qualname__}"
+            ).encode("utf-8")
+        )
+        for definition in fields(value):
+            _digest_callable_value(
+                digest,
+                f"{name}.{definition.name}",
+                getattr(value, definition.name),
+                seen,
+            )
+        return
     if isinstance(value, types.CodeType):
         digest.update(f"{name}:code".encode("utf-8"))
         digest.update(value.co_code)
@@ -1683,6 +1698,7 @@ class _SourceLayout:
     identity: str
     source_type: type = field(compare=False, repr=False)
     core_type: type | None = field(compare=False, repr=False)
+    core_static_state: dict[str, object] = field(compare=False, repr=False)
     pressure_layout: _CallableLayout | None = field(compare=False, repr=False)
     field_layout: _CallableLayout | None = field(compare=False, repr=False)
     pressure_leaf_count: int = field(compare=False, repr=False)
@@ -1699,7 +1715,9 @@ class _SourceLayout:
 
     @classmethod
     def flatten(cls, source: object) -> tuple[_SourceLayout, tuple[object, ...]]:
-        if type(source) is not ForwardSource or type(source.core) is not DomainProfile:
+        if type(source) is not ForwardSource or not isinstance(
+            source.core, DomainProfile
+        ):
             identity = (
                 f"static:{type(source).__module__}.{type(source).__qualname__}:"
                 f"{id(source)}"
@@ -1709,6 +1727,7 @@ class _SourceLayout:
                     identity=identity,
                     source_type=type(source),
                     core_type=None,
+                    core_static_state={},
                     pressure_layout=None,
                     field_layout=None,
                     pressure_leaf_count=0,
@@ -1721,12 +1740,25 @@ class _SourceLayout:
             )
         pressure_layout, pressure_leaves = _CallableLayout.flatten(source.core.p_prime)
         field_layout, field_leaves = _CallableLayout.flatten(source.core.ff_prime)
+        core_static_state = {
+            name: value
+            for name, value in source.core.__dict__.items()
+            if name not in ("p_prime", "ff_prime")
+        }
+        core_digest = hashlib.sha256()
+        _digest_callable_value(
+            core_digest,
+            "core_static_state",
+            core_static_state,
+            set(),
+        )
         identity = ":".join(
             (
                 f"{type(source).__module__}.{type(source).__qualname__}",
                 f"{type(source.core).__module__}.{type(source.core).__qualname__}",
                 pressure_layout.identity,
                 field_layout.identity,
+                core_digest.hexdigest(),
                 str(int(source.normalisation)),
                 f"common={id(source.common_sol)}",
                 f"private={id(source.private_flux)}",
@@ -1736,6 +1768,7 @@ class _SourceLayout:
             identity=identity,
             source_type=type(source),
             core_type=type(source.core),
+            core_static_state=core_static_state,
             pressure_layout=pressure_layout,
             field_layout=field_layout,
             pressure_leaf_count=len(pressure_leaves),
@@ -1759,6 +1792,8 @@ class _SourceLayout:
         pressure_leaves = tuple(profile_leaves[: self.pressure_leaf_count])
         field_leaves = tuple(profile_leaves[self.pressure_leaf_count :])
         core = object.__new__(self.core_type)
+        for name, value in self.core_static_state.items():
+            object.__setattr__(core, name, value)
         object.__setattr__(
             core, "p_prime", self.pressure_layout.rebuild(pressure_leaves)
         )
@@ -2176,6 +2211,43 @@ class ForwardFluxOperator:
                 f"sample={self.sample is not None}",
             )
         )
+
+    @property
+    def program_identity(self) -> str:
+        """Return the mesh and static evaluator identity of one solve program."""
+        return self._batch_identity()
+
+    def with_source(self, source: ForwardSource) -> ForwardFluxOperator:
+        """Return this mesh with compatible flux-function arguments replaced.
+
+        The callable representation and every coefficient shape are static
+        program properties.  Their numerical leaves are per-slice operands, so
+        replacing them does not rebuild geometry or select another executable.
+        """
+        current_layout, current_leaves = _SourceLayout.flatten(self.source)
+        source_layout, source_leaves = _SourceLayout.flatten(source)
+        if current_layout != source_layout:
+            raise ValueError(
+                "request source_profile must use this profile's static "
+                "flux-function representation"
+            )
+        current_signature = tuple(
+            (tuple(np.shape(value)), np.asarray(value).dtype.str)
+            for value in current_leaves
+        )
+        source_signature = tuple(
+            (tuple(np.shape(value)), np.asarray(value).dtype.str)
+            for value in source_leaves
+        )
+        if source_signature != current_signature:
+            raise ValueError(
+                "request source_profile coefficient and normalisation arguments "
+                "must match this profile's shapes and dtypes"
+            )
+        instance = object.__new__(type(self))
+        instance.__dict__ = self.__dict__.copy()
+        instance.source = source
+        return instance
 
     def tree_flatten(self):
         """Separate traced arithmetic arrays from immutable host metadata."""
@@ -3163,6 +3235,56 @@ class ForwardFluxOperator:
             )
         return self.current_moment_image(moments)
 
+    def profile_component_image(
+        self,
+        psi,
+        *,
+        component: str,
+        amplitude,
+        requested_class=None,
+        target_current=None,
+    ) -> jax.Array:
+        """Return one profile component's flux-image amplitude tangent.
+
+        The source evaluator and coefficient order stay fixed.  The JVP varies
+        only the selected physical normalisation, so current normalisation and
+        every downstream moment operation contribute their exact derivative.
+        """
+        if component not in ("pressure_gradient", "ff_prime"):
+            raise ValueError("unknown profile-amplitude component")
+        field = "p_prime" if component == "pressure_gradient" else "ff_prime"
+        function = getattr(self.source.core, field)
+        if not isinstance(function, PolynomialFluxFunction):
+            raise TypeError(
+                "profile component tangents require PolynomialFluxFunction "
+                "coefficient arguments"
+            )
+
+        def image(scale):
+            varied_function = PolynomialFluxFunction.tree_unflatten(
+                None,
+                (
+                    function.coefficients,
+                    function.normalisation * (1.0 + scale),
+                ),
+            )
+            core = object.__new__(type(self.source.core))
+            for name, value in self.source.core.__dict__.items():
+                object.__setattr__(core, name, value)
+            object.__setattr__(core, field, varied_function)
+            source = object.__new__(type(self.source))
+            for name, value in self.source.__dict__.items():
+                object.__setattr__(source, name, value)
+            object.__setattr__(source, "core", core)
+            active = object.__new__(type(self))
+            active.__dict__ = self.__dict__.copy()
+            active.source = source
+            return active.internal(psi, requested_class, target_current)
+
+        zero = jnp.asarray(0.0, dtype=function.normalisation.dtype)
+        _base, tangent = jax.jvp(image, (zero,), (jnp.asarray(amplitude),))
+        return tangent
+
     def current_moment_image(self, moments: CellCurrentMoments) -> jax.Array:
         """Return flux from an explicitly supplied cell-current moment image."""
         physical = jnp.r_[self.grid.internal(moments), self.wall.internal(moments)]
@@ -3228,7 +3350,7 @@ class ForwardFluxOperator:
 
         def mapped(psi: jax.Array) -> jax.Array:
             """Return the free-boundary flux map of one trial flux."""
-            return traced(psi, external, self)
+            return traced(psi, external, self, target_current)
 
         return mapped
 
@@ -3243,10 +3365,16 @@ class ForwardFluxOperator:
             psi: jax.Array,
             external: jax.Array,
             operator: ForwardFluxOperator | None = None,
+            target_value=None,
         ) -> jax.Array:
             """Return one map evaluation at an explicitly supplied exterior."""
             active = self if operator is None else operator
-            image = external + active.internal(psi, requested_class, target_current)
+            active_target = (
+                (target_current if target_value is None else target_value)
+                if target_current is not None
+                else None
+            )
+            image = external + active.internal(psi, requested_class, active_target)
             return active._exclude_shadow_residual(psi, image, requested_class)
 
         return mapped
@@ -3264,7 +3392,7 @@ class ForwardFluxOperator:
         traced = self.traced_flux_map_with_shadow(requested_class, target_current)
 
         def mapped(psi: jax.Array, shadow: jax.Array) -> jax.Array:
-            return traced(psi, shadow, external, self)
+            return traced(psi, shadow, external, self, target_current)
 
         partition_read = getattr(traced, "_read_frozen_partition", None)
         partitioned_map = getattr(traced, "_map_frozen_partition", None)
@@ -3292,9 +3420,15 @@ class ForwardFluxOperator:
             shadow: jax.Array,
             external: jax.Array,
             operator: ForwardFluxOperator | None = None,
+            target_value=None,
         ) -> jax.Array:
             active = self if operator is None else operator
-            image = external + active.internal(psi, requested_class, target_current)
+            active_target = (
+                (target_current if target_value is None else target_value)
+                if target_current is not None
+                else None
+            )
+            image = external + active.internal(psi, requested_class, active_target)
             return active._exclude_shadow_residual(
                 psi, image, requested_class, shadow=shadow
             )

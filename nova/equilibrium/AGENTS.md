@@ -196,6 +196,17 @@ before an absent solve count can be believed.
   program per slice.  Coil centroids may likewise be traced positions when the
   measured cost is negligible.  Do not differentiate through conductor or
   plasma-cell geometry.
+  The analytic representation is `PolynomialFluxFunction`: pressure and
+  diamagnetic functions each contribute one ascending-power coefficient vector
+  and one scalar physical normalisation, four traced leaves in total.  Their
+  vector lengths are static and equal to polynomial order plus one.  A request
+  may replace their values on an existing `ForwardProfile` only when evaluator,
+  shapes and dtypes match; an incompatible representation is refused before
+  lowering.  `SampledFluxFunction` remains the fixed-node, piecewise-linear
+  route and carries its coordinate and value tables as traced leaves.  Use a
+  local higher-order spline only when its fixed knot and boundary policy are
+  themselves part of the source declaration; do not infer one from samples at
+  the solve boundary.
 - One solve program contains one traced current-moment path and one traced
   topology-read path.  Repeated dynamic evaluations return to those shared
   loop bodies; a second source copy in optimized HLO is a failed size gate even

@@ -431,8 +431,23 @@ def _maximum_uncommanded_drift(table: list[dict[str, Any]]) -> float:
     return 0.0 if not drift else float(max(drift))
 
 
+def _capped_proposed_delta(iteration) -> np.ndarray:
+    """Return the proposed step after the stated per-circuit ceiling clips it."""
+    proposed = np.asarray(iteration.proposed_delta, dtype=float)
+    ceiling = iteration.proposed_ceiling_a
+    if ceiling is None:
+        return proposed
+    limit = abs(float(ceiling))
+    return np.clip(proposed, -limit, limit)
+
+
 def _outer_iteration_table(inverse) -> list[dict[str, Any]]:
-    """Return the achieved-shape Newton history in receipt-ready form."""
+    """Return the achieved-shape Newton history in receipt-ready form.
+
+    Each row carries the step the solve proposed, the ceiling that bounded it,
+    the step entering the admission search, the number of halvings that search
+    made, the step it admitted, and the motion that admitted step achieved.
+    """
     return [
         {
             "index": index,
@@ -445,9 +460,22 @@ def _outer_iteration_table(inverse) -> list[dict[str, Any]]:
                 iteration.tangent_singular_values.tolist()
             ),
             "proposed_current_delta_a": iteration.proposed_delta.tolist(),
+            "proposed_step_ceiling_a": iteration.proposed_ceiling_a,
+            "capped_current_delta_a": _capped_proposed_delta(iteration).tolist(),
+            "ceiling_limited": bool(iteration.ceiling_limited),
+            "backtracks": int(iteration.backtracks),
             "admitted_current_delta_a": iteration.admitted_delta.tolist(),
+            "achieved_motion_m": (
+                None
+                if iteration.achieved_motion is None
+                else iteration.achieved_motion.tolist()
+            ),
+            "response_gain": iteration.response_gain,
             "maximum_absolute_proposed_delta_a": float(
                 np.max(np.abs(iteration.proposed_delta))
+            ),
+            "maximum_absolute_capped_delta_a": float(
+                np.max(np.abs(_capped_proposed_delta(iteration)))
             ),
             "maximum_absolute_admitted_delta_a": float(
                 np.max(np.abs(iteration.admitted_delta))
@@ -457,6 +485,22 @@ def _outer_iteration_table(inverse) -> list[dict[str, Any]]:
         }
         for index, iteration in enumerate(inverse.iterations, start=1)
     ]
+
+
+def _forward_solve_counts(inverse) -> dict[str, Any]:
+    """Count the admission forward solves one command ran, and how many landed.
+
+    Every fraction the search tests is one forward solve through the referee,
+    and exactly one of them per recorded step is the solve whose currents the
+    step then commanded.
+    """
+    trials = [int(iteration.admissibility_trials) for iteration in inverse.iterations]
+    return {
+        "admitted": len(inverse.iterations),
+        "admission_trials": sum(trials),
+        "trials_per_step": trials,
+        "backtracks_per_step": [int(item.backtracks) for item in inverse.iterations],
+    }
 
 
 def _boundary_point_rows(inverse, profile, flux) -> list[dict[str, Any]]:
@@ -921,6 +965,7 @@ def _arm_receipt(
         "accepted_fraction": inverse.accepted_fraction,
         "admissibility_trials": inverse.admissibility_trials,
         "outer_iterations": _outer_iteration_table(inverse),
+        "forward_solve_counts": _forward_solve_counts(inverse),
         "turning_point_tolerance_m": inverse.turning_point_tolerance,
         "achieved_shape_converged": inverse.converged,
     }
@@ -1052,6 +1097,7 @@ def _arm_receipt(
         },
         "rounds": [round_receipt],
         "outer_iterations": _outer_iteration_table(inverse),
+        "forward_solve_counts": _forward_solve_counts(inverse),
         "round_count": len(inverse.iterations),
         "current_step_policy": {
             "reference": "fixed carrier seed current per circuit",
@@ -1125,6 +1171,7 @@ def _null_receipt(
         "accepted_fraction": inverse.accepted_fraction,
         "admissibility_trials": inverse.admissibility_trials,
         "outer_iterations": _outer_iteration_table(inverse),
+        "forward_solve_counts": _forward_solve_counts(inverse),
         "turning_point_tolerance_m": inverse.turning_point_tolerance,
         "achieved_shape_converged": inverse.converged,
         "coil_current_by_circuit_a": {

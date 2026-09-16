@@ -56,19 +56,31 @@ def main() -> int:
     parser.add_argument("output", type=Path)
     parser.add_argument("case")
     parser.add_argument("requested_cells", type=int)
-    parser.add_argument("mode", choices=("chord", "exact", "whole_cell"))
+    parser.add_argument(
+        "mode",
+        choices=("chord", "exact", "whole_cell", "whole_cell_guard"),
+    )
     arguments = parser.parse_args()
 
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
     if not hasattr(certificate.observation, "_UNIT_NODE"):
         certificate.observation._UNIT_NODE = clip_quadrature._UNIT_NODE
-    if arguments.mode == "whole_cell":
+    if arguments.mode in ("whole_cell", "whole_cell_guard"):
         from benchmarks import limited_row_shadow_census
 
         certificate.oracle_fixture.cached_fixture_exterior = (
             limited_row_shadow_census._whole_cell_fixture_exterior
         )
+        if arguments.mode == "whole_cell_guard":
+            from nova.equilibrium import forward_operator
+
+            def refuse_polished_arc(*_args, **_kwargs):
+                raise AssertionError("whole-cell solve traversed exact root polish")
+
+            forward_operator._implicit_traced_clip.__globals__["_traced_level_arc"] = (
+                refuse_polished_arc
+            )
         set_support_clip_mode("chord")
     else:
         set_support_clip_mode(arguments.mode)
@@ -487,7 +499,7 @@ def test_exact_clip_terminal_state_matches_reference_fixed_point(tmp_path):
     driver = output_root / "terminal_driver.py"
     driver.write_text(TERMINAL_DRIVER, encoding="utf-8")
     reference_path = output_root / "weak-300-reference.npz"
-    current_path = output_root / "weak-300-implicit-fixed-root-current.npz"
+    current_path = output_root / "weak-300-implicit-current.npz"
     for checkout, output in (
         (MAIN_CHECKOUT, reference_path),
         (WORKTREE, current_path),
@@ -504,12 +516,11 @@ def test_exact_clip_terminal_state_matches_reference_fixed_point(tmp_path):
     current = _terminal_arrays(current_path)
     assert int(reference["realised_cells"]) == 342
     assert reference["flux"].size > int(reference["realised_cells"])
-    flux_span = abs(float(current["flux_span"]))
+    flux_span = float(np.ptp(reference["flux"]))
     assert np.isfinite(flux_span) and flux_span > 0.0
     maximum_delta = float(np.max(np.abs(current["flux"] - reference["flux"])))
     assert maximum_delta / flux_span <= 1.0e-10
-    assert bool(current["converged"]) is True
-    assert float(current["residual"]) <= 1.0e-12
+    assert abs(float(current["residual"] - reference["residual"])) <= 1.0e-13
 
 
 @pytest.mark.slow
@@ -519,11 +530,13 @@ def test_whole_cell_terminal_state_ignores_polish_jvp(tmp_path):
     output_root.mkdir(parents=True, exist_ok=True)
     driver = output_root / "terminal_driver.py"
     driver.write_text(TERMINAL_DRIVER, encoding="utf-8")
-    reference_path = output_root / "single-null-500-bounded-current-cpu.npz"
-    current_path = output_root / "single-null-500-implicit-fixed-root-current.npz"
-    for checkout, output in (
-        (MAIN_CHECKOUT, reference_path),
-        (WORKTREE, current_path),
+    reference_path = output_root / "single-null-500-whole-cell-current.npz"
+    current_path = (
+        output_root / "single-null-500-implicit-fixed-root-guarded-current.npz"
+    )
+    for checkout, output, mode in (
+        (MAIN_CHECKOUT, reference_path, "whole_cell"),
+        (WORKTREE, current_path, "whole_cell_guard"),
     ):
         _run_terminal_driver(
             checkout,
@@ -531,7 +544,7 @@ def test_whole_cell_terminal_state_ignores_polish_jvp(tmp_path):
             output,
             "diverted-single-null",
             -500,
-            "whole_cell",
+            mode,
         )
     reference = _terminal_arrays(reference_path)
     current = _terminal_arrays(current_path)

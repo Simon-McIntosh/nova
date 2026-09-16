@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T09:12:03",
+  "updated": "2026-09-16T09:33:52",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4535,6 +4535,17 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-07"
+      },
+      {
+        "id": "s19c-bob-drift-l",
+        "harness": "codex-luna",
+        "role": "investigate",
+        "session_id": "01a0a911-8b21-7b20-8319-f54e0e1dc209",
+        "session_model": "gpt-5.6-luna",
+        "sessions": {
+          "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"read-only\"}": "01a0a911-8b21-7b20-8319-f54e0e1dc209"
+        },
+        "created": "2026-09-16"
       },
       {
         "id": "s19c-cco-fieldunknown-s",
@@ -168865,6 +168876,196 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T071438961102-bob-residual-drift-attribution",
+        "plan": "batched-operator-boundary",
+        "section": "\u00a72",
+        "node": "bob-residual-drift-attribution",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3786,
+                "cached_input_tokens": 342624,
+                "input_tokens": 346442,
+                "output_tokens": 1953,
+                "reasoning_output_tokens": 1093,
+                "total_tokens": 348395,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/bob-drift-attribution.md exists, names the bank's recorded producing revision and the rerun revision from the receipts with git log commands run over the paths that changed between them, names the mechanism with path:line for the bank-era code and the current code side by side or states with evidence that no code path changed and the drift is numerical, tables the twelve per-arm residual differences from the retained receipt, with no tracked file modified",
+          "estimated_hours": null,
+          "goal": "Attribute the twelve-arm terminal-residual drift between the bank-exact operand cache (logs/exact-operand-cache.npz, sha256 2c291a84, bank sha256 58a5d895) and the producer rerun at the current operator revision (H200 job 1265131, recomputed cache sha256 83f01684, receipt under docs/figures/batched-operator-boundary/exit-incidence/) by naming which side moved, the commit range between the bank's recorded data_authority revision and the producer revision that ran, the mechanism as path:line on both sides (a different profile support, a different operand partition, a different quadrature, or another named change), with the per-arm drift magnitudes tabled from the retained receipt",
+          "id": "bob-residual-drift-attribution",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-16T07:14:39Z",
+            "read_at": "2026-09-16T07:14:40Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 75.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T071438961102-bob-residual-drift-attribution/manifest.md",
+          "plan": "batched-operator-boundary",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "20m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/bob-drift-attribution.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "s19c-bob-drift-l",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "xhigh",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-16T07:14:53Z",
+        "completed_at": "2026-09-16T07:32:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1044,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1044,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "5bd02cb242be65698713afb569b9432b9bf5ef61",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "test -s bob-drift-attribution.md; grep both revisions, mechanism commit, path:line anchors, twelve arm rows",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/bob-drift-attribution-gate.log",
+          "log_digest": "sha256:40fcfe8020916b66a760f2b0eac31bc81b2172230bac7cdb3fcd58a11433705a"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T071438961102-bob-residual-drift-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a911-8b21-7b20-8319-f54e0e1dc209",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 550400,
+            "cached_input_tokens_cumulative": 550400,
+            "input_tokens": 552505,
+            "input_tokens_cumulative": 552505,
+            "output_tokens": 1364,
+            "output_tokens_cumulative": 1364,
+            "reasoning_output_tokens": 212,
+            "reasoning_output_tokens_cumulative": 212
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-16T07:32:17Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 76.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-16T07:32:17Z"
+            }
+          ],
+          "notional_cost_usd": 3.7763,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 16074496,
+          "cumulative_input_tokens": 16410091,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 1576,
+          "generation_seconds": 1001.398,
+          "machine_seconds": 40.924,
+          "tokens_per_second": 1.57
+        },
+        "follow_on_paths": [
+          "old-tree/current-tree"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "investigate-only node; its deliverable is the report file outside the repository",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/bob-residual-drift-attribution",
+          "session_id": "01a0a911-8b21-7b20-8319-f54e0e1dc209",
+          "session_source": "pointer",
+          "retained_at": "2026-09-16T07:32:17Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 89.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -169177,6 +169378,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2595
+    "_version": 2598
   }
 }

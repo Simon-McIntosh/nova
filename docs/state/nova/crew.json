@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T07:55:35",
+  "updated": "2026-09-16T07:59:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -168391,6 +168391,245 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T132132875202-cca-exact-clip-solve-memory-scaling",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-exact-clip-solve-memory-scaling",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3647,
+                "cached_input_tokens": 478699,
+                "input_tokens": 482378,
+                "output_tokens": 3115,
+                "reasoning_output_tokens": 520,
+                "total_tokens": 485493,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "The producer of the jit_bitwise_and temporary is identified from the compiled program's memory analysis at 300 and 500 cells on CPU (all_debug, JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on the node, one foreground srun under 59 minutes, receipts persisted per rung): the plan records about 279 GiB at 1000 cells (jobs 1270272 and 1270262) and the limited-shadow node measured 159.06 GiB for the same allocation under an XLA-estimated 159.23 GiB executable (jobs 1271272 and 1271297, receipt docs/figures/cut-cell-current-attribution/limited-shadow/solve-receipt.json), inside profile.solve on the exact-clip path (candidates: the frozen-partition reconcile, the topology read, or the spline-chain clip inside the traced residual in nova/equilibrium/forward_operator.py and nova/equilibrium/cell_partition.py); the report fits the exponent of that temporary's bytes against realised cells from 110, 300 and 500 and names the file, function and line that build it; the pairwise construction is replaced by the per-cell form it stands for (a segment or neighbour list of fixed per-cell capacity, never an all-cells-by-all-cells mask), with the docstring stating why the result is unchanged; gates, each persisted as it lands: terminal states bit-identical at 300 cells on the weak exact-clip row and the committed single-null whole-cell 500 control, peak device memory of the exact-clip solve at 1000 cells under 20 GiB by XLA's memory analysis and by the measured allocation, then ONE H200 job (one card, 8 cores, 128 GiB, TMPDIR=/tmp, PYTHONPATH the worktree, root venv python, persistent compilation cache) solving the weak 1000 exact-clip row with the row receipt persisted immediately and a line-contour panel of solved beside analytic on shared levels with both null sets and the wall, tabling axis error in pitch, terminal residual, boundary flux against the analytic zero and amplitude beside the whole-cell 1000 row's 0.635 pitch, 1.39e-15 and 4.96 Wb; every test module importing the changed files passes one per fresh CPU process on all_debug against the base ids with zero added failures; manifest in plain key: value lines, any waiting declaration with wait_probe as a JSON list such as [\"squeue\",\"-h\",\"-j\",\"1271409\"] and wait_terminal exit:0",
+          "estimated_hours": null,
+          "goal": "The exact-clip production solve no longer builds a pairwise boolean that grows quadratically with cells, so the weak 1000 exact-clip row compiles and runs inside one 128 GiB H200 job and the analytic oracle row can finally be solved",
+          "id": "cca-exact-clip-solve-memory-scaling",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T13:21:34Z",
+            "read_at": "2026-09-15T13:21:35Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 39.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T132132875202-cca-exact-clip-solve-memory-scaling/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/cell_partition.py",
+            "benchmarks/exact_clip_memory_scaling.py",
+            "tests/test_exact_clip_memory.py",
+            "docs/figures/cut-cell-current-attribution/exact-clip-memory",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-memory",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-cca-clipmem-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T13:22:22Z",
+        "completed_at": "2026-09-16T05:55:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 59600,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "623d23dbe8feb8f096af7c9b9dd0fc200b8dd345",
+        "commits": [
+          "f3b64a46266ba60d53a06dcb5bfed72d61138e0f",
+          "c42612cd9cb67f8f9de0cab9d6c61df1941ad5a5",
+          "826358aa96acf2f3d0f96698adc3727a23180ad8",
+          "ad0bdf79d386238429ef90ea64f276ad23536e32",
+          "5ad5a59d396fd49e126483342eec1f8e4e8605a6",
+          "823b9e6d8c33f7a78d2f35f83b59f4fd762171ac",
+          "7fe47a072bc64df701e663eb7f1852d8d3c7d293",
+          "5366ac4e210fae5c3bb0fa7cb74bfc33c70d553c",
+          "e6bfb8014c2faad29d47166e6882199f17b2a77e",
+          "eb567d241d1793a1fa69f1e11d218b27b6ca7143",
+          "fbef2dd9392286427bf766e38b4697f8e0237189",
+          "e203bde33374f9986783516223c8d78b1d5998bb",
+          "a55eb09bdbd9ada674ae65e750cf468f2112509a",
+          "e89fbebff8829df374a1e7678789bb59d90fdb33",
+          "9693713b24fff75e50691931e4d7ff836d772e6b",
+          "454cd2ca06fa6304845b8f76a85d6571ebf95464",
+          "39cee36b1ca755ed5c4b727d8ee0cfbe2dc8fed0",
+          "ff051c9b3c93dd92163e0a9e1b4c167db9c557f0",
+          "9fa332fe47072ac9a38b6c598fdbf42cbe3278e7",
+          "14193b48f48085321ef3ab09cb185e4d774d46e1",
+          "534baa61046e52f89d3036ed7ed772d55520a313",
+          "db468fa66631fc0cc394cce4d4e070c5c57fd229",
+          "b7bc1515ff31fb87acf981291e1168dc77f1074f",
+          "89b26f54dd3610b1c4f0477f161f0f405c27ff03",
+          "f9389773113e80c4102d1f33c0009c8398880eeb",
+          "70a9b7b809ddc3cc47ac1e793a9ef63287c3fac0",
+          "8800562d9158016136694543bc2ba3d5cba11b08",
+          "c7e8cc12ebc081fc2bb7bb0c6bf957ec901e21e6",
+          "617b657c19b2806ada1337318c62b0d459e562b5",
+          "c221f20de39d1c4497bc1ad779c5db397ebe54d2",
+          "7e1456e4182195e09c2fa7ae3590f8b4c660b9d6",
+          "ddd34096682d5ef0695cbe6f6e60bdf16069ea4b",
+          "5b65b6732ad50e9931fe01c3bf25392b28950e62"
+        ],
+        "changed_lines": {
+          "added": 295067,
+          "removed": 26,
+          "files": 59
+        },
+        "tests_added": 12,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1271849 fixed-root finite differences 8 of 8 at weak 110 and 300; job 1271863 whole-cell 500 control bit-identical; job 1271864 1000-cell memory 7.82 GiB; job 1271873 weak 1000 exact-clip row residual 1.45e-13 qualified; all_debug job 1271880 tests/test_exact_clip_memory.py 12 of 12",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/cut-cell-current-attribution/exact-clip-memory/weak-1000-exact-implicit-seed-repaired-receipt.json",
+          "log_digest": "sha256:35445da0a7c70be2eaa9eef0312ef666d175ca7b103aa0239f52896084802b0e"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T132132875202-cca-exact-clip-solve-memory-scaling/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a0a53b-a136-71a2-9aa2-36ba56634aeb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 133425792,
+            "cached_input_tokens_cumulative": 133425792,
+            "input_tokens": 134629394,
+            "input_tokens_cumulative": 134629394,
+            "output_tokens": 127465,
+            "output_tokens_cumulative": 127465,
+            "reasoning_output_tokens": 28369,
+            "reasoning_output_tokens_cumulative": 28369
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-16T05:55:42Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 73.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-16T05:55:42Z"
+            }
+          ],
+          "notional_cost_usd": 3595.7982,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 133425792,
+          "cumulative_input_tokens": 268055186,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 155834
+        },
+        "follow_on_paths": [
+          "benchmarks/solovev_certificate.py::_certificate_compile_problem"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-solve-memory-scaling",
+          "session_id": "01a0a53b-a136-71a2-9aa2-36ba56634aeb",
+          "session_source": "stream",
+          "retained_at": "2026-09-16T05:55:42Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 150.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -168703,6 +168942,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2587
+    "_version": 2588
   }
 }

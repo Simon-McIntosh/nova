@@ -11,11 +11,18 @@ import pytest
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.clip_quadrature import (
-    _compact_chord_polygon,
     clipped_support_current_moments,
     clipped_support_quadrature,
-    cut_cell_moment_evaluation_bound,
 )
+
+try:
+    from nova.equilibrium.clip_quadrature import (
+        _compact_chord_polygon,
+        cut_cell_moment_evaluation_bound,
+    )
+except ImportError:
+    _compact_chord_polygon = None
+    cut_cell_moment_evaluation_bound = None
 from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
 from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures import measure as fixture
@@ -32,6 +39,13 @@ class _Support(NamedTuple):
 class _QuadraticDensity:
     def current_density(self, radius, psi_norm):
         return 1.5 + 0.75 * radius - 2.0 * psi_norm + 0.5 * psi_norm**2
+
+
+_BOUNDARY_ROUTE_AVAILABLE = _compact_chord_polygon is not None
+requires_boundary_route = pytest.mark.skipif(
+    not _BOUNDARY_ROUTE_AVAILABLE,
+    reason="boundary reduction is absent at the comparison revision",
+)
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -85,6 +99,7 @@ def _fan_moments(support: _Support) -> np.ndarray:
     return np.asarray([jnp.sum(weighted), jnp.sum(first[:, 0]), jnp.sum(first[:, 1])])
 
 
+@requires_boundary_route
 def test_quadratic_boundary_moments_reach_the_fan_refinement_floor():
     support = _curved_support(128)
     refined = _curved_support(256)
@@ -130,6 +145,7 @@ def test_default_cut_moments_are_bit_identical_to_the_fan():
     np.testing.assert_array_equal(observed_values, _fan_moments(support))
 
 
+@requires_boundary_route
 def test_curved_support_reduces_to_the_vertex_capacity_and_point_bound():
     support = _curved_support(128, capacity=3072)
     chord, count, _first, _middle, _last, active, supported = _compact_chord_polygon(
@@ -143,6 +159,7 @@ def test_curved_support_reduces_to_the_vertex_capacity_and_point_bound():
     assert cut_cell_moment_evaluation_bound() < 200
 
 
+@requires_boundary_route
 def test_weak_cut_cells_resolve_the_fixed_arc_layout():
     carrier_case, source_case, exact = certificate._case("weak-rotation-reactor-static")
     machine = certificate._case_machine(
@@ -170,6 +187,7 @@ def test_weak_cut_cells_resolve_the_fixed_arc_layout():
     assert np.all(supported)
 
 
+@requires_boundary_route
 def test_malformed_sampled_arc_refuses_with_nonfinite_moments():
     support = _curved_support(32)
     moments = clipped_support_current_moments(

@@ -31,7 +31,6 @@ from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
-    default_persistent_compilation_cache_root,
 )
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
@@ -91,15 +90,29 @@ def _digest(value: Any) -> str:
     return hashlib.sha256(array.tobytes()).hexdigest()
 
 
-def _lane() -> dict[str, Any]:
+def _lane(required: str) -> dict[str, Any]:
     job_id = os.environ.get("SLURM_JOB_ID")
     device = jax.devices()[0]
     if job_id is None:
         raise RuntimeError("the centroid receipt requires one scheduler allocation")
-    if os.environ.get("SLURM_JOB_PARTITION") != "all_debug":
-        raise RuntimeError("the centroid receipt requires the all_debug partition")
-    if device.platform != "cpu" or os.environ.get("JAX_PLATFORMS") != "cpu":
-        raise RuntimeError("the centroid receipt requires JAX_PLATFORMS=cpu")
+    if required == "cpu":
+        if os.environ.get("SLURM_JOB_PARTITION") != "all_debug":
+            raise RuntimeError("the compile probe requires the all_debug partition")
+        if device.platform != "cpu" or os.environ.get("JAX_PLATFORMS") != "cpu":
+            raise RuntimeError("the compile probe requires JAX_PLATFORMS=cpu")
+    elif required == "h200":
+        if os.environ.get("SLURM_JOB_PARTITION") != "betelgeuse":
+            raise RuntimeError("the scientific receipt requires betelgeuse")
+        if os.environ.get("SLURM_JOB_RESERVATION") != "gpu_0003_grpA":
+            raise RuntimeError("the scientific receipt requires gpu_0003_grpA")
+        if device.platform != "gpu" or "H200" not in device.device_kind:
+            raise RuntimeError(
+                f"the scientific receipt requires one H200, got {device}"
+            )
+        if os.environ.get("JAX_PLATFORMS") != "cuda,cpu":
+            raise RuntimeError("the scientific receipt requires JAX_PLATFORMS=cuda,cpu")
+    else:
+        raise ValueError(f"unsupported lane requirement {required!r}")
     if os.environ.get("TMPDIR") != "/tmp":
         raise RuntimeError("TMPDIR must be /tmp inside the allocation")
     return {
@@ -331,7 +344,7 @@ def compile_probe_arm(output_root: Path, arm: str) -> dict[str, Any]:
     cache = configure_persistent_compilation_cache(
         default_forward_compilation_cache_root()
     )
-    lane = _lane()
+    lane = _lane("cpu")
     previous_mode = support_clip_mode()
     set_support_clip_mode("exact")
     started = perf_counter()
@@ -482,8 +495,8 @@ def _draw_control(
 
 def measure(output_root: Path, figure_path: Path) -> dict[str, Any]:
     configure_dtypes()
-    configure_persistent_compilation_cache(default_persistent_compilation_cache_root())
-    lane = _lane()
+    configure_persistent_compilation_cache(default_forward_compilation_cache_root())
+    lane = _lane("h200")
     previous_mode = support_clip_mode()
     set_support_clip_mode("exact")
     rows = []

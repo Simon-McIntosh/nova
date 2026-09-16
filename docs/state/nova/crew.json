@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T02:54:47",
+  "updated": "2026-09-16T04:00:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -168166,6 +168166,222 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T184108433291-cca-exact-clip-seed-books-target-current",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-exact-clip-seed-books-target-current",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2659,
+                "cached_input_tokens": 670136,
+                "input_tokens": 672827,
+                "output_tokens": 1432,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 674259,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "Followup f-20260911T061050375499 measured (gate C at 07cd60e0, receipts docs/figures/cut-cell-current-attribution/gate-c-resolve/receipt.json): every static row books about half the plasma current at the cold seed under the clip (seed amplitude 2.05, 2.03, 1.95, 1.89 for weak at 110, 300, 500, 1000 cells against 0.93 to 0.90 whole-cell) because the uniform-disc seed's own flux places half the cells outside its clip while the partition labels cover the whole target region, so the normalisation doubles the profile before the first trip and the solve cycles unconverged (active_set_cycle_detected, residual 0.075 to 0.098, axis error 0.17 to 0.37 m); remedy (a) is implemented in nova/equilibrium/forward.py cold_seed_portfolio and moment_seed: choose the disc seed's boundary level or radius so that the clipped region at the seed equals the partition's confined region and the booked current equals the target at unit amplitude (solve the one-dimensional level or radius equation against the clip's booked current with the analytic normalisation stated in the docstring), with remedy (b) (whole-cell booking on the first trip only, switching to the clip once the flux is self-consistent) recorded as the alternative and attempted only if (a) cannot reach one percent, in which case request a scope extension to forward_operator.py rather than editing it, since a live node owns that file; gates, each persisted as it lands: a benchmark benchmarks/exact_clip_seed_amplitude.py on all_debug CPU (JAX_PLATFORMS=cpu, TMPDIR=/tmp exported in the submit environment and the payload, /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on the node, foreground srun under 59 minutes) tabling seed amplitude under set_support_clip_mode(\"exact\") for weak, moderate and strong at 110 and 300 cells before and after, acceptance within one percent of unity on every row; then ONE H200 job (one card, 8 cores, 128 GiB, TMPDIR=/tmp in submit environment and payload, PYTHONPATH the worktree, root venv python, persistent compilation cache, rows persisted as each lands) re-solving weak, moderate and strong at 110 and 300 cells under the exact clip from the repaired seed, tabling seed and terminal amplitude, terminal residual, axis error in pitch, boundary flux against the analytic zero and converged flag beside the gate C and the committed whole-cell rows, with one line-contour panel per row of solved over analytic on shared levels plus a solved-minus-analytic difference panel in fractions of span (the 1000-cell exact row is owned by the memory node and is not attempted here); the committed whole-cell certificate rows and the single-null 500 control bit-identical (the seed change must not touch the chord route, or the change is gated behind the exact mode); every test module importing forward.py passes one per fresh CPU process on all_debug against the base ids with zero added failures; manifest in plain key: value lines, any waiting declaration with wait_probe as a JSON list such as [\"squeue\",\"-h\",\"-j\",\"1271409\"] and wait_terminal exit:0",
+          "estimated_hours": null,
+          "goal": "The cold seed books the target plasma current at unit amplitude under the exact clip, so the exact-clip solve starts from a consistent state and the static certificate rows converge toward the analytic oracle instead of cycling at amplitude two",
+          "id": "cca-exact-clip-seed-books-target-current",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T18:41:08Z",
+            "read_at": "2026-09-15T18:41:09Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 55.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T184108433291-cca-exact-clip-seed-books-target-current/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward.py",
+            "benchmarks/exact_clip_seed_amplitude.py",
+            "tests/test_exact_clip_seed.py",
+            "docs/figures/cut-cell-current-attribution/exact-clip-seed",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-seed",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19h-cca-clipseed-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T18:41:24Z",
+        "completed_at": "2026-09-16T01:53:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 25935,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "ee4f7773045c7c788bb6223699dbd0443477b313",
+        "commits": [
+          "29a690a293e75c5ef793d9bb559174b959ab1145",
+          "9dfc35b1c41e6e0c4cdd5f5484fbf117adda91ab",
+          "1a83fbca5159bd6f49e68d2978b47920beae07cb",
+          "a8cf8670b3eebdde3031be732dce5da2a967fcbe",
+          "346f9df012ccde4cd68296f2f318e7791d968cd1",
+          "9aebe5faea06beaa830e52cec69ef5ad17407abf",
+          "5f7e0f50e3f659bf78592a7072b4dab7373932da",
+          "bfa673da897d7f83cd310a97d0dd185f03e4b211",
+          "9089a86bdc458d0de474466ad9777efde906343e",
+          "ae59270ef039a646e72b002703b22dc88c0a73a8",
+          "62f9b8c808bc139eba9c482a2de950a39fc927ae",
+          "6e33e3b476b9b02f42bc32239c72aa4e6919f065",
+          "d473fe81c024522e0e2a4f8751b6ffa3e60b135b"
+        ],
+        "changed_lines": {
+          "added": 105150,
+          "removed": 1,
+          "files": 30
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1271699 six-row seed amplitude gate; H200 job 1271708 six exact-clip rows re-solved from the repaired seed; all_debug jobs 1271801 and 1271817 38 forward.py importers base and after, zero added failures",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/cut-cell-current-attribution/exact-clip-seed/receipt.json",
+          "log_digest": "sha256:e843f1f7982e22102d602642f1a3c10f7f11e913ebf2262d1fc61e8fab30ebf7"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T184108433291-cca-exact-clip-seed-books-target-current/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a65f-b220-7b33-8e8d-f8e8d3dac4af",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 157740544,
+            "cached_input_tokens_cumulative": 157740544,
+            "input_tokens": 158622033,
+            "input_tokens_cumulative": 158622033,
+            "output_tokens": 137877,
+            "output_tokens_cumulative": 137877,
+            "reasoning_output_tokens": 20517,
+            "reasoning_output_tokens_cumulative": 20517
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-16T01:53:39Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 70.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-16T01:53:39Z"
+            }
+          ],
+          "notional_cost_usd": 925.5909,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 157740544,
+          "cumulative_input_tokens": 316362577,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 158394
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-seed-books-target-current",
+          "session_id": "01a0a65f-b220-7b33-8e8d-f8e8d3dac4af",
+          "session_source": "stream",
+          "retained_at": "2026-09-16T01:53:39Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 131.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -168478,6 +168694,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2585
+    "_version": 2586
   }
 }

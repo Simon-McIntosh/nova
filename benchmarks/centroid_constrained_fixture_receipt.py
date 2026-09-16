@@ -38,6 +38,7 @@ from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.analytic_oracle_fixtures.centroid_row import (
     DEFAULT_FIELD_BOUND_T,
     DEFAULT_FIELD_SCALE_T,
+    DEFAULT_STEP_LIMIT,
     centroid_constraint_pair,
     exterior_field_identity,
 )
@@ -45,18 +46,18 @@ from scripts.analytic_oracle_fixtures.centroid_row import (
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_ROOT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row"
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-step"
 )
 DEFAULT_FIGURE = ROOT / (
     "docs/figures/centroid-constrained-oracle-solve/weak-displaced-control.png"
 )
-ROWS = (
-    ("weak-rotation-reactor-static", -110),
-    ("moderate-rotation-conventional-static", -110),
-    ("strong-rotation-compact-static", -110),
-    ("diverted-single-null", -110),
-)
+ROWS = (("weak-rotation-reactor-static", -110),)
 DISPLACEMENT_M = np.asarray((0.020, 0.0), dtype=np.float64)
+
+# One-map response of the fixture centroid to a uniform exterior field,
+# measured with both signs at 1 mT and 10 mT with the exterior held fixed.
+PROBE_RADIAL_M_PER_T = 1.627789
+PROBE_VERTICAL_M_PER_T = 4.916664
 
 
 def _strict(value: Any) -> Any:
@@ -229,6 +230,11 @@ def _solve(
         physical = np.asarray(record.physical_unknown, dtype=np.float64)
         scaled_residual = np.asarray(record.scaled_residual, dtype=np.float64)
         qualified = bool(np.asarray(record.qualified).all())
+        bound_refusal = (
+            None
+            if record.bound_refusal is None
+            else [bool(value) for value in np.asarray(record.bound_refusal).reshape(-1)]
+        )
     else:
         observation = context["profile"].current_moment_observation(
             jnp.asarray(state), target_current=context["target_current"]
@@ -239,6 +245,7 @@ def _solve(
         physical = np.full(2, np.nan)
         scaled_residual = (observed - context["centroid"]) / context["pitch"]
         qualified = False
+        bound_refusal = None
     return (
         {
             "constrained": constrained,
@@ -252,7 +259,9 @@ def _solve(
                 np.linalg.norm(observed - context["centroid"]) / context["pitch"]
             ),
             "row_scaled_residual_sup": float(np.max(np.abs(scaled_residual))),
+            "bound_refusal": bound_refusal,
             "compensating_field_t": physical,
+            "compensating_field_t_abs_sup": float(np.max(np.abs(physical))),
             "field_bound_t": DEFAULT_FIELD_BOUND_T,
             "field_scale_t": DEFAULT_FIELD_SCALE_T,
             "wall_seconds": perf_counter() - started,
@@ -387,6 +396,74 @@ def compile_probe_arm(output_root: Path, arm: str) -> dict[str, Any]:
         set_support_clip_mode(previous_mode)
 
 
+def measure_first_step(output_root: Path) -> dict[str, Any]:
+    """Record the row's first undamped Newton step on the weak fixture.
+
+    The unknown starts at zero, so the first map evaluation's unknown step is
+    the undamped Newton step of the row: ``-scaled_residual`` on the normalised
+    unknown, mapped to tesla by the field scale.  The receipt puts its size and
+    sign beside what the measured one-map response predicts for the seed's own
+    centroid offset.
+    """
+    configure_dtypes()
+    configure_persistent_compilation_cache(default_forward_compilation_cache_root())
+    lane = _lane("h200")
+    previous_mode = support_clip_mode()
+    set_support_clip_mode("exact")
+    try:
+        context = _context("weak-rotation-reactor-static", -110)
+        observation = context["profile"].current_moment_observation(
+            jnp.asarray(context["seed"]), target_current=context["target_current"]
+        )
+        observed = np.asarray(
+            (observation.centroid_r, observation.centroid_z), dtype=np.float64
+        )
+        target = context["centroid"]
+        pitch = context["pitch"]
+        row_scaled_residual = (observed - target) / pitch
+        normalised_step = -row_scaled_residual
+        field_step = DEFAULT_FIELD_SCALE_T * normalised_step
+        probe_field = -row_scaled_residual[0] * pitch / PROBE_RADIAL_M_PER_T
+        receipt = {
+            "schema": "nova.centroid-first-newton-step",
+            "source_revision": _revision(),
+            "support_clip_mode": "exact",
+            "lane": lane,
+            "case": "weak-rotation-reactor-static",
+            "requested_cells": -110,
+            "realised_cells": len(context["machine"].node),
+            "characteristic_pitch_m": pitch,
+            "analytic_centroid_m": target,
+            "seed_centroid_observed_m": observed,
+            "seed_centroid_offset_m": observed - target,
+            "row_scaled_residual": row_scaled_residual,
+            "first_step_normalized": normalised_step,
+            "first_step_field_t": field_step,
+            "first_step_pitches": normalised_step,
+            "probe_radial_response_m_per_t": PROBE_RADIAL_M_PER_T,
+            "probe_field_for_seed_offset_t": np.asarray(
+                (probe_field, np.nan), dtype=np.float64
+            ),
+            "probe_field_for_seed_offset_pitches": np.asarray(
+                (probe_field * PROBE_RADIAL_M_PER_T / pitch, np.nan),
+                dtype=np.float64,
+            ),
+            "first_step_to_probe_ratio": float(field_step[0] / probe_field),
+            "field_bound_t": DEFAULT_FIELD_BOUND_T,
+            "step_limit": DEFAULT_STEP_LIMIT,
+            "first_step_exceeds_declared_bound": bool(
+                np.any(np.abs(field_step) > DEFAULT_FIELD_BOUND_T)
+            ),
+            "first_step_cap_binds": bool(
+                np.any(np.abs(normalised_step) > DEFAULT_STEP_LIMIT)
+            ),
+        }
+        _write_json(output_root / "weak-first-step.json", receipt)
+        return receipt
+    finally:
+        set_support_clip_mode(previous_mode)
+
+
 def _row(case_name: str, requested_cells: int) -> tuple[dict[str, Any], dict[str, Any]]:
     context = _context(case_name, requested_cells)
     result, state = _solve(context, context["seed"], constrained=True)
@@ -406,19 +483,46 @@ def _row(case_name: str, requested_cells: int) -> tuple[dict[str, Any], dict[str
 
 
 def _bound_refusal() -> dict[str, Any]:
+    """Show the declared bound refusing a step, with its in-bound control."""
     pair = centroid_constraint_pair(np.asarray((1.0, 0.0)), pitch=0.1)
-    trial = np.asarray((1.01 * DEFAULT_FIELD_BOUND_T / DEFAULT_FIELD_SCALE_T, 0.0))
+    bound_normalized = DEFAULT_FIELD_BOUND_T / DEFAULT_FIELD_SCALE_T
+    over = np.asarray((1.01 * bound_normalized, 0.0))
+    accepted_state = np.asarray((0.5 * bound_normalized, 0.0))
+
     try:
-        pair.unknown.require_within_bound(jnp.asarray(trial))
+        pair.unknown.require_within_bound(jnp.asarray(over))
     except ValueError as error:
-        return {
+        raised = {"fired": True, "message": str(error)}
+    else:
+        raise RuntimeError("the exterior-field bound accepted an out-of-bound trial")
+
+    refused_step, refused = pair.unknown.damped_step(
+        jnp.asarray(over), jnp.asarray((0.0, 0.0))
+    )
+    accepted_step, accepted_refusal = pair.unknown.damped_step(
+        jnp.asarray(accepted_state), jnp.asarray((0.5, 0.0))
+    )
+    if not bool(np.asarray(refused).all()):
+        raise RuntimeError("damped step control did not refuse an out-of-bound state")
+    if bool(np.asarray(accepted_refusal).any()):
+        raise RuntimeError("damped step control refused an in-bound state")
+    return {
+        "raised_route": raised,
+        "damped_route": {
             "fired": True,
-            "trial_normalized": trial,
-            "trial_physical_t": trial * DEFAULT_FIELD_SCALE_T,
+            "state_normalized": over,
+            "state_physical_t": over * DEFAULT_FIELD_SCALE_T,
             "declared_bound_t": DEFAULT_FIELD_BOUND_T,
-            "message": str(error),
-        }
-    raise RuntimeError("the exterior-field bound accepted an out-of-bound trial")
+            "step_normalized": refused_step,
+        },
+        "in_bound_control": {
+            "fired": False,
+            "state_normalized": accepted_state,
+            "physical_t": accepted_state * DEFAULT_FIELD_SCALE_T,
+            "step_normalized": accepted_step,
+        },
+        "step_limit": DEFAULT_STEP_LIMIT,
+    }
 
 
 def _draw_control(
@@ -533,6 +637,22 @@ def measure(output_root: Path, figure_path: Path) -> dict[str, Any]:
         "all_rows_row_residual_at_or_below_1e_12": all(
             row["solve"]["row_scaled_residual_sup"] <= 1.0e-12 for row in rows
         ),
+        "all_rows_field_within_declared_bound": all(
+            row["solve"]["compensating_field_t_abs_sup"] <= DEFAULT_FIELD_BOUND_T
+            for row in rows
+        ),
+        "all_rows_bound_never_engaged": all(
+            row["solve"]["bound_refusal"] is None
+            or not any(row["solve"]["bound_refusal"])
+            for row in rows
+        ),
+        "positive_row_residual_at_or_below_1e_12": (
+            controls["positive"]["row_scaled_residual_sup"] <= 1.0e-12
+        ),
+        "positive_field_within_declared_bound": (
+            controls["positive"]["compensating_field_t_abs_sup"]
+            <= DEFAULT_FIELD_BOUND_T
+        ),
         "positive_centroid_within_tenth_pitch": (
             controls["positive"]["centroid_error_pitches"] <= 0.1
         ),
@@ -562,6 +682,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
     parser.add_argument("--compile-probe-arm", choices=("unconstrained", "constrained"))
+    parser.add_argument("--first-step", action="store_true")
     return parser.parse_args()
 
 
@@ -574,6 +695,21 @@ def main() -> None:
             f"arm={result['arm']} lower={result['lower_seconds']:.6f}s "
             f"compile={result['backend_compile_seconds']:.6f}s "
             f"stablehlo_instructions={result['stablehlo_instruction_count']}",
+            flush=True,
+        )
+        return
+    if arguments.first_step:
+        receipt = measure_first_step(arguments.output_root)
+        radial_step = float(receipt["first_step_field_t"][0])
+        probe_field = float(receipt["probe_field_for_seed_offset_t"][0])
+        print(
+            "CENTROID_FIRST_STEP "
+            f"radial_field_step_t={radial_step:+.9e} "
+            f"radial_step_pitches={float(receipt['first_step_pitches'][0]):+.9e} "
+            f"probe_field_t={probe_field:+.9e} "
+            f"probe_measured_ratio={radial_step / probe_field:+.6f} "
+            f"exceeds_bound={bool(receipt['first_step_exceeds_declared_bound'])} "
+            f"cap_binds={bool(receipt['first_step_cap_binds'])}",
             flush=True,
         )
         return

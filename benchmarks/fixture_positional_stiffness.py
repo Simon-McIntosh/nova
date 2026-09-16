@@ -395,25 +395,24 @@ def _measure_displacement(
         "completed": False,
     }
     _write_json(part_path, partial)
-    one_trip_state, one_trip = _solve(context, state, current, 1)
-    one_trip_topology = oracle_probe._topology(operator, one_trip_state)
-    partial["iteration"] = {
-        "after_one_trip": {
-            **one_trip,
-            "axis": _axis_displacement(one_trip_topology, context, direction),
-            "boundary_level_wb": one_trip_topology["boundary_flux_wb"],
-            "contact_rz_m": one_trip_topology["wall_contact_rz_m"],
+    trip_state = state
+    partial["iteration"] = {"trips": []}
+    for trip in range(1, 5):
+        trip_state, trip_receipt = _solve(context, trip_state, current, 1)
+        trip_topology = oracle_probe._topology(operator, trip_state)
+        measured_trip = {
+            **trip_receipt,
+            "trip": trip,
+            "axis": _axis_displacement(trip_topology, context, direction),
+            "boundary_level_wb": trip_topology["boundary_flux_wb"],
+            "contact_rz_m": trip_topology["wall_contact_rz_m"],
         }
-    }
-    _write_json(part_path, partial)
-    four_trip_state, four_trip = _solve(context, state, current, 4)
-    four_trip_topology = oracle_probe._topology(operator, four_trip_state)
-    partial["iteration"]["after_four_trips"] = {
-        **four_trip,
-        "axis": _axis_displacement(four_trip_topology, context, direction),
-        "boundary_level_wb": four_trip_topology["boundary_flux_wb"],
-        "contact_rz_m": four_trip_topology["wall_contact_rz_m"],
-    }
+        partial["iteration"]["trips"].append(measured_trip)
+        if trip == 1:
+            partial["iteration"]["after_one_trip"] = measured_trip
+        if trip == 4:
+            partial["iteration"]["after_four_trips"] = measured_trip
+        _write_json(part_path, partial)
     partial["completed"] = True
     _write_json(part_path, partial)
     residual_rms = partial["one_map"]["residual"]["rms_fraction_of_span"]

@@ -766,12 +766,58 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   <code>benchmarks.diiid_forward_gs_match</code> no longer exports
   <code>_separatrix</code>, an out-of-scope import defect.</p>
 
-  <p><strong>Open acceptance.</strong> The required single-card H200 job over the
-  six static solves, its solved-versus-analytic contour and difference panels,
-  and the complete per-module <code>forward.py</code> importer delta were not
-  started after the CPU gate because they could not complete inside this node's
-  55-minute fence. The driving followup stays open; this record establishes the
-  landed seed construction and CPU amplitude gate only.</p>
+  <p><strong>H200 exact-clip solve.</strong> One job, 1271708, used one H200,
+  eight CPU cores and 128 GiB with <code>TMPDIR=/tmp</code> in the submit and
+  payload environments, the worktree on <code>PYTHONPATH</code>, the root virtual
+  environment's Python and one persistent compilation cache. Each row was
+  written and committed before the next row finished. All six repaired rows
+  converged; terminal residuals span 1.20e-13 to 6.71e-13. The table retains the
+  failed Gate C state and the committed whole-cell state beside the repaired
+  exact-clip state rather than filtering either predecessor out.</p>
+
+  <table>
+    <caption>Static certificate delta: historical exact clip, committed whole cell and repaired exact clip</caption>
+    <thead><tr><th scope="col">Case / cells</th><th scope="col">Gate C exact clip</th><th scope="col">Committed whole cell</th><th scope="col">Repaired exact clip</th></tr></thead>
+    <tbody>
+      <tr><td>weak / 110</td><td>seed 2.054064; residual 7.52e-2; axis 0.1731 m; <a href="/nova/figures/cut-cell-current-attribution/gate-c-resolve/weak-rotation-reactor-static-production-route-reduced.png">panel</a></td><td>seed 0.929778; residual 7.45e-3; axis 0.00185 m; <a href="/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-reduced.png">panel</a></td><td>seed 1.009016 → terminal 0.999934; residual 3.42e-13; axis 0.0325 pitch; boundary error 0.00188 Wb; converged</td></tr>
+      <tr><td>weak / 300</td><td>seed 2.025096; residual 9.83e-2; axis 0.3659 m; <a href="/nova/figures/cut-cell-current-attribution/gate-c-resolve/weak-rotation-reactor-static-production-route-cells-300.png">panel</a></td><td>seed 0.906235; residual 5.56e-3; axis 0.03346 m; <a href="/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-300.png">panel</a></td><td>seed 0.998336 → terminal 0.967361; residual 2.08e-13; axis 0.1289 pitch; boundary error 2.02206 Wb; converged</td></tr>
+      <tr><td>moderate / 110</td><td>seed 2.082365; residual 6.85e-2; axis 0.07337 m; <a href="/nova/figures/cut-cell-current-attribution/gate-c-resolve/moderate-rotation-conventional-static-production-route-reduced.png">panel</a></td><td>seed 0.913327; residual 1.25e-2; axis 0.00270 m; <a href="/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-reduced.png">panel</a></td><td>seed 0.999331 → terminal 0.966108; residual 1.44e-13; axis 0.1124 pitch; boundary error 0.05934 Wb; converged</td></tr>
+      <tr><td>moderate / 300</td><td>seed 1.971156; residual 9.71e-2; axis 0.08108 m; <a href="/nova/figures/cut-cell-current-attribution/gate-c-resolve/moderate-rotation-conventional-static-production-route-cells-300.png">panel</a></td><td>seed 0.900430; residual 8.46e-3; axis 0.01129 m; <a href="/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.png">panel</a></td><td>seed 1.002439 → terminal 0.964952; residual 3.86e-13; axis 0.1443 pitch; boundary error 0.06144 Wb; converged</td></tr>
+      <tr><td>strong / 110</td><td>seed 1.905067; residual 3.79e-2; axis 0.02670 m; <a href="/nova/figures/cut-cell-current-attribution/gate-c-resolve/strong-rotation-compact-static-production-route-reduced.png">panel</a></td><td>seed 0.918941; residual 1.35e-2; axis 0.00256 m; <a href="/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-reduced.png">panel</a></td><td>seed 1.009832 → terminal 0.965182; residual 6.71e-13; axis 0.0753 pitch; boundary error 0.00459 Wb; converged</td></tr>
+      <tr><td>strong / 300</td><td>seed 1.803822; residual 5.59e-2; axis 0.02921 m; <a href="/nova/figures/cut-cell-current-attribution/gate-c-resolve/strong-rotation-compact-static-production-route-cells-300.png">panel</a></td><td>seed 0.901124; residual 1.74e-2; axis 0.00405 m; <a href="/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.png">panel</a></td><td>seed 1.003210 → terminal 0.965738; residual 1.20e-13; axis 0.1005 pitch; boundary error 0.00459 Wb; converged</td></tr>
+    </tbody>
+  </table>
+
+  <div class="r-grid r-grid-2">
+    <figure><img src="/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-110-comparison.png" alt="Weak 110 solved and analytic shared line contours with normalized difference"><figcaption>Weak 110. Left: analytic blue and solved ochre on shared Wb levels. Right: signed solved-minus-analytic line contours divided by analytic flux span. Both axes and the wall are marked; residual 3.42e-13, converged.</figcaption></figure>
+    <figure><img src="/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/weak-rotation-reactor-static-300-comparison.png" alt="Weak 300 solved and analytic shared line contours with normalized difference"><figcaption>Weak 300, the same shared-level and normalized-difference construction; residual 2.08e-13, converged.</figcaption></figure>
+    <figure><img src="/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-110-comparison.png" alt="Moderate 110 solved and analytic shared line contours with normalized difference"><figcaption>Moderate 110; residual 1.44e-13, converged.</figcaption></figure>
+    <figure><img src="/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/moderate-rotation-conventional-static-300-comparison.png" alt="Moderate 300 solved and analytic shared line contours with normalized difference"><figcaption>Moderate 300; residual 3.86e-13, converged.</figcaption></figure>
+    <figure><img src="/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-110-comparison.png" alt="Strong 110 solved and analytic shared line contours with normalized difference"><figcaption>Strong 110; residual 6.71e-13, converged.</figcaption></figure>
+    <figure><img src="/nova/figures/cut-cell-current-attribution/exact-clip-seed/panels/strong-rotation-compact-static-300-comparison.png" alt="Strong 300 solved and analytic shared line contours with normalized difference"><figcaption>Strong 300; residual 1.20e-13, converged.</figcaption></figure>
+  </div>
+
+  <p><strong>Fresh-process importer delta.</strong> The live main checkout moved
+  during the first attempted delta, so its mixed-base receipt was rejected and
+  preserved as <code>importer-delta-live-root-invalid.json</code>. The accepted
+  run uses an archive of exact base <code>ee4f7773</code>; its
+  <code>forward.py</code> object <code>963ef114…</code> matches the assigned base
+  byte-for-byte. Jobs 1271801 and 1271817 ran each of the 38 importing modules
+  in separate base and repaired CPU processes. The pinned receipt records 38 of
+  38 complete, no remaining modules, no added or fixed failure ids, and 37
+  base-matched pairs. The sole mismatch is positive evidence: the newly added
+  <code>test_exact_clip_seed.py</code> is absent at base (exit 4) and passes after
+  (exit 0). Ten pre-existing failure ids are identical on both arms; four
+  modules time out at the same 420-second bound; six collect no tests under the
+  required <code>not slow</code> selection. The user-authorized
+  <code>test_moment_seed.py</code> collection failure is represented identically
+  on both arms as <code>missing-_separatrix-export</code>. The accepted receipt is
+  under <code>~/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-seed/importer-delta-exact-base</code>.</p>
+
+  <p>The worker has landed the repaired seed, six-row H200 measurement, contour
+  evidence and importer delta. The driving followup remains open for the
+  coordinator to resolve; this worker does not set the section's terminal
+  status.</p>
 </section>
 </main>
 </body>

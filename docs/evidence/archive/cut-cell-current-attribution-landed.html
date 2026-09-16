@@ -799,6 +799,77 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   The measurement harness is commit <code>fc3abf0c</code>; no Nova product source
   file changed.</p>
 </section>
+<section id="fixture-positional-stiffness">
+  <h2>Fixture positional stiffness: the re-posed exterior is locally runaway</h2>
+
+  <p><strong>Measured 2026-09-16 in one H200 job.</strong> Job
+  <code>1271814</code> used one card, eight cores and 128 GiB, completed all 84
+  requested displacement receipts in 728 seconds, and exited zero. On weak 110,
+  weak 300 and moderate 300, the analytic flux was rigidly displaced by 0, 2, 5,
+  10, 20, 40 and 60 mm separately outboard and vertically. The target current
+  and each arm's exterior stayed fixed. One target-normalised production map and
+  four successive trips of that same map were persisted for the
+  analytic-clipped exterior and the former whole-cell exterior.</p>
+
+  <table>
+    <caption>Analytic-clipped exterior: one-map rms stiffness and four-trip motion</caption>
+    <thead>
+      <tr><th>row</th><th>direction</th><th>rms curvature [span/m²]</th><th>first displacement above 10× floor</th><th>fitted rms at 36 mm</th><th>40 mm axis after four trips</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>weak 110</td><td>outboard</td><td>0.140</td><td>2 mm</td><td>0.0430</td><td>73.8 mm</td></tr>
+      <tr><td>weak 110</td><td>vertical</td><td>0.684</td><td>5 mm</td><td>0.00413</td><td>139.1 mm</td></tr>
+      <tr><td>weak 300</td><td>outboard</td><td>0.0768</td><td>2 mm</td><td>0.0442</td><td>71.5 mm</td></tr>
+      <tr><td>weak 300</td><td>vertical</td><td>0.709</td><td>5 mm</td><td>0.00415</td><td>137.0 mm</td></tr>
+      <tr><td>moderate 300</td><td>outboard</td><td>0.307</td><td>2 mm</td><td>0.156</td><td>68.1 mm</td></tr>
+      <tr><td>moderate 300</td><td>vertical</td><td>13.94</td><td>2 mm</td><td>0.0199</td><td>114.2 mm</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Verdict.</strong> The fixture exterior does not hold the plasma
+  position. Every nonzero analytic-clipped displacement grows after four map
+  trips rather than contracting. Five of the six fitted residual valleys remain
+  below the low state's 8.6e-2-of-span separation at its 36 mm marker; the two
+  moderate directions do not rescue the verdict because the axis itself still
+  runs away. The former whole-cell posing is worse as a reference: its zero
+  displacement rms floor is already 0.21 to 0.22 of span, and its outboard
+  residual decreases under displacement. The two fixed points are therefore a
+  weakly held positional basin, not a certificate that can be trusted from seed
+  independence.</p>
+
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/positional-stiffness/figures/weak-rotation-reactor-static-cells-110-residual.png" alt="Weak 110 positional stiffness curves for outboard and vertical displacement under analytic-clipped and whole-cell exterior posings">
+    <figcaption>Weak 110 one-map rms and sup residuals on a log scale. Horizontal lines mark each posing's zero-displacement floor; the purple markers show 36 mm and 8.6e-2 of span.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/positional-stiffness/figures/weak-rotation-reactor-static-cells-300-residual.png" alt="Weak 300 positional stiffness curves for outboard and vertical displacement under analytic-clipped and whole-cell exterior posings">
+    <figcaption>Weak 300. The analytic-clipped residual rises from a 3.68e-5 floor, but the outboard fit reaches only 0.0442 and the vertical fit 0.00415 at 36 mm, both below the displaced low state's separation.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/positional-stiffness/figures/moderate-rotation-conventional-static-cells-300-residual.png" alt="Moderate 300 positional stiffness curves for outboard and vertical displacement under analytic-clipped and whole-cell exterior posings">
+    <figcaption>Moderate 300. The outboard residual is steep, but four map trips still move 40 mm to 68.1 mm; vertically, 40 mm grows to 114.2 mm.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/positional-stiffness/figures/translated-40mm.png" alt="Forty millimetre outboard and vertical translations of all three analytic states over the undisplaced analytic contours on shared levels">
+    <figcaption>Forty-millimetre translated inputs on shared Wb levels. Blue is the analytic state, ochre the translated state; both axis markers and the unit-faithful wall are drawn, with no axes or filled scalar map.</figcaption>
+  </figure>
+
+  <p><strong>Re-posing that preserves the oracle.</strong> Retain the non-vacuum
+  analytic construction and build an exterior family from the analytic total
+  minus analytically clipped plasma images at nearby rigid displacements. Its
+  first and second displacement derivatives provide an explicit restoring
+  Taylor term while the undisplaced member remains the analytic oracle. A
+  vacuum coil set fitted to the boundary is not an alternative: the Solovev
+  exterior is not a vacuum field, so that fit would discard the oracle.</p>
+
+  <p>The machine-readable aggregate, all 84 atomic parts, report and figure
+  hashes are under
+  <code>docs/figures/cut-cell-current-attribution/positional-stiffness/</code>.
+  The external report and complete scheduler log are under
+  <code>~/.config/reckon/crew/reports/nova/s19-handoff/positional-stiffness/</code>.
+  Measurement driver commits are <code>8fa8e7e1</code>, <code>1535bca3</code>
+  and <code>dbac754b</code>; no Nova product source file changed.</p>
+</section>
 </main>
 </body>
 </html>

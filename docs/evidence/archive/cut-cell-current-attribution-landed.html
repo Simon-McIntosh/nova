@@ -549,7 +549,7 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   </div>
 </section>
 <section id="exact-clip-memory-scaling">
-  <h2>Exact-clip solve memory: all-cell pair reproduced and replaced</h2>
+  <h2>Exact-clip solve memory: reproduced, reduced, and held on correctness</h2>
   <p><strong>Reproduction.</strong> One foreground <code>all_debug</code> CPU job
   (<code>1271480</code>, eight cores, 256 GiB, <code>JAX_PLATFORMS=cpu</code>,
   <code>TMPDIR=/tmp</code> in submission and payload) compiled the production exact-clip
@@ -572,13 +572,50 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
     floor, while the identified <code>pred[cells,cells]</code> family itself is exactly
     quadratic.</figcaption>
   </figure>
-  <p><strong>Implementation.</strong> Commit <code>826358aa</code> gives each compact cut
-  polygon only its own flux polynomial and vectorizes that one-cell integration before
-  scattering the three current moments back to the original carrier. Whole cells keep
-  the existing 24-vertex path, the production whole-cell route is not rerouted, overflow
-  remains fail-closed, and a mixed whole/cut synthetic control is bit-identical to the
-  former result. The post-change compiled-memory and 1000-cell H200 solve gates remain
-  required before this node can be promoted.</p>
+  <p><strong>Implementation and corrected attribution.</strong> Commit
+  <code>826358aa</code> gives each compact cut polygon only its own flux polynomial and
+  vectorizes that one-cell integration before scattering the three current moments back
+  to the original carrier. This removed all nine pairwise predicates but did not reduce
+  total solve memory: jobs 1271733 and 1271751 still measured 25.568408, 52.050680 and
+  70.773622 GiB at 135, 342 and 555 realised cells. The dominant retained workspace was
+  instead the repeated <code>f64[bank,12,cells,129,7]</code> spline-level evaluation in
+  <code>ForwardFluxOperator._profile_support</code> and
+  <code>_polished_level_root</code> in
+  <code>nova/equilibrium/forward_operator.py</code>: 24 edge slots differentiated through
+  twelve polish steps. Commits <code>9693713b</code> through <code>9fa332fe</code> retain
+  the byte-identical full primal behind a custom-JVP boundary; the final measured arm
+  rematerializes the exact bounded twelve-step derivative rather than retaining every
+  polish intermediate.</p>
+
+  <table>
+    <thead><tr><th>Gate</th><th>Receipt</th><th>Measured result</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>1000-cell XLA memory</td><td>H200 job 1271802</td><td>1,072 realised cells; 7,367,535,168 temporary bytes (6.861552 GiB); 1,289.30 s compile wall</td><td>PASS — below 20 GiB</td></tr>
+      <tr><td>Weak 110 JVP, Newton plus three random directions</td><td>H200 job 1271792</td><td>relative errors 8.022804e-3, 8.223342e-3, 7.876643e-3 and 8.177483e-3</td><td>FAIL — bound 1e-8</td></tr>
+      <tr><td>Weak 300 JVP, Newton plus three random directions</td><td>H200 job 1271792</td><td>relative errors 7.876236e-3, 7.911160e-3, 8.015141e-3 and 7.888358e-3</td><td>FAIL — bound 1e-8</td></tr>
+      <tr><td>Weak exact 300 terminal identity</td><td>H200 job 1271821</td><td>all 1,529 flux values differ; maximum 1.350884e-10 Wb; residual 0.03633683774282267 against 0.036336837742911895</td><td>FAIL — not bit-identical</td></tr>
+      <tr><td>Single-null whole-cell 500 control</td><td>H200 job 1271821</td><td>2,089 of 2,226 flux values differ against the CPU reference; maximum 1.118897e-16 Wb</td><td>FAIL — device-mixed identity guard correctly refuses</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Instrument checks.</strong> The weak-110 central-difference discrepancy was
+  unchanged as the step moved from 7.300197e-7 to 7.475402e-4. Across that range there
+  were zero exact-clip packing-level sign changes; the base state had no exact-zero
+  packing levels and its minimum absolute level was 0.0050333. The packing-level
+  evaluator's own JVP differed from central differences by only 1.452896e-7 to
+  7.394970e-7, so the stable 0.8 percent mismatch enters downstream of level evaluation
+  and is not a zero, empty census or crossed packing branch.</p>
+
+  <p><strong>Blocking conflict.</strong> The requested implicit fixed-root derivative did
+  not preserve terminal identity either: its weak-300 terminal state differed from the
+  CUDA reference by 1.080878e-10 Wb. The rematerialized bounded-primal derivative meets
+  the memory gate but differs by 1.350884e-10 Wb and does not meet the finite-difference
+  gate. Retaining the original derivative is the only measured bit-identical line, but it
+  is the reproduced 159.66 GiB executable. No weak-1000 production solve was submitted:
+  its prerequisite JVP and terminal-identity gates had failed. The implementation is held
+  pending a lead choice between the mathematical implicit derivative with a
+  tolerance-based terminal gate, the bounded twelve-step derivative with a
+  tolerance-based gate, or retaining bit identity and its 159.66 GiB program.</p>
 </section>
 </main>
 </body>

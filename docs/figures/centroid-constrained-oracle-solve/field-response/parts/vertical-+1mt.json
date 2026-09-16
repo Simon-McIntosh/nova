@@ -1,0 +1,147 @@
+{
+  "after_four_trips": {
+    "centroid_m": [
+      6.0642232950099855,
+      8.566135361732535e-13
+    ],
+    "centroid_shift_m": [
+      0.0006931216770871274,
+      8.566135361732535e-13
+    ],
+    "centroid_shift_pitches": [
+      0.001487183206582155,
+      1.8379763721740882e-12
+    ],
+    "measured_target_shift_m": 0.0006931216770871274,
+    "measured_to_predicted_ratio": 0.42580552086479523,
+    "predicted_target_shift_m": 0.0016277893148952671,
+    "sign_agreement": true,
+    "state_sha256_binary64": "b0398b4e9379c0c025d4da0d4471fd309428b247fb64ba8670330f2bcd65be00",
+    "target_component": "centroid_r",
+    "trip": 4
+  },
+  "after_one_map": {
+    "centroid_m": [
+      6.059044255837154,
+      7.390834467774512e-13
+    ],
+    "centroid_shift_m": [
+      -0.004485917495744118,
+      7.390834467774512e-13
+    ],
+    "centroid_shift_pitches": [
+      -0.009625122667957068,
+      1.5858001944615489e-12
+    ],
+    "measured_target_shift_m": -0.004485917495744118,
+    "measured_to_predicted_ratio": -2.7558342192661125,
+    "predicted_target_shift_m": 0.0016277893148952671,
+    "sign_agreement": false,
+    "state_sha256_binary64": "61d0d9d5a0e9224d38d1e2bb07a9f9eb3d3a2fc127f8208aa69495cb4f28d46a",
+    "target_component": "centroid_r",
+    "trip": 1
+  },
+  "analytic_centroid_m": [
+    6.063530173332898,
+    0.0
+  ],
+  "baseline_external_sha256_binary64": "f772db866bec0d12a05a060f50b67645fcfe6a8559b2ae6197297d57ad0dae2e",
+  "completed": true,
+  "component": "vertical",
+  "field_amplitude_mt": 1.0,
+  "field_amplitude_t": 0.001,
+  "linear_prediction_centroid_shift_m": [
+    0.0016277893148952671,
+    -3.1396538967978074e-13
+  ],
+  "prescribed_current": [
+    0.001,
+    0.0
+  ],
+  "trips": [
+    {
+      "centroid_m": [
+        6.059044255837154,
+        7.390834467774512e-13
+      ],
+      "centroid_shift_m": [
+        -0.004485917495744118,
+        7.390834467774512e-13
+      ],
+      "centroid_shift_pitches": [
+        -0.009625122667957068,
+        1.5858001944615489e-12
+      ],
+      "measured_target_shift_m": -0.004485917495744118,
+      "measured_to_predicted_ratio": -2.7558342192661125,
+      "predicted_target_shift_m": 0.0016277893148952671,
+      "sign_agreement": false,
+      "state_sha256_binary64": "61d0d9d5a0e9224d38d1e2bb07a9f9eb3d3a2fc127f8208aa69495cb4f28d46a",
+      "target_component": "centroid_r",
+      "trip": 1
+    },
+    {
+      "centroid_m": [
+        6.06064506103629,
+        7.375867594936936e-13
+      ],
+      "centroid_shift_m": [
+        -0.002885112296608483,
+        7.375867594936936e-13
+      ],
+      "centroid_shift_pitches": [
+        -0.0061903857554298615,
+        1.5825888561532974e-12
+      ],
+      "measured_target_shift_m": -0.002885112296608483,
+      "measured_to_predicted_ratio": -1.7724113742533767,
+      "predicted_target_shift_m": 0.0016277893148952671,
+      "sign_agreement": false,
+      "state_sha256_binary64": "85c21e5a18366428be211847672fec118a99b158ef35a9dca8a8dc234781d5c2",
+      "target_component": "centroid_r",
+      "trip": 2
+    },
+    {
+      "centroid_m": [
+        6.062329049106902,
+        7.666820748668578e-13
+      ],
+      "centroid_shift_m": [
+        -0.0012011242259966082,
+        7.666820748668578e-13
+      ],
+      "centroid_shift_pitches": [
+        -0.002577169113261773,
+        1.6450166604531507e-12
+      ],
+      "measured_target_shift_m": -0.0012011242259966082,
+      "measured_to_predicted_ratio": -0.7378867860880934,
+      "predicted_target_shift_m": 0.0016277893148952671,
+      "sign_agreement": false,
+      "state_sha256_binary64": "256442663cf85748d1e284228d2bc0d65b287b10e1850ede38602b1c535b6dc7",
+      "target_component": "centroid_r",
+      "trip": 3
+    },
+    {
+      "centroid_m": [
+        6.0642232950099855,
+        8.566135361732535e-13
+      ],
+      "centroid_shift_m": [
+        0.0006931216770871274,
+        8.566135361732535e-13
+      ],
+      "centroid_shift_pitches": [
+        0.001487183206582155,
+        1.8379763721740882e-12
+      ],
+      "measured_target_shift_m": 0.0006931216770871274,
+      "measured_to_predicted_ratio": 0.42580552086479523,
+      "predicted_target_shift_m": 0.0016277893148952671,
+      "sign_agreement": true,
+      "state_sha256_binary64": "b0398b4e9379c0c025d4da0d4471fd309428b247fb64ba8670330f2bcd65be00",
+      "target_component": "centroid_r",
+      "trip": 4
+    }
+  ]
+}

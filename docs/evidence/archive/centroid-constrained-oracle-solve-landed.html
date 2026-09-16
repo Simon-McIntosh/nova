@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="centroid-constrained-oracle-solve-landed">
+  <meta name="plan-title" content="Centroid-constrained oracle solve — cumulative execution evidence">
+  <meta name="plan-summary" content="Bounded exterior-field constraint implementation and its quantitative CPU qualification record.">
+  <meta name="plan-evidence-for" content="centroid-constrained-oracle-solve">
+  <meta name="plan-verifies" content="centroid-constrained-oracle-solve#s2">
+  <meta name="plan-modified" content="2026-09-16">
+  <meta name="plan-version" content="1">
+  <title>Centroid-constrained oracle solve — execution evidence</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Centroid-constrained oracle solve — cumulative execution evidence</h1>
+
+  <section id="bounded-exterior-field">
+    <h2>Bounded exterior-field compensator</h2>
+    <p><strong>Implementation checkpoint, commit <code>57d681a9</code>.</strong>
+    <code>BoundedExteriorFieldUnknown</code> maps normalized constraint unknowns
+    to finite field amplitudes in tesla, refuses a concrete command beyond the
+    declared bound before evaluating its response, and clips traced solver
+    trials to the same interval. The coil-less fixture now carries two explicit
+    prescribed exterior-response columns on top of the unchanged cached
+    baseline: a uniform vertical field for <code>centroid_r</code> and a uniform
+    radial field for <code>centroid_z</code>. Both enter through the existing
+    <code>ConstraintPair</code> and <code>CurrentCentroidConstraint</code>
+    interfaces.</p>
+
+    <p>The pre-repair reproduction was explicit: the existing unbounded
+    <code>ConstraintMultiplier</code> accepted normalized value <code>2.0</code>,
+    returned physical value <code>2.0</code>, and reported no refusal. The new
+    direct negative control requests 0.2525 T against a 0.25 T bound and must
+    raise <code>exterior-field amplitude exceeds its declared finite bound</code>.</p>
+
+    <p><strong>Qualification remains open.</strong> CPU job <code>1271927</code>
+    was launched on <code>all_debug</code> with <code>JAX_PLATFORMS=cpu</code>.
+    It must complete the two importing test modules in fresh processes and then
+    persist the four 110-cell amplitudes plus the displaced weak-row controls
+    under <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row</code>.
+    This checkpoint records no scientific pass until those receipts exist.</p>
+  </section>
+</main>
+</body>
+</html>

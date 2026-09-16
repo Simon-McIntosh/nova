@@ -28,16 +28,28 @@ from nova.equilibrium.clip_quadrature import (
 
 try:
     from nova.equilibrium.clip_quadrature import (
+        _ARC_EDGE_NODE,
+        _ARC_EDGE_ORDER,
+        _ARC_EDGE_WEIGHT,
+        _DENSITY_POWERS,
+        _DENSITY_SAMPLE_LOCAL,
         _compact_chord_polygon,
         _quadratic_coefficients,
         _quadratic_sample_field,
+        cut_capacity_edge_bound,
         cut_cell_moment_evaluation_bound,
     )
 except ImportError:
     _compact_chord_polygon = None
     _quadratic_coefficients = None
     _quadratic_sample_field = None
+    cut_capacity_edge_bound = None
     cut_cell_moment_evaluation_bound = None
+    _ARC_EDGE_NODE = None
+    _ARC_EDGE_WEIGHT = None
+    _ARC_EDGE_ORDER = None
+    _DENSITY_SAMPLE_LOCAL = None
+    _DENSITY_POWERS = None
 from nova.equilibrium.stencil_mesh import CellCurrentMoments, flux_field_polynomial
 from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures import measure as fixture
@@ -45,7 +57,7 @@ from scripts.analytic_oracle_fixtures import measure as fixture
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT_ROOT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments"
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-gauss"
 )
 FIGURE_ROOT = ROOT / "docs/figures/exact-clip-moment-quadrature"
 CASES = (
@@ -92,10 +104,12 @@ def _require_boundary_route() -> None:
     if any(
         item is None
         for item in (
-            _compact_chord_polygon,
             _quadratic_coefficients,
             _quadratic_sample_field,
+            cut_capacity_edge_bound,
             cut_cell_moment_evaluation_bound,
+            _ARC_EDGE_NODE,
+            _ARC_EDGE_WEIGHT,
         )
     ):
         raise RuntimeError("the boundary-reduction implementation is unavailable")
@@ -275,6 +289,39 @@ def _relative_difference(observed: np.ndarray, reference: np.ndarray) -> np.ndar
     )
 
 
+def edge_order_study() -> dict[str, Any]:
+    """Find the lowest per-edge Gauss order exact on the density model's integral.
+
+    The boundary rule integrates, along each straight edge, the radial
+    antiderivative of the local density model. That integrand is a polynomial of
+    degree five in the edge parameter, so a Gauss rule is exact on it once
+    2 * order - 1 reaches five. This checks the claim directly on the model's
+    own monomials rather than on the reduced moments.
+    """
+    parameter = np.linspace(0.0, 1.0, 2001)
+    result: dict[str, Any] = {}
+    for order in (1, 2, 3, 4):
+        nodes, weights = np.polynomial.legendre.leggauss(order)
+        nodes = 0.5 * (nodes + 1.0)
+        weights = 0.5 * weights
+        defect = 0.0
+        for radial_power, vertical_power in _DENSITY_POWERS:
+            exponent = radial_power + 1
+            integrand = parameter**exponent * (1.0 - 2.0 * parameter) ** vertical_power
+            quadrature = np.sum(
+                weights * nodes**exponent * (1.0 - 2.0 * nodes) ** vertical_power
+            )
+            exact = float(np.trapezoid(integrand, parameter))
+            defect = max(defect, abs(quadrature - exact) / max(abs(exact), 1e-300))
+        result[str(order)] = defect
+    lowest = next(order for order in (1, 2, 3, 4) if result[str(order)] <= 1e-12)
+    return {
+        "relative_line_integral_defect_by_order": result,
+        "lowest_order_exact_on_the_model_antiderivative": lowest,
+        "integrand_degree_in_edge_parameter": 5,
+    }
+
+
 def _replace_cut(base: CellCurrentMoments, cut: np.ndarray, values: np.ndarray):
     return CellCurrentMoments(
         *(
@@ -352,9 +399,10 @@ def discriminate() -> dict[str, Any]:
         ),
     ]
     production_arm = arm(
-        "chord_sagitta_quadratic_density",
-        "Production chord-plus-sagitta region with the six-sample quadratic "
-        "density fit.",
+        "sampled_arc_density_model",
+        "Production sampled-arc boundary route: the clip's own 128-segment arc "
+        "region carrying a per-edge Gauss rule of the local degree-four density "
+        "model.",
         production_array,
     )
     production_image = _frozen_image(operator, production, boundary, production_array)
@@ -452,13 +500,12 @@ def measure(case_name: str, requested_cells: int) -> dict[str, Any]:
     )(support, field)
     jax.block_until_ready(reduced)
     reduced_array = np.stack([np.asarray(value) for value in reduced])
-    if np.any(~np.isfinite(reduced_array[:, boundary])):
-        compact = _compact_chord_polygon(support.support_vertices, support.vertex_count)
-        supported = np.asarray(compact[-1], dtype=bool)
+    refused = boundary & ~np.all(np.isfinite(reduced_array), axis=0)
+    if np.any(refused):
         raise RuntimeError(
             "boundary reduction refused cells "
-            f"{np.flatnonzero(boundary & ~supported).tolist()} with counts "
-            f"{np.asarray(support.vertex_count)[boundary & ~supported].tolist()}"
+            f"{np.flatnonzero(refused).tolist()} with polygon counts "
+            f"{np.asarray(support.vertex_count)[refused].tolist()}"
         )
     fan = _fan_cut_moments(support, field, operator.source.core, FAN_ORDER)
     relative = _relative_difference(reduced_array[:, boundary], fan[:, boundary])
@@ -518,7 +565,16 @@ def measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         ),
         "frozen_current_image": image,
         "evaluation_points_per_cut_cell": cut_cell_moment_evaluation_bound(),
-        "chord_polygon_vertex_capacity": 24,
+        "fixed_edges_per_cut_cell": cut_capacity_edge_bound(),
+        "per_edge_gauss_order": _ARC_EDGE_ORDER,
+        "live_evaluations_per_cut_cell": (
+            len(_DENSITY_SAMPLE_LOCAL) + cut_capacity_edge_bound() * _ARC_EDGE_ORDER
+        ),
+        "per_edge_gauss_order_study": (
+            edge_order_study()
+            if case_name == CASES[0] and requested_cells == CELL_REQUESTS[0]
+            else None
+        ),
         "lane": {
             "job_id": os.environ.get("SLURM_JOB_ID"),
             "partition": os.environ.get("SLURM_JOB_PARTITION"),
@@ -598,18 +654,30 @@ def finalize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         for row in rows
         if row["fan_refinement_floor_relative_l2"] is not None
     )
+    budget = {name: 0.1 * floor[name] for name in MOMENT_NAMES}
     for row in rows:
         row["floor_ratio"] = {
             name: row["moment_relative_l2_boundary_minus_fan"][name] / floor[name]
+            for name in MOMENT_NAMES
+        }
+        row["one_tenth_of_the_fan_floor"] = dict(budget)
+        row["budget_ratio_against_one_tenth_of_the_fan_floor"] = {
+            name: row["moment_relative_l2_boundary_minus_fan"][name] / budget[name]
             for name in MOMENT_NAMES
         }
     payload = {
         "schema": "nova.exact-clip-moment-floor-summary.v1",
         "created_at": datetime.now(UTC).isoformat(),
         "fan_refinement_floor_relative_l2": floor,
+        "one_tenth_of_the_fan_floor_relative_l2": budget,
         "rows": rows,
         "maximum_floor_ratio": max(
             value for row in rows for value in row["floor_ratio"].values()
+        ),
+        "maximum_budget_ratio": max(
+            value
+            for row in rows
+            for value in row["budget_ratio_against_one_tenth_of_the_fan_floor"].values()
         ),
     }
     _write_json(REPORT_ROOT / "summary.json", payload)

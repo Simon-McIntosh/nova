@@ -47,7 +47,11 @@ from nova.equilibrium.source import (
     ForwardSource,
     PolynomialFluxFunction,
 )
-from nova.jax.config import configure_dtypes
+from nova.jax.config import (
+    configure_dtypes,
+    configure_persistent_compilation_cache,
+    default_persistent_compilation_cache_root,
+)
 from tests.test_forward_compile_identity import (
     CASES,
     REQUESTED_CELLS,
@@ -652,6 +656,9 @@ def _profile_figure(row, scaled_row) -> Path:
 def main() -> int:
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root(), minimum_compile_seconds=0.0
+    )
     set_support_clip_mode("chord")
     assert support_clip_mode() == "chord"
 
@@ -721,6 +728,7 @@ def main() -> int:
         "case": CASE,
         "clip_mode": support_clip_mode(),
         "requested_cells": REQUESTED_CELLS,
+        "persistent_compilation_cache": str(cache.directory),
         "pressure_scale": PRESSURE_SCALE,
         "diamagnetic_scale": DIAMAGNETIC_SCALE,
         "external_shape": list(external.shape),

@@ -271,6 +271,9 @@ def solve_and_measure(
     low-memory measurement.
     """
     configure_dtypes()
+    output = output.resolve()
+    figure_root = figure_root.resolve()
+    part_root = part_root.resolve()
     if not hasattr(certificate.observation, "_UNIT_NODE"):
         certificate.observation._UNIT_NODE = clip_quadrature._UNIT_NODE
     device = jax.devices()[0]

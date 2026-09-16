@@ -616,6 +616,67 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   pending a lead choice between the mathematical implicit derivative with a
   tolerance-based terminal gate, the bounded twelve-step derivative with a
   tolerance-based gate, or retaining bit identity and its 159.66 GiB program.</p>
+
+  <h3 id="exact-clip-memory-final">Implicit fixed-root line and repaired-seed terminal solve</h3>
+  <p><strong>Superseding result.</strong> The lead selected the mathematical implicit
+  derivative and restated the terminal gate because a Jacobian change may move the Newton
+  path without moving the fixed point. Commit <code>c7e8cc12</code> keeps the twelve-step
+  polish byte-identical in the primal and evaluates
+  <code>-partial(f)/partial(psi) / partial(f)/partial(s)</code> once at each converged
+  interior root. The production validation in <code>c221f20d</code> holds the terminal
+  packing branch fixed, checks the 127 polished interior roots rather than the two
+  segment-owned endpoints, and banks every failed instrument correction beside the final
+  receipt. Job 1271849 passed all eight directions at 6.334e-10 to 3.792e-9 relative
+  error with zero branch-sign changes; the declared bound is 1e-8. The bounded
+  twelve-step replay is 2.209e-8 to 1.042e-6 on those isolated roots, and the earlier
+  complete-map measurement remains 7.877e-3 to 8.223e-3. This is measured candidate (a)
+  of <code>q-cca-newton-stall-mechanism</code>: the production exact-clip Jacobian was
+  inconsistent with its residual at percent scale.</p>
+
+  <table>
+    <caption>Final fixed-root, terminal, memory and solve gates</caption>
+    <thead><tr><th scope="col">Gate</th><th scope="col">Receipt</th><th scope="col">Measured result</th><th scope="col">Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>Weak 110 fixed-root JVP</td><td>H200 job 1271849</td><td>Newton 6.334e-10; random 1.461e-9, 2.649e-9, 8.682e-10; zero branch changes</td><td>pass, all below 1e-8</td></tr>
+      <tr><td>Weak 300 fixed-root JVP</td><td>H200 job 1271849</td><td>Newton 2.201e-9; random 1.821e-9, 3.792e-9, 2.783e-9; zero branch changes</td><td>pass, all below 1e-8</td></tr>
+      <tr><td>Weak exact 300 terminal agreement</td><td>receipt-backed H200 states</td><td>maximum 1.080878e-10 Wb; 2.16e-12 of 49.946 Wb analytic span; residual difference 3.72e-14</td><td>pass, below 1e-10 of span</td></tr>
+      <tr><td>Single-null whole-cell 500 non-participation</td><td>H200 job 1271863</td><td>exact polish replaced by a raising guard; flux, residual, amplitude, convergence and cell count all bit-identical</td><td>pass</td></tr>
+      <tr><td>Current-source 1000 executable memory</td><td>H200 job 1271864</td><td>1,072 realised cells; 8,398,566,704 temporary bytes (7.821775 GiB); zero pairwise predicates</td><td>pass, below 20 GiB</td></tr>
+      <tr><td>Repaired-seed weak exact 1000 solve</td><td>H200 job 1271873</td><td>two trips; residual 1.451711e-13; allocator peak 8.020622 GiB; qualified</td><td>pass</td></tr>
+    </tbody>
+  </table>
+
+  <table>
+    <caption>Weak 1000 terminal state against the analytic oracle and whole-cell comparator</caption>
+    <thead><tr><th scope="col">Booking</th><th scope="col">Axis error (pitch)</th><th scope="col">Terminal residual</th><th scope="col">Boundary flux from analytic zero (Wb)</th><th scope="col">Amplitude</th><th scope="col">Qualification</th></tr></thead>
+    <tbody>
+      <tr><td>Exact clip, repaired unit-amplitude seed</td><td><strong>0.0108475</strong></td><td>1.451711e-13</td><td><strong>0.00186713</strong></td><td><strong>0.999938</strong></td><td>qualified</td></tr>
+      <tr><td>Whole-cell comparator</td><td>0.635491</td><td><strong>1.387744e-15</strong></td><td>4.959386</td><td>0.896835</td><td>qualified</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/exact-clip-memory/solve-panels-final-receipted/weak-rotation-reactor-static-production-route-cells-1000.png" alt="Weak 1000 exact-clip solved and analytic line contours on shared levels beside absolute flux, gradient and Hessian difference contours, with wall and admitted axes">
+    <figcaption>Weak 1000 exact clip from the repaired unit-amplitude seed. Top left overlays
+    solved ochre and analytic blue on shared Wb levels; the remaining panels show unfilled
+    absolute flux, gradient and Hessian difference contours. The black wall and both
+    admitted magnetic axes are drawn. Terminal residual 1.451711e-13, converged and
+    qualified. Receipt:
+    <code>docs/figures/cut-cell-current-attribution/exact-clip-memory/weak-1000-exact-implicit-seed-repaired-receipt.json</code>.</figcaption>
+  </figure>
+
+  <p><strong>Seed and stiffness caveat.</strong> The final run used worktree revision
+  <code>ddd34096</code> with only <code>nova/equilibrium/forward.py</code> loaded
+  byte-for-byte from seed commit <code>f5af7294</code>; the bootstrap verified those bytes
+  before import and the node did not edit that file. The seed starts at amplitude
+  1.007454 and terminates at 0.999938, selecting the analytic basin in two trips. Because
+  the exact map is stiff and the Jacobian change alters its Newton trajectory, this is an
+  honest result for the repaired seed, not evidence that every cold seed selects the same
+  fixed point. The first final allocation, job 1271870, also completed the solve and
+  rendered a qualified panel but failed after rendering because a relative figure path
+  could not be serialized; job 1271873 used absolute artifact paths and is the receipted
+  result. The benchmark now resolves all three output roots before invoking the
+  certificate driver, preventing that post-solve receipt loss.</p>
 </section>
 </main>
 </body>

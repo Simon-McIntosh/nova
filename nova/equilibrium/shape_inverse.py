@@ -139,6 +139,7 @@ class ShapeInverseResult:
     consistency_floor: np.ndarray
     row_weight: np.ndarray
     iterations: tuple[ShapeInverseIteration, ...]
+    seed_achieved_flux_points: np.ndarray
     achieved_flux_points: np.ndarray
     turning_point_residual: np.ndarray
     turning_point_residual_norm: float
@@ -280,7 +281,13 @@ def _turning_point_residual(
 
 
 def _refine_turning_point(
-    profile: ForwardProfile, grid: jax.Array, level: float, start, *, radial: bool
+    profile: ForwardProfile,
+    grid: jax.Array,
+    level: float,
+    start,
+    *,
+    radial: bool,
+    boundary: np.ndarray,
 ) -> np.ndarray:
     """Newton-refine a rough boundary extremum onto the exact turning point.
 
@@ -293,7 +300,8 @@ def _refine_turning_point(
     with every field row at zero.
     """
 
-    point = jnp.asarray(start, dtype=jnp.float64)
+    seed = np.asarray(start, dtype=float)
+    point = jnp.asarray(seed, dtype=jnp.float64)
     for _ in range(20):
         residual = _turning_point_residual(
             profile.lattice, grid, level, point, radial=radial
@@ -306,7 +314,50 @@ def _refine_turning_point(
             )
         )(point)
         point = point + jnp.linalg.solve(jacobian, -residual)
-    return np.asarray(point)
+    refined = np.asarray(point, dtype=float)
+    radial_step = float(profile.lattice.radial_step)
+    height_step = float(profile.lattice.height[1] - profile.lattice.height[0])
+    cell_diagonal = float(np.hypot(radial_step, height_step))
+    polygon = np.asarray(boundary, dtype=float)
+    if (
+        not np.all(np.isfinite(refined))
+        or np.linalg.norm(refined - seed) > cell_diagonal
+        or not _point_in_polygon(refined, polygon)
+    ):
+        return seed
+    return refined
+
+
+def _point_in_polygon(point: np.ndarray, polygon: np.ndarray) -> bool:
+    """Return whether a point lies inside or on a closed polygon."""
+    vertices = np.asarray(polygon, dtype=float)
+    candidate = np.asarray(point, dtype=float)
+    following = np.roll(vertices, -1, axis=0)
+    edges = following - vertices
+    offsets = candidate - vertices
+    edge_length_squared = np.sum(edges * edges, axis=1)
+    nonzero = edge_length_squared > 0.0
+    fractions = np.zeros(vertices.shape[0])
+    fractions[nonzero] = (
+        np.sum(offsets[nonzero] * edges[nonzero], axis=1) / edge_length_squared[nonzero]
+    )
+    closest = vertices + np.clip(fractions, 0.0, 1.0)[:, None] * edges
+    scale = max(1.0, float(np.max(np.abs(vertices))))
+    if float(np.min(np.linalg.norm(closest - candidate, axis=1))) <= (
+        64.0 * np.finfo(float).eps * scale
+    ):
+        return True
+    x, y = candidate
+    crosses = (vertices[:, 1] > y) != (following[:, 1] > y)
+    denominator = following[:, 1] - vertices[:, 1]
+    intersections = np.full(vertices.shape[0], np.inf)
+    valid = crosses & (denominator != 0.0)
+    intersections[valid] = vertices[valid, 0] + (
+        (y - vertices[valid, 1])
+        * (following[valid, 0] - vertices[valid, 0])
+        / denominator[valid]
+    )
+    return bool(np.count_nonzero(valid & (intersections >= x)) % 2)
 
 
 def achieved_target(profile: ForwardProfile, flux) -> BoundingBoxTarget:
@@ -331,10 +382,18 @@ def achieved_target(profile: ForwardProfile, flux) -> BoundingBoxTarget:
         poly[int(np.argmin(poly[:, 0]))],
         poly[int(np.argmin(poly[:, 1]))],
     )
-    outer = _refine_turning_point(profile, grid, level, starts[0], radial=True)
-    upper = _refine_turning_point(profile, grid, level, starts[1], radial=False)
-    inner = _refine_turning_point(profile, grid, level, starts[2], radial=True)
-    lower = _refine_turning_point(profile, grid, level, starts[3], radial=False)
+    outer = _refine_turning_point(
+        profile, grid, level, starts[0], radial=True, boundary=poly
+    )
+    upper = _refine_turning_point(
+        profile, grid, level, starts[1], radial=False, boundary=poly
+    )
+    inner = _refine_turning_point(
+        profile, grid, level, starts[2], radial=True, boundary=poly
+    )
+    lower = _refine_turning_point(
+        profile, grid, level, starts[3], radial=False, boundary=poly
+    )
     saddle = np.asarray(topology.x_point, dtype=float)
     x_point = (
         saddle
@@ -1148,6 +1207,20 @@ def solve_shape_inverse(
         admitted_forward["result"] = result
         return result
 
+    commanded_turning_points = np.asarray(target.flux_points, dtype=float)[:4]
+    previous_turning_points = np.asarray(previous_flux_points, dtype=float)[:4]
+    commanded_motion = commanded_turning_points - previous_turning_points
+    command_norm = float(np.max(np.linalg.norm(commanded_motion, axis=1)))
+    turning_point_tolerance = turning_point_relative_tolerance * command_norm
+    seed_achieved_turning_points = previous_turning_points.copy()
+    if forward_solve is not None and command_norm > 0.0:
+        seed_result = forward_solve(initial_current.copy())
+        seed_state = jnp.asarray(getattr(seed_result, "flux", seed_result))
+        seed_achieved_turning_points = np.asarray(
+            achieved_target(profile, seed_state).flux_points, dtype=float
+        )[:4]
+        admitted_forward.clear()
+
     for iteration in range(placement_rounds + 1):
         _masks, topology = profile.operator.read(state, requested_class=requested_class)
         picard_boundary_history.append(float(np.asarray(topology.boundary_flux)))
@@ -1199,7 +1272,9 @@ def solve_shape_inverse(
             current_step_fraction,
         )
         current_step_limited = current_step_limited or limited
-        final_without_referee = iteration == placement_rounds and forward_solve is None
+        final_without_referee = iteration == placement_rounds and (
+            forward_solve is None or command_norm == 0.0
+        )
         if final_without_referee:
             fraction = 1.0
             trials = 0
@@ -1229,19 +1304,15 @@ def solve_shape_inverse(
                 prescribed_current=jnp.asarray(current),
             )(state)
 
-    commanded_turning_points = np.asarray(target.flux_points, dtype=float)[:4]
-    previous_turning_points = np.asarray(previous_flux_points, dtype=float)[:4]
-    commanded_motion = commanded_turning_points - previous_turning_points
-    command_norm = float(np.max(np.linalg.norm(commanded_motion, axis=1)))
-    turning_point_tolerance = turning_point_relative_tolerance * command_norm
     iteration_history: list[ShapeInverseIteration] = []
-    achieved_turning_points = previous_turning_points.copy()
-    physical_residual = commanded_turning_points - achieved_turning_points
+    achieved_turning_points = seed_achieved_turning_points.copy()
+    achieved_motion = achieved_turning_points - seed_achieved_turning_points
+    physical_residual = commanded_motion - achieved_motion
     physical_residual_norm = float(np.max(np.linalg.norm(physical_residual, axis=1)))
     converged = command_norm == 0.0
     last_uncapped_total = np.asarray(solved_delta, dtype=float).copy()
 
-    if forward_solve is not None:
+    if forward_solve is not None and command_norm > 0.0:
         admitted_result = admitted_forward.get("result")
         if admitted_result is None:
             raise RuntimeError("the axis-admission referee returned no forward result")
@@ -1249,7 +1320,8 @@ def solve_shape_inverse(
         achieved_turning_points = np.asarray(
             achieved_target(profile, state).flux_points, dtype=float
         )[:4]
-        physical_residual = commanded_turning_points - achieved_turning_points
+        achieved_motion = achieved_turning_points - seed_achieved_turning_points
+        physical_residual = commanded_motion - achieved_motion
         physical_residual_norm = float(
             np.max(np.linalg.norm(physical_residual, axis=1))
         )
@@ -1257,7 +1329,7 @@ def solve_shape_inverse(
         tangent = _secant_refreshed_tangent(
             tangent,
             current[free] - initial_current[free],
-            achieved_turning_points - previous_turning_points,
+            achieved_motion,
         )
         tangent_singular_values = np.linalg.svd(tangent, compute_uv=False)
         iteration_history.append(
@@ -1277,7 +1349,7 @@ def solve_shape_inverse(
         converged = physical_residual_norm <= turning_point_tolerance
         maximum_iterations = max(1, picard_rounds)
         prior_current = initial_current[free].copy()
-        prior_achieved = previous_turning_points.copy()
+        prior_achieved = seed_achieved_turning_points.copy()
         while not converged and len(iteration_history) < maximum_iterations:
             tangent = turning_point_response_matrix(profile, state, free)
             tangent = _secant_refreshed_tangent(
@@ -1328,7 +1400,8 @@ def solve_shape_inverse(
             achieved_turning_points = np.asarray(
                 achieved_target(profile, state).flux_points, dtype=float
             )[:4]
-            physical_residual = commanded_turning_points - achieved_turning_points
+            achieved_motion = achieved_turning_points - seed_achieved_turning_points
+            physical_residual = commanded_motion - achieved_motion
             physical_residual_norm = float(
                 np.max(np.linalg.norm(physical_residual, axis=1))
             )
@@ -1401,6 +1474,7 @@ def solve_shape_inverse(
         consistency_floor=consistency_floor,
         row_weight=row_weight,
         iterations=tuple(iteration_history),
+        seed_achieved_flux_points=seed_achieved_turning_points,
         achieved_flux_points=achieved_turning_points,
         turning_point_residual=physical_residual,
         turning_point_residual_norm=physical_residual_norm,

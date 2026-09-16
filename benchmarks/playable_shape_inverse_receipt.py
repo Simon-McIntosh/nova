@@ -36,7 +36,6 @@ from nova.equilibrium.shape_inverse import (
     shape_row_target,
     shape_values,
     solve_shape_inverse,
-    turning_point_error,
 )
 from nova.equilibrium.topology import NoQualifiedAxisError
 from nova.imas.mast_solve_inputs import SHOT_STORE
@@ -826,6 +825,11 @@ def _arm_receipt(
     profile = machine.profile
     seed_current = np.asarray(solver.prescribed_current).copy()
     prior = achieved_target(profile, previous.flux)
+    command_motion = _points(target) - _points(prior)
+    motion_reference = _target_with_points(prior, np.asarray(null_points, dtype=float))
+    motion_target = _target_with_points(
+        target, np.asarray(null_points, dtype=float) + command_motion
+    )
     arm_path = directory / f"{name}.json"
     inverse_started = perf_counter()
     try:
@@ -861,7 +865,9 @@ def _arm_receipt(
             "previous_turning_points_m": _points(prior).tolist(),
             "commanded_turning_points_m": _points(target).tolist(),
             "achieved_turning_points_m": None,
-            "turning_point_table": _turning_point_table(prior, target, None),
+            "turning_point_table": _turning_point_table(
+                motion_reference, motion_target, None
+            ),
             "maximum_uncommanded_drift_m": None,
             "accepted_fraction": None,
             "admissibility_trials": len(refusal_sequence),
@@ -954,9 +960,11 @@ def _arm_receipt(
         )
         _write(arm_path, persisted)
         raise
-    error = turning_point_error(profile, target, equilibrium.flux)
+    achieved_motion = _points(achieved) - np.asarray(null_points, dtype=float)
+    motion_residual = command_motion - achieved_motion
+    error = float(np.max(np.linalg.norm(motion_residual, axis=1)))
     current_change = inverse.currents - seed_current
-    point_table = _turning_point_table(prior, target, achieved)
+    point_table = _turning_point_table(motion_reference, motion_target, achieved)
     round_receipt = {
         "index": 1,
         "coil_current_a": inverse.currents.tolist(),
@@ -1006,6 +1014,9 @@ def _arm_receipt(
         "placement_picard_boundary_flux_wb": inverse.picard_boundary_flux.tolist(),
         "commanded_change_against_consistency_floor": row_floor_table,
         "commanded_turning_points_m": _points(target).tolist(),
+        "motion_reference_turning_points_m": np.asarray(null_points).tolist(),
+        "commanded_motion_m": command_motion.tolist(),
+        "motion_command_turning_points_m": _points(motion_target).tolist(),
         "achieved_turning_points_m": _points(achieved).tolist(),
         "turning_point_table": point_table,
         "maximum_uncommanded_drift_m": _maximum_uncommanded_drift(point_table),
@@ -1025,7 +1036,9 @@ def _arm_receipt(
         "commanded_turning_points_m": _points(target).tolist(),
         "achieved_turning_points_m": _points(achieved).tolist(),
         "null_turning_points_m": null_points.tolist(),
-        "relative_turning_point_motion_m": (_points(achieved) - null_points).tolist(),
+        "commanded_motion_m": command_motion.tolist(),
+        "relative_turning_point_motion_m": achieved_motion.tolist(),
+        "motion_residual_m": motion_residual.tolist(),
         "turning_point_table": point_table,
         "maximum_uncommanded_drift_m": _maximum_uncommanded_drift(point_table),
         "accepted_fraction": inverse.accepted_fraction,
@@ -1090,16 +1103,19 @@ def _null_receipt(
     wall = perf_counter() - started
     prior = achieved_target(machine.profile, previous.flux)
     achieved = achieved_target(machine.profile, equilibrium.flux)
+    motion_reference = _target_with_points(prior, _points(achieved))
     current_change = inverse.currents - seed_current
-    turning_point_drift = _points(achieved) - _points(prior)
-    point_table = _turning_point_table(prior, target, achieved)
+    turning_point_drift = np.zeros_like(_points(achieved))
+    point_table = _turning_point_table(motion_reference, motion_reference, achieved)
     payload = {
         "arm": "null-resolve",
         "status": "complete",
         "achieved_shape_status": "achieved",
-        "previous_turning_points_m": _points(prior).tolist(),
-        "commanded_turning_points_m": _points(target).tolist(),
+        "previous_turning_points_m": _points(motion_reference).tolist(),
+        "commanded_turning_points_m": _points(motion_reference).tolist(),
+        "absolute_seed_target_turning_points_m": _points(target).tolist(),
         "achieved_turning_points_m": _points(achieved).tolist(),
+        "relative_turning_point_motion_m": turning_point_drift.tolist(),
         "turning_point_drift_m": turning_point_drift.tolist(),
         "maximum_turning_point_drift_m": float(
             np.max(np.linalg.norm(turning_point_drift, axis=1))

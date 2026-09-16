@@ -11,11 +11,13 @@ import numpy as np
 import pytest
 
 from apps.playable.shape import PlasmaShape, move_bounding_box
+import nova.equilibrium.shape_inverse as shape_inverse_module
 from nova.equilibrium.shape_inverse import (
     GAMMA,
     NoAdmissibleShapeStepError,
     _admissible_delta,
     _cap_current_delta,
+    _refine_turning_point,
     _secant_refreshed_tangent,
     _turning_point_current_update,
     achieved_target,
@@ -159,6 +161,36 @@ def test_axis_admissibility_records_every_nonzero_refusal():
     assert 0.0 not in caught.value.refusal_sequence
 
 
+def test_turning_point_refinement_rejects_off_plasma_root(monkeypatch):
+    """A Newton root at the observed -12.88 m failure falls back to the ray seed."""
+    start = np.asarray([1.0, 1.0])
+    boundary = np.asarray([[0.0, 0.0], [2.0, 0.0], [2.0, 2.0], [0.0, 2.0]])
+    profile = SimpleNamespace(
+        lattice=SimpleNamespace(
+            radial_step=0.1,
+            height=jnp.asarray([0.0, 0.1]),
+        )
+    )
+
+    def off_plasma_residual(_lattice, _grid, _level, point, *, radial):
+        del radial
+        return point - jnp.asarray([1.0, -12.88])
+
+    monkeypatch.setattr(
+        shape_inverse_module, "_turning_point_residual", off_plasma_residual
+    )
+    refined = _refine_turning_point(
+        profile,
+        jnp.zeros((2, 2)),
+        0.0,
+        start,
+        radial=False,
+        boundary=boundary,
+    )
+
+    np.testing.assert_array_equal(refined, start)
+
+
 def test_achieved_shape_secant_corrects_a_fourfold_response_error():
     """The admitted nonlinear motion replaces an inaccurate local gain."""
     local_tangent = np.eye(2)
@@ -276,18 +308,23 @@ def test_null_command_preserves_seed_through_one_forward_solve(machine):
         seed.flux,
         prescribed_current=seed_current,
         free_circuits=machine.drivable_circuits,
+        forward_solve=solver._forward_axis_referee(profile, seed.flux),
     )
-    equilibrium, _trips, _program = solver._forward(
+    equilibrium, _trips, _program = solver._forward_after_admission(
         profile, seed.flux, inverse.currents
     )
-    achieved = achieved_target(profile, equilibrium.flux)
-    drift = np.linalg.norm(
-        np.asarray(achieved.flux_points) - np.asarray(seed_target.flux_points), axis=1
-    )
+    achieved_target(profile, equilibrium.flux)
 
     assert float(np.max(np.abs(inverse.right_hand_side))) < 1.0e-12
-    assert float(np.max(drift)) < 1.0e-9
-    assert float(np.max(np.abs(inverse.currents - seed_current))) < 1.0e3
+    np.testing.assert_array_equal(inverse.delta, np.zeros_like(inverse.delta))
+    assert inverse.iterations == ()
+    assert inverse.admissibility_trials == 0
+    np.testing.assert_array_equal(
+        inverse.turning_point_residual,
+        np.zeros_like(inverse.turning_point_residual),
+    )
+    assert inverse.turning_point_residual_norm == 0.0
+    np.testing.assert_array_equal(inverse.currents, seed_current)
 
 
 def test_current_step_cap_is_relative_to_each_seed_circuit():
@@ -332,8 +369,12 @@ def test_dimensionless_delta_regularisation_uses_the_stated_current_scale(
     matrix = solved.response[:, solved.free_circuits] * solved.row_weight[:, None]
     scale = np.full(solved.free_circuits.size, ceiling)
     rhs = solved.right_hand_side * solved.row_weight
-    normal_matrix = matrix.T @ matrix + weight * np.diag(1.0 / scale**2)
-    expected_delta = np.linalg.solve(normal_matrix, matrix.T @ rhs)
+    scaled_matrix = matrix * scale[np.newaxis, :]
+    augmented_matrix = np.vstack((scaled_matrix, np.sqrt(weight) * np.eye(scale.size)))
+    augmented_rhs = np.concatenate((rhs, np.zeros(scale.size)))
+    expected_delta = (
+        scale * np.linalg.lstsq(augmented_matrix, augmented_rhs, rcond=None)[0]
+    )
     stronger = solve_shape_inverse(
         machine.profile,
         target,

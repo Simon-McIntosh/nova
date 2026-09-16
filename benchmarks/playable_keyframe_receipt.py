@@ -71,6 +71,10 @@ DEFAULT_FIGURE = (
 DEFAULT_THROUGHPUT_FIGURE = (
     ROOT / "docs/figures/playable-forward-solve/keyframes/h200-keyframes-throughput.png"
 )
+DEFAULT_STAGE_FIGURE = ROOT / (
+    "docs/figures/playable-forward-solve/keyframes/"
+    "h200-playable-press-stage-breakdown.png"
+)
 #: One press against each sign of the vertical bulk control, ten round trips:
 #: the chain stays near the free centroid while exercising both moved
 #: targets.  The horizontal +R centroid move is deliberately excluded: on the
@@ -183,6 +187,31 @@ def _draw_throughput(receipt: dict[str, Any], figure: Path) -> None:
     plt.close()
 
 
+def _draw_stage_breakdown(receipt: dict[str, Any], figure: Path) -> None:
+    """Draw the first moved press as one complete, non-overlapping stage bar."""
+    press = receipt.get("first_moved", {}).get("press", {})
+    stages = press.get("press_stages", {})
+    if not stages:
+        return
+    names = list(stages)
+    values = [1000.0 * stages[name] for name in names]
+    figure.parent.mkdir(parents=True, exist_ok=True)
+    plt.figure(figsize=(10, 5))
+    bottom = 0.0
+    for name, value in zip(names, values, strict=True):
+        plt.bar(["first moved press"], [value], bottom=[bottom], label=name)
+        bottom += value
+    plt.ylabel("host wall / ms")
+    plt.title(
+        "First moved press stages: "
+        f"{press.get('press_wall', press.get('wall', 0.0)) * 1000.0:.1f} ms total"
+    )
+    plt.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0))
+    plt.tight_layout()
+    plt.savefig(figure, dpi=150)
+    plt.close()
+
+
 def _atime_entries(directory: Path) -> dict[str, float]:
     """Return every persistent-cache entry key with its atime-file mtime."""
     if not directory.is_dir():
@@ -256,6 +285,7 @@ def measure(
     output: Path,
     figure: Path,
     throughput_figure: Path | None = None,
+    stage_figure: Path | None = None,
     target: tuple[int, int] = DEFAULT_TARGET,
     cache_root: Path | None = None,
     route: str = "host",
@@ -481,9 +511,8 @@ def measure(
             return equilibrium
 
         def timed_channels(session_):
-            started = time.perf_counter()
             frame_push(session_)
-            channel_walls.append(time.perf_counter() - started)
+            channel_walls.append(session_.receipts[-1].stage_walls["channel_push"])
 
         solver._reduced = timed_reduce
         solver._reduced_receipt = timed_receipt
@@ -505,7 +534,9 @@ def measure(
         mark("prime")
         prime = session.prime()
         timed_channels(session)
+        prime = session.receipts[-1]
         prime_frame = session.frame
+        prime_stages = dict(prime.stage_walls)
         receipt["prime"] = {
             "wall": prime.wall,
             "trips": prime.trips,
@@ -514,6 +545,9 @@ def measure(
             "receipt_wall": receipt_walls[-1],
             "channel_wall": channel_walls[-1],
             "frame_assembly_wall": session.frame_assembly_walls[-1],
+            "press_wall": prime.press_wall,
+            "press_stages": prime_stages,
+            "stage_counts": dict(solver.last_stage_counts),
             "second_x_point_finite": _second_x_point_finite(prime_frame),
             "stages": _stage_durations(stage_mark_sets[-1]),
             "trip_census": trip_census[-1],
@@ -543,6 +577,7 @@ def measure(
         for index, key in enumerate(KEY_CHAIN, start=1):
             press = session.step(key)
             timed_channels(session)
+            press = session.receipts[-1]
             entry = {
                 "index": index,
                 "press": key,
@@ -555,6 +590,9 @@ def measure(
                 "receipt_wall": receipt_walls[-1],
                 "channel_wall": channel_walls[-1],
                 "frame_assembly_wall": session.frame_assembly_walls[-1],
+                "press_wall": press.press_wall,
+                "press_stages": dict(press.stage_walls),
+                "stage_counts": dict(solver.last_stage_counts),
                 "second_x_point_finite": _second_x_point_finite(session.frame),
                 "stages": _stage_durations(stage_mark_sets[-1]),
                 "trip_census": trip_census[-1],
@@ -587,6 +625,12 @@ def measure(
         if event["kind"] == "compile"
         and event.get("seconds", float("inf")) <= CACHE_SERVED_COMPILE_SECONDS
     ]
+    first_moved_press = receipt["presses"][1]
+    stage_sum = sum(first_moved_press.get("press_stages", {}).values())
+    first_moved_press["press_stage_sum_s"] = stage_sum
+    first_moved_press["press_stage_error_s"] = stage_sum - first_moved_press.get(
+        "press_wall", first_moved_press["wall"]
+    )
     receipt["first_moved"] = {
         "press": receipt["presses"][1],
         "compile_events": len(moved_events),
@@ -598,6 +642,16 @@ def measure(
         "dispatch_and_host_seconds": receipt["presses"][1]["wall"]
         - sum(event["seconds"] for event in fresh)
         - sum(event["seconds"] for event in cached),
+        "press_stage_sum_s": stage_sum,
+        "press_stage_error_s": first_moved_press["press_stage_error_s"],
+        "largest_stage": max(
+            first_moved_press.get("press_stages", {}),
+            key=first_moved_press.get("press_stages", {}).get,
+            default=None,
+        ),
+        "forward_solve_count": first_moved_press.get("stage_counts", {}).get(
+            "forward_solve", 0
+        ),
     }
     receipt["compile_events_total"] = sum(
         1 for event in events if event["kind"] == "compile"
@@ -621,6 +675,8 @@ def measure(
     _draw(receipt, figure)
     if throughput_figure is not None:
         _draw_throughput(receipt, throughput_figure)
+    if stage_figure is not None:
+        _draw_stage_breakdown(receipt, stage_figure)
     return receipt
 
 
@@ -649,6 +705,7 @@ def main() -> None:
     parser.add_argument(
         "--throughput-figure", type=Path, default=DEFAULT_THROUGHPUT_FIGURE
     )
+    parser.add_argument("--stage-figure", type=Path, default=DEFAULT_STAGE_FIGURE)
     parser.add_argument("--cache-root", type=Path, default=None)
     parser.add_argument("--route", choices=("host", "compiled"), default="host")
     parser.add_argument("--shot", type=int, default=DEFAULT_TARGET[0])
@@ -665,6 +722,7 @@ def main() -> None:
             output=arguments.output,
             figure=arguments.figure,
             throughput_figure=arguments.throughput_figure,
+            stage_figure=arguments.stage_figure,
             target=(arguments.shot, arguments.slice),
             cache_root=arguments.cache_root,
             route=arguments.route,

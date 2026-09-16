@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="centroid-constrained-oracle-solve">
+  <meta name="plan-title" content="Centroid-constrained oracle solve — a Newton-Krylov position constraint on the Solovev certificate rows">
+  <meta name="plan-summary" content="Pin the current centroid to the analytic one with a Newton-Krylov row so the certificate cannot fall into the displaced basin of a stiffness-free fixture.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="14.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S19">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="equilibrium,solovev,grad-shafranov,active-set">
+  <meta name="plan-depends-on" content="cut-cell-current-attribution,constraint-augmented-newton-krylov">
+  <meta name="plan-informs" content="gs-absolute-accuracy-gates">
+  <title>Centroid-constrained oracle solve | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-16">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — The fixture holds no position, so the iteration must</h2>
+    <p>The Solovev certificate fixture poses its exterior as the analytic total flux minus the plasma's own clipped image, whatever field makes the analytic solution exact. That exterior has no coils and no decay index. The positional-stiffness measurement (cut-cell-current-attribution, merged 6958819b, H200 job 1271814) showed that every rigid displacement of the analytic state from 2 to 60 mm grows over four production trips, outboard and vertically, on weak 110, weak 300 and moderate 300: the oracle is a repelling fixed point of the trip iteration. The consequence, measured by the fixed-point discriminator (b56931bd), is that the production map has two converged fixed points with the same target current and the same exterior: the oracle-near state that an analytic start keeps to 1.1e-4 of span, and a state displaced by 36 mm leaning on a different part of the wall, with the axis flux six to seven percent low and the boundary four percent of span inside, which the production seed selects on five of six exact-clip rows. Every displaced Solovev terminal state of the sprint, whole-cell and exact-clip alike, is this mechanism.</p>
+    <p>The lead's ruling of 2026-09-16 is to constrain the position rather than re-pose the fixture or rely on the seed: pin the plasma current centroid to the analytic centroid with a Newton-Krylov constraint row, so the iteration cannot fall into the displaced basin, and the certificate converges to the equilibrium the oracle describes. The constraint machinery exists: <code>CurrentCentroidConstraint</code> and the imposed constraint interface in <code>nova/equilibrium/constraint.py</code>, the reduced-route constraint pairs in <code>nova/equilibrium/reduced_newton.py</code>, and the bounded compensating unknown owned by constraint-augmented-newton-krylov.</p>
+
+    <h2 id="s2">§2 — The compensating unknown for a coil-less fixture</h2>
+    <p>A constraint row needs a compensating unknown. On a machine the centroid row drives a coil circuit; the fixture has none. The natural unknown is a rigid exterior field increment, a uniform vertical field for the radial centroid and a uniform radial field for the vertical centroid, each with a bounded amplitude, added to the fixture exterior and eliminated by the row. At the true equilibrium the analytic exterior already balances the plasma, so the converged compensating amplitude measures the force imbalance of the discretisation and must tend to zero with cell count: the row is both the restraint and a new absolute-accuracy diagnostic. Done-when: the fixture exposes the two field increments as a compensating unknown implementing the existing protocol, the centroid row is imposed on the four analytic rows through the same interface as the machine rows with no fixture-specific branch in the solver, and a positive control shows the row drives a deliberately displaced seed back to the analytic centroid.</p>
+
+    <h2 id="s3">§3 — The certificate under the constraint</h2>
+    <p>Done-when: in one H200 job the weak, moderate and strong rows at 110, 300 and 1000 cells and the single-null 500 control are re-solved under the exact clip from the production seed with the centroid row imposed, every row converges to the oracle-near fixed point (max solved-minus-analytic within ten times the analytic-start floor of 1.1e-4 of span, axis within a tenth of a pitch, boundary level within 1e-3 of span), the compensating field amplitude is tabled per row and falls with cell count, the terminal residual and the row's own residual are both at or below 1e-12, and the receipt carries the solved-over-analytic and difference panels per row under the plotting rules. The whole-cell rows are re-solved under the same row as the negative control: they must move to the oracle centroid and still show the 0.2 of span booking error, so the certificate separates position from discretisation. The unconstrained solve remains the production default; the row is a certificate-side option until the lead decides whether real machines need it.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="compensating-unknown" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What compensates the centroid row on the coil-less fixture: a uniform exterior field increment per direction, a rigid translation of the fixture exterior, or a Lagrange multiplier on the position with no field change?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="uniform-field-increment">uniform field increment</button>
+      <button class="r-opt" data-value="exterior-translation">exterior translation</button>
+      <button class="r-opt" data-value="position-multiplier">position multiplier</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-cco-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create s19-handoff" data-written-at="2026-09-16" data-recommends-skill="/reckon-ship centroid-constrained-oracle-solve §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">A compensating exterior-field unknown for the coil-less fixture and the centroid row imposed on the analytic rows</h4>
+    <div class="r-fu-body"><p>Expose two bounded uniform field increments on the Solovev fixture exterior as a compensating unknown implementing the existing protocol, impose CurrentCentroidConstraint on the weak, moderate, strong and single-null rows through the machine interface with no fixture-specific solver branch, decide the compensating unknown (the plan's open decision), and show with a positive control that a deliberately displaced seed is driven back to the analytic centroid. Then the certificate re-solve of section 3.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship centroid-constrained-oracle-solve §2</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

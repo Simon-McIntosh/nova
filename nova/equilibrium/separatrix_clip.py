@@ -864,8 +864,16 @@ def _traced_clip(
     curve_scale=None,
     curve_evaluator=None,
     participating_cell=None,
+    arc_tracer: Callable | None = None,
 ):
-    """Clip fixed atomic cells using only traced fixed-shape operations."""
+    """Clip fixed atomic cells using only traced fixed-shape operations.
+
+    ``arc_tracer`` is the level-root tracer used on each gap crossing, called as
+    ``arc_tracer(start, end, curve_evaluator, inside_vertex)``. It defaults to
+    the fixed twelve-step polish of :func:`_traced_level_arc`; a caller that
+    needs a different derivative, such as an implicit-function tangent, passes
+    its own tracer explicitly rather than rebinding a module global.
+    """
     from nova.jax.config import configure_dtypes
 
     configure_dtypes()
@@ -1099,9 +1107,11 @@ def _traced_clip(
         following_vertex = jnp.take_along_axis(support, next_slot[..., None], axis=1)
         inside_vertex = jnp.take_along_axis(support, inside_slot[..., None], axis=1)
 
+        tracer = _traced_level_arc if arc_tracer is None else arc_tracer
+
         def trace_gap(_carry, gap_geometry):
             gap_start, gap_end, gap_inside = gap_geometry
-            traced = _traced_level_arc(
+            traced = tracer(
                 gap_start,
                 gap_end,
                 curve_evaluator,
@@ -1745,6 +1755,7 @@ class AtomicCellMesh:
         curve_scale=None,
         curve_evaluator=None,
         participating_cell=None,
+        arc_tracer: Callable | None = None,
     ) -> TracedClippedSupports:
         """Clip this fixed topology inside a JAX transformation."""
         return _traced_clip(
@@ -1760,6 +1771,7 @@ class AtomicCellMesh:
             curve_scale,
             curve_evaluator,
             participating_cell,
+            arc_tracer,
         )
 
     def traced_saddle_wedges(

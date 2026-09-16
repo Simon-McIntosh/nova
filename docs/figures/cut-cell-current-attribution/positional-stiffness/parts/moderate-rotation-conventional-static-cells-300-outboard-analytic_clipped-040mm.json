@@ -1,0 +1,252 @@
+{
+  "booking": {
+    "booked_current_a": 1624991.1778605897,
+    "normalisation_amplitude": 1.2177045458029667,
+    "target_current_a": 1624991.1778605897,
+    "unit_amplitude_booked_current_a": 1334470.8151590696
+  },
+  "case": "moderate-rotation-conventional-static",
+  "completed": true,
+  "current_selector": [
+    1.0,
+    0.0
+  ],
+  "direction": "outboard",
+  "direction_rz": [
+    1.0,
+    0.0
+  ],
+  "displacement_m": 0.04,
+  "input": {
+    "state_sha256_binary64": "17f01c8e7f886c003ce6b086a5c434f2e65b880cd97ec15e4aa840edaeea33d6",
+    "topology": {
+      "analytic_authored_boundary_flux_wb": 0.0,
+      "axis_flux_wb": 1.3809234618256547,
+      "axis_rz_m": [
+        1.7386810503512817,
+        3.122502256758253e-16
+      ],
+      "boundary_flux_offset_from_analytic_zero_wb": 0.25590413034886283,
+      "boundary_flux_wb": 0.25590413034886283,
+      "boundary_rz_m": [
+        2.1549865100112875,
+        5.46350791691212e-12
+      ],
+      "class": "limited",
+      "exception_text": null,
+      "o_candidate_count": 1,
+      "o_second_best_flux_margin_wb": null,
+      "read_status": "qualified_axis",
+      "wall_contact_rz_m": [
+        2.1549865100112875,
+        5.46350791691212e-12
+      ],
+      "x_candidate_count": 0,
+      "x_point_flux_wb": null,
+      "x_point_rz_m": null,
+      "x_second_best_flux_margin_wb": null
+    }
+  },
+  "iteration": {
+    "after_four_trips": {
+      "axis": {
+        "axis_rz_m": [
+          1.7669137744855108,
+          0.00027398571213362727
+        ],
+        "from_analytic_rz_m": [
+          0.06811478880770827,
+          0.00027398571213254133
+        ],
+        "magnitude_m": 0.06811533984712366,
+        "projected_on_input_direction_m": 0.06811478880770827
+      },
+      "boundary_level_wb": 0.92899079047424,
+      "contact_rz_m": [
+        2.1549859432470138,
+        -4.8796446140654014e-05
+      ],
+      "residual_from_previous": {
+        "rms_fraction_of_span": 0.06943853524969537,
+        "rms_wb": 0.0959323702576169,
+        "sup_fraction_of_span": 0.15723133879476922,
+        "sup_wb": 0.2172219640740014
+      },
+      "state_sha256_binary64": "5d13209cde84c46ac9333795d27f3234dc2998ab68bc88295fa52418474e89b4",
+      "trip": 4,
+      "wall_seconds": 0.19874763675034046
+    },
+    "after_one_trip": {
+      "axis": {
+        "axis_rz_m": [
+          1.7419660341762924,
+          4.9836501671469274e-05
+        ],
+        "from_analytic_rz_m": [
+          0.043167048498489846,
+          4.983650167038334e-05
+        ],
+        "magnitude_m": 0.043167077266684076,
+        "projected_on_input_direction_m": 0.043167048498489846
+      },
+      "boundary_level_wb": 0.4664852270022726,
+      "contact_rz_m": [
+        2.1549865089770437,
+        -8.903936573039284e-08
+      ],
+      "residual_from_previous": {
+        "rms_fraction_of_span": 0.17304971640596276,
+        "rms_wb": 0.2390757438580223,
+        "sup_fraction_of_span": 0.3224386872736652,
+        "sup_wb": 0.44546313400314563
+      },
+      "state_sha256_binary64": "8f9cb27741a8497f90f8ed179eb32b7e27932856c09e24b1ff6811a400bbb60e",
+      "trip": 1,
+      "wall_seconds": 0.2062140740454197
+    },
+    "trips": [
+      {
+        "axis": {
+          "axis_rz_m": [
+            1.7419660341762924,
+            4.9836501671469274e-05
+          ],
+          "from_analytic_rz_m": [
+            0.043167048498489846,
+            4.983650167038334e-05
+          ],
+          "magnitude_m": 0.043167077266684076,
+          "projected_on_input_direction_m": 0.043167048498489846
+        },
+        "boundary_level_wb": 0.4664852270022726,
+        "contact_rz_m": [
+          2.1549865089770437,
+          -8.903936573039284e-08
+        ],
+        "residual_from_previous": {
+          "rms_fraction_of_span": 0.17304971640596276,
+          "rms_wb": 0.2390757438580223,
+          "sup_fraction_of_span": 0.3224386872736652,
+          "sup_wb": 0.44546313400314563
+        },
+        "state_sha256_binary64": "8f9cb27741a8497f90f8ed179eb32b7e27932856c09e24b1ff6811a400bbb60e",
+        "trip": 1,
+        "wall_seconds": 0.2062140740454197
+      },
+      {
+        "axis": {
+          "axis_rz_m": [
+            1.7485851527416287,
+            0.00010886903312004939
+          ],
+          "from_analytic_rz_m": [
+            0.049786167063826214,
+            0.00010886903311896345
+          ],
+          "magnitude_m": 0.04978628609741428,
+          "projected_on_input_direction_m": 0.049786167063826214
+        },
+        "boundary_level_wb": 0.5974887771097876,
+        "contact_rz_m": [
+          2.154986170629246,
+          2.930060793108341e-05
+        ],
+        "residual_from_previous": {
+          "rms_fraction_of_span": 0.06052533251601469,
+          "rms_wb": 0.08361839125800359,
+          "sup_fraction_of_span": 0.12206967274530654,
+          "sup_wb": 0.16864458619294176
+        },
+        "state_sha256_binary64": "60f4c988be3d0a4780fb5e7b91d08ef03e76c037f7258aaa730652a987d57626",
+        "trip": 2,
+        "wall_seconds": 0.1956823067739606
+      },
+      {
+        "axis": {
+          "axis_rz_m": [
+            1.7574231717895832,
+            0.00018020419685639902
+          ],
+          "from_analytic_rz_m": [
+            0.05862418611178066,
+            0.00018020419685531308
+          ],
+          "magnitude_m": 0.05862446307490808,
+          "projected_on_input_direction_m": 0.05862418611178066
+        },
+        "boundary_level_wb": 0.7528220623940032,
+        "contact_rz_m": [
+          2.1549854183946957,
+          -9.398442274124597e-05
+        ],
+        "residual_from_previous": {
+          "rms_fraction_of_span": 0.06584107910087414,
+          "rms_wb": 0.09096232741306004,
+          "sup_fraction_of_span": 0.14116755110635823,
+          "sup_wb": 0.19502913954619494
+        },
+        "state_sha256_binary64": "47eb2c6d0f7e54fd44345ca707b50c5b11f97fcec87adc4abcd8b12f5ec23b33",
+        "trip": 3,
+        "wall_seconds": 0.1988058127462864
+      },
+      {
+        "axis": {
+          "axis_rz_m": [
+            1.7669137744855108,
+            0.00027398571213362727
+          ],
+          "from_analytic_rz_m": [
+            0.06811478880770827,
+            0.00027398571213254133
+          ],
+          "magnitude_m": 0.06811533984712366,
+          "projected_on_input_direction_m": 0.06811478880770827
+        },
+        "boundary_level_wb": 0.92899079047424,
+        "contact_rz_m": [
+          2.1549859432470138,
+          -4.8796446140654014e-05
+        ],
+        "residual_from_previous": {
+          "rms_fraction_of_span": 0.06943853524969537,
+          "rms_wb": 0.0959323702576169,
+          "sup_fraction_of_span": 0.15723133879476922,
+          "sup_wb": 0.2172219640740014
+        },
+        "state_sha256_binary64": "5d13209cde84c46ac9333795d27f3234dc2998ab68bc88295fa52418474e89b4",
+        "trip": 4,
+        "wall_seconds": 0.19874763675034046
+      }
+    ]
+  },
+  "one_map": {
+    "axis": {
+      "axis_rz_m": [
+        1.7419660341762924,
+        4.9836501671469274e-05
+      ],
+      "from_analytic_rz_m": [
+        0.043167048498489846,
+        4.983650167038334e-05
+      ],
+      "magnitude_m": 0.043167077266684076,
+      "projected_on_input_direction_m": 0.043167048498489846
+    },
+    "boundary_level_wb": 0.4664852270022726,
+    "contact_rz_m": [
+      2.1549865089770437,
+      -8.903936573039284e-08
+    ],
+    "residual": {
+      "rms_fraction_of_span": 0.17304971640596276,
+      "rms_wb": 0.2390757438580223,
+      "sup_fraction_of_span": 0.3224386872736652,
+      "sup_wb": 0.44546313400314563
+    },
+    "state_sha256_binary64": "8f9cb27741a8497f90f8ed179eb32b7e27932856c09e24b1ff6811a400bbb60e",
+    "wall_seconds": 7.594399864785373
+  },
+  "posing": "analytic_clipped",
+  "realised_cells": 341,
+  "requested_cells": -300
+}

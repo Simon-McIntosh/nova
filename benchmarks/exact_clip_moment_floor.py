@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.clip_quadrature import (
+    _compact_chord_polygon,
     clipped_support_current_moments,
     cut_cell_bank_capacity,
     cut_cell_moment_evaluation_bound,
@@ -174,6 +175,16 @@ def measure(case_name: str, requested_cells: int) -> dict[str, Any]:
     )(support, field)
     jax.block_until_ready(reduced)
     reduced_array = np.stack([np.asarray(value) for value in reduced])
+    if np.any(~np.isfinite(reduced_array[:, boundary])):
+        compact = _compact_chord_polygon(
+            support.support_vertices, support.vertex_count
+        )
+        supported = np.asarray(compact[-1], dtype=bool)
+        raise RuntimeError(
+            "boundary reduction refused cells "
+            f"{np.flatnonzero(boundary & ~supported).tolist()} with counts "
+            f"{np.asarray(support.vertex_count)[boundary & ~supported].tolist()}"
+        )
     fan = _fan_cut_moments(support, field, operator.source.core, FAN_ORDER)
     relative = _relative_difference(reduced_array[:, boundary], fan[:, boundary])
 

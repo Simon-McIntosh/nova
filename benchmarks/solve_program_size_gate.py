@@ -302,6 +302,33 @@ def _certificate_operands(case_name: str, requested_cells: int):
     return profile, seed, requested_class, target_current, request
 
 
+class EmptyIdentitySetError(ValueError):
+    """A certificate identity comparison carries no rows to compare.
+
+    An empty identity set makes the comparison vacuous: ``array_equal`` over two
+    empty arrays is true and a maximum over an empty difference defaults to zero,
+    so a row that compared nothing reads as a machine-precision match.
+    """
+
+
+def _require_identity_rows(identity_row_count: int, label: str) -> int:
+    """Refuse a certificate identity comparison that carries no rows.
+
+    A row whose identity set is empty reports a bit-identical state and a zero
+    difference over nothing, which is indistinguishable from a genuine
+    machine-precision match, so the refusal fires before either is read as a
+    within-drift result.  The returned count is the denominator the comparison
+    states.
+    """
+    count = int(identity_row_count)
+    if count <= 0:
+        raise EmptyIdentitySetError(
+            f"identity set for {label} carries {count} rows; a comparison over "
+            "no rows cannot read as within drift"
+        )
+    return count
+
+
 def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str, Any]:
     """Compare the pre-wrapper and frozen-partition terminal states exactly."""
     import jax
@@ -359,6 +386,9 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
     candidate_seconds = time.perf_counter() - candidate_started
     baseline_state = np.asarray(baseline.state, dtype=np.float64)
     candidate_state = np.asarray(candidate.state, dtype=np.float64)
+    identity_row_count = _require_identity_rows(
+        baseline_state.size, f"solovev:{case_name}:{requested_cells}"
+    )
     baseline_hash = hashlib.sha256(baseline_state.tobytes()).hexdigest()
     candidate_hash = hashlib.sha256(candidate_state.tobytes()).hexdigest()
     baseline_state_finite = bool(np.all(np.isfinite(baseline_state)))
@@ -374,7 +404,8 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
     return {
         "case": case_name,
         "requested_cells": requested_cells,
-        "realised_state_values": int(baseline_state.size),
+        "identity_row_count": identity_row_count,
+        "realised_state_values": identity_row_count,
         "baseline_seconds": baseline_seconds,
         "candidate_seconds": candidate_seconds,
         "baseline_state_sha256_binary64": baseline_hash,
@@ -402,6 +433,9 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
 
 def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str, Any]:
     """Persist the four certificate identity rows as each comparison lands."""
+    identity_row_count = _require_identity_rows(
+        len(CERTIFICATE_ROWS), "certificate identity rows"
+    )
     import jax
 
     from benchmarks.trip_quantum_width_one import _require_revision
@@ -416,6 +450,7 @@ def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str,
         raise RuntimeError("certificate identity requires a SLURM allocation")
     receipt: dict[str, Any] = {
         "schema": "nova.solve-program-certificate-identity",
+        "identity_row_count": identity_row_count,
         "measurement_revision": _require_revision(),
         "captured_at": datetime.now(UTC).isoformat(),
         "assignment": {
@@ -446,7 +481,7 @@ def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str,
             f"bit_identical={int(row['terminal_state_bit_identical'])}",
             flush=True,
         )
-    receipt["passed"] = len(receipt["rows"]) == len(CERTIFICATE_ROWS) and all(
+    receipt["passed"] = len(receipt["rows"]) == identity_row_count and all(
         row["terminal_state_bit_identical"] and row["converged_equal"]
         for row in receipt["rows"]
     )

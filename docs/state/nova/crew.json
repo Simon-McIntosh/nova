@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T13:27:05",
+  "updated": "2026-09-17T00:01:52",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4548,6 +4548,33 @@
         "created": "2026-09-16"
       },
       {
+        "id": "s19c-cank-thomson-c",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-cca-arctracer-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-cco-bound-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
+      },
+      {
         "id": "s19c-cco-fieldunknown-s",
         "harness": "codex",
         "role": "implement",
@@ -4590,6 +4617,33 @@
         "created": "2026-09-16"
       },
       {
+        "id": "s19c-dvf-cocos-c",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-dvf-pfactive-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-ecq-gauss-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
+      },
+      {
         "id": "s19c-ecq-moments-s",
         "harness": "codex",
         "role": "implement",
@@ -4597,6 +4651,17 @@
         "session_model": "gpt-5.6-sol",
         "sessions": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a0a90a-1e63-77c3-9fbd-9518b2ef1698"
+        },
+        "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-msc-evaluator-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": "a36dd8a4-f0ff-41e3-acdd-5de48e199986",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "a36dd8a4-f0ff-41e3-acdd-5de48e199986"
         },
         "created": "2026-09-16"
       },
@@ -4652,6 +4717,24 @@
         "created": "2026-09-16"
       },
       {
+        "id": "s19c-mulw-zeroid-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-nia-driftprobe-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
+      },
+      {
         "id": "s19c-pfs-cache-s",
         "harness": "codex",
         "role": "implement",
@@ -4660,6 +4743,15 @@
         "sessions": {
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a0a93a-4bb3-7143-9a9b-79048224463f"
         },
+        "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-pfs-components-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-16"
       },
       {
@@ -4691,6 +4783,15 @@
         "sessions": {
           "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a0a9c0-f973-7d52-b197-22a8ff7ac25d"
         },
+        "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-pfs-shape-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-16"
       },
       {
@@ -6446,6 +6547,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
+      },
+      {
+        "id": "session-2b74bb0b748560f47150",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-16"
       },
       {
         "id": "shadow-haiku-1",
@@ -172221,6 +172331,220 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T205958834556-msc-single-evaluator-state-machine",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-single-evaluator-state-machine",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5933,
+                "cached_input_tokens": 797938,
+                "input_tokens": 803873,
+                "output_tokens": 4112,
+                "reasoning_output_tokens": 346,
+                "total_tokens": 807985,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "on all_debug with JAX_PLATFORMS=cpu, one job per measure with each declared as a wait: the program census shows one current-moment body with one topology-read body in the optimised solve HLO at 300 cells, benchmarks/solve_program_size_gate.py --measure-300-output reports the executable bytes against the 210159751 baseline with the value stated whatever it is, the four certificate rows re-solve bit-identical against base one row per job through that gate's certificate identity, every module importing the changed files passes one per fresh process against base, the compiled-slice MAST 0 ULP check on twelve members against the committed receipt is reported as run or explicitly deferred to a follow-on H200 node, receipts under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/evaluator as each lands, no change to benchmarks/solve_program_size_gate.py (another node owns it), manifest scalars unquoted",
+          "estimated_hours": null,
+          "goal": "Carry every solve evaluation of the forward operator through one traced lax state machine whose single operator body serves the residual, merit, acceptance, recovery, reconciliation, Jacobian-vector requests with the exact live read semantics of each, so the compiled solve stops carrying the 120 current-moment with 36 topology-read copies that the executable census attributed the remaining 210 MB to (docs/figures/millisecond-converged-solve/program-census/report.md, ~/.config/reckon/crew/reports/nova/s19-codex/msc-remainder-3/executable-remainder-census.md)",
+          "id": "msc-single-evaluator-state-machine",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-16T21:00:00Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205958834556-msc-single-evaluator-state-machine/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/fixed_point.py",
+            "nova/equilibrium/reduced_newton.py",
+            "nova/equilibrium/forward.py",
+            "tests/test_single_evaluator_state_machine.py",
+            "tests/test_forward_compile_identity.py",
+            "docs/figures/millisecond-converged-solve/evaluator",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/evaluator",
+            "docs/evidence/archive/millisecond-converged-solve-landed.html",
+            "docs/plans/millisecond-converged-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19c-msc-evaluator-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-16T21:00:51Z",
+        "completed_at": "2026-09-16T21:59:20.117Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3497,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3509,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "ef5504ea7966773255934b7e09e208db88a77866",
+        "commits": [
+          "04f26b1e5f83c2659017e4ccbc443e0df6804d56"
+        ],
+        "changed_lines": {
+          "added": 0,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "tests/test_single_evaluator_state_machine.py exploratory probe (2 passed, 1 falsified its premise; removed)",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205958834556-msc-single-evaluator-state-machine/manifest.md",
+          "log_digest": "sha256:16834c44f0fa7cb5b01e6f37c679d2b340a20be698bb8ad20e65f3cbc41d9819"
+        },
+        "suite_delta": null,
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205958834556-msc-single-evaluator-state-machine/manifest.md",
+        "scope_changed": false,
+        "session_id": "a36dd8a4-f0ff-41e3-acdd-5de48e199986",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 8315997,
+            "input_tokens_cumulative": 8315997,
+            "output_tokens": 44307,
+            "output_tokens_cumulative": 44307,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-16T21:59:20.117Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 8315997,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3505.624,
+          "generated_tokens": 44307,
+          "generation_seconds": 3471.879,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.0,
+          "machine_seconds": 33.745,
+          "peak_input_tokens": 163008,
+          "tokens_per_second": 12.76,
+          "wall_tokens_per_second": 12.64
+        },
+        "follow_on_paths": [
+          "reduced_newton.py",
+          "benchmarks/solve_program_size_gate.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-single-evaluator-state-machine",
+          "session_id": "a36dd8a4-f0ff-41e3-acdd-5de48e199986",
+          "session_source": "pointer",
+          "retained_at": "2026-09-16T21:59:20.117Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "a36dd8a4-f0ff-41e3-acdd-5de48e199986",
+          "source": "pointer",
+          "reason": "the node ends at a design decision; a fresh design node follows"
+        },
+        "watch_override": null,
+        "tool_steps": 72.0,
+        "orientation_input_tokens": 2802819.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -172533,6 +172857,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2633
+    "_version": 2647
   }
 }

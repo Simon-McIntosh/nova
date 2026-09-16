@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T01:52:35",
+  "updated": "2026-09-16T02:54:47",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -167961,6 +167961,211 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T234923711881-cca-fixture-positional-stiffness",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-fixture-positional-stiffness",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1997,
+                "cached_input_tokens": 748139,
+                "input_tokens": 750168,
+                "output_tokens": 2876,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 753044,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "581bc7d1-8317-4ea1-b357-708c1ee885eb",
+            "session_id": "s19-handoff-20260915"
+          },
+          "done_when": "The discriminator (merged this session, docs/figures/cut-cell-current-attribution/exact-clip-low-state/report.md) found two converged fixed points of the production map on weak 300 under the exact clip with the same target current and exterior: the analytic-start state at 1.1e-4 of span and a seed-selected state displaced 36 mm with the boundary 2.02 Wb inside; a benchmark benchmarks/fixture_positional_stiffness.py measures, in ONE H200 job (one card, 8 cores, 128 GiB, TMPDIR=/tmp in submit environment and payload, PYTHONPATH the worktree, root venv python, persistent cache, set_support_clip_mode exact, receipts persisted per displacement as each lands) on weak 110, weak 300 and moderate 300: the analytic flux translated rigidly by 0, 2, 5, 10, 20, 40 and 60 mm along the outboard midplane direction and separately vertically, with the exterior and target current held fixed, one production map applied at each displacement, and per displacement the one-application residual (rms and sup over span), the booked current and its amplitude, the read boundary level and contact point, the axis position the map returns and the axis displacement after one and after four trips of the production iteration started there (so the restoring or runaway direction is measured, persisted per trip); the receipt fits the residual against displacement to a quadratic and reports the curvature as the stiffness in span per metre squared and the displacement at which the residual first exceeds ten times the 0 mm floor; a second arm poses the same measurement on the fixture whose exterior is the analytic total minus the whole-cell image (the pre-2026-09-14 posing) so the two posings' stiffness is compared; one figure per row of residual against displacement for both directions and both posings on a log scale with the floor and the 36 mm low-state displacement marked, and one line-contour panel of the 40 mm translated state over the analytic on shared levels; the report states in one paragraph whether the fixture exterior holds the position (a restoring iteration and a residual valley steeper than the low state's 8.6e-2 of span at 36 mm) or not, and what re-posing would give stiffness (a vacuum coil set fitted to the boundary was ruled out because the Solovev exterior is not a vacuum field, so name the alternative that keeps the analytic oracle); no source file changes; manifest in plain key: value lines, any waiting declaration with wait_probe as a JSON list such as [\"squeue\",\"-h\",\"-j\",\"1271758\"] and wait_terminal exit:0",
+          "estimated_hours": null,
+          "goal": "The positional stiffness of the re-posed Solovev fixture measured as the one-map residual against a rigid displacement of the analytic state, so the lead can decide whether the exterior must be re-posed to hold the plasma before the certificate is trusted",
+          "id": "cca-fixture-positional-stiffness",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T23:49:24Z",
+            "read_at": "2026-09-15T23:49:25Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 67.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T234923711881-cca-fixture-positional-stiffness/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/fixture_positional_stiffness.py",
+            "docs/figures/cut-cell-current-attribution/positional-stiffness",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/positional-stiffness",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19h-cca-stiffness-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T23:49:40Z",
+        "completed_at": "2026-09-16T00:51:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3730,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3730,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "b56931bd0de518d6d77edf6e15ed349a3c1126d3",
+        "commits": [
+          "8fa8e7e1e5fa69eb47fcf2d4f5057436bb775ae7",
+          "1535bca3b39067db7fd49d687d9a617928f933b9",
+          "dbac754bada6433892787ee2e2fc1f3abf1ef9fe",
+          "741af42cd989d012e5e14ff7f23aec3393716b5e"
+        ],
+        "changed_lines": {
+          "added": 43802,
+          "removed": 0,
+          "files": 93
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "H200 job 1271814: one production map and four trips at rigid displacements 0 to 60 mm on weak 110, weak 300, moderate 300, both posings, 84 rows",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/Code/nova/docs/figures/cut-cell-current-attribution/positional-stiffness/receipt.json",
+          "log_digest": "sha256:6e0b30e9b875ceb1ee4714d1aee8476a8ff50ba71d476f3a34828783dec223bb"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T234923711881-cca-fixture-positional-stiffness/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a779-ee65-7870-acaf-65e6359a3315",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 43016320,
+            "cached_input_tokens_cumulative": 43016320,
+            "input_tokens": 43352453,
+            "input_tokens_cumulative": 43352453,
+            "output_tokens": 58253,
+            "output_tokens_cumulative": 58253,
+            "reasoning_output_tokens": 13864,
+            "reasoning_output_tokens_cumulative": 13864
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-16T00:51:50Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 69.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-16T00:51:50Z"
+            }
+          ],
+          "notional_cost_usd": 190.571,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 43016320,
+          "cumulative_input_tokens": 86368773,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 72117
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-fixture-positional-stiffness",
+          "session_id": "01a0a779-ee65-7870-acaf-65e6359a3315",
+          "session_source": "stream",
+          "retained_at": "2026-09-16T00:51:50Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 124.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -168273,6 +168478,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2584
+    "_version": 2585
   }
 }

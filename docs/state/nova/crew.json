@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T00:22:36",
+  "updated": "2026-09-17T00:25:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4733,9 +4733,11 @@
         "id": "s19c-mulw-zeroid-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "32667720-db70-4a37-9c91-e990539c0d60",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "32667720-db70-4a37-9c91-e990539c0d60"
+        },
         "created": "2026-09-16"
       },
       {
@@ -173160,6 +173162,211 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T205150200621-mulw-zero-residual-identity-assert",
+        "plan": "multi-unit-limiter-wall",
+        "section": "\u00a73",
+        "node": "mulw-zero-residual-identity-assert",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 9200,
+                "cached_input_tokens": 788738,
+                "input_tokens": 797940,
+                "output_tokens": 4001,
+                "reasoning_output_tokens": 241,
+                "total_tokens": 801941,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the comparator refuses an empty identity set with a named error, reports the identity row count it compared on every row, a test presents an empty set with a non-empty set expecting refusal then acceptance, the diverted -110 CPU row is re-read on all_debug with JAX_PLATFORMS=cpu (one job, declared as a wait) reporting its identity row count beside its residual difference, the module gates for the changed files pass one per fresh process against base, receipts under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/zero-identity, manifest scalars unquoted",
+          "estimated_hours": null,
+          "goal": "Make the Solovev certificate identity comparator in benchmarks/solve_program_size_gate.py (run_certificate_identity with _certificate_identity_row) assert a non-empty identity set before it reads a row as within drift, so the diverted single-null row whose CPU terminal residual reads exactly 0.0 against the bank's 5.3e-15 is compared over a stated non-zero row count or refused with a named error, as the lead's confirmation of 04cb76c4 requires",
+          "id": "mulw-zero-residual-identity-assert",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-16T20:51:51Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205150200621-mulw-zero-residual-identity-assert/manifest.md",
+          "plan": "multi-unit-limiter-wall",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/solve_program_size_gate.py",
+            "tests/test_solve_program_size_gate.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/zero-identity",
+            "docs/evidence/archive/multi-unit-limiter-wall-landed.html",
+            "docs/plans/multi-unit-limiter-wall.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19c-mulw-zeroid-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-16T20:52:32Z",
+        "completed_at": "2026-09-16T22:21:39.214Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 5335,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 5347,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ef5504ea7966773255934b7e09e208db88a77866",
+        "commits": [
+          "c478f13bb28958fae6e83ee9647e4b2b8fac8f29",
+          "77c50e199d8b1c3454e8112b67a59a7d9eded667"
+        ],
+        "changed_lines": {
+          "added": 118,
+          "removed": 2,
+          "files": 4
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "tests/test_solve_program_size_gate.py fresh process plus all_debug re-read job 1272380",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/zero-identity/diverted-identity-row.json",
+          "log_digest": "sha256:901ffac349ffe838603dc463bd23f5d1cf0b8f695a19753f78a4bb8b932982fc"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205150200621-mulw-zero-residual-identity-assert/manifest.md",
+        "scope_changed": false,
+        "session_id": "32667720-db70-4a37-9c91-e990539c0d60",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 11179179,
+            "input_tokens_cumulative": 11179179,
+            "output_tokens": 53522,
+            "output_tokens_cumulative": 53522,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-16T22:21:39.214Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 11347022,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 5343.505,
+          "generated_tokens": 63920,
+          "generation_seconds": 4676.608,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.7,
+          "machine_seconds": 666.897,
+          "peak_input_tokens": 166543,
+          "tokens_per_second": 13.67,
+          "wall_tokens_per_second": 11.96
+        },
+        "follow_on_paths": [
+          "tests/test_solve_program_size.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/mulw-zero-residual-identity-assert",
+          "session_id": "32667720-db70-4a37-9c91-e990539c0d60",
+          "session_source": "pointer",
+          "retained_at": "2026-09-16T22:21:39.214Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 95.0,
+        "orientation_input_tokens": 2189769.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -173472,6 +173679,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2654
+    "_version": 2656
   }
 }

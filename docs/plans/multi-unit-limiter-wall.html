@@ -24,8 +24,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-impl" content="0.88">
-<meta name="plan-modified" content="2026-09-16">
-<meta name="plan-version" content="21">
+<meta name="plan-modified" content="2026-09-17">
+<meta name="plan-version" content="22">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;}">
 </head>
@@ -176,11 +176,14 @@
 <div class="r-comment" data-section="s3" data-id="c-zero-identity-guard" data-who="s19-local worker" data-when="2026-09-17T00:12:00Z">
     <div class="r-comment-body"><p>The repair is a named refusal, <code>EmptyIdentitySetError</code>, raised by <code>_require_identity_rows</code> when a comparison's row count is not positive; the returned count is the denominator the row then reports as <code>identity_row_count</code> beside the state value count it already carried. The guard runs per row on the compared terminal-state size and once in the driver on the configured certificate set, before the allocation check, so an empty certificate is refused by name rather than by the scheduler. Existing rows were correct and were not reimplemented: the guard is added and the missing test written.</p></div>
 </div>
-<div class="r-comment" data-section="s3" data-id="c-zero-identity-reread" data-who="s19-local worker" data-origin="job 1272380" data-when="2026-09-17T00:12:00Z">
+<div class="r-comment" data-section="s3" data-id="c-zero-identity-reread" data-who="s19-local worker" data-when="2026-09-17T00:12:00Z">
     <div class="r-comment-body"><p>The diverted <code>diverted-single-null</code> row at <code>-110</code> cells was re-read on CPU x64 (one <code>all_debug</code> job, <code>JAX_PLATFORMS=cpu</code>, persistent compilation cache on, 947.3 s total: 397.2 s baseline against 379.9 s candidate), which is the row whose residual reads exactly 0.0. It states an identity row count of <b>730</b> non-zero values on both sides, with a maximum absolute state difference of <b>730 rows, 0.0</b> and both terminal-state SHA-256 digests equal at <code>e870873e…b51b86</code>. So the exactly-zero difference now reads as an identity over 730 stated rows rather than as a comparison over none: the number the reader needs beside the zero is the denominator, and the row reports it. The banked H200 residual for the same row stays <code>5.291367049957982e-15</code> against the prior CPU reading of <code>0.0</code>, inside the documented 3.9e-8 cross-device envelope. One caveat recorded rather than smoothed: in this re-read the row's terminal-residual field is not finite on either side (<code>baseline_terminal_residual_finite</code> and <code>candidate_terminal_residual_finite</code> both false), so the discriminator here is the state difference and its denominator, not the residual that the bank receipt quoted for the earlier reading. The guard turns on row count and is unaffected, but the two readings of the same row disagree about the residual field and that is a lead-visible difference, not a rounding of the same quantity.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-zero-identity-fence" data-who="s19-local worker" data-when="2026-09-17T00:12:00Z">
     <div class="r-comment-body"><p>Fence check against the four items of the lead's condition: the comparator refuses an empty identity set with a named error (test <code>test_identity_row_count_states_the_denominator</code>, <code>test_empty_set_refused_then_nonempty_set_accepted</code>); it reports the count it compared on every row (<code>identity_row_count</code> per row, plus a receipt-level count); one test presents an empty set expecting refusal then a non-empty set expecting acceptance; the diverted row is re-read on <code>all_debug</code> as one job declared as a wait, reporting 730 rows beside a 0.0 difference. The five guard tests pass in a fresh process; the existing gate file is unchanged in outcome at 2 failed / 11 passed at both base and head, same failure ids, so no failures were added. The DIII-D gate-frame item of the followup is untouched and remains open.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260916T205150200621-mulw-zero-residual-identity-assert" data-who="s19c-mulw-zeroid-c" data-when="2026-09-16T22:21:39.214Z">
+    <div class="r-comment-body"><p>EmptyIdentitySetError guards the certificate identity comparator per row and before the allocation check, every row and receipt carry identity_row_count; the diverted -110 CPU row re-read on all_debug (job 1272380, 947 s) reports 730 identity rows with maximum absolute state difference 0.0, so its exactly-zero residual is a genuine identity and not an empty set; 5 new tests pass, zero added failures against base; follow-on: the re-read reports the terminal-residual field non-finite on both sides where the earlier reading quoted a finite residual, a reviewer item</p></div>
 </div>
 </section>
 </main>

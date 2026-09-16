@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="single-evaluator-state-machine-design">
+<meta name="plan-title" content="Single-evaluator state machine design">
+<meta name="plan-summary" content="Fixes the request set, the request-tag mechanism, the vmap/linearize boundary and the optimised-HLO measure for one traced operator body, from a measured three-site reproducer.">
+<meta name="plan-tags" content="equilibrium,jax,compilation,state-machine">
+<meta name="plan-informs" content="millisecond-converged-solve">
+<meta name="plan-recorded-at" content="2026-09-17">
+<title>Single-evaluator state machine design | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<header>
+<p class="eyebrow">Design · measured 2026-09-17 on all_debug jobs 1272458 and 1272459</p>
+<h1>Single-evaluator state machine design</h1>
+<p class="lede">The forward solve traces one operator read once per request path and pays for every copy in the optimised HLO. This document fixes the design that will carry the read through <strong>one</strong> traced body serving the residual, merit, acceptance, recovery, reconciliation and Jacobian-vector requests, and it corrects the mechanism the preceding refusal record proposed: the copy count follows the number of <em>traced call sites</em>, not the wrapper around them. It is the design input for the implement node dispatched against <a href="/nova/plans/millisecond-converged-solve#s2">millisecond-converged-solve §2</a>.</p>
+</header>
+
+<h2 id="s1">§1 — What the preceding refusal established</h2>
+<p>Run <code>r-20260916T205958834556-msc-single-evaluator-state-machine</code> refused to restructure the evaluator seam inside a sixty-minute fence and delivered findings instead (<a href="/nova/plans/millisecond-converged-solve#c-run-r-20260916T205958834556-msc-single-evaluator-state-machine">plan comment</a>). Four findings carry into this design unchanged:</p>
+<ul>
+<li><strong>The multiplicity is a post-optimisation phenomenon.</strong> A <code>jax.jit</code>-wrapped callee is one callee at StableHLO lowering; three direct call sites become three bodies only after XLA's inliner. Any measure of "one body" must therefore read the optimised HLO, never StableHLO and never Python object identity.</li>
+<li><strong>The two read-qualification passes in <code>_fixed_design_read</code> are not redundant</strong> — the second pass admits a rescue-derived material set — so no local de-duplication exists inside the body.</li>
+<li><strong>The residual-shadow read and the map read are requested on different states</strong>, so they cannot be co-produced without changing what is read.</li>
+<li><strong><code>reduced_newton.py</code> carries its own copies of the same seam</strong> (<code>residual_from_external</code>, <code>_fixed_design_read</code>, <code>normalised_current_moments</code>) and must ride the same machine, or it re-introduces the copies the machine removes.</li>
+</ul>
+<p>The census that bounds the prize is committed: a known-present sentinel finds <strong>120</strong> traced copies of <code>ForwardFluxOperator.normalised_current_moments</code> (<code>forward_operator.py:3051</code>) and <strong>36</strong> copies of <code>ForwardFluxOperator._fixed_design_read</code> (<code>forward_operator.py:2454</code>) in the optimised HLO of both solve rungs, and the same census attributes the three largest source-attributed bodies of the remaining 210 MB executable to repeated topology-read and clipped-evaluation code (<a href="/nova/figures/millisecond-converged-solve/program-census/report.md">program-census report</a>).</p>
+<p>The semantics bar comes from the frozen-topology interim, which cut 300-cell instructions by about 69 percent and still changed all four certificate terminal states, including a <code>2.2199809164994903e-03</code> single-null movement and a non-finite candidate residual. Any restructure of this seam is judged by bit-identical certificate rows, never by instruction count alone.</p>
+
+<h2 id="s2">§2 — The measured mechanism: copies follow traced sites</h2>
+<p>The design question is not which wrapper defeats the inliner; it is what creates a copy at all. A five-arm reproducer answers it directly. One traced body carries a single marker instruction (a <code>sine</code> on a distinctive width) and is reached from one, three and three call sites under four wrapper forms. Every site input is a traced function argument, so nothing constant-folds; the marker is counted in the dumped optimised HLO by parsing every computation block of the module.</p>
+
+<figure>
+<img src="/nova/figures/millisecond-converged-solve/evaluator-design/wrapper-body-count.png" alt="Marker instruction count and marker-bearing computation count for five wrapper arms: one call site, three direct sites, three lax.switch sites, three while_loop sites, and one machine carrying the request list">
+<figcaption>Body copies in the optimised HLO by wrapper form. The count follows the number of traced call sites: three direct sites and three <code>lax.switch</code> sites both yield three inlined marker instructions in a single computation, and three <code>while_loop</code> sites yield three separate marker-bearing computations. Only the single machine that carries the whole request set inside its loop yields one body.</figcaption>
+</figure>
+
+<table>
+<caption>Small-reproducer body count, all_debug jobs 1272458 (four arms) and 1272459 (the machine arm), 98dci4-clu-3141, JAX 0.11.0, <code>JAX_PLATFORMS=cpu</code>. Logs: <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/evaluator-design/reproducer/reproducer.log</code> and <code>machine-arm.log</code>; per-arm receipts beside them as <code>receipt-&lt;arm&gt;.json</code>.</caption>
+<thead>
+<tr><th scope="col">Arm</th><th scope="col">Reached from</th><th scope="col">Marker instructions</th><th scope="col">Marker-bearing computations</th></tr>
+</thead>
+<tbody>
+<tr><th scope="row">one</th><td>one direct call site</td><td>1</td><td>1</td></tr>
+<tr><th scope="row">direct</th><td>three direct call sites</td><td>3</td><td>1</td></tr>
+<tr><th scope="row">switch</th><td>three <code>lax.switch</code> sites over a dynamic tag, one branch</td><td>3</td><td>1</td></tr>
+<tr><th scope="row">while_</th><td>three <code>lax.while_loop</code> sites carrying the tag</td><td>3</td><td>3</td></tr>
+<tr><th scope="row">machine</th><td>one machine invocation, request list carried inside the loop</td><td><strong>1</strong></td><td><strong>1</strong></td></tr>
+</tbody>
+</table>
+
+<p>Three readings, each of which changes the design:</p>
+<ul>
+<li><strong>The counter has a working positive control: <code>direct</code> shows three known-present copies in one computation, and <code>one</code> shows one, so the count tracks the site count linearly.</strong> This control is load-bearing, because a first run of this reproducer reported zero everywhere: with literal inputs JAX folded the whole program to a constant block, and the absence of a marker read exactly like a clean result.</li>
+<li><strong>A wrapper does not deduplicate across call sites.</strong> <code>lax.switch</code> is inlined like a plain call (three marker instructions in one computation), and a <code>while_loop</code> is not inlined but is still <em>traced once per site</em> (three separate marker-bearing computations). Choosing between <code>switch</code> and <code>while_loop</code> per call site therefore cannot produce one body; the body's copy count is fixed by how many times the body is traced, which is fixed by how many call sites exist.</li>
+<li><strong>One body is obtained by having one call site.</strong> The <code>machine</code> arm — a single loop that carries the request list and dispatches on a dynamic tag inside its own body — yields one marker instruction in one computation while serving all three requests.</li>
+</ul>
+
+<h2 id="s3">§3 — The design</h2>
+<p>Each decision below states its reason. The reasons are the part the implement node is bound by; the code shapes below are the intended spelling, not a literal patch.</p>
+
+<h3 id="d1">D1 — The request set rides one machine invocation, not one call site per request</h3>
+<p><strong>Decision.</strong> Per solve, the seam exposes one traced entry point: a machine that takes the request list as data and returns the request list's answers. The six request kinds — residual, merit, acceptance, recovery, reconciliation and Jacobian-vector — are elements of that list, not independent call sites.</p>
+<p><strong>Reason.</strong> The measurement above is decisive: copies are created by traces, and a trace happens per call site. Building the machine as a request dispatcher that is still invoked once per request kind reproduces the 120-copy census whatever wrapper it uses internally. Only a single invocation carrying the requests as data collapses the count.</p>
+
+<h3 id="d2">D2 — The tag is dynamic loop state, and it selects among the read's outputs</h3>
+<p><strong>Decision.</strong> The tag travels as a loop-carried value and is dispatched inside the loop body. It is never a Python or literal constant at the call site, because a constant tag is a static input and specialises the body per site — the same specialisation that produced the observed copies.</p>
+<p><strong>Reason.</strong> The heavy read is unconditional inside the loop body and shared by every request; the tag selects which of the already-computed read outputs — which mask, which moments, which scalar reduction, in which combination — form the returned request value. Requests that differ only in their post-processing of one read therefore cost one body and one read, and the residual, merit, acceptance, recovery and reconciliation requests are exactly of that shape.</p>
+<p><strong>Consequence the implement node must respect.</strong> The Jacobian-vector request is <em>not</em> a post-processing of the primal read, so it cannot be a tag case in the same loop body without dragging the tangent computation into the body (see D4). It follows the same machine at the transform level, not the same loop iteration set.</p>
+
+<h3 id="d3">D3 — <code>vmap</code> sits outside <code>jax.linearize</code></h3>
+<p><strong>Decision.</strong> The batched boundary is <code>vmap(linearize(machine_body))</code>: each member's linearisation point is its own state, and the machine body inside the linearise is the single-member body.</p>
+<p><strong>Reason.</strong> <code>linearize(vmap(machine_body))</code> requires the machine's data-dependent control flow to be batched, because the loop condition and the trip count are per-member; batching them forces masked iterations to the slowest member and changes the loop's semantics rather than its arithmetic. With the vmap outside, the body is traced once inside the linearise and the transform batches that one trace, so the multiplicity stays at one while each member keeps its own convergence path.</p>
+<p><strong>What must be checked at the implement gate.</strong> That the JVP path's traced body is the same body the primal path uses — an identical marker count in both, not merely an identical digest of two separately authored functions.</p>
+
+<h3 id="d4">D4 — The residual-shadow read is not co-produced with the map read</h3>
+<p><strong>Decision.</strong> The two reads stay separate requests of the machine. They are not fused into one read that returns both.</p>
+<p><strong>Reason.</strong> They are requested on different states. The shadow read is requested on the state a trip has just produced — <code>residual_shadow_mask(state, …)</code> has eight call sites in <code>reduced_newton.py</code>, and the one at line 1923 reads the state that <code>kernels["reconstruct"]</code> has just returned — while the map read that forms the residual is taken on the state under evaluation. A co-produced read would have to serve both states, which is a change in what is read rather than a change in how many times it is traced. This node's fence reached no further than quoting the caller; the implement node's first check on this decision is to confirm the state identity at every call site before merging any two of them.</p>
+
+<h3 id="d5">D5 — <code>reduced_newton.py</code>'s own seam copies ride the same machine</h3>
+<p><strong>Decision.</strong> <code>residual_from_external</code> (<code>reduced_newton.py:2441</code>), the module's <code>_fixed_design_read</code> use (line 2330) and its <code>normalised_current_moments</code> use (line 350) are requests of the same machine, not additional call sites.</p>
+<p><strong>Reason.</strong> The census counts copies in the whole optimised program, so a body removed from one call path and left in another leaves the program's copies in place. The refusal record names this module explicitly as carrying its own copies of the same seam; moving only the forward-operator call paths would leave the census unchanged and the executable's third largest attributed body in place.</p>
+
+<h3 id="d6">D6 — The measure that proves one body is a marker census on the optimised HLO</h3>
+<p><strong>Decision.</strong> The implement gate counts, in the optimised HLO of the production solve at 300 cells, (a) the marker-bearing computations reachable from each request path and (b) the instructions of the read body itself, beside the existing sentinel census of <code>normalised_current_moments</code> and <code>_fixed_design_read</code>. The route is the census dump route — the optimised HLO module dump, read as text — never StableHLO and never a Python-side call count.</p>
+<p><strong>Reason.</strong> The refusal record's first finding: the copies exist only after optimisation, so a lower-only or executed-count instrument can read one and mean three. The census report's sentinel counts (120 and 36) are the same instrument, so the gate compares like with like and its before/after is a single number per body.</p>
+
+<h2 id="s4">§4 — Staged implement plan</h2>
+<p>Every stage names its gate and is sized to a sixty-minute fence. Stages 1 to 3 change no semantics; stage 4 does, and is gated on bit-identity.</p>
+<table>
+<caption>Stages, gates and fences for the implement node.</caption>
+<thead>
+<tr><th scope="col">Stage</th><th scope="col">Change</th><th scope="col">Gate</th><th scope="col">Fence</th></tr>
+</thead>
+<tbody>
+<tr><th scope="row">1 — instrument</th><td>Add the marker census to the existing program-size instrument: marker-bearing computations and read-body instruction count from the optimised HLO dump, on the 300-cell solve.</td><td>The instrument reproduces the committed sentinel counts (120 current-moment, 36 topology-read copies) at HEAD in one <code>all_debug</code> job. A zero or a uniform column fails the stage.</td><td>60 min</td></tr>
+<tr><th scope="row">2 — request set</th><td>Declare the six request kinds against the machine entry point and route the residual, merit, acceptance, recovery and reconciliation requests through one invocation carrying the request list.</td><td>Marker census shows one read body for those five requests; all four certificate rows bit-identical to base (maximum difference <code>0.0</code>).</td><td>60 min</td></tr>
+<tr><th scope="row">3 — reduced seam</th><td>Route <code>residual_from_external</code>, the module's <code>_fixed_design_read</code> and <code>normalised_current_moments</code> uses through the same machine.</td><td>Same marker census at the same one-body count, plus module gates green (one fresh process per module).</td><td>60 min</td></tr>
+<tr><th scope="row">4 — Jacobian-vector</th><td>Place the vmap boundary outside <code>jax.linearize</code> per D3 and route the JVP request through the same body.</td><td>The JVP path's body count equals the primal path's, and GMRES's per-trip iteration count is unchanged against the recorded per-trip receipt.</td><td>60 min</td></tr>
+<tr><th scope="row">5 — physical gate</th><td>None (measurement only).</td><td>One H200 job: four certificate rows bit-identical, twelve compiled-slice MAST members at 0 ULP, executable bytes and cold compile wall beside the 210,159,751-byte and 337.367-second mesh-argument receipts.</td><td>One job, 60 min</td></tr>
+</tbody>
+</table>
+
+<h2 id="s5">§5 — What this design does not settle</h2>
+<ul>
+<li><strong>The tag's granularity is open.</strong> Whether the reconciliation request (host-facing scalars) can share an iteration with the residual request or needs its own tag value is a question for stage 2's measurement of trip count, not for this document.</li>
+<li><strong>Requests that need a state the loop does not carry</strong> (a recovery request starting from a restored state, an acceptance request on a trial state) may require the machine to be entered more than once per trip. That is compatible with D1 only while the number of invocations stays independent of the request count; stage 2 must show that shape or report it as a blocker.</li>
+<li><strong>The 130 MB of unattributed traced code in the executable is not addressed here.</strong> The census's instruction-share attribution names the compatibility census, the cut-cell fan quadrature and <code>wall_coordinate</code> as the three largest bodies; whether the machine reaches any of them is unknown, and claiming the 50 MB executable gate from this design alone would be unsupported.</li>
+</ul>
+</main>
+</body>
+</html>

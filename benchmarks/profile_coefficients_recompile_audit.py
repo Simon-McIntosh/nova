@@ -34,6 +34,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from nova.equilibrium import reduced_newton
+from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.forward_operator import (
     PrescribedCurrentField,
     _CallableLayout,
@@ -263,6 +264,17 @@ def _scaled_source(
 def _scaled_row(fixture_row, scaled_source):
     """Return the same inputs with only the source's profile coefficients moved."""
     profile, seed, requested_class, target_current, _request = fixture_row
+    try:
+        profile.operator.with_source(scaled_source)
+    except ValueError:
+        operator = dataclasses.replace(profile.operator, source=scaled_source)
+        profile = ForwardProfile(
+            operator,
+            profile.lattice,
+            evaluations=profile.evaluations,
+            relaxation=profile.relaxation,
+            newton_steps=profile.newton_steps,
+        )
     scaled_request = dataclasses.replace(
         _request,
         source_profile=scaled_source,

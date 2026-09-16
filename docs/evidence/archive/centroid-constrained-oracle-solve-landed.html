@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="centroid-constrained-oracle-solve-landed">
+  <meta name="plan-title" content="Centroid-constrained oracle solve — cumulative execution evidence">
+  <meta name="plan-summary" content="Bounded exterior-field constraint implementation and its quantitative CPU qualification record.">
+  <meta name="plan-evidence-for" content="centroid-constrained-oracle-solve">
+  <meta name="plan-verifies" content="centroid-constrained-oracle-solve#s2">
+  <meta name="plan-modified" content="2026-09-16">
+  <meta name="plan-version" content="1">
+  <title>Centroid-constrained oracle solve — execution evidence</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Centroid-constrained oracle solve — cumulative execution evidence</h1>
+
+  <section id="bounded-exterior-field">
+    <h2>Bounded exterior-field compensator</h2>
+    <p><strong>Implementation checkpoint, commit <code>57d681a9</code>.</strong>
+    <code>BoundedExteriorFieldUnknown</code> maps normalized constraint unknowns
+    to finite field amplitudes in tesla, refuses a concrete command beyond the
+    declared bound before evaluating its response, and clips traced solver
+    trials to the same interval. The coil-less fixture now carries two explicit
+    prescribed exterior-response columns on top of the unchanged cached
+    baseline: a uniform vertical field for <code>centroid_r</code> and a uniform
+    radial field for <code>centroid_z</code>. Both enter through the existing
+    <code>ConstraintPair</code> and <code>CurrentCentroidConstraint</code>
+    interfaces.</p>
+
+    <p>The pre-repair reproduction was explicit: the existing unbounded
+    <code>ConstraintMultiplier</code> accepted normalized value <code>2.0</code>,
+    returned physical value <code>2.0</code>, and reported no refusal. The new
+    direct negative control requests 0.2525 T against a 0.25 T bound and must
+    raise <code>exterior-field amplitude exceeds its declared finite bound</code>.</p>
+
+    <p><strong>Qualification remains open.</strong> CPU job <code>1271927</code>
+    was launched on <code>all_debug</code> with <code>JAX_PLATFORMS=cpu</code>.
+    It must complete the two importing test modules in fresh processes and then
+    persist the four 110-cell amplitudes plus the displaced weak-row controls
+    under <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row</code>.
+    This checkpoint records no scientific pass until those receipts exist.</p>
+
+    <h3>Bounded compile probe</h3>
+    <p>CPU job <code>1271974</code> ran both weak-110 exact-clip compile arms in
+    one <code>all_debug</code> allocation with <code>JAX_PLATFORMS=cpu</code>, four
+    CPUs, 64 GiB, and the supported per-host cache from
+    <code>default_forward_compilation_cache_root</code>. The job completed in
+    1021 seconds, while each backend compile was independently censored so one
+    slow arm could not consume the other arm's evidence.</p>
+
+    <table>
+      <thead><tr><th>Arm</th><th>Construction</th><th>Lowering</th><th>StableHLO instructions</th><th>StableHLO size</th><th>Backend compile</th></tr></thead>
+      <tbody>
+        <tr><td>Unconstrained</td><td>90.865 s</td><td>45.246 s</td><td>423,061</td><td>76 MiB</td><td>&gt;223.89 s; exit 124</td></tr>
+        <tr><td>Centroid pair imposed</td><td>80.152 s</td><td>147.213 s</td><td>1,036,327</td><td>173 MiB</td><td>&gt;432.63 s; exit 124</td></tr>
+      </tbody>
+    </table>
+
+    <p>The constrained-to-unconstrained ratios are <strong>3.254× lowering
+    wall</strong> and <strong>2.449× StableHLO instructions</strong>. The
+    predeclared greater-than-three-times backend-compile test is not decidable:
+    both walls are right-censored, so their lower bounds cannot establish that
+    ratio. The operation census shows broad program replication rather than one
+    isolated clip primitive: <code>stablehlo.while</code> grows from 991 to
+    2,205, constants from 80,980 to 200,564, broadcasts from 116,893 to 302,917,
+    and gathers from 9,746 to 31,072.</p>
+
+    <p><strong>Verdict: blocked, cause not attributed to the bounded mapping.</strong>
+    The control itself does not compile inside its six-minute arm, while the
+    row-augmented program is materially larger and also misses its eleven-minute
+    arm. Downstream module tests and scientific receipts remain held because the
+    probe is not sane. The full lowerings, operation census, and compressed
+    35 MiB unified diff are under
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row</code>;
+    the diff digest is
+    <code>4952e47108ff703d691b0d0b8604c18f25ba6b255d4f9233aa4abbc53de23217</code>.</p>
+
+    <h3>H200 scientific receipt attempt</h3>
+    <p>Fresh-process CPU gates passed twice after the unit test was narrowed to
+    direct contracts: job <code>1271990</code> returned 7 tests in 88.72 s and
+    2 tests in 5.06 s; after the bound-path repair, job <code>1272017</code>
+    returned the same 7 tests in 84.17 s and 2 tests in 4.74 s.</p>
+
+    <p>Cold H200 job <code>1271992</code> used one card on
+    <code>98dci4-gpu-0003</code>, two free cores measured at submission, 128 GiB,
+    <code>JAX_PLATFORMS=cuda,cpu</code>, and the declared reservation. Its first
+    <code>jit_while</code> compile took 6m43.015s, then an internal concrete trial
+    fired the eager bound refusal during active-set reconciliation. Commit
+    <code>7f83a9db</code> separated the direct refusal control from solver clipping;
+    the two module gates remained green.</p>
+
+    <p>Repaired H200 job <code>1272020</code> ran for its complete 3303-second
+    inner bound. The repaired <code>jit_scan</code> compile took 8m31.133s. One
+    row landed before the next case remained in compilation:</p>
+
+    <table>
+      <thead><tr><th>Row</th><th>Field amplitudes</th><th>Centroid error</th><th>Row residual</th><th>Terminal residual</th><th>Verdict</th></tr></thead>
+      <tbody><tr><td>Weak static, requested 110 / realised 135 cells</td><td>vertical 0.25 T (at bound); radial 3.47e-11 T</td><td>0.5663 pitches (0.2639 m radial, -0.00439 m vertical)</td><td>0.5662</td><td>1.001e-3</td><td>FAIL — nonconverged and off target</td></tr></tbody>
+    </table>
+
+    <p>The moderate row did not land before timeout; strong, single-null, the
+    displaced-seed positive and negative controls, final bound-refusal receipt,
+    and poloidal panels did not run. No amplitude-table or scientific pass is
+    inferred from the missing rows. The durable weak receipt is
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row/weak-rotation-reactor-static-cells-110.json</code>.</p>
+  </section>
+</main>
+</body>
+</html>

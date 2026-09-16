@@ -12,6 +12,7 @@ import numpy as np
 
 from nova.equilibrium import fixed_point
 from nova.equilibrium.constraint import (
+    BoundedExteriorFieldUnknown,
     CircuitCurrentUnknown,
     ConstraintBinding,
     ConstraintContext,
@@ -163,6 +164,44 @@ def test_linear_circuit_and_nonlinear_multiplier_rows_converge() -> None:
     assert all(bool(np.all(record.qualified)) for record in result.constraints)
     assert result.fixed_point.state.shape == (2,)
     assert result.fixed_point.row_jvp_projections.shape == (2,)
+
+
+def test_bounded_exterior_field_unknown_routes_and_refuses() -> None:
+    configure_dtypes()
+    profile = _profile()
+    functional = _CoordinateFunctional(0)
+    unknown = BoundedExteriorFieldUnknown(
+        direction=jnp.asarray([1.0]),
+        field_scale=jnp.asarray([1.0]),
+        field_bound=jnp.asarray([2.0]),
+    )
+    context = ConstraintContext(
+        flux=jnp.asarray([0.0, 0.0]),
+        requested_class=None,
+        target_current=None,
+        shadow=None,
+    )
+
+    delta = unknown.flux_delta(
+        profile,
+        context,
+        functional,
+        None,
+        jnp.asarray([1.0]),
+    )
+    leaves, structure = jax.tree_util.tree_flatten(unknown)
+    rebuilt = jax.tree_util.tree_unflatten(structure, leaves)
+
+    np.testing.assert_array_equal(delta, [1.0, 0.0])
+    np.testing.assert_array_equal(unknown.physical_value(jnp.asarray([1.0])), [1.0])
+    np.testing.assert_array_equal(unknown.physical_value(jnp.asarray([2.5])), [2.0])
+    np.testing.assert_array_equal(rebuilt.direction, unknown.direction)
+    np.testing.assert_array_equal(rebuilt.field_scale, unknown.field_scale)
+    np.testing.assert_array_equal(rebuilt.field_bound, unknown.field_bound)
+    with np.testing.assert_raises_regex(
+        ValueError, "exterior-field amplitude exceeds its declared finite bound"
+    ):
+        unknown.require_within_bound(jnp.asarray([2.5]))
 
 
 def test_residual_row_actions_match_central_differences() -> None:

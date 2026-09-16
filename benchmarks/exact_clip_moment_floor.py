@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import UTC, datetime
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -21,13 +22,22 @@ import matplotlib.pyplot as plt
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.clip_quadrature import (
-    _compact_chord_polygon,
-    _quadratic_coefficients,
-    _quadratic_sample_field,
     clipped_support_current_moments,
     cut_cell_bank_capacity,
-    cut_cell_moment_evaluation_bound,
 )
+
+try:
+    from nova.equilibrium.clip_quadrature import (
+        _compact_chord_polygon,
+        _quadratic_coefficients,
+        _quadratic_sample_field,
+        cut_cell_moment_evaluation_bound,
+    )
+except ImportError:
+    _compact_chord_polygon = None
+    _quadratic_coefficients = None
+    _quadratic_sample_field = None
+    cut_cell_moment_evaluation_bound = None
 from nova.equilibrium.stencil_mesh import CellCurrentMoments, flux_field_polynomial
 from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures import measure as fixture
@@ -76,6 +86,19 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
 
 def _case_key(case_name: str, requested_cells: int) -> str:
     return f"{case_name}-{abs(requested_cells)}"
+
+
+def _require_boundary_route() -> None:
+    if any(
+        item is None
+        for item in (
+            _compact_chord_polygon,
+            _quadratic_coefficients,
+            _quadratic_sample_field,
+            cut_cell_moment_evaluation_bound,
+        )
+    ):
+        raise RuntimeError("the boundary-reduction implementation is unavailable")
 
 
 def _build(case_name: str, requested_cells: int):
@@ -270,6 +293,7 @@ def _frozen_image(operator, base, boundary, values) -> np.ndarray:
 
 def discriminate() -> dict[str, Any]:
     """Separate sampled-region and quadratic-density effects on the weak row."""
+    _require_boundary_route()
     case_name = CASES[0]
     requested_cells = CELL_REQUESTS[0]
     operator, support, field, bank_capacity, flux_span = _build(
@@ -283,6 +307,7 @@ def discriminate() -> dict[str, Any]:
             carried_field,
             operator.source.core,
             cut_cell_capacity=bank_capacity,
+            boundary_reduction=True,
         )
     )(support, field)
     jax.block_until_ready(production)
@@ -410,6 +435,7 @@ def discriminate() -> dict[str, Any]:
 
 
 def measure(case_name: str, requested_cells: int) -> dict[str, Any]:
+    _require_boundary_route()
     operator, support, field, bank_capacity, flux_span = _build(
         case_name, requested_cells
     )
@@ -421,6 +447,7 @@ def measure(case_name: str, requested_cells: int) -> dict[str, Any]:
             carried_field,
             operator.source.core,
             cut_cell_capacity=bank_capacity,
+            boundary_reduction=True,
         )
     )(support, field)
     jax.block_until_ready(reduced)
@@ -506,6 +533,65 @@ def measure(case_name: str, requested_cells: int) -> dict[str, Any]:
     return receipt
 
 
+def default_route_snapshot(path: Path, revision: str) -> dict[str, Any]:
+    """Persist the default weak-row moments and frozen image without rounding."""
+    operator, support, field, bank_capacity, _flux_span = _build(
+        CASES[0], CELL_REQUESTS[0]
+    )
+    moments = jax.jit(
+        lambda carried_support, carried_field: clipped_support_current_moments(
+            carried_support,
+            carried_support.included,
+            carried_field,
+            operator.source.core,
+            cut_cell_capacity=bank_capacity,
+        )
+    )(support, field)
+    jax.block_until_ready(moments)
+    moment_array = np.stack([np.asarray(value) for value in moments])
+    image = np.asarray(
+        operator.current_moment_image(operator.coupling_current_moments(moments))
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez(path, revision=np.asarray(revision), moments=moment_array, image=image)
+    return {
+        "revision": revision,
+        "path": str(path),
+        "moment_shape": list(moment_array.shape),
+        "image_shape": list(image.shape),
+    }
+
+
+def compare_default_route_snapshots(base_path: Path, current_path: Path):
+    """Require last-bit identity between base and current default-route arrays."""
+    with (
+        np.load(base_path, allow_pickle=False) as base,
+        np.load(current_path, allow_pickle=False) as current,
+    ):
+        result = {}
+        for name in ("moments", "image"):
+            base_value = np.asarray(base[name])
+            current_value = np.asarray(current[name])
+            result[name] = {
+                "array_equal": bool(np.array_equal(base_value, current_value)),
+                "maximum_absolute_difference": float(
+                    np.max(np.abs(base_value - current_value))
+                ),
+                "sha256": hashlib.sha256(base_value.tobytes()).hexdigest(),
+            }
+        payload = {
+            "schema": "nova.exact-clip-default-route-identity.v1",
+            "created_at": datetime.now(UTC).isoformat(),
+            "base_revision": str(base["revision"]),
+            "current_revision": str(current["revision"]),
+            "arrays": result,
+        }
+    _write_json(REPORT_ROOT / "default-route-bit-identity.json", payload)
+    if not all(value["array_equal"] for value in result.values()):
+        raise RuntimeError("default exact-clip route differs from the base revision")
+    return payload
+
+
 def finalize(rows: list[dict[str, Any]]) -> dict[str, Any]:
     floor = next(
         row["fan_refinement_floor_relative_l2"]
@@ -558,10 +644,32 @@ def main() -> None:
     parser.add_argument("--case", choices=CASES)
     parser.add_argument("--cells", type=int, choices=CELL_REQUESTS)
     parser.add_argument("--discriminate", action="store_true")
+    parser.add_argument("--default-route-snapshot", type=Path)
+    parser.add_argument("--snapshot-revision")
+    parser.add_argument(
+        "--compare-default-route-snapshots",
+        type=Path,
+        nargs=2,
+        metavar=("BASE", "CURRENT"),
+    )
     arguments = parser.parse_args()
     configure_dtypes()
     if not jax.config.jax_enable_x64 or jax.default_backend() != "cpu":
         raise RuntimeError("this measurement requires binary64 on the CPU backend")
+    if arguments.default_route_snapshot is not None:
+        if arguments.snapshot_revision is None:
+            parser.error("--default-route-snapshot requires --snapshot-revision")
+        snapshot = default_route_snapshot(
+            arguments.default_route_snapshot, arguments.snapshot_revision
+        )
+        print("DEFAULT_ROUTE_SNAPSHOT", snapshot, flush=True)
+        return
+    if arguments.compare_default_route_snapshots is not None:
+        comparison = compare_default_route_snapshots(
+            *arguments.compare_default_route_snapshots
+        )
+        print("DEFAULT_ROUTE_IDENTITY", comparison, flush=True)
+        return
     if arguments.discriminate:
         payload = discriminate()
         for row in payload["arms"]:

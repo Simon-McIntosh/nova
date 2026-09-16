@@ -94,6 +94,7 @@ def test_quadratic_boundary_moments_reach_the_fan_refinement_floor():
         _field(),
         _QuadraticDensity(),
         cut_cell_capacity=1,
+        boundary_reduction=True,
     )
     observed_values = np.asarray(
         [
@@ -108,6 +109,25 @@ def test_quadratic_boundary_moments_reach_the_fan_refinement_floor():
     difference = np.abs(observed_values - fan)
     roundoff = 64.0 * np.finfo(np.float64).eps * np.maximum(np.abs(refined_fan), 1.0)
     np.testing.assert_array_less(difference, 1.5 * fan_floor + roundoff)
+
+
+def test_default_cut_moments_are_bit_identical_to_the_fan():
+    support = _curved_support(128)
+    observed = clipped_support_current_moments(
+        support,
+        support.included,
+        _field(),
+        _QuadraticDensity(),
+        cut_cell_capacity=1,
+    )
+    observed_values = np.asarray(
+        [
+            observed.cell_current[0],
+            observed.radial_moment[0],
+            observed.vertical_moment[0],
+        ]
+    )
+    np.testing.assert_array_equal(observed_values, _fan_moments(support))
 
 
 def test_curved_support_reduces_to_the_vertex_capacity_and_point_bound():
@@ -158,6 +178,7 @@ def test_malformed_sampled_arc_refuses_with_nonfinite_moments():
         _field(),
         _QuadraticDensity(),
         cut_cell_capacity=1,
+        boundary_reduction=True,
     )
     assert np.all(~np.isfinite(np.asarray(moments)))
 

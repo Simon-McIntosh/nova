@@ -465,14 +465,16 @@ def clipped_support_field_integrals(
     flux_span,
     *,
     cut_cell_capacity: int,
+    boundary_reduction: bool = False,
 ) -> ClippedFieldIntegrals:
-    """Reduce whole cells in one small bank and cut cells one at a time.
+    """Reduce field integrals with an opt-in polynomial boundary route.
 
     Whole cells retain the authored 24-vertex, 64-node-per-triangle rule. Cut
     indices are compacted into the declared mesh-static bank, while a scan
     forms and immediately reduces one high-capacity polygon at a time. The
     expensive work is therefore proportional to live cut entries; dead bank
-    entries execute no polygon branch and contribute exact zero.
+    entries execute no polygon branch and contribute exact zero. Cut cells use
+    the retained fan unless ``boundary_reduction`` is explicitly enabled.
     """
     vertices = jnp.asarray(support.support_vertices)
     count = jnp.asarray(support.vertex_count)
@@ -512,16 +514,34 @@ def clipped_support_field_integrals(
 
         def integrate(operand):
             index, carried_vertices, carried_count, carried_centroid = operand
-            value = _integrate_field_polynomial(
-                carried_vertices[None, ...],
-                carried_count[None],
-                field,
-                jnp.asarray([index], dtype=jnp.int32),
-                carried_centroid[None, ...],
-                pressure,
-                boundary_pressure,
-                flux_span,
-            )
+            if boundary_reduction:
+                value = _integrate_field_polynomial(
+                    carried_vertices[None, ...],
+                    carried_count[None],
+                    field,
+                    jnp.asarray([index], dtype=jnp.int32),
+                    carried_centroid[None, ...],
+                    pressure,
+                    boundary_pressure,
+                    flux_span,
+                )
+            else:
+                point, weight = _quadrature_from_arrays(
+                    carried_vertices[None, ...],
+                    carried_count[None],
+                    carried_centroid[None, ...],
+                    jnp.ones(1, dtype=bool),
+                )
+                value = _integrate_points(
+                    point,
+                    weight,
+                    field,
+                    jnp.asarray([index], dtype=jnp.int32),
+                    carried_centroid[None, ...],
+                    pressure,
+                    boundary_pressure,
+                    flux_span,
+                )
             return value.pressure_volume[0], value.field_volume[0]
 
         values = jax.lax.cond(
@@ -662,8 +682,9 @@ def clipped_support_current_moments(
     profile,
     *,
     cut_cell_capacity: int,
+    boundary_reduction: bool = False,
 ) -> ClippedCurrentMoments:
-    """Reduce profile current moments with dense work confined to cut cells."""
+    """Reduce current moments with an opt-in polynomial boundary route."""
     vertices = jnp.asarray(support.support_vertices)
     count = jnp.asarray(support.vertex_count)
     centroids = jnp.asarray(support.centroids)
@@ -702,14 +723,30 @@ def clipped_support_current_moments(
 
         def integrate(operand):
             index, carried_vertices, carried_count, carried_centroid = operand
-            value = _integrate_current_polynomial(
-                carried_vertices[None, ...],
-                carried_count[None],
-                field,
-                jnp.asarray([index], dtype=jnp.int32),
-                carried_centroid[None, ...],
-                profile,
-            )
+            if boundary_reduction:
+                value = _integrate_current_polynomial(
+                    carried_vertices[None, ...],
+                    carried_count[None],
+                    field,
+                    jnp.asarray([index], dtype=jnp.int32),
+                    carried_centroid[None, ...],
+                    profile,
+                )
+            else:
+                point, weight = _quadrature_from_arrays(
+                    carried_vertices[None, ...],
+                    carried_count[None],
+                    carried_centroid[None, ...],
+                    jnp.ones(1, dtype=bool),
+                )
+                value = _integrate_current_points(
+                    point,
+                    weight,
+                    field,
+                    jnp.asarray([index], dtype=jnp.int32),
+                    carried_centroid[None, ...],
+                    profile,
+                )
             return (
                 value.cell_current[0],
                 value.radial_moment[0],

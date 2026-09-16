@@ -145,6 +145,7 @@ def test_compact_reduction_matches_dense_quadrature(case_name: str):
             operator.source.boundary_pressure,
             flux_span,
             cut_cell_capacity=bank_capacity,
+            boundary_reduction=True,
         )
     )(support, field)
     jax.block_until_ready(actual)
@@ -155,6 +156,7 @@ def test_compact_reduction_matches_dense_quadrature(case_name: str):
             carried_field,
             operator.source.core,
             cut_cell_capacity=bank_capacity,
+            boundary_reduction=True,
         )
     )(support, field)
     jax.block_until_ready(actual_current)
@@ -303,6 +305,7 @@ def test_compact_reduction_work_arrays_stay_below_one_gibibyte():
             operator.source.boundary_pressure,
             flux_span,
             cut_cell_capacity=min(cell_count, bank_capacity * 5),
+            boundary_reduction=True,
         ),
         carried_support,
         carried_field,

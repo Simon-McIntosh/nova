@@ -1,0 +1,282 @@
+{
+  "completed": false,
+  "lane": {
+    "execution": "slurm",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_default_backend": "gpu",
+    "jax_platforms": "cuda",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "precision": "float64",
+    "reservation": "gpu_0003_grpA",
+    "slurm_job_id": "1271798"
+  },
+  "passed": false,
+  "rows": [
+    {
+      "branch": {
+        "fixed_participating_cells": 25,
+        "fixed_shadowed_carriers": 0,
+        "packing_exact_zero_count": 0,
+        "packing_level_count": 2535,
+        "packing_minimum_absolute_level": 0.005033327633755635
+      },
+      "directions": [
+        {
+          "central_difference_l2": 7.661346420085231,
+          "direction": "newton",
+          "error_l2": 0.061465479644212596,
+          "error_linf": 0.007307068210434808,
+          "finite_difference_rule": "sqrt(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 2.920078890094234e-06,
+          "packing_level_jvp_relative_error": 1.452895999749101e-07,
+          "relative_error": 0.008022803861612722,
+          "step_probes": [
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 0.25,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.00801887303130116,
+              "step": 7.300197225235585e-07,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 1.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008022803861612722,
+              "step": 2.920078890094234e-06,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 4.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008022558885664659,
+              "step": 1.1680315560376937e-05,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 16.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008022893469853642,
+              "step": 4.672126224150775e-05,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 64.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008022860380818404,
+              "step": 0.000186885048966031,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 256.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008022868575055742,
+              "step": 0.000747540195864124,
+              "upper_sign_changes": 0
+            }
+          ],
+          "tangent_l2": 7.599883729024245
+        },
+        {
+          "central_difference_l2": 1.514895162180923,
+          "direction": "random-1",
+          "error_l2": 0.012457501430907682,
+          "error_linf": 0.0023366742986010713,
+          "finite_difference_rule": "sqrt(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 2.920078890094234e-06,
+          "packing_level_jvp_relative_error": 4.3854345741460257e-07,
+          "relative_error": 0.008223342276024703,
+          "step_probes": [
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 0.25,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008257793544200623,
+              "step": 7.300197225235585e-07,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 1.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008223342276024703,
+              "step": 2.920078890094234e-06,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 4.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008226499133806929,
+              "step": 1.1680315560376937e-05,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 16.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008227075649977513,
+              "step": 4.672126224150775e-05,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 64.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008226929562887876,
+              "step": 0.000186885048966031,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 256.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008226911850731575,
+              "step": 0.000747540195864124,
+              "upper_sign_changes": 0
+            }
+          ],
+          "tangent_l2": 1.5024800330399453
+        },
+        {
+          "central_difference_l2": 0.6163257188928012,
+          "direction": "random-2",
+          "error_l2": 0.004854577522100128,
+          "error_linf": 0.0008140791812568104,
+          "finite_difference_rule": "sqrt(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 2.920078890094234e-06,
+          "packing_level_jvp_relative_error": 7.394969683036846e-07,
+          "relative_error": 0.007876642777168439,
+          "step_probes": [
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 0.25,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.00788383105858879,
+              "step": 7.300197225235585e-07,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 1.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007876642777168439,
+              "step": 2.920078890094234e-06,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 4.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007879328465887434,
+              "step": 1.1680315560376937e-05,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 16.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007877651598268151,
+              "step": 4.672126224150775e-05,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 64.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007878451157419903,
+              "step": 0.000186885048966031,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 256.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.007878238742931061,
+              "step": 0.000747540195864124,
+              "upper_sign_changes": 0
+            }
+          ],
+          "tangent_l2": 0.6114935582247795
+        },
+        {
+          "central_difference_l2": 0.9221067139003335,
+          "direction": "random-3",
+          "error_l2": 0.007540511566443454,
+          "error_linf": 0.0011749280873635526,
+          "finite_difference_rule": "sqrt(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 2.920078890094234e-06,
+          "packing_level_jvp_relative_error": 5.432458021718759e-07,
+          "relative_error": 0.008177482554647656,
+          "step_probes": [
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 0.25,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008200009261772435,
+              "step": 7.300197225235585e-07,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 1.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008177482554647656,
+              "step": 2.920078890094234e-06,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 4.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008180098105262521,
+              "step": 1.1680315560376937e-05,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 16.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008180750169571756,
+              "step": 4.672126224150775e-05,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 64.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008180924180415335,
+              "step": 0.000186885048966031,
+              "upper_sign_changes": 0
+            },
+            {
+              "lower_sign_changes": 0,
+              "multiplier": 256.0,
+              "opposed_probe_signs": 0,
+              "relative_error": 0.008180923558171502,
+              "step": 0.000747540195864124,
+              "upper_sign_changes": 0
+            }
+          ],
+          "tangent_l2": 0.91457395290056
+        }
+      ],
+      "fixed_point_residual_l2": 57.713668334133,
+      "gmres_info": 0,
+      "passed": false,
+      "realised_cells": 135,
+      "relative_error_bound": 1e-08,
+      "requested_cells": 110,
+      "terminal_state": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-memory/identity/weak-110-implicit-current.npz",
+      "terminal_state_size": 772
+    }
+  ],
+  "schema": "nova.exact-clip-jvp-accuracy",
+  "source_revision": "b7bc1515ff31fb87acf981291e1168dc77f1074f"
+}

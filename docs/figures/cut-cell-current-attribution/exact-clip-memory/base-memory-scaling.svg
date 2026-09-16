@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" role="img" aria-labelledby="title desc">
+  <title id="title">Exact-clip solve memory before per-cell integration</title>
+  <desc id="desc">CPU XLA temporary memory rises from 25.47 GiB at 135 realised cells to 70.41 GiB at 555 cells, above the 20 GiB limit at every rung.</desc>
+  <rect width="760" height="430" fill="#fcfbf8"/>
+  <g stroke="#29343d" stroke-width="2" fill="none">
+    <path d="M90 35V350H715"/>
+    <path d="M90 271H715" stroke="#b24a3a" stroke-dasharray="8 7"/>
+    <path d="M177 249L441 148L713 77" stroke="#245d72" stroke-width="4"/>
+  </g>
+  <g fill="#245d72">
+    <circle cx="177" cy="249" r="7"/><circle cx="441" cy="148" r="7"/><circle cx="713" cy="77" r="7"/>
+  </g>
+  <g font-family="system-ui, sans-serif" fill="#29343d" font-size="16">
+    <text x="380" y="405" text-anchor="middle">realised atomic cells</text>
+    <text x="22" y="195" transform="rotate(-90 22 195)" text-anchor="middle">XLA temporary memory (GiB)</text>
+    <text x="177" y="375" text-anchor="middle">135</text><text x="441" y="375" text-anchor="middle">342</text><text x="713" y="375" text-anchor="middle">555</text>
+    <text x="78" y="355" text-anchor="end">0</text><text x="78" y="276" text-anchor="end">20</text><text x="78" y="197" text-anchor="end">40</text><text x="78" y="118" text-anchor="end">60</text><text x="78" y="39" text-anchor="end">80</text>
+    <text x="190" y="238">25.47</text><text x="454" y="137">51.81</text><text x="700" y="65" text-anchor="end">70.41</text>
+    <text x="705" y="262" text-anchor="end" fill="#b24a3a">20 GiB gate</text>
+    <text x="90" y="22" font-size="20" font-weight="600">Base exact-clip solve: pairwise JVP state exceeds the gate</text>
+  </g>
+</svg>

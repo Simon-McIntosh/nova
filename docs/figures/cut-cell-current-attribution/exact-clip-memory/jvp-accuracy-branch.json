@@ -1,0 +1,131 @@
+{
+  "completed": true,
+  "lane": {
+    "execution": "slurm",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_default_backend": "gpu",
+    "jax_platforms": "cuda",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "precision": "float64",
+    "reservation": "gpu_0003_grpA",
+    "slurm_job_id": "1271792"
+  },
+  "passed": false,
+  "rows": [
+    {
+      "branch": {
+        "fixed_participating_cells": 25,
+        "fixed_shadowed_carriers": 0
+      },
+      "directions": [
+        {
+          "central_difference_l2": 7.661346420085231,
+          "direction": "newton",
+          "error_l2": 0.061465479644212596,
+          "error_linf": 0.007307068210434808,
+          "finite_difference_rule": "sqrt(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 2.920078890094234e-06,
+          "relative_error": 0.008022803861612722,
+          "tangent_l2": 7.599883729024245
+        },
+        {
+          "central_difference_l2": 1.514895162180923,
+          "direction": "random-1",
+          "error_l2": 0.012457501430907682,
+          "error_linf": 0.0023366742986010713,
+          "finite_difference_rule": "sqrt(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 2.920078890094234e-06,
+          "relative_error": 0.008223342276024703,
+          "tangent_l2": 1.5024800330399453
+        },
+        {
+          "central_difference_l2": 0.6163257188928012,
+          "direction": "random-2",
+          "error_l2": 0.004854577522100128,
+          "error_linf": 0.0008140791812568104,
+          "finite_difference_rule": "sqrt(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 2.920078890094234e-06,
+          "relative_error": 0.007876642777168439,
+          "tangent_l2": 0.6114935582247795
+        },
+        {
+          "central_difference_l2": 0.9221067139003335,
+          "direction": "random-3",
+          "error_l2": 0.007540511566443454,
+          "error_linf": 0.0011749280873635526,
+          "finite_difference_rule": "sqrt(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 2.920078890094234e-06,
+          "relative_error": 0.008177482554647656,
+          "tangent_l2": 0.91457395290056
+        }
+      ],
+      "fixed_point_residual_l2": 57.713668334133,
+      "gmres_info": 0,
+      "passed": false,
+      "realised_cells": 135,
+      "relative_error_bound": 1e-08,
+      "requested_cells": 110,
+      "terminal_state": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-memory/identity/weak-110-implicit-current.npz",
+      "terminal_state_size": 772
+    },
+    {
+      "branch": {
+        "fixed_participating_cells": 65,
+        "fixed_shadowed_carriers": 0
+      },
+      "directions": [
+        {
+          "central_difference_l2": 10.000254754073818,
+          "direction": "newton",
+          "error_l2": 0.0787643690670339,
+          "error_linf": 0.007250947484574222,
+          "finite_difference_rule": "sqrt(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 2.695302311689931e-06,
+          "relative_error": 0.007876236256376122,
+          "tangent_l2": 9.921491221625189
+        },
+        {
+          "central_difference_l2": 1.0089222659204893,
+          "direction": "random-1",
+          "error_l2": 0.007981745369296056,
+          "error_linf": 0.000698147938260979,
+          "finite_difference_rule": "sqrt(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 2.695302311689931e-06,
+          "relative_error": 0.007911159896955905,
+          "tangent_l2": 1.0009421720080087
+        },
+        {
+          "central_difference_l2": 0.6768480179464409,
+          "direction": "random-2",
+          "error_l2": 0.0054250326008777865,
+          "error_linf": 0.0004830898049965615,
+          "finite_difference_rule": "sqrt(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 2.695302311689931e-06,
+          "relative_error": 0.008015141445397674,
+          "tangent_l2": 0.6714259997414341
+        },
+        {
+          "central_difference_l2": 0.9638028507478035,
+          "direction": "random-3",
+          "error_l2": 0.007602821814400994,
+          "error_linf": 0.0008293968744006175,
+          "finite_difference_rule": "sqrt(binary64 epsilon) times terminal infinity scale for a max-unit direction",
+          "finite_difference_step": 2.695302311689931e-06,
+          "relative_error": 0.007888357882010883,
+          "tangent_l2": 0.9562004219974395
+        }
+      ],
+      "fixed_point_residual_l2": 76.54550907280498,
+      "gmres_info": 0,
+      "passed": false,
+      "realised_cells": 342,
+      "relative_error_bound": 1e-08,
+      "requested_cells": 300,
+      "terminal_state": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-memory/identity/weak-300-implicit-current.npz",
+      "terminal_state_size": 1529
+    }
+  ],
+  "schema": "nova.exact-clip-jvp-accuracy",
+  "source_revision": "534baa61046e52f89d3036ed7ed772d55520a313"
+}

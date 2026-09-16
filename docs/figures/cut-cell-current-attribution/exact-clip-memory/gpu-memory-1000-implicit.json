@@ -1,0 +1,64 @@
+{
+  "completed": true,
+  "lane": {
+    "execution": "slurm",
+    "hostname": "98dci4-gpu-0003.iter.org",
+    "jax_default_backend": "gpu",
+    "jax_platforms": "cuda",
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "precision": "float64",
+    "reservation": "gpu_0003_grpA",
+    "slurm_job_id": "1271864"
+  },
+  "rows": [
+    {
+      "arm": "exact-1000",
+      "case": "weak-rotation-reactor-static",
+      "compile_wall_seconds": 1115.3041030699387,
+      "dimensions": {
+        "active_set_steps": 16,
+        "atomic_support_capacity": 22,
+        "cell_polynomial_terms": 6,
+        "exact_quadrature_points_per_cell": 180096,
+        "exact_support_capacity": 2816,
+        "gmres_iterations": 30,
+        "grid_nodes": 1072,
+        "newton_steps": 10,
+        "quadrature_nodes_per_axis": 8,
+        "quadrature_nodes_per_triangle": 64,
+        "realised_cells": 1072,
+        "sample_nodes": 2828,
+        "solve_state_size": 4021,
+        "spline_chain_samples_per_chord": 128,
+        "wall_nodes": 121,
+        "whole_cell_quadrature_points_per_cell": 1280
+      },
+      "executed": false,
+      "largest_array_intermediates": [],
+      "largest_predicate_intermediates": [],
+      "memory_analysis": {
+        "alias_size_in_bytes": 0,
+        "argument_size_in_bytes": 32168,
+        "generated_code_size_in_bytes": 3801644311,
+        "host_alias_size_in_bytes": 0,
+        "host_argument_size_in_bytes": 0,
+        "host_output_size_in_bytes": 0,
+        "host_temp_size_in_bytes": 0,
+        "output_size_in_bytes": 32201,
+        "temp_size_in_bytes": 8398566704
+      },
+      "method": "jax.jit(solve_program).lower(seed).compile().memory_analysis(); optimized HLO serialization deliberately skipped",
+      "pairwise_predicate_candidates": [],
+      "qualifying_array_signatures": [],
+      "realised_cells": 1072,
+      "requested_cells": -1000
+    }
+  ],
+  "scaling": {
+    "adjacent_rungs": [],
+    "independent_variable": "realised atomic cell count"
+  },
+  "schema": "nova.exact-clip-memory-scaling",
+  "source_revision": "7e1456e4182195e09c2fa7ae3590f8b4c660b9d6"
+}

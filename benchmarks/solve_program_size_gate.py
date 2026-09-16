@@ -21,7 +21,7 @@ from typing import Any
 
 REQUIRED_CELLS = (300, 1000)
 BASELINE_300_EXECUTABLE_BYTES = 461_724_765
-MAX_300_EXECUTABLE_BYTES = 450_000_000
+MAX_300_EXECUTABLE_BYTES = 50_000_000
 MAX_300_SOLVE_INSTRUCTIONS = 210_000
 REPLICATION_PATHS = ("current-moment path", "topology read")
 CERTIFICATE_ROWS = (
@@ -319,11 +319,11 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
         requested_class, target_current
     )
 
-    def shadow_mask(value):
-        return profile.operator.residual_shadow_mask(value, requested_class)
+    def shadow_mask(value, operator):
+        return operator.residual_shadow_mask(value, requested_class)
 
-    def promoted_shadow_mask(value, previous):
-        return profile.operator.residual_shadow_mask(
+    def promoted_shadow_mask(value, previous, operator):
+        return operator.residual_shadow_mask(
             value, requested_class, previous_shadow=previous
         )
 
@@ -336,7 +336,8 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
             shadow_mask_fn=shadow_mask,
             promoted_shadow_mask_fn=promoted_shadow_mask,
             shadowed_map_fn=shadowed,
-            map_arguments=(exterior,),
+            map_arguments=(exterior, profile.operator),
+            callback_arguments=(profile.operator,),
             **options,
         )
 
@@ -352,7 +353,7 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
         **options,
     )
     candidate_started = time.perf_counter()
-    candidate = candidate_program(state, external)
+    candidate = candidate_program(state, external, profile.operator)
     jax.block_until_ready(candidate.state)
     candidate_seconds = time.perf_counter() - candidate_started
     baseline_state = np.asarray(baseline.state, dtype=np.float64)
@@ -502,10 +503,12 @@ def run_mast_identity(
             )
         )
         external = member.operator.external()
-        jax.block_until_ready(first.program.slice_solver(state, shadow, external))
+        jax.block_until_ready(
+            first.program.slice_solver(state, shadow, external, member.operator)
+        )
         second = _solve(member)
         direct_started = time.perf_counter()
-        direct = first.program.slice_solver(state, shadow, external)
+        direct = first.program.slice_solver(state, shadow, external, member.operator)
         jax.block_until_ready(direct)
         direct_seconds = time.perf_counter() - direct_started
         warm_started = time.perf_counter()

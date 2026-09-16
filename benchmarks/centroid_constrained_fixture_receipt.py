@@ -23,8 +23,10 @@ import numpy as np
 
 from benchmarks import oracle_start_newton_probe as oracle_probe
 from benchmarks import solovev_certificate as certificate
-from nova.equilibrium import ForwardProfile
+from nova.equilibrium import ForwardProfile, fixed_point
+from nova.equilibrium.constraint import assemble_augmented_system
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
+from nova.equilibrium.solve_request import default_forward_compilation_cache_root
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import (
     configure_dtypes,
@@ -118,6 +120,11 @@ def _revision() -> str:
     return subprocess.check_output(
         ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
     ).strip()
+
+
+def _stablehlo_instruction_count(module: str) -> int:
+    """Count result-defining StableHLO operations in one lowered module."""
+    return sum(" = stablehlo." in line for line in module.splitlines())
 
 
 def _translated_state(context: dict[str, Any]) -> np.ndarray:
@@ -241,6 +248,130 @@ def _solve(
         },
         state,
     )
+
+
+def _compile_probe_program(
+    context: dict[str, Any], *, constrained: bool
+) -> tuple[Any, tuple[jax.Array, ...]]:
+    """Return the production solve program and explicit array arguments."""
+    profile = context["profile"]
+    request = certificate._certificate_solve_request(
+        profile,
+        context["seed"],
+        context["target_current"],
+        carrier_identity=f"centroid-compile:{'bounded' if constrained else 'control'}",
+    )
+    options = request.policy.kernel_options()
+    if not constrained:
+        program = profile._accelerated_history_program(
+            request.route,
+            requested_class=None,
+            target_current=request.target_current,
+            **options,
+        )
+        external = profile.operator.external(
+            request.current, request.prescribed_current
+        )
+        return program, (jnp.asarray(context["seed"]), external)
+
+    pair = centroid_constraint_pair(
+        context["centroid"],
+        pitch=context["pitch"],
+    )
+    mapped = profile.flux_map(
+        request.current,
+        None,
+        request.target_current,
+        request.prescribed_current,
+    )
+    shadowed = profile.operator.flux_map_with_shadow(
+        request.current,
+        None,
+        request.target_current,
+        request.prescribed_current,
+    )
+
+    def shadow_mask(state):
+        return profile.operator.residual_shadow_mask(state, None)
+
+    def promoted_shadow_mask(state, previous):
+        return profile.operator.residual_shadow_mask(
+            state, None, previous_shadow=previous
+        )
+
+    system = assemble_augmented_system(
+        profile,
+        jnp.asarray(context["seed"]),
+        (pair,),
+        base_map=mapped,
+        base_shadow_mask=shadow_mask,
+        base_promoted_shadow_mask=promoted_shadow_mask,
+        base_shadowed_map=shadowed,
+        requested_class=None,
+        target_current=jnp.asarray(context["target_current"]),
+    )
+
+    def solve(initial):
+        return fixed_point.newton_krylov(
+            system.map_fn,
+            initial,
+            shadow_mask_fn=system.shadow_mask_fn,
+            promoted_shadow_mask_fn=system.promoted_shadow_mask_fn,
+            shadowed_map_fn=system.shadowed_map_fn,
+            row_jvp_observers=system.row_jvp_observers,
+            **options,
+        )
+
+    return jax.jit(solve), (system.initial,)
+
+
+def compile_probe_arm(output_root: Path, arm: str) -> dict[str, Any]:
+    """Lower and compile one weak-fixture solve arm with durable checkpoints."""
+    configure_dtypes()
+    cache = configure_persistent_compilation_cache(
+        default_forward_compilation_cache_root()
+    )
+    lane = _lane()
+    previous_mode = support_clip_mode()
+    set_support_clip_mode("exact")
+    started = perf_counter()
+    try:
+        context = _context("weak-rotation-reactor-static", -110)
+        constructed = perf_counter()
+        program, arguments = _compile_probe_program(
+            context, constrained=arm == "constrained"
+        )
+        lower_started = perf_counter()
+        lowered = program.lower(*arguments)
+        lower_seconds = perf_counter() - lower_started
+        stablehlo = lowered.as_text(dialect="stablehlo")
+        stablehlo_path = output_root / f"compile-{arm}.stablehlo"
+        stablehlo_path.parent.mkdir(parents=True, exist_ok=True)
+        stablehlo_path.write_text(stablehlo, encoding="utf-8")
+        partial = {
+            "schema": "nova.centroid-constraint-compile-probe",
+            "arm": arm,
+            "source_revision": _revision(),
+            "lane": lane,
+            "cache_directory": str(cache.directory),
+            "construction_seconds": constructed - started,
+            "lower_seconds": lower_seconds,
+            "stablehlo_instruction_count": _stablehlo_instruction_count(stablehlo),
+            "stablehlo_sha256": hashlib.sha256(stablehlo.encode()).hexdigest(),
+            "stablehlo_path": str(stablehlo_path),
+            "completed": False,
+        }
+        state_path = output_root / f"compile-{arm}.json"
+        _write_json(state_path, partial)
+        compile_started = perf_counter()
+        lowered.compile()
+        partial["backend_compile_seconds"] = perf_counter() - compile_started
+        partial["total_seconds"] = perf_counter() - started
+        partial["completed"] = True
+        _write_json(state_path, partial)
+        return partial
+    finally:
+        set_support_clip_mode(previous_mode)
 
 
 def _row(case_name: str, requested_cells: int) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -417,11 +548,22 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
+    parser.add_argument("--compile-probe-arm", choices=("unconstrained", "constrained"))
     return parser.parse_args()
 
 
 def main() -> None:
     arguments = parse_args()
+    if arguments.compile_probe_arm is not None:
+        result = compile_probe_arm(arguments.output_root, arguments.compile_probe_arm)
+        print(
+            "CENTROID_COMPILE_PROBE "
+            f"arm={result['arm']} lower={result['lower_seconds']:.6f}s "
+            f"compile={result['backend_compile_seconds']:.6f}s "
+            f"stablehlo_instructions={result['stablehlo_instruction_count']}",
+            flush=True,
+        )
+        return
     report = measure(arguments.output_root, arguments.figure)
     print(
         f"CENTROID_CONSTRAINED_FIXTURE_EXIT={0 if report['verdict']['passed'] else 1}",

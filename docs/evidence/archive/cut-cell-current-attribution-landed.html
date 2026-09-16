@@ -1104,6 +1104,95 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   result. The benchmark now resolves all three output roots before invoking the
   certificate driver, preventing that post-solve receipt loss.</p>
 </section>
+<section id="exact-clip-warm-cost-and-workspace">
+  <h2>Exact-clip warm fixed-point cost and dominant device workspace</h2>
+
+  <p><strong>Accepted measurement.</strong> H200 job 1271922 completed with
+  batch exit <code>0:0</code> in 27m38s using one NVIDIA H200 NVL, eight CPU
+  cores, 128 GiB, <code>TMPDIR=/tmp</code> in both environments, binary64,
+  the root virtual-environment Python, the worktree benchmark, production on
+  <code>PYTHONPATH</code>, and one persistent compilation cache. It reused the
+  already completed 110- and 300-cell receipts, measured the 1000-cell rung,
+  ran both route comparisons, and wrote every part before aggregation. The
+  submitted production base was <code>e657f84c…</code>; the aggregation saw
+  <code>5bd02cb2…</code>. A path-scoped diff proves the intervening commits
+  changed documentation only: <code>nova/equilibrium</code>,
+  <code>benchmarks/solovev_certificate.py</code>, and
+  <code>scripts/analytic_oracle_fixtures/measure.py</code> are identical.</p>
+
+  <table>
+    <caption>Cold compile, three-solve warm median and device allocation by weak exact-clip rung</caption>
+    <thead><tr><th scope="col">Requested / realised cells</th><th scope="col">Cold compile</th><th scope="col">Warm fixed point</th><th scope="col">Trips</th><th scope="col">Warm / trip</th><th scope="col">Topology</th><th scope="col">Boundary</th><th scope="col">Clipped moments</th><th scope="col">Clip fraction / trip</th><th scope="col">Allocator peak</th><th scope="col">Largest allocation</th></tr></thead>
+    <tbody>
+      <tr><td>110 / 135</td><td>1029.443 s</td><td>34.538 s</td><td>2</td><td>17.269 s</td><td>1.431 ms</td><td>173.294 ms</td><td>6.881 ms</td><td>1.035%</td><td>1.383 GiB</td><td>1.373 GiB</td></tr>
+      <tr><td>300 / 342</td><td>1047.387 s</td><td>47.424 s</td><td>2</td><td>23.712 s</td><td>1.904 ms</td><td>160.395 ms</td><td>15.668 ms</td><td>0.734%</td><td>2.779 GiB</td><td>2.757 GiB</td></tr>
+      <tr><td>1000 / 1072</td><td>1074.164 s</td><td>92.843 s</td><td>2</td><td>46.421 s</td><td>2.161 ms</td><td>191.850 ms</td><td>40.365 ms</td><td>0.496%</td><td>7.950 GiB</td><td>7.822 GiB</td></tr>
+    </tbody>
+  </table>
+
+  <p>Warm wall per trip scales as cells<sup>0.4814</sup>; allocator peak scales
+  as cells<sup>0.8469</sup>. The exact clip is therefore 691–1857 times slower
+  per trip than the banked whole-cell compiled-trip reference of 24.996 ms,
+  and its complete two-trip fixed point is 251–674 times the banked 137.780 ms
+  one-trip solve. The separately blocked stage timers are small fractions of
+  the fixed-point wall—1.035%, 0.734%, and 0.496%—so the residual cost is in the
+  compiled fixed-point program rather than the isolated clip kernel.</p>
+
+  <p><strong>Allocation attribution.</strong> The allocator's largest single
+  allocation agrees with the optimized HLO buffer assignment at every rung.
+  The dominant allocation is XLA's preallocated temporary pool, not the
+  anticipated all-cell exact-quadrature array. Its largest live value is the
+  fixed-point JVP dynamic-update slice
+  <code>loop_dynamic_update_slice_fusion</code>: shapes
+  <code>f64[30,15,135,129]</code>, <code>f64[24,12,342,129]</code>, and
+  <code>f64[22,11,1072,129]</code>, occupying 0.058, 0.095, and 0.249 GiB.
+  The per-cell exact rules carry 245,632, 196,480, and 180,096 quadrature
+  points respectively, but the promoted fixed-capacity cell scan prevents
+  their all-cell workspace from being the dominant live array.</p>
+
+  <table>
+    <caption>Production cell scan against the former compact moment integrator</caption>
+    <thead><tr><th scope="col">Requested / realised cells</th><th scope="col">Scan median</th><th scope="col">Compact median</th><th scope="col">Scan temporary floor</th><th scope="col">Compact temporary</th><th scope="col">Terminal moments</th></tr></thead>
+    <tbody>
+      <tr><td>110 / 135</td><td>7.226 ms</td><td>7.086 ms</td><td>17.018 MiB</td><td>17.018 MiB</td><td>bit-identical</td></tr>
+      <tr><td>300 / 342</td><td>15.952 ms</td><td>15.950 ms</td><td>23.124 MiB</td><td>23.124 MiB</td><td>bit-identical</td></tr>
+    </tbody>
+  </table>
+
+  <p>The scan is already the production route after the promoted memory repair.
+  Current, radial-moment and vertical-moment arrays are bit-identical at both
+  comparison rungs (maximum absolute difference zero). Both routes now compile
+  to the same temporary floor, so the measurement retains the negative result:
+  no additional memory reduction remains relative to the repaired compact
+  kernel.</p>
+
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/exact-clip-cost/exact-clip-warm-cost-and-memory.svg" alt="Log-log exact-clip wall per trip and allocator peak against realised cell count, with scan and compact route comparisons">
+    <figcaption>Measured warm wall per fixed-point trip and allocator peak across the three exact-clip rungs; the route comparison shows the production scan and repaired compact kernel at 110 and 300 requested cells.</figcaption>
+  </figure>
+
+  <p><strong>Receipt discipline and driver history.</strong> All five part
+  receipts and the aggregate carry <code>completed: true</code>. The full
+  accepted log is
+  <code>~/.config/reckon/crew/reports/nova/s19-handoff/exact-clip-cost/h200-final.log</code>;
+  the report and retained, hash-verified optimized-HLO assignments sit beside
+  it. The persistent cache was configured and shared throughout the allocation,
+  but its writes were not admitted: the node could not resolve numeric group
+  89486, and the 1000-cell executable's 4.34 GB serialized form also exceeds
+  protobuf's 2 GiB message limit. Those warnings do not change the measured
+  in-process cold compile or the three warm executions, but no cross-process
+  cache-hit claim is made. Jobs 1271885 and 1271886 exposed benchmark-driver defects (a moved private
+  import and strict JSON refusing padded NaN values); job 1271899 completed the
+  300-cell measurement before a documentation-only HEAD advance tripped an
+  over-broad revision guard. Those logs are preserved. The repaired writer
+  stores padded non-finite telemetry as JSON <code>null</code>, and the guard
+  now refuses changes to measured inputs while admitting documentation-only
+  advances. The machine-readable aggregate is
+  <code>docs/figures/cut-cell-current-attribution/exact-clip-cost/receipt.json</code>.</p>
+
+  <p>The worker landed the benchmark and quantitative evidence but leaves the
+  driving followup and section status open for coordinator adjudication.</p>
+</section>
 </main>
 </body>
 </html>

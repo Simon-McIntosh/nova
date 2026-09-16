@@ -1,0 +1,96 @@
+{
+  "case": "weak-rotation-reactor-static",
+  "completed": true,
+  "former_compact_integrator": {
+    "compile_wall_seconds": 0.0011292891576886177,
+    "memory_analysis": {
+      "alias_size_in_bytes": 0,
+      "argument_size_in_bytes": 16830482,
+      "generated_code_size_in_bytes": 162144,
+      "host_alias_size_in_bytes": 0,
+      "host_argument_size_in_bytes": 0,
+      "host_generated_code_size_in_bytes": 0,
+      "host_output_size_in_bytes": 0,
+      "host_temp_size_in_bytes": 0,
+      "output_size_in_bytes": 8232,
+      "temp_size_in_bytes": 24829304
+    },
+    "warm_max_seconds": 0.01603329088538885,
+    "warm_median_seconds": 0.015949899330735207,
+    "warm_min_seconds": 0.01591281220316887,
+    "warm_wall_seconds": [
+      0.01603329088538885,
+      0.015949899330735207,
+      0.01591281220316887
+    ]
+  },
+  "lane": {
+    "allocated_cpus": 8,
+    "device": "NVIDIA H200 NVL",
+    "jax_enable_x64": true,
+    "jax_platforms": "cuda",
+    "job_id": 1271922,
+    "memory_mb": 131072,
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "platform": "gpu",
+    "reservation": "gpu_0003_grpA",
+    "tmpdir": "/tmp"
+  },
+  "memory_floor_bytes": 24829304,
+  "production_cell_banked_scan": {
+    "compile_wall_seconds": 0.7800363227725029,
+    "memory_analysis": {
+      "alias_size_in_bytes": 0,
+      "argument_size_in_bytes": 16830482,
+      "generated_code_size_in_bytes": 162144,
+      "host_alias_size_in_bytes": 0,
+      "host_argument_size_in_bytes": 0,
+      "host_generated_code_size_in_bytes": 0,
+      "host_output_size_in_bytes": 0,
+      "host_temp_size_in_bytes": 0,
+      "output_size_in_bytes": 8232,
+      "temp_size_in_bytes": 24829304
+    },
+    "warm_max_seconds": 0.021613401360809803,
+    "warm_median_seconds": 0.015951775014400482,
+    "warm_min_seconds": 0.015785332769155502,
+    "warm_wall_seconds": [
+      0.021613401360809803,
+      0.015951775014400482,
+      0.015785332769155502
+    ]
+  },
+  "realised_cells": 342,
+  "requested_cells": 300,
+  "schema": "nova.exact-clip-warm-cost.moment-route-comparison",
+  "source": {
+    "benchmark_revision": "0720a96709c79bbfac4ffe272b01b1235f3e048c",
+    "benchmark_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace",
+    "cell_banked_scan_present": true,
+    "implicit_root_derivative_present": true,
+    "production_base_revision": "e657f84c1f08549a66a3b13d5ca24c32001a5f75",
+    "production_input_paths": [
+      "nova/equilibrium",
+      "benchmarks/solovev_certificate.py",
+      "scripts/analytic_oracle_fixtures/measure.py"
+    ],
+    "production_revision": "4c21012b6b3dba1080aba8424d79c69e1f185b63",
+    "production_root": "/home/ITER/mcintos/Code/nova"
+  },
+  "terminal_moment_comparison": {
+    "cell_current": {
+      "bit_identical": true,
+      "maximum_absolute_difference": 0.0
+    },
+    "radial_moment": {
+      "bit_identical": true,
+      "maximum_absolute_difference": 0.0
+    },
+    "vertical_moment": {
+      "bit_identical": true,
+      "maximum_absolute_difference": 0.0
+    }
+  },
+  "terminal_state_sha256_binary64": "4ecade2dac6587413b16affd925b55c1da6304fd679792e9c619b7a7bf0915d0"
+}

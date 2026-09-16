@@ -560,6 +560,34 @@ def test_keyframe_measurement_forwards_the_reusable_program():
     assert calls == [("profile", "flux", "current", expected_program)]
 
 
+def test_keyframe_measurement_failure_exits_nonzero(monkeypatch, tmp_path):
+    """A refused receipt must be a failed process, not only a printed label."""
+    import sys
+
+    from benchmarks import playable_keyframe_receipt
+
+    def refuse(**_kwargs):
+        raise RuntimeError("receipt refused")
+
+    monkeypatch.setattr(playable_keyframe_receipt, "measure", refuse)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "playable_keyframe_receipt.py",
+            "--output",
+            str(tmp_path / "receipt.json"),
+            "--figure",
+            str(tmp_path / "receipt.png"),
+        ],
+    )
+
+    with pytest.raises(SystemExit) as raised:
+        playable_keyframe_receipt.main()
+
+    assert raised.value.code == 1
+
+
 # --------------------------------------------------------------------------
 # one keyframe through the production protocol (slow, CPU)
 # --------------------------------------------------------------------------

@@ -676,6 +676,7 @@ def main() -> None:
         print(f"DRIVER-ERROR {type(error).__name__}: {error}", flush=True)
         status = 1
     print(f"DRIVER_EXIT_STATUS={status}", flush=True)
+    raise SystemExit(status)
 
 
 if __name__ == "__main__":

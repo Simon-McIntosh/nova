@@ -1753,6 +1753,30 @@ remains below the canonical wall at every measured batch after the twelve-row id
   </figure>
   <p>The first H200 launcher exited 1 only after all rows, certificate parts and figures had landed, because its first adjudicator compared each solve terminal with its input seed. That implausible zero-of-twelve result was rejected as an instrument claim. Follow-on job <code>1271598</code> used the same one-card, eight-core, 128 GiB shape and persistent cache; for each MAST member it solved once through the canonical production read and once through the parallel production read from the same seed, persisting the canonical array before starting the parallel arm and both arrays before moving to the next member. All twelve pairs have identical hashes and zero differing binary64 elements, including the non-converged terminal states; the job and its assertion exited 0. Receipts: <code>docs/figures/playable-forward-solve/parallel-components-read/parallel-components-read-receipt.json</code> and <code>mast-paired-terminal-receipt.json</code>. Paired arrays: <code>docs/figures/playable-forward-solve/parallel-components-read/mast-paired-terminals/</code>. Logs: <code>~/.config/reckon/crew/reports/nova/s19-handoff/parallel-components-read/logs/</code>.</p>
 </section>
+<section id="press-stage-attribution">
+  <h2>The H200 press wall is fully attributed by the production and session stage clock (2026-09-16)</h2>
+  <p><strong>Defect reproduced before repair.</strong> The prior receipt at <code>docs/figures/playable-forward-solve/keyframes/h200-playable-axis-continuation-keyframes.json</code> recorded the first moved <code>bulk_z+</code> press at <code>250.86241241451353 s</code> while the reduced solve took <code>0.7916493061929941 s</code>, the forward receipt <code>0.19420686177909374 s</code>, frame assembly <code>0.12565797474235296 s</code>, and channel reduction <code>0.00036881398409605026 s</code>. Its 100 cache-served compiles totalled <code>4.084995988 s</code>, leaving <code>246.77741642651354 s</code> outside every clocked stage. This reproduction established that the missing instrument was the host-side inverse and admission path, not a fresh compile.</p>
+  <p><strong>Implementation.</strong> Commit <code>f101c55d</code> records exclusive stage walls in <code>ProductionSolver.solve_target</code> for target construction, program binding, shape-inverse host work, every admission referee solve, target observation and forward-solve counts. <code>PlayableSession.step</code> records command construction, receipt construction, frame assembly and bookkeeping; <code>frame_push</code> records channel reduction and finalises the press wall. The benchmark persists the stage map and renders the stacked breakdown with a project-absolute figure source.</p>
+  <table>
+    <caption>First moved H200 press on 22086/43, job 1272105</caption>
+    <thead><tr><th scope="col">Stage</th><th scope="col">Wall (s)</th><th scope="col">Path</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Shape target</th><td>54.875413361005485</td><td><code>apps/playable/production.py:366-373</code></td></tr>
+      <tr><th scope="row">Shape inverse, exclusive of referee</th><td>113.73839998058975</td><td><code>apps/playable/production.py:287-300</code></td></tr>
+      <tr><th scope="row">Target observation</th><td>111.86069428641349</td><td><code>apps/playable/production.py:306-314</code></td></tr>
+      <tr><th scope="row">Admission referee</th><td>0.9207628266885877</td><td><code>apps/playable/production.py:238-247</code></td></tr>
+      <tr><th scope="row">Forward receipt</th><td>0.0011534644290804863</td><td><code>apps/playable/session.py:229-249</code></td></tr>
+      <tr><th scope="row">Frame assembly</th><td>0.15508604049682617</td><td><code>apps/playable/session.py:259-265</code></td></tr>
+      <tr><th scope="row">Channel push</th><td>0.00041493121534585953</td><td><code>apps/playable/session.py:334-399</code></td></tr>
+    </tbody>
+  </table>
+  <p>The full press wall is <code>281.5537887495011 s</code>; the non-overlapping rows sum to <code>281.55364739056677 s</code>, an error of <code>-0.00014135893434286118 s</code> and well within the five-percent gate. The largest stage is shape-inverse host work at <code>113.73839998058975 s</code>. The press ran one forward solve, reused the carried program, emitted zero fresh compiles and 100 cache-served compile events. The prime and first moved receipt were durable before the allocation was cancelled at <code>9m53s</code> to avoid measuring the separate next press, so no warm-chain median is claimed and the 60-second fence remains open.</p>
+  <figure>
+    <img src="/nova/figures/playable-forward-solve/keyframes/h200-playable-press-stage-breakdown.png" alt="Stacked stage breakdown for the first moved H200 press">
+    <figcaption>The first moved press is dominated by shape-target construction, exclusive shape-inverse host work and target observation; the stage sum closes the measured press wall.</figcaption>
+  </figure>
+  <p><strong>Artifacts and gates.</strong> Receipt: <code>docs/figures/playable-forward-solve/keyframes/h200-press-stage-receipt.json</code>. Figure: <code>docs/figures/playable-forward-solve/keyframes/h200-playable-press-stage-breakdown.png</code>. H200 log: <code>~/.config/reckon/crew/reports/nova/s19-codex/press-remainder-2/h200-1272105.log</code>. Focused CPU log: <code>~/.config/reckon/crew/reports/nova/s19-codex/press-remainder-2/focused-session-after.log</code>. The focused gate passed 25 selected tests with zero failures and 3 deselected; no file under <code>nova/equilibrium/</code> was modified.</p>
+</section>
 </main>
 </body>
 </html>

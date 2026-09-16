@@ -317,6 +317,7 @@ def _compiled_slice_module(operator, seed, requested_class, target_current):
         requested_class=requested_class,
         target_current=jnp.asarray(target_current),
         external=external,
+        default_external=False,
         program=None,
     )
     kernels = reduced_newton._bind_dynamic_arguments(

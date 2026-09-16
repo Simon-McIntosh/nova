@@ -1583,8 +1583,7 @@ def _digest_callable_value(
     if is_dataclass(value) and not isinstance(value, type):
         digest.update(
             (
-                f"{name}:dataclass:{type(value).__module__}."
-                f"{type(value).__qualname__}"
+                f"{name}:dataclass:{type(value).__module__}.{type(value).__qualname__}"
             ).encode("utf-8")
         )
         for definition in fields(value):
@@ -3370,7 +3369,11 @@ class ForwardFluxOperator:
         ) -> jax.Array:
             """Return one map evaluation at an explicitly supplied exterior."""
             active = self if operator is None else operator
-            active_target = target_value if target_current is not None else None
+            active_target = (
+                (target_current if target_value is None else target_value)
+                if target_current is not None
+                else None
+            )
             image = external + active.internal(psi, requested_class, active_target)
             return active._exclude_shadow_residual(psi, image, requested_class)
 
@@ -3420,7 +3423,11 @@ class ForwardFluxOperator:
             target_value=None,
         ) -> jax.Array:
             active = self if operator is None else operator
-            active_target = target_value if target_current is not None else None
+            active_target = (
+                (target_current if target_value is None else target_value)
+                if target_current is not None
+                else None
+            )
             image = external + active.internal(psi, requested_class, active_target)
             return active._exclude_shadow_residual(
                 psi, image, requested_class, shadow=shadow

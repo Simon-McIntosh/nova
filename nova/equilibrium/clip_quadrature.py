@@ -107,31 +107,31 @@ def _quadratic_coefficients(values):
 def _compact_chord_polygon(vertices, count):
     """Collapse every sampled level arc to its chord and retain its sagitta.
 
-    The exact clip expands one curved base edge into 128 ordered line segments.
-    Dense runs are recognised by their scale relative to the cell's straight
-    edges. Their endpoints form the chord polygon; the midpoint is retained as
-    the sagitta sample used by the quadratic boundary correction.
+    The exact clip rotates a cut support to its leaving crossing, then packs the
+    traced arc into the first 129 vertices: both endpoints and 127 interior
+    samples. Slots 0 through 128 therefore carry the 128 arc edges, while every
+    later live slot carries one straight cell-boundary vertex. The endpoints
+    form the chord polygon and slot 64 supplies the sagitta. A layout that does
+    not resolve to one arc plus a three-to-24-vertex base polygon is refused.
     """
     point = jnp.asarray(vertices)
     vertex_count = jnp.asarray(count)
     cell_count, capacity, _coordinate = point.shape
     slot = jnp.arange(capacity)
     valid = slot[None, :] < vertex_count[:, None]
-    following_slot = jnp.where(
-        slot[None, :] + 1 < vertex_count[:, None], slot[None, :] + 1, 0
+    expanded = vertex_count > _WHOLE_CELL_VERTEX_CAPACITY
+    base_count = vertex_count - (_SPLINE_ARC_SEGMENTS - 1)
+    supported = jnp.where(
+        expanded,
+        (vertex_count >= _SPLINE_ARC_SEGMENTS + 2)
+        & (base_count >= 3)
+        & (base_count <= _WHOLE_CELL_VERTEX_CAPACITY),
+        (vertex_count >= 3) & (vertex_count <= _WHOLE_CELL_VERTEX_CAPACITY),
     )
-    following = jnp.take_along_axis(point, following_slot[..., None], axis=1)
-    edge_length = jnp.linalg.norm(following - point, axis=2)
-    longest = jnp.max(jnp.where(valid, edge_length, 0.0), axis=1)
-    sampled = (
-        valid
-        & (vertex_count[:, None] > _WHOLE_CELL_VERTEX_CAPACITY)
-        & (edge_length < longest[:, None] / 16.0)
+    arc_interior = (
+        expanded[:, None] & (slot[None, :] > 0) & (slot[None, :] < _SPLINE_ARC_SEGMENTS)
     )
-    previous_sampled = jnp.roll(sampled, 1, axis=1)
-    arc_start = sampled & ~previous_sampled
-    interior = sampled & previous_sampled
-    keep = valid & ~interior
+    keep = valid & ~arc_interior
     rank = jnp.cumsum(keep, axis=1) - 1
     safe_rank = jnp.where(keep, rank, 0)
     cell = jnp.broadcast_to(jnp.arange(cell_count)[:, None], safe_rank.shape)
@@ -147,26 +147,18 @@ def _compact_chord_polygon(vertices, count):
     chord_count = jnp.sum(keep, axis=1)
 
     retained_arc_capacity = min(_MAX_CURVED_ARCS, capacity)
-    arc_value, arc_index = jax.lax.top_k(
-        arc_start.astype(jnp.int32), retained_arc_capacity
+    arc_slot = jnp.arange(retained_arc_capacity)
+    arc_active = expanded[:, None] & (arc_slot[None, :] == 0)
+    arc_index = jnp.zeros((cell_count, retained_arc_capacity), dtype=jnp.int32)
+    middle_index = jnp.full_like(
+        arc_index, min(_SPLINE_ARC_SEGMENTS // 2, capacity - 1)
     )
-    arc_active = arc_value.astype(bool)
-    middle_index = (arc_index + _SPLINE_ARC_SEGMENTS // 2) % jnp.maximum(
-        vertex_count[:, None], 1
-    )
-    end_index = (arc_index + _SPLINE_ARC_SEGMENTS) % jnp.maximum(
-        vertex_count[:, None], 1
-    )
+    end_index = jnp.full_like(arc_index, min(_SPLINE_ARC_SEGMENTS, capacity - 1))
     arc_first = jnp.take_along_axis(point, arc_index[..., None], axis=1)
     arc_middle = jnp.take_along_axis(point, middle_index[..., None], axis=1)
     arc_last = jnp.take_along_axis(point, end_index[..., None], axis=1)
-    sampled_edges = jnp.sum(sampled, axis=1)
-    arc_count = jnp.sum(arc_start, axis=1)
-    expanded = vertex_count > _WHOLE_CELL_VERTEX_CAPACITY
-    supported = (
-        (chord_count <= _WHOLE_CELL_VERTEX_CAPACITY)
-        & (arc_count <= _MAX_CURVED_ARCS)
-        & (~expanded | (sampled_edges == arc_count * _SPLINE_ARC_SEGMENTS))
+    supported = supported & (
+        chord_count == jnp.where(expanded, base_count, vertex_count)
     )
     return (
         chord,

@@ -9,6 +9,7 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
+from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.clip_quadrature import (
     _compact_chord_polygon,
     clipped_support_current_moments,
@@ -17,6 +18,7 @@ from nova.equilibrium.clip_quadrature import (
 )
 from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
 from nova.jax.config import configure_dtypes
+from scripts.analytic_oracle_fixtures import measure as fixture
 
 
 class _Support(NamedTuple):
@@ -119,6 +121,33 @@ def test_curved_support_reduces_to_the_vertex_capacity_and_point_bound():
     assert bool(supported[0])
     assert cut_cell_moment_evaluation_bound() == 66
     assert cut_cell_moment_evaluation_bound() < 200
+
+
+def test_weak_cut_cells_resolve_the_fixed_arc_layout():
+    carrier_case, source_case, exact = certificate._case("weak-rotation-reactor-static")
+    machine = certificate._case_machine(
+        "weak-rotation-reactor-static", carrier_case, exact, -110
+    )
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    state = certificate._exact_state("weak-rotation-reactor-static", exact, coordinates)
+    operator = fixture.forward_operator(source_case, machine)
+    support = fixture._analytic_profile_support(exact, operator, state)
+    cells = np.asarray([35, 36, 54, 101, 102, 128])
+    compact = _compact_chord_polygon(
+        support.support_vertices[cells], support.vertex_count[cells]
+    )
+    chord_count = np.asarray(compact[1])
+    arc_active = np.asarray(compact[5])
+    supported = np.asarray(compact[6])
+    np.testing.assert_array_equal(
+        np.asarray(support.vertex_count)[cells],
+        np.asarray([131, 132, 132, 131, 131, 131]),
+    )
+    np.testing.assert_array_equal(chord_count, np.asarray([4, 5, 5, 4, 4, 4]))
+    np.testing.assert_array_equal(np.sum(arc_active, axis=1), np.ones(len(cells)))
+    assert np.all(supported)
 
 
 def test_malformed_sampled_arc_refuses_with_nonfinite_moments():

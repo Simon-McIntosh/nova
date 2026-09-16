@@ -306,6 +306,13 @@ def _solve_program(profile: Any, request: Any) -> Callable[[jax.Array], Any]:
     return solve_program
 
 
+def _certificate_problem(cells: int) -> tuple[Any, np.ndarray, Any, dict[str, Any]]:
+    """Build one certificate row across the quadrature-node ownership move."""
+    if not hasattr(certificate.observation, "_UNIT_NODE"):
+        certificate.observation._UNIT_NODE = clip_quadrature._UNIT_NODE
+    return certificate._certificate_compile_problem(CASE, -abs(cells))
+
+
 def _compile_and_time(
     function: Callable[[Any], Any], argument: Any, repeats: int = REPEATS
 ) -> tuple[Any, dict[str, Any], Any]:
@@ -402,9 +409,7 @@ def _production_worker(
     source = _require_promoted_source()
     cache = configure_persistent_compilation_cache(cache_root)
     set_support_clip_mode("exact")
-    profile, seed, request, dimensions = certificate._certificate_compile_problem(
-        CASE, -abs(cells)
-    )
+    profile, seed, request, dimensions = _certificate_problem(cells)
     seed_array = jnp.asarray(seed, dtype=jnp.float64)
     compiled, solve_timing, result = _compile_and_time(
         _solve_program(profile, request), seed_array
@@ -478,9 +483,7 @@ def _moment_worker(cells: int, production_part: Path, output: Path) -> dict[str,
     set_support_clip_mode("exact")
     production = json.loads(production_part.read_text(encoding="utf-8"))
     terminal = jnp.asarray(production["terminal"]["state"], dtype=jnp.float64)
-    profile, _seed, _request, dimensions = certificate._certificate_compile_problem(
-        CASE, -abs(cells)
-    )
+    profile, _seed, _request, dimensions = _certificate_problem(cells)
     partition = jax.block_until_ready(
         profile.operator._support_partition(terminal, int(TopologyClass.LIMITED))
     )
@@ -790,6 +793,7 @@ def _child_environment(dump_root: Path) -> dict[str, str]:
         "--xla_dump_hlo_module_re=solve_program"
     )
     environment["XLA_FLAGS"] = f"{existing} {flags}".strip()
+    environment["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
     environment["PYTHONPATH"] = os.pathsep.join(
         [str(PRODUCTION_ROOT), str(ROOT), environment.get("PYTHONPATH", "")]
     )

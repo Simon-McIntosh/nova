@@ -14,6 +14,7 @@ from datetime import UTC, datetime
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import time
 from typing import Any
@@ -401,7 +402,9 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
 
 def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str, Any]:
     """Persist the four certificate identity rows as each comparison lands."""
-    from benchmarks.trip_quantum_width_one import _require_allocation, _require_revision
+    import jax
+
+    from benchmarks.trip_quantum_width_one import _require_revision
     from nova.jax.config import (
         configure_dtypes,
         configure_persistent_compilation_cache,
@@ -409,11 +412,19 @@ def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str,
     )
 
     configure_dtypes()
+    if os.environ.get("SLURM_JOB_ID") is None:
+        raise RuntimeError("certificate identity requires a SLURM allocation")
     receipt: dict[str, Any] = {
         "schema": "nova.solve-program-certificate-identity",
         "measurement_revision": _require_revision(),
         "captured_at": datetime.now(UTC).isoformat(),
-        "assignment": _require_allocation(),
+        "assignment": {
+            "job_id": os.environ["SLURM_JOB_ID"],
+            "partition": os.environ.get("SLURM_JOB_PARTITION"),
+            "node": os.environ.get("SLURMD_NODENAME")
+            or os.environ.get("SLURM_JOB_NODELIST"),
+            "platform": jax.default_backend(),
+        },
         "persistent_compilation_cache": configure_persistent_compilation_cache(
             cache_root or default_persistent_compilation_cache_root(),
             minimum_compile_seconds=0.0,
@@ -445,8 +456,6 @@ def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str,
 
 def measure_300_program(output: Path, cache_root: Path | None) -> dict[str, Any]:
     """Compile the explicit-operator certificate program and gate its byte size."""
-    import os
-
     import jax
     import jax.numpy as jnp
 

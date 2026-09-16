@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-16T11:03:12",
+  "updated": "2026-09-16T11:27:01",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -169737,6 +169737,226 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T075905455400-pfs-playable-persistent-cache-keyframe-receipt",
+        "plan": "playable-forward-solve",
+        "section": "\u00a73",
+        "node": "pfs-playable-persistent-cache-keyframe-receipt",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2429,
+                "cached_input_tokens": 427191,
+                "input_tokens": 429652,
+                "output_tokens": 1469,
+                "reasoning_output_tokens": 338,
+                "total_tokens": 431121,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "tests/test_playable_session.py::test_production_keyframe_completes_on_the_solovev_machine passes on all_debug with JAX_PLATFORMS=cpu and a warm cache under a fence restated from the measured warm figure (it read 217.7 s against a 60 s fence at 00d983ad because every edit recompiled), the whole tests/test_playable_session.py module passes in one fresh CPU process with zero added failures against the base revision, one H200 job (one card, an explicit --mem such as 128G, --cpus-per-task sized to the cores free on 98dci4-gpu-0003 at submission which read 2 of 30 at dispatch, the shared environment's interpreter run directly with no uv on the node) writes per keyframe the solve wall, trip count and frame-assembly wall into docs/figures/playable-forward-solve/keyframes/ with the receipt JSON and one figure, logs persisted under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/playable-cache as each lands",
+          "estimated_hours": null,
+          "goal": "Give the playable production solver (apps/playable/production.py) one compiled reduced program reused across prescribed-current edits through the landed traced-current route of forward-solve-api section 5, with the persistent compilation cache enabled through nova.equilibrium.solve_request.default_forward_compilation_cache_root exactly as the benchmarks enable it, re-receipted per keyframe on the H200 by benchmarks/playable_keyframe_receipt.py, starting from the banked partial under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-handoff/playable-cache/banked rather than from scratch",
+          "id": "pfs-playable-persistent-cache-keyframe-receipt",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-16T07:59:06Z",
+            "read_at": "2026-09-16T07:59:07Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 77.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T075905455400-pfs-playable-persistent-cache-keyframe-receipt/manifest.md",
+          "plan": "playable-forward-solve",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "apps/playable/production.py",
+            "benchmarks/playable_keyframe_receipt.py",
+            "tests/test_playable_session.py",
+            "docs/figures/playable-forward-solve/keyframes",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/playable-cache",
+            "docs/evidence/archive/playable-forward-solve-landed.html",
+            "docs/plans/playable-forward-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19c-pfs-cache-s",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-16T07:59:24Z",
+        "completed_at": "2026-09-16T09:23:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5047,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5047,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "50e64d3acdb7cb38f3f8a461a3c71c64dae885e6",
+        "commits": [
+          "1a97c8d7fba809baa7ccca85b1122c2b616ec6d9",
+          "4a9102b48bb65de288037619a8b38d22b82b94e5",
+          "bdfbae0e9d35bd49a13e61b4e3a977f459494323",
+          "f81be077abdef0d43a88390cfa078d9f468d7944",
+          "e36d1e045c2184c4647c6c9449237f1caa9aa61c",
+          "b29da280168c8f3af405448c5d9d2dda0ac9b808"
+        ],
+        "changed_lines": {
+          "added": 1300,
+          "removed": 3,
+          "files": 14
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "tests/test_flux_surface_geometry.py and tests/test_playable_session.py one per fresh all_debug process plus H200 keyframe receipt job 1272001",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/playable-cache/h200-continuation-1272001.log",
+          "log_digest": "sha256:d668b4700afdbba61f2e1fd5a096075bd9531e724d464dc453b330049581bbc9"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T075905455400-pfs-playable-persistent-cache-keyframe-receipt/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a0a93a-4bb3-7143-9a9b-79048224463f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 48483968,
+            "cached_input_tokens_cumulative": 48483968,
+            "input_tokens": 48748828,
+            "input_tokens_cumulative": 48748828,
+            "output_tokens": 76369,
+            "output_tokens_cumulative": 76369,
+            "reasoning_output_tokens": 21028,
+            "reasoning_output_tokens_cumulative": 21028
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-16T09:23:31Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 82.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-16T09:23:31Z"
+            }
+          ],
+          "notional_cost_usd": 390.6991,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 59405312,
+          "cumulative_input_tokens": 59862534,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 97397,
+          "generation_seconds": 3166.07,
+          "machine_seconds": 1880.086,
+          "tokens_per_second": 30.76
+        },
+        "follow_on_paths": [
+          "nova/equilibrium/shape_inverse.py:_deform_boundary_polygon",
+          "246.777416",
+          "0.791649",
+          "0.194207",
+          "0.125658"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": [
+          {
+            "path": "apps/playable/session.py",
+            "reason": "scope widened by the coordinator at the first resume to repair the moved-frame boundary selection the node exposed"
+          },
+          {
+            "path": "tests/test_flux_surface_geometry.py",
+            "reason": "regression for the widened repair, granted at the same resume"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/pfs-playable-persistent-cache-keyframe-receipt",
+          "session_id": "01a0a93a-4bb3-7143-9a9b-79048224463f",
+          "session_source": "pointer",
+          "retained_at": "2026-09-16T09:23:31Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 98.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -170049,6 +170269,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2608
+    "_version": 2609
   }
 }

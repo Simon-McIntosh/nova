@@ -10,8 +10,8 @@
   <meta name="plan-summary" content="Boundary-moment implementation and its retained weak-row refusal">
   <meta name="plan-evidence-for" content="exact-clip-moment-quadrature">
   <meta name="plan-verifies" content="exact-clip-moment-quadrature#s2">
-  <meta name="plan-commits" content="e916b3f9,1f885217,5fea2b5b,a9d8061e,f221d583">
-  <meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/focused-tests.log,/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/layout-focused-tests.log,/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/weak-110-rerun.log,/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/parts/weak-rotation-reactor-static-110.json">
+  <meta name="plan-commits" content="e916b3f9,1f885217,5fea2b5b,a9d8061e,f221d583,5c32623e,1f42a3ee,8095963b">
+  <meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/focused-tests.log,/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/layout-focused-tests.log,/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/weak-110-rerun.log,/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/parts/weak-rotation-reactor-static-110.json,/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/discriminator.log,/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/discriminator-rerun.log,/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments/density-region-discriminator.json">
   <meta name="plan-recorded-at" content="2026-09-16">
   <meta name="plan-verdict" content="blocked">
   <meta name="plan-environment" content="all_debug, JAX_PLATFORMS=cpu, binary64">
@@ -25,7 +25,7 @@
     <header>
       <p class="eyebrow">Execution evidence</p>
       <h1>Exact-clip moment quadrature</h1>
-      <p class="lead">The boundary reduction and fixed-layout repair landed; the analytic-row comparison is blocked by moment and image errors far above the fan floor.</p>
+      <p class="lead">The boundary reduction and fixed-layout repair landed; a weak-row discriminator attributes the gate failure primarily to replacing the sampled arc, leaving the representation and accuracy budget for the lead to lock.</p>
     </header>
     <section id="s2-boundary-reduction">
       <h2>Polygon-exact density moments</h2>
@@ -42,6 +42,35 @@
         </tbody>
       </table>
       <p><strong>Retained blocker.</strong> The fixed layout is now resolved: for representative cell 35, the live count is 131, arc edges are slots 0–127, sagitta is slot 64, the arc endpoint is slot 128, and the chord polygon keeps slots 0, 128, 129, and 130. The fail-closed layout guard refused no weak-row cells. The remaining failure is numerical: a six-sample quadratic density does not reproduce the retained fan to its own refinement floor, and its frozen-current flux image is likewise changed above that floor. Under the one-rerun fence no further density-order repair or full twelve-row matrix was attempted; no comparison figure is claimed.</p>
+    </section>
+    <section id="density-region-discriminator">
+      <h2>Weak-row density and region discriminator</h2>
+      <p><code>all_debug</code> job <code>1271951</code>, with <code>JAX_PLATFORMS=cpu</code> and binary64 enabled, held one part of the candidate route fixed at a time. The boundary arm used the divergence-theorem homotopy from the fan anchor over every edge of the actual sampled polygon; with the same eight-point radial and edge Gauss rules, it evaluates the profile at exactly the fan's Duffy points while expressing the reduction as a boundary integral. The second arm retained the fan polygon and replaced only the pointwise density by the production six-sample quadratic fit.</p>
+      <table>
+        <thead><tr><th>Arm against exact-density fan</th><th>Current relative L2</th><th>Radial relative L2</th><th>Vertical relative L2</th><th>Frozen image sup/span</th></tr></thead>
+        <tbody>
+          <tr><td>Sampled polygon, boundary homotopy, pointwise density</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>Sampled polygon, fan integration, quadratic-fit density</td><td>1.1693910794921578e-6</td><td>9.432656549758488e-6</td><td>1.1231467775583494e-6</td><td>4.6622335696852e-7</td></tr>
+          <tr><td>Chord plus sagitta, quadratic-fit density (production context)</td><td>1.543882739834855e-4</td><td>2.542183868984931e-3</td><td>2.122222575024714e-3</td><td>1.0205229719434942e-4</td></tr>
+          <tr><td>Region increment at fixed quadratic density, normalized by exact-fan norm</td><td>1.544659199907938e-4</td><td>2.543221716878162e-3</td><td>2.122223346586164e-3</td><td>1.0176518729840111e-4</td></tr>
+        </tbody>
+      </table>
+      <p>The exact-density boundary arm is an exact numerical identity with the retained fan on this row. The density approximation is measurable but is one to three orders smaller than the combined discrepancy, while the fixed-density region increment reproduces essentially all of the <code>1.5e-4 / 2.5e-3 / 2.1e-3</code> moment error and <code>1.02e-4</code> image error. The sampled-arc replacement, not the boundary contraction, is therefore the dominant cause on weak 110. This does not rehabilitate the quadratic density against the approximately <code>1e-15</code> fan floor; it shows that increasing its order would not settle the larger representation decision.</p>
+      <h3>What the dense fan allocation contains</h3>
+      <p>The 196,480-point figure was reproduced with a 3,072-vertex support capacity. The weak-row instrument instead observed capacity 3,840, which makes the historical fixed fan shape <strong>245,632 points per cut cell</strong>. Across 43 cut cells only 357,376 of 10,562,176 allocated point slots were live, a live fraction of 3.3835%; 10,204,800 slots carried exact-zero weights. The table retains the requested 196,480-point comparison and states the actual weak-row allocation separately.</p>
+      <table>
+        <thead><tr><th>Live vertices</th><th>Cut cells</th><th>Live evaluations/cell</th><th>Zero padding of 196,480</th><th>Zero padding of actual 245,632</th></tr></thead>
+        <tbody>
+          <tr><td>130</td><td>4</td><td>8,192</td><td>188,288</td><td>237,440</td></tr>
+          <tr><td>131</td><td>14</td><td>8,256</td><td>188,224</td><td>237,376</td></tr>
+          <tr><td>132</td><td>13</td><td>8,320</td><td>188,160</td><td>237,312</td></tr>
+          <tr><td>133</td><td>8</td><td>8,384</td><td>188,096</td><td>237,248</td></tr>
+          <tr><td>134</td><td>4</td><td>8,448</td><td>188,032</td><td>237,184</td></tr>
+        </tbody>
+      </table>
+      <h3>Decision brief</h3>
+      <p><strong>Blocked pending lead choice.</strong> Lock one boundary representation—chord, chord plus sagitta, or the sampled arc with per-edge Gauss—and pair it with explicit allowable relative error for each of current, radial moment, vertical moment, and frozen-image sup/span. Chord plus sagitta has the measured 66-evaluation bound but would require a budget that admits at least this weak-row result before the full matrix can test it. The sampled arc preserves the fan region and achieved zero discriminator delta with pointwise density, but the measured live work is 8,192–8,448 evaluations per cut cell at the fan's rule, so it cannot satisfy the current under-200 cost gate without a separately justified lower-order edge rule. No density-order repair or full matrix was run.</p>
+      <p>Receipts: <code>density-region-discriminator.json</code> and <code>discriminator-rerun.log</code>. The first instrument run, job <code>1271950</code>, correctly refused its own assumption that weak 110 carried the nominal 196,480-point shape; job <code>1271951</code> retained that discrepancy and completed.</p>
     </section>
   </main>
 </body>

@@ -316,7 +316,7 @@ def discriminate() -> dict[str, Any]:
     arms = [
         arm(
             "sampled_polygon_exact_density_boundary",
-            "Boundary homotopy over all 131 sampled vertices with pointwise "
+            "Boundary homotopy over every live sampled vertex with pointwise "
             "profile density.",
             exact_boundary,
         ),

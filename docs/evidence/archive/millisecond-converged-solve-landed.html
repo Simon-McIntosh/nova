@@ -13,6 +13,8 @@
   <title>Millisecond converged solve — landed evidence | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-16">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -591,6 +593,27 @@
   residual, merit, acceptance, recovery, reconciliation and JVP requests without
   freezing the live topology semantics. Focused instrument tests pass 13 of 13
   after the refused wrapper is removed.</p>
+</section>
+
+<section id="mesh-arguments">
+  <h2>Mesh-sized forward-operator arrays are executable arguments (2026-09-16)</h2>
+  <p><strong>Result.</strong> Commits <code>dd7d8286</code>, <code>4cd74aed</code>, <code>27b2495f</code>, <code>64c2a161</code>, <code>78d87c69</code>, <code>8d84644c</code>, <code>205d0f35</code> and <code>e0e9417a</code> carry the forward operator's kernel, wall, sample, moment-geometry and topology arrays as traced operands through the operator pytree, jitted map, frozen-partition callbacks, fixed-point iterations, reduced kernels and compiled slice. Host-only geometry identity, cut-cell capacity and topology construction remain outside the executable. The 300-cell generated-code measurement is <code>0 bytes</code>, where the base program's captured literals grew quadratically with cell count.</p>
+  <figure>
+    <img src="/nova/figures/millisecond-converged-solve/mesh-arguments/operator-argument-boundary.svg" alt="Forward operator boundary showing mesh-sized arrays entering the compiled arithmetic as explicit traced arguments">
+    <figcaption>Every mesh-sized geometry and interaction block crosses the operator pytree boundary as an explicit operand; only scalar identity and construction metadata remain host-owned.</figcaption>
+  </figure>
+  <p><strong>Terminal identity.</strong> CPU job <code>1271939</code> re-solved the weak-, moderate- and strong-rotation 300-cell certificate rows and the diverted single-null 500-cell row. All four candidate terminal states have the same binary64 SHA-256 digest as their base-route counterpart, equal convergence state, equal terminal residual and maximum absolute state difference <code>0.0</code>.</p>
+  <table>
+    <caption>Fresh-process CPU module gates at revision <code>e0e9417a</code></caption>
+    <thead><tr><th scope="col">Module</th><th scope="col">Job</th><th scope="col">Verdict</th></tr></thead>
+    <tbody>
+      <tr><th scope="row"><code>tests/test_forward_operator_arguments.py</code></th><td><code>1271917</code></td><td>3 of 3 passed</td></tr>
+      <tr><th scope="row"><code>tests/test_batched_operator_boundary.py</code></th><td><code>1271937</code></td><td>7 of 7 passed</td></tr>
+      <tr><th scope="row"><code>tests/test_forward_compile_identity.py</code></th><td><code>1271938</code></td><td>3 of 3 passed</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Program size.</strong> The committed 300-cell baseline executable was <code>461,724,765 bytes</code>, including <code>390,646,760 bytes</code> of captured literals. The explicit-argument executable measured by CPU job <code>1271977</code> is <code>210,159,751 bytes</code>, a <code>54.48%</code> reduction, with <code>0 bytes</code> reported as generated code and a <code>337.367 s</code> compile wall. The receipt is <code>~/.config/reckon/crew/reports/nova/s19-codex/mesh-arguments/receipts/size-300.json</code>; the four-row identity receipt is beside it as <code>certificate-identity.json</code>.</p>
+  <p><strong>Measured remainder.</strong> The executable remains above the borrowed <code>50,000,000-byte</code> program-size figure. That remainder is the unrolled Newton-step and trip payload, not mesh-array capture, and is handed to followup <code>f-msc-program-size-budget</code> for the separate program census and attribution. It is not a refusal of the mesh-argument deliverable.</p>
 </section>
 </main>
 </body>

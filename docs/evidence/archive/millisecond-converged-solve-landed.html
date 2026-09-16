@@ -615,6 +615,60 @@
   <p><strong>Program size.</strong> The committed 300-cell baseline executable was <code>461,724,765 bytes</code>, including <code>390,646,760 bytes</code> of captured literals. The explicit-argument executable measured by CPU job <code>1271977</code> is <code>210,159,751 bytes</code>, a <code>54.48%</code> reduction, with <code>0 bytes</code> reported as generated code and a <code>337.367 s</code> compile wall. The receipt is <code>~/.config/reckon/crew/reports/nova/s19-codex/mesh-arguments/receipts/size-300.json</code>; the four-row identity receipt is beside it as <code>certificate-identity.json</code>.</p>
   <p><strong>Measured remainder.</strong> The executable remains above the borrowed <code>50,000,000-byte</code> program-size figure. That remainder is the unrolled Newton-step and trip payload, not mesh-array capture, and is handed to followup <code>f-msc-program-size-budget</code> for the separate program census and attribution. It is not a refusal of the mesh-argument deliverable.</p>
 </section>
+<section id="flux-arguments">
+  <h2>Flux-function coefficients are traced solve arguments</h2>
+  <p><strong>Implementation.</strong> Analytic pressure and diamagnetic gradients now use a
+  fixed-order power basis: each function contributes an order-plus-one coefficient vector and
+  one scalar physical normalisation as dynamic operator-pytree leaves, while the Horner
+  evaluator, basis order and profile methods remain static. The committed order-zero
+  certificate profiles therefore add four <code>float64</code> leaves, <code>32 bytes</code> in
+  total. Those leaves, together with target current, cross the forward-map, fixed-point and
+  compiled-slice call boundaries; a profile with a different static representation is refused
+  rather than silently reusing an incompatible program.</p>
+
+  <figure>
+    <img src="/nova/figures/millisecond-converged-solve/flux-arguments/flux-functions.png"
+         alt="Pressure and diamagnetic flux-function gradients for the committed profile and the coefficient-scaled profile sharing one compiled program">
+    <figcaption>The committed weak 300-cell profile and the audit profile, with pressure
+    coefficients scaled by 0.9 and diamagnetic coefficients by 1.1. Their values differ while
+    their fixed shapes and compiled program are identical.</figcaption>
+  </figure>
+
+  <table>
+    <thead><tr><th>Gate</th><th>Measured result</th></tr></thead>
+    <tbody>
+      <tr><td>Base reproduction, CPU job 1271993</td><td>Profile-only change produced distinct
+      StableHLO digests: <code>57abb42d…</code> against <code>57e76746…</code>.</td></tr>
+      <tr><td>Candidate certificate lowering, CPU job 1272031</td><td>Both profiles produced
+      <code>ad944e89594793dbdf4139db9dfe87471fca0f68f253aa2446a66c83e1a0cd34</code>,
+      with <code>0</code> differing constants.</td></tr>
+      <tr><td>Candidate compiled slice</td><td>Both profiles produced
+      <code>338469cce36286c804ca9957323ba53c597e76586430e50f2a3e40fe3a3b35f1</code>.</td></tr>
+      <tr><td>Backend compile</td><td>First profile <code>299.686857 s</code>; second profile
+      <code>0.000608 s</code>, which reads <code>0.0 s</code> at one-decimal receipt resolution.</td></tr>
+      <tr><td>Profile-component JVP, CPU job 1272023</td><td>Maximum central-difference error
+      <code>1.6438069727620075e-07</code> against its earned tolerance
+      <code>9.868840305302917e-07</code>.</td></tr>
+      <tr><td>Certificate identity, CPU jobs 1272030 and 1272094</td><td>Weak, moderate and strong
+      300-cell rows plus the 500-cell single-null row are bit-identical, convergence-equal and
+      have maximum difference <code>0.0</code>; combined receipt <code>passed: true</code>.</td></tr>
+      <tr><td>Fresh-process modules, CPU job 1272048</td><td><code>3/3</code> source,
+      <code>4/4</code> profile-argument and <code>3/3</code> compile-identity tests passed.</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Instrument caveat.</strong> Job 1272030 wrote the first three passing rows, then
+  exhausted LLVM section memory while retaining their compiled programs before it could compare
+  the 500-cell row. Job 1272094 ran that missing row alone through the same
+  <code>benchmarks.solve_program_size_gate</code> row function and atomically completed the
+  four-row receipt. This was an instrument-resource failure, not a numerical mismatch.</p>
+
+  <p><strong>Receipts.</strong>
+  <code>~/.config/reckon/crew/reports/nova/s19-codex/flux-arguments/recompile-receipt.json</code>,
+  <code>certificate-identity.json</code>,
+  <code>profile-component-qualified-1272023.log</code>, and
+  <code>module-gate-1272048.log</code>.</p>
+</section>
 </main>
 </body>
 </html>

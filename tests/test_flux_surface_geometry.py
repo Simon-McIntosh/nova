@@ -185,8 +185,10 @@ def test_moved_playable_geometry_continues_the_preceding_axis_component():
 
     session = SimpleNamespace(
         frame=SimpleNamespace(
-            magnetic_axis_r=float(previous_axis[0]),
-            magnetic_axis_z=float(previous_axis[1]),
+            flux_surface_r=np.full((11, 64), float(previous_axis[0])),
+            flux_surface_z=np.full((11, 64), float(previous_axis[1])),
+            magnetic_axis_r=float(moved_axis[0]),
+            magnetic_axis_z=float(moved_axis[1]),
         )
     )
     seed = _internal_geometry_axis_seed(session, SimpleNamespace(axis=moved_axis))

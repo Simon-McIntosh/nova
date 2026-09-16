@@ -2,15 +2,20 @@
 
 from dataclasses import dataclass
 from functools import cache
+from pathlib import Path
+from types import SimpleNamespace
 
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
 
+from apps.playable.session import _internal_geometry_axis_seed
 from nova.biot.contour import Contour
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.flux_surface_geometry import (
     FluxSurfaceGeometry as HostFluxSurfaceGeometry,
+    SurfaceGeometryError,
 )
 from nova.transport import (
     CurrentDiffusion,
@@ -145,6 +150,68 @@ def test_internal_geometry_loops_are_nested_and_lcfs_matches_contour():
     )
     cell_diagonal = np.hypot(np.diff(grid.rg).min(), np.diff(grid.zg).min())
     assert float(np.max(nearest)) <= cell_diagonal
+
+
+def test_moved_playable_geometry_continues_the_preceding_axis_component():
+    """A warm frame follows the prior closed component on the moved map."""
+    state_path = (
+        Path(__file__).resolve().parents[1]
+        / "docs/figures/playable-forward-solve/keyframes"
+        / "mast-22086-43-bulk-z-moved-state.npz"
+    )
+    with np.load(state_path) as state:
+        flux = np.asarray(state["flux"], dtype=float)
+        lattice = FluxLattice(state["radius"], state["height"])
+        moved_axis = np.asarray(state["axis"], dtype=float)
+        previous_axis = np.asarray(state["prime_axis"], dtype=float)
+        boundary_flux = float(state["boundary_flux"])
+        diverted = bool(state["diverted"])
+
+    def field_function(psi_norm):
+        return np.ones_like(psi_norm)
+
+    with pytest.raises(SurfaceGeometryError, match="does not close inside"):
+        HostFluxSurfaceGeometry.internal_geometry(
+            lattice,
+            flux,
+            field_function,
+            axis=tuple(moved_axis),
+            boundary_flux=boundary_flux,
+            n_surface=11,
+            n_theta=64,
+            n_rho=25,
+            diverted=diverted,
+        )
+
+    session = SimpleNamespace(
+        frame=SimpleNamespace(
+            magnetic_axis_r=float(previous_axis[0]),
+            magnetic_axis_z=float(previous_axis[1]),
+        )
+    )
+    seed = _internal_geometry_axis_seed(session, SimpleNamespace(axis=moved_axis))
+    geometry = HostFluxSurfaceGeometry.internal_geometry(
+        lattice,
+        flux,
+        field_function,
+        axis=seed,
+        boundary_flux=boundary_flux,
+        n_surface=11,
+        n_theta=64,
+        n_rho=25,
+        diverted=diverted,
+    )
+
+    np.testing.assert_allclose(seed, previous_axis, rtol=0.0, atol=0.0)
+    np.testing.assert_allclose(
+        geometry.record.magnetic_axis,
+        np.asarray([0.9010083441304683, 0.07146260734841742]),
+        rtol=0.0,
+        atol=1.0e-12,
+    )
+    np.testing.assert_array_equal(geometry.surface_psi_norm, np.linspace(0.0, 1.0, 11))
+    assert np.all(np.isfinite(geometry.surface_r))
+    assert np.all(np.isfinite(geometry.surface_z))
 
 
 def test_internal_geometry_faces_are_finite_monotone_and_match_device_volume():

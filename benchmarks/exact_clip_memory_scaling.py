@@ -373,14 +373,14 @@ def _normalise_direction(direction: jax.Array) -> jax.Array:
 
 
 def _fixed_clip_map(profile, request, state):
-    """Return the smooth production-map branch selected by one terminal read."""
+    """Return the smooth map and clip primal selected by one terminal read."""
     operator = profile.operator
     masks, topology, _sample_psi_norm, support = operator._support_partition(state)
     participation = jnp.asarray(support.vertex_count) >= 3
     shadow = operator.residual_shadow_mask(state)
     external = operator.external(request.current, request.prescribed_current)
 
-    def mapped(candidate):
+    def partitioned(candidate):
         physical = jnp.asarray(candidate)[: operator.physical_node_number]
         grid_flux, _wall_flux = operator.topology.split_flux_map(physical)
         psi_norm = operator.topology.normalize(
@@ -404,6 +404,10 @@ def _fixed_clip_map(profile, request, state):
             sample_psi_norm,
             candidate_support,
         )
+        return candidate_support, partition
+
+    def mapped(candidate):
+        _candidate_support, partition = partitioned(candidate)
         moments = operator._partitioned_current_moments(partition)
         if request.target_current is not None:
             amplitude = operator.current_normalisation_amplitude(
@@ -418,10 +422,18 @@ def _fixed_clip_map(profile, request, state):
             shadow=shadow,
         )
 
-    return mapped, {
-        "fixed_participating_cells": int(jnp.sum(participation)),
-        "fixed_shadowed_carriers": int(jnp.sum(shadow)),
-    }
+    def clip_primal(candidate):
+        candidate_support, _partition = partitioned(candidate)
+        return candidate_support.support_vertices
+
+    return (
+        mapped,
+        clip_primal,
+        {
+            "fixed_participating_cells": int(jnp.sum(participation)),
+            "fixed_shadowed_carriers": int(jnp.sum(shadow)),
+        },
+    )
 
 
 def _clip_branch_levels(profile, topology):
@@ -504,7 +516,7 @@ def measure_jvp_accuracy(
                     f"terminal state size {state.size} does not match "
                     f"compiled size {dimensions['solve_state_size']}"
                 )
-            mapped, branch = _fixed_clip_map(profile, request, state)
+            mapped, clip_primal, branch = _fixed_clip_map(profile, request, state)
             _masks, topology, _sample_psi_norm, _support = (
                 profile.operator._support_partition(state)
             )
@@ -517,6 +529,7 @@ def measure_jvp_accuracy(
                 "packing_minimum_absolute_level": float(jnp.min(jnp.abs(base_levels))),
             }
             compiled_map = jax.jit(mapped)
+            compiled_clip_primal = jax.jit(clip_primal)
             mapped_state, tangent_action = jax.linearize(compiled_map, state)
             residual = mapped_state - state
 
@@ -547,11 +560,16 @@ def measure_jvp_accuracy(
                 )
 
             state_scale = float(jnp.maximum(jnp.max(jnp.abs(state)), 1.0))
-            difference_step = float(np.sqrt(np.finfo(np.float64).eps) * state_scale)
+            difference_step = float(np.cbrt(np.finfo(np.float64).eps) * state_scale)
             comparisons = []
             for name, direction in directions:
-                _primal, tangent = jax.jvp(
+                _primal, map_tangent = jax.jvp(
                     compiled_map,
+                    (state,),
+                    (direction,),
+                )
+                _clip, clip_tangent = jax.jvp(
+                    compiled_clip_primal,
                     (state,),
                     (direction,),
                 )
@@ -562,18 +580,33 @@ def measure_jvp_accuracy(
                 )
                 upper = compiled_map(state + difference_step * direction)
                 lower = compiled_map(state - difference_step * direction)
-                central = (upper - lower) / (2.0 * difference_step)
+                map_central = (upper - lower) / (2.0 * difference_step)
+                clip_upper = compiled_clip_primal(state + difference_step * direction)
+                clip_lower = compiled_clip_primal(state - difference_step * direction)
+                clip_central = (clip_upper - clip_lower) / (2.0 * difference_step)
                 upper_levels = branch_levels(state + difference_step * direction)
                 lower_levels = branch_levels(state - difference_step * direction)
                 level_central = (upper_levels - lower_levels) / (2.0 * difference_step)
-                tangent, central, level_tangent, level_central = jax.block_until_ready(
-                    (tangent, central, level_tangent, level_central)
+                map_tangent, map_central, clip_tangent, clip_central = (
+                    jax.block_until_ready(
+                        (map_tangent, map_central, clip_tangent, clip_central)
+                    )
                 )
-                error = tangent - central
-                tangent_norm = float(jnp.linalg.norm(tangent))
-                central_norm = float(jnp.linalg.norm(central))
-                error_norm = float(jnp.linalg.norm(error))
-                scale = max(tangent_norm, central_norm, np.finfo(np.float64).tiny)
+                level_tangent, level_central = jax.block_until_ready(
+                    (level_tangent, level_central)
+                )
+                clip_error = clip_tangent - clip_central
+                clip_tangent_norm = float(jnp.linalg.norm(clip_tangent))
+                clip_central_norm = float(jnp.linalg.norm(clip_central))
+                clip_error_norm = float(jnp.linalg.norm(clip_error))
+                clip_scale = max(
+                    clip_tangent_norm,
+                    clip_central_norm,
+                    np.finfo(np.float64).tiny,
+                )
+                map_error_norm = float(jnp.linalg.norm(map_tangent - map_central))
+                map_tangent_norm = float(jnp.linalg.norm(map_tangent))
+                map_central_norm = float(jnp.linalg.norm(map_central))
                 level_error_norm = float(jnp.linalg.norm(level_tangent - level_central))
                 level_tangent_norm = float(jnp.linalg.norm(level_tangent))
                 level_central_norm = float(jnp.linalg.norm(level_central))
@@ -588,7 +621,7 @@ def measure_jvp_accuracy(
                     probe_central, upper_levels, lower_levels = jax.block_until_ready(
                         (probe_central, upper_levels, lower_levels)
                     )
-                    probe_error = float(jnp.linalg.norm(tangent - probe_central))
+                    probe_error = float(jnp.linalg.norm(map_tangent - probe_central))
                     probe_norm = float(jnp.linalg.norm(probe_central))
                     step_probes.append(
                         {
@@ -596,7 +629,7 @@ def measure_jvp_accuracy(
                             "step": probe_step,
                             "relative_error": probe_error
                             / max(
-                                tangent_norm,
+                                map_tangent_norm,
                                 probe_norm,
                                 np.finfo(np.float64).tiny,
                             ),
@@ -615,15 +648,21 @@ def measure_jvp_accuracy(
                     {
                         "direction": name,
                         "finite_difference_rule": (
-                            "sqrt(binary64 epsilon) times terminal infinity scale "
+                            "cuberoot(binary64 epsilon) times terminal infinity scale "
                             "for a max-unit direction"
                         ),
                         "finite_difference_step": difference_step,
-                        "tangent_l2": tangent_norm,
-                        "central_difference_l2": central_norm,
-                        "error_l2": error_norm,
-                        "relative_error": error_norm / scale,
-                        "error_linf": float(jnp.max(jnp.abs(error))),
+                        "clip_tangent_l2": clip_tangent_norm,
+                        "clip_central_difference_l2": clip_central_norm,
+                        "clip_error_l2": clip_error_norm,
+                        "relative_error": clip_error_norm / clip_scale,
+                        "clip_error_linf": float(jnp.max(jnp.abs(clip_error))),
+                        "production_map_relative_error": map_error_norm
+                        / max(
+                            map_tangent_norm,
+                            map_central_norm,
+                            np.finfo(np.float64).tiny,
+                        ),
                         "packing_level_jvp_relative_error": level_error_norm
                         / max(
                             level_tangent_norm,

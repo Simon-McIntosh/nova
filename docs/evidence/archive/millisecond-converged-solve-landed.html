@@ -675,6 +675,24 @@
   <code>certificate-identity.json</code>,
   <code>profile-component-qualified-1272023.log</code>, and
   <code>module-gate-1272048.log</code>.</p>
+<section id="executable-remainder-census">
+  <h2>The 300-cell executable remainder is traced evaluator code (2026-09-16)</h2>
+  <p><strong>Measurement.</strong> Foreground CPU <code>all_debug</code> job <code>1272098</code> ran the exact explicit-operator size-gate entry point from the assigned worktree with an XLA optimized-HLO dump. The authoritative receipt is <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/mesh-arguments/receipts/size-300.json</code>: <code>210159751</code> serialized executable bytes and <code>0</code> generated-code bytes. The independent rerun measured <code>210150548</code> serialized bytes in <code>369.441 s</code>, a <code>9203</code>-byte (<code>0.0044%</code>) difference. Its log is <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/msc-remainder-3/exact-all-debug.log</code> and its optimized HLO is <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/msc-remainder-3/exact-hlo-dump/module_0190.jit_solve.cpu_after_optimizations.txt</code>.</p>
+  <p><strong>Attribution.</strong> The optimized HLO has <code>668453</code> instructions. No literal above <code>1 KiB</code> remains captured: mesh connectivity, wall/sample blocks and other literals are all below the threshold, while mesh-sized arrays are explicit operands. Since XLA does not expose source-addressable serialized-code sections, the executable table allocates bytes by optimized-HLO instruction share and reconciles exactly to the authoritative receipt. The largest three source seams are <code>forward_operator.py:1317</code> compatibility census, <code>clip_quadrature.py:91</code> quadrature construction, and <code>geometry/select.py:112</code> wall-coordinate selection; all are owned by <code>f-msc-single-evaluator-state-machine</code>. The separate <code>f-msc-program-size-budget</code> followup owns the remaining compiled control-body reduction.</p>
+  <table>
+    <caption>Executable remainder attribution</caption>
+    <thead><tr><th scope="col">Kind</th><th scope="col">Optimized-HLO instructions</th><th scope="col">Allocated executable bytes</th><th scope="col">Owning seam</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Compatibility census</th><td>36141</td><td>11362629</td><td><code>forward_operator.py:1317</code></td></tr>
+      <tr><th scope="row">Quadrature from arrays</th><td>34998</td><td>11003273</td><td><code>clip_quadrature.py:91</code></td></tr>
+      <tr><th scope="row">Wall coordinate</th><td>32002</td><td>10061339</td><td><code>geometry/select.py:112</code></td></tr>
+      <tr><th scope="row">Remaining traced code</th><td>565312</td><td>177717262</td><td>evaluator and compiled control bodies</td></tr>
+      <tr><th scope="row">Captured literals above 1 KiB</th><td>0</td><td>0</td><td>none; explicit mesh operands</td></tr>
+      <tr><th scope="row">Generated code</th><td>0</td><td>0</td><td>none reported</td></tr>
+      <tr><th scope="row">Total</th><td>668453</td><td>210159751</td><td>authoritative size receipt</td></tr>
+    </tbody>
+  </table>
+  <p>The controlled 2026-09-15 known-present census records <code>120</code> current-moment traced copies and <code>36</code> topology-read traced copies in the solve, against one each in the map. The exact rerun's broader read-helper sentinel reports <code>79</code> matches, which is retained as an instrument qualification rather than substituted for the controlled comparison. Python Newton and trip loops remain host-side; the compiled solver budgets are <code>fori_loop</code> bodies. The report and full attribution table are under <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/msc-remainder-3/executable-remainder-census.md</code>.</p>
 </section>
 </main>
 </body>

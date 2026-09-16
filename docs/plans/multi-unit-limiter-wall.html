@@ -23,9 +23,9 @@
 <title>Multi-unit limiter wall | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-impl" content="0.88">
+<meta name="plan-impl" content="0.92">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="23">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;}">
 </head>
@@ -184,6 +184,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260916T205150200621-mulw-zero-residual-identity-assert" data-who="s19c-mulw-zeroid-c" data-when="2026-09-16T22:21:39.214Z">
     <div class="r-comment-body"><p>EmptyIdentitySetError guards the certificate identity comparator per row and before the allocation check, every row and receipt carry identity_row_count; the diverted -110 CPU row re-read on all_debug (job 1272380, 947 s) reports 730 identity rows with maximum absolute state difference 0.0, so its exactly-zero residual is a genuine identity and not an empty set; 5 new tests pass, zero added failures against base; follow-on: the re-read reports the terminal-residual field non-finite on both sides where the earlier reading quoted a finite residual, a reviewer item</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s19c-identity-guard-landed" data-who="reckon-ship s19-codex" data-when="2026-09-16T22:27:00Z">
+    <div class="r-comment-body">mulw-zero-residual-identity-assert landed (run r-20260916T205150200621, DeepSeek v4.1 local lane, 1 h 29 min; commits c478f13b and 77c50e19 merged, promoted). The second item of f-20260909T201444769610 is closed: the certificate identity comparator in benchmarks/solve_program_size_gate.py now raises EmptyIdentitySetError on a non-positive identity row count, per row before the difference is read and before the allocation check, and every row and receipt carry identity_row_count; the pre-fix defect was reproduced in a test (array_equal over two empty arrays is true and the maximum over an empty difference is 0.0). The diverted single-null -110 CPU row was re-read on all_debug (job 1272380, 947 s): identity_row_count 730 with maximum absolute state difference 0.0, so its exactly-zero residual is a genuine identity over 730 rows, not an empty set, and the earlier reading (5.3e-15 against the H200 bank, inside the 3.9e-8 envelope) stands. Five new tests; tests/test_solve_program_size.py carries two pre-existing failures at base and head with the same ids, zero added. Reviewer item recorded from the worker: the re-read reports the terminal-residual field non-finite on both sides where the earlier reading quoted a finite residual, so two readings of one row disagree about that field while the guard, which turns on the row count, is unaffected. Remaining on the followup: item 1, the DIII-D gate-frame identity in one H200 job, still a node; item 3 is confirmed by the lead (4a, 2026-09-16).</div>
 </div>
 </section>
 </main>

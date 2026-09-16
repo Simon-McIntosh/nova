@@ -169,29 +169,34 @@ def test_linear_circuit_and_nonlinear_multiplier_rows_converge() -> None:
 def test_bounded_exterior_field_unknown_routes_and_refuses() -> None:
     configure_dtypes()
     profile = _profile()
+    functional = _CoordinateFunctional(0)
     unknown = BoundedExteriorFieldUnknown(
         direction=jnp.asarray([1.0]),
         field_scale=jnp.asarray([1.0]),
         field_bound=jnp.asarray([2.0]),
     )
-    pair = _pair(
-        _CoordinateFunctional(0),
-        unknown,
-        target=1.0,
+    context = ConstraintContext(
+        flux=jnp.asarray([0.0, 0.0]),
+        requested_class=None,
+        target_current=None,
+        shadow=None,
     )
 
-    result = profile._solve_augmented_constraints(
-        jnp.asarray([0.0, 0.0]),
+    delta = unknown.flux_delta(
+        profile,
+        context,
+        functional,
         None,
-        constraint_pairs=(pair,),
-        warmup=0,
-        gmres_iterations=4,
-        active_set_steps=2,
-        stop_on_active_set_settlement=False,
+        jnp.asarray([1.0]),
     )
+    leaves, structure = jax.tree_util.tree_flatten(unknown)
+    rebuilt = jax.tree_util.tree_unflatten(structure, leaves)
 
-    np.testing.assert_allclose(result.flux, [1.0, 0.0], rtol=0.0, atol=1.0e-8)
-    np.testing.assert_allclose(result.constraints[0].physical_unknown, [1.0])
+    np.testing.assert_array_equal(delta, [1.0, 0.0])
+    np.testing.assert_array_equal(unknown.physical_value(jnp.asarray([1.0])), [1.0])
+    np.testing.assert_array_equal(rebuilt.direction, unknown.direction)
+    np.testing.assert_array_equal(rebuilt.field_scale, unknown.field_scale)
+    np.testing.assert_array_equal(rebuilt.field_bound, unknown.field_bound)
     with np.testing.assert_raises_regex(
         ValueError, "exterior-field amplitude exceeds its declared finite bound"
     ):

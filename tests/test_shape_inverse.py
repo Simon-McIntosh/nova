@@ -16,6 +16,8 @@ from nova.equilibrium.shape_inverse import (
     NoAdmissibleShapeStepError,
     _admissible_delta,
     _cap_current_delta,
+    _secant_refreshed_tangent,
+    _turning_point_current_update,
     achieved_target,
     bounding_box_pairs,
     observed_values,
@@ -24,6 +26,7 @@ from nova.equilibrium.shape_inverse import (
     shape_steering_target,
     shape_values,
     solve_shape_inverse,
+    turning_point_response_matrix,
 )
 from nova.equilibrium.topology import NoQualifiedAxisError
 
@@ -154,6 +157,40 @@ def test_axis_admissibility_records_every_nonzero_refusal():
     assert caught.value.refusal_sequence[-1] == 2.0**-20
     assert len(caught.value.refusal_sequence) == 21
     assert 0.0 not in caught.value.refusal_sequence
+
+
+def test_achieved_shape_secant_corrects_a_fourfold_response_error():
+    """The admitted nonlinear motion replaces an inaccurate local gain."""
+    local_tangent = np.eye(2)
+    admitted_current_delta = np.asarray([1.0, 0.0])
+    achieved_motion = np.asarray([4.0, 0.0])
+
+    refreshed = _secant_refreshed_tangent(
+        local_tangent, admitted_current_delta, achieved_motion
+    )
+    correction = _turning_point_current_update(
+        refreshed,
+        np.asarray([-2.0, 0.0]),
+        regularisation=0.0,
+        delta_regularisation=0.0,
+        delta_scale=np.ones(2),
+    )
+
+    np.testing.assert_allclose(refreshed @ admitted_current_delta, achieved_motion)
+    np.testing.assert_allclose(correction, [-0.5, 0.0])
+
+
+def test_turning_point_tangent_reads_physical_extrema(machine):
+    """The current tangent is expressed in the eight turning-point coordinates."""
+    tangent = turning_point_response_matrix(
+        machine.profile,
+        machine.seed,
+        (0, machine.circuit_count // 2),
+    )
+
+    assert tangent.shape == (8, 2)
+    assert np.all(np.isfinite(tangent))
+    assert np.linalg.norm(tangent) > 0.0
 
 
 def test_response_matrix_matches_central_differences(machine, seed_target):

@@ -432,6 +432,34 @@ def _maximum_uncommanded_drift(table: list[dict[str, Any]]) -> float:
     return 0.0 if not drift else float(max(drift))
 
 
+def _outer_iteration_table(inverse) -> list[dict[str, Any]]:
+    """Return the achieved-shape Newton history in receipt-ready form."""
+    return [
+        {
+            "index": index,
+            "commanded_turning_points_m": iteration.commanded_turning_points.tolist(),
+            "achieved_turning_points_m": iteration.achieved_turning_points.tolist(),
+            "turning_point_residual_m": iteration.turning_point_residual.tolist(),
+            "turning_point_residual_norm_m": iteration.turning_point_residual_norm,
+            "tangent_numerical_rank": iteration.tangent_numerical_rank,
+            "tangent_singular_values_m_per_a": (
+                iteration.tangent_singular_values.tolist()
+            ),
+            "proposed_current_delta_a": iteration.proposed_delta.tolist(),
+            "admitted_current_delta_a": iteration.admitted_delta.tolist(),
+            "maximum_absolute_proposed_delta_a": float(
+                np.max(np.abs(iteration.proposed_delta))
+            ),
+            "maximum_absolute_admitted_delta_a": float(
+                np.max(np.abs(iteration.admitted_delta))
+            ),
+            "accepted_fraction": iteration.accepted_fraction,
+            "admissibility_trials": iteration.admissibility_trials,
+        }
+        for index, iteration in enumerate(inverse.iterations, start=1)
+    ]
+
+
 def _boundary_point_rows(inverse, profile, flux) -> list[dict[str, Any]]:
     """Report each polygon target beside its prior and one-solve achieved point."""
     achieved = np.concatenate(
@@ -886,6 +914,9 @@ def _arm_receipt(
         "inverse_wall_s": inverse_wall,
         "accepted_fraction": inverse.accepted_fraction,
         "admissibility_trials": inverse.admissibility_trials,
+        "outer_iterations": _outer_iteration_table(inverse),
+        "turning_point_tolerance_m": inverse.turning_point_tolerance,
+        "achieved_shape_converged": inverse.converged,
     }
     _write(arm_path, persisted)
     forward_started = perf_counter()
@@ -1007,13 +1038,14 @@ def _arm_receipt(
             for index, current in enumerate(solver.prescribed_current)
         },
         "rounds": [round_receipt],
-        "round_count": 1,
+        "outer_iterations": _outer_iteration_table(inverse),
+        "round_count": len(inverse.iterations),
         "current_step_policy": {
             "reference": "fixed carrier seed current per circuit",
             "gamma_factor_per_ampere": gamma_factor,
             "maximum_fraction_per_round": solver.current_step_fraction,
             "placement_picard_rounds": 3,
-            "nonlinear_forward_solves": 1,
+            "nonlinear_forward_solves": len(inverse.iterations),
         },
         "delta_regularisation_sweep": delta_regularisation_sweep,
         "total_wall_s": round_receipt["wall_s"],
@@ -1021,6 +1053,8 @@ def _arm_receipt(
         "converged": bool(np.asarray(equilibrium.fixed_point.converged)),
         "qualified_axis": True,
         "final_turning_point_error_m": error,
+        "turning_point_tolerance_m": inverse.turning_point_tolerance,
+        "achieved_shape_converged": inverse.converged,
     }
     _write_command_receipt(arm_path, payload)
     return payload, achieved
@@ -1074,6 +1108,9 @@ def _null_receipt(
         "maximum_uncommanded_drift_m": _maximum_uncommanded_drift(point_table),
         "accepted_fraction": inverse.accepted_fraction,
         "admissibility_trials": inverse.admissibility_trials,
+        "outer_iterations": _outer_iteration_table(inverse),
+        "turning_point_tolerance_m": inverse.turning_point_tolerance,
+        "achieved_shape_converged": inverse.converged,
         "coil_current_by_circuit_a": {
             _circuit_label(index, circuit_names): float(current)
             for index, current in enumerate(solver.prescribed_current)

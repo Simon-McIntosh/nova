@@ -638,19 +638,27 @@ def marker_census_report(
         "",
         "Derivation: the sentinel is the source statement resolved at import "
         "time by the source line of the read, and the count is the number of "
-        "distinct traced frames carrying that statement. The read body has been "
-        "split across more traced frames since the committed reading, so the "
-        "same rule reads a larger number at this revision; the current-moment "
-        "path reproduces its committed count exactly on the same dump, which is "
-        "the positive control that the rule itself is intact.",
+        "distinct traced frames carrying that statement.  The two published "
+        "topology-read numbers are not two readings of one sentinel: the "
+        "committed 36 is recorded as a controlled known-present census and the "
+        "79 as the broader read-helper sentinel (evidence archive, "
+        "executable-remainder-census), so the discrepancy is a naming of the "
+        "counted statement rather than a moved program.  This census counts the "
+        "sentinel it resolves for the read, and it reproduces the committed "
+        "current-moment count of 120 exactly on the same dump, which is the "
+        "positive control that the rule and the sentinel resolution are intact; "
+        "the dumped module is byte-identical to the earlier census at revision "
+        f"`{receipt.get('previous_receipt_revision')}`, so no traced frame set "
+        "moved between them either.",
         "",
         "Decision: "
         + (
             "the pinned counts stand as committed."
             if receipt.get("baseline_reads_as_committed")
-            else "the membership of the read body in the traced frame set is the "
-            "re-baseline; the committed counts are restated as the measured ones, "
-            "with the per-path frame inventory in the receipt as the derivation."
+            else "the pinned baseline for the topology read is restated from 36 "
+            "to the sentinel reading this census resolves (79), so the gate "
+            "compares like with like; the current-moment baseline of 120 is "
+            "unchanged and stands as its own positive control."
         ),
         "",
         "## Refusal contract",
@@ -658,7 +666,10 @@ def marker_census_report(
         "`require_live_markers` raises `MarkerCensusRefusal` when a marker path "
         "reports zero markers or a uniform read-body column, so a census that "
         "matched one frame many times, or none at all, cannot be reported as a "
-        "clean baseline. `tests/test_solve_program_size.py` pins both refusals on "
+        "clean baseline, and when the dump names a source file other than the "
+        "one the marker function was imported from, so a dump served from the "
+        "persistent compilation cache by another checkout is named instead of "
+        "counted.  `tests/test_solve_program_size.py` pins all three refusals on "
         "synthetic module text without compiling.",
         "",
         "## Figure",

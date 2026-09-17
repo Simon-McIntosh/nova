@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T11:55:35",
+  "updated": "2026-09-17T12:00:15",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -176067,6 +176067,228 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T204834010483-ecq-sampled-arc-gauss-route",
+        "plan": "exact-clip-moment-quadrature",
+        "section": "\u00a72",
+        "node": "ecq-sampled-arc-gauss-route",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3414,
+                "cached_input_tokens": 785324,
+                "input_tokens": 788770,
+                "output_tokens": 7088,
+                "reasoning_output_tokens": 5907,
+                "total_tokens": 795858,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "on all_debug with JAX_PLATFORMS=cpu, one job per row so no job exceeds 59 minutes with every job declared as a wait: for the weak, moderate, strong rows at 110, 300, 1000 cells the route's three moments agree with the fan to within one tenth of that row's smallest other error term (state the term with its value per row from the committed receipts, the second-order coupling frozen-image error where measured, otherwise the fan floor), the per-edge Gauss order reported as the lowest meeting it, evaluation points per cut cell reported as the fixed edge count times the order (expected under 500), the weak-110 frozen-current image within the same budget, the production default still the fan bit-identical to base on weak 110, tests/test_exact_clip_moments.py with tests/test_clipped_support_quadrature.py green one module per fresh process against base, receipts under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-gauss as each lands, manifest scalars unquoted",
+          "estimated_hours": null,
+          "goal": "Make the opt-in boundary-integration route in nova/equilibrium/clip_quadrature.py integrate over the clip's own sampled arc, each of the fixed 128 arc segments a straight edge carrying a per-edge Gauss rule of the lowest order that meets the locked budget, with pointwise profile density, fixed shape, exact-zero padding, replacing the chord-plus-sagitta region of the current route as the locked arc-representation decision (spline-gauss) states",
+          "id": "ecq-sampled-arc-gauss-route",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-16T20:48:35Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T204834010483-ecq-sampled-arc-gauss-route/manifest.md",
+          "plan": "exact-clip-moment-quadrature",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/clip_quadrature.py",
+            "tests/test_exact_clip_moments.py",
+            "tests/test_clipped_support_quadrature.py",
+            "benchmarks/exact_clip_moment_floor.py",
+            "docs/figures/exact-clip-moment-quadrature",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-gauss",
+            "docs/evidence/archive/exact-clip-moment-quadrature-landed.html",
+            "docs/plans/exact-clip-moment-quadrature.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19c-ecq-gauss-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-16T20:48:55Z",
+        "completed_at": "2026-09-17T05:23:49.359Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 30883,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 30894,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "ef5504ea7966773255934b7e09e208db88a77866",
+        "commits": [
+          "1ad4bea965d4c00863192499e1aa350d386740c6",
+          "c96dad28e91c9be1779531931e7d7b7ad3792a43",
+          "d9b594b29be63302832faf0097ae60b983e20295",
+          "f573ac1b61ed0d6c0b93023684916e87ba938e9b",
+          "f225e9c0e1521464c799ee7e4fe6d2ed7c7fb0c7"
+        ],
+        "changed_lines": {
+          "added": 6565,
+          "removed": 212,
+          "files": 11
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "tests/test_exact_clip_moments.py (6 passed) and tests/test_clipped_support_quadrature.py (3 passed) one module per fresh all_debug process; nine row jobs and the default-route identity job; independent review",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T204834010483-ecq-sampled-arc-gauss-route.json",
+          "log_digest": "sha256:d3fcae3431725ba23eb4b829b6cfe9b5724fe603df50a2cf9daafdd2ed0d3af0"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T204834010483-ecq-sampled-arc-gauss-route/manifest.md",
+        "scope_changed": false,
+        "session_id": "e65b7489-6a4a-41bd-b626-aed280275f5a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 17374304,
+            "input_tokens_cumulative": 17374304,
+            "output_tokens": 85728,
+            "output_tokens_cumulative": 85728,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T05:23:49.359Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 16,
+            "evidence": 11,
+            "fit": 18,
+            "goal_fidelity": 17,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 82
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 17710648,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 6272.195,
+          "generated_tokens": 109973,
+          "generation_seconds": 5594.019,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 35.1,
+          "machine_seconds": 678.176,
+          "peak_input_tokens": 168496,
+          "tokens_per_second": 19.66,
+          "wall_tokens_per_second": 17.53
+        },
+        "follow_on_paths": [
+          "summary.json"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-sampled-arc-gauss-route",
+          "session_id": "e65b7489-6a4a-41bd-b626-aed280275f5a",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T05:23:49.359Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 183.0,
+        "orientation_input_tokens": 2350056.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -176379,6 +176601,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2691
+    "_version": 2692
   }
 }

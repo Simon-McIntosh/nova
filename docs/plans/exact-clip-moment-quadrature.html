@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
@@ -128,6 +128,11 @@
     <div class="r-fu-body"><p>Replace the triangle-fan Gauss product rule in clip_quadrature.py with boundary integration of the density moments over the clipped polygon at the order the second-order coupling blocks use, decide the level-arc representation (the plan's open decision), and gate on agreement with the fan quadrature to its own convergence floor on the four analytic rows at 110, 300 and 1000 cells, the frozen-current flux image unchanged, and under 200 evaluation points per cut cell. Baseline for cost comes from the cca-exact-clip-warm-cost-and-workspace measurement on cut-cell-current-attribution.</p></div>
     <pre class="r-fu-prompt">/reckon-ship exact-clip-moment-quadrature §2</pre>
     </article>
+<article class="r-fu" data-id="f-ecq-order-study-record-repairs" data-status="open" data-written-by="coordinator s19-codex-20260916" data-written-at="2026-09-17T17:15:00Z" data-recommends-skill="/reckon-ship exact-clip-moment-quadrature §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Repair the shifted-path order study&#x27;s record: the decade-off JSON field, two transcription slips, a receipt for the order-study arm, and the route column at order four</h4>
+    <div class="r-fu-body">From the 84/100 review of ecq-shifted-path-order-and-budget-terms. (1) benchmarks/exact_clip_moment_floor.py writes other_error_term as denominator times ten, a decade off the record's definition; emit the denominator itself. (2) The evidence and plan copies of the order table give the order-1 radial-shift cell as 2.53e-3 where the study prints 0.2526, and quote the study's quadratic coefficients as the test fixture's (0.4, 0.3, -0.35) where the arm prints (0.2, 0.3, -0.35); correct both copies. (3) The --edge-order-study arm prints and returns; write its per-order per-path defect map to a receipt under the reports fence so the measurement the order rests on exists as a file. (4) Re-run the nine-row route column at per-edge order 4 on the four coupling rows; the committed column was measured at order 3. (5) The five fallback rows use the fan refinement floor (an image-scale instrument floor) as a moment-scale denominator; derive a moment-scale floor for them or state why none exists. Gate: module test green in one fresh all_debug process, the default route bit-identical to base, the JSON field equal to the record's stated denominator on every row.</div>
+    <pre class="r-fu-prompt">/reckon-ship exact-clip-moment-quadrature §3</pre>
+    </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260916T065319397062-s19c-reuse-scout" data-who="s19c-scout-l" data-when="2026-09-16T07:05:09Z">
@@ -152,7 +157,7 @@
     <div class="r-comment-body"><p>Per-edge Gauss order moves from 3 to 4 (merge f6cc6f29): the three-path order study on an asymmetric sliver with quadratic flux shows the shifted first-moment paths need order 4 (relative defects 3.9e-15 and 2.2e-15 at 3 and 4 on the unshifted path, inexact at 3 on the shifted paths), the fixed evaluation bound rises 472 to 621 (above the declared 500 ceiling, a lead decision recorded on the plan), the nine-row margin table carries both denominators with five rows falling back to the fan refinement floor, the default route is bit-identical to base (max abs diff 0.0), the module test fixture now has quadratic flux (7 passed). Review 84/100 with record defects for a follow-on: the JSON other_error_term field is written as denominator times ten, a decade off the record's definition; two transcription slips in the evidence and plan copies (order-1 radial cell 2.53e-3 for 0.2526, study coefficients quoted as the test fixture's); the plan section the worker appended sits outside the plan body's main element, the only such case among 76 plans; the order-study arm writes no receipt file so its per-order map exists only as captured output</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T145020447325-review-of-ecq-shifted-path-order-and-budget-terms" data-who="reckon-ship" data-when="2026-09-17T17:01:44.171Z">
-    <div class="r-comment-body"><p>Independent review of ecq-shifted-path-order-and-budget-terms stored at the fence path, total 84, six findings recorded on the reviewed run&#x27;s completion</p></div>
+    <div class="r-comment-body"><p>Independent review of ecq-shifted-path-order-and-budget-terms stored at the fence path, total 84, six findings recorded on the reviewed run's completion</p></div>
 </div>
 </section>
 </main>

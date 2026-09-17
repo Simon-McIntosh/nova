@@ -26,6 +26,7 @@ from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import ForwardProfile, fixed_point
 from nova.equilibrium.constraint import assemble_augmented_system
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
+from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.solve_request import default_forward_compilation_cache_root
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import (
@@ -38,6 +39,7 @@ from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.analytic_oracle_fixtures.centroid_row import (
     DEFAULT_FIELD_BOUND_T,
     DEFAULT_FIELD_SCALE_T,
+    DEFAULT_STEP_LIMIT,
     centroid_constraint_pair,
     exterior_field_identity,
 )
@@ -45,18 +47,18 @@ from scripts.analytic_oracle_fixtures.centroid_row import (
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_ROOT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/centroid-row"
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-step"
 )
 DEFAULT_FIGURE = ROOT / (
     "docs/figures/centroid-constrained-oracle-solve/weak-displaced-control.png"
 )
-ROWS = (
-    ("weak-rotation-reactor-static", -110),
-    ("moderate-rotation-conventional-static", -110),
-    ("strong-rotation-compact-static", -110),
-    ("diverted-single-null", -110),
-)
+ROWS = (("weak-rotation-reactor-static", -110),)
 DISPLACEMENT_M = np.asarray((0.020, 0.0), dtype=np.float64)
+
+# One-map response of the fixture centroid to a uniform exterior field,
+# measured with both signs at 1 mT and 10 mT with the exterior held fixed.
+PROBE_RADIAL_M_PER_T = 1.627789
+PROBE_VERTICAL_M_PER_T = 4.916664
 
 
 def _strict(value: Any) -> Any:
@@ -229,9 +231,16 @@ def _solve(
         physical = np.asarray(record.physical_unknown, dtype=np.float64)
         scaled_residual = np.asarray(record.scaled_residual, dtype=np.float64)
         qualified = bool(np.asarray(record.qualified).all())
+        bound_refusal = (
+            None
+            if record.bound_refusal is None
+            else [bool(value) for value in np.asarray(record.bound_refusal).reshape(-1)]
+        )
     else:
         observation = context["profile"].current_moment_observation(
-            jnp.asarray(state), target_current=context["target_current"]
+            jnp.asarray(state),
+            support=MomentIntegralSupport.ALL_DOMAIN,
+            target_current=context["target_current"],
         )
         observed = np.asarray(
             (observation.centroid_r, observation.centroid_z), dtype=np.float64
@@ -239,6 +248,7 @@ def _solve(
         physical = np.full(2, np.nan)
         scaled_residual = (observed - context["centroid"]) / context["pitch"]
         qualified = False
+        bound_refusal = None
     return (
         {
             "constrained": constrained,
@@ -252,7 +262,9 @@ def _solve(
                 np.linalg.norm(observed - context["centroid"]) / context["pitch"]
             ),
             "row_scaled_residual_sup": float(np.max(np.abs(scaled_residual))),
+            "bound_refusal": bound_refusal,
             "compensating_field_t": physical,
+            "compensating_field_t_abs_sup": float(np.max(np.abs(physical))),
             "field_bound_t": DEFAULT_FIELD_BOUND_T,
             "field_scale_t": DEFAULT_FIELD_SCALE_T,
             "wall_seconds": perf_counter() - started,
@@ -387,6 +399,76 @@ def compile_probe_arm(output_root: Path, arm: str) -> dict[str, Any]:
         set_support_clip_mode(previous_mode)
 
 
+def measure_first_step(output_root: Path) -> dict[str, Any]:
+    """Record the row's first undamped Newton step on the weak fixture.
+
+    The unknown starts at zero, so the first map evaluation's unknown step is
+    the undamped Newton step of the row: ``-scaled_residual`` on the normalised
+    unknown, mapped to tesla by the field scale.  The receipt puts its size and
+    sign beside what the measured one-map response predicts for the seed's own
+    centroid offset.
+    """
+    configure_dtypes()
+    configure_persistent_compilation_cache(default_forward_compilation_cache_root())
+    lane = _lane("h200")
+    previous_mode = support_clip_mode()
+    set_support_clip_mode("exact")
+    try:
+        context = _context("weak-rotation-reactor-static", -110)
+        observation = context["profile"].current_moment_observation(
+            jnp.asarray(context["seed"]),
+            support=MomentIntegralSupport.ALL_DOMAIN,
+            target_current=context["target_current"],
+        )
+        observed = np.asarray(
+            (observation.centroid_r, observation.centroid_z), dtype=np.float64
+        )
+        target = context["centroid"]
+        pitch = context["pitch"]
+        row_scaled_residual = (observed - target) / pitch
+        normalised_step = -row_scaled_residual
+        field_step = DEFAULT_FIELD_SCALE_T * normalised_step
+        probe_field = -row_scaled_residual[0] * pitch / PROBE_RADIAL_M_PER_T
+        receipt = {
+            "schema": "nova.centroid-first-newton-step",
+            "source_revision": _revision(),
+            "support_clip_mode": "exact",
+            "lane": lane,
+            "case": "weak-rotation-reactor-static",
+            "requested_cells": -110,
+            "realised_cells": len(context["machine"].node),
+            "characteristic_pitch_m": pitch,
+            "analytic_centroid_m": target,
+            "seed_centroid_observed_m": observed,
+            "seed_centroid_offset_m": observed - target,
+            "row_scaled_residual": row_scaled_residual,
+            "first_step_normalized": normalised_step,
+            "first_step_field_t": field_step,
+            "first_step_pitches": normalised_step,
+            "probe_radial_response_m_per_t": PROBE_RADIAL_M_PER_T,
+            "probe_field_for_seed_offset_t": np.asarray(
+                (probe_field, np.nan), dtype=np.float64
+            ),
+            "probe_field_for_seed_offset_pitches": np.asarray(
+                (probe_field * PROBE_RADIAL_M_PER_T / pitch, np.nan),
+                dtype=np.float64,
+            ),
+            "first_step_to_probe_ratio": float(field_step[0] / probe_field),
+            "field_bound_t": DEFAULT_FIELD_BOUND_T,
+            "step_limit": DEFAULT_STEP_LIMIT,
+            "first_step_exceeds_declared_bound": bool(
+                np.any(np.abs(field_step) > DEFAULT_FIELD_BOUND_T)
+            ),
+            "first_step_cap_binds": bool(
+                np.any(np.abs(normalised_step) > DEFAULT_STEP_LIMIT)
+            ),
+        }
+        _write_json(output_root / "weak-first-step.json", receipt)
+        return receipt
+    finally:
+        set_support_clip_mode(previous_mode)
+
+
 def _row(case_name: str, requested_cells: int) -> tuple[dict[str, Any], dict[str, Any]]:
     context = _context(case_name, requested_cells)
     result, state = _solve(context, context["seed"], constrained=True)
@@ -406,19 +488,50 @@ def _row(case_name: str, requested_cells: int) -> tuple[dict[str, Any], dict[str
 
 
 def _bound_refusal() -> dict[str, Any]:
+    """Show the declared bound refusing a step, with its in-bound control."""
     pair = centroid_constraint_pair(np.asarray((1.0, 0.0)), pitch=0.1)
-    trial = np.asarray((1.01 * DEFAULT_FIELD_BOUND_T / DEFAULT_FIELD_SCALE_T, 0.0))
+    bound_normalized = DEFAULT_FIELD_BOUND_T / DEFAULT_FIELD_SCALE_T
+    # Both components beyond the bound, so the refusal must hold componentwise
+    # and a per-component flag cannot pass the check by being in bound.
+    over = np.full(2, 1.01 * bound_normalized)
+    accepted_state = np.asarray((0.5 * bound_normalized, 0.0))
+
     try:
-        pair.unknown.require_within_bound(jnp.asarray(trial))
+        pair.unknown.require_within_bound(jnp.asarray(over))
     except ValueError as error:
-        return {
+        raised = {"fired": True, "message": str(error)}
+    else:
+        raise RuntimeError("the exterior-field bound accepted an out-of-bound trial")
+
+    refused_step, refused = pair.unknown.damped_step(
+        jnp.asarray(over), jnp.asarray((0.0, 0.0))
+    )
+    accepted_step, accepted_refusal = pair.unknown.damped_step(
+        jnp.asarray(accepted_state), jnp.asarray((0.5, 0.0))
+    )
+    if not bool(np.asarray(refused).all()):
+        raise RuntimeError("damped step control did not refuse an out-of-bound state")
+    if bool(np.asarray(accepted_refusal).any()):
+        raise RuntimeError("damped step control refused an in-bound state")
+    return {
+        "raised_route": raised,
+        "damped_route": {
             "fired": True,
-            "trial_normalized": trial,
-            "trial_physical_t": trial * DEFAULT_FIELD_SCALE_T,
+            "state_normalized": over,
+            "state_physical_t": over * DEFAULT_FIELD_SCALE_T,
             "declared_bound_t": DEFAULT_FIELD_BOUND_T,
-            "message": str(error),
-        }
-    raise RuntimeError("the exterior-field bound accepted an out-of-bound trial")
+            "step_normalized": np.asarray(refused_step, dtype=np.float64).tolist(),
+            "refusal_recorded": np.asarray(refused).tolist(),
+        },
+        "in_bound_control": {
+            "fired": False,
+            "state_normalized": accepted_state,
+            "physical_t": accepted_state * DEFAULT_FIELD_SCALE_T,
+            "step_normalized": np.asarray(accepted_step, dtype=np.float64).tolist(),
+            "refusal_recorded": np.asarray(accepted_refusal).tolist(),
+        },
+        "step_limit": DEFAULT_STEP_LIMIT,
+    }
 
 
 def _draw_control(
@@ -493,6 +606,219 @@ def _draw_control(
     }
 
 
+def _draw_state(
+    context: dict[str, Any],
+    state: np.ndarray,
+    path: Path,
+    *,
+    title: str,
+    color: str,
+    project_src: str,
+) -> dict[str, Any]:
+    """Draw one terminal state beside the analytic field under the plotting rules."""
+    wall = np.asarray(context["machine"].wall_node, dtype=np.float64)
+    radial, height, analytic_field = certificate._raster_field(
+        context["coordinates"], context["analytic"], wall
+    )
+    _, _, field = certificate._raster_field(context["coordinates"], state, wall)
+    levels = poloidal.contour_levels(analytic_field, count=12)
+    analytic_topology = oracle_probe._topology(
+        context["profile"].operator, context["analytic"]
+    )
+    topology = oracle_probe._topology(context["profile"].operator, state)
+    figure, axis = plt.subplots(figsize=(4.8, 4.2), constrained_layout=True)
+    poloidal.draw_flux_contours(
+        axis, radial, height, analytic_field, levels, color="#3366cc"
+    )
+    poloidal.draw_flux_contours(axis, radial, height, field, levels, color=color)
+    poloidal.draw_wall(axis, units=(wall,))
+    poloidal.draw_nulls(
+        axis,
+        magnetic_axis=analytic_topology["axis_rz_m"],
+        x_points=analytic_topology["x_point_rz_m"],
+        style=DEFAULT_INK.variant(
+            axis_marker="^", axis_color="#3366cc", xpoint_color="#3366cc"
+        ),
+        contain=(wall,),
+    )
+    poloidal.draw_nulls(
+        axis,
+        magnetic_axis=topology["axis_rz_m"],
+        x_points=topology["x_point_rz_m"],
+        style=DEFAULT_INK.variant(
+            axis_marker="^", axis_color=color, xpoint_color=color
+        ),
+        contain=(wall,),
+    )
+    poloidal_axes(axis)
+    axis.set_title(f"{title}\nanalytic blue / terminal coloured", fontsize=8)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+    return {
+        "filesystem_path": str(path),
+        "project_absolute_src": project_src,
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+    }
+
+
+def _control_verdict(
+    rows: list[dict[str, Any]], positive: dict[str, Any], negative: dict[str, Any]
+) -> dict[str, Any]:
+    verdict = {
+        "all_rows_terminal_residual_at_or_below_1e_12": all(
+            row["solve"]["terminal_residual"] <= 1.0e-12 for row in rows
+        ),
+        "all_rows_row_residual_at_or_below_1e_12": all(
+            row["solve"]["row_scaled_residual_sup"] <= 1.0e-12 for row in rows
+        ),
+        "all_rows_field_within_declared_bound": all(
+            row["solve"]["compensating_field_t_abs_sup"] <= DEFAULT_FIELD_BOUND_T
+            for row in rows
+        ),
+        "all_rows_bound_never_engaged": all(
+            row["solve"]["bound_refusal"] is None
+            or not any(row["solve"]["bound_refusal"])
+            for row in rows
+        ),
+        "positive_row_residual_at_or_below_1e_12": (
+            positive["row_scaled_residual_sup"] <= 1.0e-12
+        ),
+        "positive_field_within_declared_bound": (
+            positive["compensating_field_t_abs_sup"] <= DEFAULT_FIELD_BOUND_T
+        ),
+        "positive_centroid_within_tenth_pitch": (
+            positive["centroid_error_pitches"] <= 0.1
+        ),
+        "negative_remains_outside_tenth_pitch": (
+            negative["centroid_error_pitches"] > 0.1
+        ),
+    }
+    verdict["passed"] = all(verdict.values())
+    return verdict
+
+
+def control_arm(output_root: Path, figure_path: Path, arm: str) -> dict[str, Any]:
+    """Solve one displaced-seed control and draw its own panel.
+
+    The positive arm imposes the centroid row on a seed displaced from the
+    analytic centroid; the negative arm runs the same displaced seed with no
+    row. Each arm is its own job because one H200 job does not hold the four
+    programs of a full receipt inside an hour.
+    """
+    if arm not in ("positive", "negative"):
+        raise ValueError(f"unknown control arm {arm!r}")
+    configure_dtypes()
+    configure_persistent_compilation_cache(default_forward_compilation_cache_root())
+    lane = _lane("h200")
+    constrained = arm == "positive"
+    previous_mode = support_clip_mode()
+    set_support_clip_mode("exact")
+    try:
+        context = _context("weak-rotation-reactor-static", -110)
+        displaced = _translated_state(context)
+        result, state = _solve(context, displaced, constrained=constrained)
+        figure = _draw_state(
+            context,
+            state,
+            figure_path,
+            title=(
+                "bounded centroid row on a displaced seed"
+                if constrained
+                else "same displaced seed, no row"
+            ),
+            color="#cc7722" if constrained else "#a23b72",
+            project_src=(
+                f"/nova/figures/centroid-constrained-oracle-solve/control-{arm}.png"
+            ),
+        )
+    finally:
+        set_support_clip_mode(previous_mode)
+    control = {
+        "schema": "nova.centroid-displaced-control",
+        "arm": arm,
+        "constrained": constrained,
+        "source_revision": _revision(),
+        "support_clip_mode": "exact",
+        "lane": lane,
+        "field_identity": exterior_field_identity(),
+        "case": "weak-rotation-reactor-static",
+        "requested_cells": -110,
+        "realised_cells": len(context["machine"].node),
+        "characteristic_pitch_m": context["pitch"],
+        "centroid_target_m": context["centroid"],
+        "displacement_m": DISPLACEMENT_M,
+        "displaced_seed_sha256_binary64": _digest(displaced),
+        "terminal_state_sha256_binary64": _digest(state),
+        "solve": result,
+        "figure": figure,
+    }
+    _write_json(output_root / f"control-{arm}.json", control)
+    return control
+
+
+def merge_controls(output_root: Path) -> dict[str, Any]:
+    """Assemble the receipt from the split row and control jobs.
+
+    A pure data merge: it reads the row receipt and both control receipts and
+    applies the same verdict, so it runs on the login node without a lane.
+    """
+    row_path = output_root / "weak-rotation-reactor-static-cells-110.json"
+    positive_path = output_root / "control-positive.json"
+    negative_path = output_root / "control-negative.json"
+    for path in (row_path, positive_path, negative_path):
+        if not path.exists():
+            raise FileNotFoundError(f"the split receipt is incomplete: missing {path}")
+    row = json.loads(row_path.read_text())
+    positive_receipt = json.loads(positive_path.read_text())
+    negative_receipt = json.loads(negative_path.read_text())
+    positive = positive_receipt["solve"]
+    negative = negative_receipt["solve"]
+    controls = {
+        "displacement_m": np.asarray(
+            positive_receipt["displacement_m"], dtype=np.float64
+        ),
+        "displaced_seed_sha256_binary64": positive_receipt[
+            "displaced_seed_sha256_binary64"
+        ],
+        "positive": positive,
+        "negative": negative,
+    }
+    if (
+        negative_receipt["displaced_seed_sha256_binary64"]
+        != controls["displaced_seed_sha256_binary64"]
+    ):
+        raise RuntimeError("the two control arms solved different displaced seeds")
+    report = {
+        "schema": "nova.centroid-constrained-analytic-fixture",
+        "source_revision": _revision(),
+        "support_clip_mode": "exact",
+        "split_jobs": {
+            "row": row_path.name,
+            "positive": positive_path.name,
+            "negative": negative_path.name,
+            "arms": [
+                {"arm": key, "lane": value["lane"], "job": value["lane"]["job_id"]}
+                for key, value in (
+                    ("positive", positive_receipt),
+                    ("negative", negative_receipt),
+                )
+            ],
+        },
+        "field_identity": exterior_field_identity(),
+        "bound_refusal": _bound_refusal(),
+        "rows": [row],
+        "controls": controls,
+        "figures": {
+            "positive": positive_receipt["figure"],
+            "negative": negative_receipt["figure"],
+        },
+        "verdict": _control_verdict([row], positive, negative),
+    }
+    _write_json(output_root / "receipt.json", report)
+    return report
+
+
 def measure(output_root: Path, figure_path: Path) -> dict[str, Any]:
     configure_dtypes()
     configure_persistent_compilation_cache(default_forward_compilation_cache_root())
@@ -526,21 +852,7 @@ def measure(output_root: Path, figure_path: Path) -> dict[str, Any]:
         figure = _draw_control(context, positive_state, negative_state, figure_path)
     finally:
         set_support_clip_mode(previous_mode)
-    verdict = {
-        "all_rows_terminal_residual_at_or_below_1e_12": all(
-            row["solve"]["terminal_residual"] <= 1.0e-12 for row in rows
-        ),
-        "all_rows_row_residual_at_or_below_1e_12": all(
-            row["solve"]["row_scaled_residual_sup"] <= 1.0e-12 for row in rows
-        ),
-        "positive_centroid_within_tenth_pitch": (
-            controls["positive"]["centroid_error_pitches"] <= 0.1
-        ),
-        "negative_remains_outside_tenth_pitch": (
-            controls["negative"]["centroid_error_pitches"] > 0.1
-        ),
-    }
-    verdict["passed"] = all(verdict.values())
+    verdict = _control_verdict(rows, controls["positive"], controls["negative"])
     report = {
         "schema": "nova.centroid-constrained-analytic-fixture",
         "source_revision": _revision(),
@@ -562,6 +874,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
     parser.add_argument("--compile-probe-arm", choices=("unconstrained", "constrained"))
+    parser.add_argument("--first-step", action="store_true")
+    parser.add_argument("--control-arm", choices=("positive", "negative"))
+    parser.add_argument("--merge-controls", action="store_true")
     return parser.parse_args()
 
 
@@ -574,6 +889,45 @@ def main() -> None:
             f"arm={result['arm']} lower={result['lower_seconds']:.6f}s "
             f"compile={result['backend_compile_seconds']:.6f}s "
             f"stablehlo_instructions={result['stablehlo_instruction_count']}",
+            flush=True,
+        )
+        return
+    if arguments.first_step:
+        receipt = measure_first_step(arguments.output_root)
+        radial_step = float(receipt["first_step_field_t"][0])
+        probe_field = float(receipt["probe_field_for_seed_offset_t"][0])
+        print(
+            "CENTROID_FIRST_STEP "
+            f"radial_field_step_t={radial_step:+.9e} "
+            f"radial_step_pitches={float(receipt['first_step_pitches'][0]):+.9e} "
+            f"probe_field_t={probe_field:+.9e} "
+            f"probe_measured_ratio={radial_step / probe_field:+.6f} "
+            f"exceeds_bound={bool(receipt['first_step_exceeds_declared_bound'])} "
+            f"cap_binds={bool(receipt['first_step_cap_binds'])}",
+            flush=True,
+        )
+        return
+    if arguments.merge_controls:
+        report = merge_controls(arguments.output_root)
+        print(
+            f"CENTROID_MERGED_CONTROLS passed={report['verdict']['passed']}",
+            flush=True,
+        )
+        return
+    if arguments.control_arm is not None:
+        arm_figure = arguments.figure.with_name(f"control-{arguments.control_arm}.png")
+        control = control_arm(arguments.output_root, arm_figure, arguments.control_arm)
+        solve = control["solve"]
+        print(
+            "CENTROID_CONTROL "
+            f"arm={control['arm']} constrained={solve['constrained']} "
+            f"centroid_error_pitches={solve['centroid_error_pitches']:+.9e} "
+            f"row_scaled_residual_sup={solve['row_scaled_residual_sup']:+.9e} "
+            f"terminal_residual={solve['terminal_residual']:+.9e} "
+            f"field_t_abs_sup={solve['compensating_field_t_abs_sup']:+.9e} "
+            f"bound_refusal={solve['bound_refusal']} "
+            f"qualified={solve['qualified']} "
+            f"wall_seconds={solve['wall_seconds']:.3f}",
             flush=True,
         )
         return

@@ -440,6 +440,33 @@ def _require_within_bound_if_concrete(value: object, bound: object, name: str) -
         raise ValueError(f"{name} exceeds its declared finite bound")
 
 
+def compensator_step(
+    unknown: CompensatingUnknown, normalized: jax.Array, row_residual: jax.Array
+) -> tuple[jax.Array, jax.Array]:
+    """Return the per-trip normalized unknown step and its refusal flag.
+
+    Every augmenting unknown steps along ``-row_residual``.  A bounded
+    unknown additionally caps and backtracks that step through its own
+    :meth:`BoundedExteriorFieldUnknown.damped_step`, so the bounded route is a
+    property of the unknown rather than a branch in the solver.
+    """
+    step = -jnp.asarray(row_residual)
+    damped = getattr(unknown, "damped_step", None)
+    if damped is None:
+        return step, jnp.zeros_like(step, dtype=bool)
+    return damped(normalized, row_residual)
+
+
+def compensator_bound_refusal(
+    unknown: CompensatingUnknown, normalized: jax.Array
+) -> jax.Array | None:
+    """Return an unknown's terminal bound refusal, or None when unbounded."""
+    refusal = getattr(unknown, "bound_refusal", None)
+    if refusal is None:
+        return None
+    return jnp.atleast_1d(refusal(normalized))
+
+
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True)
 class BoundedExteriorFieldUnknown:
@@ -448,20 +475,31 @@ class BoundedExteriorFieldUnknown:
     ``direction`` selects one column-vector direction per constraint row from
     the operator's prescribed exterior-field response.  ``field_scale`` maps
     the dimensionless Newton unknown to tesla and ``field_bound`` gives the
-    largest admitted magnitude in tesla. Solver calls are clipped to that
-    interval so no trial can apply an out-of-bound field; callers that need to
-    qualify a proposed command use :meth:`require_within_bound` for an explicit
-    refusal before the response is evaluated.
+    largest admitted magnitude in tesla.
+
+    The bound is imposed by damped step control, never by saturating
+    :meth:`physical_value`: a value clipped at its bound reaches zero tangent
+    there, so a Newton step that lands on the bound can no longer be pulled
+    back and the row saturates instead of converging.  Instead the per-trip
+    change of the normalized unknown is capped at ``step_limit``, the step is
+    backtracked until the trial field lies inside the bound, and a step that
+    still exceeds it after the ladder is refused with the refusal recorded.
+    Callers that need to qualify a proposed command use
+    :meth:`require_within_bound` for an explicit refusal before the response
+    is evaluated.
     """
 
     direction: object
     field_scale: object
     field_bound: object
+    step_limit: object = 1.0
+    backtrack_steps: int = 8
 
     def __post_init__(self) -> None:
         direction = jnp.asarray(self.direction)
         scale = jnp.atleast_1d(jnp.asarray(self.field_scale))
         bound = jnp.atleast_1d(jnp.asarray(self.field_bound))
+        limit = jnp.atleast_1d(jnp.asarray(self.step_limit))
         if direction.ndim == 1:
             direction = direction[:, None]
         if direction.ndim != 2 or direction.shape[1] != scale.shape[-1]:
@@ -470,11 +508,18 @@ class BoundedExteriorFieldUnknown:
             )
         if bound.shape != scale.shape:
             raise ValueError("exterior-field bounds must match the field scales")
+        if limit.shape != scale.shape:
+            raise ValueError("exterior-field step limits must match the field scales")
+        if int(self.backtrack_steps) < 1:
+            raise ValueError("an exterior-field backtracking ladder needs steps")
+        object.__setattr__(self, "step_limit", limit)
+        object.__setattr__(self, "backtrack_steps", int(self.backtrack_steps))
         object.__setattr__(self, "direction", direction)
         object.__setattr__(self, "field_scale", scale)
         object.__setattr__(self, "field_bound", bound)
         _require_positive_if_concrete(scale, "exterior-field scale")
         _require_positive_if_concrete(bound, "exterior-field bound")
+        _require_positive_if_concrete(limit, "exterior-field step limit")
 
     @property
     def row_count(self) -> int:
@@ -482,9 +527,12 @@ class BoundedExteriorFieldUnknown:
         return int(jnp.shape(self.field_scale)[-1])
 
     def physical_value(self, normalized: jax.Array) -> jax.Array:
-        """Return field amplitudes clipped to the finite interval in tesla."""
-        value = jnp.asarray(self.field_scale) * normalized
-        return jnp.clip(value, -self.field_bound, self.field_bound)
+        """Return the unclipped field amplitude in tesla.
+
+        Bounds are imposed by :meth:`damped_step` as a recorded refusal, so the
+        value keeps a nonzero tangent at the declared bound.
+        """
+        return jnp.asarray(self.field_scale) * normalized
 
     def require_within_bound(self, normalized: jax.Array) -> jax.Array:
         """Return a direct trial in tesla or refuse it before field evaluation."""
@@ -493,6 +541,38 @@ class BoundedExteriorFieldUnknown:
             value, self.field_bound, "exterior-field amplitude"
         )
         return value
+
+    def bound_refusal(self, normalized: jax.Array) -> jax.Array:
+        """Return whether a physical field would exceed its declared bound."""
+        return jnp.abs(self.physical_value(normalized)) > jnp.asarray(self.field_bound)
+
+    def damped_step(
+        self, normalized: jax.Array, row_residual: jax.Array
+    ) -> tuple[jax.Array, jax.Array]:
+        """Return the capped, backtracked normalized step and its refusal flag.
+
+        ``row_residual`` is the scaled constraint residual at the current
+        iterate, so ``-row_residual`` is the undamped Newton step on the
+        normalized unknown.  The step is capped at ``step_limit`` per trip so
+        one trip can never jump the declared interval, then backtracked by a
+        fixed halving ladder until the trial field lies inside the bound.  A
+        step that still exceeds the bound after the ladder is refused: the
+        unknown holds and the refusal is recorded rather than the field being
+        clipped onto the bound.
+        """
+        raw = -jnp.asarray(row_residual)
+        magnitude = jnp.abs(raw)
+        tiny = jnp.finfo(jnp.asarray(self.field_scale).dtype).tiny
+        factor = jnp.minimum(
+            1.0, jnp.asarray(self.step_limit) / jnp.maximum(magnitude, tiny)
+        )
+        normalized_value = jnp.asarray(normalized)
+        refused = self.bound_refusal(normalized_value + factor * raw)
+        for _ in range(int(self.backtrack_steps)):
+            factor = jnp.where(refused, 0.5 * factor, factor)
+            refused = self.bound_refusal(normalized_value + factor * raw)
+        step = jnp.where(refused, 0.0, factor * raw)
+        return step, refused
 
     def flux_delta(
         self,
@@ -513,12 +593,14 @@ class BoundedExteriorFieldUnknown:
         return field.flux_delta(field_delta)
 
     def tree_flatten(self):
-        return ((self.direction, self.field_scale, self.field_bound), None)
+        return (
+            (self.direction, self.field_scale, self.field_bound, self.step_limit),
+            self.backtrack_steps,
+        )
 
     @classmethod
     def tree_unflatten(cls, aux_data, children):
-        del aux_data
-        return cls(*children)
+        return cls(*children, backtrack_steps=aux_data)
 
 
 @jax.tree_util.register_pytree_node_class
@@ -1437,6 +1519,7 @@ class ConstraintRecord(NamedTuple):
     physical_unknown: jax.Array
     soft_mode_projection: jax.Array
     compensator_rule: jax.Array | None = None
+    bound_refusal: jax.Array | None = None
     compensator_direction: jax.Array | None = None
     compensator_singular_values: jax.Array | None = None
     compensator_authority: jax.Array | None = None
@@ -1500,27 +1583,27 @@ def assemble_augmented_system(
             base_map(flux) if shadow is None else base_shadowed_map(flux, flux_shadow)
         )
         context = ConstraintContext(flux, requested_class, target_current, flux_shadow)
-        residuals = []
+        steps = []
         for pair, row_slice in zip(pairs, row_slices, strict=True):
             value = unknowns[row_slice]
             delta = pair.unknown.flux_delta(
                 profile, context, pair.functional, pair.binding.payload, value
             )
             mapped_flux = mapped_flux + jnp.where(flux_shadow, 0.0, delta)
-            residuals.append(
-                jnp.ravel(
-                    pair.functional.residual(
-                        profile,
-                        context,
-                        value,
-                        pair.binding.payload,
-                        jnp.asarray(pair.binding.target),
-                        jnp.asarray(pair.binding.scale),
-                    )
+            row = jnp.ravel(
+                pair.functional.residual(
+                    profile,
+                    context,
+                    value,
+                    pair.binding.payload,
+                    jnp.asarray(pair.binding.target),
+                    jnp.asarray(pair.binding.scale),
                 )
             )
-        rows = jnp.concatenate(tuple(residuals))
-        return jnp.concatenate((mapped_flux / flux_scale, unknowns - rows))
+            step, _refused = compensator_step(pair.unknown, value, row)
+            steps.append(step)
+        unknowns_next = unknowns + jnp.concatenate(tuple(steps))
+        return jnp.concatenate((mapped_flux / flux_scale, unknowns_next))
 
     def shadow_mask(state):
         flux, _unknowns = split(state)
@@ -1612,6 +1695,7 @@ def constraint_records(
                     int(CompensatorRule.EXPLICIT if circuit is None else circuit.rule),
                     dtype=jnp.int8,
                 ),
+                bound_refusal=compensator_bound_refusal(pair.unknown, value),
                 compensator_direction=(
                     None if circuit is None else jnp.asarray(circuit.direction)
                 ),
@@ -1658,7 +1742,9 @@ __all__ = [
     "WallGapTarget",
     "XPointConstraint",
     "assemble_augmented_system",
+    "compensator_bound_refusal",
     "compensator_rule_name",
+    "compensator_step",
     "constraint_records",
     "constraint_residual_jvp",
     "constraint_response_matrix",

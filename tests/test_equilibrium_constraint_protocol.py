@@ -194,14 +194,51 @@ def test_bounded_exterior_field_unknown_routes_and_refuses() -> None:
 
     np.testing.assert_array_equal(delta, [1.0, 0.0])
     np.testing.assert_array_equal(unknown.physical_value(jnp.asarray([1.0])), [1.0])
-    np.testing.assert_array_equal(unknown.physical_value(jnp.asarray([2.5])), [2.0])
+    np.testing.assert_array_equal(unknown.physical_value(jnp.asarray([2.5])), [2.5])
     np.testing.assert_array_equal(rebuilt.direction, unknown.direction)
     np.testing.assert_array_equal(rebuilt.field_scale, unknown.field_scale)
     np.testing.assert_array_equal(rebuilt.field_bound, unknown.field_bound)
+    np.testing.assert_array_equal(rebuilt.step_limit, unknown.step_limit)
     with np.testing.assert_raises_regex(
         ValueError, "exterior-field amplitude exceeds its declared finite bound"
     ):
         unknown.require_within_bound(jnp.asarray([2.5]))
+
+
+def test_bounded_exterior_step_caps_backtracks_and_refuses() -> None:
+    """The per-trip cap binds, the bound refusal fires, and the tangent survives."""
+    configure_dtypes()
+    unknown = BoundedExteriorFieldUnknown(
+        direction=jnp.asarray([1.0]),
+        field_scale=jnp.asarray([1.0]),
+        field_bound=jnp.asarray([2.0]),
+        step_limit=1.0,
+    )
+
+    step, refused = unknown.damped_step(jnp.asarray([0.0]), jnp.asarray([0.5]))
+    np.testing.assert_allclose(step, [-0.5], atol=0.0)
+    assert not bool(np.asarray(refused).any())
+
+    capped, refused = unknown.damped_step(jnp.asarray([0.0]), jnp.asarray([100.0]))
+    np.testing.assert_allclose(capped, [-1.0], atol=0.0)
+    # the cap bounds the per-trip change without clipping onto it
+    assert abs(float(capped[0])) <= 1.0
+    assert not bool(np.asarray(refused).any())
+
+    refused_step, refused = unknown.damped_step(
+        jnp.asarray([-1.0e6]), jnp.asarray([1.0e12])
+    )
+    np.testing.assert_array_equal(refused_step, [0.0])
+    assert bool(np.asarray(refused).all())
+
+    # the value the refusal guards keeps a nonzero tangent at the bound
+    tangent = jax.jvp(
+        lambda value: unknown.physical_value(value),
+        (jnp.asarray([2.5]),),
+        (jnp.asarray([1.0]),),
+    )[1]
+    np.testing.assert_allclose(tangent, [1.0], atol=0.0)
+    assert bool(np.asarray(unknown.bound_refusal(jnp.asarray([2.5]))).all())
 
 
 def test_residual_row_actions_match_central_differences() -> None:

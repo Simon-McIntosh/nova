@@ -164,6 +164,170 @@
     <p><img src="/nova/figures/centroid-constrained-oracle-solve/field-response/panels/vertical-plus-10mt.png" alt="Vertical plus 10 mT response with analytic and mapped contours, nulls and wall.">
     <img src="/nova/figures/centroid-constrained-oracle-solve/field-response/panels/radial-plus-10mt.png" alt="Radial plus 10 mT response with analytic and mapped contours, nulls and wall."></p>
   </section>
+
+  <section id="bounded-row-step-control">
+    <h2>Bounded-row damped step control and the first Newton step</h2>
+    <p><strong>Implementation, commit <code>a096fecc</code>; driver commits
+    <code>8165d70f</code> and <code>66e8e8c7</code>; H200 jobs
+    <code>1272452</code> and <code>1272453</code>.</strong>
+    <code>BoundedExteriorFieldUnknown.physical_value</code> no longer clips its
+    trial amplitude. A bound violation is now a fail-closed refusal: the
+    physical field is checked against the declared bound outside the traced map,
+    the refusal is recorded on the constraint record, and the traced map instead
+    carries a damped step — the change of the normalised unknown per outer trip
+    is capped at <code>step_limit</code> and the row residual is halved
+    repeatedly on a backtracking ladder. The two analytic solenoidal flux columns
+    remain the locked compensating unknown.</p>
+
+    <p>The first receipt is the size and sign of the row’s undamped first Newton
+    step on the weak-110 fixture (135 realised cells), beside the
+    <code>+1.627789 m/T</code> radial directional prediction measured by the
+    uniform-field probe. Durable receipt:
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-step/weak-first-step.json</code>.</p>
+
+    <table>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Row’s undamped first Newton step, radial field</td><td><code>+2.690337050e-04 T</code></td></tr>
+        <tr><td>Same step in centroid pitches</td><td><code>+0.269033705</code></td></tr>
+        <tr><td>Probe field required for the seed’s own <code>-0.125386766 m</code> offset</td><td><code>+7.702888155e-02 T</code></td></tr>
+        <tr><td>Row step to probe-field ratio</td><td><code>0.003492634</code> (1/286)</td></tr>
+        <tr><td>Per-trip cap engaged</td><td><code>false</code></td></tr>
+        <tr><td>Declared 0.25 T bound engaged</td><td><code>false</code></td></tr>
+      </tbody>
+      <caption>Weak-110 first Newton step against the measured linear gain (<code>step_limit</code> 1.0, exact clip, characteristic pitch 0.466063410 m).</caption>
+    </table>
+
+    <p><strong>This inverts the saturation reading of the first constrained
+    receipt.</strong> The earlier record (<code>true</code> in the plan’s
+    H200 checkpoint) attributed the clipped unknown’s stall to the zero tangent
+    the clip gives at its bound. The first constrained receipt derived its step
+    from the full dual contraction rather than the directional derivative, and
+    the first Newton step measured here is <code>+2.690337050e-04 T</code>
+    against a required <code>+7.702888155e-02 T</code>: the row
+    <em>under-steps by two orders of magnitude</em> rather than overshooting
+    onto the bound, and it moves in the direction that opposes the seed’s
+    offset. Neither the cap nor the bound is engaged on that step, so neither
+    the clip nor the new refusal is what limits it. The open question is whether
+    the damped route walks the unknown far enough inside its Newton budget.</p>
+
+    <p>The constrained weak-110 row itself landed under the new route before the
+    job’s 60-minute limit, with the bound now engaging as a recorded refusal
+    instead of a silent clip. Job <code>1272453</code>, 135 realised cells,
+    wall <code>2845.65 s</code> (dominated by <code>jit_while</code> GPU
+    compiles of about 6m19s). Durable receipt:
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-step/weak-rotation-reactor-static-cells-110.json</code>.</p>
+
+    <table>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Compensating field, radial / vertical</td><td><code>[0.566319947, 6.529608e-04] T</code></td></tr>
+        <tr><td>Abs sup of compensating field</td><td><code>0.566319947 T</code> (2.27× the 0.25 T bound)</td></tr>
+        <tr><td>Bound refusal, radial / vertical</td><td><code>[true, false]</code></td></tr>
+        <tr><td>Centroid error</td><td><code>0.452424437</code> pitches (<code>0.210541289 m</code> radial)</td></tr>
+        <tr><td>Row scaled residual sup</td><td><code>0.451743871</code></td></tr>
+        <tr><td>Terminal residual</td><td><code>4.890538e-04</code></td></tr>
+        <tr><td>Qualified</td><td><code>false</code></td></tr>
+      </tbody>
+      <caption>Weak-110 constrained row at the bounded-step route; the bound is refused and recorded rather than clipped.</caption>
+    </table>
+
+    <p>The displaced-seed positive and negative controls, the converged-field
+    amplitude table, and the required poloidal panels did not run in this job;
+    they are carried by two separately submitted control jobs. No qualification
+    or convergence is inferred from the rows above, and §2 remains open.</p>
+  </section>
+
+  <section id="bounded-row-step-controls">
+    <h2>Displaced-seed controls under the damped route</h2>
+    <p><strong>Driver, commit <code>442820bf</code>; H200 jobs <code>1272540</code>
+    (positive arm) and <code>1272541</code> (negative arm).</strong> Each arm is
+    its own job on <code>98dci4-gpu-0003</code> under <code>betelgeuse</code> and
+    reservation <code>gpu_0003_grpA</code>, one card each, seven CPUs, 131072 MB,
+    <code>TMPDIR=/tmp</code>, JAX platforms <code>cuda,cpu</code>, x64 enabled, the
+    shared interpreter run directly, and the persistent compilation cache shared
+    so the compile is paid once. Each arm writes its own receipt and its own
+    poloidal panel as it lands; a third, pure login-node run merges the split
+    receipts with the earlier weak-110 constrained row and applies the single
+    verdict exactly once.</p>
+
+    <p>Both arms are one fixture, one displacement and one compilation cache, and
+    differ only in whether the centroid row is imposed: the seed is translated
+    <code>20 mm</code> radially, its binary64 digest
+    <code>062b465a7364914f…</code> is recorded identically in both arms, and both
+    ran at <code>442820bf0f0220c9b0ab1cf84295d4b0832a2d8a</code>. The analytic
+    target centroid is <code>(6.063530173332898, 0.0) m</code>; the normalized
+    current centroid of the sampled analytic state on this fixture is
+    <code>(6.057406900, 5.9e-13) m</code>, the <code>-6.123e-03 m</code> radial
+    baseline the uniform-field probe recorded at <code>-6.128e-03 m</code>.</p>
+
+    <table>
+      <thead><tr><th>Quantity</th><th>Positive arm (row imposed)</th><th>Negative arm (no row)</th></tr></thead>
+      <tbody>
+        <tr><td>Terminal residual</td><td><code>6.731388e-04</code></td><td><code>1.589925e-13</code></td></tr>
+        <tr><td>Row scaled residual sup</td><td><code>1.339846e-03</code></td><td><code>1.313828e-02</code></td></tr>
+        <tr><td>Centroid observed radial [m]</td><td><code>6.064154626</code></td><td><code>6.057406900</code></td></tr>
+        <tr><td>Centroid error [m]</td><td><code>+6.244531e-04</code></td><td><code>-6.123274e-03</code></td></tr>
+        <tr><td>Centroid error [pitches]</td><td><code>1.339846e-03</code></td><td><code>1.313828e-02</code></td></tr>
+        <tr><td>Compensating field radial / vertical [T]</td><td><code>[2.387201e-03, -1.108e-13]</code></td><td>not imposed</td></tr>
+        <tr><td>Field against the declared 0.25 T bound</td><td><code>0.96%</code></td><td>not imposed</td></tr>
+        <tr><td>Bound refusal radial / vertical</td><td><code>[false, false]</code></td><td>not imposed</td></tr>
+        <tr><td>Boundary flux offset from analytic zero [Wb]</td><td><code>-0.528909578</code></td><td><code>-0.001877698</code></td></tr>
+        <tr><td>Topology class / axis read</td><td><code>limited</code> / <code>qualified_axis</code></td><td><code>limited</code> / <code>qualified_axis</code></td></tr>
+        <tr><td>Qualified</td><td><code>false</code></td><td><code>true</code></td></tr>
+        <tr><td>Wall [s]</td><td><code>954.75</code></td><td><code>1170.64</code></td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Why the negative control does not discriminate.</strong> The
+    displacement is 20 mm, <code>0.0429</code> pitches, and an unconstrained map
+    relaxes a perturbed seed to its own fixed point, which sits
+    <code>-6.123e-03 m</code> from the analytic centroid. So the no-row arm
+    returns to that fixed point at a terminal residual of <code>1.59e-13</code>
+    rather than staying at the seed, and the row's whole measured effect is the
+    <code>+6.75e-03 m</code> shift from that fixed point onto the analytic
+    centroid.</p>
+
+    <p><strong>What the positive arm establishes, and what it does not.</strong>
+    The damped route steers the converged centroid onto the analytic centroid
+    horizontally — from the discrete baseline onto a target <code>+6.75e-03 m</code>
+    away — at a cost of 0.96% of the declared field bound and with no refusal, so
+    the 0.25 T saturation of the first constrained receipt does not recur on a
+    displaced seed. What it does not establish is the fixed point: the row
+    residual stays at <code>1.34e-03</code>, the terminal residual at
+    <code>6.73e-04</code>, and the compensated state's boundary flux sits
+    <code>-0.5289 Wb</code> off the analytic authored zero, so the field that
+    moved the centroid also moved the flux level by half a weber and the state
+    reached is not the analytic equilibrium even where the centroid matches to
+    <code>1.3e-03</code> pitches. No convergence is inferred beyond the numbers
+    above, and §2 remains open.</p>
+
+    <table>
+      <thead><tr><th>Verdict clause</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Positive centroid within a tenth of a pitch</td><td><strong>true</strong> — <code>1.340e-03</code> pitches, 74 times inside the asked tenth</td></tr>
+        <tr><td>Positive field within the declared bound</td><td><strong>true</strong> — <code>2.387e-03 T</code>, 0.96% of 0.25 T</td></tr>
+        <tr><td>Positive row residual at or below <code>1e-12</code></td><td><strong>false</strong> — <code>1.340e-03</code></td></tr>
+        <tr><td>Negative control remains outside a tenth of a pitch</td><td><strong>false</strong> — it converges onto the retained <code>-6.123e-03 m</code> baseline, settling <code>1.314e-02</code> pitches off the analytic centroid</td></tr>
+        <tr><td>Every row terminal residual at or below <code>1e-12</code></td><td><strong>false</strong> — the positive arm ends at <code>6.731e-04</code></td></tr>
+        <tr><td>Every row row-residual at or below <code>1e-12</code></td><td><strong>false</strong> — the weak-110 constrained row is at <code>0.4517</code></td></tr>
+        <tr><td>Every row field within the declared bound</td><td><strong>false</strong> — the weak-110 constrained row reaches <code>0.5663 T</code>, 2.27 times the bound</td></tr>
+        <tr><td>Every row bound never engaged</td><td><strong>false</strong> — that row reports the refusal <code>[true, false]</code></td></tr>
+        <tr><td>Bound engaged only as a recorded refusal</td><td><strong>true</strong> — a direct in-bound control at <code>0.125 T</code> records no refusal and a live step, an out-of-bound request at <code>0.2525 T</code> records the refusal <code>[true, true]</code> with a zero step, and the eager route still raises</td></tr>
+      </tbody>
+      <caption>Every clause is evaluated over the weak-110 constrained row and both displaced-seed arms together; where a bound clause fails it is failed by that row's recorded refusal, never by either control. The merged verdict is <code>passed: false</code>.</caption>
+    </table>
+
+    <p><img src="/nova/figures/centroid-constrained-oracle-solve/control-positive.png" alt="Positive arm: the displaced-seed constrained solve with solved contours beside the captured state on shared levels, both null sets drawn, the first wall drawn for closure, and the terminal residual in the caption.">
+    <img src="/nova/figures/centroid-constrained-oracle-solve/control-negative.png" alt="Negative arm: the same displaced seed with no row, solved against the captured state on shared levels, both null sets and the first wall drawn."></p>
+
+    <p>Receipts: <code>control-positive.json</code>,
+    <code>control-negative.json</code> and the merged <code>receipt.json</code>
+    under
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-step/</code>.
+    State digests <code>26403364ef4b18da…</code> positive and
+    <code>bcd653f6ab330a6b…</code> negative; panel digests
+    <code>6a54bf70f0259f93…</code> and <code>4ca550a8ddc6e0bd…</code>.</p>
+  </section>
 </main>
-</body>
 </html>

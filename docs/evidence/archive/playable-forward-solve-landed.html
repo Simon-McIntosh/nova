@@ -1859,6 +1859,63 @@ standalone kernel wall only. Receipts: <code>~/.config/reckon/crew/reports/nova/
   <p><strong>Gate.</strong> The null command passes exactly and is unchanged by the repair: zero turning-point motion, zero current change, zero admitted forwards. The upper command fails at 114.991 mm final turning-point error against a 2 mm tolerance, with the commanded extremum moving minus 35.386 mm along its own plus 20.000 mm command and 61.161 to 114.991 mm of drift at the three uncommanded extrema. The elongation arm was not submitted because its gate was conditioned on the upper arm landing inside its own. The node therefore has no positive steering arm, the achieved-motion shape inverse is still not accepted as a control, and the driving followup remains open.</p>
   <p><strong>Not shown.</strong> No poloidal flux contour panel accompanies this record. The per-command receipt retains turning points, motion residuals and per-circuit current changes but no flux field, so the required contour panels cannot be rendered from what is on disk and rendering them would need another forward solve. The gap is recorded rather than captioned around.</p>
 </section>
+<section id="self-consistent-shape-response">
+  <h2>The self-consistent turning-point response exceeds the frozen tangent by 1.9 to 90 times (2026-09-17)</h2>
+  <p><strong>What was measured.</strong> The frozen tangent behind the shape inverse,
+  <code>turning_point_response_matrix</code> in <code>nova/equilibrium/shape_inverse.py</code>, differences the boundary read of the seed flux plus
+  the coil's vacuum response with the plasma current held fixed. It therefore omits the plasma's own self-consistent motion. This measurement tables
+  the true response beside it: each of the thirteen free circuits is stepped by plus and minus 500 A on MAST 22086/43, the reduced-Newton forward
+  solve is converged at each perturbed current, and the central-difference motion of the four bounding-box turning points (outer, upper, inner,
+  lower) is compared with the frozen tangent norm. Every perturbation is a full forward solve, not a linearisation.</p>
+  <p><strong>The ratio.</strong> Across 52 compared pairs (13 circuits &#215; 1 to 2 usable steps &#215; 4 extrema) the self-consistent response norm
+  exceeds the frozen tangent norm at every pair. The largest is <strong>90.16</strong> on <code>circuit_00_sol</code> at the outer extremum, where the
+  frozen tangent reads <code>2.586e-07 m/A</code> against a measured <code>2.332e-05 m/A</code>; the smallest is <strong>1.90</strong> on
+  <code>circuit_10_p5_lower</code> at the outer extremum, <code>1.380e-06</code> against <code>2.627e-06 m/A</code>. A 90-fold under-prediction on the
+  solenoid and a whole-plasma displacement of <code>2.50e-05 m/A</code> on the same circuit are the same statement as the earlier failure of the
+  merit-and-cap repair: the linear model the outer step rested on was not a description of the machine.</p>
+  <figure>
+    <img src="/nova/figures/playable-forward-solve/shape-inverse/response-comparison.png" alt="Left: the seed 22086/43 diverted equilibrium, unfilled flux contours at shared levels with the wall and the seed null set. Right: the same equilibrium after circuit_00_sol plus 2000 A, drawn on the identical level array, with the seed nulls overlaid in grey and the perturbed nulls solid.">
+    <figcaption>Seed state (left) beside the largest-ratio driven state, <code>circuit_00_sol</code> plus 2000 A (right), on one physical level
+      array so the shift cannot hide behind independent colour scales. Both panels draw the first wall and both null sets: grey open markers are the
+      seed axis and X-point, solid markers the perturbed state. Right panel caption in the figure: terminal residual <code>5.38e-09</code>,
+      converged True, topology diverted.</figcaption>
+  </figure>
+  <table>
+    <caption>Frozen tangent against the self-consistent response, per free circuit, outer extremum, at plus 500 A</caption>
+    <thead><tr><th scope="col">Circuit</th><th scope="col">Family</th><th scope="col">Frozen tangent (m/A)</th><th scope="col">Self-consistent (m/A)</th><th scope="col">Ratio, outer</th><th scope="col">Ratio, largest extremum</th></tr></thead>
+    <tbody>
+      <tr><th scope="row"><code>circuit_00_sol</code></th><td>sol</td><td>2.586e-07</td><td>2.332e-05</td><td>90.16</td><td>90.16 (outer)</td></tr>
+      <tr><th scope="row"><code>circuit_05_p3_upper</code></th><td>p3_upper</td><td>5.057e-07</td><td>1.232e-05</td><td>24.35</td><td>24.35 (outer)</td></tr>
+      <tr><th scope="row"><code>circuit_07_p4_upper</code></th><td>p4_upper</td><td>5.770e-07</td><td>9.633e-06</td><td>16.69</td><td>16.84 (upper)</td></tr>
+      <tr><th scope="row"><code>circuit_11_p6_upper</code></th><td>p6_upper</td><td>7.834e-07</td><td>1.171e-05</td><td>14.95</td><td>15.84 (upper)</td></tr>
+      <tr><th scope="row"><code>circuit_04_p2_outer_lower</code></th><td>p2_outer_lower</td><td>8.155e-08</td><td>1.194e-06</td><td>14.64</td><td>21.03 (inner)</td></tr>
+      <tr><th scope="row"><code>circuit_03_p2_inner_lower</code></th><td>p2_inner_lower</td><td>6.379e-08</td><td>9.319e-07</td><td>14.61</td><td>21.04 (inner)</td></tr>
+      <tr><th scope="row"><code>circuit_06_p3_lower</code></th><td>p3_lower</td><td>6.135e-07</td><td>7.734e-06</td><td>12.61</td><td>17.87 (inner)</td></tr>
+      <tr><th scope="row"><code>circuit_02_p2_outer_upper</code></th><td>p2_outer_upper</td><td>1.621e-07</td><td>1.909e-06</td><td>11.78</td><td>26.70 (upper)</td></tr>
+      <tr><th scope="row"><code>circuit_01_p2_inner_upper</code></th><td>p2_inner_upper</td><td>1.268e-07</td><td>1.491e-06</td><td>11.76</td><td>26.69 (upper)</td></tr>
+      <tr><th scope="row"><code>circuit_09_p5_upper</code></th><td>p5_upper</td><td>1.262e-06</td><td>9.100e-06</td><td>7.21</td><td>16.35 (inner)</td></tr>
+      <tr><th scope="row"><code>circuit_08_p4_lower</code></th><td>p4_lower</td><td>7.404e-07</td><td>5.158e-06</td><td>6.97</td><td>12.12 (inner)</td></tr>
+      <tr><th scope="row"><code>circuit_12_p6_lower</code></th><td>p6_lower</td><td>9.264e-07</td><td>6.139e-06</td><td>6.63</td><td>11.14 (inner)</td></tr>
+      <tr><th scope="row"><code>circuit_10_p5_lower</code></th><td>p5_lower</td><td>1.380e-06</td><td>2.627e-06</td><td>1.90</td><td>4.78 (inner)</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Convergence.</strong> Of the 52 perturbed solves, one lost its axis and eight terminated without converging, and all nine are recorded in the receipt rather than aborting the run. The lost axis is
+  <code>circuit_00_sol</code> at minus 2000 A, which raises <code>NoQualifiedAxisError</code> in the forward stage and therefore contributes no 2000 A row to the table; the 500 A central difference is used
+  in its place. The eight non-converged solves are circuit 0 at minus 500 A (<code>terminal_residual 2.52e-03</code>), circuit 5 at minus 2000 A (<code>3.72e-03</code>), circuit 6 at plus 2000 A
+  (<code>3.34e-04</code>), circuit 7 at minus 2000 A (<code>2.81e-03</code>), circuit 8 at plus 2000 A (<code>1.23e-04</code>), circuit 9 at minus 2000 A (<code>9.76e-04</code>), circuit 11 at minus
+  2000 A (<code>7.58e-04</code>) and circuit 12 at plus 2000 A (<code>1.88e-04</code>), every one of them still classified <code>diverted</code>, so the topology was reached and the residual was not. Each
+  circuit carries a <code>central_difference_unavailable</code> map naming which step and which sign are missing, so a reader can tell a small ratio from an unfilled row.</p>
+  <p><strong>Execution and panel.</strong> The measurement is one H200 job, <code>1272849</code> on <code>98dci4-gpu-0003</code> under reservation <code>gpu_0003_grpA</code>, 4770.77 s wall, exit 0, from
+  <code>source_commit 27f5035f</code> with <code>devices cuda:0</code>; the receipt is <code>docs/figures/playable-forward-solve/shape-inverse/response-comparison.json</code> (sha256
+  <code>14bdfea9b60e2c9710d8d4a6acf3eaccdd0c6c5693832c915ed9545cffaad33d</code>), the state archive <code>response-comparison-states.npz</code> (sha256
+  <code>86f63c517d350d16101b95c92ae1027aa3b329f82b3dce1dab7a096f272cfe72</code>, 484 430 bytes, retaining the seed and driven lattice flux of circuit 0 so the panel is re-renderable without a
+  re-solve) and the panel <code>response-comparison.png</code> (sha256 <code>3e072f86efa8b6847ed51b05002b2fb3dde35be31d4c7d72020ee0e216dc9b07</code>). The panel's render script is <code>benchmarks/playable_shape_response_comparison.py</code>;
+  reading it, the figure obeys the four plotting rules: both panels are drawn through <code>ink.poloidal_axes</code>, which calls <code>set_axis_off()</code> and disables the grid, so there are no spines, ticks or
+  gridlines; the flux is drawn with <code>poloidal.draw_flux_contours</code>, which calls <code>axes.contour</code> and never <code>contourf</code>, so the scalar map is unfilled line contours; the two panels
+  share one <code>levels</code> array computed from the seed and the driven flux together, so a mismatch cannot hide behind independent colour scales; the first wall is drawn on both panels with
+  <code>poloidal.draw_wall</code>; and both null sets are drawn on the driven panel with distinct styles (grey open markers for the seed, solid for the perturbed state) with the caption naming which is
+  which. No breach of the rules was found and nothing was changed in the script.</p>
+</section>
 </main>
 </body>
 </html>

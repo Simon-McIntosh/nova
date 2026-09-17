@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T07:27:41",
+  "updated": "2026-09-17T07:29:11",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4829,6 +4829,15 @@
         "created": "2026-09-16"
       },
       {
+        "id": "s19c-pfs-response-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
+      },
+      {
         "id": "s19c-pfs-shape-c",
         "harness": "clive",
         "role": "implement",
@@ -4861,9 +4870,11 @@
         "id": "s19c-review-ecq-c",
         "harness": "clive",
         "role": "review",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "4bad1370-86f8-4e49-b76e-8a9c7210cfd9",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "4bad1370-86f8-4e49-b76e-8a9c7210cfd9"
+        },
         "created": "2026-09-17"
       },
       {
@@ -175393,6 +175404,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2675
+    "_version": 2677
   }
 }

@@ -1365,6 +1365,66 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   its controls, over the same clipped geometry already drawn in the exact-clip
   records above.</p>
 </section>
+
+<section class="r-record" data-node="ecm-memory-test-tracer-parameter-route">
+  <h3>Memory test reaches the arc tracer through the clip parameter</h3>
+
+  <p><strong>What changed.</strong> The deletion of the globals-dictionary clone
+  left <code>tests/test_exact_clip_memory.py</code> unimportable: it imported
+  <code>_implicit_traced_clip</code> at line 24, rewrote
+  <code>_traced_level_arc</code> inside that clone's <code>__globals__</code> at
+  line 81 and called the clone at line 450. The module now reaches the same
+  tracer through the clip entry point's own <code>arc_tracer</code> argument:
+  the primal bit-identity test passes
+  <code>arc_tracer=forward_operator._implicit_traced_level_arc</code> to
+  <code>AtomicCellMesh.traced_clip</code>, and the whole-cell guard driver
+  rebinds <code>forward_operator._implicit_traced_level_arc</code> instead of a
+  cloned namespace. Its test id became
+  <code>test_implicit_level_arc_primal_is_bit_identical</code>, which drops the
+  name of the deleted wrapper. One commit, <code>93a0b141</code>, touching one
+  path; <code>benchmarks/exact_clip_memory_scaling.py</code> already resolved
+  the retained <code>_implicit_traced_level_arc</code> and is unchanged.</p>
+
+  <p><strong>The guard's poison reaches the parameter.</strong> A structural
+  check of <code>ForwardFluxOperator._profile_support</code> in a fresh CPU
+  process disassembles the method and finds
+  <code>LOAD_GLOBAL _implicit_traced_level_arc</code> on the instruction list of
+  the <code>_traced_clip(..., arc_tracer=...)</code> call, so the argument is
+  bound from the module namespace at call time and the driver's rebind lands on
+  the parameter; rebinding the attribute is visible at that namespace and the
+  deleted clone is absent. Log:
+  <code>reports/nova/s19-local/memory-test-repair/logs/jobC_poison_route.log</code>.</p>
+
+  <p><strong>Evidence that could have failed.</strong> Collection counts are
+  equal to the heuristic base: the module collects <strong>14</strong> tests at
+  the node head and <strong>14</strong> at revision <code>26c45542</code>, both
+  measured on <code>all_debug</code> with <code>JAX_PLATFORMS=cpu</code>, the
+  root venv interpreter and <code>PYTHONPATH</code> pointed at the tree under
+  test (<code>logs/collect_head.txt</code>, <code>logs/collect_base.txt</code>).
+  The base tree is a <code>git archive</code> extraction of <code>26c45542</code>
+  that includes the repository-root <code>conftest.py</code>: without it the
+  base run collects 12 and reports 2 deselected, a filter artefact of the
+  archive rather than a count difference, which is why the archive was
+  completed before the count was accepted. The repaired primal test carries a
+  liveness control it would fail without: a displaced tracer
+  (<code>arc + 1.0</code>) is handed to the same entry point and must change at
+  least one returned field, so the equality assertion cannot pass by the clip
+  ignoring its <code>arc_tracer</code>. The twelve fast tests ran one per
+  <code>all_debug</code> job, each in its own fresh process, and each passed;
+  the bit-identity test among them took 14.86 s of its 20 s allocation.</p>
+
+  <p><strong>Not run, and why.</strong> The two hour-scale tests are listed
+  unrun: <code>test_exact_clip_terminal_state_matches_reference_fixed_point</code>
+  and <code>test_whole_cell_terminal_state_ignores_polish_jvp</code>. Each drives
+  two production solves in fresh subprocesses (at -300 and -500 cells) and the
+  module's last committed lane run was cancelled at its 59-minute limit on
+  <code>............F</code>, the twelfth dot being
+  <code>test_implicit_level_root_jvp_matches_central_difference</code>, so their
+  base walls exceed a single 59-minute allocation by construction. The guard
+  driver they exercise is changed by this node and is therefore unverified in
+  this record; it is a live refusal path verified structurally, not a solved
+  terminal moment.</p>
+</section>
 </section>
 </main>
 </body>

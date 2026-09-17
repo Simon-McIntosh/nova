@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T05:47:46",
+  "updated": "2026-09-17T06:21:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4562,9 +4562,11 @@
         "id": "s19c-cca-arctracer-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "b5cd904c-9186-4461-bae4-7540dd209677",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "b5cd904c-9186-4461-bae4-7540dd209677"
+        },
         "created": "2026-09-16"
       },
       {
@@ -173808,6 +173810,223 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-implicit-arc-tracer-by-parameter",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5933,
+                "cached_input_tokens": 797938,
+                "input_tokens": 803873,
+                "output_tokens": 4112,
+                "reasoning_output_tokens": 346,
+                "total_tokens": 807985,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the globals clone is gone from separatrix_clip.py, the twelve-test exact-clip module with every test module importing separatrix_clip.py passes one module per fresh CPU process on all_debug with zero added failures against base (one job per module, each declared as a wait), the weak-110 exact-clip terminal moments are bit-identical to base, no other file under nova/ changes (the benchmarks/solovev_certificate.py _UNIT_NODE move stays with a later node), logs under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/arc-tracer, manifest scalars unquoted",
+          "estimated_hours": null,
+          "goal": "Make the implicit level-root arc tracer an explicit argument (or a small strategy object) of _traced_clip in nova/equilibrium/separatrix_clip.py, deleting the globals-dictionary clone that the memory repair b9486687 used to rebind _traced_level_arc, so the exact-clip route is readable, refactor-safe, with its terminal moments unchanged",
+          "id": "cca-implicit-arc-tracer-by-parameter",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-16T20:58:02Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/separatrix_clip.py",
+            "tests/test_equilibrium_separatrix_clip.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/arc-tracer",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19c-cca-arctracer-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-16T20:58:43Z",
+        "completed_at": "2026-09-17T00:39:04.254Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 13208,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 13221,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "ef5504ea7966773255934b7e09e208db88a77866",
+        "commits": [
+          "935589accb2747064211e8039d68ed1cf98b79db"
+        ],
+        "changed_lines": {
+          "added": 77,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "failed",
+        "gate_check": {
+          "command": "one all_debug job per exact-clip module at 935589ac plus independent review re-run of tests/test_equilibrium_separatrix_clip.py (23 passed)",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter.json",
+          "log_digest": "sha256:de954bc098b9d55ca41a3caeca770fbf48ae5ef7ba8dd4197229e3c0b3f8f90c"
+        },
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter/manifest.md",
+        "scope_changed": false,
+        "session_id": "b5cd904c-9186-4461-bae4-7540dd209677",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 11485295,
+            "input_tokens_cumulative": 11485295,
+            "output_tokens": 104227,
+            "output_tokens_cumulative": 104227,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T00:39:04.254Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 18,
+            "evidence": 11,
+            "fit": 19,
+            "goal_fidelity": 14,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 82
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 11816657,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 9367.896,
+          "generated_tokens": 121047,
+          "generation_seconds": 6765.348,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.4,
+          "machine_seconds": 2602.548,
+          "peak_input_tokens": 165299,
+          "tokens_per_second": 17.89,
+          "wall_tokens_per_second": 12.92
+        },
+        "follow_on_paths": [
+          "nova/equilibrium/forward_operator.py",
+          "benchmarks/solovev_certificate.py",
+          "tests/test_exact_clip_memory.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-implicit-arc-tracer-by-parameter",
+          "session_id": "b5cd904c-9186-4461-bae4-7540dd209677",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T00:39:04.254Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 72.0,
+        "orientation_input_tokens": 1833428.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -174120,6 +174339,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2662
+    "_version": 2664
   }
 }

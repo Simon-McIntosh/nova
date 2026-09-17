@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="76">
+<meta name="plan-version" content="77">
 <meta name="plan-impl" content="0.88">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd,273ff747,7aef0963">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -386,6 +386,13 @@
 <div class="r-q" data-id="q-msc-jacobian-refresh" data-section="" data-status="resolved" data-opened-by="" data-opened-at="" data-resolved-at="2026-09-05T13:12:50+00:00" data-resolved-by="smc">
     <p class="r-q-body"><p>The prototype holds one dense Jacobian per trip and refreshes it only when a whole grade ladder is refused, which makes the inner iteration a chord method: on the MAST rows it still contracts to 1e-13 in twelve steps, on the small synthetic CPU machine it contracts linearly at about a quarter per step and needs a 24-step budget where production needs 12. Refreshing the Jacobian every step costs 0.4 to 0.9 ms (warm, H200) and buys quadratic contraction. Options: keep the chord (cheapest step, more steps), refresh every step (fewer steps, plus up to 0.9 ms each), or refresh when the contraction factor of the last step exceeds a threshold (adaptive). Recommendation: adaptive refresh, since the step budget is the quantity the millisecond target constrains and the Jacobian is not the binding cost.</p></p>
     <p class="r-q-resolution">Lead decision 2026-09-05: adaptive refresh. Hold one dense Jacobian per trip by default and rebuild it when the contraction factor of the last accepted step exceeds a threshold, or when a grade ladder is refused, so the step budget stays near the fresh-Jacobian count while the Jacobian cost (0.4 to 0.9 ms warm) is paid only where the chord is contracting slowly.</p>
+    </div>
+</section>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="compile-cost-levers" data-choice="all-four" data-by="lead" data-when="2026-09-17T20:46:28+00:00">
+    <p class="r-dec-q">compile-cost-levers</p>
+    <p class="r-dec-rat">Lead 2026-09-17: compile time must fall and compiled programs must persist; an hour of CPU-only compile before an H200 job does any GPU work is not acceptable, and GPU use should be visible within seconds of allocation. Four levers taken together, in this order of urgency: (1) canonical program shapes, bucketing mesh and support capacities into a small set so every identity compiles to one of a few programs and the persistent cache hits across identities, rows and test modules (the drift campaign paid ten compiles for ten arms, 7551 s); (2) a pre-warm job that compiles the canonical program set into a shared, non-pruned cache location on the H200 after each merge to main, with test lanes and workers pointed at it, so compile is a once-per-merge cost off the critical path; (3) the single-evaluator restructure continues (stages two to five) to shrink the program itself; (4) a cache-hit guard on every H200 and debug lane: compile seconds and cache hits per program in the log header, and a lane that refuses to report a wall-clock result when misses exceed a budget. Measured baselines to beat: 337 to 1050 s per solve compile, 345 to 409 s for the 300-cell census program, 848 and 965 s for the exact-clip solve at 110 and 300 cells, executables of 590 MB and 903 MB.</p>
     </div>
 </section>
 </main>

@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -52,14 +52,14 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="compensating-unknown" data-choice="uniform-field-increment" data-by="lead" data-when="2026-09-16T19:27:43+00:00">
+<div class="r-dec" data-key="compensating-unknown" data-choice="uniform-field-increment-plus-flux-level" data-by="lead" data-when="2026-09-17T20:46:22+00:00">
     <p class="r-dec-q">What compensates the centroid row on the coil-less fixture: a uniform exterior field increment per direction, a rigid translation of the fixture exterior, or a Lagrange multiplier on the position with no field change?</p>
     <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="uniform-field-increment">uniform field increment</button>
+      <button class="r-opt" data-value="uniform-field-increment">uniform field increment</button>
       <button class="r-opt" data-value="exterior-translation">exterior translation</button>
       <button class="r-opt" data-value="position-multiplier">position multiplier</button>
       </p>
-    <p class="r-dec-rat">Lead 2026-09-16 (2a), revised the same day: the compensating increments are the two analytic total-flux columns of scripts/analytic_oracle_fixtures/measure.py uniform_exterior_field_response, and the one condition is that they are solenoidal (div B = 0). Both satisfy it by construction, because each is a flux function: the vertical column pi (R squared minus R0 squared) images a uniform Bz, and the radial column minus 2 pi R Z makes Br uniform with the accompanying divergence-free vertical component minus Br Z over R. The lead ruled explicitly that the control fields do not need to be coil-generated or curl-free, so no ghost coils and no vacuum-field substitution are required; the columns stay as they are. Evidence for the choice: the row&#x27;s directional prediction matches the measured fixture response to 0.004 percent at 1 mT and 0.17 percent at 10 mT in both components (field-response probe, H200 job 1272113), so the actuator is right in direction and scale. The bound is imposed as a fail-closed refusal after damped step control on the row, never as a clip inside the traced map (a clipped unknown has zero tangent at its bound, which is how the first constrained receipt saturated at 0.25 T); the successor node measures the size and sign of the first Newton step before anything else.</p>
+    <p class="r-dec-rat">Lead 2026-09-17, revising the 2026-09-16 lock after the one-gauge re-read: the two solenoidal uniform-field columns stay, and the compensating family gains a third term that moves the flux level without moving the centroid (a uniform flux offset, the gauge freedom of the fixture), so the fixed point is reachable with the centroid pinned. Evidence behind the revision: with the two-column family the compensated state lands the centroid 74 times inside its band while the flux level sits 1.6 percent of span (0.83 Wb gauge-free, 0.67 Wb beyond the column&#x27;s own contribution) from the authored level and the row scaled residual stays at 1.34e-3 against the 1e-12 clause, so the displaced seed cannot relax to the authored fixed point under a two-parameter family. The fixed-point clause itself is kept at 1e-12. Conditions carried over: the bound is imposed by damped step control with a fail-closed refusal, never a clip; the level term is solenoidal trivially (it adds no field) and is reported on the receipt beside the two field amplitudes.</p>
     </div>
 </section>
 
@@ -100,7 +100,7 @@
     <div class="r-comment-body"><p>The centroid row's fixed-point clause is judged in one gauge (merge e08158c4): the probe derives the authored boundary flux from the fixture in the compensator column's gauge and the receipt driver compares at the same two points; gauge-free offset -0.8267 Wb (1.6 percent of span), of which the closed-form compensator column accounts for -0.1597 Wb, leaving -0.6670 Wb as an upper estimate that still carries the plasma's own response to the 2.4 mT field; the clause fails on the row scaled residual 1.34e-3 against 1e-12 regardless of gauge; the confounded 0.529 figure was low by 1.56. Tests 5 passed, zero added failures. Review 88/100: the two new tests cover only the closed-form re-read and would not catch a restored hardcoded zero; a missing compensating_field_t is coerced to zeros rather than refused; the authored-level keys fall back unmarked to the read's own levels; the compensator split is first-order, not a measured separation</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T145020372027-review-of-cco-fixed-point-clause-in-one-gauge" data-who="reckon-ship" data-when="2026-09-17T16:38:59.157Z">
-    <div class="r-comment-body"><p>Independent review of cco-fixed-point-clause-in-one-gauge stored at the fence path, total 88, four findings recorded on the reviewed run&#x27;s completion</p></div>
+    <div class="r-comment-body"><p>Independent review of cco-fixed-point-clause-in-one-gauge stored at the fence path, total 88, four findings recorded on the reviewed run's completion</p></div>
 </div>
 </section>
 </main>

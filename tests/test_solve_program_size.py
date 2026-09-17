@@ -17,6 +17,8 @@ from benchmarks.solve_program_size_gate import (
     MAX_300_SOLVE_INSTRUCTIONS,
     MarkerCensusRefusal,
     _carried_census_counts,
+    _dump_comparison,
+    _dump_comparison_sentence,
     _rebaseline_marker_copies,
     _write_json,
     dual_census,
@@ -571,3 +573,85 @@ def test_marker_census_report_tables_both_counts_and_the_decision(tmp_path):
     assert "topology read: committed 36, measured 1, delta -35" in report
     assert "Carried forward from the earlier receipt" in report
     assert figure.stat().st_size > 0
+    assert "byte-identical" not in report
+    assert "recorded no dump comparison" in report
+
+
+def test_dump_comparison_measures_differing_bytes_and_first_offset(tmp_path):
+    earlier_bytes = b"module @m {\n  // /checkout/one/nova/read.py\n  %0 = f32[]\n}"
+    current_bytes = b"module @m {\n  // /checkout/two/nova/read.py\n  %0 = f32[]\n}"
+    earlier = tmp_path / "earlier.hlo.txt"
+    current = tmp_path / "current.hlo.txt"
+    earlier.write_bytes(earlier_bytes)
+    current.write_bytes(current_bytes)
+
+    comparison = _dump_comparison(earlier, current)
+
+    assert comparison["compared"] is True
+    assert comparison["size_equal"] is True
+    assert (
+        comparison["current_bytes"]
+        == len(current_bytes)
+        == comparison["previous_bytes"]
+    )
+    assert comparison["current_sha256"] != comparison["previous_sha256"]
+    assert comparison["differing_bytes"] == 3  # "one" against "two", no other change
+    # 1-based, as cmp reports it: the first byte of the changed path in the names table
+    assert comparison["first_difference_offset"] == earlier_bytes.index(b"one") + 1
+    assert "/checkout/one" in comparison["first_difference_context"]["previous"]
+    assert "/checkout/two" in comparison["first_difference_context"]["current"]
+
+
+def test_dump_comparison_reports_an_absent_previous_dump(tmp_path):
+    current = tmp_path / "current.hlo.txt"
+    current.write_bytes(b"module @m {}")
+
+    comparison = _dump_comparison(tmp_path / "missing.hlo.txt", current)
+
+    assert comparison["compared"] is False
+    assert comparison["previous_exists"] is False
+    assert comparison["differing_bytes"] is None
+    sentence = _dump_comparison_sentence(comparison, "abc123")
+    assert "was not on disk" in sentence
+    assert "byte-identical" not in sentence
+
+
+def test_marker_census_report_states_only_the_measured_comparison(tmp_path):
+    module = _hlo_module({"ForwardFluxOperator._fixed_design_read": [4]})
+    census = dual_census(module)
+    current_sha = "97cee38e1ea67a4a1ec9893cd76d631425f5d9d832a641e9fed094c36da8eb0e"
+    previous_sha = "ffca59be3f2c82f09bf36205906fca7a55bdf713eccc0e9b9aa2d9e4cc156bc5"
+    receipt = {
+        "measurement_revision": "revision",
+        "assignment": {"job_id": "1", "partition": "all_debug", "platform": "cpu"},
+        "sentinel": census["sentinel"],
+        "baseline_reads_as_committed": True,
+        "baseline_derivation": ["topology read: committed 79, measured 79, delta 0"],
+        "previous_receipt_revision": "a30309ad",
+        "dump_comparison": {
+            "current_path": "/now/current.hlo.txt",
+            "current_bytes": 219_637_882,
+            "current_sha256": current_sha,
+            "previous_path": "/then/previous.hlo.txt",
+            "previous_exists": True,
+            "previous_bytes": 219_637_882,
+            "previous_sha256": previous_sha,
+            "compared": True,
+            "size_equal": True,
+            "differing_bytes": 1094,
+            "first_difference_offset": 2937,
+            "offset_base": "1-based byte position",
+            "first_difference_context": {
+                "previous": '".../one/topology.py"',
+                "current": '".../two/topology.py"',
+            },
+        },
+    }
+
+    report = marker_census_report(census, receipt, None)
+
+    assert "219637882 bytes" in report
+    assert "differ in 1094 bytes" in report
+    assert "first at offset 2937" in report
+    assert "97cee38e" in report and "ffca59be" in report
+    assert "byte-identical" not in report

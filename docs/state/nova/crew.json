@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T00:46:16",
+  "updated": "2026-09-18T00:46:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4927,6 +4927,15 @@
           "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "32667720-db70-4a37-9c91-e990539c0d60"
         },
         "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-nia-bisect-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
       },
       {
         "id": "s19c-nia-driftprobe-c",
@@ -186209,6 +186218,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2755
+    "_version": 2756
   }
 }

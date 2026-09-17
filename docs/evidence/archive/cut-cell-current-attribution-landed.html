@@ -1278,6 +1278,93 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   files is in this change's write scope, so the clone cannot be deleted from
   inside this node: <code>forward_operator.py</code> needs both a scope grant and
   a followup node of its own. The landed half is the seam that deletion needs.</p>
+<section id="clip-globals-clone-deletion">
+  <h2>The globals clone is deleted; the tracer travels by parameter</h2>
+
+  <p>Commit <code>294b070e</code> removes <code>_implicit_clip_globals</code>,
+  <code>_implicit_traced_clip</code> and the <code>types.FunctionType</code>
+  construction from <code>nova/equilibrium/forward_operator.py</code> and
+  reaches the implicit-derivative level-root tracer through the clip's own
+  <code>arc_tracer</code> parameter at the production exact-support call site.
+  <code>_implicit_traced_level_arc</code> itself is kept and passed by name.
+  The change rests on two facts: the parameter route has an explicit caller,
+  and the deletion moved no arithmetic.</p>
+
+  <p><strong>What changed.</strong> Three commits on the node: 294b070e
+  deletes eight lines of clone construction and one alias and rewrites the
+  exact-support call; aa2eec1a and dbf411d9 add
+  <code>tests/test_equilibrium_forward_operator.py</code>, which pins the
+  route and the absence of a clone.</p>
+
+  <p><strong>Evidence - the moments are identical, not merely close.</strong>
+  Receipt <code>reports/nova/s19-local/arc-tracer-clone/clone-deletion-moments.json</code>
+  drives the weak-rotation-reactor -110 certificate machine and its exact state
+  in a fresh CPU process per arm, one arm on the node head and one on the main
+  checkout, and records the exact-clip per-cell support moments the forward
+  operator raises on its own accord. Max absolute difference is <strong>exactly
+  0.0</strong> on every array - clipped area, first area moment, second area
+  moment, per-cell vertex count, the support-vertex table and the cell currents
+  - over 135 cells of which 121 are clipped, with both shapes, the dtype and a
+  sha256 digest printed per array.</p>
+
+  <p><strong>Why that zero is a measurement and not a blank.</strong> Five
+  ways the instrument is shown live, each reported in the receipt:</p>
+  <ul>
+    <li>The recorder fired; an arm whose recorder records nothing exits
+        non-zero rather than reporting an empty comparison.</li>
+    <li>The exact and chord modes of the same arm disagree - exact total area
+        <code>21.20135866955972</code> against chord
+        <code>23.893661380085774</code> - so the exact clip was exercised
+        rather than short-circuited into a shared code path.</li>
+    <li>A one-ulp perturbation of the area array is detected as different, so
+        the equality test resolves the smallest representable difference.</li>
+    <li>The head module reports no <code>_implicit_clip_globals</code> and no
+        clone function in its namespace while the base arm reports both, so
+        the two arms are not both running post-change code.</li>
+    <li>The base arm is the main checkout, and the two modules the change
+        touches are byte-identical between the orientation base revision
+        <code>26c45542</code> and that checkout's HEAD, established by an empty
+        <code>git diff --name-only</code> over exactly those two paths.</li>
+  </ul>
+
+  <p><strong>Tests.</strong> One module per fresh CPU process, each in its own
+  <code>all_debug</code> job, root venv interpreter,
+  <code>JAX_PLATFORMS=cpu</code>:
+  <code>tests/test_equilibrium_separatrix_clip.py</code> 23 passed in 60.5 s;
+  <code>tests/test_equilibrium_forward_operator.py</code> 3 passed in
+  113.3 s.</p>
+
+  <p><strong>The guard is falsifiable in two directions.</strong> The clone
+  detector is first run on a synthetic patched-globals clone of the traced clip
+  built inside the test and must flag it, so a green detector that never fires
+  fails rather than passes; and the tracer spy asserts that every traced clip
+  call the exact mode raises carries
+  <code>arc_tracer is _implicit_traced_level_arc</code>, while the committed
+  chord mode raises no traced clip call at all as the negative side of the same
+  assertion.</p>
+
+  <p><strong>Narrowing during the node.</strong> The detector first keyed on
+  the deleted names, which would not survive a rename, and an over-broad
+  version flagged two functions legitimately defined in
+  <code>clip_quadrature</code>. It now tests the structural signature: a module
+  attribute that is a function whose <code>__globals__</code> reports the clip
+  module's <code>__name__</code> while not being that module's own dictionary.
+  Importing a function from the clip cannot produce that signature; carrying a
+  copy of its namespace can, which is what the removed clone did.</p>
+
+  <p><strong>Scope defect carried.</strong>
+  <code>tests/test_exact_clip_memory.py</code> imports the deleted name at line
+  24, rebinds <code>_traced_level_arc</code> inside its <code>__globals__</code>
+  at line 81 and calls the clone at line 450, so that module now fails at
+  import; it lies outside this node's write scope and needs a node of its own.
+  <code>benchmarks/exact_clip_memory_scaling.py</code> line 498 uses
+  <code>_implicit_traced_level_arc</code>, which is retained and unaffected.</p>
+
+  <p>No terminal forward state is produced by this node, so this record carries
+  no poloidal flux contour panel: the evidence is a per-cell moment table with
+  its controls, over the same clipped geometry already drawn in the exact-clip
+  records above.</p>
+</section>
 </section>
 </main>
 </body>

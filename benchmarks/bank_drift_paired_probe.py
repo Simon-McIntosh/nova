@@ -110,7 +110,7 @@ def _flatten_operand(value: Any) -> list[np.ndarray]:
             return
         try:
             array = np.asarray(item, dtype=np.float64)
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return
         leaves.append(array.reshape(-1) if array.ndim else array.reshape(1))
 
@@ -134,7 +134,7 @@ def _profile_support_digest(profile: Any) -> dict[str, Any]:
     if callable(connectivity):
         try:
             axes, _shape = connectivity()
-        except (TypeError, ValueError, RuntimeError):
+        except TypeError, ValueError, RuntimeError:
             axes = None
         if axes is not None:
             leaves = _flatten_operand(axes)
@@ -165,9 +165,7 @@ def _partition_report(operator: Any) -> dict[str, Any]:
         "is_pytree": not opaque,
         "leaf_count": len(leaves),
         "tree_node_count": int(getattr(treedef, "num_nodes", -1)),
-        "leaf_dtypes": sorted(
-            {str(np.asarray(leaf).dtype) for leaf in numeric_leaves}
-        ),
+        "leaf_dtypes": sorted({str(np.asarray(leaf).dtype) for leaf in numeric_leaves}),
         "pytree_repr": str(treedef)[:400],
         "operator_type": f"{type(operator).__module__}.{type(operator).__name__}",
     }
@@ -222,7 +220,7 @@ def _resume_rows(out_path: Path) -> list[dict[str, Any]]:
         return []
     try:
         payload = json.loads(out_path.read_text())
-    except (json.JSONDecodeError, UnicodeDecodeError):
+    except json.JSONDecodeError, UnicodeDecodeError:
         return []
     rows = payload.get("rows")
     return rows if isinstance(rows, (list,)) else []
@@ -300,13 +298,9 @@ def _emit(
                 "digest": partition["structure_digest"],
                 "summary": partition["summary"],
             }
-            entry["stages"]["partition_values"] = {
-                "digest": partition["values_digest"]
-            }
+            entry["stages"]["partition_values"] = {"digest": partition["values_digest"]}
             observed = producer._ObservedProfile(profile)
-            target_current = abs(
-                float(passive_case["reference"]["plasma_current_a"])
-            )
+            target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
             states = reachability._mast_states(
                 observed,
                 jnp.asarray(passive_case["state"]),
@@ -358,8 +352,6 @@ def _emit(
     return 0
 
 
-
-
 def _flat_stages(row: dict[str, Any] | None) -> dict[str, Any]:
     """Return the identity-level stage digests of one emission row.
 
@@ -380,7 +372,7 @@ def _flat_stages(row: dict[str, Any] | None) -> dict[str, Any]:
 
 
 def _compare(left_path: Path, right_path: Path, out_path: Path) -> int:
-    """Join the two tree emissions into one twelve-row attribution receipt."""
+    """Join the two trees' emissions into one twelve-row attribution receipt."""
 
     left = json.loads(left_path.read_text())
     right = json.loads(right_path.read_text())
@@ -465,9 +457,7 @@ def _compare(left_path: Path, right_path: Path, out_path: Path) -> int:
         if row["residual_moved"]
     ]
     focus = [
-        row
-        for row in rows
-        if row["identity"] == "21983/35" and row["arm"] == "mixed"
+        row for row in rows if row["identity"] == "21983/35" and row["arm"] == "mixed"
     ]
     receipt = {
         "artifact": "paired old-tree against current-tree MAST operand-solve probe",
@@ -532,9 +522,7 @@ def _merge(arms_dir: Path, out_path: Path, expected_rows: int) -> int:
         key = str(row["first_differing_stage"])
         counts[key] = counts.get(key, 0) + 1
     focus = [
-        row
-        for row in rows
-        if row["identity"] == "21983/35" and row["arm"] == "mixed"
+        row for row in rows if row["identity"] == "21983/35" and row["arm"] == "mixed"
     ]
     moved = [
         {
@@ -551,7 +539,9 @@ def _merge(arms_dir: Path, out_path: Path, expected_rows: int) -> int:
         for row in rows
         if row["residual_moved"]
     ]
-    missing = expected_rows - len(rows)
+    present = len(rows)
+    missing = max(0, expected_rows - present)
+    unexpected = max(0, present - expected_rows)
     receipt = {
         "artifact": "paired old-tree against current-tree MAST operand-solve probe",
         "left": trees.get("left"),
@@ -561,8 +551,9 @@ def _merge(arms_dir: Path, out_path: Path, expected_rows: int) -> int:
         "rows": rows,
         "summary": {
             "rows_expected": expected_rows,
-            "rows_present": len(rows),
-            "arms_missing": missing,
+            "rows_present": present,
+            "rows_missing": missing,
+            "rows_unexpected": unexpected,
             "first_differing_stage_counts": counts,
             "residual_moved": moved,
             "focus_21983_35_mixed": focus,
@@ -574,7 +565,7 @@ def _merge(arms_dir: Path, out_path: Path, expected_rows: int) -> int:
     out_path.write_text(json.dumps(receipt, indent=1, sort_keys=True))
     print(f"wrote {out_path}", flush=True)
     print(json.dumps(receipt["summary"], indent=1, sort_keys=True), flush=True)
-    return 0 if missing <= 0 else 1
+    return 0 if present == expected_rows else 1
 
 
 def _parse() -> argparse.Namespace:

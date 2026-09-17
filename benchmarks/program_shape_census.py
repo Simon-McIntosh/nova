@@ -126,6 +126,40 @@ def bank_rows(path: Path) -> list[dict]:
         return rows
 
 
+GEOMETRY_ARRAYS = ("radius", "height", "wall")
+OPERAND_ONLY_ARRAYS = ("flux",)
+
+
+def geometry_value_agreement(path: Path, arrays: tuple[str, ...]) -> dict:
+    """Max absolute difference of the persisted geometry arrays across bank arms.
+
+    The operator program identity hashes mesh VALUES, so two arms share a
+    compiled program only if those values agree.  Comparing the persisted
+    arrays measures the inputs the identity hashes without building an operator.
+    """
+    worst = {}
+    with np.load(path, allow_pickle=False) as stored:
+        count = int(json.loads(str(stored["metadata"].item()))["arm_count"])
+        for name in arrays:
+            reference = np.asarray(stored["arm_00_" + name], dtype=float)
+            worst[name] = max(
+                float(
+                    np.max(
+                        np.abs(
+                            np.asarray(stored["arm_%02d_" % index + name], dtype=float)
+                            - reference
+                        )
+                    )
+                )
+                for index in range(1, count)
+            )
+    return {
+        "arrays": list(arrays),
+        "max_abs_difference": worst,
+        "shared_program": all(value == 0.0 for value in worst.values()),
+    }
+
+
 def certificate_rows(
     requested_cells: int, cases: tuple[str, ...] | None = None
 ) -> list[dict]:
@@ -200,11 +234,19 @@ def _ceiling(value: int, floors: tuple[int, ...]) -> int:
 
 
 def bucketed(capacities: dict, buckets: dict) -> dict:
-    return {
-        name: _ceiling(int(capacities[name]), buckets[name])
-        for name in buckets
-        if name in capacities and capacities[name] is not None
-    }
+    """Round every present capacity up; an undeclared axis falls back to a power of two.
+
+    Every program-reaching axis must appear in the bucketed signature, so an
+    axis with no declared floors is rounded to the next power of two rather than
+    dropped: dropping it would understate the program count by making two
+    identities look alike on the axes that remain.
+    """
+    rounded = {}
+    for name, value in capacities.items():
+        if value is None:
+            continue
+        rounded[name] = _ceiling(int(value), buckets.get(name, ()))
+    return rounded
 
 
 def _group(rows: list[dict], key) -> dict:
@@ -298,8 +340,17 @@ def summarise(rows: list[dict], buckets: dict, label: str) -> dict:
         rows,
         lambda row: json.dumps(bucketed(row["capacities"], buckets), sort_keys=True),
     )
+    observed_axes = sorted(
+        {
+            name
+            for row in rows
+            for name, value in row["capacities"].items()
+            if value is not None
+        }
+    )
     waste = {}
-    for name, floors in buckets.items():
+    for name in observed_axes:
+        floors = buckets.get(name, ())
         observed = sorted(
             {
                 int(row["capacities"][name])
@@ -307,11 +358,9 @@ def summarise(rows: list[dict], buckets: dict, label: str) -> dict:
                 if row["capacities"].get(name) is not None
             }
         )
-        if not observed:
-            continue
         waste[name] = {
             "observed": observed,
-            "floors": list(floors),
+            "floors": list(floors) if floors else "power-of-two fallback",
             "padding_ratio": {
                 str(value): round(_ceiling(value, floors) / value, 4)
                 for value in observed
@@ -353,7 +402,16 @@ def main(argv: list[str] | None = None) -> int:
     bank_summary["distinct_receipt_shape_signatures"] = len(
         {row["receipt_signature"] for row in bank}
     )
-    bank_summary["memory_keyed_program_count_today"] = len(bank)
+    agreement = geometry_value_agreement(arguments.bank_cache, GEOMETRY_ARRAYS)
+    agreement["operand_only_arrays"] = geometry_value_agreement(
+        arguments.bank_cache, OPERAND_ONLY_ARRAYS
+    )["max_abs_difference"]
+    bank_summary["geometry_value_agreement"] = agreement
+    bank_summary["program_count_today"] = (
+        1
+        if agreement["shared_program"]
+        else "one per distinct geometry digest (the census reads shape only)"
+    )
 
     certificates = (
         []
@@ -364,6 +422,10 @@ def main(argv: list[str] | None = None) -> int:
         summarise(certificates, DEFAULT_BUCKETS, "certificate")
         if certificates
         else None
+    )
+
+    combined_summary = summarise(
+        bank + certificates, DEFAULT_BUCKETS, "bank-and-certificate"
     )
 
     proposals = []
@@ -402,6 +464,7 @@ def main(argv: list[str] | None = None) -> int:
         "requested_cells": arguments.requested_cells,
         "bank": bank_summary,
         "certificate": certificate_summary,
+        "combined": combined_summary,
         "bucketing_proposals": proposals,
         "cache": cache_inventory(arguments.cache_root),
         "rows": {"bank": bank, "certificate": certificates},
@@ -414,6 +477,8 @@ def main(argv: list[str] | None = None) -> int:
         len(bank),
         "shape signatures",
         bank_summary["distinct_program_shape_signatures"],
+        "programs today",
+        bank_summary["program_count_today"],
     )
     if certificate_summary:
         print(

@@ -7,14 +7,18 @@ from benchmarks.program_scope_census import (
     _executable_size,
     _loop_inventory,
     _render_constant_svg,
+    _replication_targets,
     build_rung_report,
     reanalyze,
 )
 from benchmarks.solve_program_size_gate import (
     MAX_300_EXECUTABLE_BYTES,
     MAX_300_SOLVE_INSTRUCTIONS,
+    MarkerCensusRefusal,
     _write_json,
     evaluate_gate,
+    marker_census,
+    require_live_markers,
     write_semantic_report,
 )
 
@@ -332,3 +336,103 @@ def test_semantic_receipt_preserves_nonfinite_refusal_as_null(tmp_path):
         "finite": False,
         "residual": None,
     }
+
+
+def _sentinel_line(function):
+    for target in _replication_targets().values():
+        for item in target["targets"]:
+            if item["function"] == function:
+                return item["sentinel"]["line"]
+    raise KeyError(function)
+
+
+def _hlo_module(copies):
+    """Build synthetic optimised HLO whose traced frames carry the sentinels.
+
+    ``copies`` maps a marker function to the read-body instruction count of
+    each traced copy of it, so a degenerate census can be written by hand and
+    refused without compiling anything.
+    """
+    names = sorted(copies)
+    functions = "\n".join(f'{index + 1} "{name}"' for index, name in enumerate(names))
+    frames = []
+    locations = []
+    blocks = []
+    frame_id = 100
+    for name, counts in copies.items():
+        for count in counts:
+            frames.append(
+                f"{frame_id} {{file_location_id={frame_id} parent_frame_id=0}}"
+            )
+            locations.append(
+                f"{frame_id} {{file_name_id=1 function_name_id="
+                f"{names.index(name) + 1} line={_sentinel_line(name)}}}"
+            )
+            body = "\n".join(
+                f"  %i{frame_id}.{step} = f64[4] add(f64[4] %x, f64[4] %x), "
+                f'metadata={{op_name="jit(body)/jit(body)/add" '
+                f"stack_frame_id={frame_id}}}"
+                for step in range(count)
+            )
+            blocks.append(
+                f"%fused.{frame_id} {{\n{body}\n"
+                f"  ROOT %t{frame_id} = (f64[4]) tuple(%i{frame_id}.0)\n}}\n"
+            )
+            frame_id += 1
+    return (
+        "HloModule jit_synthetic, is_scheduled=true\n\n"
+        f'FileNames\n1 "/repo/nova/equilibrium/forward_operator.py"\n\n'
+        f"FunctionNames\n{functions}\n\n"
+        f"FileLocations\n" + "\n".join(locations) + "\n\n"
+        "StackFrames\n" + "\n".join(frames) + "\n\n" + "\n".join(blocks)
+    )
+
+
+def test_marker_census_refuses_a_module_without_markers():
+    module = (
+        "HloModule jit_synthetic, is_scheduled=true\n\n"
+        'FileNames\n1 "/repo/nova/equilibrium/forward_operator.py"\n\n'
+        'FunctionNames\n1 "ForwardFluxOperator.normalised_current_moments"\n\n'
+        "FileLocations\n1 {file_name_id=1 function_name_id=1 line=7}\n\n"
+        "StackFrames\n1 {file_location_id=1 parent_frame_id=0}\n\n"
+        "%fused.0 {\n"
+        '  %a = f64[4] sine(f64[4] %x), metadata={op_name="jit(body)/sine}\n'
+        "  ROOT %t = (f64[4]) tuple(%a)\n}\n"
+    )
+
+    census = marker_census(module)
+
+    with pytest.raises(MarkerCensusRefusal, match="zero markers"):
+        require_live_markers(census)
+
+
+def test_marker_census_refuses_a_uniform_read_body_column():
+    module = _hlo_module(
+        {
+            "ForwardFluxOperator.normalised_current_moments": [1, 1],
+            "ForwardFluxOperator._fixed_design_read": [2],
+        }
+    )
+
+    census = marker_census(module)
+
+    with pytest.raises(MarkerCensusRefusal, match="uniform column"):
+        require_live_markers(census)
+
+
+def test_marker_census_counts_distinct_copies_and_accepts_a_live_census():
+    module = _hlo_module(
+        {
+            "ForwardFluxOperator.normalised_current_moments": [1, 2, 3],
+            "ForwardFluxOperator._fixed_design_read": [2, 3],
+        }
+    )
+
+    census = marker_census(module)
+    require_live_markers(census)
+
+    rows = census["paths"]
+    assert rows["current-moment path"]["copies"] == 3
+    assert rows["current-moment path"]["read_body_per_copy"] == [1, 2, 3]
+    assert rows["current-moment path"]["marker_bearing_computations"] == 3
+    assert rows["topology read"]["copies"] == 2

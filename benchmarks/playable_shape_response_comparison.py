@@ -236,9 +236,7 @@ def _circuit_entry(
                 entry[f"ratio_{int(step)}_self_consistent_over_frozen"] = None
                 continue
             entry[f"self_consistent_{int(step)}_m_per_a"] = _vector(value)
-            entry[f"differential_{int(step)}_m_per_a"] = _vector(
-                value - common[step]
-            )
+            entry[f"differential_{int(step)}_m_per_a"] = _vector(value - common[step])
             entry[f"ratio_{int(step)}_self_consistent_over_frozen"] = (
                 float(np.linalg.norm(value) / denominator)
                 if denominator > 0.0
@@ -251,13 +249,10 @@ def _circuit_entry(
         "label": _circuit_label(int(circuit), names),
         "central_difference_table": rows,
         "central_difference_unavailable": {
-            str(int(step)): sorted(sides)
-            for step, sides in unavailable.items()
+            str(int(step)): sorted(sides) for step, sides in unavailable.items()
         },
         "whole_plasma_motion_m_per_a": {
-            str(int(step)): (
-                None if common[step] is None else _vector(common[step])
-            )
+            str(int(step)): (None if common[step] is None else _vector(common[step]))
             for step in STEPS_A
         },
         "solves": {
@@ -401,6 +396,17 @@ def measure(directory: Path = DIRECTORY) -> dict[str, Any]:
         },
     }
 
+    print(
+        "PRIME converged %s residual %.3e after %.1f s; frozen tangent %s"
+        % (
+            bool(np.asarray(prime.fixed_point.converged)),
+            float(np.asarray(prime.fixed_point.residual)),
+            perf_counter() - started,
+            frozen.shape,
+        ),
+        flush=True,
+    )
+
     entries: list[dict[str, Any]] = []
     for position, circuit in enumerate(free):
         measured: dict[float, dict[str, dict[str, Any]]] = {}
@@ -462,7 +468,8 @@ def measure(directory: Path = DIRECTORY) -> dict[str, Any]:
                 _write(directory / RECEIPT_NAME, payload)
                 print(
                     "SOLVE circuit %02d %s %+d A stage %s error %s "
-                    "after %.1f s" % (
+                    "after %.1f s"
+                    % (
                         circuit,
                         key,
                         int(sign * step),

@@ -1,0 +1,52 @@
+{
+  "schema": "nova.bank-shape-identity",
+  "captured_at": "2026-09-18T00:30:00+00:00",
+  "question": "do the twelve bank members need twelve compiled programs, or do their program-shape axes agree?",
+  "instrument": "benchmarks/program_shape_census.py --skip-certificate (reads array shapes from logs/exact-operand-cache.npz; nothing is compiled and no MAST profile is rebuilt)",
+  "source": {
+    "operand_cache": "logs/exact-operand-cache.npz (89486 bytes, allow_pickle=False)",
+    "metadata_guard": "metadata.arm_count == 12, asserted before any row is read",
+    "rows": 12,
+    "identities": "six MAST shot/slice pairs (21978/35, 21983/35, 21985/51, 21986/46, 21989/55, 22086/43), each at two arms (pure, mixed)"
+  },
+  "result": {
+    "identities": 12,
+    "distinct_program_reaching_shape_signatures": 1,
+    "signature_contents": {
+      "radius": [33, "<f8"],
+      "height": [33, "<f8"],
+      "flux": [33, 33, "<f8"],
+      "wall": [37, 2, "<f8"],
+      "axis": [2, "<f8"],
+      "selected_saddle": [2, "<f8"],
+      "binding_flux": [[], "<f8"]
+    },
+    "mesh_axis_nodes": 1089,
+    "wall_node_capacity": 37,
+    "state_size": 1089,
+    "sole_per_row_varying_shape": "efit_lcfs, a reference contour at 153/155/147/139/145/151 nodes per identity; it is a receipt operand, not a program argument"
+  },
+  "reading": {
+    "today": "the twelve bank members present ONE shape signature but compile to twelve programs, because _operator_program_identity hashes the mesh VALUES (geometry_identity) rather than its capacities: 12 arms x 1 shape = 12 programs",
+    "conclusion": "for the bank the bucketing lever is not about padding shape (there is nothing to pad) but about making the operator program identity capacity-keyed instead of value-keyed; until that holds, a mesh whose values change between shots recompiles even though every array shape is identical",
+    "bucketed_program_count_note": "with a capacity-keyed identity the twelve bank members collapse to ONE program"
+  },
+  "not_persisted": [
+    "the solve support cell index list (coordinates.cells) whose LENGTH is a static program shape; it is host-derived per solve and repeats, so a census of it needs the solve coordinates, not this operand cache",
+    "the arc capacity (moment_geometry support capacity)"
+  ],
+  "cache_inventory": {
+    "root": "/home/ITER/mcintos/.cache/nova/jax-compilation",
+    "runtime_key_directories": 12,
+    "entries": 3958,
+    "bytes": 20044389103,
+    "gib": 18.662,
+    "largest_directory": {"name": "runtime-0745ecebea4cb264e054", "entries": 1442, "gib": 8.707},
+    "second": {"name": "runtime-ea5c55820be3d80549fe", "entries": 2139, "gib": 5.526},
+    "age_days": {"min": 0.02, "median": 2.2, "max": 16.01, "older_than_10_days": 356, "older_than_20_days": 0},
+    "bound_is_per_directory": "LRUCache._evict enforces max_size against a single cache directory, and nova configures 8 GiB (nova/jax/config.py:27). Twelve runtime-version keys therefore carry twelve independent bounds: the aggregate ceiling is up to 12 x 8 GiB = 96 GiB, and the observed 18.7 GiB is a sum across twelve directories rather than a reading against one bound",
+    "observed_overshoot": "runtime-0745ecebea4cb264e054 holds 8.707 GiB, above the 8 GiB bound: _evict runs while dir_size > max_size - additional_size on each put, so a directory can settle just above the bound once no further put has flushed it",
+    "bound_correction_to_plan": "f-msc-program-size-budget records '1907 entries totalling 7.6 GB' for the persistent cache: that figure is one runtime key, not the cache. The installed cache today is 3958 entries / 18.662 GiB across twelve keys",
+    "entries_the_twelve_identities_need": "one program per identity today, so twelve entries plus the four certificate programs; the twelve are shape-identical, so under a capacity-keyed identity they need one entry shared with every other 1089-node MAST identity"
+  }
+}

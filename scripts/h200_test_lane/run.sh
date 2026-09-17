@@ -3,7 +3,9 @@
 set -euo pipefail
 
 readonly PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
-readonly LANE_DIRECTORY="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# Inside the batch job the shell runs a spooled copy of this file, so the
+# script path there is not the lane directory; the submitter passes it.
+readonly LANE_DIRECTORY="${H200_LANE_DIRECTORY:-$(dirname "$(realpath -e -- "${BASH_SOURCE[0]}")")}"
 readonly DEFAULT_PINNED_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
 
 usage() {
@@ -147,7 +149,7 @@ submission=(
   --chdir="${repository_root}"
   --output="${resolved_log}"
   --error="${resolved_log}"
-  --export="ALL,H200_LANE_EXPECTED_REVISION=${source_revision},H200_LANE_REPOSITORY_ROOT=${repository_root}"
+  --export="ALL,H200_LANE_EXPECTED_REVISION=${source_revision},H200_LANE_REPOSITORY_ROOT=${repository_root},H200_LANE_DIRECTORY=${LANE_DIRECTORY}"
 )
 if [[ "${foreground}" == true ]]; then
   submission+=(--wait)

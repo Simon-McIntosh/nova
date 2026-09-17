@@ -15,7 +15,9 @@
 set -euo pipefail
 
 readonly PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
-readonly LANE_DIRECTORY="$(dirname "$(realpath -e -- "${BASH_SOURCE[0]}")")"
+# Inside the batch job the shell runs a spooled copy of this file, so the
+# script path there is not the lane directory; the submitter passes it.
+readonly LANE_DIRECTORY="${NOVA_PREWARM_LANE_DIRECTORY:-$(dirname "$(realpath -e -- "${BASH_SOURCE[0]}")")}"
 readonly DEFAULT_PINNED_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
 
 usage() {
@@ -155,6 +157,7 @@ fi
 
 readonly repository_root="$(git -C "${LANE_DIRECTORY}/../.." rev-parse --show-toplevel)"
 readonly source_revision="$(git -C "${repository_root}" rev-parse HEAD)"
+readonly script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
 readonly resolved_log="$(realpath -m -- "${log_path}")"
 readonly log_directory="$(dirname "${resolved_log}")"
 
@@ -169,16 +172,16 @@ submission=(
   --cpus-per-task=8
   --gpus=h200:1
   --mem=128G
-  --time=01:00:00
+  --time=01:30:00
   --chdir="${repository_root}"
   --output="${resolved_log}"
   --error="${resolved_log}"
-  --export="ALL,NOVA_PREWARM_EXPECTED_REVISION=${source_revision},NOVA_PREWARM_REPOSITORY_ROOT=${repository_root}"
+  --export="ALL,NOVA_PREWARM_EXPECTED_REVISION=${source_revision},NOVA_PREWARM_REPOSITORY_ROOT=${repository_root},NOVA_PREWARM_LANE_DIRECTORY=${LANE_DIRECTORY}"
 )
 if [[ "${foreground}" == true ]]; then
   submission+=(--wait)
 fi
-submission+=("${BASH_SOURCE[0]}" --payload)
+submission+=("${script_path}" --payload)
 
 if [[ "${dry_run}" == true ]]; then
   printf 'SOURCE_REVISION=%s\n' "${source_revision}"

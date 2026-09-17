@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import UTC, datetime
+from fractions import Fraction
 import hashlib
 import json
 import math
@@ -58,7 +59,17 @@ from scripts.analytic_oracle_fixtures import measure as fixture
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT_ROOT = Path(
+    os.environ.get(
+        "NOVA_EXACT_CLIP_REPORT_ROOT",
+        "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-gauss",
+    )
+)
+REPORT_INPUT_ROOT = Path(
     "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-gauss"
+)
+COUPLING_RECEIPT = Path(
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/"
+    "moment-order/receipt.json"
 )
 FIGURE_ROOT = ROOT / "docs/figures/exact-clip-moment-quadrature"
 CASES = (
@@ -184,64 +195,6 @@ def _fan_cut_moments(support, field, profile, order: int) -> np.ndarray:
     return values
 
 
-def _boundary_exact_density_moments(support, field, profile, order: int) -> np.ndarray:
-    """Integrate exact density by a boundary homotopy over the sampled polygon."""
-    node, weight = np.polynomial.legendre.leggauss(order)
-    unit_node = 0.5 * (node + 1.0)
-    unit_weight = 0.5 * weight
-    count = np.asarray(support.vertex_count, dtype=np.intp)
-    vertices = np.asarray(support.support_vertices, dtype=np.float64)
-    centres = np.asarray(support.centroids, dtype=np.float64)
-    boundary = np.asarray(support.included) & np.asarray(support.boundary)
-    coefficient = np.asarray(field.coefficient, dtype=np.float64)
-    sample_centre = np.asarray(field.centre, dtype=np.float64)
-    scale = np.asarray(field.scale, dtype=np.float64)
-    values = np.zeros((3, len(count)), dtype=np.float64)
-    for cell in np.flatnonzero(boundary):
-        polygon = vertices[cell, : count[cell]]
-        anchor = polygon[0]
-        edge_first = polygon[1:-1] - anchor
-        edge_second = polygon[2:] - anchor
-        direction = (1.0 - unit_node)[None, :, None] * edge_first[
-            :, None, :
-        ] + unit_node[None, :, None] * edge_second[:, None, :]
-        points = (
-            anchor[None, None, None, :]
-            + unit_node[None, :, None, None] * direction[:, None, :, :]
-        )
-        local = (points - sample_centre[cell]) / scale[cell]
-        radial, vertical = local[..., 0], local[..., 1]
-        psi_norm = (
-            coefficient[cell, 0]
-            + coefficient[cell, 1] * radial
-            + coefficient[cell, 2] * vertical
-            + coefficient[cell, 3] * radial**2
-            + coefficient[cell, 4] * radial * vertical
-            + coefficient[cell, 5] * vertical**2
-        )
-        density = np.asarray(
-            profile.current_density(jnp.asarray(points[..., 0]), jnp.asarray(psi_norm)),
-            dtype=np.float64,
-        )
-        jacobian = np.abs(
-            edge_first[:, 0] * edge_second[:, 1] - edge_first[:, 1] * edge_second[:, 0]
-        )
-        area_weight = (
-            jacobian[:, None, None]
-            * unit_node[None, :, None]
-            * unit_weight[None, :, None]
-            * unit_weight[None, None, :]
-        )
-        offset = points - centres[cell]
-        weighted = density * area_weight
-        values[:, cell] = (
-            np.sum(weighted),
-            np.sum(weighted * offset[..., 0]),
-            np.sum(weighted * offset[..., 1]),
-        )
-    return values
-
-
 def _fan_quadratic_density_moments(support, field, profile, order: int) -> np.ndarray:
     """Integrate the production six-sample quadratic density on the fan region."""
     cell_index = jnp.arange(len(support.vertex_count), dtype=jnp.int32)
@@ -290,55 +243,196 @@ def _relative_difference(observed: np.ndarray, reference: np.ndarray) -> np.ndar
     )
 
 
-def edge_order_study() -> dict[str, Any]:
-    """Find the lowest per-edge Gauss order exact on the density model's integral.
+_ORDER_STUDY_ORDERS = (1, 2, 3, 4, 5)
+# An asymmetric sliver: one long edge, one short near-parallel edge, one long
+# near-parallel edge. Every edge carries a distinct (dx, dy) pair, so a defect
+# cannot hide behind a degenerate edge direction.
+_ORDER_STUDY_SLIVER = (
+    (Fraction(0), Fraction(0)),
+    (Fraction(1), Fraction(0)),
+    (Fraction(63, 100), Fraction(35, 1000)),
+)
+# A genuinely quadratic flux: every second-order monomial carries a nonzero
+# coefficient, which is what puts total degree four into the density model.
+_ORDER_STUDY_FLUX = (
+    Fraction(1, 5),
+    Fraction(3, 10),
+    Fraction(-1, 4),
+    Fraction(2, 10),
+    Fraction(3, 10),
+    Fraction(-7, 20),
+)
+# The analytic-oracle density shape rho = c0 + c1 r + c2 psi + c3 psi**2.
+_ORDER_STUDY_DENSITY = (
+    Fraction(3, 2),
+    Fraction(3, 4),
+    Fraction(-2),
+    Fraction(1, 2),
+)
 
-    The boundary rule integrates, along each straight edge, the radial
-    antiderivative of the local density model. That integrand is a polynomial of
-    degree five in the edge parameter, so a Gauss rule is exact on it once
-    2 * order - 1 reaches five. This checks the claim directly on the model's
-    own monomials rather than on the reduced moments.
 
-    The reference is the monomial's antiderivative in closed form. A sampled rule
-    cannot serve as it: its own truncation sits near 1e-6 on these integrands,
-    which floors the measured defect above the exactness threshold and makes
-    every order read as inexact.
-    """
+def _order_study_polynomial_product(
+    left: dict[tuple[int, int], Fraction],
+    right: dict[tuple[int, int], Fraction],
+) -> dict[tuple[int, int], Fraction]:
+    product: dict[tuple[int, int], Fraction] = {}
+    for (left_radial, left_vertical), left_value in left.items():
+        for (right_radial, right_vertical), right_value in right.items():
+            power = (left_radial + right_radial, left_vertical + right_vertical)
+            product[power] = product.get(power, Fraction(0)) + left_value * right_value
+    return product
 
-    def exact_line_integral(exponent: int, vertical_power: int) -> float:
-        """Integrate t**exponent * (1 - 2 t)**vertical_power along the unit edge."""
-        return float(
-            sum(
-                math.comb(vertical_power, term) * (-2.0) ** term / (exponent + term + 1)
-                for term in range(vertical_power + 1)
-            )
+
+def _order_study_density_monomials(
+    flux: tuple[Fraction, ...] = _ORDER_STUDY_FLUX,
+    density: tuple[Fraction, ...] = _ORDER_STUDY_DENSITY,
+) -> dict[tuple[int, int], Fraction]:
+    """Expand the density model into local monomials exactly, in rationals."""
+    psi = {
+        (0, 0): flux[0],
+        (1, 0): flux[1],
+        (0, 1): flux[2],
+        (2, 0): flux[3],
+        (1, 1): flux[4],
+        (0, 2): flux[5],
+    }
+    radius = {(1, 0): Fraction(1)}
+    psi_squared = _order_study_polynomial_product(psi, psi)
+    radius_psi = _order_study_polynomial_product(radius, psi)
+    first, second = density[1], density[2]
+    squared = density[3]
+    monomials: dict[tuple[int, int], Fraction] = {(0, 0): density[0]}
+    for table, factor in ((radius, first), (psi, second), (psi_squared, squared)):
+        for power, value in table.items():
+            monomials[power] = monomials.get(power, Fraction(0)) + factor * value
+    return {power: value for power, value in monomials.items() if value != 0}
+
+
+def _order_study_edge_integral(
+    power: tuple[int, int],
+    start: tuple[Fraction, Fraction],
+    delta: tuple[Fraction, Fraction],
+) -> Fraction:
+    """Integrate x**p * y**q along the unit-parameterised straight edge exactly."""
+    radial_power, vertical_power = power
+    total = Fraction(0)
+    for radial_term in range(radial_power + 1):
+        radial_weight = (
+            math.comb(radial_power, radial_term)
+            * start[0] ** (radial_power - radial_term)
+            * delta[0] ** radial_term
         )
-
-    result: dict[str, Any] = {}
-    for order in (1, 2, 3, 4):
-        nodes, weights = np.polynomial.legendre.leggauss(order)
-        nodes = 0.5 * (nodes + 1.0)
-        weights = 0.5 * weights
-        defect = 0.0
-        for radial_power, vertical_power in _DENSITY_POWERS:
-            exponent = radial_power + 1
-            quadrature = np.sum(
-                weights * nodes**exponent * (1.0 - 2.0 * nodes) ** vertical_power
+        for vertical_term in range(vertical_power + 1):
+            vertical_weight = (
+                math.comb(vertical_power, vertical_term)
+                * start[1] ** (vertical_power - vertical_term)
+                * delta[1] ** vertical_term
             )
-            exact = exact_line_integral(exponent, vertical_power)
-            defect = max(defect, abs(quadrature - exact) / max(abs(exact), 1e-300))
-        result[str(order)] = defect
-    exact_orders = [order for order in (1, 2, 3, 4) if result[str(order)] <= 1e-12]
+            total += (
+                radial_weight
+                * vertical_weight
+                / Fraction(radial_term + vertical_term + 1)
+            )
+    return total
+
+
+def edge_order_study(
+    flux: tuple[Fraction, ...] = _ORDER_STUDY_FLUX,
+    density: tuple[Fraction, ...] = _ORDER_STUDY_DENSITY,
+    sliver: tuple[tuple[Fraction, Fraction], ...] = _ORDER_STUDY_SLIVER,
+) -> dict[str, Any]:
+    """Find the lowest per-edge Gauss order exact on every monomial path.
+
+    The boundary rule integrates along each straight edge the shifted radial
+    antiderivative of the local density model, times the edge's vertical
+    differential. Three paths are carried: the unshifted zeroth moment, and the
+    two first moments with one unit of radial and of vertical shift. The shifts
+    raise the integrand's degree in the edge parameter from five to six, so a
+    rule verified only on the zeroth path can be inexact on the first moments.
+
+    The reference is the edge integral in closed form over rationals. A sampled
+    rule cannot serve as it: its own truncation sits above the exactness
+    threshold on these integrands, which makes every order read as inexact.
+    """
+    monomials = _order_study_density_monomials(flux, density)
+    missing = [power for power in _DENSITY_POWERS if power not in monomials]
+    if missing:
+        raise ValueError(f"density expansion lost monomials {missing}")
+
+    paths = {"zero": (0, 0), "radial_shift": (1, 0), "vertical_shift": (0, 1)}
+    defect_by_path: dict[str, dict[str, float]] = {name: {} for name in paths}
+    degree_by_path: dict[str, int] = {}
+    for name, (radial_shift, vertical_shift) in paths.items():
+        degree_by_path[name] = max(
+            radial + radial_shift + 1 + vertical + vertical_shift
+            for radial, vertical in _DENSITY_POWERS
+        )
+        for order in _ORDER_STUDY_ORDERS:
+            nodes, weights = np.polynomial.legendre.leggauss(order)
+            nodes = 0.5 * (nodes + 1.0)
+            weights = 0.5 * weights
+            defect = 0.0
+            for start, end in zip(sliver, sliver[1:] + sliver[:1]):
+                delta = (end[0] - start[0], end[1] - start[1])
+                if delta[1] == 0:
+                    continue
+                exact = Fraction(0)
+                for (radial_power, vertical_power), coefficient in monomials.items():
+                    power = (
+                        radial_power + radial_shift + 1,
+                        vertical_power + vertical_shift,
+                    )
+                    exact += (
+                        coefficient
+                        * _order_study_edge_integral(power, start, delta)
+                        / power[0]
+                    )
+                exact *= delta[1]
+                radial = float(start[0]) + nodes * float(delta[0])
+                vertical = float(start[1]) + nodes * float(delta[1])
+                quadrature = 0.0
+                for (radial_power, vertical_power), coefficient in monomials.items():
+                    power = (
+                        radial_power + radial_shift + 1,
+                        vertical_power + vertical_shift,
+                    )
+                    quadrature += float(
+                        np.sum(
+                            weights
+                            * radial**power[0]
+                            * vertical**power[1]
+                            / power[0]
+                        )
+                    ) * float(coefficient)
+                quadrature *= float(delta[1])
+                defect = max(
+                    defect, abs(quadrature - exact) / max(abs(float(exact)), 1e-300)
+                )
+            defect_by_path[name][str(order)] = defect
+
+    every_path = {
+        str(order): max(defect_by_path[name][str(order)] for name in paths)
+        for order in _ORDER_STUDY_ORDERS
+    }
+    exact_orders = [
+        order for order in _ORDER_STUDY_ORDERS if every_path[str(order)] <= 1e-12
+    ]
     if not exact_orders:
         raise ValueError(
-            "no tested per-edge Gauss order is exact on the model "
-            f"antiderivative: {result}"
+            "no tested per-edge Gauss order is exact on every moment path: "
+            f"{every_path}"
         )
     lowest = exact_orders[0]
     return {
-        "relative_line_integral_defect_by_order": result,
-        "lowest_order_exact_on_the_model_antiderivative": lowest,
-        "integrand_degree_in_edge_parameter": 5,
+        "relative_line_integral_defect_by_order": every_path,
+        "relative_defect_by_path_and_order": defect_by_path,
+        "lowest_order_exact_on_the_model_antiderivative": exact_orders[0],
+        "lowest_order_exact_on_every_path": lowest,
+        "integrand_degree_in_edge_parameter": degree_by_path,
+        "study_sliver_vertices": [
+            [float(value) for value in vertex] for vertex in sliver
+        ],
+        "study_flux_quadratic_coefficients": [float(value) for value in flux[3:]],
     }
 
 
@@ -367,9 +461,15 @@ def discriminate(
 
     The receipt is the row's other error term: the retained fan region carrying
     the production quadratic density fit, measured against the fan's own
-    pointwise profile, alongside an exact-density arm that must reproduce the
-    fan identically. ``built`` carries a ``_build`` result forward so a row
+    pointwise profile. ``built`` carries a ``_build`` result forward so a row
     report does not rebuild the machine and support.
+
+    An exact-density arm stood here and reported exactly zero against the fan.
+    It is removed rather than repaired: it integrated the profile at the fan's
+    own Duffy points through a boundary homotopy, so it reproduced the fan as an
+    arithmetic identity and could not have failed on any row. The independent
+    statement of the sampled region's share is the fan's own refinement floor,
+    which the quadratic-density arm is compared against.
     """
     _require_boundary_route()
     operator, support, field, bank_capacity, flux_span = (
@@ -389,9 +489,6 @@ def discriminate(
     jax.block_until_ready(production)
     production_array = np.stack([np.asarray(value) for value in production])
     fan = _fan_cut_moments(support, field, operator.source.core, FAN_ORDER)
-    exact_boundary = _boundary_exact_density_moments(
-        support, field, operator.source.core, FAN_ORDER
-    )
     quadratic_fan = _fan_quadratic_density_moments(
         support, field, operator.source.core, FAN_ORDER
     )
@@ -415,12 +512,6 @@ def discriminate(
         }
 
     arms = [
-        arm(
-            "sampled_polygon_exact_density_boundary",
-            "Boundary homotopy over every live sampled vertex with pointwise "
-            "profile density.",
-            exact_boundary,
-        ),
         arm(
             "sampled_polygon_quadratic_density_fan",
             "Retained fan region with the production six-sample quadratic density fit.",
@@ -530,7 +621,7 @@ def row_report(case_name: str, requested_cells: int) -> dict[str, Any]:
         "discriminator": discriminator,
         "budget_one_tenth": {
             name: 0.1 * value
-            for name, value in discriminator["arms"][1][
+            for name, value in discriminator["arms"][0][
                 "moment_relative_l2_against_fan"
             ].items()
         },
@@ -644,6 +735,163 @@ def measure(
         REPORT_ROOT / "parts" / f"{_case_key(case_name, requested_cells)}.json", receipt
     )
     return receipt
+
+
+def _coupling_second_order_errors() -> dict[tuple[str, int], float]:
+    """Per-row second-order coupling errors, where the coupling study measured them."""
+    if not REPORT_INPUT_ROOT.exists():
+        return {}
+    payload = json.loads(COUPLING_RECEIPT.read_text(encoding="utf-8"))
+    errors: dict[tuple[str, int], float] = {}
+    for row in payload.get("rows", []):
+        metrics = row.get("route_metrics", {}).get("order_two", {}).get("all", {})
+        value = metrics.get("rms_over_span")
+        if value is None:
+            continue
+        errors[(row["case"], int(row["requested_cells"]))] = float(value)
+    return errors
+
+
+def row_margin_table() -> dict[str, Any]:
+    """Rebuild the nine-row margin table against the independent error terms.
+
+    Each row's margin is its own independent-error budget divided by the route's
+    measured error on that row. The budget is one tenth of the smallest other
+    error term measured on the row: the second-order coupling's frozen-image
+    error where the coupling study measured it, and otherwise the fan's own
+    refinement floor, which is an instrument floor and is shared by every row
+    that has no coupling measurement of its own.
+
+    The route column was measured at the revision named by ``route_revision``
+    and is an upper bound for the shipped route's error, because the per-edge
+    rule was raised from the third order to the fourth on the strength of the
+    order study and the fan it is differenced against did not move.
+    """
+    coupling = _coupling_second_order_errors()
+    rows: list[dict[str, Any]] = []
+    floor_receipt = json.loads(
+        (
+            REPORT_INPUT_ROOT
+            / "parts"
+            / f"{_case_key(CASES[0], CELL_REQUESTS[0])}.json"
+        ).read_text(encoding="utf-8")
+    )
+    floor_moments = floor_receipt["fan_refinement_floor_relative_l2"]
+    floor_image = floor_receipt["frozen_current_image"][
+        "fan_refinement_floor_sup_over_span"
+    ]
+    for case_name in CASES[:3]:
+        for requested_cells in CELL_REQUESTS:
+            key = _case_key(case_name, requested_cells)
+            receipt = json.loads(
+                (REPORT_INPUT_ROOT / "parts" / f"{key}.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            route = receipt["moment_relative_l2_boundary_minus_fan"]
+            coupling_error = coupling.get((case_name, requested_cells))
+            if coupling_error is None:
+                source = "fan floor, shared instrument floor at the weak row"
+                denominators = {name: floor_moments[name] for name in MOMENT_NAMES}
+                image_denominator = floor_image
+            else:
+                source = "second-order coupling frozen-image error"
+                denominators = {name: coupling_error for name in MOMENT_NAMES}
+                image_denominator = coupling_error
+            image = receipt["frozen_current_image"]
+            rows.append(
+                {
+                    "row": key,
+                    "case": case_name,
+                    "requested_cells": requested_cells,
+                    "cut_cells": receipt["cut_cells"],
+                    "per_edge_gauss_order": receipt["per_edge_gauss_order"],
+                    "denominator_source": source,
+                    "other_error_term": {
+                        name: denominators[name] * 10.0 for name in MOMENT_NAMES
+                    },
+                    "budget_one_tenth": {
+                        name: 0.1 * denominators[name] for name in MOMENT_NAMES
+                    },
+                    "route_relative_l2": route,
+                    "margin": {
+                        name: 0.1 * denominators[name] / max(route[name], 1e-300)
+                        for name in MOMENT_NAMES
+                    },
+                    "frozen_image_route": (
+                        None
+                        if image is None
+                        else image["boundary_minus_fan_sup_over_span"]
+                    ),
+                    "frozen_image_margin": (
+                        None
+                        if image is None
+                        else 0.1
+                        * image_denominator
+                        / max(image["boundary_minus_fan_sup_over_span"], 1e-300)
+                    ),
+                    "frozen_image_denominator_source": (
+                        None if image is None else source
+                    ),
+                    "route_measured_at_order": receipt["per_edge_gauss_order"],
+                    "route_revision": receipt["source_revision"],
+                }
+            )
+    denominators_by_source = {
+        "coupling_measured": [
+            row["row"]
+            for row in rows
+            if row["denominator_source"].startswith("second-order")
+        ],
+        "fan_floor_fallback": [
+            row["row"]
+            for row in rows
+            if not row["denominator_source"].startswith("second-order")
+        ],
+    }
+    tightest = min(
+        rows,
+        key=lambda row: min(row["margin"].values()),
+    )
+    table = {
+        "schema": "nova.exact-clip-moment-floor.row-margin.v1",
+        "created_at": datetime.now(UTC).isoformat(),
+        "rows": rows,
+        "denominators_by_source": denominators_by_source,
+        "tightest_row": tightest["row"],
+        "tightest_margin": min(
+            value for name, value in tightest["margin"].items()
+        ),
+        "route_upper_bound_note": (
+            "route relative L2 was measured at the per-edge order recorded per "
+            "row; the shipped order is higher, so each route error is an upper "
+            "bound and each margin a lower bound"
+        ),
+    }
+    _write_json(REPORT_ROOT / "row-margin-table.json", table)
+    (REPORT_ROOT / "row-margin-table.md").write_text(
+        _row_margin_markdown(table), encoding="utf-8"
+    )
+    return table
+
+
+def _row_margin_markdown(table: dict[str, Any]) -> str:
+    lines = [
+        "| row | denominator | budget (1/10) | route current | route radial | "
+        "route vertical | margin current | margin radial | margin vertical |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for row in table["rows"]:
+        budget = row["budget_one_tenth"]["current"]
+        lines.append(
+            f"| {row['row']} | {row['denominator_source']} | {budget:.3e} | "
+            f"{row['route_relative_l2']['current']:.3e} | "
+            f"{row['route_relative_l2']['radial']:.3e} | "
+            f"{row['route_relative_l2']['vertical']:.3e} | "
+            f"{row['margin']['current']:.3g} | {row['margin']['radial']:.3g} | "
+            f"{row['margin']['vertical']:.3g} |"
+        )
+    return "\n".join(lines) + "\n"
 
 
 def default_route_snapshot(path: Path, revision: str) -> dict[str, Any]:
@@ -774,6 +1022,8 @@ def main() -> None:
         action="store_true",
         help="measure the requested row and its density/region discriminator once",
     )
+    parser.add_argument("--row-margin-table", action="store_true")
+    parser.add_argument("--edge-order-study", action="store_true")
     parser.add_argument("--default-route-snapshot", type=Path)
     parser.add_argument("--snapshot-revision")
     parser.add_argument(
@@ -799,6 +1049,13 @@ def main() -> None:
             *arguments.compare_default_route_snapshots
         )
         print("DEFAULT_ROUTE_IDENTITY", comparison, flush=True)
+        return
+    if arguments.edge_order_study:
+        print("ORDER_STUDY", json.dumps(_jsonable(edge_order_study())), flush=True)
+        return
+    if arguments.row_margin_table:
+        table = row_margin_table()
+        print("ROW_MARGIN_TABLE", table["tightest_row"], table["tightest_margin"])
         return
     if arguments.row_report:
         if arguments.case is None or arguments.cells is None:

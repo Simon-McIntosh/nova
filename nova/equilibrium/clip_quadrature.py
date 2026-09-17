@@ -50,7 +50,13 @@ _QUADRATIC_SAMPLE_INVERSE = np.linalg.inv(_QUADRATIC_SAMPLE_DESIGN)
 #: Per-edge Gauss order of the sampled-arc boundary rule. Chosen as the lowest
 #: order whose line integral of the local density model's radial antiderivative
 #: meets the row budget; see the dropped-term receipt in the evidence record.
-_ARC_EDGE_ORDER = 3
+# Gauss order per sampled-arc edge, set by the shifted paths rather than the
+# zeroth one: the unshifted integrand reaches degree five in the edge parameter
+# and a third-order rule is exact on it, but the two first moments raise the
+# degree to six, where a third-order rule carries a relative defect near 1e-6.
+# Fourth order is exact through degree seven and reaches roundoff on all three
+# paths, so the fixed edge count costs four evaluations rather than three.
+_ARC_EDGE_ORDER = 4
 _ARC_EDGE_RULE = np.polynomial.legendre.leggauss(_ARC_EDGE_ORDER)
 _ARC_EDGE_NODE = 0.5 * (_ARC_EDGE_RULE[0] + 1.0)
 _ARC_EDGE_WEIGHT = 0.5 * _ARC_EDGE_RULE[1]

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T00:25:31",
+  "updated": "2026-09-17T05:43:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4662,9 +4662,11 @@
         "id": "s19c-msc-evaldesign-c",
         "harness": "clive",
         "role": "documentation",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "38b59779-6a06-4252-b8ad-aaf067a8e8e2",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "38b59779-6a06-4252-b8ad-aaf067a8e8e2"
+        },
         "created": "2026-09-16"
       },
       {
@@ -4808,6 +4810,24 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-review-a-c",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-review-b-c",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
       },
       {
         "id": "s19c-scout-l",
@@ -173367,6 +173387,215 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T220436914526-msc-single-evaluator-design",
+        "plan": "millisecond-converged-solve",
+        "section": "\u00a72",
+        "node": "msc-single-evaluator-design",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2505,
+                "cached_input_tokens": 870128,
+                "input_tokens": 872665,
+                "output_tokens": 1268,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 873933,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the document exists, passes reckon audit-doc, carries one small-reproducer measurement on all_debug (three call sites of a tagged body, optimised-HLO body count for the switch form beside the while form, job id, log path under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/evaluator-design, declared as a wait) with its figure or table, states each design choice with its reason, ends with the staged implement plan where every stage names its gate under a 60-minute fence, is committed with the plan-informs meta, no file outside docs/ modified, manifest scalars unquoted",
+          "estimated_hours": null,
+          "goal": "Author docs/research/single-evaluator-state-machine-design.html (reckon research document, meta shape of docs/research/compile-cost-evidence.html, plan-informs millisecond-converged-solve) that fixes the design the implement node will build: the request set one traced operator body serves (residual, merit, acceptance, recovery, reconciliation, Jacobian-vector), the request-tag mechanism that defeats XLA's inliner (lax.switch over a tag with one body against a while_loop carrying the tag, with the optimised-HLO evidence that the chosen form stays one body when called from three sites on a small reproducer), where the vmap boundary sits relative to jax.linearize, whether the residual-shadow read on the candidate state is co-produced with the map read on the current state or kept separate with the reason, how reduced_newton.py's own copies of the seam (residual_from_external, _fixed_design_read, normalised_current_moments) ride the same body, the exact optimised-HLO measure that proves one body in the production solve, drawing on the refusal record of r-20260916T205958834556 with the census at docs/figures/millisecond-converged-solve/program-census/report.md",
+          "id": "msc-single-evaluator-design",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-16T22:04:38Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T220436914526-msc-single-evaluator-design/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/research/single-evaluator-state-machine-design.html",
+            "docs/figures/millisecond-converged-solve/evaluator-design",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/evaluator-design",
+            "docs/evidence/archive/millisecond-converged-solve-landed.html",
+            "docs/plans/millisecond-converged-solve.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "s19c-msc-evaldesign-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-16T22:06:04Z",
+        "completed_at": "2026-09-17T03:39:11.745Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 19946,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 19987,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "a828071d54c64c1f0d659428f7d60efbd2e58379",
+        "commits": [
+          "5d8f1bee015d4bb68dd30f8b8ad2b4a64c8191aa",
+          "d42e2f21b7aea3d087937340e5f82d22cf1dd8e3"
+        ],
+        "changed_lines": {
+          "added": 139,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reckon audit-doc docs/research/single-evaluator-state-machine-design.html; all_debug reproducer measurement",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T220436914526-msc-single-evaluator-design/manifest.md",
+          "log_digest": "sha256:bd5f243da8fef31db94b35a273d461ea76f69d6e6eb79b8feb50692ed13360b2"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T220436914526-msc-single-evaluator-design/manifest.md",
+        "scope_changed": false,
+        "session_id": "38b59779-6a06-4252-b8ad-aaf067a8e8e2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 351288,
+            "input_tokens_cumulative": 351288,
+            "output_tokens": 622,
+            "output_tokens_cumulative": 622,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T03:39:11.745Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 351288,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 51.682,
+          "generated_tokens": 622,
+          "generation_seconds": 50.544,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 25.6,
+          "machine_seconds": 1.138,
+          "peak_input_tokens": 122866,
+          "tokens_per_second": 12.31,
+          "wall_tokens_per_second": 12.04
+        },
+        "follow_on_paths": [
+          "subject/body"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-single-evaluator-design",
+          "session_id": "38b59779-6a06-4252-b8ad-aaf067a8e8e2",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T03:39:11.745Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 61.0,
+        "orientation_input_tokens": 1567723.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -173679,6 +173908,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2656
+    "_version": 2660
   }
 }

@@ -131,7 +131,7 @@ def _vector(value: np.ndarray) -> dict[str, float]:
     }
 
 
-def _solve_at(
+def _attempt_at(
     solver: ProductionSolver,
     profile: Any,
     warm: Any,
@@ -140,24 +140,48 @@ def _solve_at(
     step: float,
     sign: float,
 ) -> dict[str, Any]:
-    """Re-solve the forward problem at one perturbed circuit current."""
+    """Attempt one perturbed solve, recording a lost axis instead of raising.
+
+    A perturbation large enough to move the plasma off a qualified axis
+    aborts the turning-point read while the solve itself may have settled, so
+    the two stages are separated so a lost axis on one rung is a datum and
+    never the end of the ladder.
+    """
     currents = np.array(base_current, dtype=float)
     currents[circuit] += sign * step
-    started = perf_counter()
-    equilibrium, trips, _program = solver._forward(profile, warm, currents)
-    wall_s = perf_counter() - started
-    points = _points(achieved_target(profile, equilibrium.flux))
-    return {
+    record: dict[str, Any] = {
         "current_a": float(currents[circuit]),
         "delta_a": float(sign * step),
-        "converged": bool(np.asarray(equilibrium.fixed_point.converged)),
-        "terminal_residual": float(np.asarray(equilibrium.fixed_point.residual)),
-        "trips": int(trips),
-        "wall_s": float(wall_s),
-        "turning_points_m": points.tolist(),
-        "topology": _topology_summary(profile, equilibrium.flux),
-        "flux": np.asarray(equilibrium.flux, dtype=float),
+        "step_a": float(step),
+        "stage": "forward",
+        "error": None,
     }
+    started = perf_counter()
+    try:
+        equilibrium, trips, _program = solver._forward(profile, warm, currents)
+    except Exception as error:
+        record["wall_s"] = perf_counter() - started
+        record["error"] = type(error).__name__
+        record["detail"] = str(error)[:400]
+        return record
+    record["wall_s"] = perf_counter() - started
+    record["converged"] = bool(np.asarray(equilibrium.fixed_point.converged))
+    record["terminal_residual"] = float(np.asarray(equilibrium.fixed_point.residual))
+    record["trips"] = int(trips)
+    record["flux"] = np.asarray(equilibrium.flux, dtype=float)
+    record["stage"] = "turning_point_read"
+    try:
+        record["turning_points_m"] = _points(
+            achieved_target(profile, equilibrium.flux)
+        ).tolist()
+        record["topology"] = _topology_summary(profile, equilibrium.flux)
+        record["stage"] = "complete"
+    except Exception as error:
+        record["turning_points_m"] = None
+        record["topology"] = None
+        record["error"] = type(error).__name__
+        record["detail"] = str(error)[:400]
+    return record
 
 
 def _measured_flux(record: dict[str, Any]) -> np.ndarray:
@@ -171,23 +195,50 @@ def _circuit_entry(
     frozen: np.ndarray,
     measured: dict[float, dict[str, dict[str, Any]]],
 ) -> dict[str, Any]:
-    """Assemble the per-extremum comparison for one circuit."""
-    central = {}
+    """Assemble the per-extremum comparison for one circuit.
+
+    A rung whose plus or minus side never read its turning points carries no
+    central difference; every quantity it would have produced is reported as
+    ``None`` beside the name of the exception that removed it, so a circuit
+    with a lost axis is a row in the table rather than a gap in the file.
+    """
+    central: dict[float, np.ndarray | None] = {}
+    unavailable: dict[float, list[str]] = {}
     for step in STEPS_A:
-        plus = np.asarray(measured[step]["plus"]["turning_points_m"], dtype=float)
-        minus = np.asarray(measured[step]["minus"]["turning_points_m"], dtype=float)
+        pair = measured[step]
+        lost = [
+            side
+            for side in ("plus", "minus")
+            if pair[side].get("turning_points_m") is None
+        ]
+        if lost:
+            central[step] = None
+            unavailable[step] = lost
+            continue
+        plus = np.asarray(pair["plus"]["turning_points_m"], dtype=float)
+        minus = np.asarray(pair["minus"]["turning_points_m"], dtype=float)
         central[step] = 0.5 * (plus - minus) / step
-    common = {step: central[step].mean(axis=0) for step in STEPS_A}
+    common = {
+        step: (None if central[step] is None else central[step].mean(axis=0))
+        for step in STEPS_A
+    }
     frozen_points = np.reshape(np.asarray(frozen, dtype=float), (len(EXTREMA), 2))
     rows = []
     for index, name in enumerate(EXTREMA):
         entry = {"extremum": name}
         entry["frozen_tangent_m_per_a"] = _vector(frozen_points[index])
+        denominator = float(np.linalg.norm(frozen_points[index]))
         for step in STEPS_A:
-            value = central[step][index]
+            value = None if central[step] is None else central[step][index]
+            if value is None:
+                entry[f"self_consistent_{int(step)}_m_per_a"] = None
+                entry[f"differential_{int(step)}_m_per_a"] = None
+                entry[f"ratio_{int(step)}_self_consistent_over_frozen"] = None
+                continue
             entry[f"self_consistent_{int(step)}_m_per_a"] = _vector(value)
-            entry[f"differential_{int(step)}_m_per_a"] = _vector(value - common[step])
-            denominator = float(np.linalg.norm(frozen_points[index]))
+            entry[f"differential_{int(step)}_m_per_a"] = _vector(
+                value - common[step]
+            )
             entry[f"ratio_{int(step)}_self_consistent_over_frozen"] = (
                 float(np.linalg.norm(value) / denominator)
                 if denominator > 0.0
@@ -199,8 +250,15 @@ def _circuit_entry(
         "family": names.get(int(circuit)),
         "label": _circuit_label(int(circuit), names),
         "central_difference_table": rows,
+        "central_difference_unavailable": {
+            str(int(step)): sorted(sides)
+            for step, sides in unavailable.items()
+        },
         "whole_plasma_motion_m_per_a": {
-            str(int(step)): _vector(common[step]) for step in STEPS_A
+            str(int(step)): (
+                None if common[step] is None else _vector(common[step])
+            )
+            for step in STEPS_A
         },
         "solves": {
             str(int(step)): {
@@ -336,24 +394,51 @@ def measure(directory: Path = DIRECTORY) -> dict[str, Any]:
         },
         "circuits": [],
         "manifest_table": _manifest_table([]),
-        "convergence": {"perturbed_solves": 0, "non_converged": []},
+        "convergence": {
+            "perturbed_solves": 0,
+            "lost_axes": [],
+            "non_converged": [],
+        },
     }
 
     entries: list[dict[str, Any]] = []
     for position, circuit in enumerate(free):
         measured: dict[float, dict[str, dict[str, Any]]] = {}
+        ladder = {step: True for step in STEPS_A}
         for step in STEPS_A:
             measured[step] = {}
             for sign, key in ((1.0, "plus"), (-1.0, "minus")):
-                record = _solve_at(
+                if not ladder[step]:
+                    measured[step][key] = {
+                        "current_a": float(base_current[circuit] + sign * step),
+                        "delta_a": float(sign * step),
+                        "step_a": float(step),
+                        "stage": "skipped_larger_step",
+                        "error": None,
+                        "skipped_after_smaller_step_failed": min(
+                            rung for rung in STEPS_A if not ladder[rung]
+                        ),
+                    }
+                    continue
+                record = _attempt_at(
                     solver, profile, prime.flux, base_current, circuit, step, sign
                 )
-                states[f"circuit_{circuit:02d}_{key}_{int(step)}"] = _measured_flux(
-                    record
-                )
+                if record.get("flux") is not None:
+                    states[f"circuit_{circuit:02d}_{key}_{int(step)}"] = _measured_flux(
+                        record
+                    )
                 measured[step][key] = record
                 payload["convergence"]["perturbed_solves"] += 1
-                if not record["converged"]:
+                if record["error"] is not None:
+                    payload["convergence"]["lost_axes"].append(
+                        {
+                            "circuit": circuit,
+                            "delta_a": record["delta_a"],
+                            "stage": record["stage"],
+                            "error": record["error"],
+                        }
+                    )
+                elif not record.get("converged", False):
                     payload["convergence"]["non_converged"].append(
                         {
                             "circuit": circuit,
@@ -362,6 +447,31 @@ def measure(directory: Path = DIRECTORY) -> dict[str, Any]:
                             "topology": record["topology"]["class"],
                         }
                     )
+                if record["error"] is not None:
+                    # The ladder falls back down: a rung that lost the axis
+                    # removes every larger rung for this circuit and sign.
+                    for larger in STEPS_A:
+                        if larger > step:
+                            ladder[larger] = False
+                entries_now = entries + [
+                    _circuit_entry(circuit, names, frozen[:, position], measured)
+                ]
+                payload["circuits"] = entries_now
+                payload["manifest_table"] = _manifest_table(entries_now)
+                payload["runtime"] = {"wall_s": perf_counter() - started}
+                _write(directory / RECEIPT_NAME, payload)
+                print(
+                    "SOLVE circuit %02d %s %+d A stage %s error %s "
+                    "after %.1f s" % (
+                        circuit,
+                        key,
+                        int(sign * step),
+                        record["stage"],
+                        record["error"],
+                        perf_counter() - started,
+                    ),
+                    flush=True,
+                )
         entries.append(_circuit_entry(circuit, names, frozen[:, position], measured))
         payload["circuits"] = entries
         payload["manifest_table"] = _manifest_table(entries)
@@ -383,7 +493,8 @@ def measure(directory: Path = DIRECTORY) -> dict[str, Any]:
         "wall_s": perf_counter() - started,
         "states": STATES_NAME,
         "figure": FIGURE_NAME,
-        "figure_circuit": _figure_circuit(entries),
+        "figure_step_a": float(STEPS_A[-1]),
+        "figure_circuit": _figure_circuit(entries, STEPS_A[-1]),
     }
     _write(directory / RECEIPT_NAME, payload)
     print("MANIFEST-TABLE " + json.dumps(payload["manifest_table"]), flush=True)
@@ -391,12 +502,18 @@ def measure(directory: Path = DIRECTORY) -> dict[str, Any]:
     return payload
 
 
-def _figure_circuit(entries: list[dict[str, Any]]) -> int:
-    """Return the circuit whose largest ratio the panel shows."""
+def _figure_circuit(entries: list[dict[str, Any]], step: float) -> int:
+    """Return the largest-ratio circuit that also holds its driven state.
+
+    A circuit whose driven rung lost its axis has no state to draw, so the
+    panel falls to the next-highest ratio rather than failing the render.
+    """
     best, circuit = -np.inf, -1
     for entry in entries:
+        if entry["solves"][str(int(step))]["plus"].get("turning_points_m") is None:
+            continue
         for row in entry["central_difference_table"]:
-            ratio = row["ratio_500_self_consistent_over_frozen"]
+            ratio = row[f"ratio_{int(STEPS_A[0])}_self_consistent_over_frozen"]
             if ratio is None or not np.isfinite(float(ratio)):
                 continue
             if float(ratio) > best:
@@ -424,7 +541,18 @@ def render(directory: Path = DIRECTORY) -> Path:
     node_count = shape[0] * shape[1]
 
     circuit = int(payload["runtime"]["figure_circuit"])
-    step = int(STEPS_A[-1])
+    if circuit < 0:
+        raise RuntimeError(
+            "no circuit holds both a measured ratio and a driven flux state"
+        )
+    available = [
+        candidate
+        for candidate in sorted(int(item) for item in STEPS_A)
+        if f"circuit_{circuit:02d}_plus_{candidate}" in states.files
+    ]
+    if not available:
+        raise RuntimeError(f"no driven flux state is stored for circuit {circuit}")
+    step = available[-1]
     seed_flux = np.asarray(states["prime"], dtype=float)[:node_count].reshape(shape)
     driven_flux = np.asarray(states[f"circuit_{circuit:02d}_plus_{step}"], dtype=float)[
         :node_count

@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from benchmarks.bank_drift_paired_probe import _compare, _merge
+from benchmarks.bank_drift_paired_probe import _compare, _merge, _panel
 
 STAGES = {
     "profile_support": {"digest": "aaaa"},
@@ -168,3 +168,54 @@ def test_compare_does_not_invent_a_row_for_an_arm_neither_tree_ran(
 
     rows = json.loads(out.read_text())["rows"]
     assert [row["arm"] for row in rows] == ["pure"]
+
+
+def _resolve_archive(path: Path, residual: float, converged: bool) -> None:
+    """Write one resolve archive holding a terminal state whole."""
+
+    import numpy as np
+
+    radius = np.linspace(0.80, 2.20, 9)
+    height = np.linspace(-2.00, 2.00, 11)
+    radius_grid, height_grid = np.meshgrid(radius, height)
+    peak = 1.0 - ((radius_grid - 1.35) ** 2 + (height_grid / 2.2) ** 2)
+    wall = np.asarray(
+        [
+            [1.00, -2.00],
+            [2.10, -2.00],
+            [2.10, 2.00],
+            [1.00, 2.00],
+            [1.00, -2.00],
+        ],
+        dtype=float,
+    )
+    np.savez(
+        path,
+        tree_label=np.array("synthetic"),
+        converged=np.asarray(converged),
+        terminal_residual=np.asarray(residual),
+        radius=np.asarray(radius, dtype=float),
+        height=np.asarray(height, dtype=float),
+        flux=np.asarray(peak, dtype=float),
+        wall=wall,
+        axis=np.asarray([1.35, 0.0], dtype=float),
+        selected_x=np.asarray([1.45, -1.30], dtype=float),
+    )
+
+
+def test_panel_draws_both_states_from_their_resolve_archives(tmp_path: Path) -> None:
+    """The pair renders from the two archives on one shared level array.
+
+    This pins the archive keys the panel reads and the shared-level array, which
+    is what a rename or a shape swap in the driver would break."""
+
+    old = tmp_path / "old.npz"
+    new = tmp_path / "new.npz"
+    out = tmp_path / "panels.png"
+    _resolve_archive(old, residual=3.857344e-16, converged=True)
+    _resolve_archive(new, residual=2.451e-03, converged=False)
+
+    status = _panel(old, new, out, 8)
+
+    assert status == 0
+    assert out.stat().st_size > 0

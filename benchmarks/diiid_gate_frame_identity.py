@@ -1,12 +1,15 @@
 """Compare every DIII-D gate frame's terminal state against the committed batch.
 
 The five frames of the DIII-D forward-GS gate bank each supply their own stored
-boundary and their own cold diverted seed.  This driver solves all five in one
-width-five stacked program on a reserved H200, runs the paired strict-exit
-passes on the same stacked arguments, and compares each frame's terminal state
-and terminal residual against the committed batched artifact left by the
-earlier width-five measurement.  One receipt is written per frame as that
-frame's comparison is read out, so a scheduler expiry loses at most one frame.
+boundary and their own cold diverted seed.  This driver solves the five frames
+in one reserved H200 job, one compiled program per frame, and runs each frame's
+paired strict-exit passes on its own program.  It then compares each frame's
+terminal state and terminal residual against the committed batched artifact
+left by the earlier width-five measurement, which was taken on the stacked vmap
+route: this revision's accelerated history program builds its argument layout
+with numpy and so refuses the stacked route as well as the batched solve.  One
+receipt is written per frame as that frame's comparison is read out, so a
+scheduler expiry loses at most one frame.
 
 Every frame's comparison states its identity row count through the certificate
 identity comparator's refusal, so a comparison over no state values cannot read
@@ -56,6 +59,9 @@ DEFAULT_MACHINE_CACHE = Path(
 ARTIFACT_ARMS = ("base", "head")
 PRIMARY_ARTIFACT_ARM = "head"
 SCHEDULED_CORE_COUNT = 8
+DEFAULT_CACHE_ROOT = Path(
+    "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile"
+)
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -275,7 +281,6 @@ def run(arguments: argparse.Namespace) -> int:
     from nova.jax.config import (
         configure_dtypes,
         configure_persistent_compilation_cache,
-        default_persistent_compilation_cache_root,
     )
 
     from benchmarks import strict_exit_incidence as instrument
@@ -301,6 +306,18 @@ def run(arguments: argparse.Namespace) -> int:
         ),
         "scheduled_core_count": arguments.cpu_count,
         "declared_member_count": arguments.member_count,
+        "requested_repeats": arguments.repeats,
+        "cache_root": str(arguments.cache_root),
+        "execution_route": (
+            "one_compiled_program_per_frame, both strict-exit passes on the same "
+            "program: the stacked vmap program the committed artifact was measured "
+            "with is refused by this revision's accelerated history program, whose "
+            "argument layout converts the vmapped target current with numpy"
+        ),
+        "route_qualification": (
+            "a difference measured on the per-frame route against an artifact "
+            "measured on the stacked vmap route is device- and route-qualified"
+        ),
     }
 
     configure_dtypes()
@@ -308,9 +325,7 @@ def run(arguments: argparse.Namespace) -> int:
 
     if not jax.config.jax_enable_x64:
         raise RuntimeError("extended precision was not enabled before array build")
-    cache = configure_persistent_compilation_cache(
-        default_persistent_compilation_cache_root()
-    )
+    cache = configure_persistent_compilation_cache(arguments.cache_root)
     allocation = instrument._require_gpu_allocation(
         expected_cpu_count=arguments.cpu_count
     )
@@ -342,7 +357,7 @@ def _measure(
     state_counts = [int(np.asarray(member.state).size) for member in members]
     header["member_identities"] = [member.identity for member in members]
     header["evidence_inputs"] = evidence_inputs
-    result = instrument._measure_batched_machine(members, name="DIIID")
+    result = instrument._measure_machine(members, arguments.repeats, name="DIIID")
     del members
     gc.collect()
     return _guarded_persist(arguments, header, result, state_counts, artifact_index)
@@ -418,8 +433,8 @@ def _persist(
             set(artifact_index) - set(measured)
         ),
         "execution_contract": result["execution_contract"],
-        "compile_seconds": result["compile_seconds"],
-        "compile_cache": result["compile_cache"],
+        "compile_seconds": result.get("compile_seconds"),
+        "compile_cache": result.get("compile_cache"),
         "summary": result["summary"],
         "narrative": [_frame_narrative(receipt) for _, receipt in receipts],
         "identity_refusals": refusals,
@@ -438,6 +453,8 @@ def main() -> int:
     parser.add_argument("--machine-cache", type=Path, default=DEFAULT_MACHINE_CACHE)
     parser.add_argument("--member-count", type=int, default=5)
     parser.add_argument("--cpu-count", type=int, default=SCHEDULED_CORE_COUNT)
+    parser.add_argument("--repeats", type=int, default=1)
+    parser.add_argument("--cache-root", type=Path, default=DEFAULT_CACHE_ROOT)
     parser.add_argument("--probe", action="store_true")
     arguments = parser.parse_args()
 

@@ -21,7 +21,7 @@ from nova.equilibrium.forward_operator import (
     _cell_banked_current_moments,
     _cell_banked_field_integrals,
     _implicit_level_root,
-    _implicit_traced_clip,
+    _implicit_traced_level_arc,
 )
 from nova.equilibrium.separatrix_clip import AtomicCellMesh, TracedClippedSupports
 from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
@@ -78,9 +78,7 @@ def main() -> int:
             def refuse_polished_arc(*_args, **_kwargs):
                 raise AssertionError("whole-cell solve traversed exact root polish")
 
-            forward_operator._implicit_traced_clip.__globals__["_traced_level_arc"] = (
-                refuse_polished_arc
-            )
+            forward_operator._implicit_traced_level_arc = refuse_polished_arc
         set_support_clip_mode("chord")
     else:
         set_support_clip_mode(arguments.mode)
@@ -430,7 +428,7 @@ class _LinearCurve(NamedTuple):
         return self.offset - points[..., 0]
 
 
-def test_implicit_traced_clip_primal_is_bit_identical():
+def test_implicit_level_arc_primal_is_bit_identical():
     """The implicit root derivative leaves every primal support bit unchanged."""
     mesh = AtomicCellMesh.from_cells(
         (
@@ -447,18 +445,29 @@ def test_implicit_traced_clip_primal_is_bit_identical():
         curve_evaluator=curve,
         participating_cell=participation,
     )
-    actual = _implicit_traced_clip(
-        mesh.node_coordinates,
-        mesh.cell_nodes,
-        mesh.cell_vertex_count,
-        mesh.centroids,
-        mesh.support_capacity,
+    actual = mesh.traced_clip(
         signed,
         curve_evaluator=curve,
         participating_cell=participation,
+        arc_tracer=_implicit_traced_level_arc,
     )
     for one, other in zip(expected, actual, strict=True):
         np.testing.assert_array_equal(np.asarray(one), np.asarray(other))
+
+    def displaced_tracer(start, end, evaluator, inside_vertex):
+        arc = _implicit_traced_level_arc(start, end, evaluator, inside_vertex)
+        return arc + 1.0
+
+    displaced = mesh.traced_clip(
+        signed,
+        curve_evaluator=curve,
+        participating_cell=participation,
+        arc_tracer=displaced_tracer,
+    )
+    assert any(
+        not np.array_equal(np.asarray(one), np.asarray(other))
+        for one, other in zip(expected, displaced, strict=True)
+    ), "the clip entry point ignored the arc_tracer it was handed"
 
 
 def test_implicit_level_root_jvp_matches_central_difference():

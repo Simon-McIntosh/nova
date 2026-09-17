@@ -10,6 +10,7 @@ improvement.
 from __future__ import annotations
 
 import argparse
+from collections import defaultdict
 from datetime import UTC, datetime
 import hashlib
 import json
@@ -257,6 +258,236 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
         json.dumps(strict(payload), indent=2, sort_keys=True, allow_nan=False) + "\n",
         encoding="utf-8",
     )
+
+
+EXPECTED_MARKER_COPIES = {"current-moment path": 120, "topology read": 36}
+
+
+class MarkerCensusRefusal(RuntimeError):
+    """Raised when a marker census is degenerate rather than informative."""
+
+
+def marker_census(text: str, *, cells: int = 0) -> dict[str, Any]:
+    """Census the marker paths of one optimised-HLO module dump.
+
+    The marker is the source statement the census resolves for a request path:
+    a traced copy of the read body emits that statement, so the distinct traced
+    frame ids at the sentinel line are the copies of the body.  Beside the copy
+    count this reports how many computations carry the marker and the read-body
+    instruction count of every copy, so a change in tracing shows up as a
+    changed column rather than a single number.
+    """
+    from benchmarks.program_scope_census import (
+        _frame_chain,
+        _parse_instruction,
+        _parse_tables,
+        _replication_census,
+        _split_computations,
+    )
+
+    tables = _parse_tables(text)
+    records: list[dict[str, Any]] = []
+    for name, _entry, lines in _split_computations(text):
+        for raw in lines:
+            parsed = _parse_instruction(raw)
+            if parsed is None:
+                continue
+            parsed["computation"] = name
+            records.append(parsed)
+    replication = _replication_census(records, tables)
+    paths: dict[str, dict[str, Any]] = {}
+    for label, target in replication.items():
+        sentinels = {(item["function"], item["line"]) for item in target["sources"]}
+        functions = set(target["target_functions"])
+        columns: dict[int, int] = defaultdict(int)
+        bodies: dict[str, dict[str, int]] = defaultdict(
+            lambda: {"marker_instructions": 0, "read_body_instructions": 0}
+        )
+        for record in records:
+            chain = _frame_chain(tables, record["meta"].get("stack_frame_id"))
+            body_frame = next(
+                (frame for frame in chain if frame.get("function") in functions), None
+            )
+            if body_frame is None:
+                continue
+            bodies[record["computation"]]["read_body_instructions"] += 1
+            columns[body_frame["frame_id"]] += 1
+            if any(
+                (frame.get("function"), frame.get("line")) in sentinels
+                for frame in chain
+            ):
+                bodies[record["computation"]]["marker_instructions"] += 1
+        bearing = {
+            name: counts
+            for name, counts in sorted(bodies.items())
+            if counts["marker_instructions"]
+        }
+        column = sorted(columns.values())
+        paths[label] = {
+            "marker_function": target["target_function"],
+            "sentinel_line": target["sentinel_line"],
+            "copies": int(target["copy_count"]),
+            "marker_instructions": sum(
+                counts["marker_instructions"] for counts in bearing.values()
+            ),
+            "read_body_instructions": sum(
+                counts["read_body_instructions"] for counts in bodies.values()
+            ),
+            "read_body_per_copy": column,
+            "marker_bearing_computations": len(bearing),
+            "computations": [
+                {"computation": name, **counts} for name, counts in bearing.items()
+            ],
+        }
+    return {
+        "schema": "nova.solve-program-marker-census",
+        "cells": cells,
+        "total_instructions": len(records),
+        "paths": paths,
+    }
+
+
+def require_live_markers(census: dict[str, Any]) -> None:
+    """Refuse a degenerate census instead of reporting it.
+
+    Zero markers: a path that matched no sentinel instruction, no read-body
+    instruction, or no computation is the false negative a folded-constant
+    program produces, and it reads exactly like a clean census.
+
+    Uniform column: a path whose every traced copy carries the same number of
+    read-body instructions has matched one frame many times rather than many
+    traced copies.  A column that is uniform across the paths themselves means
+    every path was matched against the same frames.
+    """
+    rows = census["paths"]
+    for label, row in rows.items():
+        if row["copies"] <= 0 or row["marker_instructions"] <= 0:
+            raise MarkerCensusRefusal(
+                f"{label}: zero markers — the sentinel at line "
+                f"{row['sentinel_line']} matched no instruction"
+            )
+        if row["read_body_instructions"] <= 0 or row["marker_bearing_computations"] < 1:
+            raise MarkerCensusRefusal(
+                f"{label}: zero markers — no computation carries the body of "
+                f"{row['marker_function']}"
+            )
+        column = row["read_body_per_copy"]
+        if len(column) > 1 and len(set(column)) == 1:
+            raise MarkerCensusRefusal(
+                f"{label}: uniform column — all {len(column)} copies carry "
+                f"{column[0]} read-body instructions, so the copies collapsed "
+                f"onto one traced frame"
+            )
+    signatures = {
+        (row["copies"], row["read_body_instructions"]) for row in rows.values()
+    }
+    if len(rows) > 1 and len(signatures) == 1:
+        raise MarkerCensusRefusal(
+            "uniform column — every marker path reports the same copy count "
+            "and read-body size, so the census cannot discriminate the paths"
+        )
+
+
+def measure_300_marker_census(
+    output: Path, cache_root: Path | None, *, hlo_dir: Path
+) -> dict[str, Any]:
+    """Compile the 300-cell solve, census its marker paths, and gate the counts."""
+    import jax
+    import jax.numpy as jnp
+
+    from benchmarks.trip_quantum_width_one import _require_revision
+    from nova.jax.config import (
+        configure_dtypes,
+        configure_persistent_compilation_cache,
+        default_persistent_compilation_cache_root,
+    )
+
+    configure_dtypes()
+    if os.environ.get("SLURM_JOB_ID") is None:
+        raise RuntimeError("marker census requires a SLURM allocation")
+    profile, seed, requested_class, target_current, request = _certificate_operands(
+        CERTIFICATE_ROWS[0][0], -300
+    )
+    external = profile.operator.external(request.current, request.prescribed_current)
+    program = profile._accelerated_history_program(
+        request.route,
+        requested_class=requested_class,
+        target_current=target_current,
+        **request.policy.kernel_options(),
+    )
+    receipt: dict[str, Any] = {
+        "schema": "nova.solve-program-marker-census",
+        "measurement_revision": _require_revision(),
+        "main_sha": _require_revision(),
+        "captured_at": datetime.now(UTC).isoformat(),
+        "assignment": {
+            "job_id": os.environ["SLURM_JOB_ID"],
+            "partition": os.environ.get("SLURM_JOB_PARTITION"),
+            "node": os.environ.get("SLURMD_NODENAME")
+            or os.environ.get("SLURM_JOB_NODELIST"),
+            "platform": jax.default_backend(),
+        },
+        "requested_cells": 300,
+        "expected_copies": EXPECTED_MARKER_COPIES,
+        "completed": False,
+    }
+    _write_json(output, receipt)
+    cache = configure_persistent_compilation_cache(
+        cache_root or default_persistent_compilation_cache_root(),
+        minimum_compile_seconds=0.0,
+    )
+    started = time.perf_counter()
+    lowered = program.lower(
+        jnp.asarray(seed, dtype=jnp.float64), external, profile.operator
+    )
+    receipt["checkpoints"] = [
+        {"name": "lowered", "seconds": time.perf_counter() - started}
+    ]
+    receipt["persistent_compilation_cache"] = cache.receipt()
+    _write_json(output, receipt)
+    compile_started = time.perf_counter()
+    compiled = lowered.compile()
+    compile_seconds = time.perf_counter() - compile_started
+    text = compiled.as_text()
+    hlo_dir.mkdir(parents=True, exist_ok=True)
+    hlo_path = hlo_dir / "weak-rotation-reactor-static_300c_solve.hlo.txt"
+    hlo_path.write_text(text, encoding="utf-8")
+    census = marker_census(text, cells=300)
+    require_live_markers(census)
+    reproduced = {
+        label: int(census["paths"][label]["copies"]) == expected
+        for label, expected in EXPECTED_MARKER_COPIES.items()
+    }
+    receipt.update(
+        {
+            "compile_seconds": compile_seconds,
+            "hlo_text_path": str(hlo_path),
+            "hlo_text_bytes": len(text),
+            "paths": census["paths"],
+            "total_instructions": census["total_instructions"],
+            "reproduced": reproduced,
+            "completed": True,
+            "passed": all(reproduced.values()),
+        }
+    )
+    _write_json(output, receipt)
+    for label, row in census["paths"].items():
+        print(
+            f"MARKER_CENSUS {label!r} copies={row['copies']} "
+            f"expected={EXPECTED_MARKER_COPIES[label]} "
+            f"marker_bearing_computations={row['marker_bearing_computations']} "
+            f"read_body_instructions={row['read_body_instructions']} "
+            f"per_copy_min={min(row['read_body_per_copy'] or [0])} "
+            f"per_copy_max={max(row['read_body_per_copy'] or [0])}",
+            flush=True,
+        )
+    print(
+        "MARKER_CENSUS_DONE "
+        f"passed={int(receipt['passed'])} compile_seconds={compile_seconds:.3f} "
+        f"hlo_text_bytes={len(text)}",
+        flush=True,
+    )
+    return receipt
 
 
 def _certificate_operands(case_name: str, requested_cells: int):
@@ -798,6 +1029,12 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--certificate-output", type=Path)
     parser.add_argument("--measure-300-output", type=Path)
+    parser.add_argument("--marker-census-output", type=Path)
+    parser.add_argument(
+        "--marker-census-hlo-dir",
+        type=Path,
+        help="directory that receives the dumped optimised HLO the census reads",
+    )
     parser.add_argument("--mast-output", type=Path)
     parser.add_argument("--cache-root", type=Path)
     parser.add_argument("--semantic-report", action="store_true")
@@ -811,6 +1048,18 @@ def main() -> int:
         help="recorded baseline executable bytes for the 300-cell comparison",
     )
     args = parser.parse_args()
+    if args.marker_census_output is not None:
+        if args.marker_census_hlo_dir is None:
+            parser.error("marker census requires marker-census-hlo-dir")
+        result = measure_300_marker_census(
+            args.marker_census_output,
+            args.cache_root,
+            hlo_dir=args.marker_census_hlo_dir,
+        )
+        print(
+            f"MARKER_CENSUS_GATE={'PASS' if result['passed'] else 'FAIL'}", flush=True
+        )
+        return 0 if result["passed"] else 1
     if args.measure_300_output is not None:
         result = measure_300_program(args.measure_300_output, args.cache_root)
         return 0 if result["passed"] else 1

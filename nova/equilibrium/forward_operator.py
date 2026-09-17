@@ -644,18 +644,6 @@ def _implicit_traced_level_arc(start, end, evaluator, inside_vertex):
     return chord + root[..., None] * normal[:, None, :]
 
 
-_implicit_clip_globals = dict(_traced_clip.__globals__)
-_implicit_clip_globals["_traced_level_arc"] = _implicit_traced_level_arc
-_implicit_traced_clip = types.FunctionType(
-    _traced_clip.__code__,
-    _implicit_clip_globals,
-    name="_implicit_traced_clip",
-    argdefs=_traced_clip.__defaults__,
-    closure=_traced_clip.__closure__,
-)
-_implicit_traced_clip.__kwdefaults__ = _traced_clip.__kwdefaults__
-
-
 def _substitute_chord_cell_supports(exact, chord, cell_indices, participation):
     """Return the exact support with named cells' geometry reverted to chord.
 
@@ -2846,7 +2834,7 @@ class ForwardFluxOperator:
             if fixed_participation is None
             else jnp.asarray(fixed_participation, dtype=bool)
         )
-        traced_support = _implicit_traced_clip(
+        traced_support = _traced_clip(
             atomic_mesh.node_coordinates,
             atomic_mesh.cell_nodes,
             atomic_mesh.cell_vertex_count,
@@ -2855,6 +2843,7 @@ class ForwardFluxOperator:
             inside_boundary,
             curve_evaluator=curved_level,
             participating_cell=participation,
+            arc_tracer=_implicit_traced_level_arc,
         )
         exact_support = traced_support.qualify(participation)
         if _SUPPORT_CLIP_MODE == "chord_cells":

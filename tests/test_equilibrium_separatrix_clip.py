@@ -9,6 +9,7 @@ import jax.numpy as jnp
 
 from nova.equilibrium.separatrix_clip import (
     AtomicCellMesh,
+    _traced_level_arc,
     complete_polynomial_powers,
     padded_linear_current_moments,
     padded_polynomial_current_moments,
@@ -459,6 +460,68 @@ def test_spline_arc_samples_remain_inside_the_atomic_cell():
     assert np.all(polygon >= -1.0e-14)
     assert np.all(polygon <= 1.0 + 1.0e-14)
     assert float(support.area[0]) <= 1.0 + 1.0e-14
+
+
+def test_traced_clip_takes_the_level_root_tracer_as_an_explicit_argument():
+    """The gap tracer is supplied by the caller, not read from a module global."""
+    configure_dtypes()
+    cell = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+    mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.5, 0.5]]))
+
+    def level(points):
+        return 1.5 - points[..., 0] ** 2 - points[..., 1] ** 2
+
+    signed = level(jnp.asarray(mesh.node_coordinates))
+    participation = jnp.asarray([True])
+    default = mesh.traced_clip(
+        signed, curve_evaluator=level, participating_cell=participation
+    )
+    assert int(default.vertex_count[0]) > len(cell)
+
+    explicit_default = mesh.traced_clip(
+        signed,
+        curve_evaluator=level,
+        participating_cell=participation,
+        arc_tracer=_traced_level_arc,
+    )
+    np.testing.assert_array_equal(
+        explicit_default.support_vertices, default.support_vertices
+    )
+    np.testing.assert_array_equal(explicit_default.vertex_count, default.vertex_count)
+
+    calls = 0
+
+    def counting_tracer(start, end, evaluator, inside_vertex):
+        nonlocal calls
+        calls += 1
+        return _traced_level_arc(start, end, evaluator, inside_vertex)
+
+    counted = mesh.traced_clip(
+        signed,
+        curve_evaluator=level,
+        participating_cell=participation,
+        arc_tracer=counting_tracer,
+    )
+    assert calls > 0
+    np.testing.assert_array_equal(counted.support_vertices, default.support_vertices)
+
+    def shallow_arc(start, end, evaluator, inside_vertex):
+        traced = _traced_level_arc(start, end, evaluator, inside_vertex)
+        parameter = jnp.linspace(0.0, 1.0, traced.shape[1], dtype=start.dtype)
+        chord_line = (
+            start[:, None, :] + parameter[None, :, None] * (end - start)[:, None, :]
+        )
+        return 0.5 * (traced + chord_line)
+
+    substituted = mesh.traced_clip(
+        signed,
+        curve_evaluator=level,
+        participating_cell=participation,
+        arc_tracer=shallow_arc,
+    )
+    assert not np.allclose(
+        np.asarray(substituted.area), np.asarray(default.area), rtol=1.0e-12
+    )
 
 
 def test_traced_clip_matches_exact_zero_corner_and_tangential_cells():

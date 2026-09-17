@@ -28,6 +28,24 @@
     "marker": "distinct traced frames carrying the read body of the marker function, counted once per frame id",
     "sentinel": "distinct traced frames whose source line is the sentinel statement resolved for the read at import time"
   },
+  "dump_comparison": {
+    "compared": true,
+    "current_bytes": 219637882,
+    "current_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/marker-census-rebaseline/hlo-dump/weak-rotation-reactor-static_300c_solve.hlo.txt",
+    "current_sha256": "97cee38e1ea67a4a1ec9893cd76d631425f5d9d832a641e9fed094c36da8eb0e",
+    "differing_bytes": 1094,
+    "first_difference_context": {
+      "current": "c-marker-census-rebaseline/nova/equilibrium/topology.py\"\n2 \"/home/ITER/mcintos/C",
+      "previous": "c-marker-census-instrument/nova/equilibrium/topology.py\"\n2 \"/home/ITER/mcintos/C"
+    },
+    "first_difference_offset": 2937,
+    "offset_base": "1-based byte position, the convention relied on by cmp",
+    "previous_bytes": 219637882,
+    "previous_exists": true,
+    "previous_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/marker-census/hlo-dump/weak-rotation-reactor-static_300c_solve.hlo.txt",
+    "previous_sha256": "ffca59be3f2c82f09bf36205906fca7a55bdf713eccc0e9b9aa2d9e4cc156bc5",
+    "size_equal": true
+  },
   "expected_copies": {
     "current-moment path": 120,
     "topology read": 79

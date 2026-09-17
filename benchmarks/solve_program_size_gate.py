@@ -559,6 +559,150 @@ def _provenance_line(marker: dict[str, Any] | None) -> str:
     return f"unverified; the dump names {files}"
 
 
+def _sha256_file(path: Path) -> str:
+    """Hash a dump's bytes in chunks; these files run to hundreds of megabytes."""
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 22), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _byte_window(chunk: bytes, index: int, width: int = 64) -> str:
+    """Show the bytes around a difference so the report can quote them."""
+    start = max(0, index - 16)
+    return chunk[start : index + width].decode("utf-8", errors="replace")
+
+
+def _byte_differences(
+    previous: Path, current: Path
+) -> tuple[int, int | None, dict[str, str]]:
+    """Count differing bytes and locate the first, 1-based as ``cmp`` reports it.
+
+    Both files are streamed in chunks so the comparison does not hold two
+    hundreds-of-megabytes dumps in memory, and only a short window around the
+    first difference is kept.  A length mismatch contributes its tail to the
+    differing count.
+    """
+    differing = 0
+    first: int | None = None
+    context: dict[str, str] = {}
+    offset = 0
+    with previous.open("rb") as left, current.open("rb") as right:
+        while True:
+            left_chunk = left.read(1 << 22)
+            right_chunk = right.read(1 << 22)
+            if not left_chunk and not right_chunk:
+                break
+            shared = min(len(left_chunk), len(right_chunk))
+            if left_chunk[:shared] != right_chunk[:shared]:
+                for index in range(shared):
+                    if left_chunk[index] != right_chunk[index]:
+                        differing += 1
+                        if first is None:
+                            first = offset + index + 1
+                            context = {
+                                "previous": _byte_window(left_chunk, index),
+                                "current": _byte_window(right_chunk, index),
+                            }
+            if len(left_chunk) != len(right_chunk):
+                differing += abs(len(left_chunk) - len(right_chunk))
+                if first is None:
+                    first = offset + shared + 1
+            offset += shared
+    return differing, first, context
+
+
+def _dump_comparison(previous_path: Path | None, current_path: Path) -> dict[str, Any]:
+    """Measure this dump against the earlier one instead of asserting identity.
+
+    The sizes and digests are read from the two files themselves and, when the
+    earlier dump is on disk, the differing-byte count and the location of the
+    first difference are counted too, so the report carries only what was
+    measured rather than a comparison nobody made.  ``compared`` is False when
+    the earlier dump is absent, and the report then says so rather than claiming
+    a comparison it did not make.
+    """
+    comparison: dict[str, Any] = {
+        "current_path": str(current_path),
+        "current_bytes": None,
+        "current_sha256": None,
+        "previous_path": str(previous_path) if previous_path is not None else None,
+        "previous_exists": False,
+        "previous_bytes": None,
+        "previous_sha256": None,
+        "compared": False,
+        "size_equal": None,
+        "differing_bytes": None,
+        "first_difference_offset": None,
+        "offset_base": "1-based byte position, the convention relied on by cmp",
+        "first_difference_context": {},
+    }
+    if current_path.exists():
+        comparison["current_bytes"] = current_path.stat().st_size
+        comparison["current_sha256"] = _sha256_file(current_path)
+    if previous_path is not None and Path(previous_path).exists():
+        comparison["previous_exists"] = True
+        comparison["previous_bytes"] = Path(previous_path).stat().st_size
+        comparison["previous_sha256"] = _sha256_file(previous_path)
+    if comparison["previous_exists"] and comparison["current_bytes"] is not None:
+        differing, first, context = _byte_differences(Path(previous_path), current_path)
+        comparison.update(
+            {
+                "compared": True,
+                "size_equal": comparison["current_bytes"]
+                == comparison["previous_bytes"],
+                "differing_bytes": differing,
+                "first_difference_offset": first,
+                "first_difference_context": context,
+            }
+        )
+    return comparison
+
+
+def _dump_comparison_sentence(
+    comparison: dict[str, Any] | None, previous_revision: str | None
+) -> str:
+    """State the measured dump comparison, and nothing it did not measure."""
+    revision = f" at revision `{previous_revision}`" if previous_revision else ""
+    if not comparison or not comparison.get("current_bytes"):
+        return (
+            "This run recorded no dump comparison: the earlier census dump was "
+            "not measured beside the current one, so no relation between them "
+            "is stated here."
+        )
+    current = (
+        f"{comparison['current_bytes']} bytes, sha256 `{comparison['current_sha256']}`"
+    )
+    if not comparison.get("compared"):
+        return (
+            f"The current dump is {current}. The earlier census dump{revision} "
+            f"({comparison.get('previous_path')}) was not on disk when this ran, "
+            "so no byte comparison against it is stated."
+        )
+    previous = (
+        f"{comparison['previous_bytes']} bytes, sha256 "
+        f"`{comparison['previous_sha256']}`"
+    )
+    relation = "size-equal" if comparison.get("size_equal") else "of a different size"
+    context = comparison.get("first_difference_context") or {}
+    sentence = (
+        f"The current dump is {current}; the earlier census dump{revision} is "
+        f"{previous}. The two are {relation} and differ in "
+        f"{comparison['differing_bytes']} bytes, the first at offset "
+        f"{comparison['first_difference_offset']} "
+        f"({comparison['offset_base']})."
+    )
+    if context.get("previous") and context.get("current"):
+        sentence += (
+            f" The bytes there read {context['previous']!r} in the earlier dump "
+            f"and {context['current']!r} in the current one, a difference in "
+            "the module's name table where the compiling checkout's path is "
+            "embedded."
+        )
+    return sentence
+
+
 def marker_census_report(
     census: dict[str, Any],
     receipt: dict[str, Any],
@@ -646,10 +790,12 @@ def marker_census_report(
         "counted statement rather than a moved program.  This census counts the "
         "sentinel it resolves for the read, and it reproduces the committed "
         "current-moment count of 120 exactly on the same dump, which is the "
-        "positive control that the rule and the sentinel resolution are intact; "
-        "the dumped module is byte-identical to the earlier census at revision "
-        f"`{receipt.get('previous_receipt_revision')}`, so no traced frame set "
-        "moved between them either.",
+        "positive control that the rule and the sentinel resolution are intact.",
+        "",
+        _dump_comparison_sentence(
+            receipt.get("dump_comparison"),
+            receipt.get("previous_receipt_revision"),
+        ),
         "",
         "Decision: "
         + (
@@ -876,8 +1022,11 @@ def measure_300_marker_census(
     }
     _write_json(output, receipt)
     carried: dict[str, dict[str, Any]] = {}
+    previous_dump: Path | None = None
     if previous_receipt is not None and Path(previous_receipt).exists():
         previous = json.loads(Path(previous_receipt).read_text(encoding="utf-8"))
+        if previous.get("hlo_text_path"):
+            previous_dump = Path(previous["hlo_text_path"])
         carried = _carried_census_counts(previous)
         receipt["previous_receipt_revision"] = previous.get("measurement_revision")
         receipt["previous_receipt_counts"] = carried
@@ -902,6 +1051,7 @@ def measure_300_marker_census(
     hlo_dir.mkdir(parents=True, exist_ok=True)
     hlo_path = hlo_dir / "weak-rotation-reactor-static_300c_solve.hlo.txt"
     hlo_path.write_text(text, encoding="utf-8")
+    dump_comparison = _dump_comparison(previous_dump, hlo_path)
     from nova.equilibrium.forward_operator import ForwardFluxOperator
 
     marker_source_file = Path(inspect.getsourcefile(ForwardFluxOperator) or "")
@@ -916,6 +1066,7 @@ def measure_300_marker_census(
             "compile_seconds": compile_seconds,
             "hlo_text_path": str(hlo_path),
             "hlo_text_bytes": len(text),
+            "dump_comparison": dump_comparison,
             "marker_source_file": str(marker_source_file),
             "total_instructions": census["total_instructions"],
             "rows": census["rows"],

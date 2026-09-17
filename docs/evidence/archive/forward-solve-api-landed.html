@@ -297,6 +297,42 @@
     JUnit XML, the base archive and <code>measurement-summary.json</code> are retained at
     <code>~/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate/</code>.</p>
   </section>
+<section id="coil-edit-nonconvergence">
+  <h2>The ten non-converged coil edits, per edit (2026-09-17)</h2>
+  <p><strong>Finding.</strong> A single H200 re-run of the twenty-edit P4-upper sweep persists the traces
+  the earlier receipt lacked: terminal residual, termination reason, converged flag, achieved topology
+  class, trip count, per-trip residual trace, Newton steps and rejections per trip, the mask difference each
+  trip's closing active-set read produced, the seed's own residual on the edited operator before the first
+  trip, and the separatrix displacement. Ten of twenty edits converge; all ten non-converged edits report
+  the same termination word, <code>active_set_settled</code>, so the word carries no diagnostic and the trace
+  does.</p>
+  <p>The non-converged half separates three ways. Six edits (1, 2, 4, 6, 8, 10) take one trip, spend the
+  whole <code>newton_steps=12</code> budget in accepted steps, and end on a closing mask read that promotes
+  nothing: real descent, stranded above the 1e-8 tolerance, with terminal residuals from 1.5e-08 to 4.4e-03
+  against seeds of 2.9e-03 to 8.2e-03. Two edits (17, 19) accept zero Newton steps, reject the first one,
+  and return the seed unchanged, terminal residual bit-for-bit equal to the seed probe's &mdash; a refused
+  line search, which the host route would name <code>SUFFICIENT_DECREASE_REFUSED</code> and the compiled
+  trip loop folds into <code>active_set_settled</code>. Two edits (16, 18) walk across two and three trips
+  with the mask still moving (differences 32 then 0, and 26, 22 then 0), descending 1.3e-03 to 8.4e-04 and
+  4.9e-03 to 1.8e-03, and end on a trip that promotes nothing: cut short while working, not stalled.</p>
+  <p><strong>Ruled out.</strong> No topology change: every edit and every seed probe reads class
+  <code>diverted</code>, <code>read_status: qualified</code>, both before and after the first trip.
+  Off-support leakage is exactly 0.0 Wb and the reduced dimension is 642 on every non-converged edit.
+  <code>class_margin</code> is null throughout, so the traces cannot say how close each state sits to
+  leaving the class. No solver code changed; the forensics ride existing result fields.</p>
+  <table>
+  <thead><tr><th>group</th><th>edits</th><th>trips</th><th>steps / trip</th><th>receiver mask &Delta;</th><th>terminal residual</th><th>seed residual</th></tr></thead>
+  <tbody>
+  <tr><td>stall</td><td>1, 2, 4, 6, 8, 10</td><td>1</td><td>12</td><td>0</td><td>1.506e-08 &ndash; 4.422e-03</td><td>2.869e-03 &ndash; 8.171e-03</td></tr>
+  <tr><td>refused first step</td><td>17, 19</td><td>1</td><td>0</td><td>0</td><td>= seed, bitwise</td><td>2.111e-03, 2.922e-03</td></tr>
+  <tr><td>partial walk</td><td>16, 18</td><td>2, 3</td><td>7/1, 0/7/1</td><td>32/0, 26/22/0</td><td>8.365e-04, 1.849e-03</td><td>1.740e-03, 4.870e-03</td></tr>
+  </tbody>
+  </table>
+  <figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the wall and both null sets"><figcaption>Edit 7 (&minus;4&#37;, converged, residual 5.0e-09, left) beside edit 6 (&minus;6&#37;, non-converged, residual 4.4e-03, right): reference contours grey, solved contours orange on shared levels, reference nulls blue and solved nulls orange, over the MAST first wall.</figcaption></figure>
+  <p>Receipt: <code>docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.json</code>
+  (per-edit traces) and <code>coil-edit-nonconvergence.html</code> (the twenty edits tabled beside each
+  other, with the panel states in <code>panel-states.npz</code>).</p>
+</section>
 </main>
 </body>
 </html>

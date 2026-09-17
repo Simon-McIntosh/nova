@@ -1328,8 +1328,9 @@ class ForwardProfile:
             return self.operator.normalised_current_moments_and_observation(
                 flux, target_current, requested_class
             )
-        masks, topology = self.operator.read(flux, requested_class)
-        current_moments = self.operator.cell_current_moments(flux, requested_class)
+        masks, topology, current_moments = self.operator.read_with_current_moments(
+            flux, requested_class
+        )
         cell_current = current_moments.cell_current
         radius = jnp.asarray(self.lattice.node_radius)
         area = jnp.where(masks.core, self.operator.area, 0.0)

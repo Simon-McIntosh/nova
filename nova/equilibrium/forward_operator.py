@@ -2720,6 +2720,21 @@ class ForwardFluxOperator:
             ),
         )
 
+    def read_with_current_moments(self, psi, requested_class=None):
+        """Serve the topology request and the current-moment request from one read.
+
+        Both requests are post-processings of the same qualification pass on the
+        same state, so one read body serves them: the discrete read runs once
+        and the moments are formed from the masks it returns.  A call site per
+        request traces the body once per request and leaves a copy of it in the
+        compiled program for each, which is the multiplicity this entry point
+        exists to remove.
+        """
+        if self.use_linear_moments:
+            raise ValueError("clipped support moments are required")
+        masks, topology = self.read(psi, requested_class)
+        return masks, topology, self._point_current_moments(masks)
+
     def shared_node_flux(self, psi) -> jax.Array:
         """Evaluate the plasma-grid flux on fixed atomic shared nodes."""
         if self.moment_geometry is None:

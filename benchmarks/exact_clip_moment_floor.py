@@ -791,17 +791,22 @@ def row_margin_table() -> dict[str, Any]:
     measured error on that row. The budget is one tenth of the smallest other
     error term measured on the row: the second-order coupling's frozen-image
     error where the coupling study measured it, and otherwise the fan's own
-    refinement floor, which is an instrument floor and is shared by every row
-    that has no coupling measurement of its own.
+    relative-L2 refinement floor on the moments. The fallback floor is
+    moment-scale, but it measures the fan's own refinement noise rather than an
+    independent error, and it is measured at the weak 110 row only and shared by
+    every row that has no coupling measurement of its own.
 
     ``other_error_term`` carries that other error term itself, per moment, and
     ``budget_one_tenth`` carries one tenth of it; the two differ by exactly the
     factor of ten and a reader must not take one for the other.
 
-    The route column was measured at the revision named by ``route_revision``
-    and is an upper bound for the shipped route's error, because the per-edge
-    rule was raised from the third order to the fourth on the strength of the
-    order study and the fan it is differenced against did not move.
+    The route column carries the per-edge order it was measured at, named per
+    row by ``route_measured_at_order``. It is a difference between two
+    discretisations rather than a distance to a truth: raising the per-edge
+    order makes the route's own edge integral exact where the third order was
+    not, while the fan it is differenced against is unchanged, so the column
+    moves in either direction on the rows it was re-measured for, and it is not
+    an upper bound on the fan's or the route's error.
     """
     coupling = _coupling_second_order_errors()
     rows: list[dict[str, Any]] = []

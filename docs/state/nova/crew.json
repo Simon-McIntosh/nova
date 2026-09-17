@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T06:36:01",
+  "updated": "2026-09-17T06:41:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4573,9 +4573,11 @@
         "id": "s19c-cco-bound-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "f0b52054-8abb-4aaf-9729-fc6a138764c6",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "f0b52054-8abb-4aaf-9729-fc6a138764c6"
+        },
         "created": "2026-09-16"
       },
       {
@@ -4661,6 +4663,15 @@
         "created": "2026-09-16"
       },
       {
+        "id": "s19c-msc-census-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
+      },
+      {
         "id": "s19c-msc-evaldesign-c",
         "harness": "clive",
         "role": "documentation",
@@ -4732,6 +4743,15 @@
           "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a0a9b0-b48a-7db3-9886-c8ac7b51d194"
         },
         "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-mulw-diiid-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
       },
       {
         "id": "s19c-mulw-zeroid-c",
@@ -4812,9 +4832,11 @@
         "id": "s19c-pfs-shape-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "09191d02-3560-4da8-8001-fb415942c7b9",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "09191d02-3560-4da8-8001-fb415942c7b9"
+        },
         "created": "2026-09-16"
       },
       {
@@ -175150,6 +175172,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2669
+    "_version": 2673
   }
 }

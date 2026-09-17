@@ -1,0 +1,4284 @@
+{
+  "machine": "mast-22086/43",
+  "environment": {
+    "source_commit": "27f5035feb9824342bd50c084abab02ad0df3a52",
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "devices": [
+      "cuda:0"
+    ],
+    "scheduler": {
+      "job_id": "1272849",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "reservation": "gpu_0003_grpA"
+    }
+  },
+  "carrier": {
+    "loaded_from_persisted_carrier": true,
+    "carrier": {
+      "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+      "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+      "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+      "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+      "response_shape": [
+        1126,
+        101
+      ],
+      "stored_circuit_count": 101,
+      "frozen_reference_count": 6,
+      "warm_load_seconds": 0.005661593750119209,
+      "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+      "size_bytes": 645864
+    },
+    "named_cache_only_check": {
+      "command": [
+        "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/pfs-self-consistent-shape-response/benchmarks/mast_response_carrier_warm.py",
+        "check",
+        "--carrier",
+        "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "--receipt",
+        "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+      ],
+      "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.024241 direct_builders=0 verdict=PASS",
+      "direct_green_operator_builder_entries": 0,
+      "passes": true
+    }
+  },
+  "route": "reduced_newton",
+  "steps_a": [
+    500.0,
+    2000.0
+  ],
+  "frozen_tangent_current_step_a": 100.0,
+  "extrema": [
+    "outer",
+    "upper",
+    "inner",
+    "lower"
+  ],
+  "free_circuits": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "seed": {
+    "turning_points_m": [
+      [
+        1.4033221823112094,
+        0.011746334320118672
+      ],
+      [
+        0.8477664413705166,
+        0.9972050583105125
+      ],
+      [
+        0.2678480071293238,
+        0.017905541664296566
+      ],
+      [
+        0.814198465114401,
+        -0.9365891111448805
+      ]
+    ],
+    "converged": true,
+    "terminal_residual": 5.618610989434751e-09,
+    "topology": {
+      "class": "diverted",
+      "diverted": true,
+      "axis_m": [
+        0.9066567622358228,
+        0.028994372865836657
+      ],
+      "x_point_m": [
+        0.5943365140621406,
+        1.231749751599745
+      ],
+      "boundary_flux_wb": -0.11789629415307697
+    },
+    "current_a": {
+      "0": -25381.810546875,
+      "1": 50267.71875,
+      "2": 33341.1796875,
+      "3": 50319.8671875,
+      "4": 33416.35546875,
+      "5": 29.57099151611328,
+      "6": 46.641414642333984,
+      "7": -185433.671875,
+      "8": -185195.171875,
+      "9": -138156.90625,
+      "10": -138175.46875,
+      "11": -554.8970947265625,
+      "12": 926.8552856445312
+    }
+  },
+  "circuits": [
+    {
+      "circuit": 0,
+      "family": "sol",
+      "label": "circuit_00_sol",
+      "central_difference_table": [
+        {
+          "extremum": "outer",
+          "frozen_tangent_m_per_a": {
+            "dR": 2.485932008899905e-07,
+            "dZ": -7.125665690197596e-08,
+            "norm": 2.586041196144738e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -2.287342485101229e-05,
+            "dZ": -4.522072664816215e-06,
+            "norm": 2.3316146885812515e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": -5.186287656456622e-06,
+            "dZ": 1.3206337661242883e-05,
+            "norm": 1.4188196998853535e-05
+          },
+          "ratio_500_self_consistent_over_frozen": 90.16154468293912,
+          "self_consistent_2000_m_per_a": null,
+          "differential_2000_m_per_a": null,
+          "ratio_2000_self_consistent_over_frozen": null
+        },
+        {
+          "extremum": "upper",
+          "frozen_tangent_m_per_a": {
+            "dR": -6.758934264144978e-07,
+            "dZ": -3.915137971099991e-08,
+            "norm": 6.770264059869489e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -1.5510364049172497e-05,
+            "dZ": -2.2122746039234143e-05,
+            "norm": 2.701827687426259e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": 2.176773145383172e-06,
+            "dZ": -4.394335713175045e-06,
+            "norm": 4.903929820720009e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 39.90727191043036,
+          "self_consistent_2000_m_per_a": null,
+          "differential_2000_m_per_a": null,
+          "ratio_2000_self_consistent_over_frozen": null
+        },
+        {
+          "extremum": "inner",
+          "frozen_tangent_m_per_a": {
+            "dR": -3.515895499162647e-06,
+            "dZ": -8.844986434339633e-08,
+            "norm": 3.517007895858996e-06
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -1.6854395828865387e-05,
+            "dZ": -2.2146076560951885e-05,
+            "norm": 2.783018803025983e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": 8.327413656902816e-07,
+            "dZ": -4.417666234892787e-06,
+            "norm": 4.495468067403386e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 7.913029727066498,
+          "self_consistent_2000_m_per_a": null,
+          "differential_2000_m_per_a": null,
+          "ratio_2000_self_consistent_over_frozen": null
+        },
+        {
+          "extremum": "lower",
+          "frozen_tangent_m_per_a": {
+            "dR": -6.758934264144978e-07,
+            "dZ": -3.915137971099991e-08,
+            "norm": 6.770264059869489e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -1.5510364049172497e-05,
+            "dZ": -2.2122746039234143e-05,
+            "norm": 2.701827687426259e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": 2.176773145383172e-06,
+            "dZ": -4.394335713175045e-06,
+            "norm": 4.903929820720009e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 39.90727191043036,
+          "self_consistent_2000_m_per_a": null,
+          "differential_2000_m_per_a": null,
+          "ratio_2000_self_consistent_over_frozen": null
+        }
+      ],
+      "central_difference_unavailable": {
+        "2000": [
+          "minus"
+        ]
+      },
+      "whole_plasma_motion_m_per_a": {
+        "500": {
+          "dR": -1.768713719455567e-05,
+          "dZ": -1.7728410326059097e-05,
+          "norm": 2.50425908170092e-05
+        },
+        "2000": null
+      },
+      "solves": {
+        "500": {
+          "plus": {
+            "current_a": -24881.810546875,
+            "delta_a": 500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 1.6775289801880717,
+            "converged": true,
+            "terminal_residual": 4.977148955568189e-11,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.3894063735470907,
+                0.008996256689035937
+              ],
+              [
+                0.8396257178371435,
+                0.9942544253586072
+              ],
+              [
+                0.2623066265842343,
+                0.015000029690151132
+              ],
+              [
+                0.8060577415810278,
+                -0.9395397440967859
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.8985160387024497,
+                0.02604373991393133
+              ],
+              "x_point_m": [
+                0.5877253775820034,
+                1.2297193949177683
+              ],
+              "boundary_flux_wb": -0.11728490342229098
+            }
+          },
+          "minus": {
+            "current_a": -25881.810546875,
+            "delta_a": -500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.5171376084908843,
+            "converged": false,
+            "terminal_residual": 0.0025155967866578874,
+            "trips": 4,
+            "turning_points_m": [
+              [
+                1.412279798398103,
+                0.013518329353852152
+              ],
+              [
+                0.855136081886316,
+                1.0163771713978413
+              ],
+              [
+                0.2791610224130997,
+                0.03714610625110302
+              ],
+              [
+                0.8215681056302003,
+                -0.9174169980575517
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9140264027516222,
+                0.04816648595316544
+              ],
+              "x_point_m": [
+                0.5978928016955491,
+                1.2554113022303997
+              ],
+              "boundary_flux_wb": -0.11389402081961447
+            }
+          }
+        },
+        "2000": {
+          "plus": {
+            "current_a": -23381.810546875,
+            "delta_a": 2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.42432527150958776,
+            "converged": true,
+            "terminal_residual": 5.384796502058936e-09,
+            "trips": 4,
+            "turning_points_m": [
+              [
+                1.3464469151222684,
+                0.04705333161305583
+              ],
+              [
+                0.8199492585362218,
+                1.0641380165363836
+              ],
+              [
+                0.2785275330775807,
+                0.10634791299000643
+              ],
+              [
+                0.6573116309911714,
+                -0.8321234770291464
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.878839579401528,
+                0.0959273310917078
+              ],
+              "x_point_m": [
+                0.599646867401653,
+                1.2582343678868555
+              ],
+              "boundary_flux_wb": -0.09087022041101962
+            }
+          },
+          "minus": {
+            "current_a": -27381.810546875,
+            "delta_a": -2000.0,
+            "step_a": 2000.0,
+            "stage": "forward",
+            "error": "NoQualifiedAxisError",
+            "wall_s": 0.39408842846751213,
+            "detail": "no qualified magnetic-axis candidate has a resolved component"
+          }
+        }
+      },
+      "solves_absent": {
+        "500": [],
+        "2000": []
+      }
+    },
+    {
+      "circuit": 1,
+      "family": "p2_inner_upper",
+      "label": "circuit_01_p2_inner_upper",
+      "central_difference_table": [
+        {
+          "extremum": "outer",
+          "frozen_tangent_m_per_a": {
+            "dR": -1.1381837258128691e-07,
+            "dZ": 5.5917585582172106e-08,
+            "norm": 1.2681245330957123e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -1.6819303003701159e-07,
+            "dZ": -1.481259709892619e-06,
+            "norm": 1.490778059774223e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 1.0566162621350464e-08,
+            "dZ": 2.8784174312792774e-09,
+            "norm": 1.0951213606240912e-08
+          },
+          "ratio_500_self_consistent_over_frozen": 11.755770201330106,
+          "self_consistent_2000_m_per_a": {
+            "dR": -1.6533138871804853e-07,
+            "dZ": -1.521970293640416e-06,
+            "norm": 1.5309239180375138e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 1.7213346090727546e-08,
+            "dZ": 2.830983813013191e-09,
+            "norm": 1.744459093784397e-08
+          },
+          "ratio_2000_self_consistent_over_frozen": 12.072346824647123
+        },
+        {
+          "extremum": "upper",
+          "frozen_tangent_m_per_a": {
+            "dR": 2.196512972396647e-08,
+            "dZ": 5.120213935394524e-08,
+            "norm": 5.571468386531062e-08
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -9.920485580716676e-08,
+            "dZ": -1.4836555092380132e-06,
+            "norm": 1.4869684843694668e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 7.95543368511953e-08,
+            "dZ": 4.826180858849941e-10,
+            "norm": 7.955580074419635e-08
+          },
+          "ratio_500_self_consistent_over_frozen": 26.688987197059035,
+          "self_consistent_2000_m_per_a": {
+            "dR": -1.0051115642301101e-07,
+            "dZ": -1.5242213500256396e-06,
+            "norm": 1.527531739912292e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 8.203357838576507e-08,
+            "dZ": 5.799274277895124e-10,
+            "norm": 8.203562822697809e-08
+          },
+          "ratio_2000_self_consistent_over_frozen": 27.417040426991854
+        },
+        {
+          "extremum": "inner",
+          "frozen_tangent_m_per_a": {
+            "dR": 3.4902083869858826e-07,
+            "dZ": 5.687937142305477e-08,
+            "norm": 3.536252377013662e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -3.4843402898210305e-07,
+            "dZ": -1.4879817809269475e-06,
+            "norm": 1.5282329838487426e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -1.69674836323741e-07,
+            "dZ": -3.843653603049266e-09,
+            "norm": 1.697183659905684e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 4.321617409952294,
+          "self_consistent_2000_m_per_a": {
+            "dR": -3.638252376710338e-07,
+            "dZ": -1.5287921161220488e-06,
+            "norm": 1.5714878739218182e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -1.8128050286225774e-07,
+            "dZ": -3.9908386686197444e-09,
+            "norm": 1.8132442612971918e-07
+          },
+          "ratio_2000_self_consistent_over_frozen": 4.443935857454065
+        },
+        {
+          "extremum": "lower",
+          "frozen_tangent_m_per_a": {
+            "dR": 2.196512972396647e-08,
+            "dZ": 5.120213935394524e-08,
+            "norm": 5.571468386531062e-08
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -9.920485580716676e-08,
+            "dZ": -1.4836555092380132e-06,
+            "norm": 1.4869684843694668e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 7.95543368511953e-08,
+            "dZ": 4.826180858849941e-10,
+            "norm": 7.955580074419635e-08
+          },
+          "ratio_500_self_consistent_over_frozen": 26.688987197059035,
+          "self_consistent_2000_m_per_a": {
+            "dR": -1.0051115642301101e-07,
+            "dZ": -1.5242213500256118e-06,
+            "norm": 1.5275317399122645e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 8.203357838576507e-08,
+            "dZ": 5.799274278172528e-10,
+            "norm": 8.203562822697829e-08
+          },
+          "ratio_2000_self_consistent_over_frozen": 27.41704042699136
+        }
+      ],
+      "central_difference_unavailable": {},
+      "whole_plasma_motion_m_per_a": {
+        "500": {
+          "dR": -1.7875919265836205e-07,
+          "dZ": -1.4841381273238982e-06,
+          "norm": 1.4948648199540844e-06
+        },
+        "2000": {
+          "dR": -1.8254473480877608e-07,
+          "dZ": -1.524801277453429e-06,
+          "norm": 1.5356892641188893e-06
+        }
+      },
+      "solves": {
+        "500": {
+          "plus": {
+            "current_a": 50767.71875,
+            "delta_a": 500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.38028328120708466,
+            "converged": true,
+            "terminal_residual": 4.786341632181765e-10,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.4032346471137211,
+                0.011033221294580432
+              ],
+              [
+                0.8477168755835335,
+                0.9964906266953777
+              ],
+              [
+                0.26768499997873296,
+                0.01718914086492258
+              ],
+              [
+                0.8141488993274179,
+                -0.9373035427600154
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9066071964488397,
+                0.028279941250701712
+              ],
+              "x_point_m": [
+                0.5943486133066183,
+                1.230885469845157
+              ],
+              "boundary_flux_wb": -0.11803766604034274
+            }
+          },
+          "minus": {
+            "current_a": 49767.71875,
+            "delta_a": -500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3124356884509325,
+            "converged": true,
+            "terminal_residual": 4.4876260520344934e-10,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.4034028401437582,
+                0.012514481004473051
+              ],
+              [
+                0.8478160804393406,
+                0.9979742822046157
+              ],
+              [
+                0.26803343400771507,
+                0.018677122645849527
+              ],
+              [
+                0.814248104183225,
+                -0.9358198872507774
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9067064013046469,
+                0.029763596759939764
+              ],
+              "x_point_m": [
+                0.5943234734674273,
+                1.2326822950071554
+              ],
+              "boundary_flux_wb": -0.11773718997631807
+            }
+          }
+        },
+        "2000": {
+          "plus": {
+            "current_a": 52267.71875,
+            "delta_a": 2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.30275399796664715,
+            "converged": true,
+            "terminal_residual": 7.773502125100889e-09,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.4029389365392129,
+                0.009168691766627938
+              ],
+              [
+                0.8475675584982117,
+                0.9946210132609515
+              ],
+              [
+                0.26731106413513483,
+                0.015315628361369286
+              ],
+              [
+                0.8139995822420961,
+                -0.9391731561944415
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.906457879363518,
+                0.026410327816275628
+              ],
+              "x_point_m": [
+                0.5943920314440133,
+                1.2286265420856262
+              ],
+              "boundary_flux_wb": -0.11837042110816721
+            }
+          },
+          "minus": {
+            "current_a": 48267.71875,
+            "delta_a": -2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3012331947684288,
+            "converged": true,
+            "terminal_residual": 2.6910306759807984e-10,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.403600262094085,
+                0.015256572941189601
+              ],
+              [
+                0.8479696031239038,
+                1.000717898661054
+              ],
+              [
+                0.26876636508581897,
+                0.02143079682585748
+              ],
+              [
+                0.8144016268677882,
+                -0.9330762707943391
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.90685992398921,
+                0.032507213216378075
+              ],
+              "x_point_m": [
+                0.5942566759272112,
+                1.2360586502579287
+              ],
+              "boundary_flux_wb": -0.11711745010290928
+            }
+          }
+        }
+      },
+      "solves_absent": {
+        "500": [],
+        "2000": []
+      }
+    },
+    {
+      "circuit": 2,
+      "family": "p2_outer_upper",
+      "label": "circuit_02_p2_outer_upper",
+      "central_difference_table": [
+        {
+          "extremum": "outer",
+          "frozen_tangent_m_per_a": {
+            "dR": -1.4536071834436726e-07,
+            "dZ": 7.164453987018593e-08,
+            "norm": 1.6205763953236248e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -2.1489814502406724e-07,
+            "dZ": -1.897304817435618e-06,
+            "norm": 1.909436247429903e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 1.4585934633715132e-08,
+            "dZ": 3.6749306280810406e-09,
+            "norm": 1.5041762006501057e-08
+          },
+          "ratio_500_self_consistent_over_frozen": 11.782451311396484,
+          "self_consistent_2000_m_per_a": {
+            "dR": -2.093382728762805e-07,
+            "dZ": -1.9820214979231738e-06,
+            "norm": 1.9930458426038386e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 2.790382497053904e-08,
+            "dZ": 3.581797787284292e-09,
+            "norm": 2.813276956461046e-08
+          },
+          "ratio_2000_self_consistent_over_frozen": 12.298376357665216
+        },
+        {
+          "extremum": "upper",
+          "frozen_tangent_m_per_a": {
+            "dR": 2.7981744005756148e-08,
+            "dZ": 6.562475803884027e-08,
+            "norm": 7.134134050646933e-08
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -1.2730659693949152e-07,
+            "dZ": -1.9003466688241043e-06,
+            "norm": 1.9046061092349735e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 1.0217748271829085e-07,
+            "dZ": 6.33079239594782e-10,
+            "norm": 1.0217944394040434e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 26.697088892831516,
+          "self_consistent_2000_m_per_a": {
+            "dR": -1.3004866339239029e-07,
+            "dZ": -1.984775042231629e-06,
+            "norm": 1.9890310764580106e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 1.0719343445442924e-07,
+            "dZ": 8.282534788289464e-10,
+            "norm": 1.0719663424735503e-07
+          },
+          "ratio_2000_self_consistent_over_frozen": 27.88048363455748
+        },
+        {
+          "extremum": "inner",
+          "frozen_tangent_m_per_a": {
+            "dR": 4.4529277773486255e-07,
+            "dZ": 7.286869697096035e-08,
+            "norm": 4.512155858357237e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -4.484249797280793e-07,
+            "dZ": -1.90592083717097e-06,
+            "norm": 1.9579630231458967e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -2.1894090007029691e-07,
+            "dZ": -4.941089107270816e-09,
+            "norm": 2.189966485706065e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 4.339307161829161,
+          "self_consistent_2000_m_per_a": {
+            "dR": -4.795327917262171e-07,
+            "dZ": -1.9908416004554003e-06,
+            "norm": 2.047779767564022e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -2.4229069387939755e-07,
+            "dZ": -5.238304744942185e-09,
+            "norm": 2.423473131213978e-07
+          },
+          "ratio_2000_self_consistent_over_frozen": 4.538362219406063
+        },
+        {
+          "extremum": "lower",
+          "frozen_tangent_m_per_a": {
+            "dR": 2.7981744005756148e-08,
+            "dZ": 6.562475803884027e-08,
+            "norm": 7.134134050646933e-08
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -1.2730659693949152e-07,
+            "dZ": -1.9003466688241043e-06,
+            "norm": 1.9046061092349735e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 1.0217748271829085e-07,
+            "dZ": 6.33079239594782e-10,
+            "norm": 1.0217944394040434e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 26.697088892831516,
+          "self_consistent_2000_m_per_a": {
+            "dR": -1.3004866339239029e-07,
+            "dZ": -1.984775042231629e-06,
+            "norm": 1.9890310764580106e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 1.0719343445442924e-07,
+            "dZ": 8.282534788289464e-10,
+            "norm": 1.0719663424735503e-07
+          },
+          "ratio_2000_self_consistent_over_frozen": 27.88048363455748
+        }
+      ],
+      "central_difference_unavailable": {},
+      "whole_plasma_motion_m_per_a": {
+        "500": {
+          "dR": -2.2948407965778238e-07,
+          "dZ": -1.9009797480636991e-06,
+          "norm": 1.914781174276764e-06
+        },
+        "2000": {
+          "dR": -2.3724209784681953e-07,
+          "dZ": -1.985603295710458e-06,
+          "norm": 1.999726046469114e-06
+        }
+      },
+      "solves": {
+        "500": {
+          "plus": {
+            "current_a": 33841.1796875,
+            "delta_a": 500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.30396501533687115,
+            "converged": true,
+            "terminal_residual": 1.6782217973850124e-09,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.4032093208378995,
+                0.01084078977720972
+              ],
+              [
+                0.8477027496722053,
+                0.9962978062153155
+              ],
+              [
+                0.26764098863886365,
+                0.0169958016154012
+              ],
+              [
+                0.8141347734160896,
+                -0.9374963632400776
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9065930705375115,
+                0.028087120770639625
+              ],
+              "x_point_m": [
+                0.5943753268540246,
+                1.230649085436809
+              ],
+              "boundary_flux_wb": -0.11807590852065636
+            }
+          },
+          "minus": {
+            "current_a": 32841.1796875,
+            "delta_a": -500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3110118396580219,
+            "converged": true,
+            "terminal_residual": 1.3980736534526484e-09,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.4034242189829236,
+                0.012738094594645338
+              ],
+              [
+                0.8478300562691448,
+                0.9981981528841396
+              ],
+              [
+                0.26808941361859173,
+                0.01890172245257217
+              ],
+              [
+                0.8142620800130291,
+                -0.9355960165712535
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.906720377134451,
+                0.02998746743946367
+              ],
+              "x_point_m": [
+                0.594295043966276,
+                1.2329570908375374
+              ],
+              "boundary_flux_wb": -0.11768945122100641
+            }
+          }
+        },
+        "2000": {
+          "plus": {
+            "current_a": 35341.1796875,
+            "delta_a": 2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.2877887273207307,
+            "converged": true,
+            "terminal_residual": 4.902546212995991e-10,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.402823345759725,
+                0.008551812284183245
+              ],
+              [
+                0.8475119337133646,
+                0.9940020512985411
+              ],
+              [
+                0.2671987791393261,
+                0.014695682856528997
+              ],
+              [
+                0.813943957457249,
+                -0.9397921181568519
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9064022545786709,
+                0.025791365853865173
+              ],
+              "x_point_m": [
+                0.5945040591260997,
+                1.2278657894981626
+              ],
+              "boundary_flux_wb": -0.11847261527491154
+            }
+          },
+          "minus": {
+            "current_a": 31341.1796875,
+            "delta_a": -2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3159244507551193,
+            "converged": true,
+            "terminal_residual": 5.8108427666922825e-09,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.4036606988512301,
+                0.01647989827587594
+              ],
+              [
+                0.8480321283669342,
+                1.0019411514674676
+              ],
+              [
+                0.26911691030623097,
+                0.0226590492583506
+              ],
+              [
+                0.8144641521108186,
+                -0.9318530179879254
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9069224492322404,
+                0.03373046602279167
+              ],
+              "x_point_m": [
+                0.5941029547172223,
+                1.2376087393599664
+              ],
+              "boundary_flux_wb": -0.11682328662184983
+            }
+          }
+        }
+      },
+      "solves_absent": {
+        "500": [],
+        "2000": []
+      }
+    },
+    {
+      "circuit": 3,
+      "family": "p2_inner_lower",
+      "label": "circuit_03_p2_inner_lower",
+      "central_difference_table": [
+        {
+          "extremum": "outer",
+          "frozen_tangent_m_per_a": {
+            "dR": 4.150229747312828e-08,
+            "dZ": -4.844923938901458e-08,
+            "norm": 6.379474502591943e-08
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -2.594650661169595e-07,
+            "dZ": 8.950933641265653e-07,
+            "norm": 9.31941119941861e-07
+          },
+          "differential_500_m_per_a": {
+            "dR": -3.0094775861747026e-07,
+            "dZ": 3.98610978668163e-09,
+            "norm": 3.0097415584749237e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 14.608430828639865,
+          "self_consistent_2000_m_per_a": {
+            "dR": -2.5883869860637844e-07,
+            "dZ": 8.976684424899578e-07,
+            "norm": 9.342409242473754e-07
+          },
+          "differential_2000_m_per_a": {
+            "dR": -3.0072548990263406e-07,
+            "dZ": 3.974261385189292e-09,
+            "norm": 3.007517498381964e-07
+          },
+          "ratio_2000_self_consistent_over_frozen": 14.644480887380283
+        },
+        {
+          "extremum": "upper",
+          "frozen_tangent_m_per_a": {
+            "dR": 2.1673306477287822e-08,
+            "dZ": -4.7760624504178395e-08,
+            "norm": 5.2448159802681086e-08
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -2.3698760604484724e-08,
+            "dZ": 8.869057469482744e-07,
+            "norm": 8.872223144308676e-07
+          },
+          "differential_500_m_per_a": {
+            "dR": -6.518145310499546e-08,
+            "dZ": -4.201507391609337e-09,
+            "norm": 6.531672445278062e-08
+          },
+          "ratio_500_self_consistent_over_frozen": 16.916176235138643,
+          "self_consistent_2000_m_per_a": {
+            "dR": -2.347446120185004e-08,
+            "dZ": 8.894947882049087e-07,
+            "norm": 8.898044889594638e-07
+          },
+          "differential_2000_m_per_a": {
+            "dR": -6.536125249810564e-08,
+            "dZ": -4.199392899859867e-09,
+            "norm": 6.549601689300285e-08
+          },
+          "ratio_2000_self_consistent_over_frozen": 16.96540912602196
+        },
+        {
+          "extremum": "inner",
+          "frozen_tangent_m_per_a": {
+            "dR": 5.071505032594459e-10,
+            "dZ": -4.8128039523073763e-08,
+            "norm": 4.813071150489577e-08
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 4.727933573279719e-07,
+            "dZ": 8.955241593364207e-07,
+            "norm": 1.0126682964765207e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 4.3131066482746113e-07,
+            "dZ": 4.416904996537043e-09,
+            "norm": 4.313332802412248e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 21.039961072952636,
+          "self_consistent_2000_m_per_a": {
+            "dR": 4.733347861951009e-07,
+            "dZ": 8.981187055192991e-07,
+            "norm": 1.0152157549142071e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 4.314479948988453e-07,
+            "dZ": 4.424524414530548e-09,
+            "norm": 4.3147068118069025e-07
+          },
+          "ratio_2000_self_consistent_over_frozen": 21.092888992736814
+        },
+        {
+          "extremum": "lower",
+          "frozen_tangent_m_per_a": {
+            "dR": 2.1673306477287822e-08,
+            "dZ": -4.7760624504178395e-08,
+            "norm": 5.2448159802681086e-08
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -2.3698760604484724e-08,
+            "dZ": 8.869057469482744e-07,
+            "norm": 8.872223144308676e-07
+          },
+          "differential_500_m_per_a": {
+            "dR": -6.518145310499546e-08,
+            "dZ": -4.201507391609337e-09,
+            "norm": 6.531672445278062e-08
+          },
+          "ratio_500_self_consistent_over_frozen": 16.916176235138643,
+          "self_consistent_2000_m_per_a": {
+            "dR": -2.347446120185004e-08,
+            "dZ": 8.894947882049087e-07,
+            "norm": 8.898044889594638e-07
+          },
+          "differential_2000_m_per_a": {
+            "dR": -6.536125249810564e-08,
+            "dZ": -4.199392899859867e-09,
+            "norm": 6.549601689300285e-08
+          },
+          "ratio_2000_self_consistent_over_frozen": 16.96540912602196
+        }
+      ],
+      "central_difference_unavailable": {},
+      "whole_plasma_motion_m_per_a": {
+        "500": {
+          "dR": 4.148269250051073e-08,
+          "dZ": 8.911072543398837e-07,
+          "norm": 8.92072279871008e-07
+        },
+        "2000": {
+          "dR": 4.18867912962556e-08,
+          "dZ": 8.936941811047685e-07,
+          "norm": 8.94675244223075e-07
+        }
+      },
+      "solves": {
+        "500": {
+          "plus": {
+            "current_a": 50819.8671875,
+            "delta_a": 500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.31202918384224176,
+            "converged": true,
+            "terminal_residual": 5.234533282033716e-10,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.4031913681493962,
+                0.012201116192173313
+              ],
+              [
+                0.8477546887386604,
+                0.9976557054516699
+              ],
+              [
+                0.26808784752248815,
+                0.018360556110321957
+              ],
+              [
+                0.8141867124825448,
+                -0.9361384640037231
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9066450096039667,
+                0.029445020006993984
+              ],
+              "x_point_m": [
+                0.5943838671010272,
+                1.2323652701060253
+              ],
+              "boundary_flux_wb": -0.11771769712256863
+            }
+          },
+          "minus": {
+            "current_a": 49819.8671875,
+            "delta_a": -500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.31232117861509323,
+            "converged": true,
+            "terminal_residual": 8.76122988699204e-10,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.4034508332155131,
+                0.011306022828046748
+              ],
+              [
+                0.8477783874992649,
+                0.9967687997047217
+              ],
+              [
+                0.2676150541651602,
+                0.017465031950985536
+              ],
+              [
+                0.8142104112431493,
+                -0.9370253697506714
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9066687083645711,
+                0.028558114260045682
+              ],
+              "x_point_m": [
+                0.5942849519976108,
+                1.2311624074555312
+              ],
+              "boundary_flux_wb": -0.11806931642201927
+            }
+          }
+        },
+        "2000": {
+          "plus": {
+            "current_a": 52319.8671875,
+            "delta_a": 2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3039085725322366,
+            "converged": true,
+            "terminal_residual": 1.2282695133460897e-09,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.4027892737639625,
+                0.013637795027666998
+              ],
+              [
+                0.8477199414559824,
+                0.9990796271739605
+              ],
+              [
+                0.2688394304452275,
+                0.01979812743094196
+              ],
+              [
+                0.8141519651998668,
+                -0.9347145422814326
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9066102623212886,
+                0.03086894172928453
+              ],
+              "x_point_m": [
+                0.5944913210481045,
+                1.2343700737415944
+              ],
+              "boundary_flux_wb": -0.11715492174572778
+            }
+          },
+          "minus": {
+            "current_a": 48319.8671875,
+            "delta_a": -2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.2835885910317302,
+            "converged": true,
+            "terminal_residual": 1.2623351626672527e-09,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.403824628558388,
+                0.010047121257707167
+              ],
+              [
+                0.8478138393007898,
+                0.9955216480211408
+              ],
+              [
+                0.2669460913004471,
+                0.016205652608864765
+              ],
+              [
+                0.8142458630446742,
+                -0.9382725214342522
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.906704160166096,
+                0.027310962576464908
+              ],
+              "x_point_m": [
+                0.5941082080338473,
+                1.229529437265549
+              ],
+              "boundary_flux_wb": -0.11856400348428006
+            }
+          }
+        }
+      },
+      "solves_absent": {
+        "500": [],
+        "2000": []
+      }
+    },
+    {
+      "circuit": 4,
+      "family": "p2_outer_lower",
+      "label": "circuit_04_p2_outer_lower",
+      "central_difference_table": [
+        {
+          "extremum": "outer",
+          "frozen_tangent_m_per_a": {
+            "dR": 5.2857918066973045e-08,
+            "dZ": -6.210534321060904e-08,
+            "norm": 8.155386660166628e-08
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -3.3238666771606694e-07,
+            "dZ": 1.1470819179300804e-06,
+            "norm": 1.1942687399901008e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -3.8560605364679203e-07,
+            "dZ": 5.10619366362647e-09,
+            "norm": 3.8563986026185507e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 14.64392541708991,
+          "self_consistent_2000_m_per_a": {
+            "dR": -3.322392403216634e-07,
+            "dZ": 1.1561224148290435e-06,
+            "norm": 1.2029139415933523e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -3.8650461617238676e-07,
+            "dZ": 5.09892699850116e-09,
+            "norm": 3.865382482744755e-07
+          },
+          "ratio_2000_self_consistent_over_frozen": 14.749931446766926
+        },
+        {
+          "extremum": "upper",
+          "frozen_tangent_m_per_a": {
+            "dR": 2.7622994172027405e-08,
+            "dZ": -6.122899280924798e-08,
+            "norm": 6.717156665928525e-08
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -3.0329492944902725e-08,
+            "dZ": 1.1365921725544625e-06,
+            "norm": 1.136996765542615e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -8.354887887562778e-08,
+            "dZ": -5.383551711991467e-09,
+            "norm": 8.372214635572841e-08
+          },
+          "ratio_500_self_consistent_over_frozen": 16.926756693197444,
+          "self_consistent_2000_m_per_a": {
+            "dR": -2.996880072678176e-08,
+            "dZ": 1.1456252632605356e-06,
+            "norm": 1.146017178247243e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -8.423417657750508e-08,
+            "dZ": -5.398224570006691e-09,
+            "norm": 8.440697442864855e-08
+          },
+          "ratio_2000_self_consistent_over_frozen": 17.061045844891378
+        },
+        {
+          "extremum": "inner",
+          "frozen_tangent_m_per_a": {
+            "dR": 5.939470271165703e-10,
+            "dZ": -6.169817946200667e-08,
+            "norm": 6.170103825704234e-08
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 6.059231973287726e-07,
+            "dZ": 1.1476366340268106e-06,
+            "norm": 1.2977722314880645e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 5.527038113980475e-07,
+            "dZ": 5.6609097603566755e-09,
+            "norm": 5.527328007575119e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 21.033231662676947,
+          "self_consistent_2000_m_per_a": {
+            "dR": 6.092383451781202e-07,
+            "dZ": 1.1567210099720548e-06,
+            "norm": 1.307354143354487e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 5.549729693273969e-07,
+            "dZ": 5.6975221415124336e-09,
+            "norm": 5.550022148087527e-07
+          },
+          "ratio_2000_self_consistent_over_frozen": 21.188527458940616
+        },
+        {
+          "extremum": "lower",
+          "frozen_tangent_m_per_a": {
+            "dR": 2.7622994172027405e-08,
+            "dZ": -6.122899280924798e-08,
+            "norm": 6.717156665928525e-08
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -3.0329492944902725e-08,
+            "dZ": 1.1365921725544625e-06,
+            "norm": 1.136996765542615e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -8.354887887562778e-08,
+            "dZ": -5.383551711991467e-09,
+            "norm": 8.372214635572841e-08
+          },
+          "ratio_500_self_consistent_over_frozen": 16.926756693197444,
+          "self_consistent_2000_m_per_a": {
+            "dR": -2.996880072678176e-08,
+            "dZ": 1.1456252632605356e-06,
+            "norm": 1.146017178247243e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -8.423417657750508e-08,
+            "dZ": -5.398224570006691e-09,
+            "norm": 8.440697442864855e-08
+          },
+          "ratio_2000_self_consistent_over_frozen": 17.061045844891378
+        }
+      ],
+      "central_difference_unavailable": {},
+      "whole_plasma_motion_m_per_a": {
+        "500": {
+          "dR": 5.321938593072506e-08,
+          "dZ": 1.141975724266454e-06,
+          "norm": 1.143215140668079e-06
+        },
+        "2000": {
+          "dR": 5.426537585072332e-08,
+          "dZ": 1.1510234878305423e-06,
+          "norm": 1.1523019571942968e-06
+        }
+      },
+      "solves": {
+        "500": {
+          "plus": {
+            "current_a": 33916.35546875,
+            "delta_a": 500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.30595353711396456,
+            "converged": true,
+            "terminal_residual": 8.559897761049226e-10,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.403154339217913,
+                0.012330918695041729
+              ],
+              [
+                0.8477514049312458,
+                0.9977843360646158
+              ],
+              [
+                0.26815621512922794,
+                0.018490430492127535
+              ],
+              [
+                0.8141834286751302,
+                -0.9360098333907773
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.906641725796552,
+                0.029573650619939856
+              ],
+              "x_point_m": [
+                0.5943962448031821,
+                1.2325428668439842
+              ],
+              "boundary_flux_wb": -0.11766668357233166
+            }
+          },
+          "minus": {
+            "current_a": 32916.35546875,
+            "delta_a": -500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.30612172093242407,
+            "converged": true,
+            "terminal_residual": 3.384144551205941e-09,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.4034867258856292,
+                0.011183836777111648
+              ],
+              [
+                0.8477817344241907,
+                0.9966477438920613
+              ],
+              [
+                0.26755029193189916,
+                0.017342793858100725
+              ],
+              [
+                0.8142137581680751,
+                -0.9371464255633317
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9066720552894969,
+                0.02843705844738539
+              ],
+              "x_point_m": [
+                0.5942696771111224,
+                1.2310008278759235
+              ],
+              "boundary_flux_wb": -0.11811736233027281
+            }
+          }
+        },
+        "2000": {
+          "plus": {
+            "current_a": 35416.35546875,
+            "delta_a": 2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3510683150961995,
+            "converged": true,
+            "terminal_residual": 1.4386044575389594e-09,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.4026339709145792,
+                0.014221645406821304
+              ],
+              [
+                0.8477079032611848,
+                0.9996585023038128
+              ],
+              [
+                0.2691423702587916,
+                0.02038247014078441
+              ],
+              [
+                0.8141399270050692,
+                -0.9341356671515803
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.906598224126491,
+                0.03144781685913688
+              ],
+              "x_point_m": [
+                0.5945152496084936,
+                1.2352151414934684
+              ],
+              "boundary_flux_wb": -0.1169261834065063
+            }
+          },
+          "minus": {
+            "current_a": 31416.35546875,
+            "delta_a": -2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.32459912821650505,
+            "converged": true,
+            "terminal_residual": 7.651308246641329e-10,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.4039629278758659,
+                0.00959715574750513
+              ],
+              [
+                0.847827778464092,
+                0.9950760012507707
+              ],
+              [
+                0.26670541687807914,
+                0.015755586100896193
+              ],
+              [
+                0.8142598022079763,
+                -0.9387181682046224
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9067180993293982,
+                0.02686531580609471
+              ],
+              "x_point_m": [
+                0.5940353609818022,
+                1.2289606162653828
+              ],
+              "boundary_flux_wb": -0.11874106361530426
+            }
+          }
+        }
+      },
+      "solves_absent": {
+        "500": [],
+        "2000": []
+      }
+    },
+    {
+      "circuit": 5,
+      "family": "p3_upper",
+      "label": "circuit_05_p3_upper",
+      "central_difference_table": [
+        {
+          "extremum": "outer",
+          "frozen_tangent_m_per_a": {
+            "dR": 8.19497862125651e-09,
+            "dZ": 5.056705780560021e-07,
+            "norm": 5.057369782664643e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -1.7426216325810985e-07,
+            "dZ": -1.231383050748314e-05,
+            "norm": 1.2315063502417107e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": 1.5238981361680172e-06,
+            "dZ": 5.170246668495586e-09,
+            "norm": 1.5239069068899745e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 24.350727812369907,
+          "self_consistent_2000_m_per_a": {
+            "dR": -8.322695370499011e-07,
+            "dZ": 5.631148949156047e-07,
+            "norm": 1.0048736075631945e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -1.5758104949417164e-06,
+            "dZ": 6.659983330617856e-06,
+            "norm": 6.843870007537853e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 1.986949048115172
+        },
+        {
+          "extremum": "upper",
+          "frozen_tangent_m_per_a": {
+            "dR": 2.1766635325326523e-07,
+            "dZ": 4.983961228638423e-07,
+            "norm": 5.438541501398012e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -7.190633550656633e-07,
+            "dZ": -1.2294910825185634e-05,
+            "norm": 1.2315919953777922e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": 9.790969443604638e-07,
+            "dZ": 2.4089928966002327e-08,
+            "norm": 9.793932566306467e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 22.6456301760537,
+          "self_consistent_2000_m_per_a": {
+            "dR": -7.263627281915707e-07,
+            "dZ": -8.084005088206363e-06,
+            "norm": 8.116572002948799e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -1.4699036860833859e-06,
+            "dZ": -1.987136652504112e-06,
+            "norm": 2.4717056706021396e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 14.924170388076256
+        },
+        {
+          "extremum": "inner",
+          "frozen_tangent_m_per_a": {
+            "dR": 8.685863570895292e-07,
+            "dZ": 5.09695188492601e-07,
+            "norm": 1.0070905842547469e-06
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -5.180252324315071e-06,
+            "dZ": -1.2372350858752241e-05,
+            "norm": 1.3413056322689434e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": -3.482092024888944e-06,
+            "dZ": -5.335010460060527e-08,
+            "norm": 3.4825006968349743e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 13.318619528763817,
+          "self_consistent_2000_m_per_a": {
+            "dR": -3.132835239028492e-06,
+            "dZ": -8.125778102822216e-06,
+            "norm": 8.708784439357982e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -3.876376196920307e-06,
+            "dZ": -2.028909667119965e-06,
+            "norm": 4.375244776853426e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 8.647468833007247
+        },
+        {
+          "extremum": "lower",
+          "frozen_tangent_m_per_a": {
+            "dR": 2.1766635325326523e-07,
+            "dZ": 4.983961228638423e-07,
+            "norm": 5.438541501398012e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -7.190633550656633e-07,
+            "dZ": -1.2294910825185524e-05,
+            "norm": 1.2315919953777812e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": 9.790969443604638e-07,
+            "dZ": 2.4089928966112442e-08,
+            "norm": 9.793932566306495e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 22.645630176053498,
+          "self_consistent_2000_m_per_a": {
+            "dR": 7.665631335837225e-06,
+            "dZ": -8.740805446696031e-06,
+            "norm": 1.1625987426191403e-05
+          },
+          "differential_2000_m_per_a": {
+            "dR": 6.92209037794541e-06,
+            "dZ": -2.64393701099378e-06,
+            "norm": 7.409840627067977e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 21.37703173397292
+        }
+      ],
+      "central_difference_unavailable": {},
+      "whole_plasma_motion_m_per_a": {
+        "500": {
+          "dR": -1.698160299426127e-06,
+          "dZ": -1.2319000754151636e-05,
+          "norm": 1.243549468189085e-05
+        },
+        "2000": {
+          "dR": 7.435409578918151e-07,
+          "dZ": -6.096868435702251e-06,
+          "norm": 6.142040204876967e-06
+        }
+      },
+      "solves": {
+        "500": {
+          "plus": {
+            "current_a": 529.5709915161133,
+            "delta_a": 500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.37417922262102365,
+            "converged": true,
+            "terminal_residual": 2.523792838399444e-10,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.4030776450774685,
+                0.007262129986783199
+              ],
+              [
+                0.8474291438780436,
+                0.9927240753259029
+              ],
+              [
+                0.26594031291520914,
+                0.01339729877752288
+              ],
+              [
+                0.813861167621928,
+                -0.9410700941294902
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9063194647433498,
+                0.02451338988122701
+              ],
+              "x_point_m": [
+                0.593562728076695,
+                1.2278124677219926
+              ],
+              "boundary_flux_wb": -0.11945499528332731
+            }
+          },
+          "minus": {
+            "current_a": -470.4290084838867,
+            "delta_a": -500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3569807494059205,
+            "converged": true,
+            "terminal_residual": 4.155786037435713e-09,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.4032519072407266,
+                0.01957596049426634
+              ],
+              [
+                0.8481482072331092,
+                1.0050189861510885
+              ],
+              [
+                0.2711205652395242,
+                0.02576964963627512
+              ],
+              [
+                0.8145802309769936,
+                -0.9287751833043046
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9070385280984155,
+                0.03680830070641251
+              ],
+              "x_point_m": [
+                0.5939364835311676,
+                1.24225759269915
+              ],
+              "boundary_flux_wb": -0.1152226503223983
+            }
+          }
+        },
+        "2000": {
+          "plus": {
+            "current_a": 2029.5709915161133,
+            "delta_a": 2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3483278639614582,
+            "converged": true,
+            "terminal_residual": 1.8812261965876167e-09,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.402392919113245,
+                0.014792559555253304
+              ],
+              [
+                0.8465310025307676,
+                0.9830032449999292
+              ],
+              [
+                0.2616722724415539,
+                0.0036179716913217596
+              ],
+              [
+                0.8465310025307672,
+                -0.9534181258894227
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9054213233960738,
+                0.014792559555253304
+              ],
+              "x_point_m": [
+                0.5920640687867967,
+                1.2187697218236822
+              ],
+              "boundary_flux_wb": -0.12286559297778954
+            }
+          },
+          "minus": {
+            "current_a": -1970.4290084838867,
+            "delta_a": -2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.413785089738667,
+            "converged": false,
+            "terminal_residual": 0.0037220724982480417,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.4057219972614445,
+                0.012540099975590885
+              ],
+              [
+                0.8494364534435339,
+                1.0153392653527546
+              ],
+              [
+                0.27420361339766786,
+                0.036121084102610626
+              ],
+              [
+                0.8158684771874183,
+                -0.9184549041026385
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9083267743088401,
+                0.047128579908078644
+              ],
+              "x_point_m": [
+                0.5882397246578763,
+                1.263476052075692
+              ],
+              "boundary_flux_wb": -0.1122536959813254
+            }
+          }
+        }
+      },
+      "solves_absent": {
+        "500": [],
+        "2000": []
+      }
+    },
+    {
+      "circuit": 6,
+      "family": "p3_lower",
+      "label": "circuit_06_p3_lower",
+      "central_difference_table": [
+        {
+          "extremum": "outer",
+          "frozen_tangent_m_per_a": {
+            "dR": 3.890963146013782e-07,
+            "dZ": -4.743144510709757e-07,
+            "norm": 6.134901307528392e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -2.039086055363182e-06,
+            "dZ": 7.459956129263704e-06,
+            "norm": 7.733616061824874e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -2.451566797233046e-06,
+            "dZ": 3.24451473192504e-08,
+            "norm": 2.4517814847331038e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 12.605933941161584,
+          "self_consistent_2000_m_per_a": {
+            "dR": -1.8286539703253336e-06,
+            "dZ": 6.289495066226317e-06,
+            "norm": 6.549940727309812e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 2.089312726665577e-06,
+            "dZ": -3.712747314709148e-07,
+            "norm": 2.122044437808867e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 10.676521754754406
+        },
+        {
+          "extremum": "upper",
+          "frozen_tangent_m_per_a": {
+            "dR": 2.1298660434543316e-07,
+            "dZ": -4.681985691351587e-07,
+            "norm": 5.143667891405976e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -1.1917109186021512e-07,
+            "dZ": 7.3932819338062835e-06,
+            "norm": 7.394242321014476e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -5.31651833730079e-07,
+            "dZ": -3.42290481381705e-08,
+            "norm": 5.327525692523694e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 14.375427179831636,
+          "self_consistent_2000_m_per_a": {
+            "dR": -1.317391807570123e-07,
+            "dZ": 6.230565149795198e-06,
+            "norm": 6.231957741961107e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 3.7862275162338985e-06,
+            "dZ": -4.3020464790203434e-07,
+            "norm": 3.810589828853695e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 12.11578560966862
+        },
+        {
+          "extremum": "inner",
+          "frozen_tangent_m_per_a": {
+            "dR": 4.291231694431019e-09,
+            "dZ": -4.718212304424471e-07,
+            "norm": 4.718407444950892e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 3.927351206563068e-06,
+            "dZ": 7.463523930901432e-06,
+            "norm": 8.433758175738188e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 3.5148704646932037e-06,
+            "dZ": 3.6012948956977946e-08,
+            "norm": 3.5150549520690566e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 17.874162573143288,
+          "self_consistent_2000_m_per_a": {
+            "dR": 3.17640241025971e-06,
+            "dZ": 6.287989885133176e-06,
+            "norm": 7.0447391057044e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 7.09436910725062e-06,
+            "dZ": -3.727799125640562e-07,
+            "norm": 7.104156381522244e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 14.93033229515371
+        },
+        {
+          "extremum": "lower",
+          "frozen_tangent_m_per_a": {
+            "dR": 2.1298660434543316e-07,
+            "dZ": -4.681985691351587e-07,
+            "norm": 5.143667891405976e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -1.1917109186021512e-07,
+            "dZ": 7.393281933806395e-06,
+            "norm": 7.3942423210145876e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -5.31651833730079e-07,
+            "dZ": -3.422904813805869e-08,
+            "norm": 5.327525692523622e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 14.375427179831854,
+          "self_consistent_2000_m_per_a": {
+            "dR": -1.6887876047141008e-05,
+            "dZ": 7.835029089634237e-06,
+            "norm": 1.861687509274888e-05
+          },
+          "differential_2000_m_per_a": {
+            "dR": -1.2969909350150097e-05,
+            "dZ": 1.1742592919370054e-06,
+            "norm": 1.3022957937266454e-05
+          },
+          "ratio_2000_self_consistent_over_frozen": 36.193773559630266
+        }
+      ],
+      "central_difference_unavailable": {},
+      "whole_plasma_motion_m_per_a": {
+        "500": {
+          "dR": 4.1248074186986386e-07,
+          "dZ": 7.427510981944454e-06,
+          "norm": 7.438955555003604e-06
+        },
+        "2000": {
+          "dR": -3.917966696990911e-06,
+          "dZ": 6.660769797697232e-06,
+          "norm": 7.727633359356893e-06
+        }
+      },
+      "solves": {
+        "500": {
+          "plus": {
+            "current_a": 546.641414642334,
+            "delta_a": 500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.33929464779794216,
+            "converged": true,
+            "terminal_residual": 5.278535899893535e-10,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.4022367267275642,
+                0.015954434117724195
+              ],
+              [
+                0.8477112260515746,
+                1.0013773802522845
+              ],
+              [
+                0.2700346144601472,
+                0.02211677852817682
+              ],
+              [
+                0.8141432497954589,
+                -0.9324167892031084
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9066015469168808,
+                0.03316669480760866
+              ],
+              "x_point_m": [
+                0.5945149892324402,
+                1.2377894604801427
+              ],
+              "boundary_flux_wb": -0.11625911620930401
+            }
+          },
+          "minus": {
+            "current_a": -453.358585357666,
+            "delta_a": -500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3423240315169096,
+            "converged": true,
+            "terminal_residual": 1.47550448121821e-09,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.4042758127829273,
+                0.00849447798846049
+              ],
+              [
+                0.8478303971434348,
+                0.9939840983184782
+              ],
+              [
+                0.26610726325358414,
+                0.014653254597275386
+              ],
+              [
+                0.8142624208873191,
+                -0.9398100711369148
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.906720718008741,
+                0.025773412873802276
+              ],
+              "x_point_m": [
+                0.593840101616484,
+                1.227628106456034
+              ],
+              "boundary_flux_wb": -0.11916560711729997
+            }
+          }
+        },
+        "2000": {
+          "plus": {
+            "current_a": 2046.641414642334,
+            "delta_a": 2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.40102909691631794,
+            "converged": false,
+            "terminal_residual": 0.0003335605904966932,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.399857309613936,
+                0.024762278446107344
+              ],
+              [
+                0.8475850526574584,
+                1.01010697465032
+              ],
+              [
+                0.2743053227394414,
+                0.030922696674595185
+              ],
+              [
+                0.780560505191922,
+                -0.9198965404796757
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9064753735227646,
+                0.04189628920564405
+              ],
+              "x_point_m": [
+                0.5912173681648751,
+                1.2561956609162614
+              ],
+              "boundary_flux_wb": -0.11308415214815717
+            }
+          },
+          "minus": {
+            "current_a": -1953.358585357666,
+            "delta_a": -2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3375476226210594,
+            "converged": true,
+            "terminal_residual": 5.124699981471585e-09,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.4071719254952373,
+                -0.0003957018187979236
+              ],
+              [
+                0.8481120093804865,
+                0.9851847140511392
+              ],
+              [
+                0.2615997130984026,
+                0.005770737134062481
+              ],
+              [
+                0.848112009380486,
+                -0.9512366568382127
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9070023302457927,
+                0.016974028606463284
+              ],
+              "x_point_m": [
+                0.5910428268134573,
+                1.2208761519388693
+              ],
+              "boundary_flux_wb": -0.12233057138735154
+            }
+          }
+        }
+      },
+      "solves_absent": {
+        "500": [],
+        "2000": []
+      }
+    },
+    {
+      "circuit": 7,
+      "family": "p4_upper",
+      "label": "circuit_07_p4_upper",
+      "central_difference_table": [
+        {
+          "extremum": "outer",
+          "frozen_tangent_m_per_a": {
+            "dR": 3.3324216864860644e-07,
+            "dZ": 4.71095916312822e-07,
+            "norm": 5.770456700576166e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 2.8531053160785194e-07,
+            "dZ": -9.62839807150656e-06,
+            "norm": 9.632624332072627e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 1.5356400531578438e-06,
+            "dZ": -2.9399856860502034e-10,
+            "norm": 1.5356400813008834e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 16.693001666767266,
+          "self_consistent_2000_m_per_a": {
+            "dR": -2.1925088694840778e-07,
+            "dZ": -3.278254075500174e-06,
+            "norm": 3.285577686642208e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -1.1916520570977586e-06,
+            "dZ": 3.3520035324091215e-06,
+            "norm": 3.5575219333784222e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 5.693791422634107
+        },
+        {
+          "extremum": "upper",
+          "frozen_tangent_m_per_a": {
+            "dR": 3.2160560227867396e-07,
+            "dZ": 4.71500027284244e-07,
+            "norm": 5.707385032973256e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -4.045849784694022e-07,
+            "dZ": -9.604439599929182e-06,
+            "norm": 9.612957351070008e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 8.457445430805898e-07,
+            "dZ": 2.3664473008774058e-08,
+            "norm": 8.460755518471023e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 16.843015313550957,
+          "self_consistent_2000_m_per_a": {
+            "dR": -4.639656702729034e-07,
+            "dZ": -7.590710711120719e-06,
+            "norm": 7.604876938065112e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -1.436366840422254e-06,
+            "dZ": -9.60453103211423e-07,
+            "norm": 1.7278946332844088e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 13.324625715856705
+        },
+        {
+          "extremum": "inner",
+          "frozen_tangent_m_per_a": {
+            "dR": 5.906797287469346e-07,
+            "dZ": 4.761707797515044e-07,
+            "norm": 7.58710190680017e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -4.477458660869016e-06,
+            "dZ": -9.675139020386894e-06,
+            "norm": 1.0660954512781865e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": -3.2271291393190243e-06,
+            "dZ": -4.7034947448938014e-08,
+            "norm": 3.22747188494702e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 14.051418636181307,
+          "self_consistent_2000_m_per_a": {
+            "dR": -3.3695977104414023e-06,
+            "dZ": -7.641148440675352e-06,
+            "norm": 8.351127961098865e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -4.341998880590753e-06,
+            "dZ": -1.0108908327660563e-06,
+            "norm": 4.458122312680733e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 11.007006448158965
+        },
+        {
+          "extremum": "lower",
+          "frozen_tangent_m_per_a": {
+            "dR": 3.2160560227867396e-07,
+            "dZ": 4.71500027284244e-07,
+            "norm": 5.707385032973256e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -4.045849784694022e-07,
+            "dZ": -9.604439599929182e-06,
+            "norm": 9.612957351070008e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 8.457445430805898e-07,
+            "dZ": 2.3664473008774058e-08,
+            "norm": 8.460755518471023e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 16.843015313550957,
+          "self_consistent_2000_m_per_a": {
+            "dR": 7.942418948260116e-06,
+            "dZ": -8.01091720434094e-06,
+            "norm": 1.1280816158615784e-05
+          },
+          "differential_2000_m_per_a": {
+            "dR": 6.970017778110766e-06,
+            "dZ": -1.3806595964316443e-06,
+            "norm": 7.1054464144344176e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 19.76529723059363
+        }
+      ],
+      "central_difference_unavailable": {},
+      "whole_plasma_motion_m_per_a": {
+        "500": {
+          "dR": -1.250329521549992e-06,
+          "dZ": -9.628104072937956e-06,
+          "norm": 9.708950095236039e-06
+        },
+        "2000": {
+          "dR": 9.724011701493508e-07,
+          "dZ": -6.630257607909296e-06,
+          "norm": 6.701184968566897e-06
+        }
+      },
+      "solves": {
+        "500": {
+          "plus": {
+            "current_a": -184933.671875,
+            "delta_a": 500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3582537556067109,
+            "converged": true,
+            "terminal_residual": 4.308672275767714e-09,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.4033527922168085,
+                0.008068417681979249
+              ],
+              [
+                0.8475770146082898,
+                0.993534783035703
+              ],
+              [
+                0.26608257407796065,
+                0.014207909113035868
+              ],
+              [
+                0.8140090383521742,
+                -0.9402593864196901
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.906467335473596,
+                0.025324097591027005
+              ],
+              "x_point_m": [
+                0.59352606791056,
+                1.2280624209073436
+              ],
+              "boundary_flux_wb": -0.11935044477377049
+            }
+          },
+          "minus": {
+            "current_a": -185933.671875,
+            "delta_a": -500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3381921062245965,
+            "converged": true,
+            "terminal_residual": 2.3773158483774597e-09,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.4030674816852007,
+                0.01769681575348581
+              ],
+              [
+                0.8479815995867592,
+                1.0031392226356322
+              ],
+              [
+                0.27056003273882967,
+                0.023883048133422763
+              ],
+              [
+                0.8144136233306436,
+                -0.9306549468197609
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9068719204520654,
+                0.03492853719095622
+              ],
+              "x_point_m": [
+                0.5941974558413667,
+                1.2403258732226985
+              ],
+              "boundary_flux_wb": -0.11567083983212673
+            }
+          }
+        },
+        "2000": {
+          "plus": {
+            "current_a": -183433.671875,
+            "delta_a": 2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3877893378958106,
+            "converged": true,
+            "terminal_residual": 9.796913552566642e-09,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.4034537083581182,
+                0.0002736313378480966
+              ],
+              [
+                0.8470877709186888,
+                0.9857604915742437
+              ],
+              [
+                0.26195224339050527,
+                0.006370413447209474
+              ],
+              [
+                0.8471453331367053,
+                -0.9497145038540303
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.905978091783995,
+                0.017549806129567847
+              ],
+              "x_point_m": [
+                0.5917085927337222,
+                1.2191917019696874
+              ],
+              "boundary_flux_wb": -0.12270354352105753
+            }
+          },
+          "minus": {
+            "current_a": -187433.671875,
+            "delta_a": -2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.43021194729954004,
+            "converged": false,
+            "terminal_residual": 0.002811493007951429,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.4043307119059119,
+                0.013386647639848794
+              ],
+              [
+                0.8489436335997804,
+                1.0161233344187266
+              ],
+              [
+                0.2754306342322709,
+                0.036935007209910886
+              ],
+              [
+                0.8153756573436648,
+                -0.9176708350366666
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9078339544650866,
+                0.04791264897405059
+              ],
+              "x_point_m": [
+                0.5979964541556959,
+                1.2474653575089025
+              ],
+              "boundary_flux_wb": -0.11126491724184112
+            }
+          }
+        }
+      },
+      "solves_absent": {
+        "500": [],
+        "2000": []
+      }
+    },
+    {
+      "circuit": 8,
+      "family": "p4_lower",
+      "label": "circuit_08_p4_lower",
+      "central_difference_table": [
+        {
+          "extremum": "outer",
+          "frozen_tangent_m_per_a": {
+            "dR": 5.729696744627422e-07,
+            "dZ": -4.688588152872847e-07,
+            "norm": 7.403531836404412e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -1.2377058657699892e-06,
+            "dZ": 5.007081285392425e-06,
+            "norm": 5.157788170203241e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -1.5953827476769822e-06,
+            "dZ": 2.198511815981688e-08,
+            "norm": 1.5955342230757253e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 6.96665900029163,
+          "self_consistent_2000_m_per_a": {
+            "dR": -1.1470181139100477e-06,
+            "dZ": 4.973721655865867e-06,
+            "norm": 5.104268572838509e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 2.6810564068690123e-06,
+            "dZ": -3.6442298286115976e-07,
+            "norm": 2.705710177984849e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 6.894369721948059
+        },
+        {
+          "extremum": "upper",
+          "frozen_tangent_m_per_a": {
+            "dR": 3.1090762949548267e-07,
+            "dZ": -4.5975800804343157e-07,
+            "norm": 5.550143962444258e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 3.39977565995131e-08,
+            "dZ": 4.962917966967573e-06,
+            "norm": 4.96303441397532e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -3.2367912530747995e-07,
+            "dZ": -2.2178200265035007e-08,
+            "norm": 3.24438050676568e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 8.942172396893328,
+          "self_consistent_2000_m_per_a": {
+            "dR": 6.008317032304977e-08,
+            "dZ": 4.9318018268673384e-06,
+            "norm": 4.932167804003437e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 3.88815769110211e-06,
+            "dZ": -4.063428118596887e-07,
+            "norm": 3.909333026441535e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 8.886558326013823
+        },
+        {
+          "extremum": "inner",
+          "frozen_tangent_m_per_a": {
+            "dR": 3.028885810218984e-08,
+            "dZ": -4.646291594840798e-07,
+            "norm": 4.6561536783918237e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 2.600417880198935e-06,
+            "dZ": 5.00746744960286e-06,
+            "norm": 5.642419995931754e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 2.242740998291942e-06,
+            "dZ": 2.237128237025229e-08,
+            "norm": 2.242852571992735e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 12.11819966792972,
+          "self_consistent_2000_m_per_a": {
+            "dR": 2.4745178223823107e-06,
+            "dZ": 4.973713053176967e-06,
+            "norm": 5.55527316957777e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 6.302592343161371e-06,
+            "dZ": -3.644315855500598e-07,
+            "norm": 6.3131197220251475e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 11.931034826789675
+        },
+        {
+          "extremum": "lower",
+          "frozen_tangent_m_per_a": {
+            "dR": 3.1090762949548267e-07,
+            "dZ": -4.5975800804343157e-07,
+            "norm": 5.550143962444258e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 3.39977565995131e-08,
+            "dZ": 4.962917966967573e-06,
+            "norm": 4.96303441397532e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -3.2367912530747995e-07,
+            "dZ": -2.2178200265035007e-08,
+            "norm": 3.24438050676568e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 8.942172396893328,
+          "self_consistent_2000_m_per_a": {
+            "dR": -1.669988096191155e-05,
+            "dZ": 6.473342018997935e-06,
+            "norm": 1.7910616433750686e-05
+          },
+          "differential_2000_m_per_a": {
+            "dR": -1.2871806441132491e-05,
+            "dZ": 1.1351973802709082e-06,
+            "norm": 1.2921767454576554e-05
+          },
+          "ratio_2000_self_consistent_over_frozen": 32.27054389029386
+        }
+      ],
+      "central_difference_unavailable": {},
+      "whole_plasma_motion_m_per_a": {
+        "500": {
+          "dR": 3.5767688190699306e-07,
+          "dZ": 4.985096167232608e-06,
+          "norm": 4.997911218539996e-06
+        },
+        "2000": {
+          "dR": -3.82807452077906e-06,
+          "dZ": 5.338144638727027e-06,
+          "norm": 6.568861600049733e-06
+        }
+      },
+      "solves": {
+        "500": {
+          "plus": {
+            "current_a": -184695.171875,
+            "delta_a": 500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.34343182668089867,
+            "converged": true,
+            "terminal_residual": 5.84788920094367e-09,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.4026436987409052,
+                0.01454132219130648
+              ],
+              [
+                0.8477792451711572,
+                0.999976039374022
+              ],
+              [
+                0.26929039780952724,
+                0.020701338367023085
+              ],
+              [
+                0.8142112689150416,
+                -0.933818130081371
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9066695660364634,
+                0.03176535392934614
+              ],
+              "x_point_m": [
+                0.5945312571118487,
+                1.235462818239801
+              ],
+              "boundary_flux_wb": -0.1168589273493573
+            }
+          },
+          "minus": {
+            "current_a": -185695.171875,
+            "delta_a": -500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.34239494521170855,
+            "converged": true,
+            "terminal_residual": 1.6314165679521768e-09,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.4038814046066752,
+                0.009534240905914055
+              ],
+              [
+                0.8477452474145577,
+                0.9950131214070544
+              ],
+              [
+                0.2666899799293283,
+                0.015693870917420225
+              ],
+              [
+                0.8141772711584421,
+                -0.9387810480483386
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9066355682798639,
+                0.026802435962378475
+              ],
+              "x_point_m": [
+                0.594037883277602,
+                1.229073476641024
+              ],
+              "boundary_flux_wb": -0.1187072222268575
+            }
+          }
+        },
+        "2000": {
+          "plus": {
+            "current_a": -183195.171875,
+            "delta_a": 2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.39326814468950033,
+            "converged": false,
+            "terminal_residual": 0.00012273131378494966,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.4009338299077503,
+                0.02327841181886136
+              ],
+              [
+                0.8479399378461361,
+                1.008648168737201
+              ],
+              [
+                0.2735462996998709,
+                0.029444554864436236
+              ],
+              [
+                0.7809153903805996,
+                -0.9213553463927946
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9068302587114423,
+                0.04043748329252519
+              ],
+              "x_point_m": [
+                0.5922301602080472,
+                1.2515691520964942
+              ],
+              "boundary_flux_wb": -0.11372780134705249
+            }
+          },
+          "minus": {
+            "current_a": -187195.171875,
+            "delta_a": -2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.36243017949163914,
+            "converged": true,
+            "terminal_residual": 1.715682337303191e-14,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.4055219023633905,
+                0.0033835251953978907
+              ],
+              [
+                0.8476996051648439,
+                0.9889209614297317
+              ],
+              [
+                0.26364822841034163,
+                0.009549702651728368
+              ],
+              [
+                0.8477149142282459,
+                -0.9472487144687863
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9065899260301501,
+                0.020710275985055798
+              ],
+              "x_point_m": [
+                0.5921973325332919,
+                1.2247955853282522
+              ],
+              "boundary_flux_wb": -0.12076698480047388
+            }
+          }
+        }
+      },
+      "solves_absent": {
+        "500": [],
+        "2000": []
+      }
+    },
+    {
+      "circuit": 9,
+      "family": "p5_upper",
+      "label": "circuit_09_p5_upper",
+      "central_difference_table": [
+        {
+          "extremum": "outer",
+          "frozen_tangent_m_per_a": {
+            "dR": 1.1482447951705054e-06,
+            "dZ": 5.238518256234053e-07,
+            "norm": 1.262096210613569e-06
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 1.3197628690742036e-06,
+            "dZ": -9.003430516630853e-06,
+            "norm": 9.099644778692554e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 2.219980557384593e-06,
+            "dZ": -1.2310499336231362e-08,
+            "norm": 2.22001468994228e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 7.209945408416015,
+          "self_consistent_2000_m_per_a": {
+            "dR": 1.0387214732827665e-06,
+            "dZ": -4.225113433592899e-06,
+            "norm": 4.350922410913104e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 1.7376094791681647e-06,
+            "dZ": 3.222984712406342e-06,
+            "norm": 3.661545733498361e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 3.447377762744331
+        },
+        {
+          "extremum": "upper",
+          "frozen_tangent_m_per_a": {
+            "dR": 6.625179475405752e-07,
+            "dZ": 5.407199929086115e-07,
+            "norm": 8.551655638205184e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 1.8172171938335423e-08,
+            "dZ": -8.958229289391162e-06,
+            "norm": 8.958247720907177e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 9.18389860248725e-07,
+            "dZ": 3.289072790345896e-08,
+            "norm": 9.189786370692694e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 10.475454227700085,
+          "self_consistent_2000_m_per_a": {
+            "dR": 7.329286438878535e-08,
+            "dZ": -8.498968236914289e-06,
+            "norm": 8.499284260221462e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 7.721808702741835e-07,
+            "dZ": -1.050870090915048e-06,
+            "norm": 1.3040671932063917e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 9.938758785199735
+        },
+        {
+          "extremum": "inner",
+          "frozen_tangent_m_per_a": {
+            "dR": 3.3454016504896877e-07,
+            "dZ": 5.35026754926466e-07,
+            "norm": 6.310077261952788e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -4.956977966192433e-06,
+            "dZ": -9.044590973765425e-06,
+            "norm": 1.031388658266302e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": -4.056760277882044e-06,
+            "dZ": -5.347095647080345e-08,
+            "norm": 4.057112655003248e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 16.345103482094558,
+          "self_consistent_2000_m_per_a": {
+            "dR": -3.98085922560193e-06,
+            "dZ": -8.569342676575486e-06,
+            "norm": 9.448855702286806e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -3.2819712197165314e-06,
+            "dZ": -1.121244530576245e-06,
+            "norm": 3.4682163116499467e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 14.974231392156767
+        },
+        {
+          "extremum": "lower",
+          "frozen_tangent_m_per_a": {
+            "dR": 6.625179475405752e-07,
+            "dZ": 5.407199929086115e-07,
+            "norm": 8.551655638205184e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 1.8172171938335423e-08,
+            "dZ": -8.95822928939105e-06,
+            "norm": 8.958247720907065e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 9.18389860248725e-07,
+            "dZ": 3.289072790357077e-08,
+            "norm": 9.189786370692734e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 10.475454227699956,
+          "self_consistent_2000_m_per_a": {
+            "dR": 7.329286438878535e-08,
+            "dZ": -8.498968236914289e-06,
+            "norm": 8.499284260221462e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 7.721808702741835e-07,
+            "dZ": -1.050870090915048e-06,
+            "norm": 1.3040671932063917e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 9.938758785199735
+        }
+      ],
+      "central_difference_unavailable": {},
+      "whole_plasma_motion_m_per_a": {
+        "500": {
+          "dR": -9.002176883103896e-07,
+          "dZ": -8.991120017294621e-06,
+          "norm": 9.036073873743116e-06
+        },
+        "2000": {
+          "dR": -6.988880058853981e-07,
+          "dZ": -7.448098145999241e-06,
+          "norm": 7.480816161169033e-06
+        }
+      },
+      "solves": {
+        "500": {
+          "plus": {
+            "current_a": -137656.90625,
+            "delta_a": 500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3696009684354067,
+            "converged": true,
+            "terminal_residual": 3.092296964196497e-14,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.40390159027926,
+                0.008329059187749767
+              ],
+              [
+                0.8477907078651242,
+                0.9938070619544491
+              ],
+              [
+                0.265801649947907,
+                0.01447160216211649
+              ],
+              [
+                0.8142227316090086,
+                -0.9399871075009439
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9066810287304304,
+                0.025596376509773165
+              ],
+              "x_point_m": [
+                0.593202241905297,
+                1.227552295470267
+              ],
+              "boundary_flux_wb": -0.11960976061752003
+            }
+          },
+          "minus": {
+            "current_a": -138656.90625,
+            "delta_a": -500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.34149844385683537,
+            "converged": true,
+            "terminal_residual": 5.4660169369675636e-14,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.4025818274101858,
+                0.01733248970438062
+              ],
+              [
+                0.8477725356931859,
+                1.0027652912438403
+              ],
+              [
+                0.27075862791409944,
+                0.023516193135881915
+              ],
+              [
+                0.8142045594370703,
+                -0.9310288782115529
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9066628565584921,
+                0.034554605799164285
+              ],
+              "x_point_m": [
+                0.5942657461901508,
+                1.241105460107794
+              ],
+              "boundary_flux_wb": -0.1154700251719494
+            }
+          }
+        },
+        "2000": {
+          "plus": {
+            "current_a": -136156.90625,
+            "delta_a": 2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3425488146021962,
+            "converged": true,
+            "terminal_residual": 6.042884895700689e-09,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.405663620957917,
+                0.0017217239131636641
+              ],
+              [
+                0.8479744385602275,
+                0.9872545373790836
+              ],
+              [
+                0.26092088219062015,
+                0.00783116493995323
+              ],
+              [
+                0.8144064623041118,
+                -0.9465396320763094
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9068647594255337,
+                0.019043851934407698
+              ],
+              "x_point_m": [
+                0.5904056018540056,
+                1.2172899410071043
+              ],
+              "boundary_flux_wb": -0.12365655714606906
+            }
+          },
+          "minus": {
+            "current_a": -140156.90625,
+            "delta_a": -2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.46095133665949106,
+            "converged": false,
+            "terminal_residual": 0.0009761232123883591,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.401508735064786,
+                0.018622177647535258
+              ],
+              [
+                0.8476812671026723,
+                1.0212504103267408
+              ],
+              [
+                0.27684431909302787,
+                0.04210853564625517
+              ],
+              [
+                0.8141132908465567,
+                -0.9125437591286523
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9065715879679785,
+                0.053039724882064904
+              ],
+              "x_point_m": [
+                0.599577389438569,
+                1.2491459542811352
+              ],
+              "boundary_flux_wb": -0.11006801513259576
+            }
+          }
+        }
+      },
+      "solves_absent": {
+        "500": [],
+        "2000": []
+      }
+    },
+    {
+      "circuit": 10,
+      "family": "p5_lower",
+      "label": "circuit_10_p5_lower",
+      "central_difference_table": [
+        {
+          "extremum": "outer",
+          "frozen_tangent_m_per_a": {
+            "dR": 1.2393636830398957e-06,
+            "dZ": -6.075139380622673e-07,
+            "norm": 1.3802519783641463e-06
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -8.632655928320077e-08,
+            "dZ": 2.625772662131407e-06,
+            "norm": 2.6271913421055447e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -5.460692013547208e-07,
+            "dZ": 8.398318033028603e-09,
+            "norm": 5.461337788618888e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 1.9034142919463533,
+          "self_consistent_2000_m_per_a": {
+            "dR": -3.99921884566834e-08,
+            "dZ": 2.58074401812255e-06,
+            "norm": 2.5810538665849032e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 1.5751132959548332e-06,
+            "dZ": -3.8014708308498174e-07,
+            "norm": 1.620337526527025e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 1.8699874421798903
+        },
+        {
+          "extremum": "upper",
+          "frozen_tangent_m_per_a": {
+            "dR": 6.405769258305271e-07,
+            "dZ": -5.867194622410921e-07,
+            "norm": 8.686647945433065e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 3.7130684181330143e-07,
+            "dZ": 2.609880115111096e-06,
+            "norm": 2.6361606525456064e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -8.84358002582186e-08,
+            "dZ": -7.494228987282288e-09,
+            "norm": 8.875277029718768e-08
+          },
+          "ratio_500_self_consistent_over_frozen": 3.034727168759667,
+          "self_consistent_2000_m_per_a": {
+            "dR": 3.8296089874398367e-07,
+            "dZ": 2.5660558379992648e-06,
+            "norm": 2.594475209690181e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 1.9980663831555e-06,
+            "dZ": -3.948352632082669e-07,
+            "norm": 2.0367042388547344e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 2.986739218612175
+        },
+        {
+          "extremum": "inner",
+          "frozen_tangent_m_per_a": {
+            "dR": 8.002903525761163e-08,
+            "dZ": -5.964497937201337e-07,
+            "norm": 6.01794817951313e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 1.182683443942678e-06,
+            "dZ": 2.6239644840399153e-06,
+            "norm": 2.878181672875945e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 7.229408018711581e-07,
+            "dZ": 6.5901399415368196e-09,
+            "norm": 7.229708382463031e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 4.782662773126103,
+          "self_consistent_2000_m_per_a": {
+            "dR": 1.1199371477395858e-06,
+            "dZ": 2.5788487203123776e-06,
+            "norm": 2.8115333782731205e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 2.7350426321511023e-06,
+            "dZ": -3.8204238089515406e-07,
+            "norm": 2.761596382617139e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 4.671913573208239
+        },
+        {
+          "extremum": "lower",
+          "frozen_tangent_m_per_a": {
+            "dR": 6.405769258305271e-07,
+            "dZ": -5.867194622410921e-07,
+            "norm": 8.686647945433065e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 3.7130684181330143e-07,
+            "dZ": 2.609880115111096e-06,
+            "norm": 2.6361606525456064e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -8.84358002582186e-08,
+            "dZ": -7.494228987282288e-09,
+            "norm": 8.875277029718768e-08
+          },
+          "ratio_500_self_consistent_over_frozen": 3.034727168759667,
+          "self_consistent_2000_m_per_a": {
+            "dR": -7.923327795672952e-06,
+            "dZ": 4.117915828395935e-06,
+            "norm": 8.929521494875153e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -6.308222311261435e-06,
+            "dZ": 1.1570247271884031e-06,
+            "norm": 6.413452654196642e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 10.279594097709204
+        }
+      ],
+      "central_difference_unavailable": {},
+      "whole_plasma_motion_m_per_a": {
+        "500": {
+          "dR": 4.5974264207152004e-07,
+          "dZ": 2.6173743440983785e-06,
+          "norm": 2.6574445909714315e-06
+        },
+        "2000": {
+          "dR": -1.6151054844115165e-06,
+          "dZ": 2.9608911012075317e-06,
+          "norm": 3.372749892741249e-06
+        }
+      },
+      "solves": {
+        "500": {
+          "plus": {
+            "current_a": -137675.46875,
+            "delta_a": 500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.33230525720864534,
+            "converged": true,
+            "terminal_residual": 4.251194636747481e-09,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.4032137415746577,
+                0.01331841914632505
+              ],
+              [
+                0.8479401202728608,
+                0.9987673457757401
+              ],
+              [
+                0.26856405667325267,
+                0.01947724392925115
+              ],
+              [
+                0.8143721440167452,
+                -0.935026823679653
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.906830441138167,
+                0.030556660331064207
+              ],
+              "x_point_m": [
+                0.5944666242269089,
+                1.2331744205371307
+              ],
+              "boundary_flux_wb": -0.11748412058902324
+            }
+          },
+          "minus": {
+            "current_a": -138675.46875,
+            "delta_a": -500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.30477431509643793,
+            "converged": true,
+            "terminal_residual": 8.471592413134016e-09,
+            "trips": 1,
+            "turning_points_m": [
+              [
+                1.403300068133941,
+                0.010692646484193644
+              ],
+              [
+                0.8475688134310475,
+                0.996157465660629
+              ],
+              [
+                0.26738137322931,
+                0.016853279445211235
+              ],
+              [
+                0.8140008371749319,
+                -0.937636703794764
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9064591342963537,
+                0.027946780215953128
+              ],
+              "x_point_m": [
+                0.5942386594619711,
+                1.2310079417388715
+              ],
+              "boundary_flux_wb": -0.11811851811639484
+            }
+          }
+        },
+        "2000": {
+          "plus": {
+            "current_a": -136175.46875,
+            "delta_a": 2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3584533454850316,
+            "converged": true,
+            "terminal_residual": 4.117449584366115e-09,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.4030905389423658,
+                0.017971469023821872
+              ],
+              [
+                0.8484416593133679,
+                1.0033986998233724
+              ],
+              [
+                0.2704679872875706,
+                0.024132941543429973
+              ],
+              [
+                0.8152165045356997,
+                -0.9268152311043928
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9073319801786741,
+                0.03518801437869649
+              ],
+              "x_point_m": [
+                0.5946463038439662,
+                1.2371443938730073
+              ],
+              "boundary_flux_wb": -0.11641147550652306
+            }
+          },
+          "minus": {
+            "current_a": -140175.46875,
+            "delta_a": -2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3333473736420274,
+            "converged": true,
+            "terminal_residual": 9.89811800708439e-09,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.4032505076961925,
+                0.007648492951331673
+              ],
+              [
+                0.846909815718392,
+                0.9931344764713753
+              ],
+              [
+                0.26598823869661226,
+                0.013817546662180462
+              ],
+              [
+                0.8469098157183915,
+                -0.9432868944179765
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9058001365836982,
+                0.02492379102669938
+              ],
+              "x_point_m": [
+                0.5939009604576592,
+                1.2289116170817695
+              ],
+              "boundary_flux_wb": -0.11877033885929211
+            }
+          }
+        }
+      },
+      "solves_absent": {
+        "500": [],
+        "2000": []
+      }
+    },
+    {
+      "circuit": 11,
+      "family": "p6_upper",
+      "label": "circuit_11_p6_upper",
+      "central_difference_table": [
+        {
+          "extremum": "outer",
+          "frozen_tangent_m_per_a": {
+            "dR": 4.876315327806413e-07,
+            "dZ": 6.131422054399087e-07,
+            "norm": 7.834078604748058e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 5.162886341676387e-07,
+            "dZ": -1.1697556081096396e-05,
+            "norm": 1.1708944112265885e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": 2.030710985891637e-06,
+            "dZ": -2.496193822225506e-09,
+            "norm": 2.030712520078749e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 14.946166234749494,
+          "self_consistent_2000_m_per_a": {
+            "dR": -5.321688506365607e-09,
+            "dZ": -1.816139866625023e-08,
+            "norm": 1.8925030252902093e-08
+          },
+          "differential_2000_m_per_a": {
+            "dR": -9.795881339174154e-07,
+            "dZ": 6.65317794841043e-06,
+            "norm": 6.724906670380387e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 0.024157314736964804
+        },
+        {
+          "extremum": "upper",
+          "frozen_tangent_m_per_a": {
+            "dR": 4.0420606017499414e-07,
+            "dZ": 6.160393786858176e-07,
+            "norm": 7.368086964564134e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -4.499671950675133e-07,
+            "dZ": -1.1664000256362162e-05,
+            "norm": 1.1672676319381666e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": 1.0644551566564854e-06,
+            "dZ": 3.105963091200789e-08,
+            "norm": 1.0649082031823086e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 15.842207584573716,
+          "self_consistent_2000_m_per_a": {
+            "dR": -3.4710601782514397e-07,
+            "dZ": -8.650179379920215e-06,
+            "norm": 8.657140745789415e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -1.3213724632361938e-06,
+            "dZ": -1.9788400328435347e-06,
+            "norm": 2.3794606662399544e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 11.749509455337348
+        },
+        {
+          "extremum": "inner",
+          "frozen_tangent_m_per_a": {
+            "dR": 5.459630549070615e-07,
+            "dZ": 6.185000828850748e-07,
+            "norm": 8.249957635359684e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -5.674043650928606e-06,
+            "dZ": -1.1754682955276072e-05,
+            "norm": 1.3052484159411994e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": -4.159621299204608e-06,
+            "dZ": -5.962306800190208e-08,
+            "norm": 4.160048589023281e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 15.821274164449607,
+          "self_consistent_2000_m_per_a": {
+            "dR": -3.7953945582279434e-06,
+            "dZ": -8.710036871310346e-06,
+            "norm": 9.501040056341832e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": -4.7696610036389935e-06,
+            "dZ": -2.0386975242336663e-06,
+            "norm": 5.187094917673188e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 11.516471327828343
+        },
+        {
+          "extremum": "lower",
+          "frozen_tangent_m_per_a": {
+            "dR": 4.0420606017499414e-07,
+            "dZ": 6.160393786858176e-07,
+            "norm": 7.368086964564134e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -4.499671950675133e-07,
+            "dZ": -1.166400025636205e-05,
+            "norm": 1.1672676319381554e-05
+          },
+          "differential_500_m_per_a": {
+            "dR": 1.0644551566564854e-06,
+            "dZ": 3.1059630912119696e-08,
+            "norm": 1.0649082031823117e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 15.842207584573565,
+          "self_consistent_2000_m_per_a": {
+            "dR": 8.044888046203652e-06,
+            "dZ": -9.30697973840991e-06,
+            "norm": 1.2302036234994717e-05
+          },
+          "differential_2000_m_per_a": {
+            "dR": 7.070621600792603e-06,
+            "dZ": -2.63564039133323e-06,
+            "norm": 7.5458790140063955e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 16.696377627136837
+        }
+      ],
+      "central_difference_unavailable": {},
+      "whole_plasma_motion_m_per_a": {
+        "500": {
+          "dR": -1.5144223517239986e-06,
+          "dZ": -1.169505988727417e-05,
+          "norm": 1.1792705407425838e-05
+        },
+        "2000": {
+          "dR": 9.742664454110497e-07,
+          "dZ": -6.67133934707668e-06,
+          "norm": 6.7421038104220395e-06
+        }
+      },
+      "solves": {
+        "500": {
+          "plus": {
+            "current_a": -54.8970947265625,
+            "delta_a": 500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.34024128410965204,
+            "converged": true,
+            "terminal_residual": 6.446882620975814e-14,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.4034422535047206,
+                0.007505934123790102
+              ],
+              [
+                0.8475639298379234,
+                0.9929758606643699
+              ],
+              [
+                0.2656552311795721,
+                0.013641795796965887
+              ],
+              [
+                0.8139959535818078,
+                -0.9408183087910231
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9064542507032296,
+                0.02476517521969406
+              ],
+              "x_point_m": [
+                0.5932194976698234,
+                1.2272940077655539
+              ],
+              "boundary_flux_wb": -0.11969420085874838
+            }
+          },
+          "minus": {
+            "current_a": -1054.8970947265625,
+            "delta_a": -500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.3628990165889263,
+            "converged": true,
+            "terminal_residual": 6.333907577979953e-09,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.402925964870553,
+                0.019203490204886497
+              ],
+              [
+                0.8480138970329909,
+                1.004639860920732
+              ],
+              [
+                0.27132927483050073,
+                0.02539647875224196
+              ],
+              [
+                0.8144459207768753,
+                -0.9291543085346611
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9069042178982971,
+                0.03642917547605608
+              ],
+              "x_point_m": [
+                0.5940080333311974,
+                1.2430630787124322
+              ],
+              "boundary_flux_wb": -0.11503913889802214
+            }
+          }
+        },
+        "2000": {
+          "plus": {
+            "current_a": 1445.1029052734375,
+            "delta_a": 2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.380819302983582,
+            "converged": true,
+            "terminal_residual": 1.680327059603315e-14,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.403874288497496,
+                0.015974391835974155
+              ],
+              [
+                0.8470902970070494,
+                0.9841850772806501
+              ],
+              [
+                0.2605010845153587,
+                0.004769765205189605
+              ],
+              [
+                0.847090297007049,
+                -0.9522362936087018
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9059806178723556,
+                0.015974391835974155
+              ],
+              "x_point_m": [
+                0.5905867375305824,
+                1.2166116687966408
+              ],
+              "boundary_flux_wb": -0.12383391281104142
+            }
+          },
+          "minus": {
+            "current_a": -2554.8970947265625,
+            "delta_a": -2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.44927299302071333,
+            "converged": false,
+            "terminal_residual": 0.0007579453882932983,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.4038955752515214,
+                0.016047037430639156
+              ],
+              [
+                0.84847872107835,
+                1.018785794800331
+              ],
+              [
+                0.27568266274827047,
+                0.03960991269043099
+              ],
+              [
+                0.8149107448222344,
+                -0.9150083746550621
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9073690419436562,
+                0.050575109355654985
+              ],
+              "x_point_m": [
+                0.5979005011402981,
+                1.2485328607922184
+              ],
+              "boundary_flux_wb": -0.11105322927698368
+            }
+          }
+        }
+      },
+      "solves_absent": {
+        "500": [],
+        "2000": []
+      }
+    },
+    {
+      "circuit": 12,
+      "family": "p6_lower",
+      "label": "circuit_12_p6_lower",
+      "central_difference_table": [
+        {
+          "extremum": "outer",
+          "frozen_tangent_m_per_a": {
+            "dR": 6.987750106923762e-07,
+            "dZ": -6.082206396646611e-07,
+            "norm": 9.264010265982115e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": -1.4172272794696905e-06,
+            "dZ": 5.973099783453114e-06,
+            "norm": 6.138929400535625e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -1.8785702459653553e-06,
+            "dZ": 2.587317662938374e-08,
+            "norm": 1.8787484105902074e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 6.626643563941272,
+          "self_consistent_2000_m_per_a": {
+            "dR": -1.2734331029692903e-06,
+            "dZ": 5.252339730035728e-06,
+            "norm": 5.404507795114166e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 2.548690924066392e-06,
+            "dZ": -3.7716522230943957e-07,
+            "norm": 2.576446978173261e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 5.833875006550645
+        },
+        {
+          "extremum": "upper",
+          "frozen_tangent_m_per_a": {
+            "dR": 3.859230703762151e-07,
+            "dZ": -5.973560171085301e-07,
+            "norm": 7.111756656581914e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 7.984081395873144e-08,
+            "dZ": 5.921110079444402e-06,
+            "norm": 5.921648345559848e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -3.8150215253693333e-07,
+            "dZ": -2.6116527379327585e-08,
+            "norm": 3.823950383996486e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 8.326562102036178,
+          "self_consistent_2000_m_per_a": {
+            "dR": 6.85666115839978e-08,
+            "dZ": 5.205735191307348e-06,
+            "norm": 5.206186729482516e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 3.89069063861968e-06,
+            "dZ": -4.2376976103782e-07,
+            "norm": 3.913700864375414e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 7.320535531350335
+        },
+        {
+          "extremum": "inner",
+          "frozen_tangent_m_per_a": {
+            "dR": 3.091307397951049e-08,
+            "dZ": -6.035184967139069e-07,
+            "norm": 6.043096838696834e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 3.1029175175348868e-06,
+            "dZ": 5.973586484952893e-06,
+            "norm": 6.7314064365358835e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": 2.641574551039222e-06,
+            "dZ": 2.635987812916301e-08,
+            "norm": 2.6417060684097785e-06
+          },
+          "ratio_500_self_consistent_over_frozen": 11.139001436203165,
+          "self_consistent_2000_m_per_a": {
+            "dR": 2.603940638042562e-06,
+            "dZ": 5.249745756891209e-06,
+            "norm": 5.860062914205509e-06
+          },
+          "differential_2000_m_per_a": {
+            "dR": 6.426064665078245e-06,
+            "dZ": -3.7975919545395847e-07,
+            "norm": 6.4372761418397314e-06
+          },
+          "ratio_2000_self_consistent_over_frozen": 9.697118994818565
+        },
+        {
+          "extremum": "lower",
+          "frozen_tangent_m_per_a": {
+            "dR": 3.859230703762151e-07,
+            "dZ": -5.973560171085301e-07,
+            "norm": 7.111756656581914e-07
+          },
+          "self_consistent_500_m_per_a": {
+            "dR": 7.984081395873144e-08,
+            "dZ": 5.921110079444513e-06,
+            "norm": 5.92164834555996e-06
+          },
+          "differential_500_m_per_a": {
+            "dR": -3.8150215253693333e-07,
+            "dZ": -2.6116527379216624e-08,
+            "norm": 3.82395038399641e-07
+          },
+          "ratio_500_self_consistent_over_frozen": 8.326562102036334,
+          "self_consistent_2000_m_per_a": {
+            "dR": -1.66875702548e-05,
+            "dZ": 6.810199131146388e-06,
+            "norm": 1.8023701429361083e-05
+          },
+          "differential_2000_m_per_a": {
+            "dR": -1.2865446227764317e-05,
+            "dZ": 1.1806941788012206e-06,
+            "norm": 1.291951026097159e-05
+          },
+          "ratio_2000_self_consistent_over_frozen": 25.343529453697197
+        }
+      ],
+      "central_difference_unavailable": {},
+      "whole_plasma_motion_m_per_a": {
+        "500": {
+          "dR": 4.6134296649566477e-07,
+          "dZ": 5.94722660682373e-06,
+          "norm": 5.965093599068427e-06
+        },
+        "2000": {
+          "dR": -3.822124027035682e-06,
+          "dZ": 5.629504952345168e-06,
+          "norm": 6.8044072546050795e-06
+        }
+      },
+      "solves": {
+        "500": {
+          "plus": {
+            "current_a": 1426.8552856445312,
+            "delta_a": 500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.34469250310212374,
+            "converged": true,
+            "terminal_residual": 3.5017139895883694e-09,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.4025281163159515,
+                0.015161934259630905
+              ],
+              [
+                0.8478009703033361,
+                1.0005918830692277
+              ],
+              [
+                0.2696090504341824,
+                0.021322336310377242
+              ],
+              [
+                0.8142329940472205,
+                -0.9332022863861652
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9066912911686423,
+                0.03238119762455193
+              ],
+              "x_point_m": [
+                0.5945405777321351,
+                1.2363378841275168
+              ],
+              "boundary_flux_wb": -0.11662880891961291
+            }
+          },
+          "minus": {
+            "current_a": 426.85528564453125,
+            "delta_a": -500.0,
+            "step_a": 500.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.33537399396300316,
+            "converged": true,
+            "terminal_residual": 6.8825661518417286e-09,
+            "trips": 2,
+            "turning_points_m": [
+              [
+                1.4039453435954212,
+                0.009188834476177792
+              ],
+              [
+                0.8477211294893774,
+                0.9946707729897833
+              ],
+              [
+                0.2665061329166475,
+                0.015348749825424349
+              ],
+              [
+                0.8141531532332618,
+                -0.9391233964656097
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9066114503546836,
+                0.026460087545107404
+              ],
+              "x_point_m": [
+                0.5939841988121641,
+                1.228683600561949
+              ],
+              "boundary_flux_wb": -0.11882960675897729
+            }
+          }
+        },
+        "2000": {
+          "plus": {
+            "current_a": 2926.8552856445312,
+            "delta_a": 2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.4463444398716092,
+            "converged": false,
+            "terminal_residual": 0.0001879679190396702,
+            "trips": 4,
+            "turning_points_m": [
+              [
+                1.4007319617199725,
+                0.022986843838295853
+              ],
+              [
+                0.8478838072173567,
+                1.0083515396290967
+              ],
+              [
+                0.273350460330989,
+                0.029145500606983156
+              ],
+              [
+                0.7808592597518202,
+                -0.921651975500899
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9067741280826629,
+                0.04014085418442079
+              ],
+              "x_point_m": [
+                0.5925299823499144,
+                1.2498194574497012
+              ],
+              "boundary_flux_wb": -0.11398718539332797
+            }
+          },
+          "minus": {
+            "current_a": -1073.1447143554688,
+            "delta_a": -2000.0,
+            "step_a": 2000.0,
+            "stage": "complete",
+            "error": null,
+            "wall_s": 0.38979149516671896,
+            "converged": true,
+            "terminal_residual": 5.876143825221354e-14,
+            "trips": 3,
+            "turning_points_m": [
+              [
+                1.4058256941318497,
+                0.0019774849181529407
+              ],
+              [
+                0.8476095407710207,
+                0.9875285988638673
+              ],
+              [
+                0.2629346977788187,
+                0.00814651757941832
+              ],
+              [
+                0.8476095407710202,
+                -0.9488927720254845
+              ]
+            ],
+            "topology": {
+              "class": "diverted",
+              "diverted": true,
+              "axis_m": [
+                0.9064998616363269,
+                0.01931791341919145
+              ],
+              "x_point_m": [
+                0.591847908912852,
+                1.2236644332233535
+              ],
+              "boundary_flux_wb": -0.12122366860831471
+            }
+          }
+        }
+      },
+      "solves_absent": {
+        "500": [],
+        "2000": []
+      }
+    }
+  ],
+  "manifest_table": {
+    "compared_pairs": 52,
+    "largest_ratio": {
+      "circuit": "circuit_00_sol",
+      "family": "sol",
+      "extremum": "outer",
+      "ratio_500_self_consistent_over_frozen": 90.16154468293912,
+      "frozen_tangent_norm_m_per_a": 2.586041196144738e-07,
+      "self_consistent_500_norm_m_per_a": 2.3316146885812515e-05
+    },
+    "smallest_ratio": {
+      "circuit": "circuit_10_p5_lower",
+      "family": "p5_lower",
+      "extremum": "outer",
+      "ratio_500_self_consistent_over_frozen": 1.9034142919463533,
+      "frozen_tangent_norm_m_per_a": 1.3802519783641463e-06,
+      "self_consistent_500_norm_m_per_a": 2.6271913421055447e-06
+    }
+  },
+  "convergence": {
+    "perturbed_solves": 52,
+    "lost_axes": [
+      {
+        "circuit": 0,
+        "delta_a": -2000.0,
+        "stage": "forward",
+        "error": "NoQualifiedAxisError"
+      }
+    ],
+    "non_converged": [
+      {
+        "circuit": 0,
+        "delta_a": -500.0,
+        "terminal_residual": 0.0025155967866578874,
+        "topology": "diverted"
+      },
+      {
+        "circuit": 5,
+        "delta_a": -2000.0,
+        "terminal_residual": 0.0037220724982480417,
+        "topology": "diverted"
+      },
+      {
+        "circuit": 6,
+        "delta_a": 2000.0,
+        "terminal_residual": 0.0003335605904966932,
+        "topology": "diverted"
+      },
+      {
+        "circuit": 7,
+        "delta_a": -2000.0,
+        "terminal_residual": 0.002811493007951429,
+        "topology": "diverted"
+      },
+      {
+        "circuit": 8,
+        "delta_a": 2000.0,
+        "terminal_residual": 0.00012273131378494966,
+        "topology": "diverted"
+      },
+      {
+        "circuit": 9,
+        "delta_a": -2000.0,
+        "terminal_residual": 0.0009761232123883591,
+        "topology": "diverted"
+      },
+      {
+        "circuit": 11,
+        "delta_a": -2000.0,
+        "terminal_residual": 0.0007579453882932983,
+        "topology": "diverted"
+      },
+      {
+        "circuit": 12,
+        "delta_a": 2000.0,
+        "terminal_residual": 0.0001879679190396702,
+        "topology": "diverted"
+      }
+    ]
+  },
+  "runtime": {
+    "wall_s": 4770.771584216505,
+    "states": "response-comparison-states.npz",
+    "figure": "response-comparison.png",
+    "figure_step_a": 2000.0,
+    "figure_circuit": 0
+  }
+}

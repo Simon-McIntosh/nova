@@ -358,13 +358,22 @@ def _frozen_image(operator, base, boundary, values) -> np.ndarray:
     )
 
 
-def discriminate() -> dict[str, Any]:
-    """Separate sampled-region and quadratic-density effects on the weak row."""
+def discriminate(
+    case_name: str = CASES[0],
+    requested_cells: int = CELL_REQUESTS[0],
+    built: tuple | None = None,
+) -> dict[str, Any]:
+    """Separate sampled-region and quadratic-density effects on one row.
+
+    The receipt is the row's other error term: the retained fan region carrying
+    the production quadratic density fit, measured against the fan's own
+    pointwise profile, alongside an exact-density arm that must reproduce the
+    fan identically. ``built`` carries a ``_build`` result forward so a row
+    report does not rebuild the machine and support.
+    """
     _require_boundary_route()
-    case_name = CASES[0]
-    requested_cells = CELL_REQUESTS[0]
-    operator, support, field, bank_capacity, flux_span = _build(
-        case_name, requested_cells
+    operator, support, field, bank_capacity, flux_span = (
+        _build(case_name, requested_cells) if built is None else built
     )
     boundary = np.asarray(support.included) & np.asarray(support.boundary)
     production = jax.jit(
@@ -480,7 +489,7 @@ def discriminate() -> dict[str, Any]:
             "plan_reference_fixed_evaluations_per_cut_cell": (
                 PLAN_FAN_POINTS_PER_CUT_CELL
             ),
-            "actual_weak_support_capacity": capacity,
+            "actual_support_capacity": capacity,
             "actual_fixed_evaluations_per_cut_cell": fan_points,
             "census": census,
             "total_live_evaluations": int(np.sum(live_points)),
@@ -498,14 +507,42 @@ def discriminate() -> dict[str, Any]:
             "jax_enable_x64": bool(jax.config.jax_enable_x64),
         },
     }
-    _write_json(REPORT_ROOT / "density-region-discriminator.json", payload)
+    suffix = (
+        ""
+        if (case_name, requested_cells)
+        == (
+            CASES[0],
+            CELL_REQUESTS[0],
+        )
+        else f"-{_case_key(case_name, requested_cells)}"
+    )
+    _write_json(REPORT_ROOT / f"density-region-discriminator{suffix}.json", payload)
     return payload
 
 
-def measure(case_name: str, requested_cells: int) -> dict[str, Any]:
+def row_report(case_name: str, requested_cells: int) -> dict[str, Any]:
+    """Measure one row's route error and its other error term from one build."""
+    built = _build(case_name, requested_cells)
+    row = measure(case_name, requested_cells, built)
+    discriminator = discriminate(case_name, requested_cells, built)
+    return {
+        "row": row,
+        "discriminator": discriminator,
+        "budget_one_tenth": {
+            name: 0.1 * value
+            for name, value in discriminator["arms"][1][
+                "moment_relative_l2_against_fan"
+            ].items()
+        },
+    }
+
+
+def measure(
+    case_name: str, requested_cells: int, built: tuple | None = None
+) -> dict[str, Any]:
     _require_boundary_route()
-    operator, support, field, bank_capacity, flux_span = _build(
-        case_name, requested_cells
+    operator, support, field, bank_capacity, flux_span = (
+        _build(case_name, requested_cells) if built is None else built
     )
     boundary = np.asarray(support.included) & np.asarray(support.boundary)
     reduced = jax.jit(
@@ -732,6 +769,11 @@ def main() -> None:
     parser.add_argument("--case", choices=CASES)
     parser.add_argument("--cells", type=int, choices=CELL_REQUESTS)
     parser.add_argument("--discriminate", action="store_true")
+    parser.add_argument(
+        "--row-report",
+        action="store_true",
+        help="measure the requested row and its density/region discriminator once",
+    )
     parser.add_argument("--default-route-snapshot", type=Path)
     parser.add_argument("--snapshot-revision")
     parser.add_argument(
@@ -758,8 +800,43 @@ def main() -> None:
         )
         print("DEFAULT_ROUTE_IDENTITY", comparison, flush=True)
         return
+    if arguments.row_report:
+        if arguments.case is None or arguments.cells is None:
+            parser.error("--row-report requires --case and --cells")
+        report = row_report(arguments.case, arguments.cells)
+        row = report["row"]
+        print(
+            "ROW",
+            _case_key(arguments.case, arguments.cells),
+            row["moment_relative_l2_boundary_minus_fan"],
+            flush=True,
+        )
+        for arm in report["discriminator"]["arms"]:
+            print(
+                "ARM",
+                arm["name"],
+                arm["moment_relative_l2_against_fan"],
+                arm["frozen_image_delta_sup_over_span"],
+                flush=True,
+            )
+        print("BUDGET", report["budget_one_tenth"], flush=True)
+        print(
+            "SHAPE",
+            {
+                "cut_cells": row["cut_cells"],
+                "realised_cells": row["realised_cells"],
+                "per_edge_gauss_order": row["per_edge_gauss_order"],
+                "fixed_edges_per_cut_cell": row["fixed_edges_per_cut_cell"],
+                "live_evaluations_per_cut_cell": row["live_evaluations_per_cut_cell"],
+                "evaluation_points_per_cut_cell": row["evaluation_points_per_cut_cell"],
+            },
+            flush=True,
+        )
+        return
     if arguments.discriminate:
-        payload = discriminate()
+        payload = discriminate(
+            arguments.case or CASES[0], arguments.cells or CELL_REQUESTS[0]
+        )
         for row in payload["arms"]:
             print(
                 "ARM",

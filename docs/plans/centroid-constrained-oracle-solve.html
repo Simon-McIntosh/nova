@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -92,6 +92,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s19c-cco-step-control-reading-20260917" data-who="" data-when="">
     <div class="r-comment-body">cco-bounded-row-step-control merged (6efe441d) and promoted passed, review 84/100. Coordinator reading: the positional clause holds decisively (74 times inside the tenth-pitch band with 0.96 percent of the field bound) and the row-scaled residual 1.34e-3 misses the fixed-point clause; but the recorded 0.529 Wb boundary-flux offset that the worker read as the field moving the centroid while leaving the flux level behind is gauge-confounded: the compensator column is axis-anchored at 6.2 m while the authored zero is a boundary-anchored hardcoded 0.0, and a uniform vertical field adds pi B (R squared minus R0 squared), which at the contact radius 7.72 m is of the order of the recorded offset. The fixed-point verdict is therefore undecided, not negative. Follow-on cco-fixed-point-clause-in-one-gauge (r-20260917T095016652314) re-reads the banked receipt in one gauge. The negative control at 20 mm does not discriminate because the unconstrained map relaxes the seed to its own fixed point inside the band; a larger displacement or a target other than the fixed point is needed before it is cited. The two protocol failures at head share ids with base (eliminated-constraint outer trace, forward.py:2589) and are pre-existing.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s19c-gauge-reread-20260917" data-who="" data-when="">
+    <div class="r-comment-body">cco-fixed-point-clause-in-one-gauge merged (e08158c4), promotion pending its review. Read in one gauge, the positive control's boundary-flux offset is -0.827 Wb (1.6 percent of the axis-to-boundary span), of which the compensator column itself contributes -0.160 Wb, leaving -0.667 Wb; the confounded 0.529 figure was low by a factor 1.56. The fixed-point clause fails, and it fails on the row scaled residual alone (1.34e-3 against 1e-12, nine decades) independent of any gauge question; the positional clause holds as before. The probe's first derivation was dead code (the analytic-level callable was never passed) and was repaired in scope with the two instruments cross-checked to every digit. FOR THE LEAD: the worker and I both read the clause threshold as the thing to review next, not another re-read: a compensating uniform field that lands the centroid 74 times inside its band while leaving the flux level 1.6 percent of span away is telling us the displaced seed does not relax to the authored fixed point under a two-parameter uniform increment, so either the clause tolerates a flux-level offset the positional clause does not care about, or the compensating family needs a term that moves the level without moving the centroid. The negative control at 20 mm still does not discriminate (the unconstrained map relaxes the seed to its own fixed point inside the band).</div>
 </div>
 </section>
 </main>

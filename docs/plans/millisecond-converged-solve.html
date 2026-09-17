@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="77">
+<meta name="plan-version" content="78">
 <meta name="plan-impl" content="0.88">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd,273ff747,7aef0963">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -376,6 +376,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260917T145020377827-review-of-msc-marker-census-rebaseline" data-who="reckon-ship" data-when="2026-09-17T17:28:15.250Z">
     <div class="r-comment-body"><p>Independent review of msc-marker-census-rebaseline stored at the fence path, total 91, three findings (one false byte-identity claim in three places) recorded on the reviewed run's completion</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260917T183042361304-msc-census-byte-identity-claim" data-who="reckon-ship" data-when="2026-09-17T20:34:51.845Z">
+    <div class="r-comment-body"><p>The census generator measures the dump comparison instead of asserting byte identity (merge after 3de470f4): previous and current dump size and sha256, differing-byte count and first offset when both dumps exist; report.md and the evidence anchor regenerated from the measured dump (size-equal at 219,637,882 bytes, 1094 bytes differing, first at offset 2937, counts 120 and 79 unchanged); tests pin the measured and absent-previous cases. Review 93/100 with two small findings for the record: when no earlier dump is named the sentence prints (None) and asserts the earlier dump was not on disk, an absence the run did not measure; the absent-case test uses a named missing path so the None rendering is unpinned</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s19h-s3-certificate-prerequisite" data-who="reckon-ship s19-handoff" data-when="2026-09-15T10:15:00Z">
     <div class="r-comment-body">Section 3 prerequisite, held by the coordinator rather than by a plan-level wire: the certified millisecond measurement runs only once gs-absolute-accuracy-gates section 3 (the certificate artifact and its pin) is current on the exact cut-cell participation and the joint qualification, because it reports cost for certificate-passing solves. The stage-scoped dependency gs-absolute-accuracy-gates#s3 was authored and withdrawn the same hour: the roadmap's anchor resolver did not recognise that section (reported to reckon), and a plan-level dependency on the whole certificate plan would hold section 2, which never needed it. gs-absolute-accuracy-gates now informs this plan; no section 3 node is dispatched before the certificate lands.</div>

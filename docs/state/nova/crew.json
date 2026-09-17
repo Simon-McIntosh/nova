@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T23:04:32",
+  "updated": "2026-09-17T23:17:11",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -183192,6 +183192,406 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T183042361304-msc-census-byte-identity-claim",
+        "plan": "millisecond-converged-solve",
+        "section": "",
+        "node": "msc-census-byte-identity-claim",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4327,
+                "cached_input_tokens": 651557,
+                "input_tokens": 655886,
+                "output_tokens": 28,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 655914,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "benchmarks/solve_program_size_gate.py's derivation template no longer emits an unconditional byte-identity sentence; it records the previous dump's byte size and sha256 beside the current one and, when both dumps are on disk, the count of differing bytes and the offset of the first difference, and states only that; docs/figures/millisecond-converged-solve/marker-census/report.md is regenerated from the existing dumps on all_debug (--time 00:59:00, JAX_PLATFORMS=cpu, root interpreter with PYTHONPATH set to the worktree, no uv on the node) stating the measured comparison (expected: size-equal at 219,637,882 bytes, 1094 bytes differing, first at offset 2937 in the HLO names table) and the 120 and 79 counts unchanged; the evidence anchor's sentence is corrected to match; tests/test_solve_program_size.py passes in its own all_debug job with zero added failures against base (ids listed); every uv command carries --no-sync and nothing runs uv sync; write files in short pieces and py_compile each before committing",
+          "estimated_hours": null,
+          "goal": "Carry out followup f-msc-census-byte-identity-claim: the census generator measures the dump comparison it states instead of asserting byte identity unconditionally, and the committed report and evidence anchor carry only what was measured",
+          "id": "msc-census-byte-identity-claim",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T18:30:44Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183042361304-msc-census-byte-identity-claim/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/solve_program_size_gate.py",
+            "tests/test_solve_program_size.py",
+            "docs/figures/millisecond-converged-solve/marker-census",
+            "docs/evidence/archive/millisecond-converged-solve-landed.html",
+            "docs/plans/millisecond-converged-solve.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/census-byte-identity"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-msc-byteid-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T18:31:04Z",
+        "completed_at": "2026-09-17T20:34:51.845Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 7384,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 7427,
+        "stalled": true,
+        "time_budget": "40m",
+        "base_sha": "38b7014ee25891b59e66605d1a2f512c5271b6e6",
+        "commits": [
+          "530addc98813a29e265b7125c4436508bf95e887",
+          "25ec878407c86bd75ce0472a83f165ee17b938e0",
+          "6ec0300f8a6cc71ff00aefae6887e5e2316510ad",
+          "3de470f4c22973bfb5a628b413d5c5943a5fc461"
+        ],
+        "changed_lines": {
+          "added": 262,
+          "removed": 7,
+          "files": 6
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug regeneration from the existing dumps; tests/test_solve_program_size.py in its own all_debug job with zero added failures; independent review",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T183042361304-msc-census-byte-identity-claim.json",
+          "log_digest": "sha256:014877d71b84a40bd89c7c62a2f94c9579b6f83d244e1c78b9f7b485be13509c"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183042361304-msc-census-byte-identity-claim/manifest.md",
+        "scope_changed": false,
+        "session_id": "574981e4-d546-4e1f-b4cf-ce539790260d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6641203,
+            "input_tokens_cumulative": 6641203,
+            "output_tokens": 32412,
+            "output_tokens_cumulative": 32412,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T20:34:51.845Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4402,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: as recorded under blocker above.  No job is running; nothing is owed to SLURM.",
+              "elapsed_seconds": 7702,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2614,
+              "log_fresh": false,
+              "manifest_commits": [
+                "4404e68a58c32aaca66c0416ab343c239874e3e4  feat(benchmarks): compare DIII-D gate frames against the committed batch",
+                "6995aa6232d147b43ade2efb149ac96de050570b  fix(benchmarks): solve DIII-D gate frames one program at a time",
+                "02462d3b50a04ff137a91fce6b1968affc6520f9  fix(benchmarks): isolate each DIII-D gate frame in its own process"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0109a67061fdcd7785d3729afd8965871a3c2d074f5646ad28fbabb955448b18",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T044142288419-mulw-diiid-gate-frame-identity/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T044142288419-mulw-diiid-gate-frame-identity/manifest.md; resolve the blocker before resuming the run",
+              "node": "mulw-diiid-gate-frame-identity",
+              "phase": "working",
+              "plan": "multi-unit-limiter-wall",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T044142288419-mulw-diiid-gate-frame-identity",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260917T044142288419-mulw-diiid-gate-frame-identity",
+                "session_id": "333303e8-8d27-4066-863f-7cb393cc2b22",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 3132,
+              "terminal_at": "2026-09-17T17:38:37Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/mulw-diiid-gate-frame-identity"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1450,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 4750,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2012,
+              "log_fresh": false,
+              "manifest_commits": [
+                "f7fefbd7 (nova/equilibrium/separatrix_clip.py and tests/test_equilibrium_separatrix_clip.py: the derived capacity",
+                "its docstring derivation",
+                "and the above-bound refusal test)",
+                "128f5f57 (the receipts document",
+                "the memory receipts",
+                "the poloidal layout panel with its renderer and receipt",
+                "and the landing record in the plan section and the evidence anchor",
+                "in one commit)"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "c0b1ad3a03860608c46c16c87d60afa2ef6d8773987af5fe9f8d5c10edcde637",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T100810663195-ecq-capacity-sizing/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan exact-clip-moment-quadrature --section '\u00a74' --role review --spec-level exact --node review-of-ecq-capacity-sizing --goal 'attach an independent review to run r-20260917T100810663195-ecq-capacity-sizing' --done-when 'the review for r-20260917T100810663195-ecq-capacity-sizing parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T100810663195-ecq-capacity-sizing.json --time-budget 55m --session s19-codex-20260916 --local",
+              "node": "ecq-capacity-sizing",
+              "phase": "working",
+              "plan": "exact-clip-moment-quadrature",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T100810663195-ecq-capacity-sizing",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 2065,
+              "terminal_at": "2026-09-17T17:56:25Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-capacity-sizing"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 480,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: authored-artifact generation is corrupt in this session",
+              "elapsed_seconds": 3780,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 4982,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1d7f4bc3"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "cf0b29d1ca893684cc42e1cb2aed66bcccbc2905d84f4c44fee1ee5f98c0b1a7",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T160409157288-nia-drift-probe-remainder-and-panels/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T160409157288-nia-drift-probe-remainder-and-panels/manifest.md; resolve the blocker before resuming the run",
+              "node": "nia-drift-probe-remainder-and-panels",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T160409157288-nia-drift-probe-remainder-and-panels",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260917T160409157288-nia-drift-probe-remainder-and-panels",
+                "session_id": "adbaa40f-5934-438e-ae7e-db5c5f9da9ce",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 5141,
+              "terminal_at": "2026-09-17T17:05:09Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-drift-probe-remainder-and-panels"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 18,
+            "evidence": 19,
+            "fit": 19,
+            "goal_fidelity": 18,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 93
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 6809279,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1924.187,
+          "generated_tokens": 41589,
+          "generation_seconds": 1833.958,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.7,
+          "machine_seconds": 90.229,
+          "peak_input_tokens": 166776,
+          "tokens_per_second": 22.68,
+          "wall_tokens_per_second": 21.61
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-census-byte-identity-claim",
+          "session_id": "574981e4-d546-4e1f-b4cf-ce539790260d",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T20:34:51.845Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 70.0,
+        "orientation_input_tokens": 2721987.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -183504,6 +183904,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2744
+    "_version": 2745
   }
 }

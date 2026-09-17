@@ -1,15 +1,20 @@
 """Measure standalone identity and batch wall for parallel component labels.
 
-The receipt compares the canonical fixed-point rectangular classifier with the
-standalone hook-and-compress classifier on twelve persisted MAST rows.  It first
-writes the per-row mismatch and settlement table, then measures both kernels in
-one device process at batch 1, 8, 16, and 64.  A speed number is emitted only
-after every identity row is exact.
+The receipt compares the non-routed masked segment-propagation fixed point with
+the standalone hook-and-compress classifier on twelve persisted MAST rows.  The
+production entry point hands a sufficient caller cap to the parallel pass, so it
+is not an independent authority and is deliberately not the expectation here;
+the receipt records the compiled trip schedule of every arm so that the
+independence of the comparison is visible rather than asserted.  It first writes
+the per-row mismatch and settlement table, then measures both kernels in one
+device process at batch 1, 8, 16, and 64.  A speed number is emitted only after
+every identity row is exact and a seeded label defect has been shown detectable.
 """
 
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import os
 from pathlib import Path
@@ -155,7 +160,7 @@ def _write_table(rows: list[dict[str, Any]], output: Path) -> None:
     """Write the human-readable per-row identity table."""
     lines = [
         "| MAST row | confined cells | components | label mismatches | "
-        "trips | settled |",
+        "parallel trips | settled |",
         "|---:|---:|---:|---:|---:|:---:|",
     ]
     lines.extend(
@@ -171,7 +176,7 @@ def _draw(receipt: dict[str, Any], output: Path) -> None:
     """Draw wall per element against batch for both admitted kernels."""
     figure, axis = plt.subplots(figsize=(6.7, 4.3))
     for key, label, colour, marker in (
-        ("canonical", "canonical fixed point", "#455a64", "o"),
+        ("canonical", "non-routed segment propagation", "#455a64", "o"),
         ("parallel", "parallel hook and compress", "#7e57c2", "s"),
     ):
         values = [
@@ -234,9 +239,7 @@ def main() -> None:
     }
 
     for row, mask in zip(ROWS, device_masks):
-        fixed, fixed_steps = canonical.label_connected_components_with_steps(
-            mask, cell_count
-        )
+        fixed = canonical.label_connected_components_fixed_point(mask, cell_count)
         parallel, parallel_steps, settled = (
             label_parallel_connected_components_with_steps(mask)
         )
@@ -248,7 +251,7 @@ def main() -> None:
             "confined_cells": int(np.count_nonzero(foreground)),
             "component_count": int(np.unique(fixed_host[foreground]).size),
             "label_mismatches": int(np.count_nonzero(fixed_host != parallel_host)),
-            "canonical_active_trips": int(fixed_steps),
+            "reference_cap": cell_count,
             "parallel_trips": int(parallel_steps),
             "settled": bool(settled),
         }
@@ -269,11 +272,40 @@ def main() -> None:
     sample = device_masks[0]
 
     def canonical_element(mask):
-        return canonical.label_connected_components(mask, cell_count)
+        return canonical.label_connected_components_fixed_point(mask, cell_count)
 
     parallel_element = label_parallel_connected_components
+
+    control_reference = np.asarray(canonical_element(sample))
+    control_foreground = np.flatnonzero(np.asarray(sample).reshape(-1))
+    if control_foreground.size == 0:
+        raise SystemExit("identity control: the first bank row confines no cell")
+    seeded = int(control_foreground[0])
+    control_corrupted = control_reference.copy()
+    control_corrupted.reshape(-1)[seeded] += 1
+    seeded_mismatches = int(np.count_nonzero(control_corrupted != control_reference))
+    receipt["identity"]["seeded_defect_mismatches"] = seeded_mismatches
+    receipt["identity"]["seeded_defect_vertex"] = seeded
+    _write_json(receipt, args.output)
+    if seeded_mismatches == 0:
+        receipt["verdict"] = "refused-identity-control"
+        _write_json(receipt, args.output)
+        raise SystemExit("identity control: a seeded label defect went undetected")
+    print(
+        "CONTROL",
+        json.dumps(
+            {"seeded_vertices": 1, "detected_mismatches": seeded_mismatches},
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+
+    routed_element = functools.partial(
+        canonical.label_connected_components, n_iter=cell_count
+    )
     receipt["hlo_known_trip_counts"] = {
-        "canonical": _hlo_trip_counts(
+        "routed": _hlo_trip_counts(jax.jit(routed_element).lower(sample).compile()),
+        "reference": _hlo_trip_counts(
             jax.jit(canonical_element).lower(sample).compile()
         ),
         "parallel": _hlo_trip_counts(jax.jit(parallel_element).lower(sample).compile()),
@@ -325,6 +357,10 @@ def main() -> None:
                 "batch_mismatches": sum(
                     item["label_mismatches"] for item in receipt["batches"].values()
                 ),
+                "seeded_defect_mismatches": receipt["identity"][
+                    "seeded_defect_mismatches"
+                ],
+                "hlo_known_trip_counts": receipt["hlo_known_trip_counts"],
             },
             sort_keys=True,
         ),

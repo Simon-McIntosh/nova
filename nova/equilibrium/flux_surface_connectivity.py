@@ -90,6 +90,7 @@ __all__ = [
     "label_saddle_aware_hex_connected_components_with_steps",
     "label_connected_components",
     "label_connected_components_with_steps",
+    "label_connected_components_fixed_point",
     "census_stationary_receipt",
     "polish_census_stationary_points",
     "polish_stationary_points",
@@ -150,6 +151,16 @@ def _fill_label_segments(
         _compose_segment_minimum, elements, axis=axis, reverse=True
     )[0]
     return jnp.where(confined, jnp.minimum(forward, backward), 0)
+
+
+def _segment_propagation(confined: jnp.ndarray):
+    """Return the minimum-label propagation step along rows then columns."""
+
+    def propagate(labels: jnp.ndarray) -> jnp.ndarray:
+        row_filled = _fill_label_segments(labels, confined, axis=1)
+        return _fill_label_segments(row_filled, confined, axis=0)
+
+    return propagate
 
 
 def _iterate_component_labels(
@@ -244,14 +255,29 @@ def label_connected_components_with_steps(
 
     schedule_limit = (max(confined.size, 1) - 1).bit_length() + 2
     if n_iter < schedule_limit:
-
-        def propagate(labels):
-            row_filled = _fill_label_segments(labels, confined, axis=1)
-            return _fill_label_segments(row_filled, confined, axis=0)
-
-        return _iterate_component_labels(confined, n_iter, propagate)
+        return _iterate_component_labels(
+            confined, n_iter, _segment_propagation(confined)
+        )
     labels, steps, _settled = label_parallel_connected_components_with_steps(confined)
     return labels, steps
+
+
+@partial(jax.jit, static_argnums=(1,))
+def label_connected_components_fixed_point(
+    confined: jnp.ndarray, n_iter: int
+) -> jnp.ndarray:
+    """Return canonical labels from masked segment propagation alone.
+
+    ``label_connected_components`` hands a sufficient caller cap to the
+    fixed-shape parallel pass, so its labels are not an independent authority
+    on their own. This entry point never routes: it runs the masked segment
+    propagation for ``n_iter`` iterations, which is the caller-capped fixed
+    point an identity gate compares the parallel pass against.
+    """
+    labels, _steps = _iterate_component_labels(
+        confined, n_iter, _segment_propagation(confined)
+    )
+    return labels
 
 
 @partial(jax.jit, static_argnums=(1,))

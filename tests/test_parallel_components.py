@@ -32,6 +32,7 @@ assert jax.config.jax_enable_x64 is True
 
 _MAST_SHOT = 22086
 _MAST_ROW = 43
+_MAST_BANK_ROWS = (1, 6, 12, 18, 24, 30, 36, 43, 45, 50, 54, 57)
 _GRID_STRIDE = 2
 _DOUBLE_NULL_RING = np.array([[1.0, 0.0], [1.0, -0.62], [1.0, 0.62]])
 _DOUBLE_NULL_CURRENT = np.array([1.0e6, 5.0e5, 4.0e5])
@@ -78,15 +79,41 @@ def _minimum_graph_reference(
     return labels.reshape(mask.shape)
 
 
+def _label_mismatch_count(actual, expected) -> int:
+    """Return the number of cells whose label differs."""
+    return int(np.count_nonzero(np.asarray(actual) != np.asarray(expected)))
+
+
 def _assert_parallel_identity(mask: np.ndarray) -> int:
-    """Require exact agreement with both host and canonical device labels."""
+    """Require exact agreement with both independent references.
+
+    The production entry point routes a sufficient caller cap through the
+    parallel pass, so it is not an independent authority; the comparison is
+    against the non-routed segment propagation and a host flood instead.
+    """
     parallel, steps, settled = label_parallel_connected_components_with_steps(
         jnp.asarray(mask)
     )
-    fixed_point = canonical.label_connected_components(jnp.asarray(mask), mask.size)
+    fixed_point = canonical.label_connected_components_fixed_point(
+        jnp.asarray(mask), mask.size
+    )
     expected = _minimum_index_reference(mask)
-    np.testing.assert_array_equal(np.asarray(parallel), np.asarray(fixed_point))
-    np.testing.assert_array_equal(np.asarray(parallel), expected)
+    np.testing.assert_array_equal(
+        np.asarray(parallel),
+        np.asarray(fixed_point),
+        err_msg=(
+            f"canonical fixed point differs in "
+            f"{_label_mismatch_count(parallel, fixed_point)} of {mask.size} cells"
+        ),
+    )
+    np.testing.assert_array_equal(
+        np.asarray(parallel),
+        expected,
+        err_msg=(
+            f"host flood differs in "
+            f"{_label_mismatch_count(parallel, expected)} of {mask.size} cells"
+        ),
+    )
     assert bool(settled)
     assert int(steps) <= int(np.ceil(np.log2(mask.size))) + 2
     return int(steps)
@@ -283,3 +310,29 @@ def test_mast_keyframe_is_bit_identical_at_the_canonical_iteration_count():
     """The stride-two MAST keyframe matches the full fixed-point classifier."""
     mask = _mast_confined_mask(_MAST_ROW)
     _assert_parallel_identity(mask)
+
+
+def test_identity_comparison_counts_a_seeded_label_defect():
+    """A seeded defect is counted, so the identity comparison can fail."""
+    mask = np.zeros((9, 11), dtype=bool)
+    mask[1:8, 1:5] = True
+    mask[1:8, 7:9] = True
+    labels = canonical.label_connected_components_fixed_point(
+        jnp.asarray(mask), mask.size
+    )
+    foreground = np.flatnonzero(np.asarray(labels).reshape(-1))
+    assert foreground.size >= 2, "the control mask carries too few confined cells"
+    corrupted = np.array(labels)
+    for vertex in foreground[:2]:
+        corrupted.reshape(-1)[vertex] += 1
+    assert _label_mismatch_count(corrupted, labels) == 2
+    assert _label_mismatch_count(labels, labels) == 0
+
+
+@pytest.mark.slow
+def test_mast_bank_rows_are_bit_identical_to_the_canonical_fixed_point():
+    """Every one of the twelve bank rows keeps the canonical components."""
+    steps = [
+        _assert_parallel_identity(_mast_confined_mask(row)) for row in _MAST_BANK_ROWS
+    ]
+    assert len(steps) == len(_MAST_BANK_ROWS)

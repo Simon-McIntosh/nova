@@ -864,10 +864,18 @@ def dispatch_read_requests(read, states, tags, node_number: int):
 
     ``states`` carries one trial flux map per request and ``tags`` is a traced
     integer vector naming the request kind each row is served with.  The tag
-    travels as loop state and is dispatched with ``lax.switch`` inside the
-    body, so ``read`` is reached from exactly one call site however many
-    request kinds a caller holds: the optimised program's copy count follows
-    the number of traced call sites, not the wrapper around them.
+    travels as loop state and selects its value inside the body, so ``read`` is
+    reached from exactly one call site however many request kinds a caller
+    holds.
+
+    The selection is a dynamic gather over the reading's pooled outputs rather
+    than a ``lax.switch``: a control-flow switch whose branches select a field
+    of a value computed in the same loop body gives the optimiser a reason to
+    clone the whole body once per trip, which multiplies the read in the
+    compiled program by the request count.  A gather has no branch to clone,
+    so the body stays one instance.  Measured on a three-trip loop: three
+    branches and five branches both leave three bodies behind a switch, and
+    one body behind the gather.
 
     ``read`` takes one state and returns a :class:`FluxReadAnswer`.  The
     returned pair is the selected scalar per row and the read mask per row;
@@ -887,17 +895,16 @@ def dispatch_read_requests(read, states, tags, node_number: int):
     def body(carry):
         index, selected_answers, selected_masks = carry
         reading = read(states[index])
-        selected = jax.lax.switch(
-            tags[index],
+        pooled = jnp.stack(
             (
-                lambda answer: answer.residual,
-                lambda answer: answer.merit,
-                lambda answer: answer.acceptance,
-                lambda answer: answer.recovery,
-                lambda answer: answer.reconciliation,
-            ),
-            reading,
+                reading.residual,
+                reading.merit,
+                reading.acceptance,
+                reading.recovery,
+                reading.reconciliation,
+            )
         )
+        selected = pooled[tags[index]]
         return (
             index + 1,
             selected_answers.at[index].set(selected),

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T22:35:57",
+  "updated": "2026-09-17T22:48:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4680,6 +4680,15 @@
       },
       {
         "id": "s19c-ecq-capacity-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-ecq-closedform-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -183071,6 +183080,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2737
+    "_version": 2738
   }
 }

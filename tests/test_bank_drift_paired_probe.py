@@ -20,7 +20,12 @@ STAGES = {
     "partition_structure": {"digest": "bbbb"},
     "partition_values": {"digest": "cccc"},
 }
-FLAT_STAGES = {"profile_support": "aaaa", "partition_structure": "bbbb", "partition_values": "cccc", "exception": None}
+FLAT_STAGES = {
+    "profile_support": "aaaa",
+    "partition_structure": "bbbb",
+    "partition_values": "cccc",
+    "exception": None,
+}
 
 
 def _arm(residual: float, converged: bool) -> dict:
@@ -84,7 +89,9 @@ def test_merge_counts_present_and_missing_rows(tmp_path: Path) -> None:
     arms_dir = tmp_path / "arms"
     arms_dir.mkdir()
     for index in range(10):
-        _write(arms_dir / f"receipt-x{index:02d}.json", _receipt("21978/35", "pure", 0.1))
+        _write(
+            arms_dir / f"receipt-x{index:02d}.json", _receipt("21978/35", "pure", 0.1)
+        )
     out = tmp_path / "receipt.json"
 
     status = _merge(arms_dir, out, expected_rows=12)
@@ -102,7 +109,9 @@ def test_merge_complete_campaign_succeeds(tmp_path: Path) -> None:
     arms_dir = tmp_path / "arms"
     arms_dir.mkdir()
     for index in range(12):
-        _write(arms_dir / f"receipt-x{index:02d}.json", _receipt("21978/35", "pure", 0.1))
+        _write(
+            arms_dir / f"receipt-x{index:02d}.json", _receipt("21978/35", "pure", 0.1)
+        )
     out = tmp_path / "receipt.json"
 
     status = _merge(arms_dir, out, expected_rows=12)
@@ -120,7 +129,9 @@ def test_merge_flags_more_rows_than_expected(tmp_path: Path) -> None:
     arms_dir = tmp_path / "arms"
     arms_dir.mkdir()
     for index in range(13):
-        _write(arms_dir / f"receipt-x{index:02d}.json", _receipt("21978/35", "pure", 0.1))
+        _write(
+            arms_dir / f"receipt-x{index:02d}.json", _receipt("21978/35", "pure", 0.1)
+        )
     out = tmp_path / "receipt.json"
 
     status = _merge(arms_dir, out, expected_rows=12)
@@ -138,7 +149,10 @@ def test_compare_carries_an_arm_only_one_tree_emitted(tmp_path: Path) -> None:
     left = tmp_path / "left.json"
     right = tmp_path / "right.json"
     out = tmp_path / "receipt.json"
-    _write(left, _emission("fae50f15", {"pure": _arm(1e-16, True), "mixed": _arm(2e-16, True)}))
+    _write(
+        left,
+        _emission("fae50f15", {"pure": _arm(1e-16, True), "mixed": _arm(2e-16, True)}),
+    )
     _write(right, _emission("main", {"pure": _arm(2.45e-3, False)}))
 
     status = _compare(left, right, out)

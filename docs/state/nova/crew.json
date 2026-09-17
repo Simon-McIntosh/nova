@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T22:48:38",
+  "updated": "2026-09-17T22:48:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4941,6 +4941,15 @@
       },
       {
         "id": "s19c-nia-remainder2-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-nia-support-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -183107,6 +183116,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2741
+    "_version": 2742
   }
 }

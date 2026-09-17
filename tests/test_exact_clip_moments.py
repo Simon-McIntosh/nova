@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from fractions import Fraction
 from typing import NamedTuple
 
 import jax
@@ -88,6 +89,19 @@ def _field(cell_count: int = 1) -> FluxFieldPolynomial:
     )
 
 
+def _quadratic_flux_field(cell_count: int = 1) -> FluxFieldPolynomial:
+    """A genuinely quadratic flux: every second-order monomial is carried."""
+    return FluxFieldPolynomial(
+        coefficient=jnp.tile(
+            jnp.asarray([[0.2, 0.3, -0.25, 0.4, 0.3, -0.35]]),
+            (cell_count, 1),
+        ),
+        centre=jnp.tile(jnp.asarray([[2.0, 0.0]]), (cell_count, 1)),
+        scale=jnp.ones((cell_count, 2)),
+        active=jnp.ones(cell_count, dtype=bool),
+    )
+
+
 def _fan_moments(support: _Support) -> np.ndarray:
     points, weights = clipped_support_quadrature(support, support.included)
     psi_norm, _radial, _vertical = _field().sample(points)
@@ -151,12 +165,52 @@ def test_default_cut_moments_match_the_fan_to_roundoff():
 
 
 @requires_boundary_route
+def test_shifted_first_moment_paths_set_the_required_per_edge_order():
+    """The order is set by the first moments, not by the zeroth one."""
+    from benchmarks.exact_clip_moment_floor import edge_order_study
+
+    from nova.equilibrium.clip_quadrature import _ARC_EDGE_ORDER
+
+    fixture_field = _quadratic_flux_field()
+    fixture_coefficient = np.asarray(fixture_field.coefficient)[0]
+    assert np.all(fixture_coefficient[3:] != 0.0)
+    study = edge_order_study(
+        flux=tuple(Fraction(str(value)) for value in fixture_coefficient),
+        sliver=(
+            (Fraction(0), Fraction(0)),
+            (Fraction(1), Fraction(0)),
+            (Fraction(63, 100), Fraction(35, 1000)),
+        ),
+    )
+    defect = study["relative_defect_by_path_and_order"]
+    assert study["integrand_degree_in_edge_parameter"] == {
+        "zero": 5,
+        "radial_shift": 6,
+        "vertical_shift": 6,
+    }
+    # Positive control on the fixture: the zeroth path is exact at the third
+    # order while both shifted paths are not, so the fixture can distinguish the
+    # two rules. A linear flux would make every path exact and the test vacuous.
+    assert defect["zero"]["3"] <= 1e-12
+    assert defect["radial_shift"]["3"] > 1e-12
+    assert defect["vertical_shift"]["3"] > 1e-12
+    assert study["lowest_order_exact_on_every_path"] == 4
+    assert _ARC_EDGE_ORDER == study["lowest_order_exact_on_every_path"]
+    for path in ("radial_shift", "vertical_shift"):
+        assert defect[path]["4"] <= 1e-12
+
+
+@requires_boundary_route
 def test_arc_route_carries_the_fixed_edge_and_point_bound():
     support = _curved_support(128, capacity=3072)
     edges = cut_capacity_edge_bound()
     assert edges == 149
-    assert cut_cell_moment_evaluation_bound() == 25 + 3 * edges
-    assert cut_cell_moment_evaluation_bound() < 500
+    # Four evaluations per edge rather than three: the shifted first-moment
+    # integrands reach degree six in the edge parameter, where a third-order
+    # rule is inexact and a fourth-order rule reaches roundoff. That moves the
+    # fixed cost from 472 to 621 evaluations per cut cell.
+    assert cut_cell_moment_evaluation_bound() == 25 + 4 * edges
+    assert cut_cell_moment_evaluation_bound() == 621
     observed = np.asarray(
         clipped_support_current_moments(
             support,

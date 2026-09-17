@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T22:48:36",
+  "updated": "2026-09-17T22:48:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4608,6 +4608,15 @@
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a0a90b-5169-7be2-9e60-b489d5d6f53a"
         },
         "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-cco-fluxlevel-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
       },
       {
         "id": "s19c-cco-gauge-c",
@@ -183098,6 +183107,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2740
+    "_version": 2741
   }
 }

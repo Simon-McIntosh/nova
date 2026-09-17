@@ -53,7 +53,6 @@ from importlib.util import module_from_spec, spec_from_file_location
 import json
 import os
 from pathlib import Path
-import subprocess
 from typing import Any
 
 import numpy as np
@@ -813,7 +812,9 @@ def _panel(old_path: Path, new_path: Path, out_path: Path, levels: int) -> int:
     pad = 0.04 * span
     extent = (r_min - pad, r_max + pad, z_min - pad, z_max + pad)
 
-    figure, axes_row = plt.subplots(1, 2, figsize=(9.0, 5.0), dpi=DEFAULT_INK.figure_dpi)
+    figure, axes_row = plt.subplots(
+        1, 2, figsize=(9.0, 5.0), dpi=DEFAULT_INK.figure_dpi
+    )
     for axes, panel in zip(axes_row, panels, strict=True):
         poloidal_axes(axes)
         draw_flux_contours(axes, radius, height, panel["flux"], shared_levels)

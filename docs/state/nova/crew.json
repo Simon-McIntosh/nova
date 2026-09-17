@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T23:25:36",
+  "updated": "2026-09-17T23:26:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -184176,6 +184176,411 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T183042362879-ecq-order-study-record-repairs",
+        "plan": "exact-clip-moment-quadrature",
+        "section": "\u00a73",
+        "node": "ecq-order-study-record-repairs",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4327,
+                "cached_input_tokens": 651557,
+                "input_tokens": 655886,
+                "output_tokens": 28,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 655914,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "benchmarks/exact_clip_moment_floor.py writes other_error_term as the denominator itself (not times ten) and the regenerated row-margin JSON under the reports fence has that field equal to the stated denominator on every row; the --edge-order-study arm writes its per-order per-path defect map to a receipt JSON under the reports fence and the committed record cites it; the order table cell for order 1 radial shift reads 2.53e-1 and the study coefficients read 0.2, 0.3, -0.35 in both docs/evidence/archive/exact-clip-moment-quadrature-landed.html and the plan's section-three subsection; the route column for the four coupling rows (weak 110, weak 300, moderate 110, moderate 300) is re-measured at _ARC_EDGE_ORDER 4 in one all_debug job per row and replaces the order-3 column with both stated; tests/test_exact_clip_moments.py passes in one fresh all_debug process; the default route stays bit-identical to the main tree (max abs diff 0.0, digests stated); every uv command carries --no-sync and nothing runs uv sync; write files in short pieces and py_compile each before committing",
+          "estimated_hours": null,
+          "goal": "Carry out followup f-ecq-order-study-record-repairs: the other_error_term JSON field a decade off, the two transcription slips in the order table and the coefficient quote, a receipt file for the order-study arm, and the nine-row route column re-measured at per-edge order four on the four coupling rows",
+          "id": "ecq-order-study-record-repairs",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T18:30:44Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183042362879-ecq-order-study-record-repairs/manifest.md",
+          "plan": "exact-clip-moment-quadrature",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/exact_clip_moment_floor.py",
+            "tests/test_exact_clip_moments.py",
+            "docs/figures/exact-clip-moment-quadrature",
+            "docs/evidence/archive/exact-clip-moment-quadrature-landed.html",
+            "docs/plans/exact-clip-moment-quadrature.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-gauss-repairs"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-ecq-repairs-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T18:31:04Z",
+        "completed_at": "2026-09-17T20:06:29.115Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 5680,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 5725,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "38b7014ee25891b59e66605d1a2f512c5271b6e6",
+        "commits": [
+          "a27cb53db836850e0cbbba768d9834778e9298ea",
+          "47c9e501336f8a6907aad4591d815a826daa1c09",
+          "f07116ce4784d88fa5e6fbcf6144c36bb7379bf0",
+          "10ae04976771d3c433082122069cd286ac93e4b8",
+          "4b5c29449db950311db60eda8c28cff7296874b8"
+        ],
+        "changed_lines": {
+          "added": 175,
+          "removed": 49,
+          "files": 4
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "tests/test_exact_clip_moments.py 8 passed in one fresh all_debug process; four coupling-row jobs and the default-route identity job; independent review",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T183042362879-ecq-order-study-record-repairs.json",
+          "log_digest": "sha256:a7f1b029ea76f9ce87f28eefe2d1bf8687fcbc3beae07021af575fb788e06c8b"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183042362879-ecq-order-study-record-repairs/manifest.md",
+        "scope_changed": false,
+        "session_id": "2738a14f-2823-4353-aed8-c7062f9ae443",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 757182,
+            "input_tokens_cumulative": 757182,
+            "output_tokens": 2488,
+            "output_tokens_cumulative": 2488,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T20:06:29.115Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4402,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: as recorded under blocker above.  No job is running; nothing is owed to SLURM.",
+              "elapsed_seconds": 7702,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2614,
+              "log_fresh": false,
+              "manifest_commits": [
+                "4404e68a58c32aaca66c0416ab343c239874e3e4  feat(benchmarks): compare DIII-D gate frames against the committed batch",
+                "6995aa6232d147b43ade2efb149ac96de050570b  fix(benchmarks): solve DIII-D gate frames one program at a time",
+                "02462d3b50a04ff137a91fce6b1968affc6520f9  fix(benchmarks): isolate each DIII-D gate frame in its own process"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0109a67061fdcd7785d3729afd8965871a3c2d074f5646ad28fbabb955448b18",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T044142288419-mulw-diiid-gate-frame-identity/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T044142288419-mulw-diiid-gate-frame-identity/manifest.md; resolve the blocker before resuming the run",
+              "node": "mulw-diiid-gate-frame-identity",
+              "phase": "working",
+              "plan": "multi-unit-limiter-wall",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T044142288419-mulw-diiid-gate-frame-identity",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260917T044142288419-mulw-diiid-gate-frame-identity",
+                "session_id": "333303e8-8d27-4066-863f-7cb393cc2b22",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 3132,
+              "terminal_at": "2026-09-17T17:38:37Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/mulw-diiid-gate-frame-identity"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1450,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 4750,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2012,
+              "log_fresh": false,
+              "manifest_commits": [
+                "f7fefbd7 (nova/equilibrium/separatrix_clip.py and tests/test_equilibrium_separatrix_clip.py: the derived capacity",
+                "its docstring derivation",
+                "and the above-bound refusal test)",
+                "128f5f57 (the receipts document",
+                "the memory receipts",
+                "the poloidal layout panel with its renderer and receipt",
+                "and the landing record in the plan section and the evidence anchor",
+                "in one commit)"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "c0b1ad3a03860608c46c16c87d60afa2ef6d8773987af5fe9f8d5c10edcde637",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T100810663195-ecq-capacity-sizing/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan exact-clip-moment-quadrature --section '\u00a74' --role review --spec-level exact --node review-of-ecq-capacity-sizing --goal 'attach an independent review to run r-20260917T100810663195-ecq-capacity-sizing' --done-when 'the review for r-20260917T100810663195-ecq-capacity-sizing parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T100810663195-ecq-capacity-sizing.json --time-budget 55m --session s19-codex-20260916 --local",
+              "node": "ecq-capacity-sizing",
+              "phase": "working",
+              "plan": "exact-clip-moment-quadrature",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T100810663195-ecq-capacity-sizing",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 2065,
+              "terminal_at": "2026-09-17T17:56:25Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-capacity-sizing"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 480,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: authored-artifact generation is corrupt in this session",
+              "elapsed_seconds": 3780,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 4982,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1d7f4bc3"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "cf0b29d1ca893684cc42e1cb2aed66bcccbc2905d84f4c44fee1ee5f98c0b1a7",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T160409157288-nia-drift-probe-remainder-and-panels/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T160409157288-nia-drift-probe-remainder-and-panels/manifest.md; resolve the blocker before resuming the run",
+              "node": "nia-drift-probe-remainder-and-panels",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T160409157288-nia-drift-probe-remainder-and-panels",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260917T160409157288-nia-drift-probe-remainder-and-panels",
+                "session_id": "adbaa40f-5934-438e-ae7e-db5c5f9da9ce",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 5141,
+              "terminal_at": "2026-09-17T17:05:09Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-drift-probe-remainder-and-panels"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 8,
+            "evidence": 17,
+            "fit": 18,
+            "goal_fidelity": 17,
+            "scope_discipline": 13
+          },
+          "absent": [],
+          "total": 73
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 757182,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 221.583,
+          "generated_tokens": 2488,
+          "generation_seconds": 221.378,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 23.4,
+          "machine_seconds": 0.205,
+          "peak_input_tokens": 112436,
+          "tokens_per_second": 11.24,
+          "wall_tokens_per_second": 11.23
+        },
+        "follow_on_paths": [
+          "4/3)*|fan(order",
+          "0.987-0.989",
+          "1.011-1.014"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-order-study-record-repairs",
+          "session_id": "2738a14f-2823-4353-aed8-c7062f9ae443",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T20:06:29.115Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 143.0,
+        "orientation_input_tokens": 1833730.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -184488,6 +184893,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2747
+    "_version": 2748
   }
 }

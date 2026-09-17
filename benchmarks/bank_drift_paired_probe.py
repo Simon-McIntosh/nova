@@ -51,6 +51,7 @@ from datetime import UTC, datetime
 import hashlib
 from importlib.util import module_from_spec, spec_from_file_location
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -76,6 +77,23 @@ _STAGE_DEFINITIONS = {
     ),
     "residual_ratio": "right-tree terminal residual divided by left-tree residual",
 }
+
+
+def _repo_relative(path: Any) -> str:
+    """Return a path stated relative to the repository, never absolute.
+
+    The receipt is committed, and a worktree path it names is removed at the
+    end of the sprint, so an absolute path in the record is a reference that
+    stops resolving.  Every location the receipt carries is therefore stated
+    from the repository root.
+    """
+
+    if path in (None, ""):
+        return path
+    try:
+        return os.path.relpath(Path(str(path)).resolve(), ROOT)
+    except (OSError, ValueError):
+        return str(path)
 
 
 def _digest(array: Any) -> str:
@@ -500,12 +518,12 @@ def _compare(left_path: Path, right_path: Path, out_path: Path) -> int:
         "artifact": "paired old-tree against current-tree MAST operand-solve probe",
         "left": {
             "label": left["tree_label"],
-            "root": left["tree_root"],
+            "root": _repo_relative(left["tree_root"]),
             "compile_cache": (left.get("compile_cache") or {}).get("directory"),
         },
         "right": {
             "label": right["tree_label"],
-            "root": right["tree_root"],
+            "root": _repo_relative(right["tree_root"]),
             "compile_cache": (right.get("compile_cache") or {}).get("directory"),
         },
         "stage_order": list(GEOMETRY_STAGES) + ["map_image", "terminal_residual"],
@@ -544,14 +562,16 @@ def _merge(arms_dir: Path, out_path: Path, expected_rows: int) -> int:
         payload = json.loads(path.read_text())
         sources.append(
             {
-                "path": str(path),
+                "path": _repo_relative(path),
                 "rows": len(payload.get("rows") or []),
                 "generated_at": payload.get("generated_at"),
             }
         )
         for side in ("left", "right"):
             if payload.get(side):
-                trees[side] = payload[side]
+                trees[side] = dict(
+                    payload[side], root=_repo_relative(payload[side].get("root"))
+                )
         rows.extend(payload.get("rows") or [])
     rows.sort(key=lambda row: (row["identity"], row["arm"]))
     counts: dict[str, int] = {}
@@ -605,6 +625,238 @@ def _merge(arms_dir: Path, out_path: Path, expected_rows: int) -> int:
     return 0 if present == expected_rows else 1
 
 
+def _resolve(
+    tree_label: str,
+    tree_root: Path,
+    identity: str,
+    arm: str,
+    out_path: Path,
+    compile_cache_root: Path | None,
+) -> int:
+    """Re-solve one arm of one identity and persist the poloidal flux field.
+
+    The emission files carry digests rather than fields, so a panel drawn from
+    a committed emission has no contour to draw.  This re-runs the same solve
+    the emission ran and writes the terminal geometry whole: the grid axes, the
+    flux map, the wall and both null sets, so a figure can be rendered later in
+    the run's evidence without a second solve.
+    """
+
+    import jax
+    import jax.numpy as jnp
+
+    producer = _load_module(tree_root / PRODUCER_RELATIVE, "probe_producer")
+    reachability = producer._reachability_module()
+    producer.configure_dtypes()
+    cache_root = (
+        compile_cache_root or producer.default_persistent_compilation_cache_root()
+    )
+    producer.configure_persistent_compilation_cache(cache_root)
+
+    x64 = bool(jax.config.jax_enable_x64)
+    response_cache, carrier_evidence = producer._persisted_response_cache(
+        producer.response_carrier.DEFAULT_CARRIER,
+        producer.response_carrier.DEFAULT_RECEIPT,
+    )
+    carrier_identity = producer._carrier_semantic_identity(carrier_evidence)
+    selected = [
+        (row, qualification)
+        for row, qualification in producer.select_slices_by_shot(
+            producer.DECOMPOSITION_BANK
+        )
+        if _identity_of(row) == identity
+    ]
+    if not selected:
+        raise SystemExit(f"identity {identity} is not in the decomposition bank")
+    selected_row, qualification = selected[0]
+    shot = int(selected_row["shot"])
+    slice_index = int(selected_row["slice_index"])
+    case, context = producer._mast_case_from_selection(
+        producer.SHOT_STORE, selected_row, qualification
+    )
+    passive_case, profile, _policy = producer._passive_inclusive_case(
+        case, context, response_cache
+    )
+    observed = producer._ObservedProfile(profile)
+    target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
+    states = reachability._mast_states(
+        observed,
+        jnp.asarray(passive_case["state"]),
+        target_current,
+        carrier_identity=f"mast:{shot}:{slice_index}:{carrier_identity}",
+    )
+    result = states[arm]
+    geometry = reachability._grid_geometry(profile, result.state)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez(
+        out_path,
+        tree_label=tree_label,
+        identity=identity,
+        arm=arm,
+        jax_enable_x64=x64,
+        converged=bool(result.converged),
+        terminal_residual=float(result.terminal_residual),
+        tolerance=float(result.tolerance),
+        termination_reason=str(result.termination_reason),
+        radius=np.asarray(geometry["radius"], dtype=float),
+        height=np.asarray(geometry["height"], dtype=float),
+        flux=np.asarray(geometry["flux"], dtype=float),
+        wall=np.asarray(geometry["wall"], dtype=float),
+        axis=np.asarray(geometry["axis"], dtype=float),
+        selected_x=np.asarray(geometry["selected_x"], dtype=float),
+        class_margin=float(geometry["class_margin"]),
+        typed_saddle_coordinates_m=np.asarray(
+            geometry["typed_saddle_coordinates_m"], dtype=float
+        ).reshape(-1, 2),
+        typed_saddle_inside_wall=np.asarray(
+            geometry["typed_saddles_inside_wall"], dtype=bool
+        ),
+    )
+    print(
+        f"resolve {tree_label} {identity} {arm} converged={bool(result.converged)} "
+        f"residual={float(result.terminal_residual):.6e} wrote {out_path}",
+        flush=True,
+    )
+    return 0
+
+
+def _hollow_after(axes: Any, count_before: int) -> None:
+    """Turn the most recently added lines into hollow markers."""
+
+    for line in axes.lines[count_before:]:
+        line.set_markerfacecolor("none")
+
+
+def _load_resolved(path: Path) -> dict[str, Any]:
+    """Read one resolve archive, which carries the terminal state whole."""
+
+    with np.load(path, allow_pickle=False) as archive:
+        return {name: archive[name] for name in archive.files}
+
+
+def _panel(old_path: Path, new_path: Path, out_path: Path, levels: int) -> int:
+    """Draw the producer and current terminal states as one contour pair.
+
+    Both panels share one physical level array computed from the producer state,
+    so a difference between them cannot hide behind independent level choices.
+    Each panel draws its own stationary points in the committed vocabulary and
+    the other state's in a hollow grey, and both carry the wall.
+
+    The panel's own nulls stay solid and the counterpart's are hollowed, so a
+    reader can tell which state a marker belongs to without reading the marker
+    grammar: a solved null drawn in the same style as the reference one reads as
+    the answer even when the state under it did not converge.
+    """
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    from nova.media.ink import DEFAULT_INK, poloidal_axes
+    from nova.media.poloidal import (
+        contour_levels,
+        draw_flux_contours,
+        draw_nulls,
+        draw_wall,
+    )
+
+    old = _load_resolved(old_path)
+    new = _load_resolved(new_path)
+    old_flux = np.asarray(old["flux"], dtype=float)
+    new_flux = np.asarray(new["flux"], dtype=float)
+    radius = np.asarray(old["radius"], dtype=float)
+    height = np.asarray(old["height"], dtype=float)
+    wall = np.asarray(old["wall"], dtype=float)
+    shared_levels = contour_levels(old_flux, count=levels)
+
+    own = DEFAULT_INK.variant(
+        axis_marker="^",
+        axis_markersize=9.0,
+        xpoint_marker="x",
+        xpoint_markersize=9.0,
+    )
+    other = DEFAULT_INK.variant(
+        axis_marker="o",
+        axis_markersize=8.0,
+        xpoint_marker="s",
+        xpoint_markersize=8.0,
+        axis_color="#666666",
+        xpoint_color="#666666",
+    )
+
+    panels = (
+        {
+            "state": old,
+            "flux": old_flux,
+            "title": (
+                f"producer tree {old['tree_label']}  "
+                f"converged={bool(old['converged'])}  "
+                f"residual={float(old['terminal_residual']):.3e}"
+            ),
+        },
+        {
+            "state": new,
+            "flux": new_flux,
+            "title": (
+                f"current tree {new['tree_label']}  "
+                f"converged={bool(new['converged'])}  "
+                f"residual={float(new['terminal_residual']):.3e}"
+            ),
+        },
+    )
+
+    r_min, r_max = float(np.nanmin(wall[:, 0])), float(np.nanmax(wall[:, 0]))
+    z_min, z_max = float(np.nanmin(wall[:, 1])), float(np.nanmax(wall[:, 1]))
+    span = max(r_max - r_min, z_max - z_min)
+    pad = 0.04 * span
+    extent = (r_min - pad, r_max + pad, z_min - pad, z_max + pad)
+
+    figure, axes_row = plt.subplots(
+        1, 2, figsize=(9.0, 5.0), dpi=DEFAULT_INK.figure_dpi
+    )
+    for axes, panel in zip(axes_row, panels, strict=True):
+        poloidal_axes(axes)
+        draw_flux_contours(axes, radius, height, panel["flux"], shared_levels)
+        draw_wall(axes, radius=wall[:, 0], height=wall[:, 1])
+        state = panel["state"]
+        before = len(axes.lines)
+        draw_nulls(
+            axes,
+            magnetic_axis=np.asarray(state["axis"], dtype=float),
+            x_points=np.asarray(state["selected_x"], dtype=float).reshape(1, 2),
+            style=own,
+            contain=wall,
+        )
+        counterpart = panels[1] if panel is panels[0] else panels[0]
+        other_state = counterpart["state"]
+        before = len(axes.lines)
+        draw_nulls(
+            axes,
+            magnetic_axis=np.asarray(other_state["axis"], dtype=float),
+            x_points=np.asarray(other_state["selected_x"], dtype=float).reshape(1, 2),
+            style=other,
+            contain=wall,
+        )
+        _hollow_after(axes, before)
+        axes.set_xlim(extent[0], extent[1])
+        axes.set_ylim(extent[2], extent[3])
+        axes.set_autoscale_on(False)
+        axes.set_title(panel["title"], fontsize=7.0)
+    figure.suptitle(
+        "MAST 21978/35 pure terminal state on one shared level array.\n"
+        "solid red: this panel's axis (triangle) and admitted saddle (cross); "
+        "hollow grey: the other state's",
+        fontsize=8.0,
+    )
+    figure.tight_layout(rect=(0.0, 0.0, 1.0, 0.90))
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(out_path, facecolor=figure.get_facecolor())
+    plt.close(figure)
+    print(f"wrote {out_path}", flush=True)
+    return 0
+
+
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -653,6 +905,18 @@ def _parse() -> argparse.Namespace:
     merge.add_argument("--arms-dir", type=Path, required=True)
     merge.add_argument("--out", type=Path, required=True)
     merge.add_argument("--expected-rows", type=int, required=True)
+    resolve = sub.add_parser("resolve")
+    resolve.add_argument("--tree-root", type=Path, required=True)
+    resolve.add_argument("--label", required=True)
+    resolve.add_argument("--identity", required=True)
+    resolve.add_argument("--arm", required=True, choices=("pure", "mixed"))
+    resolve.add_argument("--out", type=Path, required=True)
+    resolve.add_argument("--compile-cache-root", type=Path, default=None)
+    panel = sub.add_parser("panel")
+    panel.add_argument("--old", type=Path, required=True)
+    panel.add_argument("--new", type=Path, required=True)
+    panel.add_argument("--out", type=Path, required=True)
+    panel.add_argument("--levels", type=int, default=12)
     return parser.parse_args()
 
 
@@ -672,6 +936,17 @@ def main() -> int:
         )
     if args.command == "merge":
         return _merge(args.arms_dir, args.out, args.expected_rows)
+    if args.command == "panel":
+        return _panel(args.old, args.new, args.out, args.levels)
+    if args.command == "resolve":
+        return _resolve(
+            args.label,
+            args.tree_root,
+            args.identity,
+            args.arm,
+            args.out,
+            args.compile_cache_root,
+        )
     return _compare(args.left, args.right, args.out)
 
 

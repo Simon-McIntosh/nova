@@ -5,16 +5,16 @@
   "residual_moved": "the terminal residual differs between the trees in any bit; residual_ratio carries the magnitude, so a difference in the last bit and a difference of twelve decades both read as true here",
   "residual_ratio": "right-tree terminal residual divided by left-tree residual"
  },
- "generated_at": "2026-09-17T09:45:10.467478+00:00",
+ "generated_at": "2026-09-17T20:48:07.525407+00:00",
  "left": {
   "compile_cache": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
   "label": "fae50f15",
-  "root": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/bank-drift/faefloor-tree"
+  "root": "../../../../../.config/reckon/crew/reports/nova/s19-local/bank-drift/faefloor-tree"
  },
  "right": {
   "compile_cache": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
   "label": "main",
-  "root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe"
+  "root": "."
  },
  "rows": [
   {
@@ -266,57 +266,117 @@
     "partition_values": "4999adc10ee82597",
     "profile_support": "5683f88ca97c076e"
    }
+  },
+  {
+   "arm": "mixed",
+   "converged_left": true,
+   "converged_right": true,
+   "first_differing_stage": "partition_structure",
+   "identity": "22086/43",
+   "note": null,
+   "residual_delta": 2.2406140223440747e-16,
+   "residual_left": 4.929350849156965e-16,
+   "residual_moved": true,
+   "residual_ratio": 0.5454545454545455,
+   "residual_right": 2.68873682681289e-16,
+   "stages_left": {
+    "exception": null,
+    "partition_structure": "236cbb2e1af2dded",
+    "partition_values": "empty",
+    "profile_support": "5683f88ca97c076e"
+   },
+   "stages_right": {
+    "exception": null,
+    "partition_structure": "b4214b763f3aed67",
+    "partition_values": "8d95bb38b91c218c",
+    "profile_support": "5683f88ca97c076e"
+   }
+  },
+  {
+   "arm": "pure",
+   "converged_left": true,
+   "converged_right": false,
+   "first_differing_stage": "partition_structure",
+   "identity": "22086/43",
+   "note": null,
+   "residual_delta": 0.0004774937483356386,
+   "residual_left": 3.5849824357505203e-16,
+   "residual_moved": true,
+   "residual_ratio": 1331927720410.2485,
+   "residual_right": 0.00047749374833599707,
+   "stages_left": {
+    "exception": null,
+    "partition_structure": "236cbb2e1af2dded",
+    "partition_values": "empty",
+    "profile_support": "5683f88ca97c076e"
+   },
+   "stages_right": {
+    "exception": null,
+    "partition_structure": "b4214b763f3aed67",
+    "partition_values": "8d95bb38b91c218c",
+    "profile_support": "5683f88ca97c076e"
+   }
   }
  ],
  "source_receipts": [
   {
    "generated_at": "2026-09-17T09:44:48.664357+00:00",
-   "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe/docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21978-35-mixed.json",
+   "path": "docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21978-35-mixed.json",
    "rows": 1
   },
   {
    "generated_at": "2026-09-17T09:44:49.871324+00:00",
-   "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe/docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21978-35-pure.json",
+   "path": "docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21978-35-pure.json",
    "rows": 1
   },
   {
    "generated_at": "2026-09-17T09:44:51.153036+00:00",
-   "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe/docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21983-35-mixed.json",
+   "path": "docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21983-35-mixed.json",
    "rows": 1
   },
   {
    "generated_at": "2026-09-17T09:44:52.358955+00:00",
-   "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe/docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21983-35-pure.json",
+   "path": "docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21983-35-pure.json",
    "rows": 1
   },
   {
    "generated_at": "2026-09-17T09:44:53.753713+00:00",
-   "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe/docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21985-51-mixed.json",
+   "path": "docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21985-51-mixed.json",
    "rows": 1
   },
   {
    "generated_at": "2026-09-17T09:44:55.062735+00:00",
-   "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe/docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21985-51-pure.json",
+   "path": "docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21985-51-pure.json",
    "rows": 1
   },
   {
    "generated_at": "2026-09-17T09:44:56.362851+00:00",
-   "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe/docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21986-46-mixed.json",
+   "path": "docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21986-46-mixed.json",
    "rows": 1
   },
   {
    "generated_at": "2026-09-17T09:44:57.556812+00:00",
-   "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe/docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21986-46-pure.json",
+   "path": "docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21986-46-pure.json",
    "rows": 1
   },
   {
    "generated_at": "2026-09-17T09:44:59.058379+00:00",
-   "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe/docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21989-55-mixed.json",
+   "path": "docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21989-55-mixed.json",
    "rows": 1
   },
   {
    "generated_at": "2026-09-17T09:45:00.453903+00:00",
-   "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe/docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21989-55-pure.json",
+   "path": "docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-21989-55-pure.json",
+   "rows": 1
+  },
+  {
+   "generated_at": "2026-09-17T20:48:07.427768+00:00",
+   "path": "docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-22086-43-mixed.json",
+   "rows": 1
+  },
+  {
+   "generated_at": "2026-09-17T20:48:07.331976+00:00",
+   "path": "docs/figures/null-identification-authority/bank-drift-probe/arms/receipt-22086-43-pure.json",
    "rows": 1
   }
  ],
@@ -329,7 +389,7 @@
  ],
  "summary": {
   "first_differing_stage_counts": {
-   "partition_structure": 10
+   "partition_structure": 12
   },
   "focus_21983_35_mixed": [
    {
@@ -468,11 +528,33 @@
     "residual_moved": true,
     "residual_ratio": 4.961555363497265,
     "residual_right": 0.003646731774171455
+   },
+   {
+    "arm": "mixed",
+    "converged_left": true,
+    "converged_right": true,
+    "first_differing_stage": "partition_structure",
+    "identity": "22086/43",
+    "residual_left": 4.929350849156965e-16,
+    "residual_moved": true,
+    "residual_ratio": 0.5454545454545455,
+    "residual_right": 2.68873682681289e-16
+   },
+   {
+    "arm": "pure",
+    "converged_left": true,
+    "converged_right": false,
+    "first_differing_stage": "partition_structure",
+    "identity": "22086/43",
+    "residual_left": 3.5849824357505203e-16,
+    "residual_moved": true,
+    "residual_ratio": 1331927720410.2485,
+    "residual_right": 0.00047749374833599707
    }
   ],
   "rows_expected": 12,
-  "rows_missing": 2,
-  "rows_present": 10,
+  "rows_missing": 0,
+  "rows_present": 12,
   "rows_unexpected": 0
  }
 }

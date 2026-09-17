@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T11:50:16",
+  "updated": "2026-09-17T11:55:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4940,6 +4940,15 @@
         "sessions": {
           "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "4bad1370-86f8-4e49-b76e-8a9c7210cfd9"
         },
+        "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-review-nia-c",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-17"
       },
       {
@@ -175804,6 +175813,260 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T053656352101-review-of-cco-bounded-row-step-control",
+        "plan": "centroid-constrained-oracle-solve",
+        "section": "\u00a73",
+        "node": "review-of-cco-bounded-row-step-control",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2148,
+                "cached_input_tokens": 250675,
+                "input_tokens": 252825,
+                "output_tokens": 446,
+                "reasoning_output_tokens": 86,
+                "total_tokens": 253271,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the review for r-20260916T205409901465-cco-bounded-row-step-control parses all five score dimensions, is stored at the fence path through reckon.crew.review store_review, and its findings check four things from the run's own artifacts under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-step: that control-positive.json reproduces the manifest's converged centroid 6.064154626 m, field 2.387201e-03 T, row scaled residual 1.339846e-03 and boundary flux offset 0.528909578 Wb; that the 0.529 Wb boundary-flux offset is or is not a gauge artefact, by stating whether the analytic authored zero and the compensated state's boundary flux are compared in the same flux gauge (a uniform vertical field adds a term proportional to R squared minus R0 squared to the flux, which moves the boundary level without moving any null), and what the receipt would need to record to settle it; that the two protocol-test failures at head share ids with two of the four failures at base; and that the six commits touch only the declared write paths",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260916T205409901465-cco-bounded-row-step-control",
+          "id": "review-of-cco-bounded-row-step-control",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T05:36:57Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T053656352101-review-of-cco-bounded-row-step-control/manifest.md",
+          "plan": "centroid-constrained-oracle-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T205409901465-cco-bounded-row-step-control.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19c-review-cco-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T05:37:53Z",
+        "completed_at": "2026-09-17T06:45:40.145Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3988,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4067,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9fbe44b3bb15b836380663587ae8a201ef5fea2b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "parse_review round trip on the stored review file",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T205409901465-cco-bounded-row-step-control.json",
+          "log_digest": "sha256:76a5291436dac09f58530a8da33f4850aaada8203bd60fa789a0d85e51c6f05d"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T053656352101-review-of-cco-bounded-row-step-control/manifest.md",
+        "scope_changed": false,
+        "session_id": "580b94c7-d648-4750-a20d-079f1595055d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3358998,
+            "input_tokens_cumulative": 3358998,
+            "output_tokens": 81073,
+            "output_tokens_cumulative": 81073,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T06:45:40.145Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2677,
+              "budget_seconds": 3600,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 6277,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 822,
+              "log_fresh": true,
+              "manifest_commits": [
+                "1ad4bea965d4c00863192499e1aa350d386740c6",
+                "c96dad28e91c9be1779531931e7d7b7ad3792a43",
+                "d9b594b29be63302832faf0097ae60b983e20295",
+                "f573ac1be1bd6e0bd4e26a6e30d33c8e2b2bd3f9",
+                "f225e9c0e1521464c799ee7e4fe6d2ed7c7fb0c7"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "f9b91801c2aa8e2d6512f64bb7b7b96d8aa090e06a1c8acf7eb7603aba206ae0",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T204834010483-ecq-sampled-arc-gauss-route/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan exact-clip-moment-quadrature --section '\u00a72' --role review --spec-level exact --node review-of-ecq-sampled-arc-gauss-route --goal 'attach an independent review to run r-20260916T204834010483-ecq-sampled-arc-gauss-route' --done-when 'the review for r-20260916T204834010483-ecq-sampled-arc-gauss-route parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T204834010483-ecq-sampled-arc-gauss-route.json --time-budget 60m --session s19-codex-20260916 --local",
+              "node": "ecq-sampled-arc-gauss-route",
+              "phase": "working",
+              "plan": "exact-clip-moment-quadrature",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260916T204834010483-ecq-sampled-arc-gauss-route",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 1548,
+              "terminal_at": "2026-09-17T05:11:43Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-sampled-arc-gauss-route"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 3526762,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 4061.597,
+          "generated_tokens": 89379,
+          "generation_seconds": 4021.96,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.7,
+          "machine_seconds": 39.637,
+          "peak_input_tokens": 166464,
+          "tokens_per_second": 22.22,
+          "wall_tokens_per_second": 22.01
+        },
+        "follow_on_paths": [
+          "scripts/analytic_oracle_fixtures/measure.py:713",
+          "nova/equilibrium/forward.py:2589"
+        ],
+        "predecessor_run": "r-20260916T205409901465-cco-bounded-row-step-control",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "review role; the deliverable is the stored review record outside the repository",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-cco-bounded-row-step-control",
+          "session_id": "580b94c7-d648-4750-a20d-079f1595055d",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T06:45:40.145Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 56.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -176116,6 +176379,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2689
+    "_version": 2691
   }
 }

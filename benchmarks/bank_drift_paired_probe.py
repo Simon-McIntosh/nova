@@ -19,28 +19,29 @@ partition that moved.  The accepted operand cache is read-only here: this probe
 never writes it.
 
 The driver runs one tree per process so jax and nova module state stay isolated,
-and it only compares the two emissions in a later invocation:
+and it only compares the comparison pairs in a later invocation.  An identity is
+solved once per process and yields both arms, so an unconstrained emission over
+the bank selection is the whole sweep for that tree, and the tree's programs are
+compiled once for the process rather than once per arm:
 
     <interpreter> bank_drift_paired_probe.py emit \\
         --tree-root <tree> --label <label> --out <label>.json \\
-        --identity <shot>/<slice> --arm {pure,mixed}
+        --out-dir <dir> --prefix <old|new> \\
+        [--identity <shot>/<slice>] [--arm {pure,mixed}]
     <interpreter> bank_drift_paired_probe.py compare \\
         --left <label>.json --right <label>.json --out receipt.json
     <interpreter> bank_drift_paired_probe.py merge \\
-        --arms-dir <dir> --out receipt.json
+        --arms-dir <dir> --out receipt.json --expected-rows 12
 
-One arm of one identity is the unit of work: it is the smallest slice that
-carries a complete pair of emissions, so an allocation that dies loses one arm
-rather than a whole campaign, and the arms that did land are already receipts.
-An emission is therefore restricted to a single identity and arm, and `merge`
-joins the per-arm receipts once they all exist.
+`--out-dir` writes one emission file per arm as each identity's solve lands, so
+an allocation that ends early still leaves every identity it finished as a pair
+of comparable arm emissions rather than one partial file.
 
-The compilation cache is passed in rather than inferred, so every job of the
-campaign writes the one directory the campaign names: the same traced programs
-in the same tree then compile once for the whole set of jobs rather than once
-per job.  The cache receipt the producer returns is stored in each emission, so
-the directory a given row was compiled against is evidence rather than an
-assumption.
+The accepted operand cache is read-only to the driver, and the compilation cache
+is passed in rather than inferred, so the whole sweep of a tree compiles against
+the one directory the caller names.  The cache receipt the producer returns is
+stored in each emission, so the directory a given row was compiled against is
+evidence rather than an assumption.
 """
 
 from __future__ import annotations
@@ -234,6 +235,8 @@ def _emit(
     identity: str | None,
     arm: str | None,
     compile_cache_root: Path | None,
+    out_dir: Path | None = None,
+    prefix: str = "emit",
 ) -> int:
     """Run the declared solve for one identity and arm and persist its digests."""
 
@@ -330,26 +333,55 @@ def _emit(
             flush=True,
         )
         rows.append(entry)
+        payload = {
+            "tree_label": tree_label,
+            "tree_root": str(tree_root),
+            "emitted_at": datetime.now(UTC).isoformat(),
+            "jax_enable_x64": x64,
+            "carrier_identity": carrier_identity,
+            "compile_cache": compile_cache.receipt(),
+            "requested_identity": identity,
+            "requested_arm": arm,
+            "rows": rows,
+        }
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(
-            json.dumps(
-                {
-                    "tree_label": tree_label,
-                    "tree_root": str(tree_root),
-                    "emitted_at": datetime.now(UTC).isoformat(),
-                    "jax_enable_x64": x64,
-                    "carrier_identity": carrier_identity,
-                    "compile_cache": compile_cache.receipt(),
-                    "requested_identity": identity,
-                    "requested_arm": arm,
-                    "rows": rows,
-                },
-                indent=1,
-                sort_keys=True,
-            )
-        )
+        out_path.write_text(json.dumps(payload, indent=1, sort_keys=True))
+        if out_dir is not None:
+            _split_arm_emissions(payload, out_dir, prefix)
     print(f"wrote {out_path}", flush=True)
     return 0
+
+
+def _slug(identity: str) -> str:
+    """Return the filename form of a shot/slice identity."""
+
+    return identity.replace("/", "-")
+
+
+def _split_arm_emissions(
+    payload: dict[str, Any], out_dir: Path | None, prefix: str
+) -> list[Path]:
+    """Persist one emission file per arm of a multi-arm emission.
+
+    Both arms of an identity come out of a single solve, so they land together;
+    writing them as separate files is what lets each arm of a campaign be
+    compared, and banked, the moment it exists rather than at the end of a run.
+    """
+
+    if out_dir is None:
+        return []
+    written: list[Path] = []
+    for row in payload["rows"]:
+        for arm_name, record in row["arms"].items():
+            arm_payload = dict(payload)
+            arm_payload["rows"] = [dict(row, arms={arm_name: record})]
+            arm_payload["requested_arm"] = arm_name
+            path = out_dir / f"{prefix}-{_slug(row['identity'])}-{arm_name}.json"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(arm_payload, indent=1, sort_keys=True))
+            written.append(path)
+    print(f"wrote {len(written)} arm emissions under {out_dir}", flush=True)
+    return written
 
 
 def _flat_stages(row: dict[str, Any] | None) -> dict[str, Any]:
@@ -395,6 +427,11 @@ def _compare(left_path: Path, right_path: Path, out_path: Path) -> int:
         for arm in ("pure", "mixed"):
             left_arm = (left_row.get("arms") or {}).get(arm)
             right_arm = (right_row.get("arms") or {}).get(arm) if right_row else None
+            if left_arm is None and right_arm is None:
+                # An arm neither emission carries is not a comparison: it is
+                # absent from both sides, and a row for it would count toward the
+                # campaign total with nothing measured in it.
+                continue
             residual_left = None if not left_arm else left_arm.get("terminal_residual")
             residual_right = (
                 None if not right_arm else right_arm.get("terminal_residual")
@@ -593,6 +630,20 @@ def _parse() -> argparse.Namespace:
         default=None,
         help="root of the shared persistent compilation cache for this campaign",
     )
+    emit.add_argument(
+        "--out-dir",
+        type=Path,
+        default=None,
+        help=(
+            "also persist one emission file per arm under this directory, "
+            "written as each identity's solve lands"
+        ),
+    )
+    emit.add_argument(
+        "--prefix",
+        default="emit",
+        help="filename prefix for the per-arm emission files",
+    )
     compare = sub.add_parser("compare")
     compare.add_argument("--left", type=Path, required=True)
     compare.add_argument("--right", type=Path, required=True)
@@ -616,6 +667,8 @@ def main() -> int:
             args.identity,
             args.arm,
             args.compile_cache_root,
+            args.out_dir,
+            args.prefix,
         )
     if args.command == "merge":
         return _merge(args.arms_dir, args.out, args.expected_rows)

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T18:04:32",
+  "updated": "2026-09-17T18:36:29",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4700,6 +4700,15 @@
       },
       {
         "id": "s19c-ecq-order-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-fsa-coiledit-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -178755,6 +178764,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2710
+    "_version": 2711
   }
 }

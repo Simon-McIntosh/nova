@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -86,6 +86,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260916T205409901465-cco-bounded-row-step-control" data-who="s19c-cco-bound-c" data-when="2026-09-17T05:37:50.850Z">
     <div class="r-comment-body"><p>Damped step control replaces the clip on the bounded exterior-field unknown (per-trip cap, halving backtracking ladder, fail-closed bound refusal on the record); tests 3 passed and 6 passed at head with zero added failures against base (two pre-existing eliminated-constraint ids at forward.py:2589). Positive control on the 20 mm displaced seed: converged centroid 6.064155 m against 6.063530 target, 6.2e-4 m or 1.3e-3 pitches, 74 times inside the tenth-pitch clause, with 2.39e-3 T of compensating field (0.96 percent of the bound, no refusal); the row scaled residual 1.34e-3 misses the 1e-12 fixed-point clause. Review 84/100: the recorded 0.529 Wb boundary-flux offset is gauge-confounded (axis-anchored compensator column at measure.py:712 against a boundary-anchored authored zero hardcoded in oracle_start_newton_probe.py:254), so the fixed-point verdict is not established either way and must be re-read in one gauge; the negative control does not discriminate at 20 mm because the unconstrained map relaxes the seed to its own fixed point inside the band</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260917T204844551541-cco-flux-level-compensating-term" data-who="reckon-ship" data-when="2026-09-17T21:40:29.304Z">
+    <div class="r-comment-body"><p>Correct scope refusal by the worker: the flux-level term is a third compensating row, and the fixture&#x27;s row, unknown and binding assembly with its direction map live in scripts/analytic_oracle_fixtures/centroid_row.py, which the brief did not fence. No code written. Redispatched as cco-flux-level-compensating-term-2 with that module in scope; the level-row functional goes in nova/equilibrium/constraint.py and the fixture builder stays in centroid_row.py</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T053656352101-review-of-cco-bounded-row-step-control" data-who="s19c-review-cco-c" data-when="2026-09-17T06:45:40.145Z">
     <div class="r-comment-body"><p>Independent review of r-20260916T205409901465-cco-bounded-row-step-control stored at the fence path, total 84, findings recorded on the reviewed run's completion</p></div>

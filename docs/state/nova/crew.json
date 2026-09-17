@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T12:54:31",
+  "updated": "2026-09-17T12:57:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -177141,6 +177141,234 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T100222692723-review-of-ecm-memory-test-tracer-parameter-route",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "review-of-ecm-memory-test-tracer-parameter-route",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1789,
+                "cached_input_tokens": 393035,
+                "input_tokens": 394828,
+                "output_tokens": 25,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 394853,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the review for r-20260917T055938156648-ecm-memory-test-tracer-parameter-route parses all five score dimensions, is stored at the fence path through reckon.crew.review store_review, and its findings check three things by reading: that tests/test_exact_clip_memory.py at 59d09275 contains no __globals__ rebinding and no import of _implicit_traced_clip, and that the manifest's collection logs (logs/jobA_collect.log, logs/jobB_collect_base.log under the node's reports fence) show equal counts of 14 at head and base; that the twelve per-test all_debug gate logs the manifest names exist and each ends in a pass line; and that the three commits touch only tests/test_exact_clip_memory.py plus the plan and evidence record",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260917T055938156648-ecm-memory-test-tracer-parameter-route",
+          "id": "review-of-ecm-memory-test-tracer-parameter-route",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T10:02:24Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T100222692723-review-of-ecm-memory-test-tracer-parameter-route/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T055938156648-ecm-memory-test-tracer-parameter-route.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19c-review-ecm-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T10:02:55Z",
+        "completed_at": "2026-09-17T10:52:13.745Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2940,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2958,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "59d092751a6bfac618ba9f4b5a3cb9341f9d4efb",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "parse_review round trip on the stored review file",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T055938156648-ecm-memory-test-tracer-parameter-route.json",
+          "log_digest": "sha256:9714fdc0fc664ffca6911ee7e39ba5a9a4348adf1f9cf7cbdaaf83a40ea5805d"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T100222692723-review-of-ecm-memory-test-tracer-parameter-route/manifest.md",
+        "scope_changed": false,
+        "session_id": "08c1f174-db4a-430c-9fdf-91d2ae978983",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T10:52:13.745Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 875,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 557,
+              "log_fresh": true,
+              "manifest_commits": [
+                "5ed1dd3b",
+                "37fec904",
+                "f7364e82",
+                "1b467745",
+                "903d5d49"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "daa8b7cde72df41e9be78d1f4312e801d77c2cd085e6821581dde55999241747",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205009785219-nia-bank-drift-paired-probe/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan null-identification-authority --section '\u00a71' --role review --spec-level exact --node review-of-nia-bank-drift-paired-probe --goal 'attach an independent review to run r-20260916T205009785219-nia-bank-drift-paired-probe' --done-when 'the review for r-20260916T205009785219-nia-bank-drift-paired-probe parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T205009785219-nia-bank-drift-paired-probe.json --time-budget 60m --session s19-codex-20260916 --local",
+              "node": "nia-bank-drift-paired-probe",
+              "phase": "working",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260916T205009785219-nia-bank-drift-paired-probe",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 614,
+              "terminal_at": "2026-09-17T09:52:19Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe"
+            }
+          ]
+        },
+        "review": null,
+        "follow_on_paths": [
+          "collect_head.txt"
+        ],
+        "predecessor_run": "r-20260917T055938156648-ecm-memory-test-tracer-parameter-route",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": "review role; the deliverable is the stored review record outside the repository",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-ecm-memory-test-tracer-parameter-route",
+          "session_id": "08c1f174-db4a-430c-9fdf-91d2ae978983",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T10:52:13.745Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 70.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -177453,6 +177681,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2697
+    "_version": 2698
   }
 }

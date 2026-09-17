@@ -1,0 +1,98 @@
+{
+ "artifact": "paired old-tree against current-tree MAST operand-solve probe",
+ "definitions": {
+  "first_differing_stage": "the earliest stage in stage_order whose digest differs between the two trees; a difference at an earlier stage propagates into every later one, so this names where the trees first diverge, not necessarily the stage that moved the residual",
+  "residual_moved": "the terminal residual differs between the trees in any bit; residual_ratio carries the magnitude, so a difference in the last bit and a difference of twelve decades both read as true here",
+  "residual_ratio": "right-tree terminal residual divided by left-tree residual"
+ },
+ "generated_at": "2026-09-17T09:44:51.153036+00:00",
+ "left": {
+  "compile_cache": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+  "label": "fae50f15",
+  "root": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/bank-drift/faefloor-tree"
+ },
+ "right": {
+  "compile_cache": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+  "label": "main",
+  "root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe"
+ },
+ "rows": [
+  {
+   "arm": "mixed",
+   "converged_left": false,
+   "converged_right": false,
+   "first_differing_stage": "partition_structure",
+   "identity": "21983/35",
+   "note": null,
+   "residual_delta": 0.00013261828976633873,
+   "residual_left": 0.0002460963048402929,
+   "residual_moved": true,
+   "residual_ratio": 1.5388877734365127,
+   "residual_right": 0.0003787145946066316,
+   "stages_left": {
+    "exception": null,
+    "partition_structure": "236cbb2e1af2dded",
+    "partition_values": "empty",
+    "profile_support": "5683f88ca97c076e"
+   },
+   "stages_right": {
+    "exception": null,
+    "partition_structure": "c6153172715a1fbf",
+    "partition_values": "15188b6a218bec95",
+    "profile_support": "5683f88ca97c076e"
+   }
+  }
+ ],
+ "stage_order": [
+  "profile_support",
+  "partition_structure",
+  "partition_values",
+  "map_image",
+  "terminal_residual"
+ ],
+ "summary": {
+  "first_differing_stage_counts": {
+   "partition_structure": 1
+  },
+  "focus_21983_35_mixed": [
+   {
+    "arm": "mixed",
+    "converged_left": false,
+    "converged_right": false,
+    "first_differing_stage": "partition_structure",
+    "identity": "21983/35",
+    "note": null,
+    "residual_delta": 0.00013261828976633873,
+    "residual_left": 0.0002460963048402929,
+    "residual_moved": true,
+    "residual_ratio": 1.5388877734365127,
+    "residual_right": 0.0003787145946066316,
+    "stages_left": {
+     "exception": null,
+     "partition_structure": "236cbb2e1af2dded",
+     "partition_values": "empty",
+     "profile_support": "5683f88ca97c076e"
+    },
+    "stages_right": {
+     "exception": null,
+     "partition_structure": "c6153172715a1fbf",
+     "partition_values": "15188b6a218bec95",
+     "profile_support": "5683f88ca97c076e"
+    }
+   }
+  ],
+  "residual_moved": [
+   {
+    "arm": "mixed",
+    "converged_left": false,
+    "converged_right": false,
+    "first_differing_stage": "partition_structure",
+    "identity": "21983/35",
+    "residual_left": 0.0002460963048402929,
+    "residual_moved": true,
+    "residual_ratio": 1.5388877734365127,
+    "residual_right": 0.0003787145946066316
+   }
+  ]
+ }
+}

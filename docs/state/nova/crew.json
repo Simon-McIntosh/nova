@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T22:48:40",
+  "updated": "2026-09-17T22:48:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6947,17 +6947,6 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
-      },
-      {
-        "id": "session-2b74bb0b748560f47150",
-        "harness": "clive",
-        "role": "implement",
-        "session_id": "ee5813e7-ea8d-47c3-8383-98392948112b",
-        "session_model": "deepseek-v4.1-flash",
-        "sessions": {
-          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "ee5813e7-ea8d-47c3-8383-98392948112b"
-        },
-        "created": "2026-09-16"
       },
       {
         "id": "session-337d1d569f61f639eedc",
@@ -183116,6 +183105,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2742
+    "_version": 2743
   }
 }

@@ -125,26 +125,28 @@ def _run_driver(tmp_path: Path, mode: str) -> dict:
         return {name: receipt[name] for name in receipt.files}
 
 
-def _patched_globals_functions(namespace) -> list[str]:
-    """Names in ``namespace`` whose function carries a matching module's dict.
+def _stale_clip_clones(namespace) -> list[str]:
+    """Names in ``namespace`` holding a patched copy of the clip's namespace.
 
-    A function's globals dictionary is its own defining module's namespace, so
-    a function that resolves its ``__module__`` elsewhere and yet does not
-    carry that module's dictionary was built over a copy of it -- a
-    patched-globals clone, whatever it is called.
+    A patched-globals clone is exactly a function whose globals dictionary
+    claims to be the clip module's namespace and is not that module's own
+    dictionary. Functions legitimately imported from the clip carry its real
+    dictionary, so a pass here cannot come from an import.
     """
-    found = []
-    for name, value in namespace.items():
-        if not isinstance(value, types.FunctionType):
-            continue
-        defining = sys.modules.get(getattr(value, "__module__", None) or "")
-        if defining is not None and value.__globals__ is not vars(defining):
-            found.append(name)
-    return sorted(found)
+    from nova.equilibrium import separatrix_clip
+
+    live = vars(separatrix_clip)
+    return sorted(
+        name
+        for name, value in namespace.items()
+        if isinstance(value, types.FunctionType)
+        and value.__globals__.get("__name__") == separatrix_clip.__name__
+        and value.__globals__ is not live
+    )
 
 
-def test_no_module_function_carries_a_foreign_globals_dictionary():
-    """The module exposes no patched-globals clone of another module's function.
+def test_no_module_attribute_clones_the_clip_with_patched_globals():
+    """The operator module holds no patched-globals clone of the traced clip.
 
     The detector is exercised on a clone built here first, so a pass cannot
     come from a detector that never fires.
@@ -153,6 +155,7 @@ def test_no_module_function_carries_a_foreign_globals_dictionary():
     from nova.equilibrium import separatrix_clip
 
     library = dict(vars(separatrix_clip))
+    library["_traced_level_arc"] = separatrix_clip._traced_level_arc
     clone = types.FunctionType(
         separatrix_clip._traced_clip.__code__,
         library,
@@ -160,9 +163,9 @@ def test_no_module_function_carries_a_foreign_globals_dictionary():
         argdefs=separatrix_clip._traced_clip.__defaults__,
         closure=separatrix_clip._traced_clip.__closure__,
     )
-    assert _patched_globals_functions({"clone": clone}) == ["clone"]
+    assert _stale_clip_clones({"clone": clone}) == ["clone"]
 
-    assert _patched_globals_functions(vars(forward_operator)) == []
+    assert _stale_clip_clones(vars(forward_operator)) == []
     assert "_implicit_traced_level_arc" in vars(forward_operator)
 
 

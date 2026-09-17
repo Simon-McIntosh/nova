@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T11:43:26",
+  "updated": "2026-09-17T11:46:27",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -175375,6 +175375,230 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T042807085151-cca-delete-clip-globals-clone",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "cca-delete-clip-globals-clone",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3048,
+                "cached_input_tokens": 120750,
+                "input_tokens": 123830,
+                "output_tokens": 2587,
+                "reasoning_output_tokens": 1101,
+                "total_tokens": 126417,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "grep for _implicit_clip_globals over nova/ and tests/ returns nothing; the forward operator builds its implicit clip by calling the separatrix_clip entry points with arc_tracer=_implicit_traced_level_arc and no FunctionType or __globals__ manipulation remains in forward_operator.py; a receipt JSON under the reports fence compares the exact-clip terminal moments (clipped area, first moments, second moments per cell) on the weak-110 certificate fixture between the node head and the main checkout at the orientation base sha, computed on one all_debug job with JAX_PLATFORMS=cpu and the root venv interpreter, and reports max absolute difference exactly 0.0 on every moment array with the two arrays' shapes and sha256 digests printed; tests/test_equilibrium_separatrix_clip.py and the forward-operator test module that covers the implicit clip each pass in their own all_debug job with the log paths named in the manifest; every uv command carries --no-sync and nothing runs uv sync",
+          "estimated_hours": null,
+          "goal": "Delete the module-globals clone _implicit_clip_globals from nova/equilibrium/forward_operator.py by passing _implicit_traced_level_arc through the arc_tracer parameter that _traced_clip and its second entry point in nova/equilibrium/separatrix_clip.py now accept",
+          "id": "cca-delete-clip-globals-clone",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T04:28:07Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T042807085151-cca-delete-clip-globals-clone/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": null,
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/separatrix_clip.py",
+            "tests/test_equilibrium_forward_operator.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/arc-tracer-clone",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-337d1d569f61f639eedc",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T04:28:42Z",
+        "completed_at": "2026-09-17T05:57:54.077Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 5337,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 5352,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "26c45542a238aee9f45171abf609291530a399e6",
+        "commits": [
+          "294b070ec92b032683ecaf6fbc6a30b82de2f29f",
+          "aa2eec1ace60a38e88336c76bae0d94622964805",
+          "dbf411d9ecc8316beea1ef94394c378cc92af061",
+          "4bfbb18c5d30545435ee5ece3b95cb236401cdeb"
+        ],
+        "changed_lines": {
+          "added": 291,
+          "removed": 13,
+          "files": 4
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "tests/test_equilibrium_separatrix_clip.py 23 passed and tests/test_equilibrium_forward_operator.py 3 passed, one module per fresh all_debug process; independent review",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T042807085151-cca-delete-clip-globals-clone.json",
+          "log_digest": "sha256:165aaad1078314ab3e0822cf7b3d2c04f1f4c98ee98927a2ac2edc70c53aff49"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T042807085151-cca-delete-clip-globals-clone/manifest.md",
+        "scope_changed": false,
+        "session_id": "cd6755f6-8a1c-45e7-b2f2-1cb575725868",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 14026507,
+            "input_tokens_cumulative": 14026507,
+            "output_tokens": 65493,
+            "output_tokens_cumulative": 65493,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T05:57:54.077Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 19,
+            "evidence": 18,
+            "fit": 20,
+            "goal_fidelity": 20,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 96
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 14192060,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 5348.234,
+          "generated_tokens": 74732,
+          "generation_seconds": 4643.307,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.2,
+          "machine_seconds": 704.927,
+          "peak_input_tokens": 164253,
+          "tokens_per_second": 16.09,
+          "wall_tokens_per_second": 13.97
+        },
+        "follow_on_paths": [
+          "tests/test_exact_clip_memory.py",
+          "benchmarks/exact_clip_memory_scaling.py:498"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-delete-clip-globals-clone",
+          "session_id": "cd6755f6-8a1c-45e7-b2f2-1cb575725868",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T05:57:54.077Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 127.0,
+        "orientation_input_tokens": 2790022.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -175687,6 +175911,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2686
+    "_version": 2687
   }
 }

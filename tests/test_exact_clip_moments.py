@@ -201,6 +201,49 @@ def test_shifted_first_moment_paths_set_the_required_per_edge_order():
 
 
 @requires_boundary_route
+def test_order_study_receipt_carries_the_map_the_record_is_transcribed_from():
+    """The receipt the order table is transcribed from holds the map itself.
+
+    The landed record quoted two values wrong from this map, a flux coefficient
+    of 0.4 for 0.2 and an order-one radial defect of 2.53e-3 for 2.53e-1, so the
+    map is pinned here rather than left to prose.
+    """
+    import json
+    import tempfile
+    from pathlib import Path
+
+    from benchmarks.exact_clip_moment_floor import (
+        EDGE_ORDER_STUDY_EXACTNESS_THRESHOLD,
+        write_edge_order_study_receipt,
+    )
+
+    from nova.equilibrium.clip_quadrature import _ARC_EDGE_ORDER
+
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / "edge-order-study.json"
+        receipt = write_edge_order_study_receipt(path)
+        assert json.loads(path.read_text(encoding="utf-8")) == receipt
+    assert receipt["schema"] == "nova.exact-clip-edge-order-study.v1"
+    assert receipt["selected_per_edge_order"] == _ARC_EDGE_ORDER
+    assert receipt["exactness_threshold"] == EDGE_ORDER_STUDY_EXACTNESS_THRESHOLD
+    study = receipt["study"]
+    assert study["study_flux_quadratic_coefficients"] == [0.2, 0.3, -0.35]
+    defect = study["relative_defect_by_path_and_order"]
+    assert defect["radial_shift"]["1"] == pytest.approx(2.53e-1, rel=0.01)
+    assert defect["zero"]["1"] == pytest.approx(2.61e-3, rel=0.01)
+    # The selection is the smallest order that satisfies every path at once, so
+    # it follows from the map rather than being a constant restated beside it.
+    first_exact = {
+        path_name: min(int(order) for order, value in orders.items() if value <= 1e-12)
+        for path_name, orders in defect.items()
+    }
+    assert first_exact["zero"] == 3
+    assert set(first_exact.values()) == {3, _ARC_EDGE_ORDER}
+    assert max(first_exact.values()) == _ARC_EDGE_ORDER
+    assert study["lowest_order_exact_on_every_path"] == _ARC_EDGE_ORDER
+
+
+@requires_boundary_route
 def test_arc_route_carries_the_fixed_edge_and_point_bound():
     support = _curved_support(128, capacity=3072)
     edges = cut_capacity_edge_bound()

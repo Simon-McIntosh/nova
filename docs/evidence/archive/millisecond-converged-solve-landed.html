@@ -694,6 +694,23 @@
   </table>
   <p>The controlled 2026-09-15 known-present census records <code>120</code> current-moment traced copies and <code>36</code> topology-read traced copies in the solve, against one each in the map. The exact rerun's broader read-helper sentinel reports <code>79</code> matches, which is retained as an instrument qualification rather than substituted for the controlled comparison. Python Newton and trip loops remain host-side; the compiled solver budgets are <code>fori_loop</code> bodies. The report and full attribution table are under <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/msc-remainder-3/executable-remainder-census.md</code>.</p>
 </section>
+<section id="single-evaluator-body-copies">
+  <h2>Body copies follow traced call sites, not wrappers (2026-09-17)</h2>
+  <p><strong>Measurement.</strong> A five-arm reproducer ran as foreground CPU <code>all_debug</code> jobs <code>1272458</code> (arms one, direct, switch, while_) and <code>1272459</code> (arm machine) on <code>98dci4-clu-3141</code>, JAX 0.11.0, <code>JAX_PLATFORMS=cpu</code>. One traced body carries exactly one marker instruction (a <code>sine</code> on a distinctive width) and is reached from call sites whose inputs are all traced function arguments, so nothing constant-folds. The count is taken from the dumped optimized HLO (<code>--xla_dump_hlo_as_text --xla_dump_hlo_pass_re=after_optimizations</code>), never from StableHLO or Python identity, because the copiedness is a post-optimization phenomenon.</p>
+  <table>
+    <caption>Marker instructions and marker-bearing computations per wrapper arm, optimized HLO.</caption>
+    <thead><tr><th scope="col">Arm</th><th scope="col">Reached from</th><th scope="col">Marker instructions</th><th scope="col">Marker-bearing computations</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">one</th><td>one direct call site</td><td>1</td><td>1</td></tr>
+      <tr><th scope="row">direct</th><td>three direct call sites</td><td>3</td><td>1</td></tr>
+      <tr><th scope="row">switch</th><td>three <code>lax.switch</code> sites over a dynamic tag, one branch</td><td>3</td><td>1</td></tr>
+      <tr><th scope="row">while_</th><td>three <code>lax.while_loop</code> sites carrying the tag</td><td>3</td><td>3</td></tr>
+      <tr><th scope="row">machine</th><td>one machine invocation, request list carried inside the loop</td><td>1</td><td>1</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Reading.</strong> Copies follow the number of traced call sites: three direct sites and three <code>lax.switch</code> sites both yield three inlined marker instructions in one computation, and three <code>while_loop</code> sites yield three separate marker-bearing computations. Neither wrapper deduplicates across sites, so one body requires one traced call site — the machine arm carries the whole request set inside a single loop and returns one marker in one computation. <strong>Instrument qualification.</strong> The counter carries a positive control (<code>direct</code> = 3 known-present copies beside <code>one</code> = 1), and a first run that reported zero everywhere is recorded as a false negative: with literal (closure) inputs JAX folded the whole program to a constant block, which dumps no marker and reads exactly like a clean result.</p>
+  <p><strong>Consequence for the solve.</strong> The design derived from this measurement — one machine invocation carrying the request list, a dynamic loop-carried tag dispatching inside the body, <code>vmap</code> outside <code>jax.linearize</code>, the residual-shadow read left unco-produced, and <code>reduced_newton.py</code>'s own seam copies routed through the same machine — is fixed in <a href="/nova/research/single-evaluator-state-machine-design">the design record</a>, with the implement gate stated as a marker census on the optimized HLO beside the committed <code>120</code>/<code>36</code> sentinel counts and the five stages each fenced at 60 minutes. Instruments, receipts (<code>receipt-&lt;arm&gt;.json</code>) and logs (<code>reproducer.log</code>, <code>machine-arm.log</code>) are under <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/evaluator-design/reproducer/</code>.</p>
+</section>
 </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T20:30:11",
+  "updated": "2026-09-17T20:37:28",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -181550,6 +181550,212 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T044142288419-mulw-diiid-gate-frame-identity",
+        "plan": "multi-unit-limiter-wall",
+        "section": "",
+        "node": "mulw-diiid-gate-frame-identity",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 355,
+                "cached_input_tokens": 180935,
+                "input_tokens": 181322,
+                "output_tokens": 1951,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 183273,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "A new driver benchmarks/diiid_gate_frame_identity.py imports the identity comparator from benchmarks/solve_program_size_gate.py rather than copying it, runs every DIII-D strict-exit gate frame the plan names against the committed batched artifact in ONE sbatch job on betelgeuse under reservation gpu_0003_grpA with --gres=gpu:1, 8 cores, --mem=128G, TMPDIR=/tmp exported at submit and inside the payload, the shared root interpreter run directly with PYTHONPATH set to the worktree (no uv on the compute node), JAX_PLATFORMS=cuda,cpu and the persistent compilation cache, and persists one receipt JSON under docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/ as each frame lands carrying per frame the identity_row_count (which must be positive, the EmptyIdentitySetError guard left in force), the maximum absolute terminal-state difference, the terminal residual on both sides and the converged flag, plus a header naming the artifact digest, the main sha and the job id; the manifest states for every frame either bit-identical (0.0) or the device-qualified difference with its magnitude, and the job log path; every uv command carries --no-sync and nothing runs uv sync",
+          "estimated_hours": null,
+          "goal": "Measure the DIII-D strict-exit gate frames at the main tree against the committed batched artifact through the certificate identity comparator, as one H200 job, closing item one of followup f-20260909T201444769610",
+          "id": "mulw-diiid-gate-frame-identity",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T04:41:42Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T044142288419-mulw-diiid-gate-frame-identity/manifest.md",
+          "plan": "multi-unit-limiter-wall",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/diiid_gate_frame_identity.py",
+            "docs/figures/multi-unit-limiter-wall",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/diiid-gate-frame-identity",
+            "docs/evidence/archive/multi-unit-limiter-wall-landed.html",
+            "docs/plans/multi-unit-limiter-wall.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-mulw-diiid-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T04:42:13Z",
+        "completed_at": "2026-09-17T17:47:15.466Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 47090,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 47102,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "92fa1f4a85b4e9a7738e9e115e0ec6f1c67a37ba",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "H200 jobs 1272630 (driver route error), 1272819 (out of memory), 1273188 (hung at fork, cancelled by the worker)",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T044142288419-mulw-diiid-gate-frame-identity/manifest.md",
+          "log_digest": "sha256:0109a67061fdcd7785d3729afd8965871a3c2d074f5646ad28fbabb955448b18"
+        },
+        "suite_delta": null,
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T044142288419-mulw-diiid-gate-frame-identity/manifest.md",
+        "scope_changed": false,
+        "session_id": "333303e8-8d27-4066-863f-7cb393cc2b22",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 17677137,
+            "input_tokens_cumulative": 17677137,
+            "output_tokens": 89187,
+            "output_tokens_cumulative": 89187,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T17:47:15.466Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 18012916,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 7697.827,
+          "generated_tokens": 102019,
+          "generation_seconds": 7473.988,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.8,
+          "machine_seconds": 223.839,
+          "peak_input_tokens": 166941,
+          "tokens_per_second": 13.65,
+          "wall_tokens_per_second": 13.25
+        },
+        "follow_on_paths": [
+          "os.fork"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "the driver commits 4404e68a, 6995aa62 and 02462d3b stay on the worktree as the base lineage of the successor node mulw-diiid-identity-single-member-build, which merges them when it lands",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/mulw-diiid-gate-frame-identity",
+          "session_id": "333303e8-8d27-4066-863f-7cb393cc2b22",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T17:47:15.466Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "333303e8-8d27-4066-863f-7cb393cc2b22",
+          "source": "pointer",
+          "reason": "the successor node carries the work with the wider scope"
+        },
+        "watch_override": null,
+        "tool_steps": 160.0,
+        "orientation_input_tokens": 4802650.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -181862,6 +182068,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2728
+    "_version": 2729
   }
 }

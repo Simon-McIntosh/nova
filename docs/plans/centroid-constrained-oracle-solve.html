@@ -23,8 +23,8 @@
   <title>Centroid-constrained oracle solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-16">
-<meta name="plan-version" content="10">
+<meta name="plan-modified" content="2026-09-17">
+<meta name="plan-version" content="11">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -81,6 +81,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-s19c-field-response-landed" data-who="reckon-ship s19-codex" data-when="2026-09-16T11:15:00Z">
     <div class="r-comment-body">cco-uniform-field-response-probe landed (run r-20260916T102915777338, codex-luna, 44 min; merged 837d26c4, promoted c0bdb7c2). Gate passed on one reused production map, H200 job 1272113, exact clip, cached exterior fixed: a uniform radial field moves the vertical centroid exactly as the row predicts (4.917 m/T; ratio 0.99996 at 1 mT, 1.0017 at 10 mT, both signs); a uniform vertical field moves the radial centroid as the row predicts once the sampled baseline's 6.1 mm inward offset is removed (one-map shifts minus 4.5 and minus 7.7 mm at plus and minus 1 mT, plus 10.2 and minus 22.3 mm at plus and minus 10 mT, centred on the minus 6.1 mm baseline, against 1.63 mm and 16.3 mm predicted; the receipt's raw ratios for those rows carry the offset). Four-trip shifts are three to seven times the one-map shifts with the same sign, the repelling fixture measured by the positional-stiffness node. Coordinator reading for the lead: the actuator is right in direction and scale in both components, so the 0.25 T saturation of the constrained solve was not the compensating unknown's response; the two candidates left are the bounded iteration itself (a clipped unknown has zero tangent at its bound, so once a Newton step overshoots onto the bound the row cannot pull it back) and the fixed-point sensitivity differing from the one-map sensitivity on a repelling map. The compensating-unknown decision is therefore informed but still the lead's: uniform-field-increment is confirmed as a valid actuator (this section's second done-when clause); the open question is how the bound is imposed, and that redesign is the next node once the decision is locked. The constrained solve stays held. Both codex lanes are near their weekly ceiling and the local lane is held for a serve restart, so no further node is dispatched on this plan in this session.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260916T205409901465-cco-bounded-row-step-control" data-who="s19c-cco-bound-c" data-when="2026-09-17T05:37:50.850Z">
+    <div class="r-comment-body"><p>Damped step control replaces the clip on the bounded exterior-field unknown (per-trip cap, halving backtracking ladder, fail-closed bound refusal on the record); tests 3 passed and 6 passed at head with zero added failures against base (two pre-existing eliminated-constraint ids at forward.py:2589). Positive control on the 20 mm displaced seed: converged centroid 6.064155 m against 6.063530 target, 6.2e-4 m or 1.3e-3 pitches, 74 times inside the tenth-pitch clause, with 2.39e-3 T of compensating field (0.96 percent of the bound, no refusal); the row scaled residual 1.34e-3 misses the 1e-12 fixed-point clause. Review 84/100: the recorded 0.529 Wb boundary-flux offset is gauge-confounded (axis-anchored compensator column at measure.py:712 against a boundary-anchored authored zero hardcoded in oracle_start_newton_probe.py:254), so the fixed-point verdict is not established either way and must be re-read in one gauge; the negative control does not discriminate at 20 mm because the unconstrained map relaxes the seed to its own fixed point inside the band</p></div>
 </div>
 </section>
 </main>

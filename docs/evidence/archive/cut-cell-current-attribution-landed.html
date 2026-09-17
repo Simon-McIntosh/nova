@@ -12,8 +12,8 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Cut-cell current attribution — cumulative execution evidence">
 <meta name="plan-summary" content="Landing record of the cut-cell-current-attribution plan: the §1 root cause (whole-cell booking since 2026-08-27), the Gate A/B/C oracle gates, the reposed fixture exterior, the exact-clip quadrature memory findings, and the clipped-support quadrature per-module test-delta gate that closes §2 re-verification">
-<meta name="plan-modified" content="2026-09-15">
-<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-09-17">
+<meta name="plan-version" content="2">
 </head>
 <body>
 <main class="plan-doc">
@@ -1192,6 +1192,91 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
 
   <p>The worker landed the benchmark and quantitative evidence but leaves the
   driving followup and section status open for coordinator adjudication.</p>
+</section>
+
+<section id="implicit-arc-tracer-parameter">
+  <h2>The implicit arc tracer becomes an explicit parameter</h2>
+
+  <p>The level-root arc tracer is now an argument of <code>_traced_clip</code>
+  and of <code>AtomicCellMesh.traced_clip</code>, appended after every existing
+  parameter and resolved at call time to the module's own twelve-step
+  <code>_traced_level_arc</code> when it is None. The scan body calls
+  <code>tracer(...)</code> instead of the module global, so a caller that needs
+  a different derivative — an implicit-function tangent, for instance — passes
+  its tracer explicitly rather than rebinding a module global through a patched
+  <code>__globals__</code> dictionary. That patched-dictionary clone is what
+  this seam exists to replace; the seam is landed here, the clone deletion is
+  not, because the clone lives outside this change's write scope.</p>
+
+  <p><strong>What changed.</strong> Commit <code>935589ac</code>: three hunks
+  and sixteen lines in <code>nova/equilibrium/separatrix_clip.py</code> — the
+  parameter, one docstring paragraph, a call-time alias, and the call site
+  inside the gap-scan body. No numeric path changed, nothing inside
+  <code>_traced_level_arc</code> changed, and because the parameter is appended
+  last no existing positional caller shifts. On the default route the callee is
+  the same function object, so the arithmetic of every existing route is
+  unchanged by construction. <code>tests/test_equilibrium_separatrix_clip.py</code>
+  gains one guard in 63 added lines.</p>
+
+  <p><strong>Evidence that could have failed.</strong> The clone route and an
+  explicit implicit tracer were driven over the same sixteen-cell mesh and agree
+  on the clipped support: vertex-count sum 1584, total clipped area
+  12.566335557375638, support-vertex digest
+  <code>99674cf594df2e543c2e93c0fe4b6e17270c1e03db3d9d3d04bb061659b3efda</code>.
+  The same receipt shows the explicit default tracer differing from the explicit
+  implicit one, so the parameter is live rather than silently inert — a test
+  that could not tell the two tracers apart would prove nothing. The new guard
+  counts tracer invocations at trace time, which <code>jax.lax.scan</code> makes
+  possible, and reads 0 under a temporary mutation that ignores
+  <code>arc_tracer</code>; the mutation was reverted before the commit. Receipts:
+  <code>reports/nova/s19-local/arc-tracer/arc-tracer-equivalence.json</code> and
+  <code>…/logs</code>.</p>
+
+  <p><strong>Importer gate.</strong> One <code>all_debug</code> job per module,
+  one module per fresh CPU process, at <code>935589ac</code>: seven of the eight
+  modules that import the changed file are green with zero failures —
+  test_domain_participation_continuity 4, test_equilibrium_density_moments 3,
+  test_equilibrium_separatrix_clip 23 (22 base tests plus the new guard),
+  test_forward_moment_class 7, test_rim_current_scatter 4, test_saddle_partition
+  3, test_xpoint_cell_wedge_clip 6. Zero added failures follows without a base
+  run, because an added failure would first have to be a head failure. The
+  module itself passes 23 of 23.</p>
+
+  <p><strong>The eighth module, and what is not established.</strong>
+  <code>tests/test_exact_clip_memory.py</code> was cancelled at its 59-minute
+  limit showing <code>............F</code>, the F being test 13 of 14, the weak
+  exact-clip terminal-agreement test. It is not attributable to this change.
+  Jobs 1272481 and 1272483 resolve the carrier the row needs: base and head
+  produce the same machine identity and the same cache digest — weak carrier at
+  110 cells <code>c7a1d2d573e4c68a</code>, at 300 cells
+  <code>40da0fa4de85b1a0</code>, and the signed <code>-300</code> row that test
+  13 actually drives agrees and is cached — while the unsigned 110 and 300
+  entries are absent from the oracle store and the on-the-fly build refuses with
+  <em>the oracle mesh has no complete hex generator</em>. That defect bites the
+  base tree exactly as it bites this one, so it cannot be this change. The
+  base-to-head terminal-moment comparison the fence asked for is therefore not
+  available: one weak exact solve at <code>-300</code> exceeded 2700 s, so the
+  two arms together do not fit a single 59-minute allocation, and the moments
+  were not measured. The bit-identity claim stands on the diff — the default
+  route calls the same function object — and on the equivalence receipt, not on
+  a measured terminal state.</p>
+
+  <p><strong>No new figure, and why.</strong> This record produces no terminal
+  forward state: the row whose flux contours would be drawn did not complete its
+  solve, and inventing a panel from an earlier state would misattribute it to
+  this change. The flux contour panels that exist for the clip work are the ones
+  under <code>docs/figures/cut-cell-current-attribution/</code>, unchanged here.</p>
+
+  <p><strong>Scope defect carried.</strong> The globals-dictionary clone the
+  work was aimed at is not in this file at all. It is
+  <code>nova/equilibrium/forward_operator.py</code> lines 645–656, where
+  <code>_implicit_clip_globals</code> copies the clip's globals and rebinds
+  <code>_traced_level_arc</code>, called at line 2849; with two more rebinding
+  sites in <code>tests/test_exact_clip_memory.py</code> line 81 and
+  <code>benchmarks/exact_clip_memory_scaling.py</code> line 498. None of those
+  files is in this change's write scope, so the clone cannot be deleted from
+  inside this node: <code>forward_operator.py</code> needs both a scope grant and
+  a followup node of its own. The landed half is the seam that deletion needs.</p>
 </section>
 </main>
 </body>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T12:57:50",
+  "updated": "2026-09-17T13:05:02",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -177369,6 +177369,226 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T205009785219-nia-bank-drift-paired-probe",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "nia-bank-drift-paired-probe",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 9200,
+                "cached_input_tokens": 788738,
+                "input_tokens": 797940,
+                "output_tokens": 4001,
+                "reasoning_output_tokens": 241,
+                "total_tokens": 801941,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "one H200 job (one card, explicit --mem 128G, both trees compiled through the persistent cache, the shared interpreter run directly, TMPDIR=/tmp outside as well as inside, declared as a wait) writes a receipt under docs/figures/null-identification-authority/bank-drift-probe/ with twelve rows each naming the first stage whose digest differs between fae50f15 and main beside the residual difference magnitude, a summary stating for 21983/35 mixed which read or partition moved, the accepted cache 2c291a84 untouched, no tracked file under nova/ modified, a section 1 plan comment stating the finding without deciding reissue or repair, logs under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/bank-drift, manifest scalars unquoted",
+          "estimated_hours": null,
+          "goal": "Run the paired old-tree against current-tree probe on the accepted MAST operand cache (logs/exact-operand-cache.npz, sha256 2c291a84, bank producer revision fae50f15) that the 2026-09-16 drift attribution on batched-operator-boundary asked for: for each of the twelve arms evaluate the producer's solve at fae50f15 (git archive of that revision unpacked under the report directory, never a second worktree of the repository) beside main in one H200 job, persisting per arm the first intermediate output whose digest differs (profile support, operand partition, first map image, terminal residual) so the 21983/35 mixed arm whose residual moved 54 percent is attributed to a named read or partition",
+          "id": "nia-bank-drift-paired-probe",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-16T20:50:11Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205009785219-nia-bank-drift-paired-probe/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/bank_drift_paired_probe.py",
+            "docs/figures/null-identification-authority/bank-drift-probe",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/bank-drift",
+            "docs/evidence/archive/null-identification-authority-landed.html",
+            "docs/plans/null-identification-authority.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19c-nia-driftprobe-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-16T20:50:42Z",
+        "completed_at": "2026-09-17T09:53:16.475Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 46939,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 46954,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "ef5504ea7966773255934b7e09e208db88a77866",
+        "commits": [
+          "5ed1dd3bb5f7d9f3c3b5e1852f734ad4abdc608d",
+          "37fec9046625131ec4eeb67d9c13b9d52a5244d7",
+          "f7364e825a9c517b5d5a56bedf8b12144115b2be",
+          "1b46774548a40d41e42bf6ff1ebf86c17ecde7b8",
+          "903d5d496e37e265833660463ed523a9eee1996d"
+        ],
+        "changed_lines": {
+          "added": 1960,
+          "removed": 3,
+          "files": 14
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "campaign job 1272590 (TIMEOUT at 2h30 with twelve producer-tree and six current-tree emissions), merge and pairing exercised on real emissions; independent review",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T205009785219-nia-bank-drift-paired-probe.json",
+          "log_digest": "sha256:950c9b10cef6e25b0443e88cfa6581252547cfe81edc6ff326026545046429cb"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205009785219-nia-bank-drift-paired-probe/manifest.md",
+        "scope_changed": false,
+        "session_id": "6d36b717-0caf-4557-a786-30ae3e5023a6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3828203,
+            "input_tokens_cumulative": 3828203,
+            "output_tokens": 28390,
+            "output_tokens_cumulative": 28390,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T09:53:16.475Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 8,
+            "evidence": 18,
+            "fit": 18,
+            "goal_fidelity": 16,
+            "scope_discipline": 16
+          },
+          "absent": [],
+          "total": 76
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 3979539,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 869.795,
+          "generated_tokens": 37941,
+          "generation_seconds": 817.612,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 29.2,
+          "machine_seconds": 52.183,
+          "peak_input_tokens": 140226,
+          "tokens_per_second": 46.4,
+          "wall_tokens_per_second": 43.62
+        },
+        "follow_on_paths": [
+          "22086/43",
+          "21978/35"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe",
+          "session_id": "6d36b717-0caf-4557-a786-30ae3e5023a6",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T09:53:16.475Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 91.0,
+        "orientation_input_tokens": 5028836.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -177681,6 +177901,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2698
+    "_version": 2699
   }
 }

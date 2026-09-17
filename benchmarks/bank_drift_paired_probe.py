@@ -721,6 +721,141 @@ def _resolve(
     return 0
 
 
+def _hollow_after(axes: Any, count_before: int) -> None:
+    """Turn the most recently added lines into hollow markers."""
+
+    for line in axes.lines[count_before:]:
+        line.set_markerfacecolor("none")
+
+
+def _load_resolved(path: Path) -> dict[str, Any]:
+    """Read one resolve archive, which carries the terminal state whole."""
+
+    with np.load(path, allow_pickle=False) as archive:
+        return {name: archive[name] for name in archive.files}
+
+
+def _panel(old_path: Path, new_path: Path, out_path: Path, levels: int) -> int:
+    """Draw the producer and current terminal states as one contour pair.
+
+    Both panels share one physical level array computed from the producer state,
+    so a difference between them cannot hide behind independent level choices.
+    Each panel draws its own stationary points in the committed vocabulary and
+    the other state's in a hollow grey, and both carry the wall.
+
+    The panel's own nulls stay solid and the counterpart's are hollowed, so a
+    reader can tell which state a marker belongs to without reading the marker
+    grammar: a solved null drawn in the same style as the reference one reads as
+    the answer even when the state under it did not converge.
+    """
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    from nova.media.ink import DEFAULT_INK, poloidal_axes
+    from nova.media.poloidal import (
+        contour_levels,
+        draw_flux_contours,
+        draw_nulls,
+        draw_wall,
+    )
+
+    old = _load_resolved(old_path)
+    new = _load_resolved(new_path)
+    old_flux = np.asarray(old["flux"], dtype=float)
+    new_flux = np.asarray(new["flux"], dtype=float)
+    radius = np.asarray(old["radius"], dtype=float)
+    height = np.asarray(old["height"], dtype=float)
+    wall = np.asarray(old["wall"], dtype=float)
+    shared_levels = contour_levels(old_flux, count=levels)
+
+    own = DEFAULT_INK.variant(
+        axis_marker="^",
+        axis_markersize=9.0,
+        xpoint_marker="x",
+        xpoint_markersize=9.0,
+    )
+    other = DEFAULT_INK.variant(
+        axis_marker="o",
+        axis_markersize=8.0,
+        xpoint_marker="s",
+        xpoint_markersize=8.0,
+        axis_color="#666666",
+        xpoint_color="#666666",
+    )
+
+    panels = (
+        {
+            "state": old,
+            "flux": old_flux,
+            "title": (
+                f"producer tree {old['tree_label']}  "
+                f"converged={bool(old['converged'])}  "
+                f"residual={float(old['terminal_residual']):.3e}"
+            ),
+        },
+        {
+            "state": new,
+            "flux": new_flux,
+            "title": (
+                f"current tree {new['tree_label']}  "
+                f"converged={bool(new['converged'])}  "
+                f"residual={float(new['terminal_residual']):.3e}"
+            ),
+        },
+    )
+
+    r_min, r_max = float(np.nanmin(wall[:, 0])), float(np.nanmax(wall[:, 0]))
+    z_min, z_max = float(np.nanmin(wall[:, 1])), float(np.nanmax(wall[:, 1]))
+    span = max(r_max - r_min, z_max - z_min)
+    pad = 0.04 * span
+    extent = (r_min - pad, r_max + pad, z_min - pad, z_max + pad)
+
+    figure, axes_row = plt.subplots(1, 2, figsize=(9.0, 5.0), dpi=DEFAULT_INK.figure_dpi)
+    for axes, panel in zip(axes_row, panels, strict=True):
+        poloidal_axes(axes)
+        draw_flux_contours(axes, radius, height, panel["flux"], shared_levels)
+        draw_wall(axes, radius=wall[:, 0], height=wall[:, 1])
+        state = panel["state"]
+        before = len(axes.lines)
+        draw_nulls(
+            axes,
+            magnetic_axis=np.asarray(state["axis"], dtype=float),
+            x_points=np.asarray(state["selected_x"], dtype=float).reshape(1, 2),
+            style=own,
+            contain=wall,
+        )
+        counterpart = panels[1] if panel is panels[0] else panels[0]
+        other_state = counterpart["state"]
+        before = len(axes.lines)
+        draw_nulls(
+            axes,
+            magnetic_axis=np.asarray(other_state["axis"], dtype=float),
+            x_points=np.asarray(other_state["selected_x"], dtype=float).reshape(1, 2),
+            style=other,
+            contain=wall,
+        )
+        _hollow_after(axes, before)
+        axes.set_xlim(extent[0], extent[1])
+        axes.set_ylim(extent[2], extent[3])
+        axes.set_autoscale_on(False)
+        axes.set_title(panel["title"], fontsize=7.0)
+    figure.suptitle(
+        "MAST 21978/35 pure terminal state on one shared level array.\n"
+        "solid red: this panel's axis (triangle) and admitted saddle (cross); "
+        "hollow grey: the other state's",
+        fontsize=8.0,
+    )
+    figure.tight_layout(rect=(0.0, 0.0, 1.0, 0.90))
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(out_path, facecolor=figure.get_facecolor())
+    plt.close(figure)
+    print(f"wrote {out_path}", flush=True)
+    return 0
+
+
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -776,6 +911,11 @@ def _parse() -> argparse.Namespace:
     resolve.add_argument("--arm", required=True, choices=("pure", "mixed"))
     resolve.add_argument("--out", type=Path, required=True)
     resolve.add_argument("--compile-cache-root", type=Path, default=None)
+    panel = sub.add_parser("panel")
+    panel.add_argument("--old", type=Path, required=True)
+    panel.add_argument("--new", type=Path, required=True)
+    panel.add_argument("--out", type=Path, required=True)
+    panel.add_argument("--levels", type=int, default=12)
     return parser.parse_args()
 
 
@@ -795,6 +935,8 @@ def main() -> int:
         )
     if args.command == "merge":
         return _merge(args.arms_dir, args.out, args.expected_rows)
+    if args.command == "panel":
+        return _panel(args.old, args.new, args.out, args.levels)
     if args.command == "resolve":
         return _resolve(
             args.label,

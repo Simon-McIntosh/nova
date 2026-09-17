@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Coil-edit non-convergence forensics</title>
+<style>
+  body { font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+         margin: 2.4rem auto; color: #1c2127; background: #fbfbfc; }
+  main { max-width: 62rem; margin: 0 auto; padding: 0 1.2rem 4rem; }
+  h1 { font-size: 1.5rem; margin: 0 0 .3rem; }
+  h2 { font-size: 1.12rem; margin: 2.2rem 0 .5rem; border-bottom: 1px solid #dfe3e8; padding-bottom: .28rem; }
+  h3 { font-size: 1rem; margin: 1.4rem 0 .35rem; }
+  p, li { color: #2b3138; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; margin: .7rem 0 1.2rem; }
+  th, td { border: 1px solid #dfe3e8; padding: .26rem .45rem; text-align: right; }
+  th:first-child, td:first-child { text-align: left; }
+  th { background: #f1f3f6; font-weight: 600; }
+  tr.fail td { background: #fdf3f2; }
+  code { font-family: ui-monospace, "SF Mono, Menlo, Consolas, monospace; font-size: 12.5px; background: #f1f3f6; padding: .05rem .25rem; }
+  figure { margin: 1rem 0 1.6rem; }
+  figure img { width: 100%; border: 1px solid #dfe3e8; }
+  figcaption { font-size: 12.5px; color: #57606a; margin-top: .4rem; }
+  .lede { color: #57606a; margin-top: 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Coil-edit non-convergence forensics</h1>
+<p class="lede">Why ten of twenty warm-started coil edits stop short of the tolerance, per edit, from the per-edit traces of a single H200 re-run of the sweep.</p>
+<h2 id="measured">What was measured</h2>
+<p>The twenty-edit sweep of <code>benchmarks/coil_edit_latency.py</code> was re-run once on one reserved H200
+(<code>98dci4-gpu-... "NVIDIA H200 NVL"</code>, partition <code>betelgeuse</code>, reservation <code>gpu_0003_grpA</code>, no <code>uv</code> on the node,
+the root interpreter with <code>PYTHONPATH</code> at the worktree, persistent compilation cache reused).
+Each edit takes the frozen MAST 22086 slice-43 mixed seed, multiplies the P4-upper (circuit 8) current by
+<code>1 + f</code> for <code>f</code> stepping 2&#37; from &minus;18&#37; to +20&#37;, and solves the reduced Newton route warm-started
+from the preceding edit's terminal state. The solve settings are the sweep's: tolerance <code>1e-8</code>,
+<code>newton_steps=12</code>, <code>active_set_steps=16</code>.</p>
+<p>Ten edits converged and ten did not. Every non-converged edit reports the same termination word,
+<code>active_set_settled</code>, so the word alone carries no diagnostic. What separates them is in the
+per-trip trace: how many Newton steps each trip accepted, how many it rejected, whether the trip's
+closing active-set read moved the mask, and the seed's own residual on the edited operator before the
+first trip. The seed probe is a zero-step solve (<code>newton_steps=0, active_set_steps=1</code>), so it
+records the residual the warm seed carries on the edited operator.</p>
+<h2 id="table">The twenty edits</h2>
+<p>Rows marked in red are the non-converged ones. <em>Residual</em> is the terminal active-set residual;
+<em>seed</em> is the seed's residual on the edited operator before the first trip; <em>steps / trip</em>
+and <em>rejected / trip</em> are the Newton steps accepted and the line-search rejections in each trip;
+<em>mask &Delta;</em> is the size of the mask change the trip's closing read produced. A trip whose
+mask &Delta; is 0 promotes nothing, which is what ends the loop.</p>
+<table>
+<thead>
+<tr><th>edit</th><th>fraction</th><th>residual</th><th>seed</th><th>conv.</th><th>termination</th><th>trips</th><th>steps / trip</th><th>rejected / trip</th><th>mask &Delta;</th><th>TX disp. (m)</th></tr>
+</thead>
+<tbody>
+<tr><td>0</td><td>-18%</td><td>2.7291e-09</td><td>5.309e-02</td><td>yes</td><td>converged</td><td>4</td><td>12,10,0,0</td><td>0,0,0,0</td><td>18,34,6,0</td><td>0.4394</td></tr>
+<tr class="fail"><td>1</td><td>-16%</td><td>2.3738e-06</td><td>8.171e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.4372</td></tr>
+<tr class="fail"><td>2</td><td>-14%</td><td>2.4079e-05</td><td>7.561e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.4347</td></tr>
+<tr><td>3</td><td>-12%</td><td>1.2711e-09</td><td>6.931e-03</td><td>yes</td><td>converged</td><td>2</td><td>12,7</td><td>0,0</td><td>20,0</td><td>0.4322</td></tr>
+<tr class="fail"><td>4</td><td>-10%</td><td>1.8825e-03</td><td>6.455e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.4325</td></tr>
+<tr><td>5</td><td>-8%</td><td>3.7661e-15</td><td>7.806e-04</td><td>yes</td><td>converged</td><td>3</td><td>6,0,1</td><td>0,0,0</td><td>20,20,0</td><td>0.4285</td></tr>
+<tr class="fail"><td>6</td><td>-6%</td><td>4.4224e-03</td><td>5.386e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.4291</td></tr>
+<tr><td>7</td><td>-4%</td><td>5.0334e-09</td><td>7.437e-03</td><td>yes</td><td>converged</td><td>1</td><td>6</td><td>0</td><td>0</td><td>0.4282</td></tr>
+<tr class="fail"><td>8</td><td>-2%</td><td>1.8590e-07</td><td>4.158e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.427</td></tr>
+<tr><td>9</td><td>+0%</td><td>2.8901e-10</td><td>3.529e-03</td><td>yes</td><td>converged</td><td>2</td><td>12,1</td><td>0,0</td><td>1,0</td><td>0.4247</td></tr>
+<tr class="fail"><td>10</td><td>+2%</td><td>1.5055e-08</td><td>2.869e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>12</td><td>0</td><td>0</td><td>0.4222</td></tr>
+<tr><td>11</td><td>+4%</td><td>2.1406e-09</td><td>2.209e-03</td><td>yes</td><td>converged</td><td>2</td><td>12,6</td><td>0,0</td><td>1,0</td><td>0.4164</td></tr>
+<tr><td>12</td><td>+6%</td><td>4.2239e-09</td><td>1.573e-03</td><td>yes</td><td>converged</td><td>2</td><td>6,0</td><td>0,0</td><td>4,0</td><td>0.4118</td></tr>
+<tr><td>13</td><td>+8%</td><td>4.1520e-10</td><td>1.490e-03</td><td>yes</td><td>converged</td><td>2</td><td>12,3</td><td>0,0</td><td>2,0</td><td>0.412</td></tr>
+<tr><td>14</td><td>+10%</td><td>1.3122e-11</td><td>1.580e-03</td><td>yes</td><td>converged</td><td>2</td><td>12,1</td><td>0,0</td><td>1,0</td><td>0.3957</td></tr>
+<tr><td>15</td><td>+12%</td><td>6.1555e-10</td><td>2.570e-02</td><td>yes</td><td>converged</td><td>2</td><td>12,2</td><td>0,0</td><td>24,0</td><td>0.3639</td></tr>
+<tr class="fail"><td>16</td><td>+14%</td><td>8.3653e-04</td><td>1.740e-03</td><td>no</td><td>active_set_settled</td><td>2</td><td>7,1</td><td>1,1</td><td>32,0</td><td>0.3043</td></tr>
+<tr class="fail"><td>17</td><td>+16%</td><td>2.1106e-03</td><td>2.111e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0.2995</td></tr>
+<tr class="fail"><td>18</td><td>+18%</td><td>1.8489e-03</td><td>4.870e-03</td><td>no</td><td>active_set_settled</td><td>3</td><td>0,7,1</td><td>1,1,1</td><td>26,22,0</td><td>0.3857</td></tr>
+<tr class="fail"><td>19</td><td>+20%</td><td>2.9220e-03</td><td>2.922e-03</td><td>no</td><td>active_set_settled</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0.3786</td></tr>
+</tbody>
+</table>
+<h2 id="groups">Grouping the non-converged half</h2>
+<p>All ten non-converged edits terminate with the same word, so the table groups them by the mechanism
+their traces support instead. The mechanism is decided by two facts only: whether any Newton step was
+accepted at all, and whether the closing active-set read ever moved the mask.</p>
+
+<h3>Stall &mdash; one trip, full Newton budget spent, mask already stable &mdash; edits 1, 2, 4, 6, 8, 10</h3>
+<p>Each of these edits takes exactly one trip, and that trip consumes the whole <code>newton_steps=12</code>
+budget in accepted steps with no rejection, while its closing mask read reports a mask difference of 0.
+The loop ends there: a trip that promotes nothing and does not reach the tolerance exits the trip loop.</p>
+<p>The cost is that these seeds receive one trip's budget and no more. Twelve Newton steps move the
+residual a long way &mdash; edit 1 from 8.171e-03 to 2.374e-06, six orders &mdash; but not to 1e-8, so a solve
+that is still descending fast is reported as settled. The residuals of the group run from 1.506e-08
+(edit 10) to 4.422e-03 (edit 6), against seeds of 2.869e-03 to 8.171e-03. Every member's terminal
+residual is below its seed's, so none is a failure to descend; all are a stop while descending.</p>
+<p>The mask-stable seed is a consequence of the warm start: from edit 1 onward the seed is the previous
+edit's terminal state, whose active set is already stationary on the new operator. The one edit that is
+not warm-started from a predecessor (edit 0, seeded from the base frame at the shot current) shows mask
+motion in every trip
+(<code>18, 34, 6, 0</code>) and converges, which is the contrast that makes the group coherent.</p>
+
+<h3>Refused first step &mdash; no Newton step accepted &mdash; edits 17, 19</h3>
+<p>These two take one trip, accept zero Newton steps, reject one, see a mask difference of 0, and return
+the seed unchanged: the terminal residual is bit-for-bit the seed probe's residual
+(<code>2.11060409400877</code> for edit 17, <code>2.92200350800961</code> for edit 19). The line search
+refused the first step, so nothing moved.</p>
+<p>This is the case the termination word misnames. On the host route the solver separates a refused-step
+exit from a settled active set: an exhausted line search with no accepted step and a mask difference of
+0 is reported as <code>SUFFICIENT_DECREASE_REFUSED</code>. The compiled trip loop has no branch for that
+case and its <code>settled = difference == 0</code> test answers <code>ACTIVE_SET_SETTLED</code> for both.
+The trace, not the word, is what distinguishes them.</p>
+
+<h3>Partial walk &mdash; several trips, mask still moving, cut short &mdash; edits 16, 18</h3>
+<p>These are the two whose closing active-set read does move the mask. Edit 16 takes two trips with mask
+differences <code>32</code> then <code>0</code>, one rejection per trip, and descends
+1.278e-03 &rarr; 8.365e-04. Edit 18 takes three trips with mask differences <code>26, 22, 0</code>,
+one rejection per trip, and descends 4.870e-03 &rarr; 2.311e-03 &rarr; 1.849e-03. Both end on a trip whose
+mask difference is 0 while the residual is still above tolerance: a genuine active-set iteration that
+was working and was cut short, not a stalled or refused one.</p>
+<table>
+<thead>
+<tr><th>group</th><th>edits</th><th>trips</th><th>steps / trip</th><th>rejected / trip</th><th>mask &Delta;</th><th>terminal residual</th><th>seed residual</th></tr>
+</thead>
+<tbody>
+<tr><td>stall</td><td>1, 2, 4, 6, 8, 10</td><td>1</td><td>12 (all)</td><td>0 (all)</td><td>0 (all)</td><td>1.506e-08 &ndash; 4.422e-03</td><td>2.869e-03 &ndash; 8.171e-03</td></tr>
+<tr><td>refused</td><td>17, 19</td><td>1</td><td>0</td><td>1</td><td>0</td><td>= seed, bitwise</td><td>2.111e-03, 2.922e-03</td></tr>
+<tr><td>walk</td><td>16, 18</td><td>2, 3</td><td>7/1, 0/7/1</td><td>1 per trip</td><td>32/0, 26/22/0</td><td>8.365e-04, 1.849e-03</td><td>1.740e-03, 4.870e-03</td></tr>
+</tbody>
+</table>
+<h2 id="caveats">What the traces rule out, and what they cannot say</h2>
+<ul>
+  <li><strong>No topology change.</strong> Every edit's achieved class is <code>diverted</code> with
+  <code>read_status: qualified</code>, and so is every seed probe's class both before and after the
+  first trip. The non-convergence is not a topology transition between the seed and the edited state.</li>
+  <li><strong>The class margin is uninformative.</strong> <code>class_margin</code> is null on all twenty
+  edits and on the seed probes, so the traces cannot say how close each state sits to leaving the
+  diverted class. A margin would have made the near-miss hypothesis testable; it is not available here.</li>
+  <li><strong>Off-support leakage is exactly 0.0 Wb</strong> and the reduced dimension is 642 on every
+  non-converged edit, unchanged from the converged ones: the active set is not losing or gaining support
+  discontinuously in a way the leakage counter sees.</li>
+  <li><strong>The termination word is not the mechanism.</strong> The compiled trip loop's exit test is
+  <code>settled = difference == 0</code>, which folds a refused-first-step exit
+  (<code>SUFFICIENT_DECREASE_REFUSED</code> on the host route) and a mask-stable stop into one
+  <code>active_set_settled</code> label. Any reading of the convergence rate from the termination word
+  alone is reading the label, not the cause.</li>
+  <li><strong>No solver code was changed.</strong> The forensics ride the existing result fields; the
+  sweep, the route, and the tolerance are as the sweep ran them.</li>
+</ul>
+<h2 id="panel">A converged edit beside a non-converged one</h2>
+<figure>
+<img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the wall and both null sets">
+<figcaption>Left: edit 7 (&minus;4&#37;), converged, terminal residual 5.033e-09 Wb, one trip. Right: edit 6
+(&minus;6&#37;), non-converged, terminal residual 4.422e-03 Wb, one trip. Reference contours are drawn in
+grey, the solved contours in orange on the same fourteen levels (spanning the whole 1.58 Wb range of the
+reference), so a mismatch under about 1/14 of the range is inside the gap between drawn lines. Both panels
+draw the reference nulls in blue (dashed separatrix, hollow markers) and the solved nulls in orange (solid
+separatrix, filled axis triangle, filled X) over the MAST first wall. The pair is the two largest-residual
+points of their respective sets, chosen by the driver's panel selector.</figcaption>
+</figure>
+<h2 id="artifacts">Where this rides</h2>
+<ul>
+  <li><code>coil-edit-nonconvergence.json</code> &mdash; the per-edit forensics: terminal and per-trip
+  residual traces, Newton steps and rejections per trip, mask-difference trace, achieved class, seed
+  probe, boundary displacement, and the persistent-cache counters for each of the twenty edits.</li>
+  <li><code>panel-states.npz</code> &mdash; the per-edit poloidal flux states, the reference state, the
+  shared contour levels, the nulls and the wall units the panel is drawn from.</li>
+  <li><code>converged-vs-nonconverged.png</code> &mdash; the panel above.</li>
+  <li><code>coil-edit-latency.json</code> &mdash; the sweep receipt in the sibling
+  <code>coil-edit-latency</code> directory, this record's forensic companion, with the latency
+  statement and the two gates that failed.</li>
+</ul>
+<p class="lede">Rendered from a single H200 job on the frozen MAST 22086 slice-43 arm. The sweep receipt
+reports 10 of 20 converged at a 353 ms median warm wall; this record explains the ten.</p>
+</main>
+</body>
+</html>

@@ -1,99 +1,17 @@
 {
-  "carrier": {
-    "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
-    "frozen_reference_count": 6,
-    "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
-    "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
-    "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
-    "response_shape": [
-      1126,
-      101
-    ],
-    "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
-    "size_bytes": 645864,
-    "stored_circuit_count": 101,
-    "warm_load_seconds": 0.01197317149490118
-  },
   "case": {
-    "boundary_coil_selection": {
-      "candidates": [
-        {
-          "family": "p4_lower",
-          "stored_circuit": 9,
-          "two_percent_wall_flux_sup_wb": 0.014249009777889935
-        },
-        {
-          "family": "p4_upper",
-          "stored_circuit": 8,
-          "two_percent_wall_flux_sup_wb": 0.018026559731829244
-        },
-        {
-          "family": "p5_lower",
-          "stored_circuit": 11,
-          "two_percent_wall_flux_sup_wb": 6.047949177778351e-05
-        },
-        {
-          "family": "p5_upper",
-          "stored_circuit": 10,
-          "two_percent_wall_flux_sup_wb": 0.01451613962232155
-        }
-      ],
-      "criterion": "largest two-percent wall-flux response among P4/P5 circuits"
-    },
     "coil_circuit_index": 8,
     "coil_family": "p4_upper",
-    "current_pin": true,
-    "edit_fraction_bounds": [
-      -0.2,
-      0.1999999999999998
-    ],
     "machine": "MAST",
-    "route": "compiled slice (reduced_newton compiled)",
-    "seed_arm": {
-      "converged": true,
-      "corrected_bank_receipt": "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json",
-      "identity": "22086/43 mixed",
-      "terminal_residual": 1.7342352532944155e-14
-    },
-    "seed_policy": "the converged corrected-bank mixed frame at the shot current starts the sweep; each edit moves the position coil and re-enters the once-built compiled slice program from the preceding terminal flux",
     "shot": 22086,
-    "shot_coil_current_a": -185195.171875,
     "slice_index": 43,
     "solver_policy": {
       "active_set_steps": 16,
       "ladder_scoring": "batched_tail",
       "newton_steps": 12,
-      "presettlement_incumbent_scoring": "production default unchanged",
-      "settled_exit": "production default unchanged",
       "tolerance": 1e-08,
       "trip_boundary": "fused"
-    },
-    "stored_circuit_count": 101,
-    "successive_edit_count": 20,
-    "successive_edit_step_fraction": 0.02,
-    "sweep_position_count": 21,
-    "sweep_seed": {
-      "converged": true,
-      "edit_fraction": 0.0,
-      "reference_lcfs_vertex_count": 0,
-      "reference_raster_separatrix_vertex_count": 140,
-      "route": "converged corrected-bank mixed frame at the shot current",
-      "terminal_residual": 1.7342352532944155e-14
-    },
-    "target_current_a": 933034.875,
-    "time_s": 0.22999998927116394
-  },
-  "compile": {
-    "later_edits_add_no_compiles": true,
-    "persistent_cache_hit_count": 26,
-    "persistent_cache_miss_count": 14,
-    "process_cache_hit_count_after_first": 19,
-    "program_built_first_edit": true,
-    "program_reused_from_edit": 0
-  },
-  "driver": {
-    "path": "benchmarks/coil_edit_latency.py",
-    "sha256": "1dfebd208d79b3fab97511bc41d7ffdab92947ba6f547cfed3d576c44f5ed9a0"
+    }
   },
   "edits": [
     {
@@ -1497,152 +1415,60 @@
       "warm_seed_source": "previous edit terminal state"
     }
   ],
-  "figure": "docs/figures/forward-solve-api/coil-edit-latency/coil-edit-latency.png",
-  "forward_module": {
-    "path": "nova/equilibrium/forward.py",
-    "sha256": "0ddb13d35616bfeb0f680376d184891c06030b5f0d4ce02ba499f36e2289b9d5"
-  },
-  "gates": {
-    "all_edits_converged": false,
-    "all_later_edits_are_cache_hits": true,
-    "boundary_displacement_is_finite": true,
-    "exactly_twenty_edits_recorded": true,
-    "first_edit_compiles_program": true,
-    "later_edits_add_no_compiles": true,
-    "median_warm_wall_meets_tens_of_milliseconds_target": false,
-    "program_reused_to_the_end": true,
-    "raster_target_rides_once": true,
-    "successive_edits_are_two_percent": true,
-    "sweep_spans_plus_minus_twenty_percent": true
-  },
-  "interactive_path": {
-    "prescribed_current": "traced 101-circuit vector, replacement semantics",
-    "raster_target": "operator-held receiver grid built once at construction",
-    "route": "compiled slice (reduced fixed point, one fixed-shape program re-entered per edit)",
-    "solve_entry": "reduced_newton.solve_reduced_newton_compiled"
-  },
-  "measurement_state": "complete",
-  "persistent_compilation_cache": {
-    "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
-    "entry_key_fields": [
-      "serialized computation",
-      "jaxlib version",
-      "backend version",
-      "XLA flags",
-      "compile options",
-      "accelerator topology"
-    ],
-    "invalidation_scope": {
-      "directory_version_key": [
-        "backend and compiler options",
-        "device topology",
-        "jax and jaxlib/XLA build"
-      ],
-      "jax_entry_key": [
-        "serialized computation",
-        "jaxlib version",
-        "backend version",
-        "XLA flags",
-        "compile options",
-        "accelerator topology"
-      ]
-    },
-    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
-    "maximum_bytes": 8589934592,
-    "minimum_compile_seconds": 1.0,
-    "process_total_compile_seconds_saved": 40.85600692592561,
-    "process_total_hit_count": 162,
-    "process_total_miss_count": 19,
-    "root": "/home/ITER/mcintos/.cache",
-    "runtime_identity": {
-      "backend": "gpu",
-      "backend_version": "PJRT C API\ncuda 12090",
-      "compiler_options": {
-        "jax_compilation_cache_include_metadata_in_key": false,
-        "jax_default_matmul_precision": null,
-        "jax_enable_x64": true,
-        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
-        "xla_flags": null
-      },
-      "device_topology": [
-        {
-          "id": 0,
-          "kind": "NVIDIA H200 NVL",
-          "platform": "gpu",
-          "process_index": 0
-        }
-      ],
-      "jax_version": "0.11.0",
-      "jaxlib_version": "0.11.0"
-    },
-    "selection": "explicit_per_recipe",
-    "solve_compile_seconds_saved": 18.093684845604002,
-    "solve_hit_count": 26,
-    "solve_miss_count": 14,
-    "version_key": "runtime-0745ecebea4cb264e054"
-  },
-  "raster": {
-    "node_count": 1089,
-    "note": "the operator holds the rectangular receiver-grid target once from construction; every edit evaluates it from the same coil and cell currents at no extra compile",
-    "shape": [
-      33,
-      33
-    ],
-    "source_quantities": "psi (Wb), psi_N, per-cell labels, separatrix"
-  },
-  "raster_figure": "docs/figures/forward-solve-api/coil-edit-latency/terminal-raster-flux.png",
-  "reduced_newton_module": {
-    "path": "nova/equilibrium/reduced_newton.py",
-    "sha256": "63dfdbd2bec1bcfe9f8426c43ca7ea904e74144482f16a6c6fd95810f270a64d"
-  },
-  "runtime": {
-    "device": "NVIDIA H200 NVL",
-    "elapsed_seconds": 428.4426540955901,
-    "exit_marker": 2,
-    "host": "98dci4-gpu-0003.iter.org",
-    "jax": "0.11.0",
-    "jax_platforms": "cuda,cpu",
-    "platform": "gpu",
-    "python": "3.14.2",
-    "tmpdir": "/tmp"
-  },
-  "scheduler": {
-    "accepted_time_limit": "01:30:00",
-    "cpus_per_task": "8",
-    "job_id": "1273204",
-    "job_name": "coil-edit-latency",
-    "node": "98dci4-gpu-0003.iter.org",
-    "partition": "betelgeuse",
-    "reservation": "gpu_0003_grpA"
-  },
-  "schema": "nova.coil-edit-latency",
+  "schema": "nova.coil-edit-nonconvergence",
+  "seed_probe_definition": "one trip closed with zero Newton steps on this edit's current vector, seeded from the state the edit starts from; the reported residual is the seed's own residual on the edited operator",
   "source_revision": "7514edd95cdb677b3f033529b96cd56920089058",
   "summary": {
-    "converged_edit_count": 10,
-    "edit_count": 20,
-    "failing_points": [
-      1,
-      2,
-      4,
-      6,
-      8,
-      10,
-      16,
-      17,
-      18,
-      19
-    ],
-    "interactive_latency_target_milliseconds": 100.0,
-    "interactive_latency_target_verdict": "FAIL",
-    "latency_regime": "above_tens_of_milliseconds",
-    "latency_statement": "Median warm per-edit wall is 353.038 ms against the below-100-ms tens-of-milliseconds target: FAIL.",
-    "maximum_boundary_displacement_m": 0.4393706171643554,
-    "maximum_warm_wall_milliseconds": 411.8563737720251,
-    "median_warm_wall_milliseconds": 353.03754080086946,
-    "minimum_warm_wall_milliseconds": 311.4813631400466,
-    "trip_count_maximum": 4,
-    "trip_count_median": 2.0,
-    "trip_count_minimum": 1
-  },
-  "verdict": "FAIL"
+    "convergence": {
+      "converged_points": [
+        0,
+        3,
+        5,
+        7,
+        9,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "trip_count_by_point": {
+        "0": 4,
+        "1": 1,
+        "10": 1,
+        "11": 2,
+        "12": 2,
+        "13": 2,
+        "14": 2,
+        "15": 2,
+        "16": 2,
+        "17": 1,
+        "18": 3,
+        "19": 1,
+        "2": 1,
+        "3": 2,
+        "4": 1,
+        "5": 3,
+        "6": 1,
+        "7": 1,
+        "8": 1,
+        "9": 2
+      }
+    },
+    "failure_count": 10,
+    "groups": {
+      "active_set_settled": [
+        1,
+        2,
+        4,
+        6,
+        8,
+        10,
+        16,
+        17,
+        18,
+        19
+      ]
+    }
+  }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T16:50:15",
+  "updated": "2026-09-17T16:59:43",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -177898,6 +177898,252 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T145020446155-review-of-cank-shafranov-pair",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a74",
+        "node": "review-of-cank-shafranov-pair",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1518,
+                "cached_input_tokens": 487112,
+                "input_tokens": 488634,
+                "output_tokens": 36,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 488670,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the review for r-20260917T094707958056-cank-shafranov-pair parses all five score dimensions, is stored at the fence path through reckon.crew.review store_review, and its findings check by reading that ExternalShafranovConstraint in nova/equilibrium/constraint.py inverts the vertical-field identity as its docstring states with no plan labels, that the receipt.json under docs/figures/constraint-augmented-newton-krylov/shafranov/ records a refusal (not a zero) on all six rows with the reason naming the callable p_prime and carries the per-row magnetics-minus-profiles gap of 0.12 to 0.17, that the six panels exist and show wall and both null sets, that the two failing protocol ids match the pristine-base failures the manifest names, and that the nine commits touch only the declared write paths",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260917T094707958056-cank-shafranov-pair",
+          "id": "review-of-cank-shafranov-pair",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T14:50:21Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145020446155-review-of-cank-shafranov-pair/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T094707958056-cank-shafranov-pair.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19c-review-cank-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T14:50:49Z",
+        "completed_at": "2026-09-17T14:55:57.062Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 251,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 308,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "49e7ce298de5fc988d7b87ca4cdc30db56734a03",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "none; the worker produced no gate",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145020446155-review-of-cank-shafranov-pair/resume-1.jsonl",
+          "log_digest": "sha256:d8822234c21bee085e9a79bb5b707e048220a0378572c384f9bd4b663044ddfb"
+        },
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145020446155-review-of-cank-shafranov-pair/manifest.md",
+        "scope_changed": false,
+        "session_id": "9d11adb9-8a95-48ba-9ab1-c67a375ec894",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 65067,
+            "input_tokens_cumulative": 65067,
+            "output_tokens": 77,
+            "output_tokens_cumulative": 77,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T14:55:57.062Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2703,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 6003,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 11735,
+              "log_fresh": false,
+              "manifest_commits": [
+                "d2e0c68e6a2b628024dd58fddc2109b531b94f25"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "b5b59fb01e40564efdbcb1acf030052b9f4f5f45f2800bddede890b58d4d2f53",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T095016652314-cco-fixed-point-clause-in-one-gauge/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan centroid-constrained-oracle-solve --section '\u00a73' --role review --spec-level exact --node review-of-cco-fixed-point-clause-in-one-gauge --goal 'attach an independent review to run r-20260917T095016652314-cco-fixed-point-clause-in-one-gauge' --done-when 'the review for r-20260917T095016652314-cco-fixed-point-clause-in-one-gauge parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T095016652314-cco-fixed-point-clause-in-one-gauge.json --time-budget 55m --session s19-codex-20260916 --local",
+              "node": "cco-fixed-point-clause-in-one-gauge",
+              "phase": "starting",
+              "plan": "centroid-constrained-oracle-solve",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T095016652314-cco-fixed-point-clause-in-one-gauge",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 11824,
+              "terminal_at": "2026-09-17T11:33:25Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cco-fixed-point-clause-in-one-gauge"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 65067,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 109.09,
+          "generated_tokens": 77,
+          "generation_seconds": 109.09,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 13.6,
+          "machine_seconds": 0.0,
+          "peak_input_tokens": 65067,
+          "tokens_per_second": 0.71,
+          "wall_tokens_per_second": 0.71
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "review role; no review record was produced",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-cank-shafranov-pair",
+          "session_id": "9d11adb9-8a95-48ba-9ab1-c67a375ec894",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T14:55:57.062Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 0.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -178210,6 +178456,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2704
+    "_version": 2705
   }
 }

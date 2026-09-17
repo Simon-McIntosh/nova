@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T07:37:23",
+  "updated": "2026-09-17T07:59:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4643,6 +4643,15 @@
         "created": "2026-09-16"
       },
       {
+        "id": "s19c-ecm-repair-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
+      },
+      {
         "id": "s19c-ecq-gauss-c",
         "harness": "clive",
         "role": "implement",
@@ -4861,6 +4870,15 @@
       },
       {
         "id": "s19c-review-b-c",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-review-cca2-c",
         "harness": "clive",
         "role": "review",
         "session_id": null,
@@ -175417,6 +175435,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2680
+    "_version": 2682
   }
 }

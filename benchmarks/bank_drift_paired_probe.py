@@ -51,7 +51,9 @@ from datetime import UTC, datetime
 import hashlib
 from importlib.util import module_from_spec, spec_from_file_location
 import json
+import os
 from pathlib import Path
+import subprocess
 from typing import Any
 
 import numpy as np
@@ -76,6 +78,23 @@ _STAGE_DEFINITIONS = {
     ),
     "residual_ratio": "right-tree terminal residual divided by left-tree residual",
 }
+
+
+def _repo_relative(path: Any) -> str:
+    """Return a path stated relative to the repository, never absolute.
+
+    The receipt is committed, and a worktree path it names is removed at the
+    end of the sprint, so an absolute path in the record is a reference that
+    stops resolving.  Every location the receipt carries is therefore stated
+    from the repository root.
+    """
+
+    if path in (None, ""):
+        return path
+    try:
+        return os.path.relpath(Path(str(path)).resolve(), ROOT)
+    except (OSError, ValueError):
+        return str(path)
 
 
 def _digest(array: Any) -> str:
@@ -500,12 +519,12 @@ def _compare(left_path: Path, right_path: Path, out_path: Path) -> int:
         "artifact": "paired old-tree against current-tree MAST operand-solve probe",
         "left": {
             "label": left["tree_label"],
-            "root": left["tree_root"],
+            "root": _repo_relative(left["tree_root"]),
             "compile_cache": (left.get("compile_cache") or {}).get("directory"),
         },
         "right": {
             "label": right["tree_label"],
-            "root": right["tree_root"],
+            "root": _repo_relative(right["tree_root"]),
             "compile_cache": (right.get("compile_cache") or {}).get("directory"),
         },
         "stage_order": list(GEOMETRY_STAGES) + ["map_image", "terminal_residual"],
@@ -544,14 +563,16 @@ def _merge(arms_dir: Path, out_path: Path, expected_rows: int) -> int:
         payload = json.loads(path.read_text())
         sources.append(
             {
-                "path": str(path),
+                "path": _repo_relative(path),
                 "rows": len(payload.get("rows") or []),
                 "generated_at": payload.get("generated_at"),
             }
         )
         for side in ("left", "right"):
             if payload.get(side):
-                trees[side] = payload[side]
+                trees[side] = dict(
+                    payload[side], root=_repo_relative(payload[side].get("root"))
+                )
         rows.extend(payload.get("rows") or [])
     rows.sort(key=lambda row: (row["identity"], row["arm"]))
     counts: dict[str, int] = {}
@@ -605,6 +626,101 @@ def _merge(arms_dir: Path, out_path: Path, expected_rows: int) -> int:
     return 0 if present == expected_rows else 1
 
 
+def _resolve(
+    tree_label: str,
+    tree_root: Path,
+    identity: str,
+    arm: str,
+    out_path: Path,
+    compile_cache_root: Path | None,
+) -> int:
+    """Re-solve one arm of one identity and persist the poloidal flux field.
+
+    The emission files carry digests rather than fields, so a panel drawn from
+    a committed emission has no contour to draw.  This re-runs the same solve
+    the emission ran and writes the terminal geometry whole: the grid axes, the
+    flux map, the wall and both null sets, so a figure can be rendered later in
+    the run's evidence without a second solve.
+    """
+
+    import jax
+    import jax.numpy as jnp
+
+    producer = _load_module(tree_root / PRODUCER_RELATIVE, "probe_producer")
+    reachability = producer._reachability_module()
+    producer.configure_dtypes()
+    cache_root = (
+        compile_cache_root or producer.default_persistent_compilation_cache_root()
+    )
+    producer.configure_persistent_compilation_cache(cache_root)
+
+    x64 = bool(jax.config.jax_enable_x64)
+    response_cache, carrier_evidence = producer._persisted_response_cache(
+        producer.response_carrier.DEFAULT_CARRIER,
+        producer.response_carrier.DEFAULT_RECEIPT,
+    )
+    carrier_identity = producer._carrier_semantic_identity(carrier_evidence)
+    selected = [
+        (row, qualification)
+        for row, qualification in producer.select_slices_by_shot(
+            producer.DECOMPOSITION_BANK
+        )
+        if _identity_of(row) == identity
+    ]
+    if not selected:
+        raise SystemExit(f"identity {identity} is not in the decomposition bank")
+    selected_row, qualification = selected[0]
+    shot = int(selected_row["shot"])
+    slice_index = int(selected_row["slice_index"])
+    case, context = producer._mast_case_from_selection(
+        producer.SHOT_STORE, selected_row, qualification
+    )
+    passive_case, profile, _policy = producer._passive_inclusive_case(
+        case, context, response_cache
+    )
+    observed = producer._ObservedProfile(profile)
+    target_current = abs(float(passive_case["reference"]["plasma_current_a"]))
+    states = reachability._mast_states(
+        observed,
+        jnp.asarray(passive_case["state"]),
+        target_current,
+        carrier_identity=f"mast:{shot}:{slice_index}:{carrier_identity}",
+    )
+    result = states[arm]
+    geometry = reachability._grid_geometry(profile, result.state)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez(
+        out_path,
+        tree_label=tree_label,
+        identity=identity,
+        arm=arm,
+        jax_enable_x64=x64,
+        converged=bool(result.converged),
+        terminal_residual=float(result.terminal_residual),
+        tolerance=float(result.tolerance),
+        termination_reason=str(result.termination_reason),
+        radius=np.asarray(geometry["radius"], dtype=float),
+        height=np.asarray(geometry["height"], dtype=float),
+        flux=np.asarray(geometry["flux"], dtype=float),
+        wall=np.asarray(geometry["wall"], dtype=float),
+        axis=np.asarray(geometry["axis"], dtype=float),
+        selected_x=np.asarray(geometry["selected_x"], dtype=float),
+        class_margin=float(geometry["class_margin"]),
+        typed_saddle_coordinates_m=np.asarray(
+            geometry["typed_saddle_coordinates_m"], dtype=float
+        ).reshape(-1, 2),
+        typed_saddle_inside_wall=np.asarray(
+            geometry["typed_saddles_inside_wall"], dtype=bool
+        ),
+    )
+    print(
+        f"resolve {tree_label} {identity} {arm} converged={bool(result.converged)} "
+        f"residual={float(result.terminal_residual):.6e} wrote {out_path}",
+        flush=True,
+    )
+    return 0
+
+
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -653,6 +769,13 @@ def _parse() -> argparse.Namespace:
     merge.add_argument("--arms-dir", type=Path, required=True)
     merge.add_argument("--out", type=Path, required=True)
     merge.add_argument("--expected-rows", type=int, required=True)
+    resolve = sub.add_parser("resolve")
+    resolve.add_argument("--tree-root", type=Path, required=True)
+    resolve.add_argument("--label", required=True)
+    resolve.add_argument("--identity", required=True)
+    resolve.add_argument("--arm", required=True, choices=("pure", "mixed"))
+    resolve.add_argument("--out", type=Path, required=True)
+    resolve.add_argument("--compile-cache-root", type=Path, default=None)
     return parser.parse_args()
 
 
@@ -672,6 +795,15 @@ def main() -> int:
         )
     if args.command == "merge":
         return _merge(args.arms_dir, args.out, args.expected_rows)
+    if args.command == "resolve":
+        return _resolve(
+            args.label,
+            args.tree_root,
+            args.identity,
+            args.arm,
+            args.out,
+            args.compile_cache_root,
+        )
     return _compare(args.left, args.right, args.out)
 
 

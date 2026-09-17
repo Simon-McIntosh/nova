@@ -669,6 +669,53 @@
 <p><strong>Method note worth keeping.</strong> The target is computed before the solve runs, so a construction-only probe answers the attribution question in seconds where the full driver timed out at sixteen minutes. Sixteen probes cost less than one of the failed ones.</p>
 <p>Report: <code>~/.config/reckon/crew/reports/nova/s19-labeller/second-target-movement.md</code>.</p>
 </section>
+
+<section id="the-operand-partition-is-the-first-stage-that-differs">
+<h2>The operand partition is the first stage that differs, on every paired arm (2026-09-17)</h2>
+<p>Node <code>nia-bank-drift-paired-probe</code> (measurement role; driver commits <code>5ed1dd3b</code>, <code>37fec904</code>, <code>f7364e82</code>, <code>1b467745</code>).</p>
+
+<p><strong>Question.</strong> A mixed arm on 21983/35 moved its terminal residual by 54 percent between the bank producer revision and the current tree, on the accepted operand cache and unchanged fixtures. Either the solve changed or the inputs did. Attribute the movement, per arm over the whole twelve-row selection, to the first stage whose digest differs.</p>
+
+<p><strong>Method.</strong> One H200 allocation (job 1272590, <code>betelgeuse</code> under reservation <code>gpu_0003_grpA</code>, two cards, 16 cores, 256G, 02:30:00) runs the whole measurement: one worker process per tree, because a single interpreter carries exactly one <code>nova</code> package, so each tree's sweep compiles in isolation; each process writes one emission file per arm as that identity's solve lands, and the join runs as the last step of the same job. The producer revision is <code>fae50f159699a0a36aa460e4cf22f39b74fd1b2a</code>, unpacked with <code>git archive</code> under the report directory rather than as a second worktree of the repository; the current tree is <code>1b467745</code>. Five digest stages are carried per arm: <code>profile_support</code>, <code>partition_structure</code>, <code>partition_values</code>, the map image, and the terminal residual.</p>
+
+<p><strong>Verdict: the drift is real, it is in the solver, and it starts at the operand partition.</strong> On <strong>all ten</strong> paired arms the first differing stage is <code>partition_structure</code>. <code>profile_support</code> is identical on both sides (<code>5683f88ca97c076e</code>, carried by the arms that record it), and <code>partition_values</code> is the literal <code>empty</code> at the producer revision against a populated digest at the current tree — the producer's partition is one opaque leaf where the current tree partitions into the 76-leaf operator pytree. The operand and fixture inputs are unchanged, so no data read explains the movement.</p>
+
+<table>
+  <tr><th>identity</th><th>arm</th><th>producer residual</th><th>current residual</th><th>ratio</th><th>converged</th></tr>
+  <tr><td>21978/35</td><td>pure</td><td>3.857344474796854e-16</td><td>0.0024506488565449</td><td>6.35e+12</td><td>true → false</td></tr>
+  <tr><td>21978/35</td><td>mixed</td><td>3.0996518101046146e-16</td><td>2.2041968427410595e-16</td><td>0.711</td><td>true → true</td></tr>
+  <tr><td>21983/35</td><td>pure</td><td>2.39868328628578e-04</td><td>4.368658757464654e-03</td><td>18.21</td><td>false → false</td></tr>
+  <tr><td>21983/35</td><td>mixed</td><td>2.460963048402929e-04</td><td>3.787145946066316e-04</td><td>1.539</td><td>false → false</td></tr>
+  <tr><td>21985/51</td><td>pure</td><td>6.680817136734577e-04</td><td>6.702453421186205e-04</td><td>1.0032</td><td>false → false</td></tr>
+  <tr><td>21985/51</td><td>mixed</td><td>6.535225590323439e-04</td><td>6.569422057107361e-04</td><td>1.0052</td><td>false → false</td></tr>
+  <tr><td>21986/46</td><td>pure</td><td>1.3530525770496962e-03</td><td>5.889860956789435e-03</td><td>4.353</td><td>false → false</td></tr>
+  <tr><td>21986/46</td><td>mixed</td><td>1.3465497226240197e-03</td><td>1.3464194829282453e-03</td><td>0.9999</td><td>false → false</td></tr>
+  <tr><td>21989/55</td><td>pure</td><td>7.349976987057086e-04</td><td>3.646731774171455e-03</td><td>4.962</td><td>false → false</td></tr>
+  <tr><td>21989/55</td><td>mixed</td><td>7.376349253747673e-04</td><td>7.321233970473052e-04</td><td>0.9925</td><td>false → false</td></tr>
+</table>
+
+<p><strong>The load-bearing row, and the control that makes the rest readable.</strong> On 21978/35 <em>pure</em> the producer revision emits <code>3.857344474796854e-16</code> converged, reproducing the bank's own <code>3.86e-16</code>, while the current tree emits <code>0.0024506488565449</code> with <code>termination_reason=active_set_cycle_detected</code>. A probe that fails to reproduce the bank on the unchanged tree would have measured nothing; this one reproduces it to the bank's own figures, so the twelve-to-fourteen-order movement on that arm is attributable to the tree and not to the harness. The same identity's mixed arm converges on both sides, so the failure is arm-specific: the active-set path the pure arm takes is the one that no longer terminates.</p>
+
+<p><strong>Compile cost, measured.</strong> The current tree's compile is not merely slower, it is the whole cost of the sweep, and it is the reason one of the two trees finished and the other did not:</p>
+
+<table>
+  <tr><th></th><th>producer tree (fae50f15)</th><th>current tree (1b467745)</th></tr>
+  <tr><td>identities / arms swept</td><td>6 / 12</td><td>5 / 10</td></tr>
+  <tr><td>XLA compilations</td><td>1068</td><td>468</td></tr>
+  <tr><td>total compile seconds</td><td>723.1</td><td>7659.2</td></tr>
+  <tr><td>largest single compile</td><td>35.1 s (<code>scan</code>)</td><td>774.0 s (<code>solve</code>)</td></tr>
+  <tr><td>compiles above 60 s</td><td>0</td><td>10, totalling 7551.2 s</td></tr>
+  <tr><td>wall clock for the sweep</td><td>~17 min</td><td>~136 min, ended by the limit</td></tr>
+</table>
+
+<p>Ten separate compilations of <code>jit(solve)</code> ran on the current tree, one per arm, at 728.5 to 774.0 seconds each — 98.6 percent of that tree's entire compile time, and roughly twelve minutes of compilation per arm against a producer tree whose heaviest single compile is thirty-five seconds and whose whole twelve-arm sweep costs 723 seconds. The shared persistent compilation cache was configured and live for both processes (the current tree logged 469 compile lines against the producer's 1068, so primitive-level entries were reused across trees), which means the <code>solve</code> compilations missed the cache because their keys differ — a cache asset cannot rescue this cost while the trace itself changes per arm. The practical rate is about 42 arms per hour of compile on the producer tree against 4.4 on the current one.</p>
+
+<p><strong>Coverage and the gap.</strong> Ten of twelve rows. The current-tree process reached five of the six identities inside the allocation's 02:30:00 and was cancelled mid-identity on 22086/43, which has a producer emission and no current-tree emission. The merged receipt reports <code>rows_expected 12</code>, <code>rows_present 10</code>, <code>rows_missing 2</code>, <code>rows_unexpected 0</code> and exits nonzero by design — the missing rows are named rather than silently absent, and the two-arm gap is the compile cost above, not a failure of the read.</p>
+
+<p><strong>Not established here.</strong> Whether the bank is reissued against the current tree or the solve is repaired to the producer's partition is not decided by this measurement and was not decided by this node. Separately, this section does not yet carry poloidal flux contour panels of the terminal states, which the repository's plotting rules require of a forward-solve evidence record; the receipt rows carry converged flags, termination reasons and map-image digests but no figure. Recorded as a named gap rather than left implicit.</p>
+
+<p><strong>Evidence.</strong> Merged receipt <code>docs/figures/null-identification-authority/bank-drift-probe/receipt.json</code> with the ten per-arm receipts under its <code>arms/</code> subdirectory; per-arm emissions, both sweep logs and the campaign log under <code>~/.config/reckon/crew/reports/nova/s19-local/bank-drift/</code>. Inputs: the accepted operand cache <code>logs/exact-operand-cache.npz</code>, sha256 <code>2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904</code>, verified unchanged before and after the run; the producer revision as an unpacked archive; one shared compilation cache root whose receipt is stored in every emission, so the directory a row was compiled against is itself evidence.</p>
+</section>
 </main>
 </body>
 </html>

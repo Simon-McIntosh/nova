@@ -1,0 +1,72 @@
+{
+ "artifact": "paired old-tree against current-tree MAST operand-solve probe",
+ "definitions": {
+  "first_differing_stage": "the earliest stage in stage_order whose digest differs between the two trees; a difference at an earlier stage propagates into every later one, so this names where the trees first diverge, not necessarily the stage that moved the residual",
+  "residual_moved": "the terminal residual differs between the trees in any bit; residual_ratio carries the magnitude, so a difference in the last bit and a difference of twelve decades both read as true here",
+  "residual_ratio": "right-tree terminal residual divided by left-tree residual"
+ },
+ "generated_at": "2026-09-17T09:44:49.871324+00:00",
+ "left": {
+  "compile_cache": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+  "label": "fae50f15",
+  "root": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/bank-drift/faefloor-tree"
+ },
+ "right": {
+  "compile_cache": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+  "label": "main",
+  "root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe"
+ },
+ "rows": [
+  {
+   "arm": "pure",
+   "converged_left": true,
+   "converged_right": false,
+   "first_differing_stage": "partition_structure",
+   "identity": "21978/35",
+   "note": null,
+   "residual_delta": 0.0024506488565445143,
+   "residual_left": 3.857344474796854e-16,
+   "residual_moved": true,
+   "residual_ratio": 6353201982755.15,
+   "residual_right": 0.0024506488565449,
+   "stages_left": {
+    "exception": null,
+    "partition_structure": "236cbb2e1af2dded",
+    "partition_values": "empty",
+    "profile_support": "5683f88ca97c076e"
+   },
+   "stages_right": {
+    "exception": null,
+    "partition_structure": "0fe0dcdf920a9b66",
+    "partition_values": "35c0be67ae2abdd8",
+    "profile_support": "5683f88ca97c076e"
+   }
+  }
+ ],
+ "stage_order": [
+  "profile_support",
+  "partition_structure",
+  "partition_values",
+  "map_image",
+  "terminal_residual"
+ ],
+ "summary": {
+  "first_differing_stage_counts": {
+   "partition_structure": 1
+  },
+  "focus_21983_35_mixed": [],
+  "residual_moved": [
+   {
+    "arm": "pure",
+    "converged_left": true,
+    "converged_right": false,
+    "first_differing_stage": "partition_structure",
+    "identity": "21978/35",
+    "residual_left": 3.857344474796854e-16,
+    "residual_moved": true,
+    "residual_ratio": 6353201982755.15,
+    "residual_right": 0.0024506488565449
+   }
+  ]
+ }
+}

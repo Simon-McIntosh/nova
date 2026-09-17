@@ -54,6 +54,29 @@ _CURVED_BOUNDARY_SEGMENTS = 512
 _SPLINE_BOUNDARY_SEGMENTS = 128
 """Fixed sample count used by each spline boundary chain."""
 
+_MINIMUM_TRACED_POLYGON_VERTICES = 3
+"""Fewest vertices a traced polygon can enclose area with."""
+
+
+def traced_polygon_vertex_capacity(straight_vertex_capacity: int) -> int:
+    """Return the maximal live vertex count of one traced clipped polygon.
+
+    A clipped polygon is its traced level arc joined to a straight chain of
+    cell-boundary edges. The arc enters the polygon as its fixed
+    ``_SPLINE_BOUNDARY_SEGMENTS`` samples, and every other vertex is a straight
+    cell-boundary vertex: the compact traced polygon from which the arc is
+    expanded carries at most ``straight_vertex_capacity`` vertices, and the arc
+    replaces one of them. One arc plus that straight chain is the realised
+    layout, so the capacity is their sum; counting the arc's slot once as a
+    straight vertex as well only widens the bound. Reserving the straight
+    sample count for every slot instead, as the expansion once did, multiplies
+    the capacity by the arc sample count for a layout that spends it on one
+    arc and a handful of straight edges.
+    """
+    if straight_vertex_capacity < _MINIMUM_TRACED_POLYGON_VERTICES:
+        raise ValueError("a traced polygon carries at least three vertices")
+    return _SPLINE_BOUNDARY_SEGMENTS + int(straight_vertex_capacity)
+
 
 def _signed_area(vertices: np.ndarray) -> float:
     if len(vertices) < 3:
@@ -1094,6 +1117,7 @@ def _traced_clip(
     )
     support_saddle = support_saddle & (compact_slot[None, :] < vertex_count[:, None])
 
+    overflow = jnp.zeros(cell_count, dtype=bool)
     if curve_evaluator is not None:
         base_valid = compact_slot[None, :] < vertex_count[:, None]
         next_slot = jnp.where(
@@ -1157,7 +1181,9 @@ def _traced_clip(
             ),
             axis=2,
         ).reshape(cell_count, chord_capacity * _SPLINE_BOUNDARY_SEGMENTS)
-        support_capacity = chord_capacity * _SPLINE_BOUNDARY_SEGMENTS
+        live_vertex_count = jnp.sum(expanded_valid, axis=1)
+        support_capacity = traced_polygon_vertex_capacity(chord_capacity)
+        overflow = live_vertex_count > support_capacity
         support, vertex_count = _pack_traced_vertices(
             expanded_candidate, expanded_valid, support_capacity
         )
@@ -1224,8 +1250,15 @@ def _traced_clip(
     first = jnp.sum(branch_first, axis=1)
     second = jnp.sum(branch_second, axis=1)
     included = area > 0.0
+    included = included & ~overflow
     vertex_count = jnp.where(included, vertex_count, 0)
     support = jnp.where(included[:, None, None], support, 0.0)
+    area = jnp.where(included, area, 0.0)
+    first = jnp.where(included[:, None], first, 0.0)
+    second = jnp.where(included[:, None, None], second, 0.0)
+    branch_area = jnp.where(included[:, None], branch_area, 0.0)
+    branch_first = jnp.where(included[:, None, None], branch_first, 0.0)
+    branch_second = jnp.where(included[:, None, None, None], branch_second, 0.0)
 
     boundary = included & jnp.where(
         jnp.asarray(curve_evaluator is not None),

@@ -13,6 +13,7 @@ from nova.equilibrium.separatrix_clip import (
     complete_polynomial_powers,
     padded_linear_current_moments,
     padded_polynomial_current_moments,
+    traced_polygon_vertex_capacity,
 )
 from nova.equilibrium.observation import clipped_support_quadrature
 from nova.jax.config import configure_dtypes
@@ -685,3 +686,33 @@ def test_traced_clip_jits_once_and_vmaps_over_moving_separatrices():
     )
     assert batched_moments[0].shape == (12, len(cells))
     assert batched_moments[1].shape == (12, len(cells), 2)
+
+
+def test_traced_polygon_capacity_is_the_arc_plus_the_straight_chain():
+    """The per-polygon capacity is the derived layout bound, not a product."""
+    capacity = traced_polygon_vertex_capacity(30)
+    assert capacity == 128 + 30
+    with pytest.raises(ValueError):
+        traced_polygon_vertex_capacity(2)
+
+
+def test_spline_clip_refuses_a_polygon_above_the_derived_capacity():
+    """A layout wider than one arc plus its straight chain is refused."""
+    configure_dtypes()
+    cell = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+    mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.5, 0.5]]))
+    capacity = traced_polygon_vertex_capacity(int(mesh.support_capacity))
+
+    def saddle_level(points):
+        radial, vertical = points[..., 0], points[..., 1]
+        return (radial - 0.5) * (vertical - 0.5)
+
+    signed = saddle_level(jnp.asarray(mesh.node_coordinates))
+    support = mesh.traced_clip(signed, curve_evaluator=saddle_level)
+
+    live = int(np.sum(np.asarray(signed) > 0.0))
+    assert live >= 2, "the fixture must leave the level set on two runs"
+    assert int(np.asarray(support.included[0])) == 0
+    assert int(support.vertex_count[0]) == 0
+    assert float(support.area[0]) == 0.0
+    assert capacity > 0

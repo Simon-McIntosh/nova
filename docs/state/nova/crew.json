@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T06:21:56",
+  "updated": "2026-09-17T06:25:27",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -174027,6 +174027,211 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260916T210526365533-dvf-cocos-scout",
+        "plan": "diiid-vertical-force-balance",
+        "section": "\u00a75",
+        "node": "dvf-cocos-scout",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1670,
+                "cached_input_tokens": 817713,
+                "input_tokens": 819415,
+                "output_tokens": 3382,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 822797,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/diiid-cocos/cocos-scout.md exists with one row per consumed quantity giving its inferred COCOS, the sign tuple that inferred it, the translation factor to COCOS 17, the consumers as path:line, whether the ambix reader translates, plus the recommended location of the translation as a question for the lead not a decision; no tracked file modified; changed_paths opens with the word none; manifest scalars unquoted",
+          "estimated_hours": null,
+          "goal": "Determine, read-only, the COCOS of every DIII-D quantity Nova consumes (the psi map, p-prime, ff-prime, plasma current, B0, the F-coil with ohmic currents, the persisted pf_active description) from the sign tuple of the data itself (signs of Ip, B0, the flux gradient from axis to boundary, q), never from a code name or the migration guide, with file:line of every consumer under benchmarks/ with nova/imas/diiid_description.py, stating whether the imas-ambix reader already translates since ambix owns corpus reading",
+          "id": "dvf-cocos-scout",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-16T21:05:28Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T210526365533-dvf-cocos-scout/manifest.md",
+          "plan": "diiid-vertical-force-balance",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/diiid-cocos"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "s19c-dvf-cocos-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-16T21:06:03Z",
+        "completed_at": "2026-09-16T23:32:30.245Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 8739,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 8787,
+        "stalled": true,
+        "time_budget": "40m",
+        "base_sha": "ef5504ea7966773255934b7e09e208db88a77866",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "independent review re-derived every table figure from five_frame_sign_tuple.json and hash-matched the three receipts",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T210526365533-dvf-cocos-scout.json",
+          "log_digest": "sha256:6bc193f0a91d1f426141d7eb9f5d564d97b227e119ba4ef40e09491f4286b8cb"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T210526365533-dvf-cocos-scout/manifest.md",
+        "scope_changed": false,
+        "session_id": "3641a805-c347-40c6-b39c-0e9ace4fea30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 12580678,
+            "input_tokens_cumulative": 12580678,
+            "output_tokens": 148620,
+            "output_tokens_cumulative": 148620,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-16T23:32:30.245Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 8,
+            "evidence": 16,
+            "fit": 18,
+            "goal_fidelity": 15,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 77
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 13074797,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 8783.268,
+          "generated_tokens": 175821,
+          "generation_seconds": 8594.596,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.5,
+          "machine_seconds": 188.672,
+          "peak_input_tokens": 165796,
+          "tokens_per_second": 20.46,
+          "wall_tokens_per_second": 20.02
+        },
+        "follow_on_paths": [
+          "imas_ambix/imas_ambix/challenge/loader.py:124"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "read-only scout; deliverable is the report under the reports fence",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/dvf-cocos-scout",
+          "session_id": "3641a805-c347-40c6-b39c-0e9ace4fea30",
+          "session_source": "stream",
+          "retained_at": "2026-09-16T23:32:30.245Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 167.0,
+        "orientation_input_tokens": 1698868.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -174339,6 +174544,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2664
+    "_version": 2665
   }
 }

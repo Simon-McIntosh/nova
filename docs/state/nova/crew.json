@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T23:18:16",
+  "updated": "2026-09-17T23:25:36",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -183869,6 +183869,313 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T200249761652-review-of-fsa-coil-edit-nonconvergence",
+        "plan": "forward-solve-api",
+        "section": "\u00a75",
+        "node": "review-of-fsa-coil-edit-nonconvergence",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 995,
+                "cached_input_tokens": 728680,
+                "input_tokens": 729679,
+                "output_tokens": 3393,
+                "reasoning_output_tokens": 745,
+                "total_tokens": 733072,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the review for r-20260917T163636652426-fsa-coil-edit-nonconvergence parses all five score dimensions, is stored at the fence path through reckon.crew.review store_review, and its findings check by reading that docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.json carries twenty edits with the ten failing points 1,2,4,6,8,10,16,17,18,19 all terminating active_set_settled and the three mechanism groups the manifest names (six one-trip stalls with closing mask difference zero, two refused first steps whose terminal residual equals the seed probe residual bit-for-bit, two partial walks), that the mechanism claim (the compiled trip loop exits on the first closing read that promotes nothing and has no branch for a refused step) is traceable to the named code in nova/equilibrium/reduced_newton.py, that the panel shows a converged edit beside a non-converged one with both null sets and the wall, and that the two commits touch only the declared write paths",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260917T163636652426-fsa-coil-edit-nonconvergence",
+          "id": "review-of-fsa-coil-edit-nonconvergence",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T20:02:51Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T200249761652-review-of-fsa-coil-edit-nonconvergence/manifest.md",
+          "plan": "forward-solve-api",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T163636652426-fsa-coil-edit-nonconvergence.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19c-review-fsa-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T20:03:09Z",
+        "completed_at": "2026-09-17T21:22:38.671Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4657,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4769,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "0797f64f35c5794a035cf35118cf2424a0219eab",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "parse_review round trip on the stored review file",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T163636652426-fsa-coil-edit-nonconvergence.json",
+          "log_digest": "sha256:4b972ae1649b50a59f3176fa20ad6d2f05ccea226af20dc54f5a4f5594b16793"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T200249761652-review-of-fsa-coil-edit-nonconvergence/manifest.md",
+        "scope_changed": false,
+        "session_id": "f93a20e7-d195-4e69-a5e3-7619ba5b6fd5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2187451,
+            "input_tokens_cumulative": 2187451,
+            "output_tokens": 8628,
+            "output_tokens_cumulative": 8628,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T21:22:38.671Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 480,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: authored-artifact generation is corrupt in this session",
+              "elapsed_seconds": 3780,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 10506,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1d7f4bc3"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "cf0b29d1ca893684cc42e1cb2aed66bcccbc2905d84f4c44fee1ee5f98c0b1a7",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T160409157288-nia-drift-probe-remainder-and-panels/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T160409157288-nia-drift-probe-remainder-and-panels/manifest.md; resolve the blocker before resuming the run",
+              "node": "nia-drift-probe-remainder-and-panels",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T160409157288-nia-drift-probe-remainder-and-panels",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260917T160409157288-nia-drift-probe-remainder-and-panels",
+                "session_id": "adbaa40f-5934-438e-ae7e-db5c5f9da9ce",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 10665,
+              "terminal_at": "2026-09-17T17:05:09Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-drift-probe-remainder-and-panels"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 838,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 4138,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1422,
+              "log_fresh": false,
+              "manifest_commits": [
+                "7514edd95cdb677b3f033529b96cd56920089058 (feat(benchmarks): persist coil-edit convergence forensics and the poloidal panel); 0797f64f35c5794a035cf35118cf2424a0219eab (docs(forward-solve): record why ten coil edits stop short of tolerance)"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0e922830ead952b923656693f2e724f21cc4b975260ccd9c5aa432b3dcd870d5",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T163636652426-fsa-coil-edit-nonconvergence/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan forward-solve-api --section '\u00a75' --role review --spec-level exact --node review-of-fsa-coil-edit-nonconvergence --goal 'attach an independent review to run r-20260917T163636652426-fsa-coil-edit-nonconvergence' --done-when 'the review for r-20260917T163636652426-fsa-coil-edit-nonconvergence parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T163636652426-fsa-coil-edit-nonconvergence.json --time-budget 55m --session s19-codex-20260916 --local",
+              "node": "fsa-coil-edit-nonconvergence",
+              "phase": "working",
+              "plan": "forward-solve-api",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T163636652426-fsa-coil-edit-nonconvergence",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 1568,
+              "terminal_at": "2026-09-17T19:36:46Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-coil-edit-nonconvergence"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 2187451,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 691.092,
+          "generated_tokens": 8628,
+          "generation_seconds": 687.239,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 28.0,
+          "machine_seconds": 3.853,
+          "peak_input_tokens": 134375,
+          "tokens_per_second": 12.55,
+          "wall_tokens_per_second": 12.48
+        },
+        "follow_on_paths": [],
+        "predecessor_run": "r-20260917T163636652426-fsa-coil-edit-nonconvergence",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "review role; the deliverable is the stored review record outside the repository",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-fsa-coil-edit-nonconvergence",
+          "session_id": "f93a20e7-d195-4e69-a5e3-7619ba5b6fd5",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T21:22:38.671Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 82.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -184181,6 +184488,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2746
+    "_version": 2747
   }
 }

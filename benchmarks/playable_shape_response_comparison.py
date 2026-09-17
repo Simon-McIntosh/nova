@@ -197,23 +197,27 @@ def _circuit_entry(
 ) -> dict[str, Any]:
     """Assemble the per-extremum comparison for one circuit.
 
-    A rung whose plus or minus side never read its turning points carries no
-    central difference; every quantity it would have produced is reported as
-    ``None`` beside the name of the exception that removed it, so a circuit
-    with a lost axis is a row in the table rather than a gap in the file.
+    A rung is assembled from whatever of its two signs exist. A sign that was
+    never attempted, or whose turning points were never read, leaves the rung
+    without a central difference: every quantity it would have produced is
+    reported as ``None``, with the rung's absent and lost sides named beside
+    the exception that removed them. This is called while a circuit is still
+    being walked, so "the minus side is not there yet" is an ordinary state
+    and never a traceback.
     """
     central: dict[float, np.ndarray | None] = {}
     unavailable: dict[float, list[str]] = {}
     for step in STEPS_A:
-        pair = measured[step]
+        pair = measured.get(step, {})
+        absent = [side for side in ("plus", "minus") if side not in pair]
         lost = [
             side
             for side in ("plus", "minus")
-            if pair[side].get("turning_points_m") is None
+            if side in pair and pair[side].get("turning_points_m") is None
         ]
-        if lost:
+        if absent or lost:
             central[step] = None
-            unavailable[step] = lost
+            unavailable[step] = sorted(absent + lost)
             continue
         plus = np.asarray(pair["plus"]["turning_points_m"], dtype=float)
         minus = np.asarray(pair["minus"]["turning_points_m"], dtype=float)
@@ -257,8 +261,16 @@ def _circuit_entry(
         },
         "solves": {
             str(int(step)): {
-                key: _public_solve(measured[step][key]) for key in ("plus", "minus")
+                key: _public_solve(measured[step][key])
+                for key in ("plus", "minus")
+                if key in measured.get(step, {})
             }
+            for step in STEPS_A
+        },
+        "solves_absent": {
+            str(int(step)): sorted(
+                side for side in ("plus", "minus") if side not in measured.get(step, {})
+            )
             for step in STEPS_A
         },
     }
@@ -517,7 +529,8 @@ def _figure_circuit(entries: list[dict[str, Any]], step: float) -> int:
     """
     best, circuit = -np.inf, -1
     for entry in entries:
-        if entry["solves"][str(int(step))]["plus"].get("turning_points_m") is None:
+        driven = entry["solves"].get(str(int(step)), {}).get("plus")
+        if not driven or driven.get("turning_points_m") is None:
             continue
         for row in entry["central_difference_table"]:
             ratio = row[f"ratio_{int(STEPS_A[0])}_self_consistent_over_frozen"]

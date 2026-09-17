@@ -17,6 +17,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+from nova.biot.greens import MU0
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.observation import MomentIntegralSupport
 
@@ -247,6 +248,12 @@ class ConstraintPair:
             raise ValueError("a constraint must contribute at least one row")
         if int(self.unknown.row_count) != rows:
             raise ValueError("one compensating unknown is required per residual row")
+        required = getattr(self.functional, "required_unknown", None)
+        if required is not None and not isinstance(self.unknown, required):
+            raise TypeError(
+                f"{type(self.functional).__name__} must be compensated by "
+                f"{required.__name__}, not {type(self.unknown).__name__}"
+            )
         for name in ("target", "tolerance", "scale", "initial_unknown"):
             shape = jnp.shape(getattr(self.binding, name))
             if not shape or shape[-1] != rows:
@@ -1332,6 +1339,130 @@ class WallGapConstraint:
         return _flux_jacobian_image(self, profile, context, payload)
 
 
+@dataclass(frozen=True)
+class ExternalShafranovConstraint:
+    r"""The Shafranov integral of the external magnetics, as one beta row.
+
+    A large-aspect-ratio current ring is balanced by a vertical field
+
+    .. math::
+
+       B_v = -\frac{\mu_0 I_p}{4\pi R}\left[\ln\left(\frac{8R}{a}\right)
+             + \beta_p + \frac{l_i}{2} - \frac{3}{2}\right],
+
+    so the external magnetics alone state the combination
+    :math:`\beta_p + l_i/2` the plasma must carry for force balance.  This row
+    inverts that identity: its observed value is the combination implied by
+    the prescribed external field at the plasma, and a solve that imposes it
+    against the values the extracted profiles imply closes the loop between
+    the flux-function extraction and the magnetics without fitting either.
+
+    The external field is not a further unknown.  It is the payload: the
+    prescribed conductor flux image on the lattice, which the circuits fix
+    before the solve begins.  The row differentiates the state through the
+    current centroid it is sampled at and the plasma current it is divided
+    by, both read from the moment observation on the declared support, so a
+    Newton step that moves the plasma changes what the same field implies.
+
+    The payload is ``(external_flux, minor_radius)``: the external flux image
+    in the lattice's own node ordering [Wb], and the minor radius [m] of the
+    reference boundary the row is stated against.  The minor radius is a
+    reference geometry rather than an unknown because this row constrains the
+    scale and shape of the profiles, not the position of the plasma.
+
+    The compensating unknown is a profile amplitude: the pressure-gradient or
+    ff-prime normalisation whose flux image the source term already carries.
+    A pair whose unknown is not a profile amplitude is refused when it is
+    built, because then the row states a constraint nothing can move.
+    """
+
+    minor_radius: object
+    support: MomentIntegralSupport = MomentIntegralSupport.ALL_DOMAIN
+    required_unknown: object = ProfileAmplitudeUnknown
+
+    def __post_init__(self) -> None:
+        radius = jnp.atleast_1d(jnp.asarray(self.minor_radius))
+        object.__setattr__(self, "minor_radius", radius)
+        _require_positive_if_concrete(radius, "shafranov reference minor radius")
+        if not isinstance(self.support, MomentIntegralSupport):
+            raise TypeError("shafranov support must be a MomentIntegralSupport")
+
+    @property
+    def row_count(self) -> int:
+        return 1
+
+    def _payload(self, payload: object) -> tuple[jax.Array, jax.Array]:
+        """Return the external flux image and the reference minor radius."""
+        if not isinstance(payload, Sequence) or len(payload) != 2:
+            raise ValueError(
+                "a shafranov row payload is (external_flux, minor_radius)"
+            )
+        external_flux, minor_radius = payload
+        return jnp.asarray(external_flux), jnp.asarray(minor_radius)
+
+    def observed(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        r"""Return :math:`\beta_p + l_i/2` the external field implies here.
+
+        The field is sampled on the lattice at the plasma's own current
+        centroid, from the external flux image the payload carries, through
+        the shared cubic reader so the row differentiates exactly the surface
+        the shape rows read.  The identity's :math:`\mu_0` is written
+        explicitly, as it is everywhere in this package.
+        """
+        external_flux, minor_radius = self._payload(payload)
+        observation = profile.current_moment_observation(
+            context.flux,
+            support=self.support,
+            target_current=context.target_current,
+        )
+        radius = observation.centroid_r
+        height = observation.centroid_z
+        lattice = profile.lattice
+        grid = jnp.reshape(
+            external_flux[: lattice.node_count], lattice.shape
+        )
+        step = lattice.radial_step
+        point = jnp.stack((radius, height))
+        upper = sample_lattice_flux(lattice, grid, point + jnp.stack((step, 0.0)))
+        lower = sample_lattice_flux(lattice, grid, point - jnp.stack((step, 0.0)))
+        vertical_field = (upper - lower) / (2.0 * step * TOTAL_FLUX_FACTOR * radius)
+        current = observation.plasma_current
+        numerator = -2.0 * TOTAL_FLUX_FACTOR * radius * vertical_field
+        force_factor = numerator / (MU0 * current)
+        combination = force_factor - jnp.log(8.0 * radius / minor_radius) + 1.5
+        return jnp.atleast_1d(combination)
+
+    def residual(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        unknown: jax.Array,
+        payload: object,
+        target: jax.Array,
+        scale: jax.Array,
+    ) -> jax.Array:
+        """Return the implied combination against the extracted target."""
+        del unknown
+        return (self.observed(profile, context, payload) - target) / scale
+
+    def dual_flux_image(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        """Return the row's direction in flux space, by autodiff of the row."""
+        jacobian = jax.jacrev(
+            lambda flux: self.observed(profile, context._replace(flux=flux), payload)
+        )(context.flux)
+        return jnp.moveaxis(jacobian, 0, -1)
+
+
 class BoundingBoxRowKind(IntEnum):
     """Which physical condition one bounding-box control row applies.
 
@@ -1734,6 +1865,7 @@ __all__ = [
     "ConstraintPolicy",
     "ConstraintRecord",
     "CurrentCentroidConstraint",
+    "ExternalShafranovConstraint",
     "FieldComponentConstraint",
     "IsofluxConstraint",
     "IsofluxReference",

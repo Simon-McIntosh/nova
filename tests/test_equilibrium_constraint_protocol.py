@@ -20,6 +20,8 @@ from nova.equilibrium.constraint import (
     ConstraintMultiplier,
     ConstraintPair,
     ConstraintRecord,
+    ExternalShafranovConstraint,
+    ProfileAmplitudeUnknown,
     assemble_augmented_system,
     constraint_residual_jvp,
 )
@@ -518,3 +520,36 @@ def test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows() -> No
         ValueError, "exactly one eliminated constraint"
     ):
         profile.solve(replace(request, constraint_pairs=(eliminated, eliminated)))
+
+
+def test_shafranov_row_requires_a_profile_amplitude_compensator() -> None:
+    """The Shafranov row states a profile constraint and refuses anything else.
+
+    A row on beta_p + l_i/2 is moved only through the source term, so a
+    circuit-current or multiplier compensator would register a constraint
+    nothing can drive.  The refusal is raised when the pair is built, which is
+    the only moment the functional and its compensator are visible together.
+    """
+    configure_dtypes()
+    binding = ConstraintBinding(
+        target=jnp.atleast_1d(0.5),
+        tolerance=jnp.asarray([1.0e-8]),
+        scale=jnp.asarray([1.0]),
+        initial_unknown=jnp.asarray([0.0]),
+    )
+    functional = ExternalShafranovConstraint(minor_radius=0.3)
+    with np.testing.assert_raises_regex(
+        TypeError, "must be compensated by ProfileAmplitudeUnknown"
+    ):
+        ConstraintPair(
+            functional,
+            CircuitCurrentUnknown(jnp.asarray([1.0]), jnp.asarray([1.0])),
+            binding,
+        )
+    pair = ConstraintPair(
+        functional,
+        ProfileAmplitudeUnknown("pressure_gradient", jnp.asarray([1.0])),
+        binding,
+    )
+    assert pair.row_count == 1
+    assert functional.required_unknown is ProfileAmplitudeUnknown

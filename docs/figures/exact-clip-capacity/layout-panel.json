@@ -1,0 +1,22 @@
+{
+  "arc_sample_count": 128,
+  "cases": "weak-rotation-reactor-static",
+  "cells_at_the_maximum": [
+    87,
+    104,
+    108,
+    110
+  ],
+  "cut_cells": 43,
+  "derived_vertex_capacity": 158,
+  "figures": [
+    "layout-panel.png",
+    "layout-panel.svg"
+  ],
+  "included_cells": 121,
+  "realised_maximum_vertex_count": 134,
+  "requested_cells": 110,
+  "schema": "nova.exact-clip-layout-panel.v1",
+  "straight_vertex_capacity": 30,
+  "superseded_swept_capacity": 3840
+}

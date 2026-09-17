@@ -1,0 +1,66 @@
+{
+  "arrays": {
+    "image": {
+      "array_equal": true,
+      "maximum_absolute_difference": 0.0,
+      "maximum_absolute_difference_unit": "abs difference for numeric arrays, 0.0 for an equal boolean mask, None across unequal shapes",
+      "mismatch_count": 0,
+      "sha256_base": "76952994eb103dd6667b9622f27527e465fb15fd74f7663c9410365482c50828",
+      "sha256_current": "76952994eb103dd6667b9622f27527e465fb15fd74f7663c9410365482c50828",
+      "shape_base": [
+        4021
+      ],
+      "shape_current": [
+        4021
+      ]
+    },
+    "included": {
+      "array_equal": true,
+      "maximum_absolute_difference": 0.0,
+      "maximum_absolute_difference_unit": "abs difference for numeric arrays, 0.0 for an equal boolean mask, None across unequal shapes",
+      "mismatch_count": 0,
+      "sha256_base": "f33b1ab3beebba008519502aa655f0acc5789f144ef031564570479e26999a13",
+      "sha256_current": "f33b1ab3beebba008519502aa655f0acc5789f144ef031564570479e26999a13",
+      "shape_base": [
+        1072
+      ],
+      "shape_current": [
+        1072
+      ]
+    },
+    "moments": {
+      "array_equal": true,
+      "maximum_absolute_difference": 0.0,
+      "maximum_absolute_difference_unit": "abs difference for numeric arrays, 0.0 for an equal boolean mask, None across unequal shapes",
+      "mismatch_count": 0,
+      "sha256_base": "8a4cc018bcb7bbe76ff76fc00b9e69550f4fedcdad38f8dda03cd1706e3de0e2",
+      "sha256_current": "8a4cc018bcb7bbe76ff76fc00b9e69550f4fedcdad38f8dda03cd1706e3de0e2",
+      "shape_base": [
+        3,
+        1072
+      ],
+      "shape_current": [
+        3,
+        1072
+      ]
+    },
+    "vertex_count": {
+      "array_equal": true,
+      "maximum_absolute_difference": 0.0,
+      "maximum_absolute_difference_unit": "abs difference for numeric arrays, 0.0 for an equal boolean mask, None across unequal shapes",
+      "mismatch_count": 0,
+      "sha256_base": "8ddb26132c89ba2aa7d2ffa4d502092cc4c9b2af07150d7c4871769e0852543a",
+      "sha256_current": "8ddb26132c89ba2aa7d2ffa4d502092cc4c9b2af07150d7c4871769e0852543a",
+      "shape_base": [
+        1072
+      ],
+      "shape_current": [
+        1072
+      ]
+    }
+  },
+  "base_revision": "base",
+  "current_revision": "current",
+  "passed": true,
+  "schema": "nova.exact-clip-capacity-identity.v1"
+}

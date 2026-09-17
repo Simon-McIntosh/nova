@@ -616,12 +616,12 @@ def _byte_differences(
 def _dump_comparison(previous_path: Path | None, current_path: Path) -> dict[str, Any]:
     """Measure this dump against the earlier one instead of asserting identity.
 
-    The report used to state that the dumped module was byte-identical to an
-    earlier census without reading either file; this returns the sizes, digests
-    and — when the earlier dump is on disk — the differing-byte count and the
-    location of the first difference, so the report can carry only what was
-    measured.  ``compared`` is False when the earlier dump is absent and the
-    report then says so rather than claiming a comparison it did not make.
+    The sizes and digests are read from the two files themselves and, when the
+    earlier dump is on disk, the differing-byte count and the location of the
+    first difference are counted too, so the report carries only what was
+    measured rather than a comparison nobody made.  ``compared`` is False when
+    the earlier dump is absent, and the report then says so rather than claiming
+    a comparison it did not make.
     """
     comparison: dict[str, Any] = {
         "current_path": str(current_path),

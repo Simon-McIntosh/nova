@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T12:10:52",
+  "updated": "2026-09-17T12:54:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -176816,6 +176816,331 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T055938156648-ecm-memory-test-tracer-parameter-route",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a72",
+        "node": "ecm-memory-test-tracer-parameter-route",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2020,
+                "cached_input_tokens": 259758,
+                "input_tokens": 261810,
+                "output_tokens": 166,
+                "reasoning_output_tokens": 101,
+                "total_tokens": 261976,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "tests/test_exact_clip_memory.py imports at the node head and collects every test it collected at 26c45542 (pytest --collect-only counts equal, both counts stated in the manifest, run with JAX_PLATFORMS=cpu and the root venv interpreter with PYTHONPATH set to the worktree in one all_debug job); no test in the module references __globals__ or _implicit_traced_clip; benchmarks/exact_clip_memory_scaling.py at line 498 still resolves _implicit_traced_level_arc and its import is checked by python -c import in the same job; every test in the module whose base wall is under ten minutes is run in its own all_debug job and passes with the log path named, while the over-hour tests are listed by id as unrun with their base walls quoted from the last committed log; every uv command carries --no-sync and nothing runs uv sync",
+          "estimated_hours": null,
+          "goal": "Repair tests/test_exact_clip_memory.py so it reaches the implicit level-arc tracer through the clip entry points arc_tracer parameter instead of importing _implicit_traced_clip and rebinding _traced_level_arc in its __globals__, which no longer exists after the clone deletion",
+          "id": "ecm-memory-test-tracer-parameter-route",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T05:59:42Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T055938156648-ecm-memory-test-tracer-parameter-route/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "tests/test_exact_clip_memory.py",
+            "benchmarks/exact_clip_memory_scaling.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/memory-test-repair",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+            "docs/plans/cut-cell-current-attribution.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-ecm-repair-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T06:01:01Z",
+        "completed_at": "2026-09-17T09:58:49.406Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 14257,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 14268,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "1e6e90b230227a20cacd4c127dcc74e4145b1da0",
+        "commits": [
+          "93a0b1414db8d1887022872861d716babee7c2e2",
+          "de6a64337b53e077af560e8a85a4216cbed7307c",
+          "59d092751a6bfac618ba9f4b5a3cb9341f9d4efb"
+        ],
+        "changed_lines": {
+          "added": 86,
+          "removed": 15,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest --collect-only at head and base (14 and 14) plus twelve per-test all_debug jobs, each a fresh CPU process; independent review",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T055938156648-ecm-memory-test-tracer-parameter-route.json",
+          "log_digest": "sha256:9714fdc0fc664ffca6911ee7e39ba5a9a4348adf1f9cf7cbdaaf83a40ea5805d"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T055938156648-ecm-memory-test-tracer-parameter-route/manifest.md",
+        "scope_changed": false,
+        "session_id": "05c09ef6-925c-459f-8239-b3b1acb5a8e2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 5867268,
+            "input_tokens_cumulative": 5867268,
+            "output_tokens": 27081,
+            "output_tokens_cumulative": 27081,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T09:58:49.406Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2677,
+              "budget_seconds": 3600,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 6277,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2194,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1ad4bea965d4c00863192499e1aa350d386740c6",
+                "c96dad28e91c9be1779531931e7d7b7ad3792a43",
+                "d9b594b29be63302832faf0097ae60b983e20295",
+                "f573ac1be1bd6e0bd4e26a6e30d33c8e2b2bd3f9",
+                "f225e9c0e1521464c799ee7e4fe6d2ed7c7fb0c7"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "f9b91801c2aa8e2d6512f64bb7b7b96d8aa090e06a1c8acf7eb7603aba206ae0",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T204834010483-ecq-sampled-arc-gauss-route/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan exact-clip-moment-quadrature --section '\u00a72' --role review --spec-level exact --node review-of-ecq-sampled-arc-gauss-route --goal 'attach an independent review to run r-20260916T204834010483-ecq-sampled-arc-gauss-route' --done-when 'the review for r-20260916T204834010483-ecq-sampled-arc-gauss-route parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T204834010483-ecq-sampled-arc-gauss-route.json --time-budget 60m --session s19-codex-20260916 --local",
+              "node": "ecq-sampled-arc-gauss-route",
+              "phase": "working",
+              "plan": "exact-clip-moment-quadrature",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260916T204834010483-ecq-sampled-arc-gauss-route",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 2921,
+              "terminal_at": "2026-09-17T05:11:43Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-sampled-arc-gauss-route"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 32,
+              "budget_seconds": 3600,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 3632,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1357,
+              "log_fresh": false,
+              "manifest_commits": [
+                "a096fecce4b7e16c8a7d714b2c6260fe0b5259e9 fix(equilibrium): impose the exterior-field bound by damped step control; 8165d70f13c71330b899e806137eead5f20bf661 feat(equilibrium): bank the bounded row first step and refusal control; 66e8e8c7bc5e0f84bfbaad003d958f23f3a0ea27 fix(equilibrium): read the fixture centroid on the declared support; 34a6e995e3871a16b77c0d09c793fb5578563d05 docs(plans): land the bounded-row step-control checkpoint and first-step receipt; 442820bf0f0220c9b0ab1cf84295d4b0832a2d8a feat(equilibrium): run each displaced-seed control as its own job; 9fbe44b3bb15b836380663587ae8a201ef5fea2b docs(plans): land the displaced-seed control record and its panels"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "a71af18171747a7c6b094c47e7a3793078d05406d8993a352e97b462ed75268d",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205409901465-cco-bounded-row-step-control/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan centroid-constrained-oracle-solve --section '\u00a72' --role review --spec-level exact --node review-of-cco-bounded-row-step-control --goal 'attach an independent review to run r-20260916T205409901465-cco-bounded-row-step-control' --done-when 'the review for r-20260916T205409901465-cco-bounded-row-step-control parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T205409901465-cco-bounded-row-step-control.json --time-budget 60m --session s19-codex-20260916 --local",
+              "node": "cco-bounded-row-step-control",
+              "phase": "working",
+              "plan": "centroid-constrained-oracle-solve",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260916T205409901465-cco-bounded-row-step-control",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 1417,
+              "terminal_at": "2026-09-17T05:36:50Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cco-bounded-row-step-control"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 18,
+            "evidence": 17,
+            "fit": 20,
+            "goal_fidelity": 20,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 95
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 5867268,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 918.184,
+          "generated_tokens": 27081,
+          "generation_seconds": 549.003,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.4,
+          "machine_seconds": 369.181,
+          "peak_input_tokens": 150749,
+          "tokens_per_second": 49.33,
+          "wall_tokens_per_second": 29.49
+        },
+        "follow_on_paths": [
+          "tests/test_exact_clip_memory.py::test_exact_clip_terminal_state_matches_reference_fixed_point",
+          "reports/nova/s19-local/memory-test-repair/base26/"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest --collect-only",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecm-memory-test-tracer-parameter-route",
+          "session_id": "05c09ef6-925c-459f-8239-b3b1acb5a8e2",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T09:58:49.406Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 31.0,
+        "orientation_input_tokens": 1186050.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -177128,6 +177453,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2696
+    "_version": 2697
   }
 }

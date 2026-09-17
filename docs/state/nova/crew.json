@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T23:43:20",
+  "updated": "2026-09-17T23:43:28",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4611,6 +4611,15 @@
       },
       {
         "id": "s19c-cco-fluxlevel-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-cco-fluxlevel2-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -185879,6 +185888,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2751
+    "_version": 2752
   }
 }

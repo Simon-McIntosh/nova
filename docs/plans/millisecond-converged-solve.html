@@ -24,8 +24,6 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
 <meta name="plan-version" content="76">
-<meta name="plan-version" content="72">
-<meta name="plan-version" content="75">
 <meta name="plan-impl" content="0.88">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd,273ff747,7aef0963">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -162,6 +160,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-s19c-marker-census-rebaselined-20260917" data-who="" data-when="">
     <div class="r-comment-body">Stage one of the single-evaluator design is landed in two pieces: msc-marker-census-instrument (a30309ad, merged b9ce8d62, closed as a partial after its session exhausted) and msc-marker-census-rebaseline (merged 439770b3, promotion pending its review). Both sentinel rules were run on one optimised HLO dump of the 300-cell solve: the committed 36 and the census's 79 count different sentinel statements, so the baseline the stage-two gate must reproduce is 120 current-moment copies and 79 topology-read copies, not 120 and 36; the design document's stage table and f-msc-single-evaluator-state-machine quote the old pair and must be read against the new one. The census refuses on zero markers or a uniform column and the refusal is pinned on synthetic HLO text. Compile of the 300-cell solve on all_debug measured 345 to 357 s per compile with a 219.6 MB HLO text, which is a compile-cost figure in its own right. The re-baseline node ran about four hours against a 55-minute fence, reported rather than justified.</div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-s19c-request-set-one-body-20260917" data-who="" data-when="">
+    <div class="r-comment-body">Stage two (msc-request-set-machine-2, two fenced turns) has demonstrated design decision D1 and stopped honestly before the restructure: the read-request set and its tagged dispatcher landed at 1f141e67, a first census counted four marker bodies rather than one, and 41bd2b44 fixed the cause, selecting the request output with a gather instead of a register switch, after which the census reads one body. The five request paths are not yet wired: the D4 precondition is open, forward.py:1934 builds the flux read and the residual-shadow read as two separate traced programs and hands the solver closures over both, and the per-call-site state identity across twelve sites in reduced_newton.py and four in forward.py is recorded as unestablished in the node's d4-state-identity report. The wiring, the census at the wired head, the four certificate rows and the module lanes are the next fenced turn on the same node; the worker's commits stay on its worktree until the census at the wired head reads one body and the rows are bit-identical. The lane is draining for a serve restart, so the resume waits for it.</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260904T124009971053-mcs-trip-quantum-profile-4" data-who="mcs-profile-x4" data-when="2026-09-04T13:09:39Z">
     <div class="r-comment-body"><p>Per-trip profile banked: topology read 63 percent of a 5.9 s trip (wall reachability 56 percent of the read, flood fills 30, separatrix 7.5, spline fits 6.7), host dispatch or device sync 37 percent, physics (forward, JVP, GMRES, line search) 0.5 percent; a Jacobi SVD in the production graph breaks the CUPTI replay; merged at c78f6364</p></div>

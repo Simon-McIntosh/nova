@@ -1223,9 +1223,10 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   on the clipped support: vertex-count sum 1584, total clipped area
   12.566335557375638, support-vertex digest
   <code>99674cf594df2e543c2e93c0fe4b6e17270c1e03db3d9d3d04bb061659b3efda</code>.
-  The same receipt shows the explicit default tracer differing from the explicit
-  implicit one, so the parameter is live rather than silently inert — a test
-  that could not tell the two tracers apart would prove nothing. The new guard
+  The same receipt does not distinguish the tracers: its three arms agree on
+  every figure, so it says nothing about whether the parameter is live, and the
+  independent review of this run scored the liveness claim down for that
+  reason. Liveness rests on the guard alone. The new guard
   counts tracer invocations at trace time, which <code>jax.lax.scan</code> makes
   possible, and reads 0 under a temporary mutation that ignores
   <code>arc_tracer</code>; the mutation was reverted before the commit. Receipts:

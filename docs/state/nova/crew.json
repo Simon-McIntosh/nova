@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T22:48:56",
+  "updated": "2026-09-17T23:04:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -182793,6 +182793,405 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T183042362388-cank-refused-row-field",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "\u00a74",
+        "node": "cank-refused-row-field",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4327,
+                "cached_input_tokens": 651557,
+                "input_tokens": 655886,
+                "output_tokens": 28,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 655914,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "benchmarks/shafranov_pair_receipt.py no longer seeds terminal_profile_combination with the constraint target on the refused path (null or the string refused, stated), the six row receipts under docs/figures/constraint-augmented-newton-krylov/shafranov/ are regenerated from the banked per-row emissions under the reports fence without any solve or job (their observed_combination_at_reference, gap and refusal reason unchanged, shown by a diff limited to the corrected field), a test in tests/test_equilibrium_constraint_protocol.py or a new tests/test_shafranov_pair_receipt.py pins that a refused row never carries the target as its terminal combination, passing in one fresh all_debug process with zero added failures against base; the evidence record names the three superseded attempts 1272932, 1272936 and 1272972 with their causes; every uv command carries --no-sync and nothing runs uv sync; write files in short pieces and py_compile each before committing",
+          "estimated_hours": null,
+          "goal": "Carry out items one and three of followup f-cank-shafranov-refused-row-field: refused Shafranov rows report null or an explicit refused marker instead of the target in terminal_profile_combination, the six committed receipts are regenerated from the banked emissions, and the evidence record lists all three superseded H200 attempts",
+          "id": "cank-refused-row-field",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T18:30:44Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183042362388-cank-refused-row-field/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/shafranov_pair_receipt.py",
+            "tests/test_shafranov_pair_receipt.py",
+            "tests/test_equilibrium_constraint_protocol.py",
+            "docs/figures/constraint-augmented-newton-krylov/shafranov",
+            "docs/evidence/archive/constraint-augmented-newton-krylov-landed.html",
+            "docs/plans/constraint-augmented-newton-krylov.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/shafranov-refused-field"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-cank-refused-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T18:31:04Z",
+        "completed_at": "2026-09-17T20:12:21.745Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6033,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6077,
+        "stalled": true,
+        "time_budget": "40m",
+        "base_sha": "38b7014ee25891b59e66605d1a2f512c5271b6e6",
+        "commits": [
+          "4c93d9ae03e286960a23aa1405e7c3b4d251b7ce",
+          "d86fca7c533c04b0997a2cb0e81855244a99cc5b"
+        ],
+        "changed_lines": {
+          "added": 324,
+          "removed": 20,
+          "files": 11
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "tests/test_shafranov_pair_receipt.py and tests/test_equilibrium_constraint_protocol.py in fresh all_debug processes, zero added failures against base; receipts regenerated from banked emissions; independent review",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T183042362388-cank-refused-row-field.json",
+          "log_digest": "sha256:46dd08b52bf979ee0cf82b9697e4dc8c73df6eebaa8ba2a9cbea2a5eda139883"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "Refused Shafranov rows report no terminal profile combination (merge after d86fca7c): the six committed receipts are regenerated from the banked emissions with only that field changed, a test pins the rule and the replay path refuses a lane log whose row set does not match the receipt (exercised by a truncated five-row control that wrote nothing), the evidence record names the three superseded H200 attempts with causes, no solve or job ran. Items one and three of followup f-cank-shafranov-refused-row-field are closed; item two (the compensating amplitude on extracted profiles) waits on polynomial flux functions reaching the solve. Review 91/100, one finding: the row-set mismatch refusal is exercised only by an uncommitted control log, so a committed test should pin the guard",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183042362388-cank-refused-row-field/manifest.md",
+        "scope_changed": false,
+        "session_id": "d162bc56-592d-4972-b19e-0abd1f05f660",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2940568,
+            "input_tokens_cumulative": 2940568,
+            "output_tokens": 9522,
+            "output_tokens_cumulative": 9522,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T20:12:21.745Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4402,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: as recorded under blocker above.  No job is running; nothing is owed to SLURM.",
+              "elapsed_seconds": 7702,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2614,
+              "log_fresh": false,
+              "manifest_commits": [
+                "4404e68a58c32aaca66c0416ab343c239874e3e4  feat(benchmarks): compare DIII-D gate frames against the committed batch",
+                "6995aa6232d147b43ade2efb149ac96de050570b  fix(benchmarks): solve DIII-D gate frames one program at a time",
+                "02462d3b50a04ff137a91fce6b1968affc6520f9  fix(benchmarks): isolate each DIII-D gate frame in its own process"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0109a67061fdcd7785d3729afd8965871a3c2d074f5646ad28fbabb955448b18",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T044142288419-mulw-diiid-gate-frame-identity/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T044142288419-mulw-diiid-gate-frame-identity/manifest.md; resolve the blocker before resuming the run",
+              "node": "mulw-diiid-gate-frame-identity",
+              "phase": "working",
+              "plan": "multi-unit-limiter-wall",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T044142288419-mulw-diiid-gate-frame-identity",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260917T044142288419-mulw-diiid-gate-frame-identity",
+                "session_id": "333303e8-8d27-4066-863f-7cb393cc2b22",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 3132,
+              "terminal_at": "2026-09-17T17:38:37Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/mulw-diiid-gate-frame-identity"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1450,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 4750,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2012,
+              "log_fresh": false,
+              "manifest_commits": [
+                "f7fefbd7 (nova/equilibrium/separatrix_clip.py and tests/test_equilibrium_separatrix_clip.py: the derived capacity",
+                "its docstring derivation",
+                "and the above-bound refusal test)",
+                "128f5f57 (the receipts document",
+                "the memory receipts",
+                "the poloidal layout panel with its renderer and receipt",
+                "and the landing record in the plan section and the evidence anchor",
+                "in one commit)"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "c0b1ad3a03860608c46c16c87d60afa2ef6d8773987af5fe9f8d5c10edcde637",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T100810663195-ecq-capacity-sizing/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan exact-clip-moment-quadrature --section '\u00a74' --role review --spec-level exact --node review-of-ecq-capacity-sizing --goal 'attach an independent review to run r-20260917T100810663195-ecq-capacity-sizing' --done-when 'the review for r-20260917T100810663195-ecq-capacity-sizing parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T100810663195-ecq-capacity-sizing.json --time-budget 55m --session s19-codex-20260916 --local",
+              "node": "ecq-capacity-sizing",
+              "phase": "working",
+              "plan": "exact-clip-moment-quadrature",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T100810663195-ecq-capacity-sizing",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 2065,
+              "terminal_at": "2026-09-17T17:56:25Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-capacity-sizing"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 480,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: authored-artifact generation is corrupt in this session",
+              "elapsed_seconds": 3780,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 4982,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1d7f4bc3"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "cf0b29d1ca893684cc42e1cb2aed66bcccbc2905d84f4c44fee1ee5f98c0b1a7",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T160409157288-nia-drift-probe-remainder-and-panels/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T160409157288-nia-drift-probe-remainder-and-panels/manifest.md; resolve the blocker before resuming the run",
+              "node": "nia-drift-probe-remainder-and-panels",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T160409157288-nia-drift-probe-remainder-and-panels",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260917T160409157288-nia-drift-probe-remainder-and-panels",
+                "session_id": "adbaa40f-5934-438e-ae7e-db5c5f9da9ce",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 5141,
+              "terminal_at": "2026-09-17T17:05:09Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-drift-probe-remainder-and-panels"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 17,
+            "evidence": 18,
+            "fit": 18,
+            "goal_fidelity": 19,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 91
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 2940568,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 574.275,
+          "generated_tokens": 9522,
+          "generation_seconds": 567.046,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 26.2,
+          "machine_seconds": 7.229,
+          "peak_input_tokens": 125675,
+          "tokens_per_second": 16.79,
+          "wall_tokens_per_second": 16.58
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-refused-row-field",
+          "session_id": "d162bc56-592d-4972-b19e-0abd1f05f660",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T20:12:21.745Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 80.0,
+        "orientation_input_tokens": 2169380.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -183105,6 +183504,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2743
+    "_version": 2744
   }
 }

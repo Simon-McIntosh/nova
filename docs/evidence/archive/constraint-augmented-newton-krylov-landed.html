@@ -405,6 +405,25 @@
       panel is committed per row under <code>docs/figures/constraint-augmented-newton-krylov/shafranov/</code>, each beside its own
       <code>row-&lt;shot&gt;-&lt;index&gt;.json</code> receipt.</figcaption>
     </figure>
+    <p><strong>The three superseded attempts, and the field the refused rows were reporting.</strong> This bank measurement is the fourth
+    H200 submission of the driver. The first, job 1272932, carried no refusal gate at all: the solve entered
+    <code>profile_component_image</code> on an extracted profile and died with
+    <code>TypeError: profile component tangents require PolynomialFluxFunction coefficient arguments</code>. The second, job 1272936, had the
+    refusal gate, but its <code>_raster</code> broadcast the row's reference arrays against mismatched supports and died with
+    <code>ValueError: operands could not be broadcast together with shapes (1089,) (1126,)</code>. The third, job 1272972, read
+    <code>topology.topology_class</code>, which <code>ForwardTopologyState</code> does not carry, and died with an
+    <code>AttributeError</code>. Job 1272973 is the run whose emissions the committed receipts come from.</p>
+    <p><strong>Correction to the refused rows' terminal field.</strong> Those receipts were audited after they landed, and one field on the
+    refused path stated something that never happened. The driver seeded <code>terminal_profile_combination</code> with the constraint target
+    and overwrote it only on the row that terminated, so each refused row's receipt carried the profile-implied combination in the slot a
+    reader takes as the combination the row terminated at: <code>row-21978-35.json</code> read <strong>0.4613</strong> there against an
+    observed 0.3126, beside <code>status: refused</code>, a terminal residual and a converged flag that were null. The value is the target,
+    not an outcome; the correct statement is that the row has no terminal state and therefore no terminal combination. Both the measurement
+    and a replay path added for this correction now take the field through one rule that returns null unless the row terminated. The six
+    committed receipts were regenerated from the banked emissions of job 1272973 with <strong>no solve and no new job</strong>: the diff
+    against the previous receipts is twelve lines, all of them this field, and the target, the observed combination, the gap, the refusal
+    reason, the figure provenance and the panel images are unchanged. A committed test pins the rule on the replay path with the seeded field
+    restored, and beside it a positive control in which an imposed row keeps the combination its emission carries.</p>
     <p><strong>Decision:</strong> the row is delivered and behaves as specified — it converges to the imposed amplitude on a profile whose
     gradient is a polynomial, and it refuses, with the reason recorded, where the amplitude is not a free unknown. What the bank measurement
     establishes is the precondition for the measurement deliverable D asks for: the current bank rows cannot be measured with this row at

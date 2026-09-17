@@ -7,7 +7,14 @@ on the external-magnetics Shafranov row, whose compensating unknown is the
 profile normalisation the source term already carries.  The receipt records,
 per row, the combination the row achieved, the compensating fraction, the
 outer step count, the terminal residual and the converged flag, so an unmet
-target is reported rather than fitted away.
+target is reported rather than fitted away.  A row the solve refuses has no
+terminal state at all, so its terminal combination is null: the target it was
+refused against is not an outcome and is never recorded as one.
+
+The per-row receipts can be rebuilt from a banked lane log, which carries one
+``SHAFRANOV-ROW`` emission per row, with ``--emissions``: the replay takes
+every value from the banked emissions and never enters the solver, so a
+corrected field is republished without a new solve or a new job.
 
 One poloidal panel per row is written under the project's plotting rules:
 line contours only, no axes or grid, both the reference and the terminal
@@ -56,6 +63,33 @@ DEFAULT_DIRECTORY = ROOT / "docs/figures/constraint-augmented-newton-krylov/shaf
 ROW_TOLERANCE = 1.0e-6
 #: Display raster resolution for the per-row panels.
 RASTER_SAMPLES = 181
+#: Fields of one row receipt, in the order the document is written.  A receipt
+#: replayed from a banked emission is assembled through this order, so a replay
+#: and a fresh measurement agree on the document shape as well as the values.
+ROW_FIELDS = (
+    "identity",
+    "status",
+    "refusal_reason",
+    "target_combination",
+    "minor_radius_m",
+    "plasma_current_a",
+    "target_source",
+    "observed_combination_at_reference",
+    "reference_combination_gap",
+    "target_error",
+    "achieved_combination",
+    "compensating_amplitude_fraction",
+    "terminal_profile_combination",
+    "outer_steps",
+    "terminal_residual",
+    "topology_consistent",
+    "converged",
+    "termination",
+)
+#: The prefix the lane prints one row emission under, which is what a replay
+#: reads a banked log for.  ``ast.literal_eval`` is not needed: the emission is
+#: the same JSON payload the receipt document carries.
+EMISSION_PREFIX = "SHAFRANOV-ROW "
 
 
 def _strict_float(value: Any) -> float | None:
@@ -64,6 +98,20 @@ def _strict_float(value: Any) -> float | None:
         return None
     result = float(np.asarray(value))
     return result if np.isfinite(result) else None
+
+
+def _terminal_combination(status: str, combination: Any) -> float | None:
+    """Return the terminal combination a row receipt may carry.
+
+    A refused row has no terminal state, so the target it was refused against
+    is not an outcome of the solve and must not be recorded as one: the refusal
+    is stated in ``status`` and ``refusal_reason``, and this field is null.  A
+    row that did terminate reports the combination its own profiles read at the
+    terminal state, which may differ from the target by the row's residual.
+    """
+    if status == "refused":
+        return None
+    return _strict_float(combination)
 
 
 def _source_revision() -> str:
@@ -317,9 +365,10 @@ def _row_receipt(
     refusal = _amplitude_availability(profile, "pressure_gradient")
     print(f"SHAFRANOV {identity} target={target!r} refusal={refusal!r}", flush=True)
     observed_at_reference = _observed_combination(profile, pair, reference_state)
+    status = "refused" if refusal is not None else "imposed"
     entry: dict[str, Any] = {
         "identity": identity,
-        "status": "refused" if refusal is not None else "imposed",
+        "status": status,
         "refusal_reason": refusal,
         "target_combination": _strict_float(target),
         "minor_radius_m": _strict_float(minor_radius),
@@ -333,7 +382,7 @@ def _row_receipt(
         "target_error": None,
         "achieved_combination": None,
         "compensating_amplitude_fraction": None,
-        "terminal_profile_combination": _strict_float(target),
+        "terminal_profile_combination": _terminal_combination(status, None),
         "outer_steps": 0,
         "terminal_residual": None,
         "topology_consistent": None,
@@ -370,7 +419,9 @@ def _row_receipt(
                     if record is None
                     else _strict_float(record.physical_unknown[0])
                 ),
-                "terminal_profile_combination": _strict_float(terminal_combination),
+                "terminal_profile_combination": _terminal_combination(
+                    status, terminal_combination
+                ),
                 "outer_steps": int(
                     np.asarray(equilibrium.fixed_point.active_set_iterations)
                 ),
@@ -400,6 +451,113 @@ def _row_receipt(
         note=note,
     )
     return entry
+
+
+def _row_path(directory: Path, identity: str) -> Path:
+    """Return the receipt path one row identity writes to."""
+    return directory / f"row-{identity.replace('/', '-')}.json"
+
+
+def write_entry(directory: Path, entry: dict[str, Any]) -> None:
+    """Write one row receipt beside its panel."""
+    directory.mkdir(parents=True, exist_ok=True)
+    _row_path(directory, entry["identity"]).write_text(
+        json.dumps(entry, indent=2) + "\n", encoding="utf-8"
+    )
+
+
+def _emissions(path: Path) -> list[dict[str, Any]]:
+    """Return the per-row emissions a banked lane log carries, in log order."""
+    emissions = [
+        json.loads(line[len(EMISSION_PREFIX) :])
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.startswith(EMISSION_PREFIX)
+    ]
+    if not emissions:
+        raise ValueError("the banked lane log carries no row emission")
+    return emissions
+
+
+def _figure_block(directory: Path, identity: str) -> dict[str, Any] | None:
+    """Return the figure block of the row receipt already in place, if any.
+
+    A replay does not re-render the panel, so it carries the committed block
+    forward and the receipt keeps the provenance of the image it points at.
+    """
+    path = _row_path(directory, identity)
+    if not path.exists():
+        return None
+    return json.loads(path.read_text(encoding="utf-8")).get("figure")
+
+
+def _emission_entry(
+    emission: dict[str, Any], *, figure: dict[str, Any] | None
+) -> dict[str, Any]:
+    """Return one row receipt entry replayed from a banked row emission.
+
+    Every value comes from the emission the lane printed; the terminal
+    combination additionally passes the rule the measurement applies, so a
+    refused row cannot carry the target it was refused against whatever the
+    banked emission holds.
+    """
+    absent = [field for field in ROW_FIELDS if field not in emission]
+    if absent:
+        raise KeyError(f"the banked emission is missing {absent}")
+    entry = {field: emission[field] for field in ROW_FIELDS}
+    entry["terminal_profile_combination"] = _terminal_combination(
+        entry["status"], entry["terminal_profile_combination"]
+    )
+    if figure is not None:
+        entry["figure"] = figure
+    return entry
+
+
+def regenerate(*, emissions: Path, directory: Path) -> dict[str, Any]:
+    """Rewrite the row receipts from a banked lane log, without a solve."""
+    receipt_path = directory / "receipt.json"
+    if not receipt_path.exists():
+        raise FileNotFoundError(
+            f"the aggregate receipt {receipt_path} must exist to be rewritten"
+        )
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    committed = [entry["identity"] for entry in receipt.get("rows_receipt", [])]
+    entries = [
+        _emission_entry(emission, figure=_figure_block(directory, emission["identity"]))
+        for emission in _emissions(emissions)
+    ]
+    replayed = [entry["identity"] for entry in entries]
+    if sorted(replayed) != sorted(committed):
+        raise ValueError(
+            "the banked log replays a different row set than the receipt holds: "
+            f"{sorted(replayed)} against {sorted(committed)}"
+        )
+    for entry in entries:
+        write_entry(directory, entry)
+        print(
+            "SHAFRANOV-STAMP "
+            + json.dumps(
+                {
+                    key: entry[key]
+                    for key in (
+                        "identity",
+                        "status",
+                        "target_combination",
+                        "terminal_profile_combination",
+                        "observed_combination_at_reference",
+                        "reference_combination_gap",
+                        "refusal_reason",
+                    )
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+    receipt["rows"] = [
+        [int(part) for part in entry["identity"].split("/")] for entry in entries
+    ]
+    receipt["rows_receipt"] = entries
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    return receipt
 
 
 def measure(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any]:
@@ -476,9 +634,7 @@ def measure(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any
         (directory / "receipt.json").write_text(
             json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
         )
-        (directory / f"row-{shot}-{row_index}.json").write_text(
-            json.dumps(entry, indent=2) + "\n", encoding="utf-8"
-        )
+        write_entry(directory, entry)
         print(
             "SHAFRANOV-ROW "
             + json.dumps(
@@ -499,8 +655,17 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--directory", type=Path, default=DEFAULT_DIRECTORY)
     parser.add_argument("--cache-root", type=Path, default=None)
+    parser.add_argument(
+        "--emissions",
+        type=Path,
+        default=None,
+        help="rewrite the receipts from a banked lane log instead of solving",
+    )
     arguments = parser.parse_args(argv)
-    measure(directory=arguments.directory, cache_root=arguments.cache_root)
+    if arguments.emissions is None:
+        measure(directory=arguments.directory, cache_root=arguments.cache_root)
+    else:
+        regenerate(emissions=arguments.emissions, directory=arguments.directory)
 
 
 if __name__ == "__main__":

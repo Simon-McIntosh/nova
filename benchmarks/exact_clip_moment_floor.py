@@ -6,6 +6,7 @@ import argparse
 from datetime import UTC, datetime
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import socket
@@ -28,16 +29,28 @@ from nova.equilibrium.clip_quadrature import (
 
 try:
     from nova.equilibrium.clip_quadrature import (
+        _ARC_EDGE_NODE,
+        _ARC_EDGE_ORDER,
+        _ARC_EDGE_WEIGHT,
+        _DENSITY_POWERS,
+        _DENSITY_SAMPLE_LOCAL,
         _compact_chord_polygon,
         _quadratic_coefficients,
         _quadratic_sample_field,
+        cut_capacity_edge_bound,
         cut_cell_moment_evaluation_bound,
     )
 except ImportError:
     _compact_chord_polygon = None
     _quadratic_coefficients = None
     _quadratic_sample_field = None
+    cut_capacity_edge_bound = None
     cut_cell_moment_evaluation_bound = None
+    _ARC_EDGE_NODE = None
+    _ARC_EDGE_WEIGHT = None
+    _ARC_EDGE_ORDER = None
+    _DENSITY_SAMPLE_LOCAL = None
+    _DENSITY_POWERS = None
 from nova.equilibrium.stencil_mesh import CellCurrentMoments, flux_field_polynomial
 from nova.jax.config import configure_dtypes
 from scripts.analytic_oracle_fixtures import measure as fixture
@@ -45,7 +58,7 @@ from scripts.analytic_oracle_fixtures import measure as fixture
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT_ROOT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/exact-moments"
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-gauss"
 )
 FIGURE_ROOT = ROOT / "docs/figures/exact-clip-moment-quadrature"
 CASES = (
@@ -92,10 +105,12 @@ def _require_boundary_route() -> None:
     if any(
         item is None
         for item in (
-            _compact_chord_polygon,
             _quadratic_coefficients,
             _quadratic_sample_field,
+            cut_capacity_edge_bound,
             cut_cell_moment_evaluation_bound,
+            _ARC_EDGE_NODE,
+            _ARC_EDGE_WEIGHT,
         )
     ):
         raise RuntimeError("the boundary-reduction implementation is unavailable")
@@ -275,6 +290,58 @@ def _relative_difference(observed: np.ndarray, reference: np.ndarray) -> np.ndar
     )
 
 
+def edge_order_study() -> dict[str, Any]:
+    """Find the lowest per-edge Gauss order exact on the density model's integral.
+
+    The boundary rule integrates, along each straight edge, the radial
+    antiderivative of the local density model. That integrand is a polynomial of
+    degree five in the edge parameter, so a Gauss rule is exact on it once
+    2 * order - 1 reaches five. This checks the claim directly on the model's
+    own monomials rather than on the reduced moments.
+
+    The reference is the monomial's antiderivative in closed form. A sampled rule
+    cannot serve as it: its own truncation sits near 1e-6 on these integrands,
+    which floors the measured defect above the exactness threshold and makes
+    every order read as inexact.
+    """
+
+    def exact_line_integral(exponent: int, vertical_power: int) -> float:
+        """Integrate t**exponent * (1 - 2 t)**vertical_power along the unit edge."""
+        return float(
+            sum(
+                math.comb(vertical_power, term) * (-2.0) ** term / (exponent + term + 1)
+                for term in range(vertical_power + 1)
+            )
+        )
+
+    result: dict[str, Any] = {}
+    for order in (1, 2, 3, 4):
+        nodes, weights = np.polynomial.legendre.leggauss(order)
+        nodes = 0.5 * (nodes + 1.0)
+        weights = 0.5 * weights
+        defect = 0.0
+        for radial_power, vertical_power in _DENSITY_POWERS:
+            exponent = radial_power + 1
+            quadrature = np.sum(
+                weights * nodes**exponent * (1.0 - 2.0 * nodes) ** vertical_power
+            )
+            exact = exact_line_integral(exponent, vertical_power)
+            defect = max(defect, abs(quadrature - exact) / max(abs(exact), 1e-300))
+        result[str(order)] = defect
+    exact_orders = [order for order in (1, 2, 3, 4) if result[str(order)] <= 1e-12]
+    if not exact_orders:
+        raise ValueError(
+            "no tested per-edge Gauss order is exact on the model "
+            f"antiderivative: {result}"
+        )
+    lowest = exact_orders[0]
+    return {
+        "relative_line_integral_defect_by_order": result,
+        "lowest_order_exact_on_the_model_antiderivative": lowest,
+        "integrand_degree_in_edge_parameter": 5,
+    }
+
+
 def _replace_cut(base: CellCurrentMoments, cut: np.ndarray, values: np.ndarray):
     return CellCurrentMoments(
         *(
@@ -291,13 +358,22 @@ def _frozen_image(operator, base, boundary, values) -> np.ndarray:
     )
 
 
-def discriminate() -> dict[str, Any]:
-    """Separate sampled-region and quadratic-density effects on the weak row."""
+def discriminate(
+    case_name: str = CASES[0],
+    requested_cells: int = CELL_REQUESTS[0],
+    built: tuple | None = None,
+) -> dict[str, Any]:
+    """Separate sampled-region and quadratic-density effects on one row.
+
+    The receipt is the row's other error term: the retained fan region carrying
+    the production quadratic density fit, measured against the fan's own
+    pointwise profile, alongside an exact-density arm that must reproduce the
+    fan identically. ``built`` carries a ``_build`` result forward so a row
+    report does not rebuild the machine and support.
+    """
     _require_boundary_route()
-    case_name = CASES[0]
-    requested_cells = CELL_REQUESTS[0]
-    operator, support, field, bank_capacity, flux_span = _build(
-        case_name, requested_cells
+    operator, support, field, bank_capacity, flux_span = (
+        _build(case_name, requested_cells) if built is None else built
     )
     boundary = np.asarray(support.included) & np.asarray(support.boundary)
     production = jax.jit(
@@ -352,9 +428,10 @@ def discriminate() -> dict[str, Any]:
         ),
     ]
     production_arm = arm(
-        "chord_sagitta_quadratic_density",
-        "Production chord-plus-sagitta region with the six-sample quadratic "
-        "density fit.",
+        "sampled_arc_density_model",
+        "Production sampled-arc boundary route: the clip's own 128-segment arc "
+        "region carrying a per-edge Gauss rule of the local degree-four density "
+        "model.",
         production_array,
     )
     production_image = _frozen_image(operator, production, boundary, production_array)
@@ -412,7 +489,7 @@ def discriminate() -> dict[str, Any]:
             "plan_reference_fixed_evaluations_per_cut_cell": (
                 PLAN_FAN_POINTS_PER_CUT_CELL
             ),
-            "actual_weak_support_capacity": capacity,
+            "actual_support_capacity": capacity,
             "actual_fixed_evaluations_per_cut_cell": fan_points,
             "census": census,
             "total_live_evaluations": int(np.sum(live_points)),
@@ -430,14 +507,42 @@ def discriminate() -> dict[str, Any]:
             "jax_enable_x64": bool(jax.config.jax_enable_x64),
         },
     }
-    _write_json(REPORT_ROOT / "density-region-discriminator.json", payload)
+    suffix = (
+        ""
+        if (case_name, requested_cells)
+        == (
+            CASES[0],
+            CELL_REQUESTS[0],
+        )
+        else f"-{_case_key(case_name, requested_cells)}"
+    )
+    _write_json(REPORT_ROOT / f"density-region-discriminator{suffix}.json", payload)
     return payload
 
 
-def measure(case_name: str, requested_cells: int) -> dict[str, Any]:
+def row_report(case_name: str, requested_cells: int) -> dict[str, Any]:
+    """Measure one row's route error and its other error term from one build."""
+    built = _build(case_name, requested_cells)
+    row = measure(case_name, requested_cells, built)
+    discriminator = discriminate(case_name, requested_cells, built)
+    return {
+        "row": row,
+        "discriminator": discriminator,
+        "budget_one_tenth": {
+            name: 0.1 * value
+            for name, value in discriminator["arms"][1][
+                "moment_relative_l2_against_fan"
+            ].items()
+        },
+    }
+
+
+def measure(
+    case_name: str, requested_cells: int, built: tuple | None = None
+) -> dict[str, Any]:
     _require_boundary_route()
-    operator, support, field, bank_capacity, flux_span = _build(
-        case_name, requested_cells
+    operator, support, field, bank_capacity, flux_span = (
+        _build(case_name, requested_cells) if built is None else built
     )
     boundary = np.asarray(support.included) & np.asarray(support.boundary)
     reduced = jax.jit(
@@ -452,13 +557,12 @@ def measure(case_name: str, requested_cells: int) -> dict[str, Any]:
     )(support, field)
     jax.block_until_ready(reduced)
     reduced_array = np.stack([np.asarray(value) for value in reduced])
-    if np.any(~np.isfinite(reduced_array[:, boundary])):
-        compact = _compact_chord_polygon(support.support_vertices, support.vertex_count)
-        supported = np.asarray(compact[-1], dtype=bool)
+    refused = boundary & ~np.all(np.isfinite(reduced_array), axis=0)
+    if np.any(refused):
         raise RuntimeError(
             "boundary reduction refused cells "
-            f"{np.flatnonzero(boundary & ~supported).tolist()} with counts "
-            f"{np.asarray(support.vertex_count)[boundary & ~supported].tolist()}"
+            f"{np.flatnonzero(refused).tolist()} with polygon counts "
+            f"{np.asarray(support.vertex_count)[refused].tolist()}"
         )
     fan = _fan_cut_moments(support, field, operator.source.core, FAN_ORDER)
     relative = _relative_difference(reduced_array[:, boundary], fan[:, boundary])
@@ -518,7 +622,16 @@ def measure(case_name: str, requested_cells: int) -> dict[str, Any]:
         ),
         "frozen_current_image": image,
         "evaluation_points_per_cut_cell": cut_cell_moment_evaluation_bound(),
-        "chord_polygon_vertex_capacity": 24,
+        "fixed_edges_per_cut_cell": cut_capacity_edge_bound(),
+        "per_edge_gauss_order": _ARC_EDGE_ORDER,
+        "live_evaluations_per_cut_cell": (
+            len(_DENSITY_SAMPLE_LOCAL) + cut_capacity_edge_bound() * _ARC_EDGE_ORDER
+        ),
+        "per_edge_gauss_order_study": (
+            edge_order_study()
+            if case_name == CASES[0] and requested_cells == CELL_REQUESTS[0]
+            else None
+        ),
         "lane": {
             "job_id": os.environ.get("SLURM_JOB_ID"),
             "partition": os.environ.get("SLURM_JOB_PARTITION"),
@@ -598,18 +711,30 @@ def finalize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         for row in rows
         if row["fan_refinement_floor_relative_l2"] is not None
     )
+    budget = {name: 0.1 * floor[name] for name in MOMENT_NAMES}
     for row in rows:
         row["floor_ratio"] = {
             name: row["moment_relative_l2_boundary_minus_fan"][name] / floor[name]
+            for name in MOMENT_NAMES
+        }
+        row["one_tenth_of_the_fan_floor"] = dict(budget)
+        row["budget_ratio_against_one_tenth_of_the_fan_floor"] = {
+            name: row["moment_relative_l2_boundary_minus_fan"][name] / budget[name]
             for name in MOMENT_NAMES
         }
     payload = {
         "schema": "nova.exact-clip-moment-floor-summary.v1",
         "created_at": datetime.now(UTC).isoformat(),
         "fan_refinement_floor_relative_l2": floor,
+        "one_tenth_of_the_fan_floor_relative_l2": budget,
         "rows": rows,
         "maximum_floor_ratio": max(
             value for row in rows for value in row["floor_ratio"].values()
+        ),
+        "maximum_budget_ratio": max(
+            value
+            for row in rows
+            for value in row["budget_ratio_against_one_tenth_of_the_fan_floor"].values()
         ),
     }
     _write_json(REPORT_ROOT / "summary.json", payload)
@@ -644,6 +769,11 @@ def main() -> None:
     parser.add_argument("--case", choices=CASES)
     parser.add_argument("--cells", type=int, choices=CELL_REQUESTS)
     parser.add_argument("--discriminate", action="store_true")
+    parser.add_argument(
+        "--row-report",
+        action="store_true",
+        help="measure the requested row and its density/region discriminator once",
+    )
     parser.add_argument("--default-route-snapshot", type=Path)
     parser.add_argument("--snapshot-revision")
     parser.add_argument(
@@ -670,8 +800,43 @@ def main() -> None:
         )
         print("DEFAULT_ROUTE_IDENTITY", comparison, flush=True)
         return
+    if arguments.row_report:
+        if arguments.case is None or arguments.cells is None:
+            parser.error("--row-report requires --case and --cells")
+        report = row_report(arguments.case, arguments.cells)
+        row = report["row"]
+        print(
+            "ROW",
+            _case_key(arguments.case, arguments.cells),
+            row["moment_relative_l2_boundary_minus_fan"],
+            flush=True,
+        )
+        for arm in report["discriminator"]["arms"]:
+            print(
+                "ARM",
+                arm["name"],
+                arm["moment_relative_l2_against_fan"],
+                arm["frozen_image_delta_sup_over_span"],
+                flush=True,
+            )
+        print("BUDGET", report["budget_one_tenth"], flush=True)
+        print(
+            "SHAPE",
+            {
+                "cut_cells": row["cut_cells"],
+                "realised_cells": row["realised_cells"],
+                "per_edge_gauss_order": row["per_edge_gauss_order"],
+                "fixed_edges_per_cut_cell": row["fixed_edges_per_cut_cell"],
+                "live_evaluations_per_cut_cell": row["live_evaluations_per_cut_cell"],
+                "evaluation_points_per_cut_cell": row["evaluation_points_per_cut_cell"],
+            },
+            flush=True,
+        )
+        return
     if arguments.discriminate:
-        payload = discriminate()
+        payload = discriminate(
+            arguments.case or CASES[0], arguments.cells or CELL_REQUESTS[0]
+        )
         for row in payload["arms"]:
             print(
                 "ARM",

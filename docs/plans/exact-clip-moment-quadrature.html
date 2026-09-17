@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
@@ -119,6 +119,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s19c-order-four-ceiling-20260917" data-who="" data-when="">
     <div class="r-comment-body">ecq-shifted-path-order-and-budget-terms merged (f6cc6f29), promotion pending its review. The three-path order study settles the review's finding: the smallest per-edge Gauss order exact on every monomial path is 4, not 3, because the shifted first-moment integrands are degree six; _ARC_EDGE_ORDER is now 4 and the module test fixture carries a genuinely quadratic flux. The nine-row margin table shows both denominators side by side: on the four rows with a coupling measurement the margin against one tenth of the frozen-image error holds, while five rows without one fall back to the fan refinement floor (about 2.9e-17) as denominator and read below one against a route defect of 1e-11 to 1e-13, which is an image-scale instrument floor used as a moment-scale threshold and needs its own derivation. DECISION FOR THE LEAD: the fixed evaluation bound per cut cell moves from 472 to 621 at order 4, above the 500-evaluation ceiling the arc-representation decision (1c) declared, so either the ceiling is restated or the representation decision is re-opened; the route is opt-in and the default remains bit-identical to base, so nothing in production changes until that is settled. The nine-row route column was measured at order 3 and should be re-run at 4 on the four coupling rows.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260917T094325762879-ecq-shifted-path-order-and-budget-terms" data-who="reckon-ship" data-when="2026-09-17T11:32:29.745Z">
+    <div class="r-comment-body"><p>Per-edge Gauss order moves from 3 to 4 (merge f6cc6f29): the three-path order study on an asymmetric sliver with quadratic flux shows the shifted first-moment paths need order 4 (relative defects 3.9e-15 and 2.2e-15 at 3 and 4 on the unshifted path, inexact at 3 on the shifted paths), the fixed evaluation bound rises 472 to 621 (above the declared 500 ceiling, a lead decision recorded on the plan), the nine-row margin table carries both denominators with five rows falling back to the fan refinement floor, the default route is bit-identical to base (max abs diff 0.0), the module test fixture now has quadratic flux (7 passed). Review 84/100 with record defects for a follow-on: the JSON other_error_term field is written as denominator times ten, a decade off the record&#x27;s definition; two transcription slips in the evidence and plan copies (order-1 radial cell 2.53e-3 for 0.2526, study coefficients quoted as the test fixture&#x27;s); the plan section the worker appended sits outside the plan body&#x27;s main element, the only such case among 76 plans; the order-study arm writes no receipt file so its per-order map exists only as captured output</p></div>
 </div>
 </section>
 </main>

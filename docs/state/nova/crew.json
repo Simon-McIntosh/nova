@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T21:45:59",
+  "updated": "2026-09-17T22:02:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5079,6 +5079,15 @@
       },
       {
         "id": "s19c-review-ecqcap-c",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-review-fsa-c",
         "harness": "clive",
         "role": "review",
         "session_id": null,
@@ -182771,6 +182780,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2731
+    "_version": 2732
   }
 }

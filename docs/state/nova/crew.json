@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T07:29:11",
+  "updated": "2026-09-17T07:37:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4748,9 +4748,11 @@
         "id": "s19c-mulw-diiid-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "333303e8-8d27-4066-863f-7cb393cc2b22",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "333303e8-8d27-4066-863f-7cb393cc2b22"
+        },
         "created": "2026-09-17"
       },
       {
@@ -4859,6 +4861,15 @@
       },
       {
         "id": "s19c-review-b-c",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-review-cco-c",
         "harness": "clive",
         "role": "review",
         "session_id": null,
@@ -6646,9 +6657,11 @@
         "id": "session-337d1d569f61f639eedc",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "cd6755f6-8a1c-45e7-b2f2-1cb575725868",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "cd6755f6-8a1c-45e7-b2f2-1cb575725868"
+        },
         "created": "2026-09-17"
       },
       {
@@ -175404,6 +175417,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2677
+    "_version": 2680
   }
 }

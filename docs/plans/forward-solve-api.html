@@ -23,8 +23,8 @@
 <title>Forward solve API | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-16">
-<meta name="plan-version" content="60">
+<meta name="plan-modified" content="2026-09-17">
+<meta name="plan-version" content="61">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
@@ -238,6 +238,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s19c-shim-half-landed" data-who="reckon-ship s19-codex" data-when="2026-09-16T07:31:00Z">
     <div class="r-comment-body">Coordinator drain of f-20260909T210712175233 (session s19-codex-20260916). The nova half is landed: fb402f8f is an ancestor of main, select_achieved_forward_branch in nova/equilibrium/branch_selection.py replaces the SimpleNamespace ForwardPortfolio shim in the transport sweep, and the per-module delta gate measured base 0f872fd6 50 passed against after fb402f8f 54 passed with zero added failures (jobs 1271211, 1271339, 1271292). The remaining half, the imas-ambix consumer reading ForwardTransportReceipt.provenance.rung and equilibrium_resolved_defaults from the receipt instead of its own configuration, is foreign-owner: it belongs to the imas-ambix repository against this landing SHA and stays open here as a pointer only. Section 3 remainder is therefore that pointer; nothing in nova is left to dispatch for it.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s19c-fsa-nova-half-closed-20260917" data-who="" data-when="">
+    <div class="r-comment-body">Currency audit of followup f-20260909T210712175233: the nova half is already landed. fb402f8f (2026-09-15, refactor(transport): select the achieved branch directly in the sweep) replaced the SimpleNamespace ForwardPortfolio shim in nova/transport/coupled_window.py equilibrium_sweep with select_achieved_forward_branch on the achieved class; grep over nova/, benchmarks/ and apps/ finds no ForwardPortfolio construction outside forward.py and no SimpleNamespace in the transport or equilibrium packages. What remains is the imas-ambix half only: the consumer reads the transport route from ForwardTransportReceipt.provenance.rung and equilibrium_resolved_defaults instead of its own configuration, foreign-owner work against this landing sha, handed to the imas-ambix coordinator. The followup stays open on that half.</div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260906T194721133352-fsa-agents-seam-guidance" data-who="fsa-docs-c" data-when="2026-09-06T20:13:45.445Z">
     <div class="r-comment-body"><p>Forward-solve seam wired into the guidance: seam section in nova/equilibrium/AGENTS.md (+35), new nova/transport/AGENTS.md (+45) for the coupled forward, two pointer rows in the root AGENTS.md; every named symbol verified present by the coordinator; the scout half of the section done-when is a separate node</p></div>

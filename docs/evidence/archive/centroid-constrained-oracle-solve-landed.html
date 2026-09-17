@@ -164,6 +164,79 @@
     <p><img src="/nova/figures/centroid-constrained-oracle-solve/field-response/panels/vertical-plus-10mt.png" alt="Vertical plus 10 mT response with analytic and mapped contours, nulls and wall.">
     <img src="/nova/figures/centroid-constrained-oracle-solve/field-response/panels/radial-plus-10mt.png" alt="Radial plus 10 mT response with analytic and mapped contours, nulls and wall."></p>
   </section>
+
+  <section id="bounded-row-step-control">
+    <h2>Bounded-row damped step control and the first Newton step</h2>
+    <p><strong>Implementation, commit <code>a096fecc</code>; driver commits
+    <code>8165d70f</code> and <code>66e8e8c7</code>; H200 jobs
+    <code>1272452</code> and <code>1272453</code>.</strong>
+    <code>BoundedExteriorFieldUnknown.physical_value</code> no longer clips its
+    trial amplitude. A bound violation is now a fail-closed refusal: the
+    physical field is checked against the declared bound outside the traced map,
+    the refusal is recorded on the constraint record, and the traced map instead
+    carries a damped step — the change of the normalised unknown per outer trip
+    is capped at <code>step_limit</code> and the row residual is halved
+    repeatedly on a backtracking ladder. The two analytic solenoidal flux columns
+    remain the locked compensating unknown.</p>
+
+    <p>The first receipt is the size and sign of the row’s undamped first Newton
+    step on the weak-110 fixture (135 realised cells), beside the
+    <code>+1.627789 m/T</code> radial directional prediction measured by the
+    uniform-field probe. Durable receipt:
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-step/weak-first-step.json</code>.</p>
+
+    <table>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Row’s undamped first Newton step, radial field</td><td><code>+2.690337050e-04 T</code></td></tr>
+        <tr><td>Same step in centroid pitches</td><td><code>+0.269033705</code></td></tr>
+        <tr><td>Probe field required for the seed’s own <code>-0.125386766 m</code> offset</td><td><code>+7.702888155e-02 T</code></td></tr>
+        <tr><td>Row step to probe-field ratio</td><td><code>0.003492634</code> (1/286)</td></tr>
+        <tr><td>Per-trip cap engaged</td><td><code>false</code></td></tr>
+        <tr><td>Declared 0.25 T bound engaged</td><td><code>false</code></td></tr>
+      </tbody>
+      <caption>Weak-110 first Newton step against the measured linear gain (<code>step_limit</code> 1.0, exact clip, characteristic pitch 0.466063410 m).</caption>
+    </table>
+
+    <p><strong>This inverts the saturation reading of the first constrained
+    receipt.</strong> The earlier record (<code>true</code> in the plan’s
+    H200 checkpoint) attributed the clipped unknown’s stall to the zero tangent
+    the clip gives at its bound. The first constrained receipt derived its step
+    from the full dual contraction rather than the directional derivative, and
+    the first Newton step measured here is <code>+2.690337050e-04 T</code>
+    against a required <code>+7.702888155e-02 T</code>: the row
+    <em>under-steps by two orders of magnitude</em> rather than overshooting
+    onto the bound, and it moves in the direction that opposes the seed’s
+    offset. Neither the cap nor the bound is engaged on that step, so neither
+    the clip nor the new refusal is what limits it. The open question is whether
+    the damped route walks the unknown far enough inside its Newton budget.</p>
+
+    <p>The constrained weak-110 row itself landed under the new route before the
+    job’s 60-minute limit, with the bound now engaging as a recorded refusal
+    instead of a silent clip. Job <code>1272453</code>, 135 realised cells,
+    wall <code>2845.65 s</code> (dominated by <code>jit_while</code> GPU
+    compiles of about 6m19s). Durable receipt:
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-step/weak-rotation-reactor-static-cells-110.json</code>.</p>
+
+    <table>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Compensating field, radial / vertical</td><td><code>[0.566319947, 6.529608e-04] T</code></td></tr>
+        <tr><td>Abs sup of compensating field</td><td><code>0.566319947 T</code> (2.27× the 0.25 T bound)</td></tr>
+        <tr><td>Bound refusal, radial / vertical</td><td><code>[true, false]</code></td></tr>
+        <tr><td>Centroid error</td><td><code>0.452424437</code> pitches (<code>0.210541289 m</code> radial)</td></tr>
+        <tr><td>Row scaled residual sup</td><td><code>0.451743871</code></td></tr>
+        <tr><td>Terminal residual</td><td><code>4.890538e-04</code></td></tr>
+        <tr><td>Qualified</td><td><code>false</code></td></tr>
+      </tbody>
+      <caption>Weak-110 constrained row at the bounded-step route; the bound is refused and recorded rather than clipped.</caption>
+    </table>
+
+    <p>The displaced-seed positive and negative controls, the converged-field
+    amplitude table, and the required poloidal panels did not run in this job;
+    they are carried by two separately submitted control jobs. No qualification
+    or convergence is inferred from the rows above, and §2 remains open.</p>
+  </section>
 </main>
 </body>
 </html>

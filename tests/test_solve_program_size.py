@@ -1,5 +1,6 @@
 from copy import deepcopy
 import json
+from pathlib import Path
 
 import pytest
 
@@ -15,10 +16,15 @@ from benchmarks.solve_program_size_gate import (
     MAX_300_EXECUTABLE_BYTES,
     MAX_300_SOLVE_INSTRUCTIONS,
     MarkerCensusRefusal,
+    _carried_census_counts,
+    _rebaseline_marker_copies,
     _write_json,
+    dual_census,
     evaluate_gate,
     marker_census,
+    marker_census_report,
     require_live_markers,
+    write_marker_census_figure,
     write_semantic_report,
 )
 
@@ -346,12 +352,15 @@ def _sentinel_line(function):
     raise KeyError(function)
 
 
-def _hlo_module(copies):
+def _hlo_module(copies, stray=None):
     """Build synthetic optimised HLO whose traced frames carry the sentinels.
 
     ``copies`` maps a marker function to the read-body instruction count of
     each traced copy of it, so a degenerate census can be written by hand and
-    refused without compiling anything.
+    refused without compiling anything.  ``stray`` maps a marker function to the
+    read-body instruction counts of additional frames of the same function at a
+    line other than the sentinel, which is how the source-sentinel rule and the
+    marker rule are made to disagree on one dump.
     """
     names = sorted(copies)
     functions = "\n".join(f'{index + 1} "{name}"' for index, name in enumerate(names))
@@ -359,26 +368,32 @@ def _hlo_module(copies):
     locations = []
     blocks = []
     frame_id = 100
+
+    def add_frame(name, count, line):
+        nonlocal frame_id
+        frames.append(f"{frame_id} {{file_location_id={frame_id} parent_frame_id=0}}")
+        locations.append(
+            f"{frame_id} {{file_name_id=1 function_name_id="
+            f"{names.index(name) + 1} line={line}}}"
+        )
+        body = "\n".join(
+            f"  %i{frame_id}.{step} = f64[4] add(f64[4] %x, f64[4] %x), "
+            f'metadata={{op_name="jit(body)/jit(body)/add" '
+            f"stack_frame_id={frame_id}}}"
+            for step in range(count)
+        )
+        blocks.append(
+            f"%fused.{frame_id} {{\n{body}\n"
+            f"  ROOT %t{frame_id} = (f64[4]) tuple(%i{frame_id}.0)\n}}\n"
+        )
+        frame_id += 1
+
     for name, counts in copies.items():
         for count in counts:
-            frames.append(
-                f"{frame_id} {{file_location_id={frame_id} parent_frame_id=0}}"
-            )
-            locations.append(
-                f"{frame_id} {{file_name_id=1 function_name_id="
-                f"{names.index(name) + 1} line={_sentinel_line(name)}}}"
-            )
-            body = "\n".join(
-                f"  %i{frame_id}.{step} = f64[4] add(f64[4] %x, f64[4] %x), "
-                f'metadata={{op_name="jit(body)/jit(body)/add" '
-                f"stack_frame_id={frame_id}}}"
-                for step in range(count)
-            )
-            blocks.append(
-                f"%fused.{frame_id} {{\n{body}\n"
-                f"  ROOT %t{frame_id} = (f64[4]) tuple(%i{frame_id}.0)\n}}\n"
-            )
-            frame_id += 1
+            add_frame(name, count, _sentinel_line(name))
+    for name, counts in (stray or {}).items():
+        for count in counts:
+            add_frame(name, count, _sentinel_line(name) + 1)
     return (
         "HloModule jit_synthetic, is_scheduled=true\n\n"
         f'FileNames\n1 "/repo/nova/equilibrium/forward_operator.py"\n\n'
@@ -420,6 +435,28 @@ def test_marker_census_refuses_a_uniform_read_body_column():
         require_live_markers(census)
 
 
+def test_marker_census_refuses_a_dump_compiled_by_another_checkout():
+    module = _hlo_module(
+        {
+            "ForwardFluxOperator.normalised_current_moments": [1, 2, 3],
+            "ForwardFluxOperator._fixed_design_read": [2, 3],
+        }
+    )
+    elsewhere = Path("/other/checkout/nova/equilibrium/forward_operator.py")
+
+    census = dual_census(module, source_file=elsewhere)
+    assert census["marker"]["provenance"]["source_matches"] is False
+
+    with pytest.raises(MarkerCensusRefusal, match="cached dump"):
+        require_live_markers(census["marker"])
+
+    same = dual_census(
+        module, source_file=Path("/repo/nova/equilibrium/forward_operator.py")
+    )
+    assert same["marker"]["provenance"]["source_matches"] is True
+    require_live_markers(same["marker"])
+
+
 def test_marker_census_counts_distinct_copies_and_accepts_a_live_census():
     module = _hlo_module(
         {
@@ -432,7 +469,105 @@ def test_marker_census_counts_distinct_copies_and_accepts_a_live_census():
     require_live_markers(census)
 
     rows = census["paths"]
-    assert rows["current-moment path"]["copies"] == 3
+    assert rows["current-moment path"]["read_body_frames"] == 3
+    assert rows["current-moment path"]["sentinel_copies"] == 3
     assert rows["current-moment path"]["read_body_per_copy"] == [1, 2, 3]
     assert rows["current-moment path"]["marker_bearing_computations"] == 3
-    assert rows["topology read"]["copies"] == 2
+    assert rows["topology read"]["read_body_frames"] == 2
+
+
+def test_dual_census_reports_both_rule_counts_on_one_dump():
+    module = _hlo_module(
+        {
+            "ForwardFluxOperator.normalised_current_moments": [2, 3],
+            "ForwardFluxOperator._fixed_design_read": [4],
+        },
+        stray={"ForwardFluxOperator._fixed_design_read": [1, 1]},
+    )
+
+    census = dual_census(module)
+
+    rows = {row["path"]: row for row in census["rows"]}
+    assert rows["current-moment path"]["sentinel_copies"] == 2
+    assert rows["current-moment path"]["marker_read_body_frames"] == 2
+    assert rows["current-moment path"]["counts_agree"] is True
+    assert rows["topology read"]["sentinel_copies"] == 1
+    assert rows["topology read"]["marker_read_body_frames"] == 3
+    assert rows["topology read"]["counts_agree"] is False
+    assert census["marker"]["paths"]["topology read"]["sentinel_copies"] == 1
+    assert census["marker"]["paths"]["topology read"]["read_body_frames"] == 3
+
+
+def test_rebaseline_derives_the_move_from_the_committed_counts():
+    standing = _rebaseline_marker_copies(
+        {"current-moment path": 120, "topology read": 36}
+    )
+    moved = _rebaseline_marker_copies({"current-moment path": 120, "topology read": 79})
+
+    assert standing["reads_as_committed"] is True
+    assert standing["rebaselined"] is False
+    assert moved["reads_as_committed"] is False
+    assert moved["rebaselined"] is True
+    assert moved["moved"]["topology read"]["delta"] == 43
+
+
+def test_carried_counts_read_an_earlier_receipt_shape():
+    earlier = {
+        "measurement_revision": "earlier",
+        "paths": {
+            "topology read": {
+                "copies": 79,
+                "read_body_per_copy": [1, 1, 2],
+                "read_body_instructions": 13_496,
+                "marker_instructions": 2_468,
+                "marker_bearing_computations": 1_357,
+            }
+        },
+    }
+
+    carried = _carried_census_counts(earlier)
+
+    assert carried["topology read"]["sentinel_copies"] == 79
+    assert carried["topology read"]["read_body_frames"] == 3
+    assert carried["topology read"]["read_body_instructions"] == 13_496
+    assert carried["topology read"]["marker_instructions"] == 2_468
+    assert carried["topology read"]["marker_bearing_computations"] == 1_357
+
+
+def test_marker_census_report_tables_both_counts_and_the_decision(tmp_path):
+    module = _hlo_module(
+        {
+            "ForwardFluxOperator.normalised_current_moments": [2, 3],
+            "ForwardFluxOperator._fixed_design_read": [4],
+        },
+        stray={"ForwardFluxOperator._fixed_design_read": [1, 1]},
+    )
+    census = dual_census(module)
+    receipt = {
+        "measurement_revision": "revision",
+        "assignment": {"job_id": "1", "partition": "all_debug", "platform": "cpu"},
+        "sentinel": census["sentinel"],
+        "baseline_reads_as_committed": False,
+        "baseline_derivation": ["topology read: committed 36, measured 1, delta -35"],
+        "previous_receipt": "/tmp/earlier.json",
+        "previous_receipt_revision": "earlier",
+    }
+    carried = {
+        "topology read": {
+            "sentinel_copies": 79,
+            "read_body_frames": 208,
+            "marker_bearing_computations": 1_357,
+            "read_body_instructions": 13_496,
+            "marker_instructions": 2_468,
+        }
+    }
+    figure = tmp_path / "census.png"
+
+    report = marker_census_report(census, receipt, carried)
+    write_marker_census_figure(census, figure)
+
+    assert "| marker path | sentinel copies | read-body frames |" in report
+    assert "source-sentinel search" in report
+    assert "topology read: committed 36, measured 1, delta -35" in report
+    assert "Carried forward from the earlier receipt" in report
+    assert figure.stat().st_size > 0

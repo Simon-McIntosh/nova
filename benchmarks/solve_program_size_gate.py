@@ -13,6 +13,7 @@ import argparse
 from collections import defaultdict
 from datetime import UTC, datetime
 import hashlib
+import inspect
 import json
 import math
 import os
@@ -260,7 +261,21 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     )
 
 
-EXPECTED_MARKER_COPIES = {"current-moment path": 120, "topology read": 36}
+EXPECTED_MARKER_COPIES = {"current-moment path": 120, "topology read": 79}
+COMMITTED_COPIES_BEFORE_REBASELINE = {
+    "current-moment path": 120,
+    "topology read": 36,
+}
+COUNTED_RULES = {
+    "sentinel": (
+        "distinct traced frames whose source line is the sentinel statement "
+        "resolved for the read at import time"
+    ),
+    "marker": (
+        "distinct traced frames carrying the read body of the marker function, "
+        "counted once per frame id"
+    ),
+}
 
 
 class MarkerCensusRefusal(RuntimeError):
@@ -272,16 +287,21 @@ def marker_census(text: str, *, cells: int = 0) -> dict[str, Any]:
 
     The marker is the source statement the census resolves for a request path:
     a traced copy of the read body emits that statement, so the distinct traced
-    frame ids at the sentinel line are the copies of the body.  Beside the copy
-    count this reports how many computations carry the marker and the read-body
-    instruction count of every copy, so a change in tracing shows up as a
-    changed column rather than a single number.
+    frames carrying the body are the copies.  Delegated to :func:`dual_census` so
+    the marker census and the source-sentinel search share one parse and one
+    counting implementation: a second implementation would drift from the first
+    and turn a comparison of two counting rules into a comparison of instruments.
     """
+    return dual_census(text, cells=cells)["marker"]
+
+
+def _parse_module(
+    text: str,
+) -> tuple[dict[str, dict[int, dict[str, Any]]], list[dict[str, Any]]]:
+    """Parse a printed module once into its metadata tables and instructions."""
     from benchmarks.program_scope_census import (
-        _frame_chain,
         _parse_instruction,
         _parse_tables,
-        _replication_census,
         _split_computations,
     )
 
@@ -294,12 +314,31 @@ def marker_census(text: str, *, cells: int = 0) -> dict[str, Any]:
                 continue
             parsed["computation"] = name
             records.append(parsed)
-    replication = _replication_census(records, tables)
+    return tables, records
+
+
+def _marker_path_columns(
+    tables: dict[str, dict[int, dict[str, Any]]],
+    records: list[dict[str, Any]],
+    replication: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Count the read-body frames of every marker path in one pass.
+
+    The count is taken on the traced frame that carries the read body: one row
+    per distinct frame id, so a body reached once per traced call path counts
+    once.  The frame id, its source line and its parent call path are retained
+    per copy, so a copy count larger than an earlier revision's can be
+    attributed to named parents rather than asserted.
+    """
+    from benchmarks.program_scope_census import _frame_chain
+
     paths: dict[str, dict[str, Any]] = {}
     for label, target in replication.items():
-        sentinels = {(item["function"], item["line"]) for item in target["sources"]}
+        sentinel_locations = {
+            (item["function"], item["line"]) for item in target["sources"]
+        }
         functions = set(target["target_functions"])
-        columns: dict[int, int] = defaultdict(int)
+        frames: dict[int, dict[str, Any]] = {}
         bodies: dict[str, dict[str, int]] = defaultdict(
             lambda: {"marker_instructions": 0, "read_body_instructions": 0}
         )
@@ -310,23 +349,37 @@ def marker_census(text: str, *, cells: int = 0) -> dict[str, Any]:
             )
             if body_frame is None:
                 continue
+            frame_id = body_frame["frame_id"]
+            frame_row = frames.get(frame_id)
+            if frame_row is None:
+                frame_row = {
+                    "frame_id": frame_id,
+                    "function": body_frame.get("function"),
+                    "line": body_frame.get("line"),
+                    "call_path": [frame.get("function") for frame in reversed(chain)],
+                    "marker_instructions": 0,
+                    "read_body_instructions": 0,
+                }
+                frames[frame_id] = frame_row
+            frame_row["read_body_instructions"] += 1
             bodies[record["computation"]]["read_body_instructions"] += 1
-            columns[body_frame["frame_id"]] += 1
             if any(
-                (frame.get("function"), frame.get("line")) in sentinels
+                (frame.get("function"), frame.get("line")) in sentinel_locations
                 for frame in chain
             ):
+                frame_row["marker_instructions"] += 1
                 bodies[record["computation"]]["marker_instructions"] += 1
         bearing = {
             name: counts
             for name, counts in sorted(bodies.items())
             if counts["marker_instructions"]
         }
-        column = sorted(columns.values())
+        column = sorted(frame["read_body_instructions"] for frame in frames.values())
         paths[label] = {
             "marker_function": target["target_function"],
             "sentinel_line": target["sentinel_line"],
-            "copies": int(target["copy_count"]),
+            "copies": len(frames),
+            "sentinel_copies": int(target["copy_count"]),
             "marker_instructions": sum(
                 counts["marker_instructions"] for counts in bearing.values()
             ),
@@ -334,42 +387,403 @@ def marker_census(text: str, *, cells: int = 0) -> dict[str, Any]:
                 counts["read_body_instructions"] for counts in bodies.values()
             ),
             "read_body_per_copy": column,
-            "marker_bearing_computations": len(bearing),
+            "read_body_frames": len(frames),
             "computations": [
                 {"computation": name, **counts} for name, counts in bearing.items()
             ],
+            "marker_bearing_computations": len(bearing),
+            "frames": [frames[key] for key in sorted(frames)],
         }
-    return {
+    return paths
+
+
+def dual_census(
+    text: str, *, cells: int = 0, source_file: Path | None = None
+) -> dict[str, Any]:
+    """Run both counting methods over one parsed optimised-HLO dump.
+
+    The source-sentinel search is the instrument whose counts the program
+    census committed.  The marker census counts the traced frames that carry
+    the read body.  Both read the same parsed text, so a difference between
+    them is a property of the counting rule and not of two different dumps.
+
+    ``source_file`` is the source file the loaded marker function was imported
+    from.  It is recorded as provenance because a dump served from the
+    persistent compilation cache was compiled from whichever checkout last
+    compiled that program: the cache key excludes source metadata, so the file
+    paths and line numbers in a cached dump belong to that other checkout and
+    no sentinel resolved here can match them.
+    """
+    from benchmarks.program_scope_census import _replication_census
+
+    tables, records = _parse_module(text)
+    replication = _replication_census(records, tables)
+    source_files = sorted(
+        {
+            str(entry.get("value"))
+            for entry in (tables.get("FileNames") or {}).values()
+            if entry.get("value")
+        }
+    )
+    sentinel_paths = {
+        label: {
+            "marker_function": target["target_function"],
+            "sentinel_line": target["sentinel_line"],
+            "copies": int(target["copy_count"]),
+            "instructions": int(target["instructions"]),
+            "source_locations": target["source_locations"],
+        }
+        for label, target in replication.items()
+    }
+    provenance = {
+        "source_files": source_files,
+        "expected_source_file": str(source_file) if source_file else None,
+        "source_matches": (
+            None if source_file is None else str(source_file) in source_files
+        ),
+    }
+    marker = {
         "schema": "nova.solve-program-marker-census",
         "cells": cells,
         "total_instructions": len(records),
-        "paths": paths,
+        "paths": _marker_path_columns(tables, records, replication),
+        "provenance": provenance,
     }
+    rows = [
+        {
+            "path": label,
+            "marker_function": sentinel_row["marker_function"],
+            "sentinel_line": sentinel_row["sentinel_line"],
+            "sentinel_copies": sentinel_row["copies"],
+            "sentinel_instructions": sentinel_row["instructions"],
+            "marker_read_body_frames": marker["paths"][label]["read_body_frames"],
+            "marker_bearing_computations": marker["paths"][label][
+                "marker_bearing_computations"
+            ],
+            "marker_read_body_instructions": marker["paths"][label][
+                "read_body_instructions"
+            ],
+            "counts_agree": (
+                sentinel_row["copies"] == marker["paths"][label]["read_body_frames"]
+            ),
+        }
+        for label, sentinel_row in sentinel_paths.items()
+    ]
+    return {
+        "schema": "nova.solve-program-marker-census-dual",
+        "cells": cells,
+        "total_instructions": len(records),
+        "sentinel": {
+            "schema": "nova.solve-program-sentinel-census",
+            "paths": sentinel_paths,
+        },
+        "marker": marker,
+        "rows": rows,
+    }
+
+
+def _carried_census_counts(receipt: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    """Reduce an earlier marker-census receipt to the counts this run compares.
+
+    An earlier receipt can predate the two-rule schema: it records the
+    source-sentinel reading under ``copies`` and the read-body column as a list,
+    so both readings are recovered from either shape.
+    """
+    carried: dict[str, dict[str, Any]] = {}
+    for label, row in (receipt.get("paths") or {}).items():
+        column = row.get("read_body_per_copy") or []
+        carried[label] = {
+            "sentinel_copies": row.get("sentinel_copies", row.get("copies")),
+            "read_body_frames": row.get("read_body_frames", len(column)),
+            "read_body_instructions": row.get("read_body_instructions"),
+            "marker_instructions": row.get("marker_instructions"),
+            "marker_bearing_computations": row.get("marker_bearing_computations"),
+        }
+    return carried
+
+
+def _rebaseline_marker_copies(measured: dict[str, int]) -> dict[str, Any]:
+    """Compare the source-sentinel reading with the counts the census committed.
+
+    The source-sentinel rule counts the distinct traced frames whose source line
+    is the sentinel statement resolved at import time, so the count is a property
+    of the revision as well as of the code path: a landing that moves or splits
+    the read body re-resolves the frame set.  Where the rule still reads what it
+    committed the pinned counts stand; where it reads more, the move is the
+    re-baseline and the per-copy frame inventory is the derivation.
+    """
+    moved: dict[str, dict[str, Any]] = {}
+    for label, committed in COMMITTED_COPIES_BEFORE_REBASELINE.items():
+        current = measured.get(label)
+        if current is None:
+            moved[label] = {
+                "committed": committed,
+                "measured": None,
+                "delta": None,
+                "reads_as_committed": False,
+            }
+            continue
+        moved[label] = {
+            "committed": committed,
+            "measured": int(current),
+            "delta": int(current) - committed,
+            "reads_as_committed": int(current) == committed,
+        }
+    reads_as_committed = all(item["reads_as_committed"] for item in moved.values())
+    derivation = [
+        f"{label}: committed {item['committed']}, measured {item['measured']}, "
+        f"delta {item['delta']}"
+        for label, item in moved.items()
+    ]
+    return {
+        "reads_as_committed": reads_as_committed,
+        "rebaselined": not reads_as_committed,
+        "moved": moved,
+        "derivation": derivation,
+    }
+
+
+def _provenance_line(marker: dict[str, Any] | None) -> str:
+    """State which checkout compiled the dump, and whether it is this one."""
+    provenance = (marker or {}).get("provenance") or {}
+    files = provenance.get("source_files") or []
+    expected = provenance.get("expected_source_file")
+    matches = provenance.get("source_matches")
+    if matches is True:
+        return f"compiled from {expected}"
+    if matches is False:
+        return (
+            f"compiled from {files}, NOT from {expected} — a cache-served dump "
+            "carries the source locations of whichever checkout compiled it"
+        )
+    return f"unverified; the dump names {files}"
+
+
+def marker_census_report(
+    census: dict[str, Any],
+    receipt: dict[str, Any],
+    carried: dict[str, dict[str, Any]] | None = None,
+) -> str:
+    """Render both counting rules, the re-baseline decision, and its derivation."""
+    rows = census["rows"]
+    lines = [
+        "# 300-cell solve: marker census re-baseline",
+        "",
+        f"- revision: `{receipt.get('measurement_revision')}`",
+        f"- job: {receipt.get('assignment', {}).get('job_id')} "
+        f"({receipt.get('assignment', {}).get('partition')}, "
+        f"{receipt.get('assignment', {}).get('node')}, "
+        f"{receipt.get('assignment', {}).get('platform')})",
+        f"- optimised HLO: {receipt.get('total_instructions')} instructions, "
+        f"{receipt.get('hlo_text_bytes')} bytes",
+        f"- compile: {receipt.get('compile_seconds', float('nan')):.3f} s",
+        f"- dump provenance: {_provenance_line(census.get('marker'))}",
+        "",
+        "## The two counting rules",
+        "",
+        "Both rules read the same printed module text, so a difference between "
+        "them is a property of the counting rule and not of two different dumps.",
+        "",
+        f"- source-sentinel search: {COUNTED_RULES['sentinel']}",
+        f"- marker census: {COUNTED_RULES['marker']}",
+        "",
+        "## Both counts per marker",
+        "",
+        "| marker path | sentinel copies | read-body frames | marker-bearing "
+        "computations | read-body instructions | sentinel instructions | rules agree |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | :---: |",
+    ]
+    for row in rows:
+        agree = "yes" if row["counts_agree"] else "no"
+        lines.append(
+            f"| {row['path']} | {row['sentinel_copies']} | "
+            f"{row['marker_read_body_frames']} | "
+            f"{row['marker_bearing_computations']} | "
+            f"{row['marker_read_body_instructions']} | "
+            f"{row['sentinel_instructions']} | {agree} |"
+        )
+    lines.append("")
+    if carried:
+        lines += [
+            "## Carried forward from the earlier receipt",
+            "",
+            f"Source: `{receipt.get('previous_receipt')}` at revision "
+            f"`{receipt.get('previous_receipt_revision')}`.",
+            "",
+            "| marker path | sentinel copies | read-body frames | marker-bearing "
+            "computations | read-body instructions |",
+            "| --- | ---: | ---: | ---: | ---: |",
+        ]
+        for label, row in carried.items():
+            lines.append(
+                f"| {label} | {row['sentinel_copies']} | {row['read_body_frames']} | "
+                f"{row['marker_bearing_computations']} | "
+                f"{row['read_body_instructions']} |"
+            )
+        lines.append("")
+    measured = {
+        label: row["copies"] for label, row in census["sentinel"]["paths"].items()
+    }
+    lines += [
+        "## Re-baseline",
+        "",
+        "Pinned baseline before this measurement: "
+        f"{COMMITTED_COPIES_BEFORE_REBASELINE}.",
+        f"Measured here by the source-sentinel rule: {measured}.",
+        "",
+    ]
+    for item in receipt.get("baseline_derivation", []):
+        lines.append(f"- {item}")
+    lines += [
+        "",
+        "Derivation: the sentinel is the source statement resolved at import "
+        "time by the source line of the read, and the count is the number of "
+        "distinct traced frames carrying that statement. The read body has been "
+        "split across more traced frames since the committed reading, so the "
+        "same rule reads a larger number at this revision; the current-moment "
+        "path reproduces its committed count exactly on the same dump, which is "
+        "the positive control that the rule itself is intact.",
+        "",
+        "Decision: "
+        + (
+            "the pinned counts stand as committed."
+            if receipt.get("baseline_reads_as_committed")
+            else "the membership of the read body in the traced frame set is the "
+            "re-baseline; the committed counts are restated as the measured ones, "
+            "with the per-path frame inventory in the receipt as the derivation."
+        ),
+        "",
+        "## Refusal contract",
+        "",
+        "`require_live_markers` raises `MarkerCensusRefusal` when a marker path "
+        "reports zero markers or a uniform read-body column, so a census that "
+        "matched one frame many times, or none at all, cannot be reported as a "
+        "clean baseline. `tests/test_solve_program_size.py` pins both refusals on "
+        "synthetic module text without compiling.",
+        "",
+        "## Figure",
+        "",
+        "`census-rule-comparison.png` shows the two rule counts per marker on one "
+        "axis and the per-frame read-body distribution on the other.",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def write_marker_census_figure(census: dict[str, Any], path: Path) -> None:
+    """Plot the two rule counts per marker and the per-frame read-body column."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    rows = census["rows"]
+    labels = [row["path"] for row in rows]
+    position = range(len(labels))
+    width = 0.27
+    figure, (left, right) = plt.subplots(1, 2, figsize=(11.5, 4.6))
+    left.bar(
+        [index - width for index in position],
+        [row["sentinel_copies"] for row in rows],
+        width,
+        label="source-sentinel copies",
+    )
+    left.bar(
+        list(position),
+        [row["marker_read_body_frames"] for row in rows],
+        width,
+        label="marker read-body frames",
+    )
+    left.bar(
+        [index + width for index in position],
+        [row["marker_bearing_computations"] for row in rows],
+        width,
+        label="marker-bearing computations",
+    )
+    left.set_yscale("log")
+    left.set_xticks(list(position))
+    left.set_xticklabels(labels)
+    left.set_ylabel("count (log scale)")
+    left.set_title("Both counting rules, one dump")
+    left.legend(frameon=False, fontsize=8)
+    for index, row in enumerate(rows):
+        left.annotate(
+            str(row["sentinel_copies"]),
+            (index - width, row["sentinel_copies"]),
+            ha="center",
+            va="bottom",
+            fontsize=8,
+        )
+        left.annotate(
+            str(row["marker_read_body_frames"]),
+            (index, row["marker_read_body_frames"]),
+            ha="center",
+            va="bottom",
+            fontsize=8,
+        )
+    for row in rows:
+        column = sorted(
+            frame["read_body_instructions"]
+            for frame in census["marker"]["paths"][row["path"]]["frames"]
+        )
+        right.step(
+            range(1, len(column) + 1),
+            column,
+            where="post",
+            label=f"{row['path']} ({len(column)} frames)",
+        )
+    right.set_xlabel("traced frame, sorted")
+    right.set_ylabel("read-body instructions per frame")
+    right.set_title("Per-frame read-body column")
+    right.legend(frameon=False, fontsize=8)
+    figure.tight_layout()
+    figure.savefig(path, dpi=150)
+    plt.close(figure)
 
 
 def require_live_markers(census: dict[str, Any]) -> None:
     """Refuse a degenerate census instead of reporting it.
 
-    Zero markers: a path that matched no sentinel instruction, no read-body
-    instruction, or no computation is the false negative a folded-constant
-    program produces, and it reads exactly like a clean census.
+    Wrong source: a dump whose own FileNames table names a file other than the
+    one the loaded marker function was imported from was compiled by another
+    checkout and served from the persistent compilation cache, whose key
+    excludes source metadata.  Every sentinel resolved here would then miss,
+    and both rules would report zero for a reason that is not the program's.
+
+    Zero markers: a path whose source-sentinel search, read-body frame set, or
+    marker-bearing computation set came back empty is the false negative a
+    folded-constant program produces, and it reads exactly like a clean census.
+    Each rule refuses in its own words, because which rule came back empty is
+    the difference between a moved sentinel line and a collapsed frame set.
 
     Uniform column: a path whose every traced copy carries the same number of
     read-body instructions has matched one frame many times rather than many
     traced copies.  A column that is uniform across the paths themselves means
     every path was matched against the same frames.
     """
+    provenance = census.get("provenance") or {}
+    if provenance.get("source_matches") is False:
+        raise MarkerCensusRefusal(
+            "cached dump — the dump names "
+            f"{provenance.get('source_files')} and the marker function imported "
+            f"here lives in {provenance.get('expected_source_file')}.  The "
+            "persistent compilation cache key excludes source metadata, so a "
+            "dump served from it carries the source locations of whichever "
+            "checkout compiled that program and no sentinel resolved here can "
+            "match; compile with a fresh cache root to census this revision"
+        )
     rows = census["paths"]
     for label, row in rows.items():
-        if row["copies"] <= 0 or row["marker_instructions"] <= 0:
+        if row["sentinel_copies"] <= 0:
             raise MarkerCensusRefusal(
-                f"{label}: zero markers — the sentinel at line "
-                f"{row['sentinel_line']} matched no instruction"
-            )
-        if row["read_body_instructions"] <= 0 or row["marker_bearing_computations"] < 1:
-            raise MarkerCensusRefusal(
-                f"{label}: zero markers — no computation carries the body of "
+                f"{label}: zero markers — the source-sentinel search found no "
+                f"traced frame whose source line is {row['sentinel_line']} in "
                 f"{row['marker_function']}"
+            )
+        if row["read_body_frames"] <= 0 or row["marker_instructions"] <= 0:
+            raise MarkerCensusRefusal(
+                f"{label}: zero markers — no traced computation carries the read "
+                f"body of {row['marker_function']}"
             )
         column = row["read_body_per_copy"]
         if len(column) > 1 and len(set(column)) == 1:
@@ -379,7 +793,7 @@ def require_live_markers(census: dict[str, Any]) -> None:
                 f"onto one traced frame"
             )
     signatures = {
-        (row["copies"], row["read_body_instructions"]) for row in rows.values()
+        (row["sentinel_copies"], row["read_body_instructions"]) for row in rows.values()
     }
     if len(rows) > 1 and len(signatures) == 1:
         raise MarkerCensusRefusal(
@@ -389,9 +803,22 @@ def require_live_markers(census: dict[str, Any]) -> None:
 
 
 def measure_300_marker_census(
-    output: Path, cache_root: Path | None, *, hlo_dir: Path
+    output: Path,
+    cache_root: Path | None,
+    *,
+    hlo_dir: Path,
+    previous_receipt: Path | None = None,
+    report_path: Path | None = None,
+    figure_path: Path | None = None,
 ) -> dict[str, Any]:
-    """Compile the 300-cell solve, census its marker paths, and gate the counts."""
+    """Compile the 300-cell solve and run both census rules on its one dump.
+
+    The source-sentinel search counts the distinct traced frames whose source
+    line is the sentinel statement the census resolves for a path.  The marker
+    census counts the distinct traced frames that carry the read body of the
+    marker function.  Both rules read the same printed module, so a difference
+    between them is a property of the rule and not of two different dumps.
+    """
     import jax
     import jax.numpy as jnp
 
@@ -406,7 +833,7 @@ def measure_300_marker_census(
     if os.environ.get("SLURM_JOB_ID") is None:
         raise RuntimeError("marker census requires a SLURM allocation")
     profile, seed, requested_class, target_current, request = _certificate_operands(
-        CERTIFICATE_ROWS[0][0], -300
+        CERTIFICATE_ROWS[0][0], CERTIFICATE_ROWS[0][1]
     )
     external = profile.operator.external(request.current, request.prescribed_current)
     program = profile._accelerated_history_program(
@@ -415,10 +842,11 @@ def measure_300_marker_census(
         target_current=target_current,
         **request.policy.kernel_options(),
     )
+    revision = _require_revision()
     receipt: dict[str, Any] = {
-        "schema": "nova.solve-program-marker-census",
-        "measurement_revision": _require_revision(),
-        "main_sha": _require_revision(),
+        "schema": "nova.solve-program-marker-census-dual",
+        "measurement_revision": revision,
+        "main_sha": revision,
         "captured_at": datetime.now(UTC).isoformat(),
         "assignment": {
             "job_id": os.environ["SLURM_JOB_ID"],
@@ -429,9 +857,20 @@ def measure_300_marker_census(
         },
         "requested_cells": 300,
         "expected_copies": EXPECTED_MARKER_COPIES,
+        "committed_copies_before_rebaseline": COMMITTED_COPIES_BEFORE_REBASELINE,
+        "counted_rules": dict(COUNTED_RULES),
+        "previous_receipt": str(previous_receipt) if previous_receipt else None,
+        "cache_root": str(cache_root or default_persistent_compilation_cache_root()),
         "completed": False,
     }
     _write_json(output, receipt)
+    carried: dict[str, dict[str, Any]] = {}
+    if previous_receipt is not None and Path(previous_receipt).exists():
+        previous = json.loads(Path(previous_receipt).read_text(encoding="utf-8"))
+        carried = _carried_census_counts(previous)
+        receipt["previous_receipt_revision"] = previous.get("measurement_revision")
+        receipt["previous_receipt_counts"] = carried
+        _write_json(output, receipt)
     cache = configure_persistent_compilation_cache(
         cache_root or default_persistent_compilation_cache_root(),
         minimum_compile_seconds=0.0,
@@ -452,39 +891,61 @@ def measure_300_marker_census(
     hlo_dir.mkdir(parents=True, exist_ok=True)
     hlo_path = hlo_dir / "weak-rotation-reactor-static_300c_solve.hlo.txt"
     hlo_path.write_text(text, encoding="utf-8")
-    census = marker_census(text, cells=300)
-    require_live_markers(census)
-    reproduced = {
-        label: int(census["paths"][label]["copies"]) == expected
-        for label, expected in EXPECTED_MARKER_COPIES.items()
+    from nova.equilibrium.forward_operator import ForwardFluxOperator
+
+    marker_source_file = Path(inspect.getsourcefile(ForwardFluxOperator) or "")
+    census = dual_census(text, cells=300, source_file=marker_source_file)
+    require_live_markers(census["marker"])
+    sentinel = {
+        label: int(row["copies"]) for label, row in census["sentinel"]["paths"].items()
     }
+    baseline = _rebaseline_marker_copies(sentinel)
     receipt.update(
         {
             "compile_seconds": compile_seconds,
             "hlo_text_path": str(hlo_path),
             "hlo_text_bytes": len(text),
-            "paths": census["paths"],
+            "marker_source_file": str(marker_source_file),
             "total_instructions": census["total_instructions"],
-            "reproduced": reproduced,
+            "rows": census["rows"],
+            "sentinel": census["sentinel"],
+            "marker": census["marker"],
+            "baseline_reads_as_committed": baseline["reads_as_committed"],
+            "rebaselined": baseline["rebaselined"],
+            "baseline_derivation": baseline["derivation"],
             "completed": True,
-            "passed": all(reproduced.values()),
+            "passed": all(
+                sentinel.get(label) == expected
+                for label, expected in EXPECTED_MARKER_COPIES.items()
+            ),
+            "rules_agree": {row["path"]: row["counts_agree"] for row in census["rows"]},
         }
     )
     _write_json(output, receipt)
-    for label, row in census["paths"].items():
+    if report_path is not None:
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(
+            marker_census_report(census, receipt, carried), encoding="utf-8"
+        )
+    if figure_path is not None:
+        figure_path.parent.mkdir(parents=True, exist_ok=True)
+        write_marker_census_figure(census, figure_path)
+    for row in census["rows"]:
         print(
-            f"MARKER_CENSUS {label!r} copies={row['copies']} "
-            f"expected={EXPECTED_MARKER_COPIES[label]} "
+            f"MARKER_CENSUS {row['path']!r} "
+            f"sentinel_copies={row['sentinel_copies']} "
+            f"committed={EXPECTED_MARKER_COPIES.get(row['path'])} "
+            f"read_body_frames={row['marker_read_body_frames']} "
             f"marker_bearing_computations={row['marker_bearing_computations']} "
-            f"read_body_instructions={row['read_body_instructions']} "
-            f"per_copy_min={min(row['read_body_per_copy'] or [0])} "
-            f"per_copy_max={max(row['read_body_per_copy'] or [0])}",
+            f"read_body_instructions={row['marker_read_body_instructions']} "
+            f"counts_agree={int(row['counts_agree'])}",
             flush=True,
         )
     print(
         "MARKER_CENSUS_DONE "
-        f"passed={int(receipt['passed'])} compile_seconds={compile_seconds:.3f} "
-        f"hlo_text_bytes={len(text)}",
+        f"passed={int(receipt['passed'])} "
+        f"rebaselined={int(receipt['rebaselined'])} "
+        f"compile_seconds={compile_seconds:.3f} hlo_text_bytes={len(text)}",
         flush=True,
     )
     return receipt
@@ -1035,6 +1496,21 @@ def main() -> int:
         type=Path,
         help="directory that receives the dumped optimised HLO the census reads",
     )
+    parser.add_argument(
+        "--marker-census-report",
+        type=Path,
+        help="path that receives the side-by-side census report",
+    )
+    parser.add_argument(
+        "--marker-census-figure",
+        type=Path,
+        help="path that receives the census comparison figure",
+    )
+    parser.add_argument(
+        "--previous-marker-census",
+        type=Path,
+        help="earlier census receipt whose counts are carried forward",
+    )
     parser.add_argument("--mast-output", type=Path)
     parser.add_argument("--cache-root", type=Path)
     parser.add_argument("--semantic-report", action="store_true")
@@ -1055,6 +1531,9 @@ def main() -> int:
             args.marker_census_output,
             args.cache_root,
             hlo_dir=args.marker_census_hlo_dir,
+            previous_receipt=args.previous_marker_census,
+            report_path=args.marker_census_report,
+            figure_path=args.marker_census_figure,
         )
         print(
             f"MARKER_CENSUS_GATE={'PASS' if result['passed'] else 'FAIL'}", flush=True

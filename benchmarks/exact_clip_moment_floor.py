@@ -65,7 +65,10 @@ REPORT_ROOT = Path(
     )
 )
 REPORT_INPUT_ROOT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-gauss"
+    os.environ.get(
+        "NOVA_EXACT_CLIP_REPORT_INPUT_ROOT",
+        "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-gauss",
+    )
 )
 COUPLING_RECEIPT = Path(
     "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/"
@@ -83,6 +86,11 @@ MOMENT_NAMES = ("current", "radial", "vertical")
 FAN_ORDER = 8
 REFINED_FAN_ORDER = 16
 PLAN_FAN_POINTS_PER_CUT_CELL = 196_480
+# A per-edge rule counts as exact on an integrand when its relative defect is
+# at or below this. The threshold separates roundoff from truncation: an
+# inexact rule leaves a defect above 1e-7 on these integrands and an exact one
+# reaches roundoff, so nothing sits near the threshold to be misclassified.
+EDGE_ORDER_STUDY_EXACTNESS_THRESHOLD = 1e-12
 
 
 def _jsonable(value: Any) -> Any:
@@ -398,8 +406,8 @@ def edge_order_study(
                     quadrature += float(
                         np.sum(
                             weights
-                            * radial**power[0]
-                            * vertical**power[1]
+                            * radial ** power[0]
+                            * vertical ** power[1]
                             / power[0]
                         )
                     ) * float(coefficient)
@@ -414,7 +422,9 @@ def edge_order_study(
         for order in _ORDER_STUDY_ORDERS
     }
     exact_orders = [
-        order for order in _ORDER_STUDY_ORDERS if every_path[str(order)] <= 1e-12
+        order
+        for order in _ORDER_STUDY_ORDERS
+        if every_path[str(order)] <= EDGE_ORDER_STUDY_EXACTNESS_THRESHOLD
     ]
     if not exact_orders:
         raise ValueError(
@@ -433,6 +443,29 @@ def edge_order_study(
         ],
         "study_flux_quadratic_coefficients": [float(value) for value in flux[3:]],
     }
+
+
+def write_edge_order_study_receipt(path: Path | None = None) -> dict[str, Any]:
+    """Persist the per-order per-path defect map the per-edge order rests on.
+
+    The study itself is cheap and runs inside the weak row's build; this writes
+    its map where a reader can find it rather than leaving it in captured
+    output.
+    """
+    receipt = {
+        "schema": "nova.exact-clip-edge-order-study.v1",
+        "created_at": datetime.now(UTC).isoformat(),
+        "source_revision": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip(),
+        "selected_per_edge_order": _ARC_EDGE_ORDER,
+        "exactness_threshold": EDGE_ORDER_STUDY_EXACTNESS_THRESHOLD,
+        "study": edge_order_study(),
+    }
+    _write_json(
+        REPORT_ROOT / "edge-order-study.json" if path is None else path, receipt
+    )
+    return receipt
 
 
 def _replace_cut(base: CellCurrentMoments, cut: np.ndarray, values: np.ndarray):
@@ -761,6 +794,10 @@ def row_margin_table() -> dict[str, Any]:
     refinement floor, which is an instrument floor and is shared by every row
     that has no coupling measurement of its own.
 
+    ``other_error_term`` carries that other error term itself, per moment, and
+    ``budget_one_tenth`` carries one tenth of it; the two differ by exactly the
+    factor of ten and a reader must not take one for the other.
+
     The route column was measured at the revision named by ``route_revision``
     and is an upper bound for the shipped route's error, because the per-edge
     rule was raised from the third order to the fourth on the strength of the
@@ -807,7 +844,7 @@ def row_margin_table() -> dict[str, Any]:
                     "per_edge_gauss_order": receipt["per_edge_gauss_order"],
                     "denominator_source": source,
                     "other_error_term": {
-                        name: denominators[name] * 10.0 for name in MOMENT_NAMES
+                        name: denominators[name] for name in MOMENT_NAMES
                     },
                     "budget_one_tenth": {
                         name: 0.1 * denominators[name] for name in MOMENT_NAMES
@@ -858,9 +895,7 @@ def row_margin_table() -> dict[str, Any]:
         "rows": rows,
         "denominators_by_source": denominators_by_source,
         "tightest_row": tightest["row"],
-        "tightest_margin": min(
-            value for name, value in tightest["margin"].items()
-        ),
+        "tightest_margin": min(value for name, value in tightest["margin"].items()),
         "route_upper_bound_note": (
             "route relative L2 was measured at the per-edge order recorded per "
             "row; the shipped order is higher, so each route error is an upper "
@@ -876,14 +911,17 @@ def row_margin_table() -> dict[str, Any]:
 
 def _row_margin_markdown(table: dict[str, Any]) -> str:
     lines = [
-        "| row | denominator | budget (1/10) | route current | route radial | "
-        "route vertical | margin current | margin radial | margin vertical |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| row | denominator | other error term (current) | budget (1/10) "
+        "current | route current | route radial | route vertical | "
+        "margin current | margin radial | margin vertical |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in table["rows"]:
+        other = row["other_error_term"]["current"]
         budget = row["budget_one_tenth"]["current"]
         lines.append(
-            f"| {row['row']} | {row['denominator_source']} | {budget:.3e} | "
+            f"| {row['row']} | {row['denominator_source']} | {other:.3e} | "
+            f"{budget:.3e} | "
             f"{row['route_relative_l2']['current']:.3e} | "
             f"{row['route_relative_l2']['radial']:.3e} | "
             f"{row['route_relative_l2']['vertical']:.3e} | "
@@ -1050,7 +1088,13 @@ def main() -> None:
         print("DEFAULT_ROUTE_IDENTITY", comparison, flush=True)
         return
     if arguments.edge_order_study:
-        print("ORDER_STUDY", json.dumps(_jsonable(edge_order_study())), flush=True)
+        receipt = write_edge_order_study_receipt()
+        print(
+            "ORDER_STUDY_RECEIPT",
+            REPORT_ROOT / "edge-order-study.json",
+            flush=True,
+        )
+        print("ORDER_STUDY", json.dumps(_jsonable(receipt["study"])), flush=True)
         return
     if arguments.row_margin_table:
         table = row_margin_table()

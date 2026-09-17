@@ -298,7 +298,6 @@ def _order_study_density_monomials(
     }
     radius = {(1, 0): Fraction(1)}
     psi_squared = _order_study_polynomial_product(psi, psi)
-    radius_psi = _order_study_polynomial_product(radius, psi)
     first, second = density[1], density[2]
     squared = density[3]
     monomials: dict[tuple[int, int], Fraction] = {(0, 0): density[0]}

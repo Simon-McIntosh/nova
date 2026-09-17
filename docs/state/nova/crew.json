@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T06:25:27",
+  "updated": "2026-09-17T06:34:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4748,9 +4748,11 @@
         "id": "s19c-nia-driftprobe-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "6d36b717-0caf-4557-a786-30ae3e5023a6",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "6d36b717-0caf-4557-a786-30ae3e5023a6"
+        },
         "created": "2026-09-16"
       },
       {
@@ -6597,6 +6599,15 @@
           "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "ee5813e7-ea8d-47c3-8383-98392948112b"
         },
         "created": "2026-09-16"
+      },
+      {
+        "id": "session-337d1d569f61f639eedc",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
       },
       {
         "id": "shadow-haiku-1",
@@ -174232,6 +174243,302 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T033952118866-review-of-dvf-cocos-scout",
+        "plan": "diiid-vertical-force-balance",
+        "section": "\u00a75",
+        "node": "review-of-dvf-cocos-scout",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1978,
+                "cached_input_tokens": 938367,
+                "input_tokens": 940347,
+                "output_tokens": 896,
+                "reasoning_output_tokens": 103,
+                "total_tokens": 941243,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the review for r-20260916T210526365533-dvf-cocos-scout parses all five score dimensions",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260916T210526365533-dvf-cocos-scout",
+          "id": "review-of-dvf-cocos-scout",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T03:39:54Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T033952118866-review-of-dvf-cocos-scout/manifest.md",
+          "plan": "diiid-vertical-force-balance",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T210526365533-dvf-cocos-scout.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19c-review-b-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T03:40:47Z",
+        "completed_at": "2026-09-17T04:31:53.063Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3008,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3066,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "1e65e1dd31365afcdbafb9c16fe03eb8f640277f",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "parse_review round trip through reckon.crew.review on the stored file",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T033952118866-review-of-dvf-cocos-scout/emit_review.log",
+          "log_digest": "sha256:1ffa7ecf1e9ff415ad338d8349460ee708eed2d6bf5f3826ecc4a3755fa2feb9"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T033952118866-review-of-dvf-cocos-scout/manifest.md",
+        "scope_changed": false,
+        "session_id": "716fb6a1-ffe7-443c-84b0-57a45563cbd5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 257763,
+            "input_tokens_cumulative": 257763,
+            "output_tokens": 384,
+            "output_tokens_cumulative": 384,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T04:31:53.063Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 6672,
+              "budget_seconds": 2700,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 9372,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 10879,
+              "log_fresh": false,
+              "manifest_commits": [
+                "935589ac",
+                "1647f506"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "749fad420f3f8124561c522a18b906e00d26418ca6382d769d22d55698106b79",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan cut-cell-current-attribution --section '\u00a72' --role review --spec-level exact --node review-of-cca-implicit-arc-tracer-by-parameter --goal 'attach an independent review to run r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter' --done-when 'the review for r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter.json --time-budget 45m --session s19-codex-20260916 --local",
+              "node": "cca-implicit-arc-tracer-by-parameter",
+              "phase": "working",
+              "plan": "cut-cell-current-attribution",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 10940,
+              "terminal_at": "2026-09-17T00:38:04Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-implicit-arc-tracer-by-parameter"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 6387,
+              "budget_seconds": 2400,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 8787,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 14875,
+              "log_fresh": false,
+              "manifest_commits": [],
+              "manifest_derived": false,
+              "manifest_digest": "c84d0a3d924e1d7a0ebea1813df72e5a34b1d1e6fa1c43360ef0de875384bb45",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T210526365533-dvf-cocos-scout/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan diiid-vertical-force-balance --section '\u00a75' --role review --spec-level exact --node review-of-dvf-cocos-scout --goal 'attach an independent review to run r-20260916T210526365533-dvf-cocos-scout' --done-when 'the review for r-20260916T210526365533-dvf-cocos-scout parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T210526365533-dvf-cocos-scout.json --time-budget 40m --session s19-codex-20260916 --local",
+              "node": "dvf-cocos-scout",
+              "phase": "starting",
+              "plan": "diiid-vertical-force-balance",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260916T210526365533-dvf-cocos-scout",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 14899,
+              "terminal_at": "2026-09-16T23:32:07Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/dvf-cocos-scout"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 257763,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 19.019,
+          "generated_tokens": 384,
+          "generation_seconds": 18.966,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 28.6,
+          "machine_seconds": 0.053,
+          "peak_input_tokens": 137252,
+          "tokens_per_second": 20.25,
+          "wall_tokens_per_second": 20.19
+        },
+        "follow_on_paths": [
+          "imas_ambix/imas_ambix/challenge/loader.py:124"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "review role; the deliverable is the stored review record outside the repository",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-dvf-cocos-scout",
+          "session_id": "716fb6a1-ffe7-443c-84b0-57a45563cbd5",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T04:31:53.063Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 63.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -174544,6 +174851,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2665
+    "_version": 2668
   }
 }

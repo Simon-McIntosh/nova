@@ -329,5 +329,81 @@
     <code>bcd653f6ab330a6b…</code> negative; panel digests
     <code>6a54bf70f0259f93…</code> and <code>4ca550a8ddc6e0bd…</code>.</p>
   </section>
+
+  <section id="gauge-free-fixed-point">
+    <h3>Re-reading the boundary-flux offset in one gauge</h3>
+    <p>The displaced-seed record above reads the positive arm's boundary flux
+    at <code>-0.5289095779831239 Wb with a boundless span of 49.3895 Wb</code>
+    against an authored analytic zero hardcoded at <code>0.0</code>, and calls
+    that a half-weber displacement of the flux level. The two numbers are not
+    in one gauge. The fixture poses its exterior as the authored total field
+    minus the plasma image, so a solved state and the authored field share the
+    gauge whose zero level is the analytic separatrix; the compensator columns
+    that carry the centroid row are anchored elsewhere, at the magnetic axis
+    (reference radius <code>6.2 m</code>), and their additive constant therefore
+    separates the two readings. The negative arm confirms the shared gauge where
+    it can be checked: its reported boundary flux <code>-0.0018776984518051078 Wb</code>
+    matches the authored flux at its own boundary point,
+    <code>+5.986607067106857e-08 Wb</code>, to <code>1.9e-3 Wb</code>.</p>
+    <p>The gauge-free substitute is the span between the magnetic axis and the
+    boundary, which no additive constant can move, evaluated on both sides at
+    the same two points. This is a re-read of the banked receipts: no solve ran
+    and no field was recomputed, because the banked JSON already carries both
+    points, the level at each, and the compensating field, and the fixture's
+    closed form supplies the authored levels those points should carry.
+    Classify the level reading rather than the difference below, which is real
+    and material.</p>
+    <table>
+      <thead>
+        <tr><th>quantity</th><th>positive arm (centroid row)</th><th>negative arm (no row)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>solved span, axis minus boundary (Wb)</td><td><code>49.38948560055078</code></td><td><code>49.944764819011645</code></td></tr>
+        <tr><td>analytic span at the same two points (Wb)</td><td><code>50.216201488163996</code></td><td><code>49.93723296300661</code></td></tr>
+        <tr><td>gauge-free flux offset (Wb)</td><td><code>-0.8267158876132186</code></td><td><code>+0.007531856005037696</code></td></tr>
+        <tr><td>gauge-free flux offset of span</td><td><code>-1.6463130685184867e-02</code></td><td><code>+1.5082645869900877e-04</code></td></tr>
+        <tr><td>compensator contribution at the contact radius, <code>pi B (R^2 - R0^2)</code> with <code>R0 = 6.2 m</code> and <code>R = 0 -> 7.718433652945465 m</code> (Wb)</td><td><code>+0.15849843757230964</code></td><td><code>0.0</code> (no field)</td></tr>
+        <tr><td>compensator contribution to the span (Wb)</td><td><code>-1.5971061810604376e-01</code></td><td><code>0.0</code></td></tr>
+        <tr><td>offset less the compensator's own span contribution (Wb)</td><td><code>-0.6670052695071749</code></td><td><code>+0.007531856005037696</code></td></tr>
+        <tr><td>row scaled residual</td><td><code>1.3398458394898267e-03</code></td><td>not applicable</td></tr>
+        <tr><td>fixed-point clause at or below <code>1e-12</code></td><td><strong>fails</strong></td><td>not applicable</td></tr>
+      </tbody>
+      <caption>Both sides are read at the same two points the solved field was read at, so the difference is a property of the two fields and not of the gauge. No figure accompanies this table: the reading is a pair of scalars, and the banked receipts store levels rather than a radial field, so there is no profile to plot.</caption>
+    </table>
+    <p>Reading: <strong>the fixed-point clause fails, and it fails by more than
+    the confounded figure suggested.</strong> The gauge-free offset is
+    <code>0.8267 Wb</code>, <code>-1.65 %</code> of span, against the
+    <code>1e-3</code> of span the section's boundary clause names — and against
+    the raw <code>0.5289 Wb</code> the confounded comparison reported, so the
+    correction moves the number by a factor of <code>1.56</code> in the
+    direction of a worse deviation, not a better one. The compensator's own
+    field accounts for <code>0.1597 Wb</code> of it; the remaining
+    <code>0.6670 Wb</code> is the equilibrium the row reached, which is not the
+    analytic one. The row's scaled residual <code>1.3398e-03</code> misses the
+    clause by nine decades on its own.</p>
+    <p>Instrument control: the same read applied to the negative arm returns
+    <code>+1.5083e-04</code> of span, so the gauge-free quantity is
+    two orders of magnitude away from its near-zero reading on the fixed point
+    the unconstrained map already reaches. A read that could not separate those
+    two would not be able to fail the clause on the first.</p>
+    <p>The probe's own instrument carries the same correction, and the two agree to
+    every digit. <code>oracle_start_newton_probe.py</code> no longer asserts an
+    authored boundary flux of <code>0.0</code>: the authored levels are read from
+    the fixture through the operator's own read of the analytic state, each
+    topology read now reports its axis-to-boundary span, and the terminal
+    measurement reads the authored levels at the solved read's own two points
+    through a closed-form reader, so its <code>gauge_free_flux_offset_wb</code>
+    is taken at the same points as the table above. Run against this banked
+    receipt, that reader returns exactly <code>49.93812658349582</code> and
+    <code>-0.27807490466817386 Wb</code> and an offset of
+    <code>-0.8267158876132186 Wb</code> — the value the receipt's separate
+    instrument produces, from a different call shape.</p>
+    <p>Receipts: <code>gauge-reread.json</code> and <code>gauge-reread.md</code>
+    under
+    <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-gauge/</code>,
+    with <code>reread.log</code> and the <code>all_debug</code> test log beside
+    them. Source receipts unchanged at revision
+    <code>442820bf0f0220c9b0ab1cf84295d4b0832a2d8a</code>.</p>
+  </section>
 </main>
 </html>

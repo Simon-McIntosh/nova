@@ -16,8 +16,70 @@ from scripts.analytic_oracle_fixtures.centroid_row import (
 )
 from scripts.analytic_oracle_fixtures.measure import (
     analytic_case,
+    exact_state,
+    gauge_free_flux_read,
+    uniform_exterior_field_flux,
     uniform_exterior_field_response,
 )
+from tests.rotating_equilibrium_references import reference_cases
+
+
+def _reactor_case():
+    """Return the reactor-scale closed form the banked control rows use."""
+    return reference_cases()["weak-rotation-reactor"].static_limit()
+
+
+def test_uniform_field_contribution_is_zero_on_the_compensator_anchor() -> None:
+    case = _reactor_case()
+    axis = np.asarray(case.magnetic_axis, dtype=np.float64)
+    field = np.asarray((2.0e-3, -3.0e-4), dtype=np.float64)
+
+    on_anchor = uniform_exterior_field_flux(case, axis.reshape(1, 2), field)
+    np.testing.assert_allclose(on_anchor[0], 0.0, rtol=0.0, atol=0.0)
+
+    # the reference radius is the axis, so the column grows with R**2 outward
+    radius = 7.718433652945465
+    outward = uniform_exterior_field_flux(case, np.asarray(((radius, 0.0),)), field)
+    np.testing.assert_allclose(
+        outward[0], field[0] * np.pi * (radius**2 - float(axis[0]) ** 2), rtol=0.0
+    )
+    assert outward[0] > 0.0
+
+
+def test_gauge_free_span_offset_ignores_an_added_flux_constant() -> None:
+    case = _reactor_case()
+    axis = np.asarray(case.magnetic_axis, dtype=np.float64)
+    boundary = np.asarray(((7.718433652945465, -1.2320178076396662),))
+    field = np.asarray((0.002387200675934618, 0.0), dtype=np.float64)
+    analytic = exact_state(case, np.vstack((axis, boundary)))
+
+    reading = gauge_free_flux_read(
+        case, axis, boundary[0], float(analytic[0]), float(analytic[1]), field
+    )
+    np.testing.assert_allclose(reading["gauge_free_flux_offset_wb"], 0.0, atol=1e-9)
+
+    # a constant added to both levels is a gauge choice, not a fixed-point error
+    shifted = gauge_free_flux_read(
+        case,
+        axis,
+        boundary[0],
+        float(analytic[0]) + 12.5,
+        float(analytic[1]) + 12.5,
+        field,
+    )
+    np.testing.assert_allclose(
+        shifted["gauge_free_flux_offset_wb"],
+        reading["gauge_free_flux_offset_wb"],
+        rtol=0.0,
+        atol=0.0,
+    )
+
+    # the authored zero level sits on the analytic separatrix, not at the axis
+    np.testing.assert_allclose(
+        float(exact_state(case, np.asarray(((7.801395788446069, 0.0),)))[0]),
+        0.0,
+        atol=1.0e-6,
+    )
 
 
 def test_uniform_exterior_response_has_declared_field_components() -> None:

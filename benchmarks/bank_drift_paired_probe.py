@@ -22,9 +22,25 @@ The driver runs one tree per process so jax and nova module state stay isolated,
 and it only compares the two emissions in a later invocation:
 
     <interpreter> bank_drift_paired_probe.py emit \\
-        --tree-root <tree> --label <label> --out <label>.json
+        --tree-root <tree> --label <label> --out <label>.json \\
+        --identity <shot>/<slice> --arm {pure,mixed}
     <interpreter> bank_drift_paired_probe.py compare \\
         --left <label>.json --right <label>.json --out receipt.json
+    <interpreter> bank_drift_paired_probe.py merge \\
+        --arms-dir <dir> --out receipt.json
+
+One arm of one identity is the unit of work: it is the smallest slice that
+carries a complete pair of emissions, so an allocation that dies loses one arm
+rather than a whole campaign, and the arms that did land are already receipts.
+An emission is therefore restricted to a single identity and arm, and `merge`
+joins the per-arm receipts once they all exist.
+
+The compilation cache is passed in rather than inferred, so every job of the
+campaign writes the one directory the campaign names: the same traced programs
+in the same tree then compile once for the whole set of jobs rather than once
+per job.  The cache receipt the producer returns is stored in each emission, so
+the directory a given row was compiled against is evidence rather than an
+assumption.
 """
 
 from __future__ import annotations
@@ -44,6 +60,21 @@ PRODUCER_RELATIVE = (
     "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py"
 )
 GEOMETRY_STAGES = ("profile_support", "partition_structure", "partition_values")
+
+_STAGE_DEFINITIONS = {
+    "first_differing_stage": (
+        "the earliest stage in stage_order whose digest differs between the two "
+        "trees; a difference at an earlier stage propagates into every later "
+        "one, so this names where the trees first diverge, not necessarily the "
+        "stage that moved the residual"
+    ),
+    "residual_moved": (
+        "the terminal residual differs between the trees in any bit; "
+        "residual_ratio carries the magnitude, so a difference in the last bit "
+        "and a difference of twelve decades both read as true here"
+    ),
+    "residual_ratio": "right-tree terminal residual divided by left-tree residual",
+}
 
 
 def _digest(array: Any) -> str:
@@ -149,6 +180,12 @@ def _partition_report(operator: Any) -> dict[str, Any]:
     }
 
 
+def _identity_of(selected_row: Any) -> str:
+    """Return the shot/slice identity a bank selection resolves to."""
+
+    return f"{int(selected_row['shot'])}/{int(selected_row['slice_index'])}"
+
+
 def _load_module(path: Path, name: str) -> Any:
     spec = spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
@@ -191,18 +228,27 @@ def _resume_rows(out_path: Path) -> list[dict[str, Any]]:
     return rows if isinstance(rows, (list,)) else []
 
 
-def _emit(tree_label: str, tree_root: Path, out_path: Path, limit: int) -> int:
-    """Run the declared solve per arm in one tree and persist stage digests."""
+def _emit(
+    tree_label: str,
+    tree_root: Path,
+    out_path: Path,
+    limit: int,
+    identity: str | None,
+    arm: str | None,
+    compile_cache_root: Path | None,
+) -> int:
+    """Run the declared solve for one identity and arm and persist its digests."""
 
+    import jax
     import jax.numpy as jnp
 
     producer = _load_module(tree_root / PRODUCER_RELATIVE, "probe_producer")
     reachability = producer._reachability_module()
     producer.configure_dtypes()
-    producer.configure_persistent_compilation_cache(
-        producer.default_persistent_compilation_cache_root()
+    cache_root = (
+        compile_cache_root or producer.default_persistent_compilation_cache_root()
     )
-    import jax
+    compile_cache = producer.configure_persistent_compilation_cache(cache_root)
 
     x64 = bool(jax.config.jax_enable_x64)
     response_cache, carrier_evidence = producer._persisted_response_cache(
@@ -211,7 +257,15 @@ def _emit(tree_label: str, tree_root: Path, out_path: Path, limit: int) -> int:
     )
     carrier_identity = producer._carrier_semantic_identity(carrier_evidence)
     selected = list(producer.select_slices_by_shot(producer.DECOMPOSITION_BANK))
-    if limit > 0:
+    if identity is not None:
+        selected = [
+            (row, qualification)
+            for row, qualification in selected
+            if _identity_of(row) == identity
+        ]
+        if not selected:
+            raise SystemExit(f"identity {identity} is not in the decomposition bank")
+    elif limit > 0:
         selected = selected[:limit]
     rows = _resume_rows(out_path)
     done = {row["identity"] for row in rows}
@@ -220,17 +274,19 @@ def _emit(tree_label: str, tree_root: Path, out_path: Path, limit: int) -> int:
     rows: list[dict[str, Any]] = []
     for selected_row, qualification in selected:
         shot = int(selected_row["shot"])
-        if f"{shot}/{int(selected_row['slice_index'])}" in done:
-            continue
         slice_index = int(selected_row["slice_index"])
-        identity = f"{shot}/{slice_index}"
+        arm_identity = _identity_of(selected_row)
         entry: dict[str, Any] = {
-            "identity": identity,
+            "identity": arm_identity,
             "stages": {},
             "arms": {},
             "exception": None,
         }
-        print(f"probe {tree_label} {identity}", flush=True)
+        print(
+            f"probe {tree_label} {arm_identity} arm={arm or 'both'} "
+            f"cache={compile_cache.directory}",
+            flush=True,
+        )
         try:
             case, context = producer._mast_case_from_selection(
                 producer.SHOT_STORE, selected_row, qualification
@@ -257,8 +313,10 @@ def _emit(tree_label: str, tree_root: Path, out_path: Path, limit: int) -> int:
                 target_current,
                 carrier_identity=f"mast:{shot}:{slice_index}:{carrier_identity}",
             )
-            for arm, result in states.items():
-                entry["arms"][str(arm)] = {
+            for arm_name, result in states.items():
+                if arm is not None and str(arm_name) != arm:
+                    continue
+                entry["arms"][str(arm_name)] = {
                     "converged": bool(result.converged),
                     "terminal_residual": float(result.terminal_residual),
                     "termination_reason": str(result.termination_reason),
@@ -267,12 +325,12 @@ def _emit(tree_label: str, tree_root: Path, out_path: Path, limit: int) -> int:
         except Exception as error:  # noqa: BLE001 - the failure is the finding
             entry["exception"] = f"{type(error).__name__}: {error}"
         print(
-            f"probe {tree_label} {identity} done exception={entry['exception']} "
+            f"probe {tree_label} {arm_identity} done exception={entry['exception']} "
             f"residuals="
             + json.dumps(
                 {
-                    arm: record.get("terminal_residual")
-                    for arm, record in entry["arms"].items()
+                    name: record.get("terminal_residual")
+                    for name, record in entry["arms"].items()
                 }
             ),
             flush=True,
@@ -287,6 +345,9 @@ def _emit(tree_label: str, tree_root: Path, out_path: Path, limit: int) -> int:
                     "emitted_at": datetime.now(UTC).isoformat(),
                     "jax_enable_x64": x64,
                     "carrier_identity": carrier_identity,
+                    "compile_cache": compile_cache.receipt(),
+                    "requested_identity": identity,
+                    "requested_arm": arm,
                     "rows": rows,
                 },
                 indent=1,
@@ -300,6 +361,13 @@ def _emit(tree_label: str, tree_root: Path, out_path: Path, limit: int) -> int:
 
 
 def _flat_stages(row: dict[str, Any] | None) -> dict[str, Any]:
+    """Return the identity-level stage digests of one emission row.
+
+    The map image and the terminal residual are properties of an arm, not of the
+    identity, so they are read from the arm record being compared rather than
+    from here.
+    """
+
     if row is None:
         return {}
     stages = row.get("stages") or {}
@@ -307,9 +375,6 @@ def _flat_stages(row: dict[str, Any] | None) -> dict[str, Any]:
         "profile_support": (stages.get("profile_support") or {}).get("digest"),
         "partition_structure": (stages.get("partition_structure") or {}).get("digest"),
         "partition_values": (stages.get("partition_values") or {}).get("digest"),
-        "map_image": (
-            ((row.get("arms") or {}).get("pure") or {}).get("map_image") or {}
-        ).get("flux"),
         "exception": row.get("exception"),
     }
 
@@ -362,6 +427,18 @@ def _compare(left_path: Path, right_path: Path, out_path: Path) -> int:
                     "residual_left": residual_left,
                     "residual_right": residual_right,
                     "residual_delta": residual_delta,
+                    "residual_moved": residual_delta not in (None, 0.0),
+                    "residual_ratio": (
+                        None
+                        if residual_left in (None, 0.0) or residual_right is None
+                        else residual_right / residual_left
+                    ),
+                    "converged_left": (
+                        None if not left_arm else bool(left_arm.get("converged"))
+                    ),
+                    "converged_right": (
+                        None if not right_arm else bool(right_arm.get("converged"))
+                    ),
                     "stages_left": left_stages,
                     "stages_right": right_stages,
                     "first_differing_stage": arm_first,
@@ -372,6 +449,21 @@ def _compare(left_path: Path, right_path: Path, out_path: Path) -> int:
     for row in rows:
         key = str(row["first_differing_stage"])
         counts[key] = counts.get(key, 0) + 1
+    moved = [
+        {
+            "identity": row["identity"],
+            "arm": row["arm"],
+            "residual_left": row["residual_left"],
+            "residual_moved": row["residual_moved"],
+            "residual_ratio": row["residual_ratio"],
+            "residual_right": row["residual_right"],
+            "first_differing_stage": row["first_differing_stage"],
+            "converged_left": row["converged_left"],
+            "converged_right": row["converged_right"],
+        }
+        for row in rows
+        if row["residual_moved"]
+    ]
     focus = [
         row
         for row in rows
@@ -379,12 +471,22 @@ def _compare(left_path: Path, right_path: Path, out_path: Path) -> int:
     ]
     receipt = {
         "artifact": "paired old-tree against current-tree MAST operand-solve probe",
-        "left": {"label": left["tree_label"], "root": left["tree_root"]},
-        "right": {"label": right["tree_label"], "root": right["tree_root"]},
+        "left": {
+            "label": left["tree_label"],
+            "root": left["tree_root"],
+            "compile_cache": (left.get("compile_cache") or {}).get("directory"),
+        },
+        "right": {
+            "label": right["tree_label"],
+            "root": right["tree_root"],
+            "compile_cache": (right.get("compile_cache") or {}).get("directory"),
+        },
         "stage_order": list(GEOMETRY_STAGES) + ["map_image", "terminal_residual"],
+        "definitions": dict(_STAGE_DEFINITIONS),
         "rows": rows,
         "summary": {
             "first_differing_stage_counts": counts,
+            "residual_moved": moved,
             "focus_21983_35_mixed": focus,
         },
         "generated_at": datetime.now(UTC).isoformat(),
@@ -396,6 +498,85 @@ def _compare(left_path: Path, right_path: Path, out_path: Path) -> int:
     return 0
 
 
+def _merge(arms_dir: Path, out_path: Path, expected_rows: int) -> int:
+    """Join the per-arm receipts into one campaign receipt.
+
+    One arm per allocation means the arms land independently, so the campaign
+    receipt is assembled from whatever arm receipts exist.  A missing arm is
+    reported rather than silently absent: the campaign is only a twelve-arm
+    attribution if all twelve are present.
+    """
+
+    receipts = sorted(arms_dir.glob("receipt-*.json"))
+    if not receipts:
+        raise SystemExit(f"no per-arm receipts under {arms_dir}")
+    rows: list[dict[str, Any]] = []
+    sources: list[dict[str, Any]] = []
+    trees: dict[str, dict[str, Any]] = {}
+    for path in receipts:
+        payload = json.loads(path.read_text())
+        sources.append(
+            {
+                "path": str(path),
+                "rows": len(payload.get("rows") or []),
+                "generated_at": payload.get("generated_at"),
+            }
+        )
+        for side in ("left", "right"):
+            if payload.get(side):
+                trees[side] = payload[side]
+        rows.extend(payload.get("rows") or [])
+    rows.sort(key=lambda row: (row["identity"], row["arm"]))
+    counts: dict[str, int] = {}
+    for row in rows:
+        key = str(row["first_differing_stage"])
+        counts[key] = counts.get(key, 0) + 1
+    focus = [
+        row
+        for row in rows
+        if row["identity"] == "21983/35" and row["arm"] == "mixed"
+    ]
+    moved = [
+        {
+            "identity": row["identity"],
+            "arm": row["arm"],
+            "residual_left": row["residual_left"],
+            "residual_moved": row["residual_moved"],
+            "residual_ratio": row["residual_ratio"],
+            "residual_right": row["residual_right"],
+            "first_differing_stage": row["first_differing_stage"],
+            "converged_left": row["converged_left"],
+            "converged_right": row["converged_right"],
+        }
+        for row in rows
+        if row["residual_moved"]
+    ]
+    missing = expected_rows - len(rows)
+    receipt = {
+        "artifact": "paired old-tree against current-tree MAST operand-solve probe",
+        "left": trees.get("left"),
+        "right": trees.get("right"),
+        "stage_order": list(GEOMETRY_STAGES) + ["map_image", "terminal_residual"],
+        "definitions": dict(_STAGE_DEFINITIONS),
+        "rows": rows,
+        "summary": {
+            "rows_expected": expected_rows,
+            "rows_present": len(rows),
+            "arms_missing": missing,
+            "first_differing_stage_counts": counts,
+            "residual_moved": moved,
+            "focus_21983_35_mixed": focus,
+        },
+        "source_receipts": sources,
+        "generated_at": datetime.now(UTC).isoformat(),
+    }
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(receipt, indent=1, sort_keys=True))
+    print(f"wrote {out_path}", flush=True)
+    print(json.dumps(receipt["summary"], indent=1, sort_keys=True), flush=True)
+    return 0 if missing <= 0 else 1
+
+
 def _parse() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -404,18 +585,49 @@ def _parse() -> argparse.Namespace:
     emit.add_argument("--label", required=True)
     emit.add_argument("--out", type=Path, required=True)
     emit.add_argument("--limit", type=int, default=0)
+    emit.add_argument(
+        "--identity",
+        default=None,
+        help="restrict the emission to one shot/slice identity, e.g. 21978/35",
+    )
+    emit.add_argument(
+        "--arm",
+        default=None,
+        choices=("pure", "mixed"),
+        help="restrict the emission to one solve arm",
+    )
+    emit.add_argument(
+        "--compile-cache-root",
+        type=Path,
+        default=None,
+        help="root of the shared persistent compilation cache for this campaign",
+    )
     compare = sub.add_parser("compare")
     compare.add_argument("--left", type=Path, required=True)
     compare.add_argument("--right", type=Path, required=True)
     compare.add_argument("--schema", type=Path, required=False)
     compare.add_argument("--out", type=Path, required=True)
+    merge = sub.add_parser("merge")
+    merge.add_argument("--arms-dir", type=Path, required=True)
+    merge.add_argument("--out", type=Path, required=True)
+    merge.add_argument("--expected-rows", type=int, required=True)
     return parser.parse_args()
 
 
 def main() -> int:
     args = _parse()
     if args.command == "emit":
-        return _emit(args.label, args.tree_root, args.out, args.limit)
+        return _emit(
+            args.label,
+            args.tree_root,
+            args.out,
+            args.limit,
+            args.identity,
+            args.arm,
+            args.compile_cache_root,
+        )
+    if args.command == "merge":
+        return _merge(args.arms_dir, args.out, args.expected_rows)
     return _compare(args.left, args.right, args.out)
 
 

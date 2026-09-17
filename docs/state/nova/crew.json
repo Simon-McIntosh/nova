@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T20:37:28",
+  "updated": "2026-09-17T21:43:59",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -181756,6 +181756,333 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T100810663195-ecq-capacity-sizing",
+        "plan": "exact-clip-moment-quadrature",
+        "section": "\u00a74",
+        "node": "ecq-capacity-sizing",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1489,
+                "cached_input_tokens": 411248,
+                "input_tokens": 412769,
+                "output_tokens": 198,
+                "reasoning_output_tokens": 116,
+                "total_tokens": 412967,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "The constant in nova/equilibrium/separatrix_clip.py (or wherever the 3,840-vertex per-polygon capacity is produced; state where) is replaced by a derived bound with its derivation in the docstring (128 arc samples plus the maximal straight-edge count, stated and justified); the overflow refusal is kept and a test presents a polygon above the new bound and sees it refuse; the weak 110, 300 and 1000 exact-clip moments and frozen images are bit-identical to the main tree on the fan route (max abs diff 0.0, digests stated) measured in ONE all_debug job per row with JAX_PLATFORMS=cpu, the root interpreter with PYTHONPATH set to the worktree and no uv on the node; benchmarks/exact_clip_memory_scaling.py is RUN unchanged to report the 1000-cell exact-clip peak and largest allocation before and after; the exact-clip solve compile wall at 110 and 300 cells is reported before and after in the same job; receipts go under docs/figures/exact-clip-capacity/ because a peer holds the plan's usual figure directory; nova/equilibrium/clip_quadrature.py is not changed by this node (a peer owns it); every uv command carries --no-sync and nothing runs uv sync",
+          "estimated_hours": null,
+          "goal": "Derive the per-polygon vertex capacity of the exact clip from the realised layout bound (the fixed arc-sample count plus the maximal straight-edge count the clip family admits) in place of the present 3,840-vertex capacity, keeping the fail-closed overflow refusal",
+          "id": "ecq-capacity-sizing",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T10:08:14Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T100810663195-ecq-capacity-sizing/manifest.md",
+          "plan": "exact-clip-moment-quadrature",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/separatrix_clip.py",
+            "tests/test_equilibrium_separatrix_clip.py",
+            "docs/figures/exact-clip-capacity",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-capacity",
+            "docs/evidence/archive/exact-clip-moment-quadrature-landed.html",
+            "docs/plans/exact-clip-moment-quadrature.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-ecq-capacity-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T10:08:58Z",
+        "completed_at": "2026-09-17T17:57:17.559Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 28075,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 28099,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "b9ce8d6225d2357d443708f1ff21c8fd19a6a629",
+        "commits": [
+          "f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+          "128f5f57ca0fab4a2823071019e05ff981de8284"
+        ],
+        "changed_lines": {
+          "added": 3624,
+          "removed": 1,
+          "files": 14
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "one all_debug job per row for bit identity at 110, 300 and 1000 cells; memory-scaling instrument before and after; tests/test_equilibrium_separatrix_clip.py 25 passed; independent review",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T100810663195-ecq-capacity-sizing.json",
+          "log_digest": "sha256:1772ac7101adca6bb8d8ae084b34dc3231a2ab407de482405f09b41ee4788276"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T100810663195-ecq-capacity-sizing/manifest.md",
+        "scope_changed": false,
+        "session_id": "8d8e56ed-dc2b-4484-9798-088c8b927348",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 10398665,
+            "input_tokens_cumulative": 10398665,
+            "output_tokens": 55276,
+            "output_tokens_cumulative": 55276,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T17:57:17.559Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3600,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 875,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 906,
+              "log_fresh": false,
+              "manifest_commits": [
+                "5ed1dd3b",
+                "37fec904",
+                "f7364e82",
+                "1b467745",
+                "903d5d49"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "daa8b7cde72df41e9be78d1f4312e801d77c2cd085e6821581dde55999241747",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205009785219-nia-bank-drift-paired-probe/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan null-identification-authority --section '\u00a71' --role review --spec-level exact --node review-of-nia-bank-drift-paired-probe --goal 'attach an independent review to run r-20260916T205009785219-nia-bank-drift-paired-probe' --done-when 'the review for r-20260916T205009785219-nia-bank-drift-paired-probe parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260916T205009785219-nia-bank-drift-paired-probe.json --time-budget 60m --session s19-codex-20260916 --local",
+              "node": "nia-bank-drift-paired-probe",
+              "phase": "working",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260916T205009785219-nia-bank-drift-paired-probe",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 962,
+              "terminal_at": "2026-09-17T09:52:19Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-bank-drift-paired-probe"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 923,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 576,
+              "log_fresh": true,
+              "manifest_commits": [
+                "93a0b141",
+                "de6a6433",
+                "59d09275"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "704cf1a5ee54de8ebe80e3b12024812cb4634ffe526fc48f5b55e49b04210d01",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T055938156648-ecm-memory-test-tracer-parameter-route/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan cut-cell-current-attribution --section '\u00a72' --role review --spec-level exact --node review-of-ecm-memory-test-tracer-parameter-route --goal 'attach an independent review to run r-20260917T055938156648-ecm-memory-test-tracer-parameter-route' --done-when 'the review for r-20260917T055938156648-ecm-memory-test-tracer-parameter-route parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T055938156648-ecm-memory-test-tracer-parameter-route.json --time-budget 55m --session s19-codex-20260916 --local",
+              "node": "ecm-memory-test-tracer-parameter-route",
+              "phase": "working",
+              "plan": "cut-cell-current-attribution",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T055938156648-ecm-memory-test-tracer-parameter-route",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 588,
+              "terminal_at": "2026-09-17T09:58:38Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecm-memory-test-tracer-parameter-route"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 19,
+            "evidence": 17,
+            "fit": 19,
+            "goal_fidelity": 19,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 93
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 10730781,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 4743.439,
+          "generated_tokens": 67928,
+          "generation_seconds": 4594.519,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.6,
+          "machine_seconds": 148.92,
+          "peak_input_tokens": 165997,
+          "tokens_per_second": 14.78,
+          "wall_tokens_per_second": 14.32
+        },
+        "follow_on_paths": [
+          "benchmarks/exact_clip_warm_cost.py",
+          "before/after"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-capacity-sizing",
+          "session_id": "8d8e56ed-dc2b-4484-9798-088c8b927348",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T17:57:17.559Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 80.0,
+        "orientation_input_tokens": 3323916.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -182068,6 +182395,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2729
+    "_version": 2730
   }
 }

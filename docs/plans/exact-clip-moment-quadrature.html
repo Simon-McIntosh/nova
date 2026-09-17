@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
@@ -162,6 +162,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s19c-capacity-landed-20260917" data-who="" data-when="">
     <div class="r-comment-body">ecq-capacity-sizing merged (be29cb0a), promotion pending its review. The per-polygon vertex capacity is derived from the realised layout, 128 arc samples plus the straight-edge chain, 158 at most against the former 3840 (152 and 150 on the 300 and 1000 rows against 3072 and 2816), with the fail-closed overflow refusal kept and exercised (258 live vertices against a 136 fixture capacity refuse to included 0, area 0). Exact-clip moments and coupled current-moment images are bit-identical to the fan route at 110, 300 and 1000 cells (maximum absolute difference 0.0, mismatch count 0). The 1000-cell peak temporary falls from 9.0065 to 8.0192 GiB with identical argument and output bytes. The compile wall is unchanged and is itself the finding for the compile-cost priority: 848 s at 110 cells and 965 to 971 s at 300 cells on all_debug from the unchanged memory-scaling instrument, before and after, so the capacity was not what the exact-clip compile was paying for. Two gaps: the section's named warm-cost driver still has no receipt (its production worker needs four arguments the lane script did not pass and refuses the CPU lane), and the largest-intermediate-array census was skipped on both sides, so the memory comparison is the compile-time peak temporary only.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260917T100810663195-ecq-capacity-sizing" data-who="reckon-ship" data-when="2026-09-17T17:57:17.559Z">
+    <div class="r-comment-body"><p>Derived traced-polygon capacity landed (merge be29cb0a): 158 at most against the former 3840 (152 and 150 on the 300 and 1000 rows), exact-clip moments and coupled images bit-identical to the fan route at 110, 300 and 1000 cells (max abs diff 0.0), 1000-cell peak temporary 9.0065 to 8.0192 GiB, compile wall unchanged at 848 and 965 s, module 25 passed. Review 93/100 with one substantive finding for a follow-on: the narrower bound refuses any layout above 128 plus the straight chain by returning included 0 with no error, so a case realising a second traced arc is silently excluded rather than reported (the one-arc premise is measured only on the three weak-rotation rows); plus record items: the per-row identity allocations ended in a TypeError and the receipts came from unnamed compare-only reruns, the memory receipts still declare exact_support_capacity 3840 from a stale computation in benchmarks/solovev_certificate.py:3654, the largest-allocation half of the memory measure was skipped, and the named warm-cost driver remains unrun (its arms exit at argparse)</p></div>
 </div>
 </section>
 </main>

@@ -12,10 +12,7 @@ import numpy as np
 
 from nova.biot.greens import MU0
 from nova.equilibrium import fixed_point
-from nova.equilibrium.observation import (
-    CurrentMomentObservation,
-    MomentIntegralSupport,
-)
+from nova.equilibrium.observation import CurrentMomentObservation
 from nova.equilibrium.constraint import (
     BoundedExteriorFieldUnknown,
     CircuitCurrentUnknown,

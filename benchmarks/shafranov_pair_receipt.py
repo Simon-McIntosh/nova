@@ -163,9 +163,10 @@ def _topology(operator, state) -> dict[str, Any]:
         _masks, topology = operator.read(jnp.asarray(state))
     except NoQualifiedAxisError as error:
         return {"read_status": "no_qualified_axis", "exception_text": str(error)}
+    diverted = bool(np.asarray(topology.diverted))
     return {
         "read_status": "qualified",
-        "class": str(topology.topology_class),
+        "class": str(TopologyClass.DIVERTED if diverted else TopologyClass.LIMITED),
         "boundary_rz_m": np.asarray(topology.boundary, dtype=float).tolist(),
         "axis_rz_m": np.asarray(topology.axis, dtype=float).reshape(-1)[:2].tolist(),
         "x_point_rz_m": np.asarray(topology.x_point, dtype=float)
@@ -229,22 +230,18 @@ def _raster(profile, state, units, *, samples: int = RASTER_SAMPLES):
     return radial, height, np.asarray(raster, dtype=float)
 
 
-def _render(profile, *, reference, terminal, units, path: Path, title: str) -> dict:
+def _render(
+    profile, *, reference, terminal, units, path: Path, title: str, note: str
+) -> dict:
     """Draw the reference and terminal states as shared-level line contours."""
     radial, height, reference_field = _raster(profile, reference, units)
-    _, _, terminal_field = _raster(profile, terminal, units)
     levels = poloidal.contour_levels(reference_field, count=12)
     reference_topology = _topology(profile.operator, reference)
-    terminal_topology = _topology(profile.operator, terminal)
     figure, axis = plt.subplots(figsize=(4.8, 4.2), constrained_layout=True)
     poloidal.draw_flux_contours(
         axis, radial, height, reference_field, levels, color="#3366cc"
     )
-    poloidal.draw_flux_contours(
-        axis, radial, height, terminal_field, levels, color="#cc7722"
-    )
-    poloidal.draw_wall(axis, units=units)
-    for topology, style in (
+    drawn = [
         (
             reference_topology,
             DEFAULT_INK.variant(
@@ -253,17 +250,26 @@ def _render(profile, *, reference, terminal, units, path: Path, title: str) -> d
                 axis_marker="^",
                 xpoint_marker="P",
             ),
-        ),
-        (
-            terminal_topology,
-            DEFAULT_INK.variant(
-                axis_color="#cc7722",
-                xpoint_color="#cc7722",
-                axis_marker="^",
-                xpoint_marker="X",
-            ),
-        ),
-    ):
+        )
+    ]
+    if terminal is not None:
+        _, _, terminal_field = _raster(profile, terminal, units)
+        poloidal.draw_flux_contours(
+            axis, radial, height, terminal_field, levels, color="#cc7722"
+        )
+        drawn.append(
+            (
+                _topology(profile.operator, terminal),
+                DEFAULT_INK.variant(
+                    axis_color="#cc7722",
+                    xpoint_color="#cc7722",
+                    axis_marker="^",
+                    xpoint_marker="X",
+                ),
+            )
+        )
+    poloidal.draw_wall(axis, units=units)
+    for topology, style in drawn:
         if topology.get("read_status") != "qualified":
             continue
         poloidal.draw_nulls(
@@ -274,9 +280,7 @@ def _render(profile, *, reference, terminal, units, path: Path, title: str) -> d
             contain=units,
         )
     poloidal_axes(axis)
-    axis.set_title(
-        f"{title}\nreference blue / terminal orange, shared levels", fontsize=8
-    )
+    axis.set_title(f"{title}\n{note}, shared levels", fontsize=8)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
     plt.close(figure)
@@ -336,7 +340,7 @@ def _row_receipt(
         "converged": False,
         "termination": None,
     }
-    terminal = np.asarray(reference_state)
+    terminal = None
     if refusal is None:
         branch = profile.solve_branch(
             jnp.asarray(reference_state),
@@ -380,6 +384,12 @@ def _row_receipt(
         )
     units = _wall_units(profile.operator)
     slug = identity.replace("/", "-")
+    note = (
+        "reference state alone: the row is refused on this profile, so no "
+        "terminal state exists"
+        if refusal is not None
+        else "reference blue / terminal orange"
+    )
     entry["figure"] = _render(
         profile,
         reference=np.asarray(reference_state),
@@ -387,6 +397,7 @@ def _row_receipt(
         units=units,
         path=directory / f"row-{slug}.png",
         title=f"MAST {identity}: beta_p + l_i/2 row",
+        note=note,
     )
     return entry
 

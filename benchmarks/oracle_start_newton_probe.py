@@ -204,7 +204,70 @@ def _norms(delta: np.ndarray, span: float, grid_count: int) -> dict[str, float]:
     }
 
 
-def _topology(operator: Any, state: np.ndarray) -> dict[str, Any]:
+def _gauge_free_span(axis_flux: float, boundary_flux: float) -> float:
+    """Return the axis-to-boundary flux difference of one topology read.
+
+    A flux level carries an arbitrary additive constant, so two levels compare
+    only when they are taken in the same gauge.  The span between the magnetic
+    axis and the boundary cancels that constant, and it is the quantity a
+    cross-gauge comparison is judged on.
+    """
+    return float(axis_flux) - float(boundary_flux)
+
+
+def _analytic_gauge_levels(
+    analytic_level: Callable[[np.ndarray], np.ndarray] | None,
+    axis_point: np.ndarray,
+    boundary_point: np.ndarray,
+    axis_flux: float,
+    boundary_flux: float,
+) -> dict[str, Any]:
+    """Return the authored analytic flux levels at the read's own two points.
+
+    The authored field is evaluated at the magnetic axis and the boundary the
+    solved read selected, so the two spans cover the same pair of points and
+    their difference is gauge-free.  The compensator columns that carry the
+    centroid row are anchored at the magnetic axis instead, so a level compared
+    straight against the authored zero is confounded by an additive constant.
+    """
+    if analytic_level is None:
+        return {}
+    levels = np.asarray(
+        analytic_level(np.vstack((axis_point, boundary_point))), dtype=np.float64
+    )
+    return {
+        "analytic_authored_axis_flux_wb": float(levels[0]),
+        "analytic_authored_boundary_flux_wb": float(levels[1]),
+        "analytic_gauge_free_span_wb": _gauge_free_span(levels[0], levels[1]),
+        "solved_gauge_free_span_wb": _gauge_free_span(axis_flux, boundary_flux),
+        "gauge_free_flux_offset_wb": _gauge_free_span(axis_flux, boundary_flux)
+        - _gauge_free_span(levels[0], levels[1]),
+    }
+
+
+def _analytic_level_reader(
+    case_name: str, exact: Any
+) -> Callable[[np.ndarray], np.ndarray]:
+    """Return the authored total-flux reader for one fixture case.
+
+    The reader evaluates the closed form at arbitrary physical points, which is
+    what lets an authored level be read at a solved read's own magnetic axis
+    and boundary instead of at the fixture's.
+    """
+
+    def read(points: np.ndarray) -> np.ndarray:
+        return certificate._exact_state(
+            case_name, exact, np.asarray(points, dtype=np.float64)
+        )
+
+    return read
+
+
+def _topology(
+    operator: Any,
+    state: np.ndarray,
+    analytic_level: Callable[[np.ndarray], np.ndarray] | None = None,
+) -> dict[str, Any]:
     try:
         _masks, topology = operator.read(jnp.asarray(state))
     except NoQualifiedAxisError as error:
@@ -214,6 +277,7 @@ def _topology(operator: Any, state: np.ndarray) -> dict[str, Any]:
             "boundary_rz_m": None,
             "axis_flux_wb": None,
             "boundary_flux_wb": None,
+            "gauge_free_span_wb": None,
             "x_point_rz_m": None,
             "x_point_flux_wb": None,
             "o_candidate_count": None,
@@ -251,8 +315,10 @@ def _topology(operator: Any, state: np.ndarray) -> dict[str, Any]:
         ),
         "axis_flux_wb": axis_flux,
         "boundary_flux_wb": boundary_flux,
-        "analytic_authored_boundary_flux_wb": 0.0,
-        "boundary_flux_offset_from_analytic_zero_wb": boundary_flux,
+        "gauge_free_span_wb": _gauge_free_span(axis_flux, boundary_flux),
+        **_analytic_gauge_levels(
+            analytic_level, axis, boundary, axis_flux, boundary_flux
+        ),
         "x_point_rz_m": (x_point.tolist() if np.all(np.isfinite(x_point)) else None),
         "x_point_flux_wb": (
             float(topology.x_point_flux)
@@ -1052,10 +1118,22 @@ def _mode_measure_decomposed(
                 "plasma-current moment image; constructed before mode selection"
             ),
             "boundary_basis": (
-                "the authored analytic total field with its zero-level boundary; "
-                "the production topology read and wall-contact level are not inputs"
+                "the authored analytic total field read through this operator; the "
+                "topology read and wall-contact level of a solved state are not inputs"
             ),
-            "analytic_authored_boundary_flux_wb": 0.0,
+            "authored_zero_level_basis": (
+                "the analytic state read through this operator, which reproduces the "
+                "authored total field rather than a solved state; a flux level carries "
+                "an additive constant, so these levels compare against another read "
+                "only through the axis-to-boundary span, which is gauge-free"
+            ),
+            "analytic_authored_axis_flux_wb": topology.get(
+                "analytic_authored_axis_flux_wb", topology["axis_flux_wb"]
+            ),
+            "analytic_authored_boundary_flux_wb": topology.get(
+                "analytic_authored_boundary_flux_wb", topology["boundary_flux_wb"]
+            ),
+            "analytic_authored_gauge_free_span_wb": topology["gauge_free_span_wb"],
             "sha256_binary64": _array_digest(external),
             "source_pointers": {
                 "construction": _pointer(
@@ -1673,8 +1751,9 @@ def _terminal_measurement(
     pitch: float,
     requested_class: int | None,
     target_current: float,
+    analytic_level: Callable[[np.ndarray], np.ndarray] | None = None,
 ) -> dict[str, Any]:
-    topology = _topology(operator, state)
+    topology = _topology(operator, state, analytic_level)
     axis_read_error = _point_error(
         topology.get("axis_rz_m"), analytic_read.get("axis_rz_m")
     )
@@ -2008,6 +2087,7 @@ def _measure_newton_row(
             pitch,
             None,
             built["target_current"],
+            _analytic_level_reader(case_name, built["exact"]),
         )
         initial_distance = _norms(initial - analytic, built["span"], grid_count)
         terminal_distance = terminal_measurement["distance_to_analytic"]

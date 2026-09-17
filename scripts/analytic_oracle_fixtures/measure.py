@@ -715,6 +715,85 @@ def uniform_exterior_field_response(
     return np.column_stack((vertical, radial))
 
 
+def uniform_exterior_field_flux(
+    case: RotatingEquilibrium,
+    coordinates: np.ndarray,
+    field_t: np.ndarray,
+) -> np.ndarray:
+    """Return the total-flux a uniform exterior field contributes, weber.
+
+    ``field_t`` is the ``(vertical, radial)`` amplitude pair in tesla, ordered
+    as the columns of :func:`uniform_exterior_field_response`.  The vertical
+    column carries an additive constant chosen at the magnetic axis, so the
+    field's own contribution to the axis level is zero there; the reference
+    radius is read back from the case rather than assumed, so a fixture change
+    cannot silently move the anchor.
+    """
+    points = np.atleast_2d(np.asarray(coordinates, dtype=np.float64))
+    field = np.asarray(field_t, dtype=np.float64)
+    reference_radius = float(np.asarray(case.magnetic_axis, dtype=np.float64)[0])
+    radius = points[:, 0]
+    height = points[:, 1]
+    return field[0] * np.pi * (radius**2 - reference_radius**2) - (
+        2.0 * np.pi * field[1] * radius * height
+    )
+
+
+def gauge_free_flux_read(
+    case: RotatingEquilibrium,
+    axis_point: np.ndarray,
+    boundary_point: np.ndarray,
+    axis_flux_wb: float,
+    boundary_flux_wb: float,
+    field_t: np.ndarray,
+) -> dict[str, float]:
+    """Re-read a solved flux level as a gauge-free span difference.
+
+    The fixture poses the exterior as the authored total field minus the plasma
+    image, so a solved state and the authored analytic field share one gauge --
+    the analytic zero level sits on the analytic separatrix -- but the
+    compensator columns that carry the centroid row are anchored elsewhere, at
+    the magnetic axis, and their additive constant therefore separates the two
+    readings.  Reading a converged boundary level straight against the authored
+    zero compares an axis-anchored column against a boundary-anchored zero.
+
+    The span between the magnetic axis and the boundary is invariant under any
+    additive constant in the flux, so it is the quantity the fixed-point clause
+    can be judged on.  The compensator's own contribution to that span is
+    returned beside the difference, so the part of an offset that is actuation
+    is separated from the part that is the equilibrium.
+    """
+    points = np.vstack((axis_point, boundary_point))
+    analytic = np.asarray(exact_state(case, points), dtype=np.float64)
+    compensator = uniform_exterior_field_flux(case, points, field_t)
+    solved_span = float(axis_flux_wb) - float(boundary_flux_wb)
+    analytic_span = float(analytic[0]) - float(analytic[1])
+    compensator_span = float(compensator[0]) - float(compensator[1])
+    offset = solved_span - analytic_span
+    span = abs(analytic_span)
+    reference_radius = float(np.asarray(case.magnetic_axis, dtype=np.float64)[0])
+    contact_radius = float(np.atleast_1d(boundary_point)[0])
+    return {
+        "reference_radius_m": reference_radius,
+        "contact_radius_m": contact_radius,
+        "solved_axis_flux_wb": float(axis_flux_wb),
+        "solved_boundary_flux_wb": float(boundary_flux_wb),
+        "solved_span_wb": solved_span,
+        "analytic_axis_flux_wb": float(analytic[0]),
+        "analytic_boundary_flux_wb": float(analytic[1]),
+        "analytic_span_wb": analytic_span,
+        "gauge_free_flux_offset_wb": offset,
+        "gauge_free_flux_offset_of_span": offset / span,
+        "compensator_flux_at_axis_wb": float(compensator[0]),
+        "compensator_flux_at_boundary_wb": float(compensator[1]),
+        "compensator_flux_at_contact_radius_wb": float(
+            field_t[0] * np.pi * (contact_radius**2 - reference_radius**2)
+        ),
+        "compensator_span_contribution_wb": compensator_span,
+        "gauge_free_flux_offset_less_compensator_wb": offset - compensator_span,
+    }
+
+
 def forward_operator(
     case: RotatingEquilibrium,
     machine: OracleMachine,

@@ -52,6 +52,12 @@ DEFAULT_OUTPUT_ROOT = Path(
 DEFAULT_FIGURE = ROOT / (
     "docs/figures/centroid-constrained-oracle-solve/weak-displaced-control.png"
 )
+DEFAULT_SOURCE_ROOT = DEFAULT_OUTPUT_ROOT
+DEFAULT_GAUGE_ROOT = Path(
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-gauge"
+)
+# A converged boundary level must sit inside a thousandth of the analytic span.
+LEVEL_TOLERANCE_OF_SPAN = 1.0e-3
 ROWS = (("weak-rotation-reactor-static", -110),)
 DISPLACEMENT_M = np.asarray((0.020, 0.0), dtype=np.float64)
 
@@ -869,6 +875,108 @@ def measure(output_root: Path, figure_path: Path) -> dict[str, Any]:
     return report
 
 
+def reread_gauge_readings(
+    source_root: Path = DEFAULT_SOURCE_ROOT,
+    output_root: Path = DEFAULT_GAUGE_ROOT,
+) -> dict[str, Any]:
+    """Re-read a banked control's flux offset as a gauge-free span difference.
+
+    No solve runs and no field is recomputed: the banked receipt already
+    carries the axis and boundary points, the level at each, and the
+    compensating field, and the fixture's closed form supplies the authored
+    levels those two points should carry.  The comparison the row's fixed-point
+    clause is judged on is then the span between the magnetic axis and the
+    boundary on both sides, which no additive constant in the flux can move.
+
+    The compensator's own contribution to the span is tabled beside the
+    difference, so the part of an offset that is the actuator's own field is
+    separated from the part that is the equilibrium the row reached.
+    """
+    output_root.mkdir(parents=True, exist_ok=True)
+    arms: list[dict[str, Any]] = []
+    for arm in ("positive", "negative"):
+        path = source_root / f"control-{arm}.json"
+        if not path.exists():
+            raise FileNotFoundError(f"banked control receipt absent: {path}")
+        stored = json.loads(path.read_text())
+        case_name = str(stored["case"])
+        topology = stored["solve"]["topology"]
+        field = np.asarray(stored["solve"]["compensating_field_t"], dtype=np.float64)
+        if field.shape != (2,) or not np.all(np.isfinite(field)):
+            field = np.zeros(2, dtype=np.float64)
+        _carrier, _source, exact = certificate._case(case_name)
+        reading = oracle_fixture.gauge_free_flux_read(
+            exact,
+            np.asarray(topology["axis_rz_m"], dtype=np.float64),
+            np.asarray(topology["boundary_rz_m"], dtype=np.float64),
+            float(topology["axis_flux_wb"]),
+            float(topology["boundary_flux_wb"]),
+            field,
+        )
+        row_residual = float(stored["solve"]["row_scaled_residual_sup"])
+        constrained = bool(stored["solve"]["constrained"])
+        row_clause = row_residual <= oracle_probe.FIXED_POINT_TOLERANCE
+        level_clause = (
+            abs(reading["gauge_free_flux_offset_of_span"]) <= LEVEL_TOLERANCE_OF_SPAN
+        )
+        if not constrained:
+            verdict = "not_applicable"
+        elif row_clause and level_clause:
+            verdict = "holds"
+        else:
+            verdict = "fails"
+        arms.append(
+            {
+                "arm": arm,
+                "case": case_name,
+                "constrained": constrained,
+                "source_receipt": str(path),
+                "source_revision": stored.get("source_revision"),
+                "row_scaled_residual_sup": row_residual,
+                "fixed_point_clause_at_or_below_1e-12": row_clause,
+                "level_clause_within_1e-3_of_span": level_clause,
+                "fixed_point_verdict": verdict,
+                "compensating_field_t": field.tolist(),
+                **reading,
+            }
+        )
+    report = {
+        "schema": "nova.centroid-gauge-free-offset",
+        "source_root": str(source_root),
+        "level_tolerance_of_span": LEVEL_TOLERANCE_OF_SPAN,
+        "row_tolerance": oracle_probe.FIXED_POINT_TOLERANCE,
+        "gauge": (
+            "solved and analytic flux levels are compared only as the span "
+            "between the magnetic axis and the boundary; the compensator "
+            "columns are anchored at the magnetic axis, so a level read against "
+            "the authored zero is confounded by an additive constant"
+        ),
+        "arms": arms,
+    }
+    _write_json(output_root / "gauge-reread.json", report)
+    (output_root / "gauge-reread.md").write_text(_gauge_markdown(report))
+    return report
+
+
+def _gauge_markdown(report: dict[str, Any]) -> str:
+    lines = [
+        "| arm | gauge-free offset (Wb) | offset / span | compensator span (Wb) | "
+        "offset less compensator (Wb) | compensator at contact R (Wb) | "
+        "row residual | verdict |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for arm in report["arms"]:
+        lines.append(
+            "| {arm} | {gauge_free_flux_offset_wb:+.9e} | "
+            "{gauge_free_flux_offset_of_span:+.9e} | "
+            "{compensator_span_contribution_wb:+.9e} | "
+            "{gauge_free_flux_offset_less_compensator_wb:+.9e} | "
+            "{compensator_flux_at_contact_radius_wb:+.9e} | "
+            "{row_scaled_residual_sup:+.9e} | {fixed_point_verdict} |".format(**arm)
+        )
+    return "\n".join(lines) + "\n"
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
@@ -877,6 +985,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--first-step", action="store_true")
     parser.add_argument("--control-arm", choices=("positive", "negative"))
     parser.add_argument("--merge-controls", action="store_true")
+    parser.add_argument("--reread-gauge", action="store_true")
+    parser.add_argument(
+        "--source-root",
+        type=Path,
+        default=DEFAULT_SOURCE_ROOT,
+        help="root holding the banked control receipts the re-read consumes",
+    )
     return parser.parse_args()
 
 
@@ -906,6 +1021,23 @@ def main() -> None:
             f"cap_binds={bool(receipt['first_step_cap_binds'])}",
             flush=True,
         )
+        return
+    if arguments.reread_gauge:
+        report = reread_gauge_readings(
+            arguments.source_root,
+            arguments.output_root,
+        )
+        for arm in report["arms"]:
+            print(
+                "CENTROID_GAUGE_REREAD "
+                f"arm={arm['arm']} "
+                f"gauge_free_offset_wb={arm['gauge_free_flux_offset_wb']:+.9e} "
+                f"of_span={arm['gauge_free_flux_offset_of_span']:+.9e} "
+                f"compensator_span_wb={arm['compensator_span_contribution_wb']:+.9e} "
+                f"row_scaled_residual_sup={arm['row_scaled_residual_sup']:+.9e} "
+                f"verdict={arm['fixed_point_verdict']}",
+                flush=True,
+            )
         return
     if arguments.merge_controls:
         report = merge_controls(arguments.output_root)

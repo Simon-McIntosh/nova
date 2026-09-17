@@ -86,10 +86,21 @@ add a hundred packages the environment never carried.
 
   ```bash
   srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=64G \
-    bash -lc 'export TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=<worktree>; \
+    bash -lc 'export TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=<worktree>:<worktree>/scripts/h200_test_lane; \
+      export HOME=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/home; \
       /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest \
-        -p no:cacheprovider <targets>' > <log> 2>&1; echo EXIT=$?
+        -p no:cacheprovider -p cache_guard <targets>' > <log> 2>&1; echo EXIT=$?
   ```
+
+  `HOME` selects the pinned pre-warm cache: the drivers resolve their cache
+  through `HOME/.cache`, so pointing `HOME` at the pinned root serves the
+  programs the merge-time pre-warm compiled there — the location is
+  `/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm`, shared storage
+  outside every pruner root, distinct from `~/.cache/nova/jax-compilation`. The
+  `cache_guard` plugin prints the directory served, one row per program with its
+  compile seconds and hit or miss outcome, and a marker; a run whose misses
+  exceed `NOVA_CACHE_MISS_BUDGET` (default 0) prints WALL-CLOCK-UNRELIABLE and
+  exits nonzero, so a timing comparison is not reported off a compile.
 
   `PYTHONPATH` is what makes the worktree's code shadow the editable install,
   which is the job `--directory` would otherwise do. The `uv run --no-sync`
@@ -373,7 +384,13 @@ scripts/h200_test_lane/run.sh \
 
 The launcher submits to `betelgeuse` under `gpu_0003_grpA`, runs pytest from
 the repository's shared environment without invoking uv on the compute node,
-and appends both the pytest wall time and exit status to the named log. Preserve
+and appends both the pytest wall time and exit status to the named log. It serves
+the pinned pre-warm cache published by `scripts/h200_test_lane/prewarm.sh` under
+`/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm`, prints the cache
+contract and one row per program with its compile seconds and hit or miss
+outcome, samples GPU utilisation at 10, 30 and 60 seconds from allocation, and
+prints WALL-CLOCK-UNRELIABLE with a nonzero exit when a run misses the cache
+more often than `NOVA_CACHE_MISS_BUDGET` allows. Preserve
 GPU failures from CPU-specific identity assertions as device-qualified evidence;
 do not weaken those CPU contracts to make the H200 lane green.
 

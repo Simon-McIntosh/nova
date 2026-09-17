@@ -65,6 +65,10 @@ FORBIDDEN_IMPORT_PREFIXES = ("h5py", "imas")
 FORBIDDEN_PATH_FRAGMENTS = (".geqdsk", ".npz", "/archive/", "stored_reference")
 EXTERIOR_CURRENT_PERTURBATION = 1.0e-4
 EXTERIOR_FIELD_COMPONENTS = ("vertical", "radial")
+# The compensating family of a coil-less fixture: the two solenoidal field
+# columns and the level column beside them, which carries no field at all.
+EXTERIOR_LEVEL_COMPONENT = "level"
+EXTERIOR_COMPENSATION_COLUMNS = (*EXTERIOR_FIELD_COMPONENTS, EXTERIOR_LEVEL_COMPONENT)
 ROUNDTRIP_COMPOSITION_FRACTIONS = {
     "23x35": 1.320394289e-2,
     "37x57": 3.819717157e-3,
@@ -713,6 +717,30 @@ def uniform_exterior_field_response(
     vertical = np.pi * (radius**2 - reference_radius**2)
     radial = -2.0 * np.pi * radius * height
     return np.column_stack((vertical, radial))
+
+
+def uniform_exterior_compensation_response(
+    case: RotatingEquilibrium, machine: OracleMachine
+) -> np.ndarray:
+    """Return the compensating family: the two field columns and the level column.
+
+    The level column is a uniform flux offset -- a constant added identically at
+    every target -- beside the vertical and radial columns of
+    :func:`uniform_exterior_field_response`.  A constant added to the poloidal
+    flux carries no field, so the level column moves the flux level and nothing
+    else; it is the gauge freedom of a fixture whose exterior is posed from the
+    authored total field.
+    """
+    return np.column_stack(
+        (
+            uniform_exterior_field_response(case, machine),
+            np.ones(
+                len(machine.node)
+                + len(machine.wall_node)
+                + len(machine.sample_coordinates)
+            ),
+        )
+    )
 
 
 def uniform_exterior_field_flux(

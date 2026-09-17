@@ -447,6 +447,16 @@ def _require_within_bound_if_concrete(value: object, bound: object, name: str) -
         raise ValueError(f"{name} exceeds its declared finite bound")
 
 
+def _require_positive_or_unbounded_if_concrete(value: object, name: str) -> None:
+    """Require positive finite limits, or an unbounded one, without forcing a trace."""
+    try:
+        concrete = np.asarray(value)
+    except TypeError, jax.errors.TracerArrayConversionError:
+        return
+    if np.any(concrete <= 0.0) or np.any(np.isnan(concrete)):
+        raise ValueError(f"{name} must be positive and not NaN")
+
+
 def compensator_step(
     unknown: CompensatingUnknown, normalized: jax.Array, row_residual: jax.Array
 ) -> tuple[jax.Array, jax.Array]:
@@ -481,8 +491,15 @@ class BoundedExteriorFieldUnknown:
 
     ``direction`` selects one column-vector direction per constraint row from
     the operator's prescribed exterior-field response.  ``field_scale`` maps
-    the dimensionless Newton unknown to tesla and ``field_bound`` gives the
-    largest admitted magnitude in tesla.
+    the dimensionless Newton unknown to the physical unit of that response
+    column and ``field_bound`` gives the largest admitted magnitude there.
+
+    A component declared with an unbounded limit carries a unit the field bound
+    has nothing to say about.  The level column of a coil-less fixture is that
+    case: its amplitude is a uniform flux offset in weber, added identically
+    everywhere, so it carries no poloidal field and cannot move the plasma.  It
+    is reported beside the field amplitudes and never refused by the field
+    bound, which :meth:`field_bound_applies` states per component.
 
     The bound is imposed by damped step control, never by saturating
     :meth:`physical_value`: a value clipped at its bound reaches zero tangent
@@ -525,8 +542,18 @@ class BoundedExteriorFieldUnknown:
         object.__setattr__(self, "field_scale", scale)
         object.__setattr__(self, "field_bound", bound)
         _require_positive_if_concrete(scale, "exterior-field scale")
-        _require_positive_if_concrete(bound, "exterior-field bound")
+        _require_positive_or_unbounded_if_concrete(bound, "exterior-field bound")
         _require_positive_if_concrete(limit, "exterior-field step limit")
+
+    @property
+    def field_bound_applies(self) -> jax.Array:
+        """Return whether each amplitude is subject to the declared field bound.
+
+        An amplitude whose limit is unbounded is reported beside the field
+        amplitudes and never refused: a uniform flux offset in weber adds no
+        poloidal field, so the tesla bound says nothing about it.
+        """
+        return jnp.isfinite(jnp.asarray(self.field_bound))
 
     @property
     def row_count(self) -> int:
@@ -962,6 +989,72 @@ class CurrentCentroidConstraint:
             lambda flux: self.observed(profile, context._replace(flux=flux), payload)
         )(context.flux)
         return jnp.moveaxis(jacobian, 0, -1)
+
+
+@dataclass(frozen=True)
+class FluxLevelConstraint:
+    """One absolute flux-level row at each declared point.
+
+    The row reads the total flux the map interpolates at a fixed ``(R, Z)``
+    point, so it vanishes exactly where the map carries the commanded level
+    there.  A uniform flux offset -- a constant added identically everywhere,
+    which carries no poloidal field and therefore no force -- has unit
+    leverage on this row.  On a coil-less fixture whose exterior carries no
+    source, that offset is the only term that can move the level with the
+    position pinned, while the solenoidal field columns contribute nothing at
+    a point on their own anchor; together they are what makes the authored
+    fixed point reachable.
+
+    The points arrive as the binding payload with shape ``(point_count, 2)``
+    in ``(R, Z)``, so moving a point is a new payload rather than a new
+    compiled program.
+    """
+
+    point_count: int
+
+    def __post_init__(self) -> None:
+        if int(self.point_count) < 1:
+            raise ValueError("a flux-level row set needs at least one point")
+        object.__setattr__(self, "point_count", int(self.point_count))
+
+    @property
+    def row_count(self) -> int:
+        return self.point_count
+
+    def observed(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        supplied = jnp.reshape(jnp.asarray(payload, dtype=jnp.float64), (-1, 2))
+        if supplied.shape[0] < self.point_count:
+            raise ValueError("a flux-level row needs one (R, Z) point per row")
+        points = supplied[: self.point_count]
+        grid = _lattice_grid(profile, context.flux)
+        return jax.vmap(
+            lambda point: sample_lattice_flux(profile.lattice, grid, point)
+        )(points)
+
+    def residual(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        unknown: jax.Array,
+        payload: object,
+        target: jax.Array,
+        scale: jax.Array,
+    ) -> jax.Array:
+        del unknown
+        return (self.observed(profile, context, payload) - target) / scale
+
+    def dual_flux_image(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        return _flux_jacobian_image(self, profile, context, payload)
 
 
 class WallGapTarget(NamedTuple):

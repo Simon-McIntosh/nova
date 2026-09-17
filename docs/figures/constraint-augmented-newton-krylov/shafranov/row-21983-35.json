@@ -1,0 +1,25 @@
+{
+  "identity": "21983/35",
+  "status": "refused",
+  "refusal_reason": "the source core's p_prime is function, not a PolynomialFluxFunction, so the profile amplitude is not a free unknown of this solve",
+  "target_combination": 0.503487063654674,
+  "minor_radius_m": 0.5933911800384521,
+  "plasma_current_a": 813718.375,
+  "target_source": "poloidal_beta + internal_inductance/2 from ForwardProfile.integral_observation on the stored reference state",
+  "observed_combination_at_reference": 0.347670634622093,
+  "reference_combination_gap": -0.15581642903258097,
+  "target_error": null,
+  "achieved_combination": null,
+  "compensating_amplitude_fraction": null,
+  "terminal_profile_combination": 0.503487063654674,
+  "outer_steps": 0,
+  "terminal_residual": null,
+  "topology_consistent": null,
+  "converged": false,
+  "termination": null,
+  "figure": {
+    "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-pair/docs/figures/constraint-augmented-newton-krylov/shafranov/row-21983-35.png",
+    "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21983-35.png",
+    "sha256": "498c3c5c2f869e779785f284d9bc48397ecc438bf2101519d8ba9d5e0b6ff943"
+  }
+}

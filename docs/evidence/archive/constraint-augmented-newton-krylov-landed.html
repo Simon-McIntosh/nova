@@ -349,6 +349,68 @@
     exclusive scope does not include either implementation path. Reproduction and option analysis are recorded under
     <code>~/.config/reckon/crew/reports/nova/s19-handoff/shafranov/</code>.</p>
   </section>
+  <section id="shafranov-pair">
+    <h2>Shafranov pair: the row, and the bank's structural refusal</h2>
+    <p><strong>Node:</strong> <code>cank-shafranov-pair</code>, run <code>r-20260917T094707958056</code>. Deliverable D of &sect;4: a
+    &beta;<sub>p</sub> + l<sub>i</sub>/2 constraint row on the external magnetics, with the profile amplitude as its compensating unknown,
+    registered through the same protocol as the centroid row and measured against the combination the bank's extracted profiles imply.</p>
+    <p><strong>The row.</strong> <code>ExternalShafranovConstraint</code> in <code>nova/equilibrium/constraint.py</code> inverts the
+    large-aspect-ratio vertical-field identity for &beta;<sub>p</sub> + l<sub>i</sub>/2 at the plasma's current centroid and forms its
+    tangent from the derivative the source term already carries, so the row's compensating column is the amplitude response rather than a
+    finite difference. Its compensator is <code>ProfileAmplitudeUnknown</code>, which moves the state through
+    <code>PolynomialFluxFunction.normalisation</code>, the scalar the profile already carries.</p>
+    <p><strong>CPU contract.</strong> <code>tests/test_equilibrium_constraint_protocol.py</code> carries a synthetic target in which the row
+    converges to the imposed profile amplitude to within 4 ulp, and a negative control in which an unreachable target terminates with the
+    documented refusal. Both run in one fresh <code>all_debug</code> CPU process: <strong>2 failed, 9 passed</strong> against a pristine base
+    of <strong>2 failed, 6 passed</strong>. The two failures are the same ids at both revisions
+    (<code>test_eliminated_constraint_runs_through_typed_solve_with_outer_trace</code> and
+    <code>test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows</code>, both
+    <code>AttributeError: '_LinearOperator' object has no attribute 'program_identity'</code> at
+    <code>nova/equilibrium/forward.py:2589</code>), so the added failures are <strong>zero</strong>.</p>
+    <p><strong>Bank measurement.</strong> One H200 job (betelgeuse 1272973, <code>gpu_0003_grpA</code>, one card, 8 CPUs, 128G,
+    <code>TMPDIR=/tmp</code> in both environments, the root virtual environment's interpreter running this worktree through
+    <code>PYTHONPATH</code>, the versioned persistent compilation cache enabled, exit 0 in 145 s). The
+    <code>settled</code> decomposition bank qualifies <strong>six</strong> rows, not twelve, across six shots:
+    (21978,35), (21983,35), (21985,51), (21986,46), (21989,55) and (22086,43). The driver discovers that set from the bank rather than
+    asserting a count. Each row's target is the combination its own extracted profiles imply through
+    <code>ForwardProfile.integral_observation</code> (<code>poloidal_beta</code> and <code>internal_inductance</code>) on the stored
+    reference state and plasma current; the observed side is the same functional the row itself reads.</p>
+    <table>
+      <thead>
+        <tr><th>Row</th><th>a [m]</th><th>I<sub>p</sub> [MA]</th><th>profiles imply</th><th>external magnetics imply</th><th>gap</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>21978/35</td><td>0.5847</td><td>0.8015</td><td>0.4613</td><td>0.3126</td><td>&minus;0.1487</td></tr>
+        <tr><td>21983/35</td><td>0.5934</td><td>0.8137</td><td>0.5035</td><td>0.3477</td><td>&minus;0.1558</td></tr>
+        <tr><td>21985/51</td><td>0.5763</td><td>0.9344</td><td>0.6061</td><td>0.4797</td><td>&minus;0.1264</td></tr>
+        <tr><td>21986/46</td><td>0.5607</td><td>0.8743</td><td>0.4437</td><td>0.3224</td><td>&minus;0.1213</td></tr>
+        <tr><td>21989/55</td><td>0.5735</td><td>0.9289</td><td>0.6251</td><td>0.4913</td><td>&minus;0.1338</td></tr>
+        <tr><td>22086/43</td><td>0.5774</td><td>0.9330</td><td>0.4924</td><td>0.3262</td><td>&minus;0.1662</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Every row refuses the row, and for one structural reason.</strong> The bank rows extract their profiles as a
+    <code>DomainProfile</code> whose <code>p_prime</code> and <code>ff_prime</code> are plain callables, not
+    <code>PolynomialFluxFunction</code> coefficients. The compensator moves the state through that polynomial's scalar normalisation, so on
+    these rows the profile amplitude is <em>not a free unknown of the solve</em>, and the driver refuses rather than fitting the row away.
+    The compensating amplitude, outer step count, terminal residual and converged flag are therefore absent, not zero, on all six rows; the
+    receipt records <code>status: refused</code> with the refusal text beside them. The recorded gap is the number the row exists to close:
+    across the six rows the external magnetics imply a &beta;<sub>p</sub> + l<sub>i</sub>/2 between <strong>0.121 and 0.166 lower</strong>
+    than the extracted profiles carry.</p>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov/row-21978-35.png"
+           alt="MAST poloidal panel of the 21978 row 35 reference flux, line contours on shared levels with its magnetic axis and X-points, and the wall">
+      <figcaption>MAST 21978/35, the reference state alone: the row is refused on this profile, so no terminal state exists and the panel
+      draws none rather than passing the reference state back as its own terminal. Line contours on one physical level array, the wall from
+      the operator's own typed units, and the reference state's magnetic axis and admitted X-point drawn in the ink vocabulary. One such
+      panel is committed per row under <code>docs/figures/constraint-augmented-newton-krylov/shafranov/</code>, each beside its own
+      <code>row-&lt;shot&gt;-&lt;index&gt;.json</code> receipt.</figcaption>
+    </figure>
+    <p><strong>Decision:</strong> the row is delivered and behaves as specified — it converges to the imposed amplitude on a profile whose
+    gradient is a polynomial, and it refuses, with the reason recorded, where the amplitude is not a free unknown. What the bank measurement
+    establishes is the precondition for the measurement deliverable D asks for: the current bank rows cannot be measured with this row at
+    all, because their extracted source carries arbitrary callables. Closing the gap needs the extracted profiles to be represented with a
+    traced gradient amplitude, or a compensator that is a free unknown on a callable source.</p>
+  </section>
 </main>
 </body>
 </html>

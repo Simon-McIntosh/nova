@@ -4,8 +4,10 @@ JAX reports persistent-cache writes as a monitoring event and reports nothing
 for the corresponding reads, so a lane log cannot tell a run that reused a
 pre-warmed executable from one that paid the compile again. This module wraps
 and records the cache lookup and write, prints a header stating the directory
-the lane serves and the miss budget, and prints one row per program. A run whose
-miss count exceeds the budget prints WALL-CLOCK-UNRELIABLE and fails.
+the lane serves and the miss budget, and prints one row per program. A lane run
+whose miss count exceeds the budget prints WALL-CLOCK-UNRELIABLE and fails; a run
+that declares itself a pre-warm prints the same rows with no budget enforced,
+because compiling those programs is the work it is there to do.
 """
 
 from __future__ import annotations
@@ -20,12 +22,14 @@ from typing import Any
 
 __all__ = [
     "WALL_CLOCK_UNRELIABLE",
+    "PREWARM_RUN_MARKER",
     "DEFAULT_MISS_BUDGET",
     "PINNED_CACHE_ROOT",
     "CacheLedger",
     "install",
     "ledger",
     "miss_budget",
+    "prewarm_run",
     "pin_reference",
     "pinned_cache_directory",
     "verify_pinned_directory",
@@ -35,8 +39,10 @@ __all__ = [
 ]
 
 WALL_CLOCK_UNRELIABLE = "WALL-CLOCK-UNRELIABLE"
+PREWARM_RUN_MARKER = "pre-warm-run"
 DEFAULT_MISS_BUDGET = 0
 MISS_BUDGET_VARIABLE = "NOVA_CACHE_MISS_BUDGET"
+PREWARM_RUN_VARIABLE = "NOVA_CACHE_PREWARM_RUN"
 REFUSE_TIMING_VARIABLE = "NOVA_CACHE_GUARD_REFUSE_TIMING"
 PREWARM_PIN_FILENAME = "prewarm-latest.json"
 
@@ -44,16 +50,32 @@ PREWARM_PIN_FILENAME = "prewarm-latest.json"
 # The pinned pre-warm directory lives on shared storage the compute nodes reach
 # and outside every pruner root: it is not under $HOME/.cache and not inside a
 # worktree, so a pre-warm survives until the next merge-time pre-warm replaces
-# it.  Override with NOVA_PREWARM_CACHE_ROOT.
+# it.  The root is named by the same variable the drivers resolve through, so
+# the pin document and the served directory cannot disagree.
 PINNED_CACHE_ROOT = Path(
     os.environ.get(
-        "NOVA_PREWARM_CACHE_ROOT",
+        "NOVA_COMPILATION_CACHE_ROOT",
         "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
     )
 )
 
 
-def miss_budget() -> int:
+def prewarm_run() -> bool:
+    """Report whether this process populates the cache rather than reading it.
+
+    A pre-warm exists to fill the cache, so its misses are the deliverable and
+    its own budget is not enforceable; a lane run reads a cache that a pre-warm
+    already compiled, so there a miss means the measurement is not the one it
+    reports and the run fails.
+    """
+    declared = os.environ.get(PREWARM_RUN_VARIABLE, "").strip().lower()
+    return declared not in {"", "0", "false", "no"}
+
+
+def miss_budget() -> int | None:
+    """Return the enforced miss budget, or None where none is enforceable."""
+    if prewarm_run():
+        return None
     return int(os.environ.get(MISS_BUDGET_VARIABLE, DEFAULT_MISS_BUDGET))
 
 
@@ -212,7 +234,12 @@ def emit_header(cache_directory: Path | str, version_key: str = "") -> None:
     print("CACHE_GUARD_ROOT=%s" % PINNED_CACHE_ROOT, flush=True)
     print("CACHE_GUARD_SERVED=%s" % cache_directory, flush=True)
     print("CACHE_GUARD_VERSION_KEY=%s" % version_key, flush=True)
-    print("CACHE_GUARD_MISS_BUDGET=%d" % miss_budget(), flush=True)
+    budget = miss_budget()
+    print(
+        "CACHE_GUARD_MISS_BUDGET=%s"
+        % ("not-enforced" if budget is None else budget),
+        flush=True,
+    )
     print(
         "CACHE_GUARD_PREWARM=%s"
         % (json.dumps(reference, sort_keys=True) if reference else "none"),
@@ -229,12 +256,16 @@ def emit_receipt(version_key: str = "", revision: str = "unknown") -> dict[str, 
         "version_key": version_key,
         "source_revision": revision,
         "miss_budget": budget,
+        "enforced": budget is not None,
         "hits": _LEDGER.hit_count(),
         "misses": misses,
-        "compile_seconds": round(_LEDGER.compile_seconds(), 3),
+        "marker": "",
         "rows": _LEDGER.rows(),
     }
-    if misses > budget:
+    receipt["compile_seconds"] = round(_LEDGER.compile_seconds(), 3)
+    if budget is None:
+        marker = "%s misses=%d budget=not-enforced" % (PREWARM_RUN_MARKER, misses)
+    elif misses > budget:
         marker = "%s misses=%d budget=%d" % (WALL_CLOCK_UNRELIABLE, misses, budget)
     else:
         marker = "wall-clock-reliable misses=%d budget=%d" % (misses, budget)
@@ -256,6 +287,8 @@ def pytest_sessionfinish(session, **_kwargs):
         version_key=os.environ.get("NOVA_PREWARM_VERSION_KEY", ""),
         revision=os.environ.get("H200_LANE_EXPECTED_REVISION", "unknown"),
     )
+    if not receipt["enforced"]:
+        return
     refuse = os.environ.get(REFUSE_TIMING_VARIABLE, "1") not in {"0", "false", "no"}
     if receipt["misses"] > receipt["miss_budget"] and refuse:
         session.exitstatus = 1

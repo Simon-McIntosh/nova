@@ -26,7 +26,7 @@ run_payload() {
   readonly actual_revision="$(git -C "${repository_root}" rev-parse HEAD)"
 
   export TMPDIR=/tmp
-  export HOME="${NOVA_PREWARM_CACHE_ROOT:-${DEFAULT_PINNED_ROOT}}/home"
+  export NOVA_COMPILATION_CACHE_ROOT="${NOVA_COMPILATION_CACHE_ROOT:-${DEFAULT_PINNED_ROOT}}"
   export PYTHONPATH="${repository_root}:${LANE_DIRECTORY}"
   export JAX_PLATFORMS=cuda,cpu
   export JAX_ENABLE_COMPILATION_CACHE=1
@@ -44,10 +44,18 @@ run_payload() {
   printf 'JAX_PLATFORMS=%s\n' "${JAX_PLATFORMS}"
   printf 'JAX_COMPILATION_CACHE_DIR=%s\n' "${JAX_COMPILATION_CACHE_DIR}"
   printf 'TMPDIR=%s\n' "${TMPDIR}"
-  printf 'HOME=%s\n' "${HOME}"
+  printf 'CACHE_ROOT=%s\n' "${NOVA_COMPILATION_CACHE_ROOT}"
   printf 'PINNED_CACHE_DIRECTORY=%s\n' "${JAX_COMPILATION_CACHE_DIR}"
   printf 'CACHE_MISS_BUDGET=%s\n' "${NOVA_CACHE_MISS_BUDGET:-0}"
   "${PYTHON}" -c 'import cache_guard; cache_guard.emit_header(cache_guard.pinned_cache_directory())'
+  local pinned_revision
+  pinned_revision="$("${PYTHON}" -c 'import cache_guard; reference = cache_guard.pin_reference() or {}; print(reference.get("source_revision", "none"))')"
+  printf 'PINNED_REVISION=%s\n' "${pinned_revision}"
+  if [[ "${pinned_revision}" != "${actual_revision}" ]]; then
+    printf 'PINNED_REVISION_MISMATCH pinned=%s serving=%s\n' \
+      "${pinned_revision}" "${actual_revision}"
+    printf 'the served directory was compiled for another revision, so a miss is a pin problem rather than a timing result\n'
+  fi
   printf 'PYTEST_COMMAND='
   printf '%q ' "${PYTHON}" -m pytest -p no:cacheprovider -p cache_guard "$@"
   printf '\n'
@@ -160,7 +168,7 @@ if [[ "${dry_run}" == true ]]; then
   printf 'SOURCE_REVISION=%s\n' "${source_revision}"
   printf 'LOG_PATH=%s\n' "${resolved_log}"
   printf 'JAX_PLATFORMS=cuda,cpu\n'
-  printf 'PINNED_CACHE_ROOT=%s\n' "${NOVA_PREWARM_CACHE_ROOT:-${DEFAULT_PINNED_ROOT}}"
+  printf 'PINNED_CACHE_ROOT=%s\n' "${NOVA_COMPILATION_CACHE_ROOT:-${DEFAULT_PINNED_ROOT}}"
   printf 'SUBMIT_COMMAND='
   printf '%q ' "${submission[@]}"
   printf '\n'

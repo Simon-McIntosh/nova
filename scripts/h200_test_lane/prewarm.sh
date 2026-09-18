@@ -2,11 +2,14 @@
 # Compile the canonical solve programs into the pinned shared cache.
 #
 # The pinned root is on shared storage and outside every pruner root: not under
-# $HOME/.cache by default, and not inside a worktree, so a pre-warm survives
-# until the next merge-time pre-warm replaces it. The committed drivers select
-# their cache through default_persistent_compilation_cache_root(), which is
-# $HOME/.cache, so pointing HOME at the pinned root lands their entries there
-# without editing any driver. NOVA_PREWARM_CACHE_ROOT overrides the location.
+# $HOME/.cache, and not inside a worktree, so a pre-warm survives until the next
+# merge-time pre-warm replaces it. The committed drivers select their cache
+# through default_persistent_compilation_cache_root(), which reads
+# NOVA_COMPILATION_CACHE_ROOT, so a launch that names the pinned root composes
+# its directory from that root alone and the lane resolves the same directory.
+#
+# This run declares itself a pre-warm, so the cache guard records its misses and
+# leaves the budget unenforced: filling the cache is what the job is for.
 #
 # ONE job per pre-warm: the four certificate rows and the bank identity are
 # issued sequentially inside one allocation, each in its own process, because an
@@ -36,16 +39,16 @@ run_payload() {
   readonly repository_root="${NOVA_PREWARM_REPOSITORY_ROOT:?missing repository root}"
   readonly expected_revision="${NOVA_PREWARM_EXPECTED_REVISION:?missing expected revision}"
   readonly actual_revision="$(git -C "${repository_root}" rev-parse HEAD)"
-  readonly pinned_root="${NOVA_PREWARM_CACHE_ROOT:-${DEFAULT_PINNED_ROOT}}"
-  readonly pinned_home="${pinned_root}/home"
+  readonly pinned_root="${NOVA_COMPILATION_CACHE_ROOT:-${DEFAULT_PINNED_ROOT}}"
   readonly receipt_directory="${pinned_root}/receipts"
   readonly receipt="${receipt_directory}/prewarm-${actual_revision:0:12}-${SLURM_JOB_ID:-local}.jsonl"
   readonly pin="${pinned_root}/prewarm-latest.json"
   readonly output_directory="/tmp/nova-prewarm-${SLURM_JOB_ID:-local}"
 
-  mkdir -p "${pinned_home}" "${receipt_directory}" "${output_directory}"
+  mkdir -p "${receipt_directory}" "${output_directory}"
 
-  export HOME="${pinned_home}"
+  export NOVA_COMPILATION_CACHE_ROOT="${pinned_root}"
+  export NOVA_CACHE_PREWARM_RUN=1
   export TMPDIR=/tmp
   export PYTHONPATH="${repository_root}:${LANE_DIRECTORY}"
   export JAX_PLATFORMS=cuda,cpu
@@ -58,7 +61,8 @@ run_payload() {
   printf 'SLURM_JOB_PARTITION=%s\n' "${SLURM_JOB_PARTITION:-unknown}"
   printf 'SOURCE_REVISION=%s\n' "${actual_revision}"
   printf 'PREWARM_PINNED_ROOT=%s\n' "${pinned_root}"
-  printf 'PREWARM_HOME=%s\n' "${HOME}"
+  printf 'NOVA_COMPILATION_CACHE_ROOT=%s\n' "${NOVA_COMPILATION_CACHE_ROOT}"
+  printf 'NOVA_CACHE_PREWARM_RUN=%s\n' "${NOVA_CACHE_PREWARM_RUN}"
   printf 'PREWARM_RECEIPT=%s\n' "${receipt}"
   printf 'TMPDIR=%s\n' "${TMPDIR}"
 
@@ -186,7 +190,7 @@ submission+=("${script_path}" --payload)
 if [[ "${dry_run}" == true ]]; then
   printf 'SOURCE_REVISION=%s\n' "${source_revision}"
   printf 'LOG_PATH=%s\n' "${resolved_log}"
-  printf 'PINNED_ROOT=%s\n' "${NOVA_PREWARM_CACHE_ROOT:-${DEFAULT_PINNED_ROOT}}"
+  printf 'PINNED_ROOT=%s\n' "${NOVA_COMPILATION_CACHE_ROOT:-${DEFAULT_PINNED_ROOT}}"
   printf 'SUBMIT_COMMAND='
   printf '%q ' "${submission[@]}"
   printf '\n'

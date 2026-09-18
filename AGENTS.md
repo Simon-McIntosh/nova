@@ -87,20 +87,25 @@ add a hundred packages the environment never carried.
   ```bash
   srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=64G \
     bash -lc 'export TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=<worktree>:<worktree>/scripts/h200_test_lane; \
-      export HOME=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/home; \
+      export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm; \
       /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest \
         -p no:cacheprovider -p cache_guard <targets>' > <log> 2>&1; echo EXIT=$?
   ```
 
-  `HOME` selects the pinned pre-warm cache: the drivers resolve their cache
-  through `HOME/.cache`, so pointing `HOME` at the pinned root serves the
-  programs the merge-time pre-warm compiled there — the location is
+  `NOVA_COMPILATION_CACHE_ROOT` names the cache parent the drivers resolve
+  through `default_persistent_compilation_cache_root()`, so the directory served
+  is composed from that root alone and the lane and the pre-warm that filled it
+  agree on it; with the variable unset the drivers keep the per-user location
+  under `$HOME/.cache`. The location is
   `/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm`, shared storage
   outside every pruner root, distinct from `~/.cache/nova/jax-compilation`. The
-  `cache_guard` plugin prints the directory served, one row per program with its
-  compile seconds and hit or miss outcome, and a marker; a run whose misses
-  exceed `NOVA_CACHE_MISS_BUDGET` (default 0) prints WALL-CLOCK-UNRELIABLE and
-  exits nonzero, so a timing comparison is not reported off a compile.
+  `cache_guard` plugin prints the directory served, the revision the pin was
+  compiled for, one row per program with its compile seconds and hit or miss
+  outcome, and a marker; a lane run whose misses exceed `NOVA_CACHE_MISS_BUDGET`
+  (default 0) prints WALL-CLOCK-UNRELIABLE and exits nonzero, so a timing
+  comparison is not reported off a compile. A run that declares itself a
+  pre-warm with `NOVA_CACHE_PREWARM_RUN=1` records the same rows with no budget
+  enforced, because compiling those programs is what it is for.
 
   `PYTHONPATH` is what makes the worktree's code shadow the editable install,
   which is the job `--directory` would otherwise do. The `uv run --no-sync`

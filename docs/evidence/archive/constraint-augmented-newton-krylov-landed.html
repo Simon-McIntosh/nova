@@ -723,6 +723,84 @@
     panels as PNG and SVG and this section's strip were committed as four revisions, the last of which re-rendered the strip's vector sibling
     from the committed receipt with no new job.</p>
   </section>
+  <section id="flux-function-fit">
+    <h2>Projecting the extracted flux functions, and whether a uniform scale closes the gap</h2>
+    <p><strong>Node:</strong> <code>cank-flux-function-fit</code>, run <code>r-20260918T094416317124</code>. The refusal above had one
+    stated prerequisite: the extracted <code>p&#8242;</code> and <code>FF&#8242;</code> must be carried as a traced amplitude rather than an
+    arbitrary callable. This node supplies that representation and then asks the measurement question the refusal blocked — whether freeing a
+    <em>scale</em> on the projected profile reaches the combination the external magnetics imply. <code>nova/equilibrium/constraint.py</code>
+    is untouched.</p>
+    <p><strong>The projection.</strong> <code>project_flux_function</code> and <code>project_domain_profile</code> in
+    <code>nova/equilibrium/source.py</code> fit an extracted function on the declared uniform normalised-flux base and return a
+    <code>FluxFunctionFit</code> carrying <code>function</code>, <code>order</code>, <code>basis</code>,
+    <code>si_scale</code>, both residuals, both condition numbers and <code>tolerance_met</code> — and a <code>DomainProfileProjection</code>
+    carrying both components. The shape lives in the coefficients as a dimensionless profile and the SI magnitude lives in the scalar
+    <code>normalisation</code>, which is the one leaf <code>ProfileAmplitudeUnknown</code> perturbs: the projection chooses the
+    <em>shape</em>, the compensator chooses the <em>scale</em>. The order is the lowest in 2..6 within a 1e-3 relative tolerance. Past order
+    five the raw monomial design is replaced by the endpoint-anchored basis <code>x(1&minus;x)x<sup>k</sup></code>, which carries its ends
+    exactly and is roughly fourteen times better conditioned on the 65-knot base the bank uses (order 6: 1.41e3 against 2.02e4); no order is
+    passed on the raw monomial basis past order five.</p>
+    <p><strong>Round-trip evidence.</strong> On the row measured below the fit is <strong>order 2 on both components</strong>, relative
+    residual 1.56e-08 (<code>p&#8242;</code>) and 1.79e-08 (<code>FF&#8242;</code>), maximum relative residual 3.44e-08 and 5.45e-08, tolerance
+    met, <strong>condition number 22.24</strong>. A bank-row round trip and the synthetic cases are pinned by
+    <code>tests/test_equilibrium_source.py</code>. Gate: <strong>7 passed</strong> in one fresh <code>all_debug</code> CPU process.</p>
+    <p><strong>The fit is not what moves the observable.</strong> Projecting 21978/35 moves &beta;<sub>p</sub> + l<sub>i</sub>/2 by
+    <strong>5.2e-05</strong>, four orders below the 0.121&ndash;0.166 gap, taking the extracted combination from 0.461309 to 0.461361. The gap
+    is therefore a property of the two measurements, not an artefact of the representation.</p>
+    <p><strong>A uniform scale does not close the gap.</strong> Freeing the pressure gradient <em>or</em> <code>FF&#8242;</code> alone through
+    <code>ProfileAmplitudeUnknown</code> under the row, with the elongation-corrected minor radius in the row's payload (a&radic;&kappa; =
+    0.8354 m against a geometric 0.5847 m, &kappa; = 2.0415), does not reach the non-dimensional combination the external magnetics imply,
+    and it does not converge. The pressure-gradient arm terminates <code>active_set_cycle_detected</code> with a terminal residual of 0.0507
+    after 8 outer steps, reaching an amplitude fraction of &minus;3.67; the <code>FF&#8242;</code> arm terminates the same way with a fraction
+    of +0.308. Both land the combination near 0.657 against a target of 0.4614 — a gap of about <strong>0.196</strong>, some four thousand
+    times the 5.2e-05 the row was asked to close (<code>scale_alone_closes_the_gap: false</code>). A single scale on either component is not
+    the degree of freedom this row needs: <strong>the shape carries the gap</strong>, which is the design answer the measurement was run to
+    obtain. The receipt records it per row as <code>scale_alone_closes_the_gap</code>.</p>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.png"
+           alt="For MAST 21978 row 35: extracted and projected pressure gradient against normalised flux, extracted and projected FF prime against normalised flux, each with the freed-scale variant; and the terminal poloidal flux as line contours on the reference's own levels with the wall and both null sets.">
+      <figcaption>MAST 21978/35, the one row the run completed. Left and centre: the extracted profile (grey), the order-2 projected profile
+      (blue) and the freed-scale variant at its own terminal amplitude (dashed), on shared axes; the percentage in each legend is the amplitude
+      fraction the solve reached, and the reader sees directly that a scaled curve does not become the target curve. Right: the terminal
+      poloidal flux as unfilled line contours on the reference's own level array, the wall drawn from the operator's typed units, and both
+      null sets — the reference state's and the terminal state's — in the committed null vocabulary. Both arms terminated unconverged with
+      <code>active_set_cycle_detected</code>; terminal residuals 0.0507 (pressure-gradient arm) and 0.2242 (<code>FF&#8242;</code> arm), with the caption
+      and legend carrying the same figures. The panel set is produced by the committed
+      <code>nova.media</code> painters on an H200 node.
+      The vector companion <a href="/nova/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.svg"><code>row-21978-35.svg</code></a>
+      is published beside the raster, so a reader that cannot open a PNG still reads the two component panels, the fitted orders, the
+      condition numbers and the caption. It was redrawn on a CPU <code>all_debug</code> allocation from the persisted receipt rather than by
+      the lane that produced the raster: no solve runs for the component panels, only the row's profiles re-extracted and re-projected, and
+      each freed-scale curve drawn at the amplitude the banked solve reported. Before anything is written the redraw re-derives the fit and
+      refuses the row unless the order, the basis, the SI scale, the condition number and the relative residual all reproduce the receipt to
+      <code>rtol=1e-9</code>; this row reproduced all six, which is why the companion is evidence about the same projection, but the identity
+      is a comparison against the record — not a byte identity with the raster. Only the raster's third panel carries the terminal state:
+      the receipt persists the terminal residual and the converged flag but <em>not</em> the terminal flux field, so the redraw has nothing
+      to redraw there and its third panel carries the reference state alone, saying so in its own title. The two figures must therefore be
+      read as one measurement with one panel short of the other, and the caption each carries states the same two terminal residuals.</figcaption>
+    </figure>
+    <p><strong>What the run cost, and what it did not reach.</strong> One H200 job (betelgeuse 1273593, <code>gpu_0003_grpA</code>, one
+    card, 8 CPUs, 128G, the root environment's interpreter running the worktree through <code>PYTHONPATH</code>, versioned persistent
+    compilation cache) carried all six rows as shards inside one allocation, per the one-measurement-one-job rule. It completed row 21978/35
+    in full and was killed at its two-hour wall while compiling the second row: the lane records single <code>jit_while</code> and
+    <code>jit_scan</code> GPU compilations of 7m03s and 9m11s, so compilation dominates the wall and six rows do not fit. The remaining five
+    rows are therefore <em>not measured</em> — not refused, not zero — and the receipt carries the one row it earned.</p>
+    <p><strong>The compensator defect this route exposed, repaired on the way.</strong> Projecting the profile removed the first refusal and
+    exposed a second, latent one: <code>ForwardFluxOperator.profile_component_image</code> forms its tangent about a scalar primal while the
+    only caller on this route hands in a length-one amplitude, so the row could never be imposed, and a caller reading only the terminal flux
+    saw a converged-looking state that had ignored the constraint entirely. The tangent is now read at the primal's own shape. It lands in its
+    own commit, in a single hunk of <code>nova/equilibrium/forward_operator.py</code> that touches nothing else in that file, because a
+    concurrent node edits a different region of it. The route now has a test that drives a <code>ProfileAmplitudeUnknown</code> through a row
+    imposed on a polynomial source and asserts the row is actually <em>reached</em>: opening gap &minus;0.6223, achieved gap &minus;1.07e-14,
+    compensator fraction 9.3313, terminal residual 1.14e-15, converged. Both the compensator test and the direct-call test run in one fresh
+    CPU process on <code>all_debug</code>: <strong>2 passed</strong>.</p>
+    <p><strong>Decision:</strong> the projection, its round trip and the uniform-scale measurement are delivered. The answer is that scale
+    alone does not close the gap — the row does not converge — so the follow-on is a <em>shape</em> unknown. Its design, left for its own
+    node and stated here: the projected <code>PolynomialFluxFunction</code> already separates shape coefficient <em>i</em> in its traced leaf
+    set, so a shape-coefficient unknown is a direction in that leaf space, and the existing <code>flux_delta</code> seam carries it without
+    touching <code>constraint.py</code>; one coefficient at a time is identifiable against this single row, while a set of them needs a second
+    row or a regularised update. The remaining five rows wait on a lane that does not pay four compilations per row.</p>
+  </section>
 </main>
 </body>
 </html>

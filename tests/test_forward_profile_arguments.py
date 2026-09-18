@@ -2,13 +2,19 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import dataclass, replace
 import hashlib
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 import pytest
 
+from nova.equilibrium.constraint import (
+    ConstraintBinding,
+    ConstraintPair,
+    ProfileAmplitudeUnknown,
+)
 from nova.equilibrium.source import (
     DomainProfile,
     ForwardSource,
@@ -176,3 +182,97 @@ def test_profile_component_image_is_the_normalisation_tangent() -> None:
     assert jnp.all(jnp.isfinite(tangent))
     assert jnp.max(jnp.abs(tangent)) > 0.0
     assert error <= earned_tolerance, figures
+
+
+@dataclass(frozen=True)
+class _NodeFluxFunctional:
+    """Read one lattice node's own flux as a constraint row's observation."""
+
+    index: int
+
+    @property
+    def row_count(self) -> int:
+        return 1
+
+    def observed(self, profile, context, payload) -> jax.Array:
+        del profile, payload
+        return jnp.atleast_1d(jnp.asarray(context.flux)[self.index])
+
+    def residual(self, profile, context, unknown, payload, target, scale) -> jax.Array:
+        del unknown
+        reading = self.observed(profile, context, payload)
+        return (reading - jnp.asarray(target)) / jnp.asarray(scale)
+
+    def dual_flux_image(self, profile, context, payload) -> jax.Array:
+        """Return a zero dual image: the compensator route never reads one."""
+        del profile, payload
+        return jnp.zeros_like(jnp.asarray(context.flux))
+
+
+def test_profile_amplitude_compensator_reaches_its_row() -> None:
+    """A profile amplitude imposed through a constraint row moves the solve.
+
+    The compensator supplies its amplitude through the unknown's per-row value,
+    so the flux image it contributes is formed from a length-one perturbation.
+    The image's arithmetic is one scalar per source, and a perturbation that
+    does not carry that shape stops the solve before the row is read at all:
+    the row is then never imposed, and a caller reading only the terminal flux
+    sees a converged-looking state that ignored the constraint.  The
+    assertions are the two halves of that failure — the solve runs on a real
+    operator, and the row it carries is actually driven to its target.
+    """
+    from benchmarks.profile_coefficients_recompile_audit import (
+        _scaled_row,
+        _scaled_source,
+    )
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    closure_row = _certificate_row(CASES[0])
+    argument_source = _scaled_source(closure_row[0].source, 1.0, 1.0)
+    profile, seed, requested, target_current, _request = _scaled_row(
+        closure_row, argument_source
+    )
+    operator = profile.operator
+    # Read a node the topology has already qualified: the certificate state is
+    # a solved equilibrium, so the row's observation is a flux the solve moves.
+    index = operator.grid.node_number // 2
+    reference = jnp.asarray(seed)
+    opening_flux = float(np.asarray(reference[index]))
+    target = jnp.asarray([opening_flux * 1.02])
+    pair = ConstraintPair(
+        functional=_NodeFluxFunctional(index),
+        unknown=ProfileAmplitudeUnknown("pressure_gradient", jnp.asarray([1.0])),
+        binding=ConstraintBinding(
+            target=target,
+            tolerance=jnp.asarray([1.0e-9]),
+            scale=jnp.asarray([1.0]),
+            initial_unknown=jnp.asarray([0.0]),
+            policy="imposed",
+        ),
+    )
+    branch = profile.solve_branch(
+        reference,
+        requested,
+        target_current=target_current,
+        constraint_pairs=(pair,),
+    )
+    records = list(branch.equilibrium.constraints)
+    record = records[0] if records else None
+    achieved = None if record is None else float(np.asarray(record.observed[0]))
+    fraction = None if record is None else float(np.asarray(record.physical_unknown[0]))
+    opening = float(np.asarray(target[0])) - opening_flux
+    achieved_gap = None if achieved is None else achieved - float(np.asarray(target[0]))
+    figures = {
+        "opening_gap": -opening,
+        "achieved_gap": achieved_gap,
+        "compensating_amplitude_fraction": fraction,
+        "terminal_residual": float(np.asarray(branch.residual)),
+        "converged": bool(np.asarray(branch.converged)),
+    }
+    print(f"COMPENSATOR_ROW_FIGURES {figures}")
+
+    assert record is not None, "the compensator row produced no record"
+    assert fraction is not None and abs(fraction) > 0.0, figures
+    assert achieved_gap is not None
+    assert abs(achieved_gap) < 1.0e-3 * abs(opening), figures

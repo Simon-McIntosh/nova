@@ -128,6 +128,28 @@ reconstruction publishes the centroid, reported as compensating currents beside 
 Every deliverable ships its receipt under <code>docs/figures/constraint-augmented-newton-krylov/</code> and the cumulative
 evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylov-landed.html</code>.</p>
 
+<p><strong>D — the extracted flux functions, landed.</strong> The Shafranov pair's unknown perturbs a profile amplitude, and the bank's
+extracted <code>p&#8242;</code> and <code>FF&#8242;</code> arrive as arbitrary callables, so the row could not be imposed on them at all
+(the refusal recorded in the evidence record). The extracted functions are now projected onto the traced coefficient representation
+(<code>project_flux_function</code> / <code>project_domain_profile</code> in <code>nova/equilibrium/source.py</code>), which separates the
+shape, carried in the coefficients, from the SI magnitude, carried in the one scalar normalisation leaf the compensator perturbs; the order
+is the lowest within tolerance and the raw monomial basis is not used past order five, where an endpoint-anchored basis is roughly fourteen
+times better conditioned. On MAST 21978/35 the fit is order 2 on both components with relative residuals of 1.56e-08 and 1.79e-08 at
+condition number 22.24, and projecting alone moves &beta;<sub>p</sub> + l<sub>i</sub>/2 by 5.2e-05 — so the fit is not what the gap is
+made of. Freeing the scale of either component alone under the row, with the elongation-corrected minor radius in the payload, does
+<em>not</em> reach the combination the external magnetics imply: both arms terminate <code>active_set_cycle_detected</code>, the
+pressure-gradient arm at terminal residual 0.0507 (amplitude fraction &minus;3.67) and the <code>FF&#8242;</code> arm at 0.2242 (+0.308), and
+they land about 0.196 away from a target the projection moved by 5.2e-05. <strong>The finding is that shape is needed, not scale</strong>, which fixes the
+shape of the follow-on: a shape-coefficient unknown in the projected leaf space, left for its own node
+(<code>nova/equilibrium/constraint.py</code> untouched). The route also exposed a latent defect — the profile-amplitude flux image was
+formed about a scalar primal while its only caller hands in a length-one amplitude, so the row could never be imposed and a converged-looking
+state ignored it — repaired in its own commit, with a test that asserts the row is reached. Row 21978/35 is measured in full; the remaining
+five bank rows did not fit the H200 wall, four GPU compilations per row dominating it, and are recorded unmeasured. The landed row figure
+draws the source and fitted flux functions on one axis pair per component, with a freed-scale variant at its own terminal amplitude beside
+them so a uniform scale is seen not to become the target curve, plus a terminal-flux contour panel; its vector companion is published
+beside the raster, redrawn on CPU from the receipt and refused unless the fit reproduces the recorded order, basis, SI scale, condition
+number and residual.</p>
+
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="compensating-unknown-class" data-choice="physical circuit current, so the output is the current the machine would have driven" data-by="lead" data-when="2026-09-09T05:23:05+00:00">

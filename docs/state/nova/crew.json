@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T12:00:33",
+  "updated": "2026-09-18T12:02:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4567,6 +4567,15 @@
       },
       {
         "id": "s19c-cank-integral-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-18"
+      },
+      {
+        "id": "s19c-cank-integral2-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -190895,6 +190904,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2788
+    "_version": 2789
   }
 }

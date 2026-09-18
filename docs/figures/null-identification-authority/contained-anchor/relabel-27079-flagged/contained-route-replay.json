@@ -1,0 +1,1950 @@
+{
+  "candidate_table": "docs/figures/null-identification-authority/contained-anchor/relabel-27079-flagged/limited-anchor-candidates.csv",
+  "complete": true,
+  "contained_route_count": 11,
+  "drawn_frame_count": 11,
+  "failure_table": "docs/figures/null-identification-authority/contained-anchor/relabel-27079-flagged/provisional-failures.csv",
+  "frames": [
+    {
+      "baseline_area_ratio": 0.3353593144,
+      "boundary_route": "contained",
+      "candidates": [
+        {
+          "contour_closed": false,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 0,
+          "node_position_m": [
+            1.899999976158142,
+            0.4050000011920929
+          ],
+          "sampled_flux_wb": -0.05396665426686814,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "trace_error": "the centred bracket contains duplicate coordinates"
+        },
+        {
+          "bracket_length_m": 0.7623959481716156,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.01945463670067235,
+          "fitted_anchor_position_m": [
+            1.5551042556762695,
+            0.45160161615889405
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 1,
+          "node_position_m": [
+            1.5551042556762695,
+            0.4050000011920929
+          ],
+          "quadratic_curvature": -0.22517114056187673,
+          "sampled_flux_wb": -0.01994364323487119,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.3914973354486737,
+          "tangent_at_wall_node": true,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.5646738708019257,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.07140608751811608,
+          "fitted_anchor_position_m": [
+            1.5551042556762695,
+            0.659817531127022
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 2,
+          "node_position_m": [
+            1.5551042556762695,
+            0.8225002288818359
+          ],
+          "quadratic_curvature": 0.7925593734494519,
+          "sampled_flux_wb": -0.05043048049266963,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.2548175299349291,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.3576737642288208,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.004907962113403809,
+          "fitted_anchor_position_m": [
+            1.407930612564087,
+            0.8323963303431648
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 3,
+          "node_position_m": [
+            1.407930612564087,
+            0.8225002288818359
+          ],
+          "quadratic_curvature": -2.2430649936775615,
+          "sampled_flux_wb": 0.004688292423859139,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.15706974457351153,
+          "tangent_at_wall_node": true,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.5784996747970581,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.08563463973390174,
+          "fitted_anchor_position_m": [
+            1.3955843419030216,
+            1.0330003499984741
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 4,
+          "node_position_m": [
+            1.407930612564087,
+            1.0330003499984741
+          ],
+          "quadratic_curvature": 1.8188078270911676,
+          "sampled_flux_wb": -0.08535739813068385,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.2228463917777034,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.5299992561340332,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.14839902308036595,
+          "fitted_anchor_position_m": [
+            1.039931058883667,
+            1.0881768038098096
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 5,
+          "node_position_m": [
+            1.039931058883667,
+            1.0330003499984741
+          ],
+          "quadratic_curvature": -1.305333476222892,
+          "sampled_flux_wb": 0.14442501225463347,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.42317600749175555,
+          "tangent_at_wall_node": true,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.0220686197280884,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.14794874999437296,
+          "fitted_anchor_position_m": [
+            1.039931058883667,
+            1.0330003499984741
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 6,
+          "node_position_m": [
+            1.039931058883667,
+            1.1950000524520874
+          ],
+          "quadratic_curvature": -0.1409818836393912,
+          "sampled_flux_wb": 0.13350359329645103,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": -0.15809572790761597,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.4900689125061035,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.048510575461373745,
+          "fitted_anchor_position_m": [
+            1.899999976158142,
+            1.2157978312100086
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 7,
+          "node_position_m": [
+            1.899999976158142,
+            1.1950000524520874
+          ],
+          "quadratic_curvature": 0.2345766694419331,
+          "sampled_flux_wb": -0.048409109885694315,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.8808666960323962,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.96506929397583,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -1.349697152257226,
+          "fitted_anchor_position_m": [
+            1.899999976158142,
+            1.1950000524520874
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 8,
+          "node_position_m": [
+            1.899999976158142,
+            1.8250000476837158
+          ],
+          "quadratic_curvature": 0.0035426501603634183,
+          "sampled_flux_wb": 0.0385472400252068,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": -19.165607321237154,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.4319877624511719,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.0007215214097037112,
+          "fitted_anchor_position_m": [
+            1.511335766566369,
+            1.8250000476837158
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 9,
+          "node_position_m": [
+            0.5649306774139404,
+            1.8250000476837158
+          ],
+          "quadratic_curvature": 0.259954956946783,
+          "sampled_flux_wb": 0.232115608432745,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.3886642095917731,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.315487802028656,
+          "containment_fraction": 1.0,
+          "contour_closed": true,
+          "enclosed_area_m2": 0.26971299234810675,
+          "enclosed_area_ratio": 0.3353593184355735,
+          "fitted_anchor_flux_wb": 0.28694575567005154,
+          "fitted_anchor_position_m": [
+            0.6050537429416492,
+            1.7280815839767456
+          ],
+          "inside_vertex_count": 64,
+          "maximum_containment_candidate": true,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 10,
+          "node_position_m": [
+            0.5649306774139404,
+            1.7280815839767456
+          ],
+          "quadratic_curvature": -2.919543965111581,
+          "sampled_flux_wb": 0.28224569749151857,
+          "selected_by_private_read": true,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.13704152923467888,
+          "tangent_at_wall_node": true
+        },
+        {
+          "bracket_length_m": 0.23106926679611206,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.19385715884296567,
+          "fitted_anchor_position_m": [
+            0.7756908316764578,
+            1.7280815839767456
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 11,
+          "node_position_m": [
+            0.7835000157356262,
+            1.7280815839767456
+          ],
+          "quadratic_curvature": 1.989843579483655,
+          "sampled_flux_wb": 0.1939785061817008,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.2107601542625174,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.2747678804901488,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.190780516178384,
+          "fitted_anchor_position_m": [
+            0.7835000157356262,
+            1.7280815839767456
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 12,
+          "node_position_m": [
+            0.7835000157356262,
+            1.7155816555023193
+          ],
+          "quadratic_curvature": 0.22114136605957294,
+          "sampled_flux_wb": 0.19467788982903667,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": -0.12025511470414506,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.4283582318333037,
+          "containment_fraction": 0.609375,
+          "contour_closed": true,
+          "enclosed_area_m2": 1.8585672215122644,
+          "enclosed_area_ratio": 2.3109299676175787,
+          "fitted_anchor_flux_wb": 0.22753250824086457,
+          "fitted_anchor_position_m": [
+            0.6242206885304206,
+            1.5819317615292765
+          ],
+          "inside_vertex_count": 39,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 13,
+          "node_position_m": [
+            0.5825902819633484,
+            1.5470000505447388
+          ],
+          "quadratic_curvature": -0.7599571558688059,
+          "sampled_flux_wb": 0.22528811523382,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.20792353939356786,
+          "tangent_at_wall_node": true
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.3591304324302078,
+          "containment_fraction": 0.609375,
+          "contour_closed": true,
+          "enclosed_area_m2": 1.8395269223100161,
+          "enclosed_area_ratio": 2.2872553878070736,
+          "fitted_anchor_flux_wb": 0.22852583574628976,
+          "fitted_anchor_position_m": [
+            0.5825902819633484,
+            1.5470000505447388
+          ],
+          "inside_vertex_count": 39,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 14,
+          "node_position_m": [
+            0.4165000021457672,
+            1.5470000505447388
+          ],
+          "quadratic_curvature": -0.6886662123356394,
+          "sampled_flux_wb": 0.19060508533991824,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": -0.06856702243818123,
+          "tangent_at_wall_node": false
+        },
+        {
+          "bracket_length_m": 0.6474516592654587,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.08925468842357133,
+          "fitted_anchor_position_m": [
+            0.2800000011920929,
+            1.573869629300078
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 15,
+          "node_position_m": [
+            0.2800000011920929,
+            1.683500051498413
+          ],
+          "quadratic_curvature": 1.106330921147144,
+          "sampled_flux_wb": 0.10255149110375927,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.3026705748109618,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.6228737516328025,
+          "containment_fraction": 0.640625,
+          "contour_closed": true,
+          "enclosed_area_m2": 1.5536175644001489,
+          "enclosed_area_ratio": 1.9317576174984992,
+          "fitted_anchor_flux_wb": 0.24105033313472352,
+          "fitted_anchor_position_m": [
+            0.19524440169334412,
+            1.0835000276565552
+          ],
+          "inside_vertex_count": 41,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 16,
+          "node_position_m": [
+            0.2800000011920929,
+            1.229088544845581
+          ],
+          "quadratic_curvature": -0.25560944145026254,
+          "sampled_flux_wb": 0.22076866613732515,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.7360962843376553,
+          "tangent_at_wall_node": false
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 2.3354623002930808,
+          "containment_fraction": 1.0,
+          "contour_closed": true,
+          "enclosed_area_m2": 0.21255450981287452,
+          "enclosed_area_ratio": 0.2642888461570746,
+          "fitted_anchor_flux_wb": 0.2892360146954392,
+          "fitted_anchor_position_m": [
+            0.19524440169334412,
+            -0.014372293870167585
+          ],
+          "inside_vertex_count": 64,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 17,
+          "node_position_m": [
+            0.19524440169334412,
+            1.0835000276565552
+          ],
+          "quadratic_curvature": -0.04269594067433627,
+          "sampled_flux_wb": 0.23777358830881143,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 1.2663345665066932,
+          "tangent_at_wall_node": true
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 2.3354623002930808,
+          "containment_fraction": 1.0,
+          "contour_closed": true,
+          "enclosed_area_m2": 0.19777123079592654,
+          "enclosed_area_ratio": 0.2459074165781543,
+          "fitted_anchor_flux_wb": 0.28983300933260436,
+          "fitted_anchor_position_m": [
+            0.19524440169334412,
+            -0.014203099987615264
+          ],
+          "inside_vertex_count": 64,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 18,
+          "node_position_m": [
+            0.19524440169334412,
+            -1.0835000276565552
+          ],
+          "quadratic_curvature": -0.04320455442613583,
+          "sampled_flux_wb": 0.2404330980969841,
+          "selected_by_private_read": false,
+          "selected_by_public_read": true,
+          "stationary_coordinate_m": 1.0977031276441704,
+          "tangent_at_wall_node": true
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.6228737516328025,
+          "containment_fraction": 0.640625,
+          "contour_closed": true,
+          "enclosed_area_m2": 1.510452299287711,
+          "enclosed_area_ratio": 1.8780862175330328,
+          "fitted_anchor_flux_wb": 0.2429502755529368,
+          "fitted_anchor_position_m": [
+            0.19524440169334412,
+            -1.0835000276565552
+          ],
+          "inside_vertex_count": 41,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 19,
+          "node_position_m": [
+            0.2800000011920929,
+            -1.229088544845581
+          ],
+          "quadratic_curvature": -0.2777583541338805,
+          "sampled_flux_wb": 0.22364156809281596,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": -0.09519701957462351,
+          "tangent_at_wall_node": false
+        },
+        {
+          "bracket_length_m": 0.6474516592654587,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.08678417356290327,
+          "fitted_anchor_position_m": [
+            0.2800000011920929,
+            -1.576611693738729
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 20,
+          "node_position_m": [
+            0.2800000011920929,
+            -1.683500051498413
+          ],
+          "quadratic_curvature": 1.133184929962245,
+          "sampled_flux_wb": 0.09973094853093167,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.34752314889314795,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.3591304324302078,
+          "containment_fraction": 0.609375,
+          "contour_closed": true,
+          "enclosed_area_m2": 1.9708173579370123,
+          "enclosed_area_ratio": 2.4505010313545377,
+          "fitted_anchor_flux_wb": 0.22156355864332167,
+          "fitted_anchor_position_m": [
+            0.5825902819633484,
+            -1.5470000505447388
+          ],
+          "inside_vertex_count": 39,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 21,
+          "node_position_m": [
+            0.4165000021457672,
+            -1.5470000505447388
+          ],
+          "quadratic_curvature": -0.7558056603473994,
+          "sampled_flux_wb": 0.1887222164697014,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.40149182262117955,
+          "tangent_at_wall_node": false
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.4283582318333037,
+          "containment_fraction": 0.609375,
+          "contour_closed": true,
+          "enclosed_area_m2": 1.9742944764905581,
+          "enclosed_area_ratio": 2.4548244571490647,
+          "fitted_anchor_flux_wb": 0.22137637938149338,
+          "fitted_anchor_position_m": [
+            0.6122831446143496,
+            -1.5719150725673376
+          ],
+          "inside_vertex_count": 39,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 22,
+          "node_position_m": [
+            0.5825902819633484,
+            -1.5470000505447388
+          ],
+          "quadratic_curvature": -0.7781452731066626,
+          "sampled_flux_wb": 0.22020727492491832,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.20485139970333546,
+          "tangent_at_wall_node": true
+        },
+        {
+          "bracket_length_m": 0.2747678804901488,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.17190179971175648,
+          "fitted_anchor_position_m": [
+            0.7835000157356262,
+            -1.7280815839767456
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 23,
+          "node_position_m": [
+            0.7835000157356262,
+            -1.7155816555023193
+          ],
+          "quadratic_curvature": 0.1983962415125718,
+          "sampled_flux_wb": 0.1825038957004596,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.49343671323095806,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.23106926679611206,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.1809300530921995,
+          "fitted_anchor_position_m": [
+            0.7688490998275982,
+            -1.7280815839767456
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 24,
+          "node_position_m": [
+            0.7835000157356262,
+            -1.7280815839767456
+          ],
+          "quadratic_curvature": 2.1349839650710494,
+          "sampled_flux_wb": 0.18138832598468807,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.027150844382454308,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.315487802028656,
+          "containment_fraction": 1.0,
+          "contour_closed": true,
+          "enclosed_area_m2": 0.5792944820749985,
+          "enclosed_area_ratio": 0.7202908580370572,
+          "fitted_anchor_flux_wb": 0.27494045125529837,
+          "fitted_anchor_position_m": [
+            0.6067334543422207,
+            -1.7280815839767456
+          ],
+          "inside_vertex_count": 64,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": true,
+          "node": 25,
+          "node_position_m": [
+            0.5649306774139404,
+            -1.7280815839767456
+          ],
+          "quadratic_curvature": -2.9940112682815148,
+          "sampled_flux_wb": 0.26970849992049684,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.17676656139340555,
+          "tangent_at_wall_node": true
+        },
+        {
+          "bracket_length_m": 1.4319877624511719,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.015170406199460473,
+          "fitted_anchor_position_m": [
+            1.471242118296602,
+            -1.8250000476837158
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 26,
+          "node_position_m": [
+            0.5649306774139404,
+            -1.8250000476837158
+          ],
+          "quadratic_curvature": 0.2830475203180184,
+          "sampled_flux_wb": 0.2173249480986627,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 1.0032299045896318,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.96506929397583,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 5.213437331514192,
+          "fitted_anchor_position_m": [
+            0.5649306774139404,
+            -1.8250000476837158
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 27,
+          "node_position_m": [
+            1.899999976158142,
+            -1.8250000476837158
+          ],
+          "quadratic_curvature": -0.000898113941789351,
+          "sampled_flux_wb": 0.03686315370932888,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": -74.58480873581553,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.4900689125061035,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.049491092764211,
+          "fitted_anchor_position_m": [
+            1.899999976158142,
+            -1.2141711471188352
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 28,
+          "node_position_m": [
+            1.899999976158142,
+            -1.1950000524520874
+          ],
+          "quadratic_curvature": 0.23144326375403526,
+          "sampled_flux_wb": -0.049406030219960775,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.6108289005648805,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.0220686197280884,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.14535946239939257,
+          "fitted_anchor_position_m": [
+            1.039931058883667,
+            -1.0330003499984741
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 29,
+          "node_position_m": [
+            1.039931058883667,
+            -1.1950000524520874
+          ],
+          "quadratic_curvature": -0.13423001765824252,
+          "sampled_flux_wb": 0.1294291307188845,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 1.2045676157274363,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.5299992561340332,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.1447054729247265,
+          "fitted_anchor_position_m": [
+            1.039931058883667,
+            -1.0869888151194247
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 30,
+          "node_position_m": [
+            1.039931058883667,
+            -1.0330003499984741
+          ],
+          "quadratic_curvature": -1.309427616097993,
+          "sampled_flux_wb": 0.14088881306359177,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.1080112373326627,
+          "tangent_at_wall_node": true,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.5784996747970581,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.08879093023965806,
+          "fitted_anchor_position_m": [
+            1.3946582490241994,
+            -1.0330003499984741
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 31,
+          "node_position_m": [
+            1.407930612564087,
+            -1.0330003499984741
+          ],
+          "quadratic_curvature": 1.8252978259699657,
+          "sampled_flux_wb": -0.08846939374400428,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.3547271901405325,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.3576737642288208,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.002781077338173857,
+          "fitted_anchor_position_m": [
+            1.407930612564087,
+            -0.8312544848465472
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 32,
+          "node_position_m": [
+            1.407930612564087,
+            -0.8225002288818359
+          ],
+          "quadratic_curvature": -2.2419495225337216,
+          "sampled_flux_wb": 0.0026092610582299225,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.2017458651519269,
+          "tangent_at_wall_node": true,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.5646738708019257,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.07291200685329938,
+          "fitted_anchor_position_m": [
+            1.5551042556762695,
+            -0.6567921981338942
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 33,
+          "node_position_m": [
+            1.5551042556762695,
+            -0.8225002288818359
+          ],
+          "quadratic_curvature": 0.7714521965484186,
+          "sampled_flux_wb": -0.05172858414847692,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.3128816738601244,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.7623959481716156,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.02354118832054028,
+          "fitted_anchor_position_m": [
+            1.5551042556762695,
+            -0.4523513016674627
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 34,
+          "node_position_m": [
+            1.5551042556762695,
+            -0.4050000011920929
+          ],
+          "quadratic_curvature": -0.2057320550004771,
+          "sampled_flux_wb": -0.024002469554105343,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.37014892721437326,
+          "tangent_at_wall_node": true,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.1548957228660583,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.06764792751051513,
+          "fitted_anchor_position_m": [
+            1.899999976158142,
+            -0.009520250396739094
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 35,
+          "node_position_m": [
+            1.899999976158142,
+            -0.4050000011920929
+          ],
+          "quadratic_curvature": 0.07962235352324909,
+          "sampled_flux_wb": -0.05519465435503326,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.7403754712772264,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "contour_closed": false,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 36,
+          "node_position_m": [
+            1.899999976158142,
+            0.4050000011920929
+          ],
+          "sampled_flux_wb": -0.053966654268213926,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "trace_error": "the centred bracket contains duplicate coordinates"
+        }
+      ],
+      "converged": true,
+      "manifest_row": 16,
+      "maximum_containment_candidate_node": 10,
+      "maximum_containment_candidate_nodes": [
+        10,
+        17,
+        18,
+        25
+      ],
+      "maximum_containment_fraction": 1.0,
+      "nearest_fully_contained_candidate_node": 25,
+      "nearest_fully_contained_candidate_ratio": 0.7202908580370572,
+      "panel": "docs/figures/null-identification-authority/contained-anchor/relabel-27079-flagged/row-16-35ms.png",
+      "private_active_partition_read": {
+        "axis_flux_wb": 0.29799491643526715,
+        "axis_position_m": [
+          0.6799217413516077,
+          -0.0018526631348966083
+        ],
+        "boundary_flux_wb": 0.2869457556700515,
+        "boundary_position_m": [
+          0.605053742941649,
+          1.7280815839767456
+        ],
+        "boundary_vertex_count": 64,
+        "containment_fraction": 1.0,
+        "contour_closed": true,
+        "enclosed_area_m2": 0.2697129923481084,
+        "enclosed_area_ratio": 0.3353593184355756,
+        "fitted_anchor_position_m": [
+          0.605053742941649,
+          1.7280815839767456
+        ],
+        "inside_vertex_count": 64,
+        "selected_anchor_node": 10,
+        "selected_anchor_node_position_m": [
+          0.5649306774139404,
+          1.7280815839767456
+        ],
+        "wall_flux_wb": 0.2869457556700515,
+        "x_point_flux_wb": 0.20761947563889985,
+        "x_point_position_m": [
+          0.5825448850430663,
+          1.3927353770784328
+        ]
+      },
+      "private_wall_masked_node_count": 0,
+      "public_read": {
+        "axis_flux_wb": 0.29799491643526715,
+        "axis_position_m": [
+          0.6799217413516077,
+          -0.0018526631348966083
+        ],
+        "boundary_flux_wb": 0.28983300933260375,
+        "boundary_position_m": [
+          0.19524440169334412,
+          -0.014203099987614154
+        ],
+        "boundary_vertex_count": 64,
+        "containment_fraction": 1.0,
+        "contour_closed": true,
+        "enclosed_area_m2": 0.19777123079594167,
+        "enclosed_area_ratio": 0.2459074165781731,
+        "fitted_anchor_position_m": [
+          0.19524440169334412,
+          -0.014203099987614154
+        ],
+        "inside_vertex_count": 64,
+        "selected_anchor_node": 18,
+        "selected_anchor_node_position_m": [
+          0.19524440169334412,
+          -1.0835000276565552
+        ],
+        "wall_flux_wb": 0.28983300933260375,
+        "x_point_flux_wb": 0.20761947563889985,
+        "x_point_position_m": [
+          0.5825448850430663,
+          1.3927353770784328
+        ]
+      },
+      "qualified": false,
+      "reconstruction_area_m2": 0.8042507767677307,
+      "selected_anchor_candidate_containment_fraction": 1.0,
+      "selected_anchor_candidate_contour_closed": true,
+      "selected_anchor_candidate_inside_vertex_count": 64,
+      "time_s": 0.03500000014901161
+    },
+    {
+      "baseline_area_ratio": 0.5710731398,
+      "boundary_route": "contained",
+      "candidates": [
+        {
+          "contour_closed": false,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 0,
+          "node_position_m": [
+            1.899999976158142,
+            0.4050000011920929
+          ],
+          "sampled_flux_wb": -0.052737131710318075,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "trace_error": "the centred bracket contains duplicate coordinates"
+        },
+        {
+          "bracket_length_m": 0.7623959481716156,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.017123587647498065,
+          "fitted_anchor_position_m": [
+            1.5551042556762695,
+            0.4454531641763644
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 1,
+          "node_position_m": [
+            1.5551042556762695,
+            0.4050000011920929
+          ],
+          "quadratic_curvature": -0.23983192011495533,
+          "sampled_flux_wb": -0.017516062606662802,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.38534888346614404,
+          "tangent_at_wall_node": true,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.5646738708019257,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.07055375618771931,
+          "fitted_anchor_position_m": [
+            1.5551042556762695,
+            0.6653234431083779
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 2,
+          "node_position_m": [
+            1.5551042556762695,
+            0.8225002288818359
+          ],
+          "quadratic_curvature": 0.7826328527509288,
+          "sampled_flux_wb": -0.05121917001725197,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.26032344191628504,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.3576737642288208,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.0021321552444745484,
+          "fitted_anchor_position_m": [
+            1.407930612564087,
+            0.8318735759129958
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 3,
+          "node_position_m": [
+            1.407930612564087,
+            0.8225002288818359
+          ],
+          "quadratic_curvature": -2.176986659874919,
+          "sampled_flux_wb": 0.0019408859920816424,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.15654699014334247,
+          "tangent_at_wall_node": true,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.5784996747970581,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.08620102987327656,
+          "fitted_anchor_position_m": [
+            1.3956032234902993,
+            1.0330003499984741
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 4,
+          "node_position_m": [
+            1.407930612564087,
+            1.0330003499984741
+          ],
+          "quadratic_curvature": 1.7751901150633584,
+          "sampled_flux_wb": -0.08593126395708807,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.22282751019042588,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.5299992561340332,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.14198904091958683,
+          "fitted_anchor_position_m": [
+            1.039931058883667,
+            1.0860972392577943
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 5,
+          "node_position_m": [
+            1.039931058883667,
+            1.0330003499984741
+          ],
+          "quadratic_curvature": -1.2853454702916218,
+          "sampled_flux_wb": 0.13836529259323826,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.4210964429397402,
+          "tangent_at_wall_node": true,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.0220686197280884,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.14333630181368695,
+          "fitted_anchor_position_m": [
+            1.039931058883667,
+            1.0330003499984741
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 6,
+          "node_position_m": [
+            1.039931058883667,
+            1.1950000524520874
+          ],
+          "quadratic_curvature": -0.12951855729517098,
+          "sampled_flux_wb": 0.12674507150587688,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": -0.19590985593501714,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.4900689125061035,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.04887034972005483,
+          "fitted_anchor_position_m": [
+            1.899999976158142,
+            1.2124640755021947
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 7,
+          "node_position_m": [
+            1.899999976158142,
+            1.1950000524520874
+          ],
+          "quadratic_curvature": 0.22805300239175777,
+          "sampled_flux_wb": -0.04880079535569455,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.8775329403245824,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.96506929397583,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -7.48515985372499,
+          "fitted_anchor_position_m": [
+            1.899999976158142,
+            1.1950000524520874
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 8,
+          "node_position_m": [
+            1.899999976158142,
+            1.8250000476837158
+          ],
+          "quadratic_curvature": 0.0006156081368840794,
+          "sampled_flux_wb": 0.03669520911947621,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": -109.90766967454336,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.4319877624511719,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.00019083713867094204,
+          "fitted_anchor_position_m": [
+            1.5119459610119221,
+            1.8250000476837158
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 9,
+          "node_position_m": [
+            0.5649306774139404,
+            1.8250000476837158
+          ],
+          "quadratic_curvature": 0.2449501692034731,
+          "sampled_flux_wb": 0.21948976981725687,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.38805401514621995,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.315487802028656,
+          "containment_fraction": 1.0,
+          "contour_closed": true,
+          "enclosed_area_m2": 0.5240258898268411,
+          "enclosed_area_ratio": 0.5710731397903283,
+          "fitted_anchor_flux_wb": 0.2712440492920545,
+          "fitted_anchor_position_m": [
+            0.6053884305761786,
+            1.7280815839767456
+          ],
+          "inside_vertex_count": 64,
+          "maximum_containment_candidate": true,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 10,
+          "node_position_m": [
+            0.5649306774139404,
+            1.7280815839767456
+          ],
+          "quadratic_curvature": -2.7423517672631785,
+          "sampled_flux_wb": 0.2667552862221706,
+          "selected_by_private_read": true,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.13737621686920845,
+          "tangent_at_wall_node": true
+        },
+        {
+          "bracket_length_m": 0.23106926679611206,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.1841356726511753,
+          "fitted_anchor_position_m": [
+            0.7757809061298105,
+            1.7280815839767456
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 11,
+          "node_position_m": [
+            0.7835000157356262,
+            1.7280815839767456
+          ],
+          "quadratic_curvature": 1.858382069187405,
+          "sampled_flux_wb": 0.1842464037021075,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.21085022871587009,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.2747678804901488,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.18135644818275784,
+          "fitted_anchor_position_m": [
+            0.7835000157356262,
+            1.7280815839767456
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 12,
+          "node_position_m": [
+            0.7835000157356262,
+            1.7155816555023193
+          ],
+          "quadratic_curvature": 0.2101885131157268,
+          "sampled_flux_wb": 0.18489539689734344,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": -0.1172576241092049,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.4283582318333037,
+          "containment_fraction": 0.609375,
+          "contour_closed": true,
+          "enclosed_area_m2": 1.9495645304255453,
+          "enclosed_area_ratio": 2.12459719877937,
+          "fitted_anchor_flux_wb": 0.21584398848632413,
+          "fitted_anchor_position_m": [
+            0.6247664451315483,
+            1.5823897011323351
+          ],
+          "inside_vertex_count": 39,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 13,
+          "node_position_m": [
+            0.5825902819633484,
+            1.5470000505447388
+          ],
+          "quadratic_curvature": -0.7208000784792771,
+          "sampled_flux_wb": 0.21365905884556874,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.20721110767913897,
+          "tangent_at_wall_node": true
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.3591304324302078,
+          "containment_fraction": 0.609375,
+          "contour_closed": true,
+          "enclosed_area_m2": 1.930214604035691,
+          "enclosed_area_ratio": 2.1035100284072774,
+          "fitted_anchor_flux_wb": 0.2168404156879148,
+          "fitted_anchor_position_m": [
+            0.5825902819633484,
+            1.5470000505447388
+          ],
+          "inside_vertex_count": 39,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 14,
+          "node_position_m": [
+            0.4165000021457672,
+            1.5470000505447388
+          ],
+          "quadratic_curvature": -0.650767786303662,
+          "sampled_flux_wb": 0.18059250343220207,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": -0.06991867172610186,
+          "tangent_at_wall_node": false
+        },
+        {
+          "bracket_length_m": 0.6474516592654587,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.08447644258316045,
+          "fitted_anchor_position_m": [
+            0.2800000011920929,
+            1.5741522912761716
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 15,
+          "node_position_m": [
+            0.2800000011920929,
+            1.683500051498413
+          ],
+          "quadratic_curvature": 1.0511558434026431,
+          "sampled_flux_wb": 0.09704504222379967,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.30238791283486804,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.6228737516328025,
+          "containment_fraction": 0.640625,
+          "contour_closed": true,
+          "enclosed_area_m2": 1.6673243535210251,
+          "enclosed_area_ratio": 1.8170173880698222,
+          "fitted_anchor_flux_wb": 0.228487813330144,
+          "fitted_anchor_position_m": [
+            0.19524440169334412,
+            1.0835000276565552
+          ],
+          "inside_vertex_count": 41,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 16,
+          "node_position_m": [
+            0.2800000011920929,
+            1.229088544845581
+          ],
+          "quadratic_curvature": -0.24571527059918424,
+          "sampled_flux_wb": 0.20963650624442268,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.7313954922915981,
+          "tangent_at_wall_node": false
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 2.3354623002930808,
+          "containment_fraction": 1.0,
+          "contour_closed": true,
+          "enclosed_area_m2": 0.4643324651383017,
+          "enclosed_area_ratio": 0.5060204160155809,
+          "fitted_anchor_flux_wb": 0.2737602143678982,
+          "fitted_anchor_position_m": [
+            0.19524440169334412,
+            -0.01168808621577444
+          ],
+          "inside_vertex_count": 64,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 17,
+          "node_position_m": [
+            0.19524440169334412,
+            1.0835000276565552
+          ],
+          "quadratic_curvature": -0.04015732528956404,
+          "sampled_flux_wb": 0.22559403240312048,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 1.2636503588523,
+          "tangent_at_wall_node": true
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 2.3354623002930808,
+          "containment_fraction": 1.0,
+          "contour_closed": true,
+          "enclosed_area_m2": 0.4522748625309183,
+          "enclosed_area_ratio": 0.4928802771159212,
+          "fitted_anchor_flux_wb": 0.2742711465661547,
+          "fitted_anchor_position_m": [
+            0.19524440169334412,
+            -0.011562757081329034
+          ],
+          "inside_vertex_count": 64,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 18,
+          "node_position_m": [
+            0.19524440169334412,
+            -1.0835000276565552
+          ],
+          "quadratic_curvature": -0.04059259196383021,
+          "sampled_flux_wb": 0.22762824857734112,
+          "selected_by_private_read": false,
+          "selected_by_public_read": true,
+          "stationary_coordinate_m": 1.0950627847378842,
+          "tangent_at_wall_node": true
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.6228737516328025,
+          "containment_fraction": 0.640625,
+          "contour_closed": true,
+          "enclosed_area_m2": 1.6385961471883506,
+          "enclosed_area_ratio": 1.7857099521025535,
+          "fitted_anchor_flux_wb": 0.22985538028519775,
+          "fitted_anchor_position_m": [
+            0.19524440169334412,
+            -1.0835000276565552
+          ],
+          "inside_vertex_count": 41,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 19,
+          "node_position_m": [
+            0.2800000011920929,
+            -1.229088544845581
+          ],
+          "quadratic_curvature": -0.26743760552953505,
+          "sampled_flux_wb": 0.21181575160112695,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": -0.09125605975668058,
+          "tangent_at_wall_node": false
+        },
+        {
+          "bracket_length_m": 0.6474516592654587,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.08150593217259419,
+          "fitted_anchor_position_m": [
+            0.2800000011920929,
+            -1.577839091103782
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 20,
+          "node_position_m": [
+            0.2800000011920929,
+            -1.683500051498413
+          ],
+          "quadratic_curvature": 1.0713894114427045,
+          "sampled_flux_wb": 0.09346717914350852,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.348750546258201,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.3591304324302078,
+          "containment_fraction": 0.609375,
+          "contour_closed": true,
+          "enclosed_area_m2": 2.122941088202343,
+          "enclosed_area_ratio": 2.313539571928819,
+          "fitted_anchor_flux_wb": 0.20653504548567084,
+          "fitted_anchor_position_m": [
+            0.5825902819633484,
+            -1.5470000505447388
+          ],
+          "inside_vertex_count": 39,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 21,
+          "node_position_m": [
+            0.4165000021457672,
+            -1.5470000505447388
+          ],
+          "quadratic_curvature": -0.7277822461109216,
+          "sampled_flux_wb": 0.17709781848905232,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.39415666070148453,
+          "tangent_at_wall_node": false
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.4283582318333037,
+          "containment_fraction": 0.609375,
+          "contour_closed": true,
+          "enclosed_area_m2": 2.125545262003457,
+          "enclosed_area_ratio": 2.3163775494754115,
+          "fitted_anchor_flux_wb": 0.20639345817543708,
+          "fitted_anchor_position_m": [
+            0.6068504231090078,
+            -1.5673565233449482
+          ],
+          "inside_vertex_count": 39,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 22,
+          "node_position_m": [
+            0.5825902819633484,
+            -1.5470000505447388
+          ],
+          "quadratic_curvature": -0.7490800150219362,
+          "sampled_flux_wb": 0.20564217554061473,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.19775951462477206,
+          "tangent_at_wall_node": true
+        },
+        {
+          "bracket_length_m": 0.2747678804901488,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.1534452491566552,
+          "fitted_anchor_position_m": [
+            0.7835000157356262,
+            -1.7280815839767456
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 23,
+          "node_position_m": [
+            0.7835000157356262,
+            -1.7155816555023193
+          ],
+          "quadratic_curvature": 0.18875372251943184,
+          "sampled_flux_wb": 0.16656055279987678,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.5258655279913222,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.23106926679611206,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.16475463959621497,
+          "fitted_anchor_position_m": [
+            0.7667723223630332,
+            -1.7280815839767456
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 24,
+          "node_position_m": [
+            0.7835000157356262,
+            -1.7280815839767456
+          ],
+          "quadratic_curvature": 2.114024002010252,
+          "sampled_flux_wb": 0.1653461767562044,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.029227621847019273,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "boundary_vertex_count": 64,
+          "bracket_length_m": 0.315487802028656,
+          "containment_fraction": 1.0,
+          "contour_closed": true,
+          "enclosed_area_m2": 0.9098260037412759,
+          "enclosed_area_ratio": 0.9915105392810006,
+          "fitted_anchor_flux_wb": 0.25572308533319005,
+          "fitted_anchor_position_m": [
+            0.6060160900120998,
+            -1.7280815839767456
+          ],
+          "inside_vertex_count": 64,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": true,
+          "node": 25,
+          "node_position_m": [
+            0.5649306774139404,
+            -1.7280815839767456
+          ],
+          "quadratic_curvature": -2.869058670602963,
+          "sampled_flux_wb": 0.2508800823692915,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.17748392572352645,
+          "tangent_at_wall_node": true
+        },
+        {
+          "bracket_length_m": 1.4319877624511719,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.026185940521403772,
+          "fitted_anchor_position_m": [
+            1.4956151194319016,
+            -1.8250000476837158
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 26,
+          "node_position_m": [
+            0.5649306774139404,
+            -1.8250000476837158
+          ],
+          "quadratic_curvature": 0.26238114530654827,
+          "sampled_flux_wb": 0.2010816624753885,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 1.0276029057249314,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.96506929397583,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.38496783105054666,
+          "fitted_anchor_position_m": [
+            1.899999976158142,
+            -1.1950000524520874
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 27,
+          "node_position_m": [
+            1.899999976158142,
+            -1.8250000476837158
+          ],
+          "quadratic_curvature": 0.009738510323015889,
+          "sampled_flux_wb": 0.016720490505531448,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 7.757483901509763,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.4900689125061035,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.05862966645855801,
+          "fitted_anchor_position_m": [
+            1.899999976158142,
+            -1.2382295757997994
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 28,
+          "node_position_m": [
+            1.899999976158142,
+            -1.1950000524520874
+          ],
+          "quadratic_curvature": 0.21885055887459828,
+          "sampled_flux_wb": -0.058220680353028464,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.5867704718839163,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.0220686197280884,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.14126594194565142,
+          "fitted_anchor_position_m": [
+            1.039931058883667,
+            -1.0330003499984741
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 29,
+          "node_position_m": [
+            1.039931058883667,
+            -1.1950000524520874
+          ],
+          "quadratic_curvature": -0.12216214298356014,
+          "sampled_flux_wb": 0.11994102529304293,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 1.2778755690093964,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.5299992561340332,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": 0.13654159890551987,
+          "fitted_anchor_position_m": [
+            1.039931058883667,
+            -1.0827962566459477
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 30,
+          "node_position_m": [
+            1.039931058883667,
+            -1.0330003499984741
+          ],
+          "quadratic_curvature": -1.3185845916659928,
+          "sampled_flux_wb": 0.1332719939368952,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.11220379580613961,
+          "tangent_at_wall_node": true,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.5784996747970581,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.09395021092423328,
+          "fitted_anchor_position_m": [
+            1.3944438770066527,
+            -1.0330003499984741
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 31,
+          "node_position_m": [
+            1.407930612564087,
+            -1.0330003499984741
+          ],
+          "quadratic_curvature": 1.8079519520951686,
+          "sampled_flux_wb": -0.0936213588626835,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.3545128181229858,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.3576737642288208,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.0030960537968680313,
+          "fitted_anchor_position_m": [
+            1.407930612564087,
+            -0.8307074557799519
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 32,
+          "node_position_m": [
+            1.407930612564087,
+            -0.8225002288818359
+          ],
+          "quadratic_curvature": -2.212120300141619,
+          "sampled_flux_wb": -0.0032450590643800237,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.20229289421852226,
+          "tangent_at_wall_node": true,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.5646738708019257,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.0760768807701686,
+          "fitted_anchor_position_m": [
+            1.5551042556762695,
+            -0.6640772921252422
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 33,
+          "node_position_m": [
+            1.5551042556762695,
+            -0.8225002288818359
+          ],
+          "quadratic_curvature": 0.7798735550272169,
+          "sampled_flux_wb": -0.05650374928955133,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.30559657986877636,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 0.7623959481716156,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.023433237620961923,
+          "fitted_anchor_position_m": [
+            1.5551042556762695,
+            -0.44118020099593414
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 34,
+          "node_position_m": [
+            1.5551042556762695,
+            -0.4050000011920929
+          ],
+          "quadratic_curvature": -0.22743729536185378,
+          "sampled_flux_wb": -0.023730954600320514,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.3813200278859018,
+          "tangent_at_wall_node": true,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "bracket_length_m": 1.1548957228660583,
+          "contour_closed": false,
+          "fitted_anchor_flux_wb": -0.06879183486733298,
+          "fitted_anchor_position_m": [
+            1.899999976158142,
+            -0.026684502565631263
+          ],
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 35,
+          "node_position_m": [
+            1.899999976158142,
+            -0.4050000011920929
+          ],
+          "quadratic_curvature": 0.08615279311744971,
+          "sampled_flux_wb": -0.05646142169749524,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "stationary_coordinate_m": 0.7232112191083342,
+          "tangent_at_wall_node": false,
+          "trace_error": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map"
+        },
+        {
+          "contour_closed": false,
+          "maximum_containment_candidate": false,
+          "nearest_fully_contained_ratio_one": false,
+          "node": 36,
+          "node_position_m": [
+            1.899999976158142,
+            0.4050000011920929
+          ],
+          "sampled_flux_wb": -0.052737131711587226,
+          "selected_by_private_read": false,
+          "selected_by_public_read": false,
+          "trace_error": "the centred bracket contains duplicate coordinates"
+        }
+      ],
+      "converged": true,
+      "manifest_row": 17,
+      "maximum_containment_candidate_node": 10,
+      "maximum_containment_candidate_nodes": [
+        10,
+        17,
+        18,
+        25
+      ],
+      "maximum_containment_fraction": 1.0,
+      "nearest_fully_contained_candidate_node": 25,
+      "nearest_fully_contained_candidate_ratio": 0.9915105392810006,
+      "panel": "docs/figures/null-identification-authority/contained-anchor/relabel-27079-flagged/row-17-40ms.png",
+      "private_active_partition_read": {
+        "axis_flux_wb": 0.29429636302195805,
+        "axis_position_m": [
+          0.710410595888436,
+          0.0038515604310329315
+        ],
+        "boundary_flux_wb": 0.2712440492920545,
+        "boundary_position_m": [
+          0.6053884305761786,
+          1.7280815839767456
+        ],
+        "boundary_vertex_count": 64,
+        "containment_fraction": 1.0,
+        "contour_closed": true,
+        "enclosed_area_m2": 0.5240258898268411,
+        "enclosed_area_ratio": 0.5710731397903283,
+        "fitted_anchor_position_m": [
+          0.6053884305761786,
+          1.7280815839767456
+        ],
+        "inside_vertex_count": 64,
+        "selected_anchor_node": 10,
+        "selected_anchor_node_position_m": [
+          0.5649306774139404,
+          1.7280815839767456
+        ],
+        "wall_flux_wb": 0.2712440492920545,
+        "x_point_flux_wb": 0.19764668330628515,
+        "x_point_position_m": [
+          0.5866910531016795,
+          1.3972420030162467
+        ]
+      },
+      "private_wall_masked_node_count": 0,
+      "public_read": {
+        "axis_flux_wb": 0.29429636302195805,
+        "axis_position_m": [
+          0.710410595888436,
+          0.0038515604310329315
+        ],
+        "boundary_flux_wb": 0.2742711465661543,
+        "boundary_position_m": [
+          0.19524440169334412,
+          -0.011562757081328368
+        ],
+        "boundary_vertex_count": 64,
+        "containment_fraction": 1.0,
+        "contour_closed": true,
+        "enclosed_area_m2": 0.4522748625309273,
+        "enclosed_area_ratio": 0.492880277115931,
+        "fitted_anchor_position_m": [
+          0.19524440169334412,
+          -0.011562757081328368
+        ],
+        "inside_vertex_count": 64,
+        "selected_anchor_node": 18,
+        "selected_anchor_node_position_m": [
+          0.19524440169334412,
+          -1.0835000276565552
+        ],
+        "wall_flux_wb": 0.2742711465661543,
+        "x_point_flux_wb": 0.19764668330628515,
+        "x_point_position_m": [
+          0.5866910531016795,
+          1.3972420030162467
+        ]
+      },
+      "qualified": false,
+      "reconstruction_area_m2": 0.917616069316864,
+      "selected_anchor_candidate_containment_fraction": 1.0,
+      "selected_anchor_candidate_contour_closed": true,
+      "selected_anchor_candidate_inside_vertex_count": 64,
+      "time_s": 0.03999999910593033
+    }
+  ],
+  "nova_revision": "faebc70a8e1b31a79577a9a052bd5376cc88140b",
+  "pairwise_table": "docs/figures/null-identification-authority/contained-anchor/relabel-27079-flagged/pairwise-boundaries.csv",
+  "receipt_count": 11,
+  "receipt_count_mismatch": true,
+  "route_table": "docs/figures/null-identification-authority/contained-anchor/relabel-27079-flagged/boundary-routes.jsonl",
+  "selected_node_change_count": 2,
+  "selected_node_destinations": [
+    18
+  ],
+  "shot": 27079,
+  "written_frame_count": 16
+}

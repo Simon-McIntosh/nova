@@ -1,0 +1,55 @@
+{
+  "identity": "21978/35",
+  "efit_own_combination": 0.688385546207428,
+  "efit_poloidal_beta": 0.33498355746269226,
+  "efit_internal_inductance": 0.7068039774894714,
+  "profile_implied_combination": 0.4613087019601231,
+  "magnetics_implied_combination": 0.31245935764258936,
+  "minor_radius_m": 0.5846531018614769,
+  "unnormalised_minor_radius_m": 0.5846531018614769,
+  "elongation": 2.0415293528698206,
+  "major_radius_m": 0.7700119063944059,
+  "plasma_current_a": 801493.25,
+  "vertical_field_t": -0.12135528091200946,
+  "identity_round_trip_residual": 1.143566864459468e-16,
+  "identity_round_trip_residual_elongated": 1.143566864459468e-16,
+  "inversion_tolerance": 1e-09,
+  "readings": {
+    "efit_own": {
+      "label": "EFIT betap + li/2",
+      "combination": 0.688385546207428
+    },
+    "profiles": {
+      "label": "profiles",
+      "combination": 0.4613087019601231
+    },
+    "magnetics_circular": {
+      "label": "magnetics (a)",
+      "combination": 0.3110576039834889
+    },
+    "magnetics_elongated": {
+      "label": "magnetics (a sqrt k)",
+      "combination": 0.66790720886533
+    },
+    "magnetics_discrete": {
+      "label": "magnetics (discrete)",
+      "combination": 0.31245935764258936
+    }
+  },
+  "unit_check": {
+    "definition": "beta_p = 4 * pressure_integral / (mu0 * major_radius * I_p**2); l_i = 2 * poloidal_field_integral / (mu0**2 * major_radius * I_p**2)",
+    "mu0_h_m": 1.2566370614359173e-06,
+    "pressure_integral_j": 39366.38031363439,
+    "poloidal_field_integral_t2_m3": 0.20799524656759044,
+    "major_radius_m": 0.8673187486320914,
+    "plasma_current_a": 801492.8053224066,
+    "recomputed_poloidal_beta": 0.22490422814938568,
+    "reported_poloidal_beta": 0.22490422817908037,
+    "poloidal_beta_relative_difference": 1.320326051264575e-10,
+    "recomputed_internal_inductance": 0.47280894743723295,
+    "reported_internal_inductance": 0.47280894756208536,
+    "internal_inductance_relative_difference": 2.6406523572616585e-10,
+    "cocos": "neither quantity carries a sign factor: each is a ratio of a volume integral to mu0 * R_ax * I_p**2, and the poloidal field enters squared, so a COCOS convention that flips the sign of the poloidal flux leaves the pressure integral, the squared-field integral and the plasma current's own sign unchanged. The magnetics side is signed through B_v, so its inversion is stated with the plasma current's signed value."
+  },
+  "sentence": "EFIT's own 0.6884 sits above the profiles' 0.4613; the closest magnetics reading is magnetics (a sqrt k) at 0.6679 (residual -0.0205), against the magnetics set magnetics (a) 0.3111, magnetics (a sqrt k) 0.6679, magnetics (discrete) 0.3125."
+}

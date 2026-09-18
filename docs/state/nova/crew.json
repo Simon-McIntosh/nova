@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T14:40:03",
+  "updated": "2026-09-18T14:46:05",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -192044,6 +192044,349 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260918T080952872560-ecq-capacity-refusal-must-report",
+        "plan": "exact-clip-moment-quadrature",
+        "section": "",
+        "node": "ecq-capacity-refusal-must-report",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1167,
+                "cached_input_tokens": 278804,
+                "input_tokens": 280003,
+                "output_tokens": 2363,
+                "reasoning_output_tokens": 349,
+                "total_tokens": 282366,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "nova/equilibrium/separatrix_clip.py reports a layout above the derived capacity (128 plus the straight chain) as a counted refusal on the clip receipt with a fail-closed assertion path the solve can surface instead of returning included 0 silently, and tests/test_equilibrium_separatrix_clip.py presents a two-arc layout and asserts the refusal is counted and raised; benchmarks/solovev_certificate.py derives exact_support_capacity for the memory receipts' dimensions block from the compiled bound (158) instead of chord_capacity times chain_samples (3840); the maximal live vertex count is measured on the moderate, strong and single-null rows at 110 cells and stated beside the weak rows; the largest-intermediate census that --skip-hlo skipped is run once per tree on the 300-cell row; the per-row identity receipts are named as compare-only reruns in the receipts; all measurements run on all_debug jobs with JAX_PLATFORMS=cpu (one job per row, logs under the reports fence); the evidence record and plan are NOT edited by this node (another node holds them) and the manifest lists the sentences the coordinator must carry into them; every uv command carries --no-sync and nothing runs uv sync; python syntax is checked with /home/ITER/mcintos/Code/nova/.venv/bin/python -m py_compile before each commit",
+          "estimated_hours": null,
+          "goal": "make the exact-clip capacity overflow refusal observable and retire the stale 3840 declaration",
+          "id": "ecq-capacity-refusal-must-report",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-18T08:09:55Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T080952872560-ecq-capacity-refusal-must-report/manifest.md",
+          "plan": "exact-clip-moment-quadrature",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/separatrix_clip.py",
+            "tests/test_equilibrium_separatrix_clip.py",
+            "benchmarks/solovev_certificate.py",
+            "docs/figures/exact-clip-moment-quadrature/capacity",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-capacity-refusal",
+            "docs/evidence/archive/exact-clip-moment-quadrature-landed.html",
+            "docs/plans/exact-clip-moment-quadrature.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-ecq-capacity-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-18T08:10:14Z",
+        "completed_at": "2026-09-18T12:14:22.112Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 14634,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 14648,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "cdc915baed2986cdbf48ff35d3fc0abe4e07da73",
+        "commits": [
+          "57af295535461807787caa1b19a1eae04ae5f9d7",
+          "f6bce45ed9fee2c83441f091ac65c98348a0e02b",
+          "da67cfc543b4599339210f2915f80d27307c1546",
+          "22c268e0ddfcee0d6c3072e503e7eb9b3d70ee4b",
+          "5d4eca292ebc0ab40b815cf99fd09da3a8db80a8"
+        ],
+        "changed_lines": {
+          "added": 421,
+          "removed": 5,
+          "files": 11
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "tests/test_equilibrium_separatrix_clip.py 25 passed in job 1273409; census jobs exit 0; independent review",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260918T080952872560-ecq-capacity-refusal-must-report.json",
+          "log_digest": "sha256:eab59f92f3e8d785c3d7483e684af776109033f8a4f58a4e257a678a2bf1b426"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T080952872560-ecq-capacity-refusal-must-report/manifest.md",
+        "scope_changed": false,
+        "session_id": "c7a4e0c9-d76b-4ed6-8cd0-9b38d6f0c8ec",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 398089,
+            "input_tokens_cumulative": 398089,
+            "output_tokens": 2772,
+            "output_tokens_cumulative": 2772,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T12:14:22.112Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1421,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: THE ONE-BODY GATE STAYS SUSPENDED; and this node now knows what the census counts; which is why it stays suspended as stated. The count is of distinct enclosing compiled computations; one copy each (120 in 120 blocks; 74 in 74); and there is no small trips-by-stages product underneath it: the current-moment read is fused into 112 distinct immediate callers; near one copy each; and the topology read is a nested call in 70; plus 28 derivative twins and a 7-copy second consumer. A seam change can therefore move the per-parent count only; and the dominant factor (XLA's clone/sink fan over the solve's staging) is not a seam. Blocked on a coordinator decision: restate the census baseline as the per-parent count and move the gated quantity from the read body to the enclosing-region fan; or accept that the census is a metric rather than a gate. Second; smaller blocker: the moment read's share that are derivative twins is unmeasured because its marker lands on fused HLO ops rather than on a nested call; so its op tail carries no trace name; that is stated as a limit in the receipt and is a cheap follow-up measurement; not a wiring task. No solver code was changed in this fence and no new compilation was issued. The write scope's other files are untouched; the plan edit was committed and pushed from the primary checkout because the plan tool resolves to it.",
+              "elapsed_seconds": 4721,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 33222,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1f141e67",
+                "41bd2b44",
+                "f7901923"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "3e08d9010235e5ae374ff178a59fdb044ba3209b4092471f82393d0143254787",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T170314445551-msc-request-set-machine-2/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T170314445551-msc-request-set-machine-2/manifest.md; resolve the blocker before resuming the run",
+              "node": "msc-request-set-machine-2",
+              "phase": "working",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T170314445551-msc-request-set-machine-2",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260917T170314445551-msc-request-set-machine-2",
+                "session_id": "198482ff-f153-4018-93e9-d2d6fc6734b8",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 33482,
+              "terminal_at": "2026-09-17T22:51:59Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-request-set-machine-2"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 525,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1120,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9bd309a3",
+                "efe5f857",
+                "7e58967b",
+                "2e848df7"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0967b66f73cf743370bf4410085fd85f02b8472236f964f547895efd08e65451",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T204844553132-msc-canonical-program-shapes-census/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan millisecond-converged-solve --section '' --role review --spec-level exact --node review-of-msc-canonical-program-shapes-census --goal 'attach an independent review to run r-20260917T204844553132-msc-canonical-program-shapes-census' --done-when 'the review for r-20260917T204844553132-msc-canonical-program-shapes-census parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T204844553132-msc-canonical-program-shapes-census.json --time-budget 55m --session s19-codex-20260916 --local",
+              "node": "msc-canonical-program-shapes-census",
+              "phase": "working",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T204844553132-msc-canonical-program-shapes-census",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 1348,
+              "terminal_at": "2026-09-18T07:47:33Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-canonical-program-shapes-census"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 18,
+            "evidence": 17,
+            "fit": 19,
+            "goal_fidelity": 18,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 91
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 398089,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 299.235,
+          "generated_tokens": 2772,
+          "generation_seconds": 297.921,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 21.8,
+          "machine_seconds": 1.314,
+          "peak_input_tokens": 104631,
+          "tokens_per_second": 9.3,
+          "wall_tokens_per_second": 9.26
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": [
+          {
+            "path": "docs/figures/exact-clip-capacity/receipts.md",
+            "reason": "the identity receipts are named as compare-only reruns in the receipts file the previous node created; the coordinator granted it as a companion path on resume"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-capacity-refusal-must-report",
+          "session_id": "c7a4e0c9-d76b-4ed6-8cd0-9b38d6f0c8ec",
+          "session_source": "stream",
+          "retained_at": "2026-09-18T12:14:22.112Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 50.0,
+        "orientation_input_tokens": 1830747.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -192356,6 +192699,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2802
+    "_version": 2803
   }
 }

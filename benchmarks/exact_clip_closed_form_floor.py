@@ -208,18 +208,21 @@ def _closed_form_moments(
 #: coupling rows carry the second-order coupling frozen-image error of their
 #: own component.
 #: The fallback rows carry the fan refinement floor, reported per moment, and
-#: apply to every row the coupling table did not reach. A row is met when every
+#: apply to every row the coupling table did not reach. That floor sits at
+#: round-off scale, so its tenth is below any polyline's own round-off floor and
+#: a fallback row is reported as met by no arc vertex count rather than by
+#: a count that would read as a verdict on the route. A row is met when every
 #: moment series it gates sits at or below its budget.
 COUPLING_BUDGET = {
-    ("weak-rotation-reactor-static", -110): 1.147e-4,
-    ("weak-rotation-reactor-static", -300): 3.244e-5,
-    ("moderate-rotation-conventional-static", -110): 1.040e-4,
-    ("moderate-rotation-conventional-static", -300): 3.348e-5,
+    ("weak-rotation-reactor-static", -110): 1.147e-5,
+    ("weak-rotation-reactor-static", -300): 3.244e-6,
+    ("moderate-rotation-conventional-static", -110): 1.040e-5,
+    ("moderate-rotation-conventional-static", -300): 3.348e-6,
 }
 FALLBACK_BUDGET = {
-    "current": 2.924e-16,
-    "radial": 5.109e-15,
-    "vertical": 5.064e-15,
+    "current": 2.924e-17,
+    "radial": 5.109e-16,
+    "vertical": 5.064e-16,
 }
 
 

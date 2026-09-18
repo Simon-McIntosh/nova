@@ -10,22 +10,24 @@ without running a solve:
 * the combination the external magnetics imply through the large-aspect-ratio
   vertical-field identity, with the minor radius the Shafranov logarithm is
   stated against taken three ways: the boundary's own half radial extent ``a``,
-  the area-equivalent ``a * sqrt(kappa)``, and nova's discrete requirement.
+  the area-equivalent ``a * sqrt(kappa)``, and the production row's own kernel.
 
-The three magnetics readings share the prescribed conductor image as their field
-instrument -- it is the payload the production Shafranov row already carries --
-and differ in the horizontal scale the logarithm is stated against.  The
-circular and discrete readings also differ in inversion path: one is the
-analytic identity of :mod:`nova.equilibrium.diagnostics`, the other is the
-production row's own kernel read at the solved state's current centroid, so
-their agreement is the round-trip check of the analytic inversion rather than a
-fourth number.
+All three magnetics readings are the *same* identity.  The first two invert it
+here, at two ln arguments; the third is
+:meth:`ExternalShafranovConstraint.observed`, the production row's own
+combination, which carries ``ln(8R/a)`` inside it.  None of the three is
+formula-free, so their agreement is a consistency check between the row and the
+diagnostic inversion, not an independent measurement of the quantity.  The
+formula-free value of this combination is a contour integral of the poloidal
+field over a contour enclosing the plasma; no reading here computes one.
 
 What the table is for is attribution.  The gap between the profiles' reading of
 ``beta_p + l_i/2`` and the magnetics' reading is the quantity the constrained
 row exists to close; placing EFIT's own value beside both says which side of
-that gap the reconstruction sits on, and which of the three minor radii closes
-on the reconstruction's answer.
+that gap the reconstruction sits on.  Which of the three magnetics readings sits
+nearest EFIT's own sitting is a weaker statement than it looks: they differ only
+in the ``ln(8R/a)`` argument, so a closure names the argument that happens to
+match rather than a mechanism.
 
 The unit and COCOS check of the profile-implied side is written out in full:
 ``beta_p`` and ``l_i`` are recomputed from the observation's own volume
@@ -95,7 +97,26 @@ READING_LABELS: dict[str, str] = {
     "profiles": "profiles",
     "magnetics_circular": "magnetics (a)",
     "magnetics_elongated": "magnetics (a sqrt k)",
-    "magnetics_discrete": "magnetics (discrete)",
+    "magnetics_discrete": "magnetics (row kernel)",
+}
+#: What each magnetics reading is, so the labels cannot be read as independence.
+MAGNETICS_PROVENANCE: dict[str, str] = {
+    "magnetics_circular": (
+        "identity_combination at a = half the boundary's radial extent: the "
+        "large-aspect-ratio vertical-field identity, inverted here"
+    ),
+    "magnetics_elongated": (
+        "the same identity inverted here at a*sqrt(kappa), the area-equivalent "
+        "horizontal scale; only the ln argument differs"
+    ),
+    "magnetics_discrete": (
+        "ExternalShafranovConstraint.observed, the production row's own "
+        "combination, evaluated at the solved state's current centroid. The row "
+        "carries ln(8R/a) inside its own expression, so the row's reading is the "
+        "same identity, not a formula-free measurement. The formula-free value of "
+        "this quantity is a contour integral of the poloidal field over a contour "
+        "enclosing the plasma, which no reading in this driver computes"
+    ),
 }
 #: Relative tolerance the analytic inversion is round-tripped against.
 INVERSION_TOLERANCE = 1.0e-9
@@ -114,6 +135,7 @@ ROW_FIELDS: tuple[str, ...] = (
     "plasma_current_a",
     "vertical_field_t",
     "identity_round_trip_residual",
+    "row_kernel_versus_circular_residual",
     "profile_implied_combination_unnormalised",
     "profile_normalisation",
     "constraint_row_reading_unnormalised",
@@ -591,6 +613,9 @@ def _row_document(
             elongated,
             elongation=elongation,
         ),
+        "row_kernel_versus_circular_residual": _strict_float(
+            shape["discrete"] - circular
+        ),
         "inversion_tolerance": INVERSION_TOLERANCE,
         "readings": readings(combinations),
         "unit_check": unit_check,
@@ -747,7 +772,13 @@ def measure(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any
             "magnetics_elongated": "identity_combination with a * sqrt(kappa)",
             "magnetics_discrete": (
                 "ExternalShafranovConstraint.observed: the production row's own "
-                "read of the same image, no analytic formula"
+                "combination, evaluated with the traced context's plasma current"
+            ),
+            "magnetics_provenance": dict(MAGNETICS_PROVENANCE),
+            "formula_free_value": (
+                "not computed here: the formula-free reading of this quantity is a "
+                "contour integral of the poloidal field over a contour enclosing "
+                "the plasma, which no driver in this receipt performs"
             ),
             "persistent_compilation_cache": {
                 "directory": str(cache.directory),

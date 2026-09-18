@@ -17,7 +17,9 @@ import pytest
 
 from benchmarks import shafranov_combination_discriminator as discriminator
 from benchmarks.shafranov_combination_discriminator import (
+    MAGNETICS_PROVENANCE,
     READING_KEYS,
+    READING_LABELS,
     attribute,
     boundary_shape,
     constraint_context,
@@ -70,9 +72,9 @@ def test_identity_inversion_round_trips_the_forward_identity():
     current, radius, minor = 801493.25, 0.86, 0.5847
     for combination in (-0.5, 0.0, 0.3126, 2.0):
         field = shafranov_vertical_field(current, radius, minor, combination)
-        assert identity_combination(
-            current, radius, minor, field
-        ) == pytest.approx(combination, rel=1.0e-12)
+        assert identity_combination(current, radius, minor, field) == pytest.approx(
+            combination, rel=1.0e-12
+        )
 
 
 def test_identity_inversion_refuses_geometry_the_forward_identity_refuses():
@@ -155,6 +157,22 @@ def test_unit_check_recomputes_beta_and_inductance_from_the_integrals():
     )
     assert check["mu0_h_m"] == MU0
     assert "mu0**2" in check["definition"]
+
+
+def test_the_combination_label_never_claims_a_formula_free_reading():
+    """Every magnetics label names its ln argument or its row, and the row's one
+    says so, because the production row evaluates the same identity."""
+    assert "discrete" not in READING_LABELS["magnetics_discrete"]
+    assert "row" in READING_LABELS["magnetics_discrete"]
+    assert "ln(8R/a)" in MAGNETICS_PROVENANCE["magnetics_discrete"]
+    assert "identity" in MAGNETICS_PROVENANCE["magnetics_elongated"]
+
+
+def test_the_formula_free_route_is_named_and_not_claimed():
+    """The receipt says which route would be formula-free, and that it is absent."""
+    text = MAGNETICS_PROVENANCE["magnetics_discrete"]
+    assert "contour integral" in text
+    assert "not a formula-free measurement" in text
 
 
 def test_reading_keys_are_ordered_and_labelled():

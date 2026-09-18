@@ -333,6 +333,60 @@
   (per-edit traces) and <code>coil-edit-nonconvergence.html</code> (the twenty edits tabled beside each
   other, with the panel states in <code>panel-states.npz</code>).</p>
 </section>
+
+<section id="coil-edit-branch-terms">
+<h2>The closed boundary branch at the trace: reproduction and mechanism (2026-09-18)</h2>
+<p><strong>Status: reproduced and localized, repair not landed.</strong> The coil-edit panel draws the
+boundary level set as one open arc that sprays coil-adjacent flux through the centre column, because at
+the boundary flux the contour of <code>traced_spline_contour</code> leaves the grid before the
+axis-enclosing lobe closes. The predecessor reported 16 of 21 raster fields failing
+<code>assemble_separatrix_branches</code>. This node re-ran that assembly against the twenty
+persisted states in
+<code>docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz</code> and reproduces the
+defect at <strong>14 of 20 with no closed branch</strong> and <strong>6 of 20 well formed</strong>.</p>
+<p>Every failing state carries the same term signature: <code>closed_candidate_count = 0</code>,
+<code>cycle_component_count = 0</code>, <code>axis_enclosing_component_count = 1</code>,
+<code>open_branch_count = 0</code>, with <code>contour_well_formed</code> and
+<code>graph_well_formed</code> both true and no overflow. The axis-enclosing component therefore exists
+and is not a cycle, and it is not reported as a saddle-ended leg either: it is one open component with
+exactly two degree-one ends.</p>
+<p>The three findings that move the repair:</p>
+<ol>
+<li><strong>The trace domain already reaches past the wall on every side.</strong> The persisted raster
+spans <code>r in [0.060, 2.000]</code> and <code>z in [-2.000, 2.000]</code> against a MAST wall of
+<code>r in [0.195, 1.900]</code> and <code>z in [-1.825, 1.825]</code>. The two open ends sit at
+<code>z = -2.000</code> and <code>z = +2.000</code>, on the raster box edge and <em>outside</em> the
+wall, so extending the domain is not the lever. Nor could it be: the fitted tensor spline is
+extrapolating out there and diverges under it (corner values 0.15, 62.6, 2879 and 155164 at 1.0x, 1.5x,
+2.0x and 3.0x the box).</li>
+<li><strong>The failing states trace as ONE component where the passing states trace as TWO.</strong> The
+six well-formed states decompose into a closed degree-2 cycle beside an open arc; the fourteen failing
+states decompose into a single open path from the bottom edge to the top edge. Quoting one of each: state
+0 (failing) has 122 segments in one component whose degree-one ends are
+<code>(r=0.9465, z=-2.0000)</code> and <code>(r=0.7206, z=+2.0000)</code>. State 13 (well formed) has 126
+segments in two components: a closed 66-node cycle and an open arc ending at
+<code>(r=0.9302, z=-2.0000)</code> and <code>(r=0.8214, z=+2.0000)</code>. So the lobe has been joined to
+a leg into one path.</li>
+<li><strong>The saddle polish is not the lever.</strong> <code>closed_candidate_count</code> is unchanged
+on all twenty states at <code>saddle_steps</code> of 8, 16, 32 and 64, so the failure is not a limit on
+the polished saddle's accuracy.</li>
+</ol>
+<p>Together these place the repair at the diagonal-cell crossing pairing inside
+<code>traced_spline_contour</code> (<code>nova/equilibrium/flux_surface_connectivity.py</code>), whose
+<code>segment_at_saddle</code> mask is what <code>separatrix_branches._expanded_graph</code> splits the
+arcs on. A pairing that joins the lobe to a leg at the boundary-level saddle yields exactly the single
+open path measured here; the saddle split in <code>assemble_separatrix_branches</code> cannot recover the
+closed lobe once the pairing has already merged them. The repair site lies outside this node's declared
+write scope, so it is reported rather than attempted.</p>
+<p>Diagnostic driver and per-state table:
+<code>docs/figures/forward-solve-api/coil-edit-nonconvergence/diagnose_branch_terms.py</code> and
+<code>branch-terms.json</code>. The predecessor's uncommitted receipt edits (the mechanism groups and the
+restored latency receipt, 303 insertions / 285 deletions across <code>coil-edit-latency.json</code> and
+<code>coil-edit-nonconvergence.json</code>) applied cleanly and are carried in the same commit.</p>
+<p><strong>Followup:</strong> <code>benchmarks/diiid_poloidal_figures.py</code> owes the same closed-branch
+fix — it draws a boundary level set from the same tracer and inherits the same merge-at-the-saddle
+failure.</p>
+</section>
 </main>
 </body>
 </html>

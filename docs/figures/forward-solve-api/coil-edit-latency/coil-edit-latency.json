@@ -12,7 +12,7 @@
     "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
     "size_bytes": 645864,
     "stored_circuit_count": 101,
-    "warm_load_seconds": 0.01197317149490118
+    "warm_load_seconds": 0.017361635342240334
   },
   "case": {
     "boundary_coil_selection": {
@@ -85,7 +85,7 @@
   },
   "compile": {
     "later_edits_add_no_compiles": true,
-    "persistent_cache_hit_count": 26,
+    "persistent_cache_hit_count": 25,
     "persistent_cache_miss_count": 14,
     "process_cache_hit_count_after_first": 19,
     "program_built_first_edit": true,
@@ -93,7 +93,7 @@
   },
   "driver": {
     "path": "benchmarks/coil_edit_latency.py",
-    "sha256": "1dfebd208d79b3fab97511bc41d7ffdab92947ba6f547cfed3d576c44f5ed9a0"
+    "sha256": "664c2031d18d690a3a2fcb31bd3ff5c53e8a3d294cdbf9fa7380328b9a6daba5"
   },
   "edits": [
     {
@@ -102,7 +102,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.4393706171643554,
+      "boundary_displacement_m": 0.4722807398543636,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -151860.0409375,
       "compilation_cache": "miss",
@@ -121,12 +121,12 @@
       "persistent_cache_hits_after": 156,
       "persistent_cache_hits_before": 154,
       "persistent_cache_miss_count": 1,
-      "persistent_cache_misses_after": 8,
-      "persistent_cache_misses_before": 7,
+      "persistent_cache_misses_after": 9,
+      "persistent_cache_misses_before": 8,
       "program_reused": false,
-      "raster_separatrix_vertex_count": 122,
+      "raster_separatrix_vertex_count": 118,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 4786.959866061807,
+      "receipt_wall_milliseconds": 4277.490111999214,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0,
@@ -156,7 +156,7 @@
           0.05309179787633965
         ]
       },
-      "solve_wall_milliseconds": 19624.423323199153,
+      "solve_wall_milliseconds": 20752.529351972044,
       "terminal_residual": 2.729051140620475e-09,
       "termination": "converged",
       "trip_count": 4,
@@ -172,7 +172,7 @@
         5.027567502355718e-10,
         2.729051140620475e-09
       ],
-      "wall_milliseconds": 24411.38237249106,
+      "wall_milliseconds": 25030.018507502973,
       "warm_seed_source": "converged base frame at the shot current"
     },
     {
@@ -181,7 +181,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.4372008533727679,
+      "boundary_displacement_m": 0.468869080164959,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -155563.944375,
       "compilation_cache": "hit",
@@ -197,12 +197,12 @@
       "persistent_cache_hits_after": 157,
       "persistent_cache_hits_before": 156,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 9,
-      "persistent_cache_misses_before": 9,
+      "persistent_cache_misses_after": 10,
+      "persistent_cache_misses_before": 10,
       "program_reused": true,
-      "raster_separatrix_vertex_count": 123,
+      "raster_separatrix_vertex_count": 119,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 301.7262816429138,
+      "receipt_wall_milliseconds": 321.3267093524337,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0
@@ -229,7 +229,7 @@
           0.008171273005420154
         ]
       },
-      "solve_wall_milliseconds": 110.1307449862361,
+      "solve_wall_milliseconds": 124.2789477109909,
       "terminal_residual": 2.3737592582011223e-06,
       "termination": "active_set_settled",
       "trip_count": 1,
@@ -239,7 +239,7 @@
       "trip_residual_trace": [
         2.3737592582011223e-06
       ],
-      "wall_milliseconds": 411.8563737720251,
+      "wall_milliseconds": 445.60509640723467,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -248,7 +248,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.4346808834173494,
+      "boundary_displacement_m": 0.4651952446978393,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -159267.8478125,
       "compilation_cache": "hit",
@@ -264,12 +264,12 @@
       "persistent_cache_hits_after": 157,
       "persistent_cache_hits_before": 157,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 9,
-      "persistent_cache_misses_before": 9,
+      "persistent_cache_misses_after": 10,
+      "persistent_cache_misses_before": 10,
       "program_reused": true,
-      "raster_separatrix_vertex_count": 123,
+      "raster_separatrix_vertex_count": 121,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 224.44074135273695,
+      "receipt_wall_milliseconds": 270.91560792177916,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0
@@ -296,7 +296,7 @@
           0.007561314170699575
         ]
       },
-      "solve_wall_milliseconds": 94.98374909162521,
+      "solve_wall_milliseconds": 99.45140033960342,
       "terminal_residual": 2.407874987463556e-05,
       "termination": "active_set_settled",
       "trip_count": 1,
@@ -306,7 +306,7 @@
       "trip_residual_trace": [
         2.407874987463556e-05
       ],
-      "wall_milliseconds": 319.4242836907506,
+      "wall_milliseconds": 370.3667912632227,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -315,7 +315,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.432158104174914,
+      "boundary_displacement_m": 0.4530252273225864,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -162971.75124999997,
       "compilation_cache": "hit",
@@ -332,12 +332,12 @@
       "persistent_cache_hits_after": 158,
       "persistent_cache_hits_before": 157,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 9,
-      "persistent_cache_misses_before": 9,
+      "persistent_cache_misses_after": 10,
+      "persistent_cache_misses_before": 10,
       "program_reused": true,
-      "raster_separatrix_vertex_count": 123,
+      "raster_separatrix_vertex_count": 122,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 254.16037067770958,
+      "receipt_wall_milliseconds": 231.86885379254818,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0,
@@ -365,7 +365,7 @@
           0.0069307329125717085
         ]
       },
-      "solve_wall_milliseconds": 130.86770102381706,
+      "solve_wall_milliseconds": 130.67676872015,
       "terminal_residual": 1.2710772866430292e-09,
       "termination": "converged",
       "trip_count": 2,
@@ -377,7 +377,7 @@
         0.003657465074930321,
         1.2710772866430292e-09
       ],
-      "wall_milliseconds": 385.0278025493026,
+      "wall_milliseconds": 362.54551354795694,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -386,7 +386,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.43253362321129313,
+      "boundary_displacement_m": 0.45187170262098003,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -166675.65468749998,
       "compilation_cache": "hit",
@@ -402,12 +402,12 @@
       "persistent_cache_hits_after": 158,
       "persistent_cache_hits_before": 158,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 10,
-      "persistent_cache_misses_before": 10,
+      "persistent_cache_misses_after": 11,
+      "persistent_cache_misses_before": 11,
       "program_reused": true,
-      "raster_separatrix_vertex_count": 125,
+      "raster_separatrix_vertex_count": 124,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 242.36314184963703,
+      "receipt_wall_milliseconds": 231.79315496236086,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0
@@ -434,7 +434,7 @@
           0.006455180777364833
         ]
       },
-      "solve_wall_milliseconds": 109.43228099495173,
+      "solve_wall_milliseconds": 116.9672841206193,
       "terminal_residual": 0.0018824984145619141,
       "termination": "active_set_settled",
       "trip_count": 1,
@@ -444,7 +444,7 @@
       "trip_residual_trace": [
         0.0018824984145619141
       ],
-      "wall_milliseconds": 351.79521702229977,
+      "wall_milliseconds": 348.76023326069117,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -453,7 +453,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.42850962374286133,
+      "boundary_displacement_m": 0.44658672910891145,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -170379.55812499998,
       "compilation_cache": "hit",
@@ -471,12 +471,12 @@
       "persistent_cache_hits_after": 158,
       "persistent_cache_hits_before": 158,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 10,
-      "persistent_cache_misses_before": 10,
+      "persistent_cache_misses_after": 11,
+      "persistent_cache_misses_before": 11,
       "program_reused": true,
-      "raster_separatrix_vertex_count": 123,
+      "raster_separatrix_vertex_count": 124,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 277.31908578425646,
+      "receipt_wall_milliseconds": 253.87297477573156,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0,
@@ -505,7 +505,7 @@
           0.0007806345075011047
         ]
       },
-      "solve_wall_milliseconds": 114.21519052237272,
+      "solve_wall_milliseconds": 113.4360721334815,
       "terminal_residual": 3.766106015855534e-15,
       "termination": "converged",
       "trip_count": 3,
@@ -519,7 +519,7 @@
         4.436427522277274e-09,
         3.766106015855534e-15
       ],
-      "wall_milliseconds": 391.53417106717825,
+      "wall_milliseconds": 367.30879824608564,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -528,7 +528,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.429117057485612,
+      "boundary_displacement_m": 0.4456882197894513,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -174083.4615625,
       "compilation_cache": "hit",
@@ -544,12 +544,12 @@
       "persistent_cache_hits_after": 158,
       "persistent_cache_hits_before": 158,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 11,
-      "persistent_cache_misses_before": 11,
+      "persistent_cache_misses_after": 12,
+      "persistent_cache_misses_before": 12,
       "program_reused": true,
-      "raster_separatrix_vertex_count": 125,
+      "raster_separatrix_vertex_count": 124,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 230.1103351637721,
+      "receipt_wall_milliseconds": 281.5388925373554,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0
@@ -576,7 +576,7 @@
           0.005385834380413215
         ]
       },
-      "solve_wall_milliseconds": 107.60237742215395,
+      "solve_wall_milliseconds": 118.00244357436895,
       "terminal_residual": 0.004422369075619115,
       "termination": "active_set_settled",
       "trip_count": 1,
@@ -586,7 +586,7 @@
       "trip_residual_trace": [
         0.004422369075619115
       ],
-      "wall_milliseconds": 337.7126222476363,
+      "wall_milliseconds": 399.5411265641451,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -595,7 +595,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.4282349234202611,
+      "boundary_displacement_m": 0.4433272918747743,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -177787.365,
       "compilation_cache": "hit",
@@ -611,12 +611,12 @@
       "persistent_cache_hits_after": 158,
       "persistent_cache_hits_before": 158,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 11,
-      "persistent_cache_misses_before": 11,
+      "persistent_cache_misses_after": 12,
+      "persistent_cache_misses_before": 12,
       "program_reused": true,
-      "raster_separatrix_vertex_count": 125,
+      "raster_separatrix_vertex_count": 123,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 231.26343823969364,
+      "receipt_wall_milliseconds": 250.89853536337614,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0
@@ -643,7 +643,7 @@
           0.007436532652392205
         ]
       },
-      "solve_wall_milliseconds": 80.21821454167366,
+      "solve_wall_milliseconds": 82.58554339408875,
       "terminal_residual": 5.0334295713128155e-09,
       "termination": "converged",
       "trip_count": 1,
@@ -653,7 +653,7 @@
       "trip_residual_trace": [
         5.0334295713128155e-09
       ],
-      "wall_milliseconds": 311.4813631400466,
+      "wall_milliseconds": 333.4838980808854,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -662,7 +662,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.4269887755248902,
+      "boundary_displacement_m": 0.44059245391042695,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -181491.26843749997,
       "compilation_cache": "hit",
@@ -678,12 +678,12 @@
       "persistent_cache_hits_after": 158,
       "persistent_cache_hits_before": 158,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 11,
-      "persistent_cache_misses_before": 11,
+      "persistent_cache_misses_after": 12,
+      "persistent_cache_misses_before": 12,
       "program_reused": true,
-      "raster_separatrix_vertex_count": 125,
+      "raster_separatrix_vertex_count": 123,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 228.6697756499052,
+      "receipt_wall_milliseconds": 263.13893776386976,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0
@@ -710,7 +710,7 @@
           0.004157670515326417
         ]
       },
-      "solve_wall_milliseconds": 96.70619294047356,
+      "solve_wall_milliseconds": 99.93843827396631,
       "terminal_residual": 1.8589944326201705e-07,
       "termination": "active_set_settled",
       "trip_count": 1,
@@ -720,7 +720,7 @@
       "trip_residual_trace": [
         1.8589944326201705e-07
       ],
-      "wall_milliseconds": 325.3757655620575,
+      "wall_milliseconds": 363.07726893574,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -729,7 +729,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.4247411787936255,
+      "boundary_displacement_m": 0.4368068367798955,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -185195.17187499997,
       "compilation_cache": "hit",
@@ -746,12 +746,12 @@
       "persistent_cache_hits_after": 158,
       "persistent_cache_hits_before": 158,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 11,
-      "persistent_cache_misses_before": 11,
+      "persistent_cache_misses_after": 12,
+      "persistent_cache_misses_before": 12,
       "program_reused": true,
-      "raster_separatrix_vertex_count": 123,
+      "raster_separatrix_vertex_count": 122,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 227.65036765486002,
+      "receipt_wall_milliseconds": 249.47650264948606,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0,
@@ -779,7 +779,7 @@
           0.003529105392187786
         ]
       },
-      "solve_wall_milliseconds": 114.9136396124959,
+      "solve_wall_milliseconds": 120.22984214127064,
       "terminal_residual": 2.8900791056265814e-10,
       "termination": "converged",
       "trip_count": 2,
@@ -791,7 +791,7 @@
         7.91239786929676e-07,
         2.8900791056265814e-10
       ],
-      "wall_milliseconds": 342.56371669471264,
+      "wall_milliseconds": 369.70625538378954,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -800,7 +800,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.42215853030719497,
+      "boundary_displacement_m": 0.43266018708405735,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -188899.07531249998,
       "compilation_cache": "hit",
@@ -816,12 +816,12 @@
       "persistent_cache_hits_after": 158,
       "persistent_cache_hits_before": 158,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 12,
-      "persistent_cache_misses_before": 12,
+      "persistent_cache_misses_after": 13,
+      "persistent_cache_misses_before": 13,
       "program_reused": true,
-      "raster_separatrix_vertex_count": 124,
+      "raster_separatrix_vertex_count": 122,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 227.8358582407236,
+      "receipt_wall_milliseconds": 264.5910158753395,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0
@@ -848,7 +848,7 @@
           0.0028694590859762825
         ]
       },
-      "solve_wall_milliseconds": 108.99949260056019,
+      "solve_wall_milliseconds": 122.40080814808607,
       "terminal_residual": 1.5055356487639855e-08,
       "termination": "active_set_settled",
       "trip_count": 1,
@@ -858,7 +858,7 @@
       "trip_residual_trace": [
         1.5055356487639855e-08
       ],
-      "wall_milliseconds": 336.83495968580246,
+      "wall_milliseconds": 386.99083123356104,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -867,7 +867,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.4163778737805923,
+      "boundary_displacement_m": 0.4253663016530966,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -192602.97874999995,
       "compilation_cache": "hit",
@@ -884,12 +884,12 @@
       "persistent_cache_hits_after": 158,
       "persistent_cache_hits_before": 158,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 12,
-      "persistent_cache_misses_before": 12,
+      "persistent_cache_misses_after": 13,
+      "persistent_cache_misses_before": 13,
       "program_reused": true,
       "raster_separatrix_vertex_count": 126,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 224.90292228758335,
+      "receipt_wall_milliseconds": 273.243953473866,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0,
@@ -917,7 +917,7 @@
           0.002208857924081244
         ]
       },
-      "solve_wall_milliseconds": 128.13479639589787,
+      "solve_wall_milliseconds": 132.24167190492153,
       "terminal_residual": 2.1406201536602478e-09,
       "termination": "converged",
       "trip_count": 2,
@@ -929,7 +929,7 @@
         0.0003879181322956529,
         2.1406201536602478e-09
       ],
-      "wall_milliseconds": 353.03754080086946,
+      "wall_milliseconds": 405.4853981360793,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -938,7 +938,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.41177499621834757,
+      "boundary_displacement_m": 0.41941717022968195,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -196306.88218749996,
       "compilation_cache": "hit",
@@ -955,12 +955,12 @@
       "persistent_cache_hits_after": 158,
       "persistent_cache_hits_before": 158,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 13,
-      "persistent_cache_misses_before": 13,
+      "persistent_cache_misses_after": 14,
+      "persistent_cache_misses_before": 14,
       "program_reused": true,
-      "raster_separatrix_vertex_count": 126,
+      "raster_separatrix_vertex_count": 124,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 246.70073483139277,
+      "receipt_wall_milliseconds": 299.05790463089943,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0,
@@ -988,7 +988,7 @@
           0.001573177353127995
         ]
       },
-      "solve_wall_milliseconds": 107.55212791264057,
+      "solve_wall_milliseconds": 121.31846323609352,
       "terminal_residual": 4.22385025565535e-09,
       "termination": "converged",
       "trip_count": 2,
@@ -1000,7 +1000,7 @@
         5.243740538361526e-09,
         4.22385025565535e-09
       ],
-      "wall_milliseconds": 354.2525190860033,
+      "wall_milliseconds": 420.3753247857094,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1009,7 +1009,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.4119500384073773,
+      "boundary_displacement_m": 0.4180814598584266,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -200010.78562499996,
       "compilation_cache": "hit",
@@ -1026,12 +1026,12 @@
       "persistent_cache_hits_after": 160,
       "persistent_cache_hits_before": 160,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 14,
-      "persistent_cache_misses_before": 14,
+      "persistent_cache_misses_after": 15,
+      "persistent_cache_misses_before": 15,
       "program_reused": true,
       "raster_separatrix_vertex_count": 126,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 256.8714255467057,
+      "receipt_wall_milliseconds": 264.8921553045511,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0,
@@ -1059,7 +1059,7 @@
           0.0014895855851015112
         ]
       },
-      "solve_wall_milliseconds": 139.6949663758278,
+      "solve_wall_milliseconds": 139.03342466801405,
       "terminal_residual": 4.152032033221426e-10,
       "termination": "converged",
       "trip_count": 2,
@@ -1071,7 +1071,7 @@
         6.456155849189393e-05,
         4.152032033221426e-10
       ],
-      "wall_milliseconds": 396.56615164130926,
+      "wall_milliseconds": 403.9243347942829,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1080,7 +1080,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.395661021104555,
+      "boundary_displacement_m": 0.4019424269416936,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -203714.68906249997,
       "compilation_cache": "hit",
@@ -1097,12 +1097,12 @@
       "persistent_cache_hits_after": 160,
       "persistent_cache_hits_before": 160,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 15,
-      "persistent_cache_misses_before": 15,
+      "persistent_cache_misses_after": 16,
+      "persistent_cache_misses_before": 16,
       "program_reused": true,
       "raster_separatrix_vertex_count": 126,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 245.916610583663,
+      "receipt_wall_milliseconds": 274.1323681548238,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0,
@@ -1130,7 +1130,7 @@
           0.0015804736001126167
         ]
       },
-      "solve_wall_milliseconds": 131.7358436062932,
+      "solve_wall_milliseconds": 141.59212727099657,
       "terminal_residual": 1.3122218172797695e-11,
       "termination": "converged",
       "trip_count": 2,
@@ -1142,7 +1142,7 @@
         4.0592825687141676e-07,
         1.3122218172797695e-11
       ],
-      "wall_milliseconds": 377.65215802937746,
+      "wall_milliseconds": 415.724097751081,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1151,7 +1151,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.3638627337822337,
+      "boundary_displacement_m": 0.3871745124241558,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -207418.59249999997,
       "compilation_cache": "hit",
@@ -1168,12 +1168,12 @@
       "persistent_cache_hits_after": 162,
       "persistent_cache_hits_before": 162,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 16,
-      "persistent_cache_misses_before": 16,
+      "persistent_cache_misses_after": 17,
+      "persistent_cache_misses_before": 17,
       "program_reused": true,
-      "raster_separatrix_vertex_count": 129,
+      "raster_separatrix_vertex_count": 124,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 255.96959702670574,
+      "receipt_wall_milliseconds": 284.8899159580469,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         0,
@@ -1201,7 +1201,7 @@
           0.025696664388224596
         ]
       },
-      "solve_wall_milliseconds": 133.25190544128418,
+      "solve_wall_milliseconds": 143.10213178396225,
       "terminal_residual": 6.155521622299323e-10,
       "termination": "converged",
       "trip_count": 2,
@@ -1213,7 +1213,7 @@
         0.027779556158222595,
         6.155521622299323e-10
       ],
-      "wall_milliseconds": 389.2200430855155,
+      "wall_milliseconds": 427.9917059466243,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1222,7 +1222,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.3042584054479049,
+      "boundary_displacement_m": 0.30632411944476445,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -211122.49593749997,
       "compilation_cache": "hit",
@@ -1239,12 +1239,12 @@
       "persistent_cache_hits_after": 162,
       "persistent_cache_hits_before": 162,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 17,
-      "persistent_cache_misses_before": 17,
+      "persistent_cache_misses_after": 18,
+      "persistent_cache_misses_before": 18,
       "program_reused": true,
       "raster_separatrix_vertex_count": 130,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 239.79381751269102,
+      "receipt_wall_milliseconds": 235.86967401206493,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1,
@@ -1272,7 +1272,7 @@
           0.0017401086934472735
         ]
       },
-      "solve_wall_milliseconds": 146.19193598628044,
+      "solve_wall_milliseconds": 157.62664563953876,
       "terminal_residual": 0.0008365310957747329,
       "termination": "active_set_settled",
       "trip_count": 2,
@@ -1284,7 +1284,7 @@
         0.0012780375848490406,
         0.0008365310957747329
       ],
-      "wall_milliseconds": 385.98552998155355,
+      "wall_milliseconds": 393.49490124732256,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1293,7 +1293,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.2995425774637535,
+      "boundary_displacement_m": 0.3010013427791291,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -214826.39937499995,
       "compilation_cache": "hit",
@@ -1309,12 +1309,12 @@
       "persistent_cache_hits_after": 162,
       "persistent_cache_hits_before": 162,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 18,
-      "persistent_cache_misses_before": 18,
+      "persistent_cache_misses_after": 19,
+      "persistent_cache_misses_before": 19,
       "program_reused": true,
       "raster_separatrix_vertex_count": 130,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 234.45573821663857,
+      "receipt_wall_milliseconds": 242.70340614020824,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1
@@ -1341,7 +1341,7 @@
           0.00211060409400877
         ]
       },
-      "solve_wall_milliseconds": 82.25791994482279,
+      "solve_wall_milliseconds": 97.57461026310921,
       "terminal_residual": 0.00211060409400877,
       "termination": "active_set_settled",
       "trip_count": 1,
@@ -1351,7 +1351,7 @@
       "trip_residual_trace": [
         0.00211060409400877
       ],
-      "wall_milliseconds": 316.71332009136677,
+      "wall_milliseconds": 340.27587715536356,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1360,7 +1360,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.38570235949564524,
+      "boundary_displacement_m": 0.3827209060491392,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -218530.30281249995,
       "compilation_cache": "hit",
@@ -1378,12 +1378,12 @@
       "persistent_cache_hits_after": 162,
       "persistent_cache_hits_before": 162,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 18,
-      "persistent_cache_misses_before": 18,
+      "persistent_cache_misses_after": 19,
+      "persistent_cache_misses_before": 19,
       "program_reused": true,
-      "raster_separatrix_vertex_count": 125,
+      "raster_separatrix_vertex_count": 127,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 226.92564968019724,
+      "receipt_wall_milliseconds": 213.42107746750116,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1,
@@ -1412,7 +1412,7 @@
           0.0048696475545747355
         ]
       },
-      "solve_wall_milliseconds": 149.1238735616207,
+      "solve_wall_milliseconds": 152.7108084410429,
       "terminal_residual": 0.0018488548830389415,
       "termination": "active_set_settled",
       "trip_count": 3,
@@ -1426,7 +1426,7 @@
         0.0023112299378581862,
         0.0018488548830389415
       ],
-      "wall_milliseconds": 376.04845222085714,
+      "wall_milliseconds": 366.1316893994808,
       "warm_seed_source": "previous edit terminal state"
     },
     {
@@ -1435,7 +1435,7 @@
         "class_margin": null,
         "read_status": "qualified"
       },
-      "boundary_displacement_m": 0.37856357446109506,
+      "boundary_displacement_m": 0.3768691537025112,
       "boundary_displacement_source": "receiver_grid_separatrix_symmetric_sup",
       "coil_current_a": -222234.20624999996,
       "compilation_cache": "hit",
@@ -1451,12 +1451,12 @@
       "persistent_cache_hits_after": 162,
       "persistent_cache_hits_before": 162,
       "persistent_cache_miss_count": 0,
-      "persistent_cache_misses_after": 19,
-      "persistent_cache_misses_before": 19,
+      "persistent_cache_misses_after": 20,
+      "persistent_cache_misses_before": 20,
       "program_reused": true,
       "raster_separatrix_vertex_count": 125,
       "receipt_error": null,
-      "receipt_wall_milliseconds": 252.30532605201006,
+      "receipt_wall_milliseconds": 250.849150121212,
       "reduced_dimension": 642,
       "rejected_steps_per_trip": [
         1
@@ -1483,7 +1483,7 @@
           0.00292200350800961
         ]
       },
-      "solve_wall_milliseconds": 90.5341636389494,
+      "solve_wall_milliseconds": 104.74301595240831,
       "terminal_residual": 0.00292200350800961,
       "termination": "active_set_settled",
       "trip_count": 1,
@@ -1493,14 +1493,14 @@
       "trip_residual_trace": [
         0.00292200350800961
       ],
-      "wall_milliseconds": 342.8393807262182,
+      "wall_milliseconds": 355.591950006783,
       "warm_seed_source": "previous edit terminal state"
     }
   ],
   "figure": "docs/figures/forward-solve-api/coil-edit-latency/coil-edit-latency.png",
   "forward_module": {
     "path": "nova/equilibrium/forward.py",
-    "sha256": "0ddb13d35616bfeb0f680376d184891c06030b5f0d4ce02ba499f36e2289b9d5"
+    "sha256": "e000f158aa438cf0eafb7b9ca0c196ae6574d59cbaab08287186701b595f0560"
   },
   "gates": {
     "all_edits_converged": false,
@@ -1550,9 +1550,9 @@
     "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
     "maximum_bytes": 8589934592,
     "minimum_compile_seconds": 1.0,
-    "process_total_compile_seconds_saved": 40.85600692592561,
+    "process_total_compile_seconds_saved": 39.71163626201451,
     "process_total_hit_count": 162,
-    "process_total_miss_count": 19,
+    "process_total_miss_count": 20,
     "root": "/home/ITER/mcintos/.cache",
     "runtime_identity": {
       "backend": "gpu",
@@ -1576,8 +1576,8 @@
       "jaxlib_version": "0.11.0"
     },
     "selection": "explicit_per_recipe",
-    "solve_compile_seconds_saved": 18.093684845604002,
-    "solve_hit_count": 26,
+    "solve_compile_seconds_saved": 18.027765521779656,
+    "solve_hit_count": 25,
     "solve_miss_count": 14,
     "version_key": "runtime-0745ecebea4cb264e054"
   },
@@ -1597,7 +1597,7 @@
   },
   "runtime": {
     "device": "NVIDIA H200 NVL",
-    "elapsed_seconds": 428.4426540955901,
+    "elapsed_seconds": 473.416054205969,
     "exit_marker": 2,
     "host": "98dci4-gpu-0003.iter.org",
     "jax": "0.11.0",
@@ -1609,14 +1609,14 @@
   "scheduler": {
     "accepted_time_limit": "01:30:00",
     "cpus_per_task": "8",
-    "job_id": "1273204",
+    "job_id": "1273580",
     "job_name": "coil-edit-latency",
     "node": "98dci4-gpu-0003.iter.org",
     "partition": "betelgeuse",
     "reservation": "gpu_0003_grpA"
   },
   "schema": "nova.coil-edit-latency",
-  "source_revision": "7514edd95cdb677b3f033529b96cd56920089058",
+  "source_revision": "d384919244f7a9e2d84df43a32a5d738b6785c68",
   "summary": {
     "converged_edit_count": 10,
     "edit_count": 20,
@@ -1635,11 +1635,11 @@
     "interactive_latency_target_milliseconds": 100.0,
     "interactive_latency_target_verdict": "FAIL",
     "latency_regime": "above_tens_of_milliseconds",
-    "latency_statement": "Median warm per-edit wall is 353.038 ms against the below-100-ms tens-of-milliseconds target: FAIL.",
-    "maximum_boundary_displacement_m": 0.4393706171643554,
-    "maximum_warm_wall_milliseconds": 411.8563737720251,
-    "median_warm_wall_milliseconds": 353.03754080086946,
-    "minimum_warm_wall_milliseconds": 311.4813631400466,
+    "latency_statement": "Median warm per-edit wall is 370.367 ms against the below-100-ms tens-of-milliseconds target: FAIL.",
+    "maximum_boundary_displacement_m": 0.4722807398543636,
+    "maximum_warm_wall_milliseconds": 445.60509640723467,
+    "median_warm_wall_milliseconds": 370.3667912632227,
+    "minimum_warm_wall_milliseconds": 333.4838980808854,
     "trip_count_maximum": 4,
     "trip_count_median": 2.0,
     "trip_count_minimum": 1

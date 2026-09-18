@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Anchor treatment bisect on 21978/35 — receipt</title>
+<meta name="doc-type" content="evidence">
+<meta name="plan" content="null-identification-authority">
+</head>
+<body>
+<main>
+<h1>Anchor treatment bisect on MAST 21978/35</h1>
+
+<p class="lede">The banked pair on <strong>21978/35 pure</strong> is the load-bearing row of the drift
+campaign: the bank producer revision <code>fae50f15</code> converges to <code>3.857344474796854e-16</code>
+while the current tree returns <code>2.4506488565449e-03</code> under <code>active_set_cycle_detected</code>,
+a ratio of 6.35e12. The paired probe located the first differing stage at the operand
+<code>partition_structure</code>. This bisect asks the next question in that chain: is the
+<strong>traced-anchor hook</strong> — the arrangement under which the three declared anchors enter the
+operator partition as traced member data rather than as host constants — the carrier of that cycle?</p>
+
+<p><strong>Verdict: no. The traced-anchor hook is exonerated on the drifting arm.</strong> On
+<code>21978/35 pure</code> the two anchor treatments terminate at the <em>same</em> residual
+<code>2.4506488565449e-03</code> under the <em>same</em> termination reason
+<code>active_set_cycle_detected</code>, while the treatment demonstrably moved the operand partition:
+the hook answers with the three declared anchors in one arm and with none in the other, the partition
+loses three leaves (76 to 73), the partition structure and value digests both move, and the cached
+geometry identity changes. A hook that changes the partition on four independent instruments and
+leaves the terminal residual bit-identical is not the mechanism. The drift therefore lies
+<em>downstream of the anchor store</em>, among the solve-path commits below.</p>
+
+<h2>The two treatments differ observably and the terminal state does not</h2>
+
+<p>One H200 allocation, one identity, four arms: each treatment is solved under the pure policy
+overrides and then under the mixed class. The traced arm is the tree as it ships, with
+<code>_dynamic_extra_names()</code> answering the three anchor names. The constant arm overrides that
+hook to return the empty tuple from the driver for the duration of the operand construction
+<em>and</em> the solve, so the three anchors join <code>geometry["specialisation"]</code> as host
+constants exactly as they did when they did not exist as hook-named extras. Nothing under
+<code>nova/</code> changes in either arm.</p>
+
+<table>
+<caption>Operand partition and terminal state, per treatment, per solve class. Digests are the
+first sixteen hex digits of a sha256 over the named object.</caption>
+<thead>
+<tr><th>class</th><th>treatment</th><th>hook answers</th><th>partition leaves</th><th>partition structure</th><th>partition values</th><th>terminal residual</th><th>reason</th><th>converged</th></tr>
+</thead>
+<tbody>
+<tr><td>pure</td><td>traced</td><td><code>declared_axis_flux</code>, <code>declared_boundary_flux</code>, <code>declared_support</code></td><td>76</td><td><code>0fe0dcdf920a9b66</code></td><td><code>35c0be67ae2abdd8</code></td><td><code>2.4506488565449e-03</code></td><td><code>active_set_cycle_detected</code></td><td>false</td></tr>
+<tr><td>pure</td><td>constant</td><td>(none)</td><td>73</td><td><code>dca863866a4c328a</code></td><td><code>689612da6a6541af</code></td><td><code>2.4506488565449e-03</code></td><td><code>active_set_cycle_detected</code></td><td>false</td></tr>
+<tr><td>mixed</td><td>traced</td><td>the same three names</td><td>76</td><td><code>0fe0dcdf920a9b66</code></td><td><code>35c0be67ae2abdd8</code></td><td><code>2.2041968427410595e-16</code></td><td><code>converged</code></td><td>true</td></tr>
+<tr><td>mixed</td><td>constant</td><td>(none)</td><td>73</td><td><code>dca863866a4c328a</code></td><td><code>689612da6a6541af</code></td><td><code>3.0996518101046146e-16</code></td><td><code>converged</code></td><td>true</td></tr>
+</tbody>
+</table>
+
+<p>The arm's own verdict object states the two classes separate. On the pure class
+<code>terminal_residual_differ=false</code>, <code>termination_reason_differ=false</code>,
+<code>active_set_cycle_present=true</code>, with the traced arm matching the bank's current-tree
+residual and stage (<code>traced_matches_bank_current_residual=true</code>,
+<code>traced_matches_bank_current_stage=true</code>) and the constant arm matching neither the
+producer's residual nor its stage.
+On the mixed class <code>terminal_residual_differ=true</code> and
+<code>constant_matches_bank_producer_residual=true</code>: the host-constant arrangement reproduces
+the producer revision's mixed residual to all seventeen digits while the traced arrangement sits
+<code>8.95e-17</code> away from it. Both are converged, so that difference is at the round-off floor —
+it is evidence about the arithmetic order the hook induces, not a drift, and it cannot be the
+mechanism of a <code>2.45e-3</code> cycle. The flag
+<code>constant_matches_bank_producer_stage=false</code> holds on both classes and is the honest
+limit of the treatment: the constant arm is still a pytree with 73 leaves, so it equalises the
+anchors' <em>placement</em>, never the producer's operand object, whose
+<code>partition_values</code> is <code>empty</code>.</p>
+
+<h3>What moved inside the cycle even though the terminal state did not</h3>
+
+<p>The trip trace digests differ between the treatments on the pure class
+(<code>ce027543956b6dc6</code> traced against <code>ee9401feed45ec0c</code> constant) and so do the
+terminal flux map (<code>77482bce5b1e8ff6</code> against <code>933fb3009abaf6d1</code>), the axis
+(<code>2d7be2d85adc22d4</code> against <code>da515b61c154c1b9</code>) and the selected saddle
+(<code>09fc087a8535c2e5</code> against <code>70a29d2af29b36ed</code>), while the residual is
+identical. That combination is a statement about the instrument as much as about the solve: a
+cycled fixed point's residual magnitude is set by the cycle it entered, not by the round-off path
+that carried it there, so an identical residual does not certify an identical state. What it does
+certify is that the hook does not decide <em>which</em> cycle is entered, which is the question asked.
+Four digests are shared across the two arms and are the invariant spine of the comparison:
+<code>class_margin 9e09211058c77fcd</code>, <code>radius 39edd644e2a70398</code>,
+<code>height 3a66374813f2f90c</code>, <code>wall a8294a08dee65e76</code> and the
+profile-support digest <code>5683f88ca97c076e</code>, which the arm also checks under its own
+<code>profile_support_invariant</code> flag.</p>
+
+<h2>The terminal states as flux contours</h2>
+
+<figure>
+<img src="/nova/figures/null-identification-authority/anchor-bisect/21978-35-pure-anchor-bisect-panels.png"
+     alt="MAST 21978/35 pure terminal state under the traced anchor treatment beside the constant anchor treatment, both as unfilled poloidal flux line contours on one shared level array, each panel drawing its own magnetic axis and admitted saddle solid and the other treatment's hollow in grey, with the vessel drawn from the traced arm">
+<figcaption>The <code>21978/35</code> pure terminal state, traced-anchor treatment (left) beside
+constant-anchor treatment (right), both as unfilled poloidal flux line contours on a single shared
+level array computed from the traced arm's terminal flux, so the two states cannot be made to agree
+by independent level choices. Each panel draws its own magnetic axis as a solid triangle and its
+admitted saddle as a solid cross, the other treatment's as a hollow grey marker, and the vessel
+(element order preserved) in both. The two panels carry the same residual <code>2.4506488565449e-03</code>
+and the same termination reason, which is the finding drawn: the anchor arrangement moves the map it
+enters the cycle on, not the cycle. Rendered inside the measurement allocation from the terminal
+arrays that are committed beside it as <code>arms/arm-21978-35-pure-{traced,constant}.npz</code>.</figcaption>
+</figure>
+
+<p>Two limits on the figure, stated rather than discovered by a reader. It was rendered by the
+committed painter stack (<code>nova.media.ink</code>, <code>nova.media.poloidal</code>) with the axis
+off, unfilled contours and the wall drawn, but it was <em>not</em> visually re-read after the fact on
+the lane that produced it, so this record does not claim more than the renderer's own success status
+(<code>PANEL_STATUS 0</code>). And the vessel is drawn from the traced arm on both panels: that is
+licensed by the two arms' identical wall digest <code>a8294a08dee65e76</code>, not by an
+assumption.</p>
+
+<h2>What remains: the difference this bisect did not remove</h2>
+
+<p>The producer revision <code>fae50f15</code> (<em>fix(banked-reads): catch malformed reference points
+with the tuple except form</em>, 2026-09-08) does not contain the hook's name at all: its
+<code>nova/equilibrium/forward_operator.py</code> is 1805 lines and holds zero occurrences of
+<code>dynamic_extra</code> against the current tree, where the hook is the mechanism this bisect
+switches. The arrangement was introduced afterwards by
+<code>879a33ee feat(equilibrium): separate operator geometry from member data</code>. So on this
+identity the traced-anchor arrangement did not exist at the producer revision, the constant arm is a
+faithful rendering of that condition for the three anchors, and the pure arm's cycle survives the
+change — which is the exoneration. Between the producer revision and this tree, 175 commits touch
+<code>nova/equilibrium/</code>. The anchor <em>names cannot be the carrier</em>, and the standing
+candidate is what the operand partition <em>contains</em>: the producer's
+<code>partition_values</code> is <code>empty</code> — no numeric leaves at all — against 76 leaves
+now. The families that add leaves to that partition are the traced profile-coefficient work
+(<code>a4de1caf</code>, <code>77b149b4</code>, <code>a8443a12</code>, and the merge
+<code>45048423</code> that carries the flux-function coefficients as traced program arguments) and
+the traced-polygon-capacity refactor (<code>f7fefbd7</code> with its merge <code>be29cb0e</code>).
+This bisect narrows the drift to <em>downstream of the anchor store</em>; it does not name the
+commit, and the record does not pretend it does.</p>
+
+<h2>Instrument</h2>
+
+<table>
+<thead><tr><th>field</th><th>value</th></tr></thead>
+<tbody>
+<tr><td>job</td><td>SLURM <code>1273425</code> on <code>98dci4-gpu-0003</code>, <code>betelgeuse</code> reservation <code>gpu_0003_grpA</code>, <code>gres/gpu:1</code>, 8 cores, 128G, wall 52m51s</td></tr>
+<tr><td>revision</td><td><code>b3c5c2f8</code> (driver committed at <code>78b8d9a7</code>, control fixes at <code>b3c5c2f8</code>)</td></tr>
+<tr><td>platforms, precision</td><td><code>cuda,cpu</code>; <code>jax_enable_x64 true</code> asserted before any array</td></tr>
+<tr><td>compilation</td><td>four <code>jit(solve)</code> compilations in the allocation, the slowest reported at 4m18s; the persistent cache served primitive-level entries only and could not refresh its <code>-atime</code> sidecar entries</td></tr>
+<tr><td>reproduction control</td><td>the traced arm's operand partition reproduces the committed bank reference exactly (<code>0fe0dcdf920a9b66</code>, <code>35c0be67ae2abdd8</code>, profile support <code>5683f88ca97c076e</code>) on device as well as on the login-node control</td></tr>
+<tr><td>pre-flight control</td><td>before any allocation the two treatments were shown to separate on four instruments (hook answer, leaf count 76/73, structure digests, cached geometry identity <code>6dda07ba…</code>/<code>0eef9f00…</code>) on the login node in 68s</td></tr>
+<tr><td>artifacts</td><td><code>receipt-21978-35-anchor-bisect.json</code>, <code>arms/arm-21978-35-{pure,mixed}-{traced,constant}.{json,npz}</code>, <code>arms/emission.json</code>, this page's panel</td></tr>
+</tbody>
+</table>
+
+<p>One launcher defect preceded this run and is recorded rather than hidden. The first submission
+(<code>1273419</code>) died in operand construction because the payload was submitted with its working
+directory at the report directory, and the producer's response-carrier check resolves
+<code>docs/figures/plateau-input-attribution/mast-response-carrier.json</code> relative to the
+repository root; reproduced by hand as <code>FileNotFoundError</code> and exit 1 from that directory
+against exit 0 from the worktree. Its receipt then printed
+<em>"the override did not take effect"</em> for want of any arm to compare — a misleading reading of
+absent arms that the driver's receipt path owes a repair.</p>
+
+</main>
+</body>
+</html>

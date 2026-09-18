@@ -45,6 +45,7 @@ from benchmarks import mast_response_carrier_warm as response_carrier
 from benchmarks.diiid_forward_gs_match import _margin_graded_newton_krylov
 from nova.equilibrium import reduced_newton
 from nova.equilibrium.fixed_point import FixedPointResult, FixedPointTerminationReason
+from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.equilibrium.wall_mask import WallUnit
 from nova.imas.mast_solve_inputs import SHOT_STORE
@@ -55,6 +56,7 @@ from nova.jax.config import (
 )
 from nova.media import poloidal
 from nova.media.ink import DEFAULT_INK, poloidal_axes
+from nova.media.sources.frame import inside_wall_units
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -67,9 +69,7 @@ DEFAULT_FIGURE = (
 DEFAULT_RASTER_FIGURE = (
     ROOT / "docs/figures/forward-solve-api/coil-edit-latency/terminal-raster-flux.png"
 )
-DIAGNOSTIC_ROOT = (
-    ROOT / "docs/figures/forward-solve-api/coil-edit-nonconvergence"
-)
+DIAGNOSTIC_ROOT = ROOT / "docs/figures/forward-solve-api/coil-edit-nonconvergence"
 DEFAULT_DIAGNOSTICS = DIAGNOSTIC_ROOT / "coil-edit-nonconvergence.json"
 DEFAULT_PANEL_DATA = DIAGNOSTIC_ROOT / "panel-states.npz"
 DEFAULT_PANEL_FIGURE = DIAGNOSTIC_ROOT / "converged-vs-nonconverged.png"
@@ -488,6 +488,7 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
         "psi": np.asarray(reference_raster.psi, dtype=float),
         "separatrix": reference_raster_separatrix,
         "nulls": _null_points(profile, mixed_seed.state),
+        "branches": _branches_of(profile, mixed_seed.state, reference_raster),
     }
     prepared = {
         "initial": mixed_seed.state,
@@ -572,17 +573,36 @@ def _achieved_class(profile: Any, state: Any) -> dict[str, Any]:
 
 
 def _null_points(profile: Any, state: Any) -> dict[str, Any]:
-    """Return the read landmarks a panel draws, or absent points as NaN."""
+    """Return the read landmarks a panel draws, or absent points as NaN.
+
+    The admitted saddle is named rather than assumed to be the first row: the
+    admitted one is the candidate sitting on the boundary flux the read
+    selected, and the remaining qualified nulls are carried too so a panel can
+    draw them hollow instead of silently dropping them.
+    """
     try:
         _masks, achieved = profile.operator.read(state)
     except NoQualifiedAxisError:
         return {
             "axis": np.full(2, np.nan),
             "x_points": np.full((2, 2), np.nan),
+            "x_point_flux": np.full(2, np.nan),
+            "saddle_index": 0,
         }
+    x_points = np.asarray(achieved.x_point, dtype=float).reshape(-1, 2)
+    flux = np.asarray(achieved.x_point_flux, dtype=float).reshape(-1)
+    boundary_flux = float(np.asarray(achieved.boundary_flux))
+    if flux.size != x_points.shape[0]:
+        padded = np.full(x_points.shape[0], np.nan)
+        padded[: min(flux.size, x_points.shape[0])] = flux[: x_points.shape[0]]
+        flux = padded
+    finite = np.isfinite(flux)
+    saddle_index = int(np.argmin(np.abs(flux - boundary_flux))) if finite.any() else 0
     return {
         "axis": np.asarray(achieved.axis, dtype=float).reshape(-1)[:2],
-        "x_points": np.asarray(achieved.x_point, dtype=float).reshape(-1, 2),
+        "x_points": x_points,
+        "x_point_flux": flux[: x_points.shape[0]],
+        "saddle_index": saddle_index,
     }
 
 
@@ -718,25 +738,94 @@ def _wall_units(operator: Any) -> tuple[Any, ...]:
 
 def _grid_field(psi: Any, shape: Any) -> np.ndarray:
     """Return one raster psi as the (height, radius) contour array."""
-    return np.asarray(psi, dtype=float).reshape(
-        tuple(int(value) for value in np.asarray(shape))
-    ).T
+    return (
+        np.asarray(psi, dtype=float)
+        .reshape(tuple(int(value) for value in np.asarray(shape)))
+        .T
+    )
+
+
+def _mechanism_of(row: dict[str, Any]) -> str:
+    """Name the mechanism one non-converged edit's own trace supports.
+
+    Two facts decide it and nothing else: whether any Newton step was accepted
+    at all, and whether a closing active-set read ever moved the mask.  The
+    termination word cannot decide it, because all three mechanisms share one
+    termination word -- the compiled trip loop folds the host route's line
+    search refusal into the same settled word a stall carries.  No accepted
+    step is a refused line search; with steps accepted, a mask that moved is a
+    walk cut short while still descending, and a mask that never moved is a
+    trip that spent its whole Newton budget at a settled active set.
+    """
+    accepted = any(int(value) for value in row["newton_steps_per_trip"])
+    moved = max([int(value) for value in row["trip_mask_difference_trace"]] or [0]) > 0
+    if not accepted:
+        return "refused_first_step"
+    if moved:
+        return "partial_walk"
+    return "stall"
+
+
+def _branches_of(profile: Any, state: Any, raster_flux: Any) -> dict[str, Any] | None:
+    """Assemble the closed lobe and its legs from the receiver-grid field.
+
+    The raw receiver-grid level set is unsplit and unbounded: it starts inside
+    the centre column and leaves the raster at the top and bottom, so drawing
+    it as a boundary is what sprays coil-adjacent flux through the column.
+    Assembling the SAME field at the boundary flux splits it at the polished
+    saddle and keeps the axis-enclosing lobe as one cycle.
+    """
+    if raster_flux is None:
+        return None
+    try:
+        _masks, topology = profile.operator.read(state)
+    except NoQualifiedAxisError:
+        return None
+    branches = jax.device_get(
+        assemble_separatrix_branches(
+            jnp.asarray(_grid_field(raster_flux.psi, raster_flux.shape)),
+            jnp.asarray(np.asarray(raster_flux.radius, dtype=float)),
+            jnp.asarray(np.asarray(raster_flux.height, dtype=float)),
+            jnp.asarray(topology.boundary_flux),
+            jnp.asarray(np.asarray(topology.axis, dtype=float)),
+        )
+    )
+    return {
+        "closed_controls_rz": np.asarray(branches["closed_controls_rz"], dtype=float),
+        "closed_valid": np.asarray(branches["closed_valid"], dtype=bool),
+        "open_controls_rz": np.asarray(branches["open_controls_rz"], dtype=float),
+        "open_valid": np.asarray(branches["open_valid"], dtype=bool),
+        "open_branch_valid": np.asarray(branches["open_branch_valid"], dtype=bool),
+        "boundary_flux": float(np.asarray(topology.boundary_flux)),
+        "axis_flux": float(np.asarray(topology.axis_flux)),
+        "well_formed": bool(np.asarray(branches["well_formed"])),
+    }
 
 
 def _group_nonconverged(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """Group the non-converged edits by the reason their solve stopped."""
-    groups: dict[str, list[int]] = {}
+    """Group the non-converged edits by the reason their solve stopped.
+
+    The three mechanism groups carry their member edit ids so the prose is
+    checkable as data; the termination word is kept beside them because all
+    three mechanisms share it.
+    """
+    mechanisms: dict[str, list[int]] = {
+        "stall": [],
+        "refused_first_step": [],
+        "partial_walk": [],
+    }
+    terminations: dict[str, list[int]] = {}
     for row in rows:
         if row["converged"]:
             continue
-        groups.setdefault(row["termination"], []).append(row["edit_index"])
+        terminations.setdefault(row["termination"], []).append(row["edit_index"])
+        mechanisms[_mechanism_of(row)].append(row["edit_index"])
     return {
-        "failure_count": sum(len(index) for index in groups.values()),
-        "groups": groups,
+        "failure_count": sum(len(index) for index in terminations.values()),
+        "groups": mechanisms,
+        "termination_groups": terminations,
         "convergence": {
-            "converged_points": [
-                row["edit_index"] for row in rows if row["converged"]
-            ],
+            "converged_points": [row["edit_index"] for row in rows if row["converged"]],
             "trip_count_by_point": {
                 str(row["edit_index"]): row["trip_count"] for row in rows
             },
@@ -754,7 +843,8 @@ def _write_diagnostics(
     document = {
         "schema": "nova.coil-edit-nonconvergence",
         "source_revision": subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip(),
         "case": {
             "machine": "MAST",
             "shot": SHOT,
@@ -784,6 +874,24 @@ def _write_diagnostics(
     )
 
 
+def _persist_branches(
+    payload: dict[str, Any], prefix: str, branches: dict[str, Any] | None
+) -> None:
+    """Write one assembled branch set under a key prefix, or write nothing."""
+    if branches is None:
+        return
+    for key in (
+        "closed_controls_rz",
+        "closed_valid",
+        "open_controls_rz",
+        "open_valid",
+        "open_branch_valid",
+    ):
+        payload[f"{prefix}{key}"] = np.asarray(branches[key])
+    payload[f"{prefix}boundary_flux"] = np.asarray(branches["boundary_flux"])
+    payload[f"{prefix}axis_flux"] = np.asarray(branches["axis_flux"])
+
+
 def _write_panel_data(
     path: Path,
     *,
@@ -808,10 +916,17 @@ def _write_panel_data(
     payload["reference_xpoints"] = np.asarray(
         reference_panel["nulls"]["x_points"], dtype=float
     )
+    _persist_branches(payload, "reference_", reference_panel.get("branches"))
+    payload["reference_xpoint_flux"] = np.asarray(
+        reference_panel["nulls"]["x_point_flux"], dtype=float
+    )
+    payload["reference_saddle_index"] = np.asarray(
+        reference_panel["nulls"]["saddle_index"], dtype=int
+    )
     wall = profile.operator
-    payload["wall_coordinate"] = np.asarray(
-        wall.wall.coordinate, dtype=float
-    ).reshape(-1, 2)
+    payload["wall_coordinate"] = np.asarray(wall.wall.coordinate, dtype=float).reshape(
+        -1, 2
+    )
     payload["wall_offsets"] = np.asarray(wall.wall_unit_offsets, dtype=int)
     payload["wall_closed"] = np.asarray(wall.wall_unit_closed, dtype=bool)
     payload["wall_kinds"] = np.asarray(tuple(wall.wall_unit_kinds), dtype=str)
@@ -840,18 +955,19 @@ def _write_panel_data(
         if state["psi"] is None:
             continue
         payload[f"psi_{position}"] = _grid_field(state["psi"], state["shape"])
-        payload[f"separatrix_{position}"] = np.asarray(
-            state["separatrix"], dtype=float
-        )
-        payload[f"axis_{position}"] = np.asarray(
-            state["nulls"]["axis"], dtype=float
-        )
-        payload[f"separatrix_{position}"] = np.asarray(
-            state["separatrix"], dtype=float
-        )
+        payload[f"separatrix_{position}"] = np.asarray(state["separatrix"], dtype=float)
+        payload[f"axis_{position}"] = np.asarray(state["nulls"]["axis"], dtype=float)
         payload[f"xpoints_{position}"] = np.asarray(
             state["nulls"]["x_points"], dtype=float
         )
+        _persist_branches(payload, f"branches_{position}_", state.get("branches"))
+        payload[f"xpoint_flux_{position}"] = np.asarray(
+            state["nulls"]["x_point_flux"], dtype=float
+        )
+        payload[f"saddle_index_{position}"] = np.asarray(
+            state["nulls"]["saddle_index"], dtype=int
+        )
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(path, **payload)
 
@@ -868,12 +984,11 @@ def _panel_edits(data: Any) -> tuple[int, int]:
     passed = np.flatnonzero(converged & finite)
     failed = np.flatnonzero(~converged & finite)
     if passed.size == 0 or failed.size == 0:
-        raise RuntimeError(
-            "the panel needs one converged and one non-converged edit"
-        )
+        raise RuntimeError("the panel needs one converged and one non-converged edit")
     return int(passed[np.argmax(residual[passed])]), int(
         failed[np.argmax(residual[failed])]
     )
+
 
 def _panel_wall(data: Any) -> tuple[Any, ...]:
     """Rebuild the typed wall units from the persisted flat coordinates."""
@@ -893,26 +1008,69 @@ def _panel_wall(data: Any) -> tuple[Any, ...]:
         )
     )
 
+
+def _optional_scalar(data: Any, name: str) -> float | None:
+    """Return one persisted scalar, or None where the archive predates it."""
+    if name not in data.files:
+        return None
+    value = float(np.asarray(data[name]))
+    return value if np.isfinite(value) else None
+
+
+def _load_branches(data: Any, prefix: str) -> dict[str, Any] | None:
+    """Return one persisted branch set under a prefix, or None if absent."""
+    key = f"{prefix}closed_controls_rz"
+    if key not in data.files:
+        return None
+    loaded = {
+        name: np.asarray(data[f"{prefix}{name}"])
+        for name in (
+            "closed_controls_rz",
+            "closed_valid",
+            "open_controls_rz",
+            "open_valid",
+            "open_branch_valid",
+        )
+    }
+    loaded["boundary_flux"] = _optional_scalar(data, f"{prefix}boundary_flux")
+    loaded["axis_flux"] = _optional_scalar(data, f"{prefix}axis_flux")
+    return loaded
+
+
 def _panel_load(data_path: Path) -> dict[str, Any]:
     """Load the persisted panel fields, wall units and shared levels."""
     with np.load(data_path, allow_pickle=False) as data:
         radius = np.asarray(data["radius"], dtype=float)
         height = np.asarray(data["height"], dtype=float)
         reference = np.asarray(data["reference_psi"], dtype=float)
+        wall = _panel_wall(data)
+        # The reference set's own plasma range, so the shared levels lie on the
+        # flux the plasma occupies instead of spanning the whole raster: the
+        # raw span reaches coil-adjacent flux and contours it into the column.
+        levels = poloidal.contour_levels(
+            reference,
+            count=14,
+            boundary=_optional_scalar(data, "reference_boundary_flux"),
+            axis=_optional_scalar(data, "reference_axis_flux"),
+        )
         loaded: dict[str, Any] = {
             "radius": radius,
             "height": height,
             "reference": reference,
-            "levels": poloidal.contour_levels(reference, count=14),
+            "levels": levels,
             "reference_axis": np.asarray(data["reference_axis"], dtype=float),
             "reference_separatrix": np.asarray(
                 data["reference_separatrix"], dtype=float
             ),
-            "reference_xpoints": np.asarray(
-                data["reference_xpoints"], dtype=float
+            "reference_xpoints": np.asarray(data["reference_xpoints"], dtype=float),
+            "reference_branches": _load_branches(data, "reference_"),
+            "reference_saddle_index": (
+                int(np.asarray(data["reference_saddle_index"]))
+                if "reference_saddle_index" in data.files
+                else 0
             ),
-
-        "wall": _panel_wall(data),
+            "wall": wall,
+            "inside": _wall_interior(radius, height, wall),
         }
         passed, failed = _panel_edits(data)
         selected = (("converged", passed), ("failed", failed))
@@ -921,86 +1079,152 @@ def _panel_load(data_path: Path) -> dict[str, Any]:
 
             panel = loaded[label]
             panel["edit_index"] = int(np.asarray(data["edit_index"])[position])
-            panel["fraction"] = float(
-                np.asarray(data["edit_fraction"])[position]
-            )
-            panel["residual"] = float(
-                np.asarray(data["terminal_residual"])[position]
-            )
+            panel["fraction"] = float(np.asarray(data["edit_fraction"])[position])
+            panel["residual"] = float(np.asarray(data["terminal_residual"])[position])
 
             panel["trips"] = int(np.asarray(data["trip_count"])[position])
-            panel["termination"] = str(
-                np.asarray(data["termination"])[position]
-            )
-            panel["class_name"] = str(
-                np.asarray(data["achieved_class"])[position]
-            )
+            panel["converged"] = bool(np.asarray(data["converged"])[position])
+            panel["termination"] = str(np.asarray(data["termination"])[position])
+            panel["class_name"] = str(np.asarray(data["achieved_class"])[position])
 
             for key in ("psi", "separatrix", "axis", "xpoints"):
                 name = "%s_%d" % (key, position)
                 panel[key] = np.asarray(data[name], dtype=float)
+            panel["branches"] = _load_branches(data, "branches_%d_" % position)
+            saddle_name = "saddle_index_%d" % position
+            panel["saddle_index"] = (
+                int(np.asarray(data[saddle_name])) if saddle_name in data.files else 0
+            )
     return loaded
+
+
+def _wall_interior(radius: Any, height: Any, wall: Any) -> np.ndarray:
+    """Return the boolean raster mask of the wall's interior."""
+    grid_radius, grid_height = np.meshgrid(
+        np.asarray(radius, dtype=float), np.asarray(height, dtype=float)
+    )
+    points = np.column_stack((grid_radius.reshape(-1), grid_height.reshape(-1)))
+    keep = np.asarray(inside_wall_units(points, wall), dtype=bool)
+    return keep.reshape(len(height), len(radius))
+
+
+def _draw_branch_set(
+    axis: Any, branches: dict[str, Any] | None, color: str, fallback: Any = None
+) -> dict[str, int]:
+    """Draw an assembled branch set, or a raw contour when none was stored.
+
+    The raw receiver-grid level set is unsplit and leaves the raster at the top
+    and bottom, so an archive carrying only that array draws dashed and reports
+    an unassembled set rather than presenting it as a boundary.
+    """
+    if branches is not None:
+        return poloidal.draw_separatrix_branches(
+            axis,
+            branches,
+            style=DEFAULT_INK.variant(separatrix_color=color),
+            closed_color=color,
+            open_color=color,
+        )
+    array = (
+        np.asarray(fallback, dtype=float) if fallback is not None else np.empty((0, 2))
+    )
+    if array.size:
+        axis.plot(array[:, 0], array[:, 1], color=color, linewidth=0.7, linestyle="--")
+    return {"closed_drawn": 0, "open_drawn": 0}
+
+
+def _draw_null_set(
+    axis: Any,
+    magnetic_axis: Any,
+    x_points: Any,
+    saddle_index: int,
+    color: str,
+    wall: Any = None,
+) -> dict[str, int]:
+    """Draw the admitted saddle filled and the other qualified nulls hollow.
+
+    The admitted saddle is the one the read selected onto the boundary flux and
+    is the only member tested against the wall; the remaining qualified nulls
+    are drawn hollow and unfiltered, so a set that carries a second saddle
+    outside the vessel reads as two stationary points rather than one.
+    """
+    array = np.atleast_2d(np.asarray(x_points, dtype=float))
+    if not 0 <= saddle_index < array.shape[0]:
+        admitted, other = array, array[:0]
+    else:
+        admitted = array[[saddle_index]]
+        other = np.delete(array, saddle_index, axis=0)
+    return poloidal.draw_nulls(
+        axis,
+        magnetic_axis=magnetic_axis,
+        x_points=admitted,
+        other_x_points=other,
+        style=DEFAULT_INK.variant(
+            axis_color=color,
+            xpoint_color=color,
+            axis_marker="^",
+            xpoint_marker="X",
+        ),
+        contain=wall,
+    )
+
 
 def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> None:
     """Draw one edit's terminal flux over the reference field.
 
-    A flux map always shows the wall; both sets of stationary points are
-    drawn in their own styles so a solved null is never mistaken for the
-    reference one.
+    Both rasters are masked to the wall interior before contouring, so a level
+    that reaches coil-adjacent flux is not contoured into the centre column.
+    Both null sets are drawn in their own styles, each with its admitted saddle
+    filled and its remaining qualified nulls hollow, so a solved null is never
+    mistaken for the reference one.
     """
     radius = loaded["radius"]
     height = loaded["height"]
     levels = loaded["levels"]
+    inside = loaded["inside"]
     poloidal.draw_flux_contours(
-        axis, radius, height, loaded["reference"], levels, color="#9aa4b2"
+        axis,
+        radius,
+        height,
+        np.where(inside, loaded["reference"], np.nan),
+        levels,
+        color="#9aa4b2",
     )
-
     poloidal.draw_flux_contours(
-        axis, radius, height, panel["psi"], levels, color="#cc7722"
+        axis,
+        radius,
+        height,
+        np.where(inside, panel["psi"], np.nan),
+        levels,
+        color="#cc7722",
     )
     poloidal.draw_wall(axis, units=loaded["wall"])
 
-    reference_separatrix = loaded["reference_separatrix"]
-    if reference_separatrix.size:
-        axis.plot(
-            reference_separatrix[:, 0],
-            reference_separatrix[:, 1],
-            color="#3366cc",
-            linewidth=0.7,
-            linestyle="--",
-        )
-
-    if panel["separatrix"].size:
-        axis.plot(
-            panel["separatrix"][:, 0],
-            panel["separatrix"][:, 1],
-            color="#cc7722",
-            linewidth=0.9,
-        )
-
-    poloidal.draw_nulls(
-        axis,
-        magnetic_axis=loaded["reference_axis"],
-        x_points=loaded["reference_xpoints"],
-        style=DEFAULT_INK.variant(
-            axis_color="#3366cc", xpoint_color="#3366cc"
-        ),
-        contain=loaded["wall"],
+    loaded["reference_branches_drawn"] = _draw_branch_set(
+        axis, loaded["reference_branches"], "#3366cc", loaded["reference_separatrix"]
+    )
+    panel["branches_drawn"] = _draw_branch_set(
+        axis, panel["branches"], "#cc7722", panel["separatrix"]
     )
 
-    poloidal.draw_nulls(
+    _draw_null_set(
         axis,
-        magnetic_axis=panel["axis"],
-        x_points=panel["xpoints"],
-        style=DEFAULT_INK.variant(
-            axis_color="#cc7722",
-            xpoint_color="#cc7722",
-            axis_marker="^",
-            xpoint_marker="X",
-        ),
-        contain=loaded["wall"],
+        loaded["reference_axis"],
+        loaded["reference_xpoints"],
+        loaded["reference_saddle_index"],
+        "#3366cc",
+        loaded["wall"],
+    )
+    _draw_null_set(
+        axis,
+        panel["axis"],
+        panel["xpoints"],
+        panel["saddle_index"],
+        "#cc7722",
+        loaded["wall"],
     )
     poloidal_axes(axis)
+
 
 def _panel_summary(panel: dict[str, Any]) -> dict[str, Any]:
     """Return the json-safe scalars the panel caption reports."""
@@ -1009,33 +1233,53 @@ def _panel_summary(panel: dict[str, Any]) -> dict[str, Any]:
         "fraction": panel["fraction"],
         "residual": panel["residual"],
         "trips": panel["trips"],
+        "converged": panel["converged"],
         "termination": panel["termination"],
         "achieved_class": panel["class_name"],
+        "branches_drawn": dict(panel.get("branches_drawn", {})),
     }
+
+
+def _saddle_note(x_points: Any, saddle_index: int) -> str:
+    """Return the admitted saddle of one null set as a caption fragment."""
+    array = np.atleast_2d(np.asarray(x_points, dtype=float))
+    if not 0 <= saddle_index < array.shape[0]:
+        return "saddle absent"
+    point = array[saddle_index]
+    return "saddle (%.3f, %+.3f) m" % (point[0], point[1])
+
 
 def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
     """Write the converged-versus-non-converged poloidal panel."""
     loaded = _panel_load(data_path)
-    figure, axes = plt.subplots(
-        1, 2, figsize=(10.6, 4.6), constrained_layout=True
-    )
+    figure, axes = plt.subplots(1, 2, figsize=(10.6, 4.6), constrained_layout=True)
 
     for axis, label in zip(axes, ("converged", "failed"), strict=True):
         panel = loaded[label]
         _paint_panel(axis, loaded, panel)
         axis.set_title(
-            "edit %d  %+d%%  residual %.3e  trips %d"
+            "edit %d  %+d%%  residual %.3e  converged %s  trips %d"
             % (
                 panel["edit_index"],
                 round(100.0 * panel["fraction"]),
                 panel["residual"],
+                "yes" if panel["converged"] else "no",
                 panel["trips"],
             )
         )
 
+    reference_note = _saddle_note(
+        loaded["reference_xpoints"], loaded["reference_saddle_index"]
+    )
+    solved_note = _saddle_note(
+        loaded["failed"]["xpoints"], loaded["failed"]["saddle_index"]
+    )
     figure.suptitle(
-        "terminal poloidal flux  |  reference grey, solved orange, "
-        "shared levels, both null sets, wall"
+        "terminal poloidal flux on shared plasma-range levels  |  reference "
+        "set blue: lobe solid, legs dashed, admitted %s, other qualified "
+        "nulls hollow  |  solved set orange: admitted %s, other hollow  |  "
+        "wall drawn" % (reference_note, solved_note),
+        fontsize=9,
     )
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(figure_path, dpi=140)
@@ -1528,6 +1772,7 @@ def run(
                         ]
                     ),
                     "nulls": _null_points(profile, result.state),
+                    "branches": _branches_of(profile, result.state, raster_flux),
                 }
             )
             rows.append(row)
@@ -1891,9 +2136,7 @@ def main() -> None:
         job_parser = subparsers.add_parser(name)
         job_parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
         job_parser.add_argument("--figure", type=Path, default=DEFAULT_FIGURE)
-        job_parser.add_argument(
-            "--diagnostics", type=Path, default=DEFAULT_DIAGNOSTICS
-        )
+        job_parser.add_argument("--diagnostics", type=Path, default=DEFAULT_DIAGNOSTICS)
         job_parser.add_argument("--panel-data", type=Path, default=DEFAULT_PANEL_DATA)
         job_parser.add_argument(
             "--panel-figure", type=Path, default=DEFAULT_PANEL_FIGURE
@@ -1914,9 +2157,7 @@ def main() -> None:
     harvest_parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     panel_parser = subparsers.add_parser("panel")
     panel_parser.add_argument("--panel-data", type=Path, default=DEFAULT_PANEL_DATA)
-    panel_parser.add_argument(
-        "--panel-figure", type=Path, default=DEFAULT_PANEL_FIGURE
-    )
+    panel_parser.add_argument("--panel-figure", type=Path, default=DEFAULT_PANEL_FIGURE)
     check_parser = subparsers.add_parser("checkcase")
     check_parser.add_argument(
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER

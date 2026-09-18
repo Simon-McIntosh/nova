@@ -97,8 +97,19 @@ class PersistentCompilationCache:
 _compilation_releases: list[CompilationRelease] = []
 
 
+_CACHE_ROOT_VARIABLE = "NOVA_COMPILATION_CACHE_ROOT"
+
+
 def default_persistent_compilation_cache_root() -> Path:
-    """Return the tracked per-user parent selected by explicit launch recipes."""
+    """Return the cache parent selected by the launch recipe.
+
+    A recipe that serves a shared pre-warmed cache exports its root, which makes
+    the served directory a function of that root alone; a recipe that names
+    nothing keeps the per-user location under $HOME/.cache.
+    """
+    shared_root = os.environ.get(_CACHE_ROOT_VARIABLE)
+    if shared_root:
+        return Path(shared_root)
     return Path.home() / ".cache"
 
 

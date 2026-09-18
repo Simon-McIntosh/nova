@@ -24,12 +24,13 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-18">
 <meta name="plan-impl" content="0.9">
+<meta name="plan-impl" content="0.88">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd,273ff747,7aef0963">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="94">
+<meta name="plan-version" content="95">
 </head>
 <body>
 <main class="plan-doc">
@@ -164,6 +165,9 @@
 <article class="r-fu" data-id="f-msc-census-record-gate-committed" data-status="open" data-written-by="coordinator" data-written-at="2026-09-18T16:52:00Z" data-recommends-skill="/reckon-ship" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Commit the census record gate and correct the receipt&#x27;s cache byte count</h4>
     <div class="r-fu-body">The 25-check gate that holds the census records to their receipts (gate_record_repairs.py) lives only under ~/.config/reckon/crew/reports/nova/s19-local/census-record and nothing in the repository fails if a later edit walks one of the repaired statements back. Commit an equivalent test beside the receipts (a test that reads bank-shape-identity.json, program-shape-census.json and the evidence anchor and asserts the byte/GiB pairs divide, the cited paths exist and the caption bar values match the receipts). In the same node correct docs/figures/millisecond-converged-solve/program-shapes/bank-shape-identity.json line 7 from 89486 bytes to the file's real 180876 bytes; the 89486 is the group id from the ls column beside the size.</div>
+<article class="r-fu" data-id="f-msc-lane-cache-coverage" data-status="open" data-written-by="msc-cache-prewarm-and-lane-guard" data-written-at="2026-09-18" data-recommends-skill="/reckon-ship" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The lane target requests a different key set from the pre-warm, and the guard counts the wrong thing</h4>
+    <div class="r-fu-body"><p>Measured 2026-09-18: the pre-warm covers 3292 keys the lane never requests and none of the 1285 keys it does, so the lane's 1341 hits all come from that target's own earlier run on the same directory. A lane that has never run there compiles everything it needs. Deliver three things. First, add the lane target's program set as pre-warm rows so a first run on a clean directory is warm by construction. Second, make the guard's <code>served_entries</code> the number of program-key cache entries rather than a recursive file count, which today includes the XLA autotune subtree. Third, make the guard marker line-anchored so an anchored grep finds it on a passing run. Gate on a lane run against a directory holding only the pin's keys reporting hits for the lane's own programs with zero compile seconds, a <code>served_entries</code> equal to the count of program-key entries on disk, and a log in which the anchored grep returns the marker.</p></div>
     <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve</pre>
     </article>
 </section>
@@ -452,6 +456,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s19h-s3-certificate-prerequisite" data-who="reckon-ship s19-handoff" data-when="2026-09-15T10:15:00Z">
     <div class="r-comment-body">Section 3 prerequisite, held by the coordinator rather than by a plan-level wire: the certified millisecond measurement runs only once gs-absolute-accuracy-gates section 3 (the certificate artifact and its pin) is current on the exact cut-cell participation and the joint qualification, because it reports cost for certificate-passing solves. The stage-scoped dependency gs-absolute-accuracy-gates#s3 was authored and withdrawn the same hour: the roadmap's anchor resolver did not recognise that section (reported to reckon), and a plan-level dependency on the whole certificate plan would hold section 2, which never needed it. gs-absolute-accuracy-gates now informs this plan; no section 3 node is dispatched before the certificate lands.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260918-cache-prewarm-lane-pair" data-who="msc-cache-prewarm-and-lane-guard" data-when="2026-09-18T18:30:00+02:00">
+    <div class="r-comment-body"><p><strong>Levers two and four, measured on the H200.</strong> One pre-warm job filled a pinned cache root and one guarded lane run of <code>tests/test_equilibrium_forward_solve.py</code> read it at the same revision: 1341 hits, 0 misses, 0 compile seconds, marker <code>wall-clock-reliable misses=0 budget=0</code> with the budget enforced at zero, and a lane wall of 353 s against 877 s for the same target on the same node with the cache directory unconfigured. The three failures are identical in both arms, so the warm arm reproduces the cold arm's result exactly at 519 s less wall. Device use appears between the +10 s and +30 s samples (0 %, 5 %, 0 %).</p><p><strong>The reuse comes from the lane's own earlier run, not from the pre-warm.</strong> A cache key carries the jitted function's abstract shapes, so the pre-warm's certificate drivers and this lane target request different key sets: pin 3362 keys, lane 1285, intersection 70, union 4577 against 4577 program-key entries on disk. Entries bucketed by write hour put the pin's 3292 exclusive keys at 14:47 to 15:19 and all 1285 keys the lane reads at 13:15 to 13:29, that target's own earlier run. The pre-warm supplied none of the warm arm's hits.</p><p><strong>Instrument caveats.</strong> The guard's <code>served_entries</code> counts every file recursively under the cache directory, so it includes the XLA autotune subtree (13123 files against 4577 cache entries at the top level), and its marker is printed unanchored, landing at the tail of an unterminated pytest progress line, so a reader grepping for the marker misses it on a run that passed. Record and figure: <code>docs/evidence/archive/millisecond-converged-solve-landed.html</code> section <code>cache-prewarm-lane-hit-accounting</code>.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

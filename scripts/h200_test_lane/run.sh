@@ -3,7 +3,10 @@
 set -euo pipefail
 
 readonly PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
-readonly COMPILATION_CACHE=/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile
+# Inside the batch job the shell runs a spooled copy of this file, so the
+# script path there is not the lane directory; the submitter passes it.
+readonly LANE_DIRECTORY="${H200_LANE_DIRECTORY:-$(dirname "$(realpath -e -- "${BASH_SOURCE[0]}")")}"
+readonly DEFAULT_PINNED_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
 
 usage() {
   printf '%s\n' \
@@ -23,11 +26,14 @@ run_payload() {
   readonly actual_revision="$(git -C "${repository_root}" rev-parse HEAD)"
 
   export TMPDIR=/tmp
-  export PYTHONPATH="${repository_root}"
+  export NOVA_COMPILATION_CACHE_ROOT="${NOVA_COMPILATION_CACHE_ROOT:-${DEFAULT_PINNED_ROOT}}"
+  export PYTHONPATH="${repository_root}:${LANE_DIRECTORY}"
   export JAX_PLATFORMS=cuda,cpu
   export JAX_ENABLE_COMPILATION_CACHE=1
-  export JAX_COMPILATION_CACHE_DIR="${COMPILATION_CACHE}"
   export JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS=0
+  local pinned_directory
+  pinned_directory="$("${PYTHON}" -c 'import cache_guard; print(cache_guard.pinned_cache_directory())')"
+  export JAX_COMPILATION_CACHE_DIR="${pinned_directory}"
 
   printf 'H200_TEST_LANE_START=%(%Y-%m-%dT%H:%M:%S%z)T\n' -1
   printf 'SLURM_JOB_ID=%s\n' "${SLURM_JOB_ID:-unknown}"
@@ -38,8 +44,20 @@ run_payload() {
   printf 'JAX_PLATFORMS=%s\n' "${JAX_PLATFORMS}"
   printf 'JAX_COMPILATION_CACHE_DIR=%s\n' "${JAX_COMPILATION_CACHE_DIR}"
   printf 'TMPDIR=%s\n' "${TMPDIR}"
+  printf 'CACHE_ROOT=%s\n' "${NOVA_COMPILATION_CACHE_ROOT}"
+  printf 'PINNED_CACHE_DIRECTORY=%s\n' "${JAX_COMPILATION_CACHE_DIR}"
+  printf 'CACHE_MISS_BUDGET=%s\n' "${NOVA_CACHE_MISS_BUDGET:-0}"
+  "${PYTHON}" -c 'import cache_guard; cache_guard.emit_header(cache_guard.pinned_cache_directory())'
+  local pinned_revision
+  pinned_revision="$("${PYTHON}" -c 'import cache_guard; reference = cache_guard.pin_reference() or {}; print(reference.get("source_revision", "none"))')"
+  printf 'PINNED_REVISION=%s\n' "${pinned_revision}"
+  if [[ "${pinned_revision}" != "${actual_revision}" ]]; then
+    printf 'PINNED_REVISION_MISMATCH pinned=%s serving=%s\n' \
+      "${pinned_revision}" "${actual_revision}"
+    printf 'the served directory was compiled for another revision, so a miss is a pin problem rather than a timing result\n'
+  fi
   printf 'PYTEST_COMMAND='
-  printf '%q ' "${PYTHON}" -m pytest -p no:cacheprovider "$@"
+  printf '%q ' "${PYTHON}" -m pytest -p no:cacheprovider -p cache_guard "$@"
   printf '\n'
 
   if [[ "${actual_revision}" != "${expected_revision}" ]]; then
@@ -51,11 +69,18 @@ run_payload() {
 
   local started_at=${SECONDS}
   local status
+  local sampler_log="${TMPDIR}/cache-guard-gpu-${SLURM_JOB_ID:-local}.txt"
+  "${PYTHON}" -c 'import cache_guard; cache_guard.sample_gpu_utilisation()' \
+    >"${sampler_log}" 2>&1 &
+  local sampler_pid=$!
+
   set +e
   srun --ntasks=1 --cpus-per-task=7 --cpu-bind=cores \
-    "${PYTHON}" -m pytest -p no:cacheprovider "$@"
+    "${PYTHON}" -m pytest -p no:cacheprovider -p cache_guard "$@"
   status=$?
   set -e
+  wait "${sampler_pid}" || true
+  cat "${sampler_log}"
   printf 'PYTEST_WALL_SECONDS=%s\n' "$((SECONDS - started_at))"
   printf 'PYTEST_EXIT_STATUS=%s\n' "${status}"
   printf 'H200_TEST_LANE_END=%(%Y-%m-%dT%H:%M:%S%z)T\n' -1
@@ -132,7 +157,7 @@ submission=(
   --chdir="${repository_root}"
   --output="${resolved_log}"
   --error="${resolved_log}"
-  --export="ALL,H200_LANE_EXPECTED_REVISION=${source_revision},H200_LANE_REPOSITORY_ROOT=${repository_root}"
+  --export="ALL,H200_LANE_EXPECTED_REVISION=${source_revision},H200_LANE_REPOSITORY_ROOT=${repository_root},H200_LANE_DIRECTORY=${LANE_DIRECTORY}"
 )
 if [[ "${foreground}" == true ]]; then
   submission+=(--wait)
@@ -143,7 +168,7 @@ if [[ "${dry_run}" == true ]]; then
   printf 'SOURCE_REVISION=%s\n' "${source_revision}"
   printf 'LOG_PATH=%s\n' "${resolved_log}"
   printf 'JAX_PLATFORMS=cuda,cpu\n'
-  printf 'JAX_COMPILATION_CACHE_DIR=%s\n' "${COMPILATION_CACHE}"
+  printf 'PINNED_CACHE_ROOT=%s\n' "${NOVA_COMPILATION_CACHE_ROOT:-${DEFAULT_PINNED_ROOT}}"
   printf 'SUBMIT_COMMAND='
   printf '%q ' "${submission[@]}"
   printf '\n'

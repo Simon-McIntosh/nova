@@ -1,0 +1,259 @@
+{
+  "costliest_lane_programs": [
+    {
+      "earlier_compile_seconds": 68.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit__lambda"
+    },
+    {
+      "earlier_compile_seconds": 57.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_solve_portfolio"
+    },
+    {
+      "earlier_compile_seconds": 56.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_solve"
+    },
+    {
+      "earlier_compile_seconds": 49.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_solve"
+    },
+    {
+      "earlier_compile_seconds": 49.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_solve"
+    },
+    {
+      "earlier_compile_seconds": 48.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_solve"
+    },
+    {
+      "earlier_compile_seconds": 47.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_solve"
+    },
+    {
+      "earlier_compile_seconds": 47.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_solve"
+    },
+    {
+      "earlier_compile_seconds": 33.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_solve"
+    },
+    {
+      "earlier_compile_seconds": 27.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_solve"
+    },
+    {
+      "earlier_compile_seconds": 21.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_traced_boundary_read"
+    },
+    {
+      "earlier_compile_seconds": 18.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_read_qualification"
+    },
+    {
+      "earlier_compile_seconds": 14.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_read_qualification"
+    },
+    {
+      "earlier_compile_seconds": 11.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit___call"
+    },
+    {
+      "earlier_compile_seconds": 11.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_read_qualification"
+    },
+    {
+      "earlier_compile_seconds": 10.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_read_qualification"
+    },
+    {
+      "earlier_compile_seconds": 9.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit___call"
+    },
+    {
+      "earlier_compile_seconds": 7.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit___call"
+    },
+    {
+      "earlier_compile_seconds": 4.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_traced_spline_contour"
+    },
+    {
+      "earlier_compile_seconds": 3.0,
+      "later_compile_seconds": 0.0,
+      "later_outcome": "hit",
+      "program": "jit_traced_spline_contour"
+    }
+  ],
+  "costliest_prewarm_programs": [
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 307.0,
+      "program": "jit_scan",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 298.0,
+      "program": "jit_scan",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 248.0,
+      "program": "jit_while",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 241.0,
+      "program": "jit_while",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 36.0,
+      "program": "jit_solve",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 4.0,
+      "program": "jit_read_qualification",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 4.0,
+      "program": "jit_read_qualification",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 4.0,
+      "program": "jit_read_qualification",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 3.0,
+      "program": "jit_read_qualification",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 3.0,
+      "program": "jit_read_qualification",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 3.0,
+      "program": "jit_read_qualification",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 3.0,
+      "program": "jit_read_qualification",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 3.0,
+      "program": "jit_read_qualification",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 3.0,
+      "program": "jit_read_qualification",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 3.0,
+      "program": "jit_read_qualification",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 3.0,
+      "program": "jit_read_qualification",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 3.0,
+      "program": "jit_read_qualification",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 1.0,
+      "program": "jit_scan",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 1.0,
+      "program": "jit_scan",
+      "requested_by_lane": false
+    },
+    {
+      "later_outcome": "not-requested",
+      "prewarm_compile_seconds": 1.0,
+      "program": "jit_scan",
+      "requested_by_lane": false
+    }
+  ],
+  "earlier_compile_seconds": 591.0,
+  "earlier_programs_with_compile": 22,
+  "earlier_wall_seconds": 877,
+  "lane_compile_seconds": 0.0,
+  "lane_hits": 1341,
+  "lane_keys_absent_from_disk": 0,
+  "lane_misses": 0,
+  "lane_programs": 1285,
+  "lane_wall_seconds": 353,
+  "pin_keys_absent_from_disk": 0,
+  "pin_programs": 3362,
+  "pin_shared_with_lane": 70,
+  "served_entries": 4578
+}

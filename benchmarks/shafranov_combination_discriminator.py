@@ -56,6 +56,7 @@ import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.interpolate import LinearNDInterpolator
 import zarr
 
 from benchmarks import settled_mask_stall as settled
@@ -71,6 +72,10 @@ from nova.equilibrium.diagnostics import (
     shafranov_vertical_field_elongated,
 )
 from nova.equilibrium.observation import MomentIntegralSupport
+from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
+from nova.equilibrium.wall_mask import WallUnit
+from nova.media import poloidal
+from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
@@ -84,6 +89,8 @@ DEFAULT_DIRECTORY = (
 )
 #: Store group the reconstruction scalars and the terminal state are read from.
 EFIT_GROUP = "efm"
+#: Display raster resolution for the per-row state contour panels.
+RASTER_SAMPLES = 181
 #: Reading keys, in the order every row document and the panel order them.
 READING_KEYS: tuple[str, ...] = (
     "efit_own",
@@ -140,6 +147,9 @@ ROW_FIELDS: tuple[str, ...] = (
     "profile_normalisation",
     "constraint_row_reading_unnormalised",
     "constraint_row_normalisation",
+    "commensurability",
+    "convention_sentence",
+    "state_panel",
     "readings",
     "sentence",
 )
@@ -243,6 +253,50 @@ def readings(combination_by_reading: dict[str, float | None]) -> dict[str, Any]:
         }
         for key in READING_KEYS
     }
+
+
+def convention_clause(
+    block: dict[str, Any], *, profile_combination: float | None
+) -> str:
+    """State what the stored moments' implied radius says about commensurability."""
+    implied = block.get("implied_radius_from_betap_m")
+    major = block.get("nova_major_radius_m")
+    minor = block.get("boundary_minor_radius_m")
+    rescaled = block.get("rescaled_efit_combination")
+    if implied is None or major is None or minor is None:
+        return (
+            "The reconstruction's stored moments do not imply a denominator "
+            "radius, so whether nova's own radius convention is commensurate "
+            "with them is unstated for this row."
+        )
+    shared = block.get("implied_radius_inductance_over_betap")
+    agreement = (
+        f"the two stored scalars imply the same radius to within "
+        f"{abs(shared - 1.0):.2%} (l_i implies "
+        f"{block['implied_radius_from_inductance_m']:.4f} m), so one convention "
+        f"difference explains both moments"
+        if shared is not None
+        else "l_i implies no finite radius, so only beta_p settles the scale"
+    )
+    return (
+        f"Commensurability: on nova's own volume integral and leading factor, "
+        f"the stored scalars are reproduced by a denominator radius of "
+        f"{implied_label(block)} m, against nova's volume-weighted major radius "
+        f"{major:.4f} m and the boundary's minor radius {minor:.4f} m; {agreement}. "
+        f"Rescaled onto nova's radius the reconstruction's own combination is "
+        f"{rescaled:.4f}"
+        + (
+            f", against the profiles' {profile_combination:.4f}."
+            if profile_combination is not None and rescaled is not None
+            else "."
+        )
+    )
+
+
+def implied_label(block: dict[str, Any]) -> str:
+    """Format the radius the stored moments imply."""
+    value = block.get("implied_radius_from_betap_m")
+    return "unstated" if value is None else f"{value:.4f}"
 
 
 def attribute(
@@ -358,6 +412,101 @@ def _efit_scalars(group, row: int) -> dict[str, float]:
         return float(np.asarray(group[name][...], dtype=float)[row])
 
     return {"betap": scalar("betap"), "li": scalar("li")}
+
+
+def implied_radius(
+    reported: float,
+    integral: float,
+    leading: float,
+    mu0_power: float,
+    plasma_current: float,
+) -> float | None:
+    r"""Return the radius a stored scalar is consistent with.
+
+    nova's definitions are
+
+    .. math::
+
+       \beta_p = \frac{4 \int p\, dV}{\mu_0 R I_p^2}, \qquad
+       l_i = \frac{2 \int B_p^2\, dV}{\mu_0^2 R I_p^2},
+
+    so a stored scalar, evaluated on the same integral with the same leading
+    factor, implies the denominator radius
+
+    .. math::
+
+       R_{\text{implied}}
+         = \frac{\text{leading} \cdot \text{integral}}
+                {\mu_0^{n} I_p^2 \cdot \text{reported}} .
+
+    Asking the store for this radius is what makes the commensurability question
+    answerable without assuming the reconstruction's convention: if the implied
+    radius is nova's own volume-weighted major radius, the two conventions agree;
+    if it is the boundary's minor radius, they differ by the aspect ratio, and
+    the difference is a stated factor rather than an unexplained gap.
+    """
+    denominator = mu0_power * plasma_current**2 * reported
+    if denominator == 0.0 or not np.isfinite(denominator):
+        return None
+    radius = leading * integral / denominator
+    return float(radius) if np.isfinite(radius) and radius > 0.0 else None
+
+
+def commensurability(
+    *,
+    efit: dict[str, float],
+    unit_check: dict[str, Any],
+    major_radius: float,
+    minor_radius: float,
+) -> dict[str, Any]:
+    """Ask the reconstruction's stored moments which radius they normalise with."""
+    current = float(unit_check["plasma_current_a"])
+    pressure = float(unit_check["pressure_integral_j"])
+    field = float(unit_check["poloidal_field_integral_t2_m3"])
+    from_beta = implied_radius(efit["betap"], pressure, 4.0, MU0, current)
+    from_inductance = implied_radius(efit["li"], field, 2.0, MU0**2, current)
+    shared = (
+        from_inductance / from_beta
+        if from_beta not in (None, 0.0) and from_inductance is not None
+        else None
+    )
+    major_over_minor = major_radius / minor_radius if minor_radius else None
+    rescaled = (
+        linear_combination(efit["betap"], efit["li"]) * from_beta / major_radius
+        if from_beta is not None and major_radius
+        else None
+    )
+    return {
+        "nova_definition": unit_check["definition"],
+        "nova_radius_convention": (
+            "beta_p = 4*int(p dV)/(mu0*R*Ip**2) and "
+            "l_i = 2*int(Bp**2 dV)/(mu0**2*R*Ip**2), with R the "
+            "volume-weighted major radius sum(radial volume elements)/volume"
+        ),
+        "stored_betap": _strict_float(efit["betap"]),
+        "stored_internal_inductance": _strict_float(efit["li"]),
+        "plasma_current_a": _strict_float(current),
+        "pressure_integral_j": _strict_float(pressure),
+        "poloidal_field_integral_t2_m3": _strict_float(field),
+        "nova_major_radius_m": _strict_float(major_radius),
+        "boundary_minor_radius_m": _strict_float(minor_radius),
+        "major_over_minor": _strict_float(major_over_minor),
+        "implied_radius_from_betap_m": _strict_float(from_beta),
+        "implied_radius_from_inductance_m": _strict_float(from_inductance),
+        "implied_radius_inductance_over_betap": _strict_float(shared),
+        "implied_over_major_from_betap": _strict_float(
+            from_beta / major_radius if from_beta is not None and major_radius else None
+        ),
+        "implied_over_major_from_inductance": _strict_float(
+            from_inductance / major_radius
+            if from_inductance is not None and major_radius
+            else None
+        ),
+        "implied_over_minor_from_betap": _strict_float(
+            from_beta / minor_radius if from_beta is not None and minor_radius else None
+        ),
+        "rescaled_efit_combination": _strict_float(rescaled),
+    }
 
 
 def constraint_context(flux, target_current, *, requested_class=None):
@@ -575,6 +724,12 @@ def _row_document(
             profile_combination - unnormalised_profile_combination
         ),
     }
+    convention = commensurability(
+        efit=efit,
+        unit_check=unit_check,
+        major_radius=shape["major_radius_m"],
+        minor_radius=minor,
+    )
     constraint_normalisation = {
         "requested_current_a": _strict_float(target_current),
         "observed_current_a": _strict_float(shape["observation_plasma_current_a"]),
@@ -617,6 +772,10 @@ def _row_document(
             shape["discrete"] - circular
         ),
         "inversion_tolerance": INVERSION_TOLERANCE,
+        "commensurability": convention,
+        "convention_sentence": convention_clause(
+            convention, profile_combination=profile_combination
+        ),
         "readings": readings(combinations),
         "unit_check": unit_check,
         "sentence": attribute(combinations)["sentence"],
@@ -628,6 +787,129 @@ def _row_document(
             shape["discrete_unnormalised"]
         ),
         "constraint_row_normalisation": constraint_normalisation,
+    }
+
+
+def _state_topology(operator, state) -> dict[str, Any]:
+    """Return the state's read nulls, or a recorded refusal."""
+    try:
+        _masks, topology = operator.read(jnp.asarray(state))
+    except NoQualifiedAxisError:
+        return {"read_status": "no_qualified_axis"}
+    diverted = bool(np.asarray(topology.diverted))
+    return {
+        "read_status": "qualified",
+        "class": str(TopologyClass.DIVERTED if diverted else TopologyClass.LIMITED),
+        "axis_rz_m": np.asarray(topology.axis, dtype=float).reshape(-1)[:2].tolist(),
+        "x_point_rz_m": np.asarray(topology.x_point, dtype=float)
+        .reshape(-1, 2)
+        .tolist(),
+    }
+
+
+def _wall_units(operator) -> tuple[WallUnit, ...]:
+    """Return the operator's wall as its own typed units.
+
+    The wall is stored flat with unit offsets and per-unit closure and kind, so
+    a panel draws every unit on its own terms rather than one invented ring.
+    """
+    coordinate = np.asarray(operator.wall.coordinate, dtype=float).reshape(-1, 2)
+    offsets = np.asarray(operator.wall_unit_offsets, dtype=int)
+    closed = np.asarray(operator.wall_unit_closed, dtype=bool)
+    kinds = tuple(operator.wall_unit_kinds)
+    return tuple(
+        WallUnit(
+            coordinate[start:stop, 0],
+            coordinate[start:stop, 1],
+            kind=kinds[index],
+            closed=bool(closed[index]),
+        )
+        for index, (start, stop) in enumerate(
+            zip(offsets[:-1], offsets[1:], strict=True)
+        )
+    )
+
+
+def _state_raster(profile, state, units, *, samples: int = RASTER_SAMPLES):
+    """Interpolate one banked state onto a display raster for line contours."""
+    points = np.asarray(profile.lattice.coordinate, dtype=float)
+    field = np.asarray(state, dtype=float).reshape(-1)[: points.shape[0]]
+    finite = np.all(np.isfinite(points), axis=1) & np.isfinite(field)
+    points, field = points[finite], field[finite]
+    if points.shape[0] < 3:
+        raise ValueError("the state carries too few finite samples to contour")
+    limits = np.vstack(
+        (points, *[np.asarray(unit.vertices, dtype=float) for unit in units])
+    )
+    radial = np.linspace(
+        float(np.min(limits[:, 0])), float(np.max(limits[:, 0])), samples
+    )
+    height = np.linspace(
+        float(np.min(limits[:, 1])), float(np.max(limits[:, 1])), samples
+    )
+    radius_grid, height_grid = np.meshgrid(radial, height)
+    raster = LinearNDInterpolator(points, field, fill_value=np.nan)(
+        radius_grid, height_grid
+    )
+    return radial, height, np.asarray(raster, dtype=float)
+
+
+def _render_state_panel(
+    profile,
+    state,
+    *,
+    path: Path,
+    title: str,
+    note: str,
+) -> dict[str, Any]:
+    """Draw one banked terminal state as shared-level line contours.
+
+    The panel follows the project's plotting rules: unfilled contours on one
+    physical level array so two panels cannot hide a mismatch behind their own
+    colour scales, the state's stationary points marked in the ``draw_nulls``
+    vocabulary, the vessel drawn unit-faithfully, and no axes or grid.
+    """
+    units = _wall_units(profile.operator)
+    radial, height, field = _state_raster(profile, state, units)
+    levels = poloidal.contour_levels(field, count=12)
+    topology = _state_topology(profile.operator, state)
+    figure, axis = plt.subplots(figsize=(4.8, 4.2), constrained_layout=True)
+    poloidal.draw_flux_contours(axis, radial, height, field, levels)
+    poloidal.draw_wall(axis, units=units)
+    if topology.get("read_status") == "qualified":
+        poloidal.draw_nulls(
+            axis,
+            magnetic_axis=topology["axis_rz_m"],
+            x_points=np.asarray(topology["x_point_rz_m"], dtype=float),
+            style=DEFAULT_INK,
+            contain=units,
+        )
+    poloidal_axes(axis)
+    axis.set_title(f"{title}\n{note}", fontsize=8)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    figure.savefig(path.with_suffix(".svg"))
+    plt.close(figure)
+    return {
+        "png": {
+            "filesystem_path": str(path),
+            "project_absolute_src": (
+                "/nova/figures/constraint-augmented-newton-krylov/"
+                f"shafranov-discriminator/{path.name}"
+            ),
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        },
+        "svg": {
+            "filesystem_path": str(path.with_suffix(".svg")),
+            "project_absolute_src": (
+                "/nova/figures/constraint-augmented-newton-krylov/"
+                f"shafranov-discriminator/{path.with_suffix('.svg').name}"
+            ),
+            "sha256": hashlib.sha256(path.with_suffix(".svg").read_bytes()).hexdigest(),
+        },
+        "levels_wb": [float(level) for level in levels],
+        "topology": topology,
+        "wall_unit_count": len(units),
     }
 
 
@@ -710,15 +992,67 @@ def _draw_panel(receipt: dict[str, Any], path: Path, *, source: str) -> dict[str
     )
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
+    figure.savefig(path.with_suffix(".svg"))
     plt.close(figure)
     return {
-        "filesystem_path": str(path),
-        "project_absolute_src": (
-            "/nova/figures/constraint-augmented-newton-krylov/"
-            f"shafranov-discriminator/{path.name}"
-        ),
-        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "png": {
+            "filesystem_path": str(path),
+            "project_absolute_src": (
+                "/nova/figures/constraint-augmented-newton-krylov/"
+                f"shafranov-discriminator/{path.name}"
+            ),
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        },
+        "svg": {
+            "filesystem_path": str(path.with_suffix(".svg")),
+            "project_absolute_src": (
+                "/nova/figures/constraint-augmented-newton-krylov/"
+                f"shafranov-discriminator/{path.with_suffix('.svg').name}"
+            ),
+            "sha256": hashlib.sha256(path.with_suffix(".svg").read_bytes()).hexdigest(),
+        },
         "source_revision": source,
+    }
+
+
+def commensurability_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """State the convention reading across the rows, from their own implied radii."""
+    blocks = [
+        (row["identity"], row["commensurability"])
+        for row in rows
+        if row.get("commensurability") is not None
+    ]
+    if not blocks:
+        return {"reading": "no row carries a commensurability block"}
+    implied = {
+        identity: block["implied_over_major_from_betap"] for identity, block in blocks
+    }
+    return {
+        "questions": (
+            "whether the reconstruction's stored betap and li use the same "
+            "volume-weighted major radius and the same l_i convention nova's "
+            "definitions use, computed from the reconstruction's own stored "
+            "scalars and nova's own volume integrals rather than asserted"
+        ),
+        "resolution": (
+            "the stored scalars are evaluated on nova's own volume integrals and "
+            "leading factors; the only free parameter left for the row is the "
+            "denominator radius, and the radius that reproduces the store is "
+            "compared with nova's own volume-weighted major radius and with the "
+            "boundary's minor radius"
+        ),
+        "implied_over_major_from_betap": implied,
+        "implied_radius_inductance_over_betap": {
+            identity: block["implied_radius_inductance_over_betap"]
+            for identity, block in blocks
+        },
+        "major_over_minor": {
+            identity: block["major_over_minor"] for identity, block in blocks
+        },
+        "rescaled_efit_combination": {
+            identity: block["rescaled_efit_combination"] for identity, block in blocks
+        },
+        "readings": [row["convention_sentence"] for row in rows],
     }
 
 
@@ -809,6 +1143,20 @@ def measure(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any
             efit=_efit_scalars(group, row_index),
             boundary=np.asarray(case["boundary"], dtype=float),
         )
+        entry["state_panel"] = _render_state_panel(
+            profile,
+            state,
+            path=directory / f"row-{shot}-{row_index}-state.png",
+            title=(
+                f"{shot}/{row_index}: banked terminal state, "
+                f"kappa = {entry['elongation']:.3f}"
+            ),
+            note=(
+                f"profiles {entry['profile_implied_combination']:.4f}, "
+                f"EFIT {entry['efit_own_combination']:.4f}, "
+                f"magnetics {entry['magnetics_implied_combination']:.4f}"
+            ),
+        )
         receipt["rows_receipt"].append(entry)
         write_row(directory, entry)
         print(
@@ -817,6 +1165,12 @@ def measure(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any
         (directory / "receipt.json").write_text(
             json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
         )
+    receipt["commensurability"] = commensurability_summary(receipt["rows_receipt"])
+    print(
+        "SHAFRANOV-COMMENSURABILITY "
+        + json.dumps(receipt["commensurability"], sort_keys=True),
+        flush=True,
+    )
     receipt["figure"] = _draw_panel(
         receipt,
         directory / "shafranov-combination-discriminator.png",

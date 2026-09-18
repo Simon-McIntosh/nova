@@ -547,6 +547,182 @@
     <code>~/.config/reckon/crew/reports/nova/s19-local/shafranov-integral-3/init_proposed.patch</code> for whoever owns that file. The plan's
     <code>f-cank-shafranov-integral</code> stays open with part two beside it.</p>
   </section>
+
+  <section id="shafranov-discriminator">
+    <h2>Shafranov discriminator: what the corrected context moved, and the convention behind the gap</h2>
+    <p><strong>Node:</strong> <code>cank-shafranov-discriminator-2</code>, run <code>r-20260918T145159571009</code>. Deliverable:
+    recompute the three-way &beta;<sub>p</sub> + l<sub>i</sub>/2 discriminator receipt on the corrected plasma-current field, so the
+    profile-implied column and the extraction-floor headline are settled, and answer the open question of whether the reconstruction's own
+    stored &beta;<sub>p</sub> and l<sub>i</sub> are commensurable with nova's definitions.</p>
+    <p><strong>The correction.</strong> The predecessor fixed the call that builds the traced context a constraint's
+    <code>observed</code> is invoked with: <code>ConstraintContext(state, target_current, None, None)</code> passes the second, third and fourth fields as
+    <code>flux, requested_class, target_current, shadow</code>, so the positional form silently exchanges the requested class with the
+    target current. The field is now built by keyword, and the driver was re-run so the receipts carry the recomputed values rather than the
+    values read through the exchanged slots.</p>
+    <p><strong>What the correction moved, and what it did not.</strong> Diffing the regenerated receipt against the committed 13:10Z one,
+    field by field and row by row:</p>
+    <table>
+      <thead>
+        <tr><th>Reading</th><th>Moved?</th><th>On how many of the six rows</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>profiles imply (<code>profile_implied_combination</code>)</td>
+            <td><strong>no</strong> — delta exactly 0.0 in IEEE double, every row</td><td>0 of 6</td></tr>
+        <tr><td>EFIT's own (<code>efit_own_combination</code>)</td><td>no — bit-identical</td><td>0 of 6</td></tr>
+        <tr><td>magnetics (a) — the circular identity</td><td>no — bit-identical</td><td>0 of 6</td></tr>
+        <tr><td>magnetics (a&radic;&kappa;) — the elongated identity</td><td>no — bit-identical</td><td>0 of 6</td></tr>
+        <tr><td>the headline magnetics reading, the production row kernel</td>
+            <td><strong>yes</strong></td><td>6 of 6</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Why the profile-implied column could not move.</strong> Every one of the six rows emits
+    <code>operator_use_linear_moments</code> &mdash; precisely <code>operator_use_linear_moments: false</code> &mdash; beside a
+    <code>profile_normalisation.path</code> that names the reason in the receipt itself: <em>&ldquo;unnormalised: the operator's moment path
+    resolves moments from the flux directly and ignores the requested current, so the profile column is the unnormalised observation&rdquo;</em>.
+    On this operator the moment path reads the flux and never consults the requested current, so the slot the argument order exchanged is a
+    slot this column does not read. The reviewed defect is real in the code — it was worth fixing, since the same field reaches other
+    quantities — and it has a <strong>nil</strong> effect on the number it had been assumed to contaminate. The two columns the receipt
+    carries for the comparison differ by 1.1&times;10<sup>&minus;4</sup> to 3.5&times;10<sup>&minus;2</sup> (the
+    <code>combination_shift</code> field), and the committed column is the one the moment path actually used.</p>
+    <p><strong>The extraction-floor headline survives.</strong> The profiles still sit below the reconstruction's own combination on every
+    row, by 0.16 to 0.29:</p>
+    <table>
+      <thead>
+        <tr><th>Row</th><th>a [m]</th><th>I<sub>p</sub> [MA]</th><th>profiles imply, 13:10Z</th>
+            <th>profiles imply, recomputed</th><th>EFIT's own</th><th>extraction floor</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>21978/35</td><td>0.5847</td><td>0.8015</td><td>0.4613</td><td>0.4613</td><td>0.6884</td><td><strong>0.2271</strong></td></tr>
+        <tr><td>21983/35</td><td>0.5934</td><td>0.8137</td><td>0.5035</td><td>0.5035</td><td>0.7563</td><td><strong>0.2528</strong></td></tr>
+        <tr><td>21985/51</td><td>0.5763</td><td>0.9344</td><td>0.6061</td><td>0.6061</td><td>0.8989</td><td><strong>0.2928</strong></td></tr>
+        <tr><td>21986/46</td><td>0.5607</td><td>0.8743</td><td>0.4437</td><td>0.4437</td><td>0.6037</td><td><strong>0.1600</strong></td></tr>
+        <tr><td>21989/55</td><td>0.5735</td><td>0.9289</td><td>0.6251</td><td>0.6251</td><td>0.9012</td><td><strong>0.2762</strong></td></tr>
+        <tr><td>22086/43</td><td>0.5774</td><td>0.9330</td><td>0.4924</td><td>0.4924</td><td>0.7198</td><td><strong>0.2274</strong></td></tr>
+      </tbody>
+    </table>
+    <p>The two profile columns agree to every printed digit because they are the same double: the difference is zero, not small. The
+    extraction floor is therefore unmoved by this node's change, and the headline stands as the predecessor stated it — the profiles the bank
+    extracts carry a &beta;<sub>p</sub> + l<sub>i</sub>/2 between 0.16 and 0.29 below the value the reconstruction itself stored.</p>
+    <p><strong>The defect's signature, visible in the superseded receipt.</strong> The old headline reading is not merely close to the
+    unnormalised one; it <em>is</em> the unnormalised one, bit for bit, on all six rows — which is what makes the exchange visible at all.
+    With the context built by keyword the row kernel's own read agrees bit-for-bit with the circular identity it inverts, on all six rows,
+    as it should when the same identity is evaluated at the same centroid and radius:</p>
+    <table>
+      <thead>
+        <tr><th>Row</th><th>13:10Z headline</th><th>= unnormalised reading?</th><th>recomputed headline</th>
+            <th>= circular identity?</th><th>shift</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>21978/35</td><td>0.312459</td><td>yes</td><td>0.311058</td><td>yes</td><td>&minus;1.40&times;10<sup>&minus;3</sup></td></tr>
+        <tr><td>21983/35</td><td>0.323674</td><td>yes</td><td>0.345902</td><td>yes</td><td>+2.22&times;10<sup>&minus;2</sup></td></tr>
+        <tr><td>21985/51</td><td>0.479732</td><td>yes</td><td>0.479206</td><td>yes</td><td>&minus;5.26&times;10<sup>&minus;4</sup></td></tr>
+        <tr><td>21986/46</td><td>0.322343</td><td>yes</td><td>0.322488</td><td>yes</td><td>+1.45&times;10<sup>&minus;4</sup></td></tr>
+        <tr><td>21989/55</td><td>0.491214</td><td>yes</td><td>0.489540</td><td>yes</td><td>&minus;1.67&times;10<sup>&minus;3</sup></td></tr>
+        <tr><td>22086/43</td><td>0.281663</td><td>yes</td><td>0.324144</td><td>yes</td><td>+4.25&times;10<sup>&minus;2</sup></td></tr>
+      </tbody>
+    </table>
+    <p>The shift is the size of the defect on this column: up to 4.2&times;10<sup>&minus;2</sup> on 22086/43, whose unnormalised reading came
+    from a centroid current 3.6% away from the requested current. The corrected reading removes that error and lands the row kernel exactly on
+    the analytic identity, which is the strongest available check that the corrected context is the intended one.</p>
+    <p><strong>Commensurability: whether the reconstruction's stored moments use nova's radius convention.</strong> This is the question the
+    plan left open when the gap was first read. It is answered by computing, per row, the denominator radius at which nova's own definition
+    reproduces the reconstruction's own stored scalar: &beta;<sub>p</sub> = 4&int;p dV/(&mu;<sub>0</sub> R I<sub>p</sub><sup>2</sup>), and
+    l<sub>i</sub> = 2&int;B<sub>p</sub><sup>2</sup> dV/(&mu;<sub>0</sub><sup>2</sup> R I<sub>p</sub><sup>2</sup>), with every integral taken
+    on the banked state. The implied radius is compared against nova's volume-weighted major radius and against the boundary's minor radius;
+    nothing is asserted:</p>
+    <table>
+      <thead>
+        <tr><th>Row</th><th>R implied by &beta;<sub>p</sub> [m]</th><th>R implied by l<sub>i</sub> [m]</th>
+            <th>implied / minor</th><th>implied / major</th><th>major / minor</th><th>l<sub>i</sub> vs &beta;<sub>p</sub></th></tr>
+      </thead>
+      <tbody>
+        <tr><td>21978/35</td><td>0.5823</td><td>0.5802</td><td>0.9960</td><td>0.7562</td><td>1.3170</td><td>0.36%</td></tr>
+        <tr><td>21983/35</td><td>0.5601</td><td>0.5681</td><td>0.9439</td><td>0.7316</td><td>1.2903</td><td>1.42%</td></tr>
+        <tr><td>21985/51</td><td>0.5810</td><td>0.5523</td><td>1.0081</td><td>0.7325</td><td>1.3763</td><td>4.94%</td></tr>
+        <tr><td>21986/46</td><td>0.6635</td><td>0.6464</td><td>1.1833</td><td>0.8299</td><td>1.4258</td><td>2.59%</td></tr>
+        <tr><td>21989/55</td><td>0.6117</td><td>0.5960</td><td>1.0667</td><td>0.7551</td><td>1.4126</td><td>2.57%</td></tr>
+        <tr><td>22086/43</td><td>0.5783</td><td>0.5803</td><td>1.0016</td><td>0.7517</td><td>1.3323</td><td>0.33%</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Reading the table.</strong> The two stored scalars imply the <em>same</em> radius to within 0.33% to 4.94% on every row, so one
+    convention difference accounts for both moments rather than two. That shared radius sits near the boundary's minor radius — 0.4% to 18.3%
+    away from the minor radius against 17% to 27% away from nova's volume-weighted major radius — and the two comparisons differ by exactly the
+    aspect ratio, so the statement is a factor rather than a fitted residual. On five of six rows the implied radius is much nearer the minor
+    row. <strong>One caveat: on 21986/46 the two distances are nearly equal</strong> (18.3% from the minor radius, 17.0% from the major), so
+    that row alone does not discriminate between the two conventions; it is named here rather than smoothed into a mean. The practical
+    consequence for the gap is immediate: rescaled onto nova's own radius, the reconstruction's own combination is 0.5206, 0.5533, 0.6584,
+    0.5010, 0.6806 and 0.5411, against the profiles' 0.4613, 0.5035, 0.6061, 0.4437, 0.6251 and 0.4924 — so the stored-moment convention
+    accounts for part of the extraction floor and does not close it: a gap of 0.0487 to 0.0593 remains on every row after the rescale.</p>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.png"
+           alt="One strip per bank row: EFIT's own combination, the extracted profiles, and the magnetics read three ways, as markers with the profile and EFIT values drawn as vertical rules.">
+      <figcaption>&beta;<sub>p</sub> + l<sub>i</sub>/2 on the six bank rows, each with its own strip: EFIT's own stored value and the profiles'
+      drawn as two guide lines, and the three magnetics readings marked. The profiles sit below the reconstruction's own value on every row;
+      the circular and production-row-kernel readings coincide after the correction, and the elongated identity is the closest reading to
+      EFIT's own. Committed as PNG and SVG under
+      <code>docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/</code>, with the SVG named beside the PNG in the
+      strip figure's own receipt block so a text-only reader can open it.</figcaption>
+    </figure>
+    <p><strong>Six terminal-state panels.</strong> The bank states' poloidal flux, drawn per the plotting rules: unfilled line contours on one
+    shared physical level array per panel, the wall from the operator's own typed units, and the state's own nulls in the ink vocabulary. Every
+    one of the six topology reads returned <code>qualified</code> with a magnetic axis and an admitted X-point, so the null path executed on
+    every panel rather than being skipped.</p>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21978-35-state.png"
+           alt="MAST 21978/35 banked terminal state as line contours on shared levels, with its magnetic axis, admitted X-point and the wall">
+      <figcaption>21978/35, the banked terminal state on the corrected field: 0.4613 profiles, 0.6884 EFIT's own, 0.2271 floor. Line contours
+      on one shared physical level array — the twelve levels the receipt records for this panel, so the panel and the receipt cannot disagree
+      about what was drawn. The wall is drawn from the typed unit collection and the state's own nulls with <code>draw_nulls</code>: the axis
+      at (0.9045, 0.0004) m, the admitted X-point at (0.5693, &minus;1.2376) m.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21983-35-state.png"
+           alt="MAST 21983/35 banked terminal state as line contours on shared levels, with its magnetic axis, admitted X-point and the wall">
+      <figcaption>21983/35: 0.5035 profiles, 0.7563 EFIT's own, 0.2528 floor.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.png"
+           alt="MAST 21985/51 banked terminal state as line contours on shared levels, with its magnetic axis, admitted X-point and the wall">
+      <figcaption>21985/51: 0.6061 profiles, 0.8989 EFIT's own, 0.2928 floor.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.png"
+           alt="MAST 21986/46 banked terminal state as line contours on shared levels, with its magnetic axis, admitted X-point and the wall">
+      <figcaption>21986/46: 0.4437 profiles, 0.6037 EFIT's own, 0.1600 floor. This is also the row whose implied radius does not separate the
+      two conventions.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21989-55-state.png"
+           alt="MAST 21989/55 banked terminal state as line contours on shared levels, with its magnetic axis, admitted X-point and the wall">
+      <figcaption>21989/55: 0.6251 profiles, 0.9012 EFIT's own, 0.2762 floor.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-22086-43-state.png"
+           alt="MAST 22086/43 banked terminal state as line contours on shared levels, with its magnetic axis, admitted X-point and the wall">
+      <figcaption>22086/43: 0.4924 profiles, 0.7198 EFIT's own, 0.2274 floor. This row's headline magnetics reading moved furthest under the
+      correction, 0.2817 to 0.3241, because its unnormalised centroid current was 3.6% from the requested one.</figcaption>
+    </figure>
+    <p><strong>Deviation from the fence, stated rather than smoothed.</strong> The fence asks each panel for <em>both</em> null sets, which is
+    the rule for a panel that shows a solved field beside a reference one. These panels carry a single field — the bank's own terminal state,
+    with no reference equilibrium on the row to draw beside it — so the state's null set is drawn and there is no second set to draw. The
+    reading was implemented and executed on all six panels rather than skipped: each receipt records <code>read_status: qualified</code> with
+    the axis and the admitted X-point it drew, so a row whose topology read refused would be visible as such rather than silently blank.</p>
+    <p><strong>What this node leaves behind, and what it does not settle.</strong> The corrections are stated as the receipt carries them,
+    recomputed from the banked states with no new solve: the profile-implied column is unmoved, the extraction-floor headline survives at 0.16
+    to 0.29, the production row kernel now agrees bit-for-bit with the analytic identity it inverts, and the reconstruction's stored moments
+    are shown to normalise on a radius near the boundary's minor radius rather than nova's volume-weighted major radius, with one row
+    (21986/46) that rescaled onto nova's own radius leaves a residual gap of 0.0487 to 0.0593 unexplained by convention alone. A
+    formula-free reading — the contour integral of the poloidal field over a contour enclosing the plasma — is named in the receipt as not
+    computed by this driver; it is the reading that would separate a genuine external-field mismatch from a profile-extraction one, and it
+    belongs to the integral node's register rather than to this measurement.</p>
+    <p><strong>Evidence inputs.</strong> One <code>all_debug</code> CPU job (<code>JAX_PLATFORMS=cpu</code>, the root virtual environment's
+    interpreter called directly with <code>PYTHONPATH</code> and no <code>uv</code> on the compute node, <code>TMPDIR=/tmp</code> in both the
+    submit and the payload environment), 4 CPUs and 64G, <strong>exit 0:0 in 3 m 40 s</strong>. The persistent compilation cache was reused
+    across runs, so the job paid the cache warm rather than a full compile. The unit module for the added convention block and the radius
+    inversion ran in one fresh <code>all_debug</code> process: <strong>15 passed</strong>. The six bank rows, the receipt, the six state
+    panels as PNG and SVG and this section's strip were committed as four revisions, the last of which re-rendered the strip's vector sibling
+    from the committed receipt with no new job.</p>
+  </section>
 </main>
 </body>
 </html>

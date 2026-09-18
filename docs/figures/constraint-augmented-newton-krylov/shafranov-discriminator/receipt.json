@@ -964,9 +964,16 @@
     ]
   },
   "figure": {
-    "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-discriminator-2/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.png",
-    "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.png",
-    "sha256": "4af6761c35fcf04631fd9634f8cfef5be42822704a53756eb877b2e2df363278",
+    "png": {
+      "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.png",
+      "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.png",
+      "sha256": "4af6761c35fcf04631fd9634f8cfef5be42822704a53756eb877b2e2df363278"
+    },
+    "svg": {
+      "filesystem_path": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.svg",
+      "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.svg",
+      "sha256": "299ff081687368d820b524b5e613fe5f7ddf5710b32989262b09f1fd38e64440"
+    },
     "source_revision": "6255587a4bba52fb77388a0c1c589949fbd199fc"
   }
 }

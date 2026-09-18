@@ -992,14 +992,25 @@ def _draw_panel(receipt: dict[str, Any], path: Path, *, source: str) -> dict[str
     )
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=180)
+    figure.savefig(path.with_suffix(".svg"))
     plt.close(figure)
     return {
-        "filesystem_path": str(path),
-        "project_absolute_src": (
-            "/nova/figures/constraint-augmented-newton-krylov/"
-            f"shafranov-discriminator/{path.name}"
-        ),
-        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "png": {
+            "filesystem_path": str(path),
+            "project_absolute_src": (
+                "/nova/figures/constraint-augmented-newton-krylov/"
+                f"shafranov-discriminator/{path.name}"
+            ),
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        },
+        "svg": {
+            "filesystem_path": str(path.with_suffix(".svg")),
+            "project_absolute_src": (
+                "/nova/figures/constraint-augmented-newton-krylov/"
+                f"shafranov-discriminator/{path.with_suffix('.svg').name}"
+            ),
+            "sha256": hashlib.sha256(path.with_suffix(".svg").read_bytes()).hexdigest(),
+        },
         "source_revision": source,
     }
 

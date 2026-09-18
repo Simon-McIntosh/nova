@@ -1179,18 +1179,34 @@ def _mesh_carried_point_flux(
     the mesh's own ownership rule, and a point on a shared edge is read by one
     of the two cells whose polynomials agree there to the fit's accuracy.
 
+    The operator's point read gathers from a pool it builds as the carried
+    cells first and the direct sampling nodes after them, indexing the second
+    block from the cell count.  The state carries more than its cells -- extra
+    physical nodes sit between the cells and the sampling nodes -- so the
+    carried block is the state's first ``node_count`` values, not its first
+    ``physical_node_number``; handing it the longer block shifts every sampled
+    value by the difference and answers with a neighbouring cell's polynomial,
+    which a uniform offset still passes through unchanged.
+
     The flux values enter the read linearly, so the read returns the point's
     flux in the state's own unit, and an offset carried identically by every
     cell moves it by exactly that offset.
     """
     operator = profile.operator
+    lattice = profile.lattice
     state = jnp.asarray(flux, dtype=jnp.float64)
-    centres = jnp.asarray(profile.lattice.coordinate, dtype=state.dtype)
+    centres = jnp.asarray(lattice.coordinate, dtype=state.dtype)
+    node_count = int(lattice.node_count)
+    if node_count != int(operator.grid.node_number):
+        raise ValueError(
+            "a cell-carried read needs the lattice and the operator's flux mesh "
+            "to carry the same cells in the same order"
+        )
     owner = jnp.argmin(jnp.sum((centres - point[None, :]) ** 2, axis=-1))
-    points = jnp.zeros((centres.shape[0], 1, 2), dtype=state.dtype)
+    points = jnp.zeros((node_count, 1, 2), dtype=state.dtype)
     points = points.at[owner, 0].set(jnp.asarray(point, dtype=state.dtype))
     values, _radial, _vertical = operator.sample_flux_field(
-        state[: operator.physical_node_number],
+        state[:node_count],
         operator.sample_node_flux(state),
         points,
     )

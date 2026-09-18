@@ -956,31 +956,53 @@ def test_flux_level_row_states_its_carrier_requirement() -> None:
 
 
 class _CellMeshOperator:
-    """Operator stub whose point read returns the owning cell's own value.
+    """Operator stub whose point read mixes the cell and its sampling nodes.
 
-    Each cell answers with its own carried value at the query the caller
-    supplied for that cell, which is what the mesh read does with a locally
-    fit quadratic: linear in the carried flux in the constant and in the
-    query point through its own slot.
+    The read is a weighted combination -- one weight on the owning cell's own
+    value, the rest on its direct sampling nodes -- so the weights sum to one
+    and a constant added to every flux value moves the read by exactly that
+    constant.  The pool is assembled the way the mesh assembles it, carried
+    cells first and sampling nodes after them indexed from the cell count, so
+    a caller that hands the read a longer carried block than the cells shifts
+    every sampled value and reads a neighbouring cell's neighbourhood.
     """
 
-    physical_node_number = 3
+    physical_node_number = 4
+
+    def __init__(self, node_number: int) -> None:
+        self.grid = SimpleNamespace(node_number=node_number)
 
     def sample_node_flux(self, state):
         return jnp.asarray(state)[self.physical_node_number :]
 
     def sample_flux_field(self, centroid_flux, sample_flux, points):
         pool = jnp.concatenate([jnp.asarray(centroid_flux), jnp.asarray(sample_flux)])
+        count = self.grid.node_number
         query = jnp.asarray(points)[:, :, 0]
-        values = jnp.broadcast_to(pool[: points.shape[0]][:, None], query.shape) + query
+        carried = pool[:count]
+        sampled = pool[count + jnp.arange(count)]
+        mixed = 0.5 * carried + 0.5 * sampled
+        values = jnp.broadcast_to(mixed[:, None], query.shape) + query
         zeros = jnp.zeros_like(values)
         return values, zeros, zeros
 
 
 def _cell_mesh_profile() -> SimpleNamespace:
     """Return a three-cell carrier whose centroids sit on the inboard axis."""
-    mesh = SimpleNamespace(coordinate=np.asarray([[1.0, 0.0], [2.0, 0.0], [3.0, 0.0]]))
-    return SimpleNamespace(lattice=mesh, operator=_CellMeshOperator())
+    mesh = SimpleNamespace(
+        coordinate=np.asarray([[1.0, 0.0], [2.0, 0.0], [3.0, 0.0]]), node_count=3
+    )
+    return SimpleNamespace(lattice=mesh, operator=_CellMeshOperator(node_number=3))
+
+
+# one carried value per cell, one extra physical node between the cells and the
+# sampling nodes, then one sampling node per cell
+_CELL_MESH_STATE = jnp.asarray([0.1, 0.2, 0.3, 0.9, 10.0, 20.0, 30.0])
+_CELL_MESH_MIX = (
+    0.5 * (0.1 + 10.0),
+    0.5 * (0.2 + 20.0),
+    0.5 * (0.3 + 30.0),
+)
 
 
 def test_flux_level_row_reads_a_cell_carried_mesh_through_its_owner() -> None:
@@ -988,7 +1010,7 @@ def test_flux_level_row_reads_a_cell_carried_mesh_through_its_owner() -> None:
     configure_dtypes()
     profile = _cell_mesh_profile()
     row = FluxLevelConstraint(point_count=1)
-    state = jnp.asarray([0.1, 0.2, 0.3, 0.0])
+    state = _CELL_MESH_STATE
     context = ConstraintContext(
         flux=state,
         requested_class=None,
@@ -997,16 +1019,39 @@ def test_flux_level_row_reads_a_cell_carried_mesh_through_its_owner() -> None:
     )
 
     # the query is nearest the second cell's centroid, so the row reads that
-    # cell: the ownership follows the point rather than a fixed slot
+    # cell: the ownership follows the point rather than a fixed slot, and the
+    # value is that cell's own mixture of its carried value and its sampling
+    # nodes rather than the mixture of the cell one slot along
     point = jnp.asarray([[2.05, 0.05]])
     centre = float(np.asarray(row.observed(profile, context, point))[0])
     np.testing.assert_allclose(profile.lattice.coordinate[1, 0], 2.0, rtol=0.0)
-    np.testing.assert_allclose(centre, 0.2 + 2.05, rtol=0.0, atol=1.0e-12)
+    np.testing.assert_allclose(centre, _CELL_MESH_MIX[1] + 2.05, rtol=0.0, atol=1.0e-12)
 
     outboard = float(
         np.asarray(row.observed(profile, context, jnp.asarray([[3.05, 0.0]])))[0]
     )
-    np.testing.assert_allclose(outboard, 0.3 + 3.05, rtol=0.0, atol=1.0e-12)
+    np.testing.assert_allclose(
+        outboard, _CELL_MESH_MIX[2] + 3.05, rtol=0.0, atol=1.0e-12
+    )
+
+    # the sampling nodes are reached through the pool's second block, indexed
+    # from the cell count: moving one cell's sampling node moves that cell's
+    # read by half the shift and leaves the cell whose carried value is the
+    # extra physical node's alone.  A read that takes the state's first
+    # physical-node-number values as the carried block answers here with the
+    # shift of the slot below, so this assertion is what separates the two.
+    shifted_state = state.at[5].add(4.0)
+    shifted = context._replace(flux=shifted_state)
+    sampled = float(np.asarray(row.observed(profile, shifted, point))[0])
+    np.testing.assert_allclose(sampled, centre + 2.0, rtol=0.0, atol=1.0e-12)
+    np.testing.assert_allclose(
+        float(
+            np.asarray(row.observed(profile, shifted, jnp.asarray([[3.05, 0.0]])))[0]
+        ),
+        outboard,
+        rtol=0.0,
+        atol=1.0e-12,
+    )
 
     # the level column's whole property: an offset carried identically by every
     # cell moves the row by exactly that offset, so its leverage is unit and a

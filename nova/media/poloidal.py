@@ -267,6 +267,15 @@ def draw_separatrix_branches(
     Returns the drawn branch counts, so a caller can record an empty set
     rather than present it as a boundary.
     """
+    # Every style keyword is consumed up front. Popping them at their own plot
+    # call leaves the other branch's keyword in kwargs, where it reaches
+    # matplotlib as an unknown property on whichever branch draws first.
+    closed_color = kwargs.pop("closed_color", style.separatrix_color)
+    open_color = kwargs.pop("open_color", style.separatrix_color)
+    closed_linewidth = kwargs.pop("closed_linewidth", style.separatrix_linewidth)
+    open_linewidth = kwargs.pop("open_linewidth", 1.5 * style.separatrix_linewidth)
+    zorder = kwargs.pop("zorder", style.zorder_separatrix)
+
     tally = {"closed_drawn": 0, "open_drawn": 0}
     closed = _sample_cubic_controls(
         branches["closed_controls_rz"],
@@ -278,10 +287,10 @@ def draw_separatrix_branches(
         axes.plot(
             closed[:, 0],
             closed[:, 1],
-            color=kwargs.pop("closed_color", style.separatrix_color),
-            linewidth=kwargs.pop("closed_linewidth", style.separatrix_linewidth),
+            color=closed_color,
+            linewidth=closed_linewidth,
             linestyle="solid",
-            zorder=kwargs.pop("zorder", style.zorder_separatrix),
+            zorder=zorder,
             **kwargs,
         )
     open_controls = np.asarray(branches["open_controls_rz"], dtype=float)
@@ -297,10 +306,10 @@ def draw_separatrix_branches(
         axes.plot(
             leg[:, 0],
             leg[:, 1],
-            color=kwargs.pop("open_color", style.separatrix_color),
-            linewidth=kwargs.pop("open_linewidth", 1.5 * style.separatrix_linewidth),
+            color=open_color,
+            linewidth=open_linewidth,
             linestyle="--",
-            zorder=kwargs.pop("zorder", style.zorder_separatrix),
+            zorder=zorder,
             **kwargs,
         )
     return tally

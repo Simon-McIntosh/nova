@@ -133,6 +133,27 @@ def test_separatrix_branches_skip_a_pad_that_lost_its_mask():
     plt.close(figure)
 
 
+def test_separatrix_branches_apply_both_colours_on_one_set():
+    """Both branch colours are consumed, whichever branch draws first.
+
+    A caller naming the lobe and leg colours separately must not have either
+    reach matplotlib as an unknown line property: a keyword popped only at its
+    own branch's plot call survives into the other one's.
+    """
+    figure, axes = plt.subplots()
+    draw_separatrix_branches(
+        axes,
+        _padded_branch_set(),
+        closed_color="#3366cc",
+        open_color="#cc7722",
+    )
+
+    assert len(axes.lines) == 2
+    assert axes.lines[0].get_color() == "#3366cc"
+    assert axes.lines[1].get_color() == "#cc7722"
+    plt.close(figure)
+
+
 def test_other_qualified_nulls_draw_hollow_beyond_the_wall():
     """A saddle outside the limiter's interior draws hollow and unfilled."""
     figure, axes = plt.subplots()

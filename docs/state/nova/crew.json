@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T05:41:54",
+  "updated": "2026-09-18T05:45:30",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -186181,6 +186181,178 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T215936673671-review-of-nia-drift-probe-remainder-and-panels-2",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "review-of-nia-drift-probe-remainder-and-panels-2",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 404,
+                "cached_input_tokens": 885515,
+                "input_tokens": 885951,
+                "output_tokens": 204,
+                "reasoning_output_tokens": 113,
+                "total_tokens": 886155,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the review for r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2 parses all five score dimensions, is stored at the fence path through reckon.crew.review store_review, and its findings check by reading that docs/figures/null-identification-authority/bank-drift-probe/receipt.json carries twelve rows with rows_missing 0, repository-relative paths and one compile-line count with its marker named, that the two 22086/43 arm receipts exist with their termination reasons and residuals, that the paired panel exists and its render script draws line contours on shared levels with both null sets and the wall, that tests/test_bank_drift_paired_probe.py pins the merge row-count contract and the unpaired-arm path, and that the commits touch only the declared write paths",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2",
+          "id": "review-of-nia-drift-probe-remainder-and-panels-2",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T21:59:37Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T215936673671-review-of-nia-drift-probe-remainder-and-panels-2/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19c-review-niar2-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T21:59:51Z",
+        "completed_at": "2026-09-17T22:56:52.745Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3392,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3421,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d85874f89840aaa57b1e0981ccd8834bbec73a1a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "parse_review round trip on the stored review file",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2.json",
+          "log_digest": "sha256:e5bd16bcd425a4b3d8b29de47f166c022d50bcaccfa6d0e2116e176ae6ae716a"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T215936673671-review-of-nia-drift-probe-remainder-and-panels-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "ae03b1ea-9d40-4786-a98a-56dcff514b2d",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T22:56:52.745Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "follow_on_paths": [],
+        "predecessor_run": "r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": "review role; the deliverable is the stored review record outside the repository",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-nia-drift-probe-remainder-and-panels-2",
+          "session_id": "ae03b1ea-9d40-4786-a98a-56dcff514b2d",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T22:56:52.745Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 57.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -186493,6 +186665,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2757
+    "_version": 2758
   }
 }

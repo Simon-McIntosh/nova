@@ -557,6 +557,12 @@ def _profile_support_digest(profile: Any) -> dict[str, Any]:
     The anchors are deliberately absent from this digest, so it is an
     invariance check rather than a treatment indicator: two treatments that
     disagree here are not measuring the same operands.
+
+    The parts are the same set the bank probe digests, which is what makes the
+    value comparable to the committed reference rather than only to this run:
+    an equal digest is evidence that this driver built the same operands the
+    banked run did, and the two solve classes agree here is evidence that a
+    residual difference is not an operand difference.
     """
 
     operator = profile.operator
@@ -565,6 +571,19 @@ def _profile_support_digest(profile: Any) -> dict[str, Any]:
         leaves = _flatten_operand(getattr(operator, name, None))
         if leaves:
             parts[name] = _digest(np.concatenate(leaves))
+    node_number = getattr(operator, "physical_node_number", None)
+    if node_number is not None:
+        parts["physical_node_number"] = _digest([float(node_number)])
+    connectivity = getattr(operator, "connectivity_grid_axes", None)
+    if callable(connectivity):
+        try:
+            axes, _shape = connectivity()
+        except TypeError, ValueError, RuntimeError:
+            axes = None
+        if axes is not None:
+            leaves = _flatten_operand(axes)
+            if leaves:
+                parts["connectivity_grid_axes"] = _digest(np.concatenate(leaves))
     source = getattr(profile, "source", None)
     source_leaves = _flatten_operand(source) if source is not None else []
     if source_leaves:
@@ -879,23 +898,24 @@ def _panel(
 
 
 def _geometry_identity_report(operator: Any) -> dict[str, Any]:
-    """Digest the operator's cached geometry identity."""
+    """Report the operator's cached geometry identity.
+
+    The identity is computed once, in ``__post_init__``, from the host-owned
+    geometry inputs plus every field that is not a declared dynamic extra.  It
+    is therefore the instrument that shows whether a treatment reached the
+    construction or was applied too late: the anchors join the specialisation
+    when the hook does not name them, and the identity moves.
+    """
 
     identity = getattr(operator, "_geometry_identity", None)
     if identity is None:
-        return {"present": False}
+        return {"present": False, "digest": "absent"}
+    if isinstance(identity, str):
+        return {"present": True, "digest": identity}
     leaves = _flatten_operand(identity)
     return {
         "present": True,
         "digest": _digest(np.concatenate(leaves)) if leaves else "empty",
-        "specialisation_keys": sorted(
-            str(key)
-            for key in (
-                (identity.get("specialisation") or {})
-                if isinstance(identity, dict)
-                else {}
-            )
-        ),
     }
 
 
@@ -938,22 +958,23 @@ def _control(
             )
             operator = profile.operator
             partition = _partition_report(operator)
-            reports[treatment] = {
+            report: dict[str, Any] = {
                 "hook_names": _hook_names(operator),
                 "partition": partition,
                 "anchors": _anchor_snapshot(operator),
                 "profile_support": _profile_support_digest(profile),
                 "geometry_identity": _geometry_identity_report(operator),
             }
+            reports[treatment] = report
+            identity_report = report["geometry_identity"]
             print(
                 f"CONTROL treatment={treatment} "
-                f"hook_names={json.dumps(reports[treatment]['hook_names'])} "
+                f"hook_names={json.dumps(report['hook_names'])} "
                 f"leaf_count={partition['summary']['leaf_count']} "
                 f"structure={partition['structure_digest']} "
                 f"values={partition['values_digest']} "
-                f"geometry_identity="
-                f"{reports[treatment]['geometry_identity'].get('digest')} "
-                f"support={reports[treatment]['profile_support']['digest']}",
+                f"geometry_identity={identity_report.get('digest')} "
+                f"support={report['profile_support']['digest']}",
                 flush=True,
             )
 

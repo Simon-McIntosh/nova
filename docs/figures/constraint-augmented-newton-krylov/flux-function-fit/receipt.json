@@ -1,0 +1,157 @@
+{
+  "receipt": "projected extracted flux functions with their scales freed under the Shafranov row",
+  "row_set": "every row the decomposition bank qualifies",
+  "rows": [
+    [
+      21978,
+      35
+    ],
+    [
+      21983,
+      35
+    ],
+    [
+      21985,
+      51
+    ],
+    [
+      21986,
+      46
+    ],
+    [
+      21989,
+      55
+    ],
+    [
+      22086,
+      43
+    ]
+  ],
+  "source": {
+    "revision": "696cc1e53464948816b517f751c08385f4165375",
+    "python": "3.14.2",
+    "jax": "0.11.0",
+    "devices": [
+      "cuda:0"
+    ]
+  },
+  "configuration": {
+    "projection": "project_domain_profile on the declared uniform 65-point normalised-flux base",
+    "projection_maximum_order": 6,
+    "projection_tolerance": 0.001,
+    "row": "ExternalShafranovConstraint at the elongation-corrected minor radius a sqrt(kappa)",
+    "compensating_unknown": "ProfileAmplitudeUnknown freed one component at a time: the row is one equation",
+    "row_tolerance": 1e-06,
+    "persistent_compilation_cache": {
+      "directory": "/work/projects/imas_gpu/sophelio/jax-cache/flux-function-fit/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "version": "runtime-0745ecebea4cb264e054"
+    }
+  },
+  "inputs": {
+    "carrier_evidence": {
+      "loaded_from_persisted_carrier": true,
+      "carrier": {
+        "path": "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+        "semantic_response_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+        "resolved_target_digest": "5623983f54f144edd70f113bdf66ed60fd4de6b751bb8312a31aa422d158b4a9",
+        "response_sha256": "79afd30bfa88bacc9a51d2747fde88b3a644ef15a677a7e13f981f65aecbca93",
+        "response_shape": [
+          1126,
+          101
+        ],
+        "stored_circuit_count": 101,
+        "frozen_reference_count": 6,
+        "warm_load_seconds": 0.008397613652050495,
+        "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
+        "size_bytes": 645864
+      },
+      "named_cache_only_check": {
+        "command": [
+          "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-flux-function-fit/benchmarks/mast_response_carrier_warm.py",
+          "check",
+          "--carrier",
+          "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
+          "--receipt",
+          "docs/figures/plateau-input-attribution/mast-response-carrier.json"
+        ],
+        "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.024715 direct_builders=0 verdict=PASS",
+        "direct_green_operator_builder_entries": 0,
+        "passes": true
+      }
+    }
+  },
+  "rows_receipt": [
+    {
+      "identity": "21978/35",
+      "status": "imposed",
+      "minor_radius_m": 0.8353646097742892,
+      "geometric_minor_radius_m": 0.5846531018614769,
+      "elongation": 2.0415293528698206,
+      "plasma_current_a": 801493.25,
+      "target_combination": 0.46136082239669995,
+      "source_combination_at_reference": 0.46130870196012286,
+      "projected_combination_at_reference": 0.46136082239669995,
+      "reference_combination_gap": 5.212043657709664e-05,
+      "projection": {
+        "p_prime": {
+          "order": 2,
+          "basis": "monomial",
+          "condition_number": 22.236523085551795,
+          "monomial_condition_number": 22.236523085551795,
+          "si_scale": 36737.21328674518,
+          "relative_residual": 1.5607145344909264e-08,
+          "maximum_relative_residual": 3.435720511688854e-08,
+          "tolerance_met": true,
+          "sample_count": 65
+        },
+        "ff_prime": {
+          "order": 2,
+          "basis": "monomial",
+          "condition_number": 22.236523085551795,
+          "monomial_condition_number": 22.236523085551795,
+          "si_scale": 0.08508896937382944,
+          "relative_residual": 1.7897634912945847e-08,
+          "maximum_relative_residual": 5.449373143914642e-08,
+          "tolerance_met": true,
+          "sample_count": 65
+        },
+        "sample_count": 65,
+        "psi_span": [
+          0.0,
+          1.0
+        ]
+      },
+      "scale_alone_closes_the_gap": false,
+      "variants": [
+        {
+          "component": "pressure_gradient",
+          "achieved_combination": 0.6572848589748193,
+          "combination_gap_after": 0.1959240365781193,
+          "compensating_amplitude_fraction": -3.667517867130625,
+          "terminal_residual": 0.05071230303477289,
+          "outer_steps": 8,
+          "converged": false,
+          "topology_consistent": true,
+          "termination": "active_set_cycle_detected"
+        },
+        {
+          "component": "ff_prime",
+          "achieved_combination": 0.6570137553234869,
+          "combination_gap_after": 0.19565293292678698,
+          "compensating_amplitude_fraction": 0.30830243834996773,
+          "terminal_residual": 0.22424184909597797,
+          "outer_steps": 3,
+          "converged": false,
+          "topology_consistent": true,
+          "termination": "active_set_cycle_detected"
+        }
+      ],
+      "figure": {
+        "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-flux-function-fit/docs/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.png",
+        "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.png",
+        "sha256": "3cc36cb4886f7245c5ee12b6643fc76f33d059be111d8832db9b339d01a00945"
+      }
+    }
+  ]
+}

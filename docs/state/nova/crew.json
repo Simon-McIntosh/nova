@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T19:18:12",
+  "updated": "2026-09-18T19:45:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5385,6 +5385,15 @@
       },
       {
         "id": "s19c-review-figrec-c",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-18"
+      },
+      {
+        "id": "s19c-review-fluxfit-c",
         "harness": "clive",
         "role": "review",
         "session_id": null,
@@ -196223,6 +196232,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2827
+    "_version": 2828
   }
 }

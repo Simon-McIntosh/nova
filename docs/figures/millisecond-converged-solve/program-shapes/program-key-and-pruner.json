@@ -1,0 +1,57 @@
+{
+  "schema": "nova.program-key-and-pruner",
+  "captured_at": "2026-09-17T00:00:00+00:00",
+  "orientation_revision": "299e4b64787ae82c8c69c35e7da6bbd02f3b7fa7",
+  "compiled_program_key": {
+    "tracer": "nova/equilibrium/reduced_newton.py:2055 _compiled_program_key",
+    "fields": [
+      "operator_program_identity",
+      "coordinates_cells_index_list",
+      "external_argument_layout",
+      "target_current_argument_layout",
+      "requested_class",
+      "row_count",
+      "row_signature"
+    ],
+    "operator_program_identity": {
+      "source": "nova/equilibrium/forward_operator.py:2204 ForwardFluxOperator.program_identity",
+      "definition": "_batch_identity() = geometry_identity + ':' + source_layout.identity + ':prescribed=' + prescribed_field-is-not-None + ':sample=' + sample-is-not-None",
+      "geometry_identity": "sha256 digest of grid.null, wall.null, sample.null, area, cell_average_stencil, cell_average_weight, inside_material, moment_geometry, polarity, use_linear_moments, wall_unit_offsets, wall_unit_closed, wall_unit_kinds and the specialised operator state (forward_operator.py:2133 _compute_geometry_identity)",
+      "reading": "the operator identity is VALUE-keyed, so two identities whose meshes differ in values but not in shapes still receive different program keys and cannot share a compiled program unless the identity itself is bucketed"
+    },
+    "static_lengths": {
+      "coordinates_cells": "tuple(np.asarray(coordinates.cells, dtype=np.intp)) is hashed whole, so the LENGTH of the support cell index list is a static shape of the program; reduced_coordinates derives it host-side from np.flatnonzero(profile_participation), so it is a static length, not a traced dimension",
+      "argument_layouts": "_compiled_argument_layout(value) returns (shape, dtype) and _compiled_argument_key(value) adds a value digest for the arrays a program captures"
+    },
+    "separate_aggregates": {
+      "entry_key": "reduced_newton.py:2076 _compiled_entry_key omits conductor currents deliberately, so a same-shaped prescribed-current edit re-enters the built program (exterior flux is a traced argument)",
+      "cache": "reduced_newton.py:246 _compiled_program_cache, an OrderedDict bounded by _COMPILED_PROGRAM_CACHE_LIMIT, remembered by _remember_compiled_program (reduced_newton.py:2137)"
+    },
+    "addressable_axes": [
+      "mesh geometry values (via geometry_identity)",
+      "support cell capacity (the length of coordinates.cells)",
+      "mesh-sized traced-argument shapes",
+      "requested class",
+      "augmentation row count and row signature"
+    ]
+  },
+  "persistent_cache_pruner": {
+    "identity": "JAX's own persistent-cache LRU, not a nova or systemd unit",
+    "class": "jax._src.lru_cache.LRUCache",
+    "rule": "on every put, while the summed size of the entry files exceeds (max_size - additional_size), pop the entry whose '<key>-atime' sidecar (an int stored little-endian) is smallest, then unlink both the entry file and its -atime sidecar; eviction is skipped entirely when eviction_enabled is false (jax/_src/lru_cache.py:170-210)",
+    "sidecar": "each entry is accompanied by a '<key>-atime' file holding the access stamp that orders eviction",
+    "configured_by": {
+      "function": "nova/jax/config.py:142 configure_persistent_compilation_cache",
+      "max_size": "jax_compilation_cache_max_size = _PERSISTENT_CACHE_MAXIMUM_BYTES = 8 GiB (nova/jax/config.py:27)",
+      "minimum_compile_seconds": "_PERSISTENT_CACHE_MINIMUM_COMPILE_SECONDS = 1.0 (nova/jax/config.py:28)",
+      "directory_layout": "<root>/nova/jax-compilation/<runtime-version-key>; the default root is Path.home() / '.cache' (nova/jax/config.py:100 default_persistent_compilation_cache_root)",
+      "observed_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation"
+    },
+    "no_external_timer": {
+      "crontab": "crontab -l reported no crontab for mcintos",
+      "systemd_user_timers": "systemctl --user list-timers --all lists only systemd-tmpfiles-clean.timer, imas-codex-graph-push.timer and grub-boot-success.timer, none of which touches the compilation cache path",
+      "tmpfiles_rules": "no rule in /usr/lib/tmpfiles.d or /etc/tmpfiles.d names nova or the compilation cache, and no ~/.config/user-tmpfiles.d exists",
+      "consequence": "entries leave the cache only through LRUCache._evict under the 8 GiB bound (or an explicit reset), so a shared pre-warmed cache location must either raise that bound or keep entries warm"
+    }
+  }
+}

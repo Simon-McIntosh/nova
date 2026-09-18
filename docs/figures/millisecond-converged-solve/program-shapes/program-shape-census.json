@@ -1,0 +1,1927 @@
+{
+ "schema": "nova.program-shape-census",
+ "captured_at": "2026-09-18T00:52:36+0200",
+ "bank_cache": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-canonical-program-shapes-census/logs/exact-operand-cache.npz",
+ "compiled_program_key": "nova/equilibrium/reduced_newton.py:2055 _compiled_program_key",
+ "certificate_source": "benchmarks/solovev_certificate._certificate_compile_problem dimensions",
+ "framework_compat_shims": [
+  "clip_quadrature._UNIT_NODE is published as observation._UNIT_NODE for the duration of the certificate call: solovev_certificate.py reads it from the module that does not define it"
+ ],
+ "requested_cells": -300,
+ "bank": {
+  "label": "bank",
+  "identities": 12,
+  "distinct_capacity_vectors_today": 1,
+  "distinct_bucketed_vectors": 1,
+  "padding_waste": {
+   "mesh_axis_nodes": {
+    "observed": [
+     1089
+    ],
+    "floors": [
+     900,
+     1089,
+     2500,
+     4096,
+     10000
+    ],
+    "padding_ratio": {
+     "1089": 1.0
+    }
+   },
+   "state_size": {
+    "observed": [
+     1089
+    ],
+    "floors": "power-of-two fallback",
+    "padding_ratio": {
+     "1089": 1.8806
+    }
+   },
+   "wall_node_capacity": {
+    "observed": [
+     37
+    ],
+    "floors": "power-of-two fallback",
+    "padding_ratio": {
+     "37": 1.7297
+    }
+   }
+  },
+  "today": {
+   "{\"arc_capacity\": null, \"mesh_axis_nodes\": 1089, \"mesh_cell_capacity\": null, \"sample_node_capacity\": null, \"state_size\": 1089, \"support_capacity\": null, \"wall_node_capacity\": 37}": [
+    "21978/35/mixed",
+    "21978/35/pure",
+    "21983/35/mixed",
+    "21983/35/pure",
+    "21985/51/mixed",
+    "21985/51/pure",
+    "21986/46/mixed",
+    "21986/46/pure",
+    "21989/55/mixed",
+    "21989/55/pure",
+    "22086/43/mixed",
+    "22086/43/pure"
+   ]
+  },
+  "bucketed": {
+   "{\"mesh_axis_nodes\": 1089, \"state_size\": 2048, \"wall_node_capacity\": 64}": [
+    "21978/35/mixed",
+    "21978/35/pure",
+    "21983/35/mixed",
+    "21983/35/pure",
+    "21985/51/mixed",
+    "21985/51/pure",
+    "21986/46/mixed",
+    "21986/46/pure",
+    "21989/55/mixed",
+    "21989/55/pure",
+    "22086/43/mixed",
+    "22086/43/pure"
+   ]
+  },
+  "distinct_program_shape_signatures": 1,
+  "distinct_receipt_shape_signatures": 12,
+  "geometry_value_agreement": {
+   "arrays": [
+    "radius",
+    "height",
+    "wall"
+   ],
+   "max_abs_difference": {
+    "radius": 0.0,
+    "height": 0.0,
+    "wall": 0.0
+   },
+   "shared_program": true,
+   "operand_only_arrays": {
+    "flux": 0.48208103183213236
+   }
+  },
+  "program_count_today": 1
+ },
+ "certificate": {
+  "label": "certificate",
+  "identities": 4,
+  "distinct_capacity_vectors_today": 4,
+  "distinct_bucketed_vectors": 1,
+  "padding_waste": {
+   "arc_capacity": {
+    "observed": [
+     3072,
+     3328
+    ],
+    "floors": [
+     256,
+     512,
+     1024,
+     2048
+    ],
+    "padding_ratio": {
+     "3072": 1.3333,
+     "3328": 1.2308
+    }
+   },
+   "mesh_axis_nodes": {
+    "observed": [
+     340,
+     341,
+     342
+    ],
+    "floors": [
+     900,
+     1089,
+     2500,
+     4096,
+     10000
+    ],
+    "padding_ratio": {
+     "340": 2.6471,
+     "341": 2.6393,
+     "342": 2.6316
+    }
+   },
+   "mesh_cell_capacity": {
+    "observed": [
+     340,
+     341,
+     342
+    ],
+    "floors": [
+     300,
+     1000,
+     2500,
+     5000
+    ],
+    "padding_ratio": {
+     "340": 2.9412,
+     "341": 2.9326,
+     "342": 2.924
+    }
+   },
+   "sample_node_capacity": {
+    "observed": [
+     1063,
+     1066,
+     1073,
+     1086
+    ],
+    "floors": "power-of-two fallback",
+    "padding_ratio": {
+     "1063": 1.9266,
+     "1066": 1.9212,
+     "1073": 1.9087,
+     "1086": 1.8858
+    }
+   },
+   "state_size": {
+    "observed": [
+     1525,
+     1529,
+     1535,
+     1547
+    ],
+    "floors": "power-of-two fallback",
+    "padding_ratio": {
+     "1525": 1.343,
+     "1529": 1.3394,
+     "1535": 1.3342,
+     "1547": 1.3239
+    }
+   },
+   "support_capacity": {
+    "observed": [
+     24,
+     26
+    ],
+    "floors": [
+     256,
+     512,
+     1024,
+     2048,
+     4096
+    ],
+    "padding_ratio": {
+     "24": 10.6667,
+     "26": 9.8462
+    }
+   },
+   "wall_node_capacity": {
+    "observed": [
+     121
+    ],
+    "floors": "power-of-two fallback",
+    "padding_ratio": {
+     "121": 1.0579
+    }
+   }
+  },
+  "today": {
+   "{\"arc_capacity\": 3072, \"mesh_axis_nodes\": 342, \"mesh_cell_capacity\": 342, \"sample_node_capacity\": 1066, \"state_size\": 1529, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
+    "weak-rotation-reactor-static"
+   ],
+   "{\"arc_capacity\": 3072, \"mesh_axis_nodes\": 341, \"mesh_cell_capacity\": 341, \"sample_node_capacity\": 1073, \"state_size\": 1535, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
+    "moderate-rotation-conventional-static"
+   ],
+   "{\"arc_capacity\": 3072, \"mesh_axis_nodes\": 341, \"mesh_cell_capacity\": 341, \"sample_node_capacity\": 1063, \"state_size\": 1525, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
+    "strong-rotation-compact-static"
+   ],
+   "{\"arc_capacity\": 3328, \"mesh_axis_nodes\": 340, \"mesh_cell_capacity\": 340, \"sample_node_capacity\": 1086, \"state_size\": 1547, \"support_capacity\": 26, \"wall_node_capacity\": 121}": [
+    "diverted-single-null"
+   ]
+  },
+  "bucketed": {
+   "{\"arc_capacity\": 4096, \"mesh_axis_nodes\": 900, \"mesh_cell_capacity\": 1000, \"sample_node_capacity\": 2048, \"state_size\": 2048, \"support_capacity\": 256, \"wall_node_capacity\": 128}": [
+    "diverted-single-null",
+    "moderate-rotation-conventional-static",
+    "strong-rotation-compact-static",
+    "weak-rotation-reactor-static"
+   ]
+  }
+ },
+ "combined": {
+  "label": "bank-and-certificate",
+  "identities": 16,
+  "distinct_capacity_vectors_today": 5,
+  "distinct_bucketed_vectors": 2,
+  "padding_waste": {
+   "arc_capacity": {
+    "observed": [
+     3072,
+     3328
+    ],
+    "floors": [
+     256,
+     512,
+     1024,
+     2048
+    ],
+    "padding_ratio": {
+     "3072": 1.3333,
+     "3328": 1.2308
+    }
+   },
+   "mesh_axis_nodes": {
+    "observed": [
+     340,
+     341,
+     342,
+     1089
+    ],
+    "floors": [
+     900,
+     1089,
+     2500,
+     4096,
+     10000
+    ],
+    "padding_ratio": {
+     "340": 2.6471,
+     "341": 2.6393,
+     "342": 2.6316,
+     "1089": 1.0
+    }
+   },
+   "mesh_cell_capacity": {
+    "observed": [
+     340,
+     341,
+     342
+    ],
+    "floors": [
+     300,
+     1000,
+     2500,
+     5000
+    ],
+    "padding_ratio": {
+     "340": 2.9412,
+     "341": 2.9326,
+     "342": 2.924
+    }
+   },
+   "sample_node_capacity": {
+    "observed": [
+     1063,
+     1066,
+     1073,
+     1086
+    ],
+    "floors": "power-of-two fallback",
+    "padding_ratio": {
+     "1063": 1.9266,
+     "1066": 1.9212,
+     "1073": 1.9087,
+     "1086": 1.8858
+    }
+   },
+   "state_size": {
+    "observed": [
+     1089,
+     1525,
+     1529,
+     1535,
+     1547
+    ],
+    "floors": "power-of-two fallback",
+    "padding_ratio": {
+     "1089": 1.8806,
+     "1525": 1.343,
+     "1529": 1.3394,
+     "1535": 1.3342,
+     "1547": 1.3239
+    }
+   },
+   "support_capacity": {
+    "observed": [
+     24,
+     26
+    ],
+    "floors": [
+     256,
+     512,
+     1024,
+     2048,
+     4096
+    ],
+    "padding_ratio": {
+     "24": 10.6667,
+     "26": 9.8462
+    }
+   },
+   "wall_node_capacity": {
+    "observed": [
+     37,
+     121
+    ],
+    "floors": "power-of-two fallback",
+    "padding_ratio": {
+     "37": 1.7297,
+     "121": 1.0579
+    }
+   }
+  },
+  "today": {
+   "{\"arc_capacity\": null, \"mesh_axis_nodes\": 1089, \"mesh_cell_capacity\": null, \"sample_node_capacity\": null, \"state_size\": 1089, \"support_capacity\": null, \"wall_node_capacity\": 37}": [
+    "21978/35/mixed",
+    "21978/35/pure",
+    "21983/35/mixed",
+    "21983/35/pure",
+    "21985/51/mixed",
+    "21985/51/pure",
+    "21986/46/mixed",
+    "21986/46/pure",
+    "21989/55/mixed",
+    "21989/55/pure",
+    "22086/43/mixed",
+    "22086/43/pure"
+   ],
+   "{\"arc_capacity\": 3072, \"mesh_axis_nodes\": 342, \"mesh_cell_capacity\": 342, \"sample_node_capacity\": 1066, \"state_size\": 1529, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
+    "weak-rotation-reactor-static"
+   ],
+   "{\"arc_capacity\": 3072, \"mesh_axis_nodes\": 341, \"mesh_cell_capacity\": 341, \"sample_node_capacity\": 1073, \"state_size\": 1535, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
+    "moderate-rotation-conventional-static"
+   ],
+   "{\"arc_capacity\": 3072, \"mesh_axis_nodes\": 341, \"mesh_cell_capacity\": 341, \"sample_node_capacity\": 1063, \"state_size\": 1525, \"support_capacity\": 24, \"wall_node_capacity\": 121}": [
+    "strong-rotation-compact-static"
+   ],
+   "{\"arc_capacity\": 3328, \"mesh_axis_nodes\": 340, \"mesh_cell_capacity\": 340, \"sample_node_capacity\": 1086, \"state_size\": 1547, \"support_capacity\": 26, \"wall_node_capacity\": 121}": [
+    "diverted-single-null"
+   ]
+  },
+  "bucketed": {
+   "{\"mesh_axis_nodes\": 1089, \"state_size\": 2048, \"wall_node_capacity\": 64}": [
+    "21978/35/mixed",
+    "21978/35/pure",
+    "21983/35/mixed",
+    "21983/35/pure",
+    "21985/51/mixed",
+    "21985/51/pure",
+    "21986/46/mixed",
+    "21986/46/pure",
+    "21989/55/mixed",
+    "21989/55/pure",
+    "22086/43/mixed",
+    "22086/43/pure"
+   ],
+   "{\"arc_capacity\": 4096, \"mesh_axis_nodes\": 900, \"mesh_cell_capacity\": 1000, \"sample_node_capacity\": 2048, \"state_size\": 2048, \"support_capacity\": 256, \"wall_node_capacity\": 128}": [
+    "diverted-single-null",
+    "moderate-rotation-conventional-static",
+    "strong-rotation-compact-static",
+    "weak-rotation-reactor-static"
+   ]
+  }
+ },
+ "bucketing_proposals": [
+  {
+   "floors": {
+    "support_capacity": [
+     256,
+     512,
+     1024,
+     2048,
+     4096
+    ],
+    "mesh_axis_nodes": [
+     900,
+     1089,
+     2500,
+     4096,
+     10000
+    ],
+    "mesh_cell_capacity": [
+     300,
+     1000,
+     2500,
+     5000
+    ],
+    "arc_capacity": [
+     256,
+     512,
+     1024,
+     2048
+    ]
+   },
+   "programs": 2,
+   "identities": 16
+  },
+  {
+   "floors": {
+    "support_capacity": [
+     256,
+     512
+    ],
+    "mesh_axis_nodes": [
+     900,
+     1089
+    ],
+    "mesh_cell_capacity": [
+     300,
+     1000
+    ],
+    "arc_capacity": [
+     256,
+     512
+    ]
+   },
+   "programs": 2,
+   "identities": 16
+  }
+ ],
+ "cache": {
+  "root": "/home/ITER/mcintos/.cache/nova/jax-compilation",
+  "present": true,
+  "runtime_keys": 12,
+  "directories": [
+   {
+    "name": "runtime-0340c6126519e4c6742a",
+    "entries": 98,
+    "bytes": 805434734,
+    "gib": 0.75,
+    "max_entry_bytes": 22128482
+   },
+   {
+    "name": "runtime-0745ecebea4cb264e054",
+    "entries": 1442,
+    "bytes": 9349259325,
+    "gib": 8.707,
+    "max_entry_bytes": 906756772
+   },
+   {
+    "name": "runtime-25e085280f54263e1c4c",
+    "entries": 2,
+    "bytes": 3926,
+    "gib": 0.0,
+    "max_entry_bytes": 3926
+   },
+   {
+    "name": "runtime-6f30831af8e50c9f8d3a",
+    "entries": 92,
+    "bytes": 18713156,
+    "gib": 0.017,
+    "max_entry_bytes": 17437685
+   },
+   {
+    "name": "runtime-6fdae1ee7e31f3aa7070",
+    "entries": 101,
+    "bytes": 259567560,
+    "gib": 0.242,
+    "max_entry_bytes": 3429665
+   },
+   {
+    "name": "runtime-ab0dbbc67db2b33418b7",
+    "entries": 18,
+    "bytes": 1421089,
+    "gib": 0.001,
+    "max_entry_bytes": 362369
+   },
+   {
+    "name": "runtime-abdc43c0d16f90d9417b",
+    "entries": 13,
+    "bytes": 115438066,
+    "gib": 0.108,
+    "max_entry_bytes": 18782504
+   },
+   {
+    "name": "runtime-cb82fcedca3c49a48216",
+    "entries": 1,
+    "bytes": 0,
+    "gib": 0.0,
+    "max_entry_bytes": 0
+   },
+   {
+    "name": "runtime-cbd2c52be4da4657e887",
+    "entries": 5,
+    "bytes": 312808533,
+    "gib": 0.291,
+    "max_entry_bytes": 301864025
+   },
+   {
+    "name": "runtime-ea5c55820be3d80549fe",
+    "entries": 2139,
+    "bytes": 5933039909,
+    "gib": 5.526,
+    "max_entry_bytes": 705173042
+   },
+   {
+    "name": "runtime-f204a4500ecf846ca010",
+    "entries": 36,
+    "bytes": 1536673489,
+    "gib": 1.431,
+    "max_entry_bytes": 301861717
+   },
+   {
+    "name": "runtime-ff159320363a74a93b07",
+    "entries": 11,
+    "bytes": 1705859270,
+    "gib": 1.589,
+    "max_entry_bytes": 425482922
+   }
+  ],
+  "total_entries": 3958,
+  "total_bytes": 20038219057,
+  "total_gib": 18.662,
+  "age_days": {
+   "min": 0.06,
+   "median": 2.25,
+   "q90": 9.62,
+   "max": 15.68,
+   "older_than_10_days": 360,
+   "older_than_20_days": 0
+  }
+ },
+ "rows": {
+  "bank": [
+   {
+    "identity": "21978/35",
+    "arm": "pure",
+    "name": "21978/35/pure",
+    "indices": 0,
+    "capacities": {
+     "mesh_axis_nodes": 1089,
+     "state_size": 1089,
+     "wall_node_capacity": 37,
+     "mesh_cell_capacity": null,
+     "support_capacity": null,
+     "arc_capacity": null,
+     "sample_node_capacity": null
+    },
+    "program_arrays": {
+     "radius": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "height": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "flux": [
+      [
+       33,
+       33
+      ],
+      "<f8"
+     ],
+     "wall": [
+      [
+       37,
+       2
+      ],
+      "<f8"
+     ],
+     "axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "selected_saddle": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "binding_flux": [
+      [],
+      "<f8"
+     ]
+    },
+    "receipt_arrays": {
+     "efit_lcfs": [
+      [
+       153,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_x_points": [
+      [
+       2,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "active_set_residuals": [
+      [
+       3
+      ],
+      "<f8"
+     ],
+     "active_set_mask_differences": [
+      [
+       3
+      ],
+      "<i8"
+     ],
+     "active_set_cycle_damping_activations": [
+      [
+       3
+      ],
+      "<i8"
+     ]
+    },
+    "program_signature": "d7f6fd0ec1c1e605",
+    "receipt_signature": "7db8e085514d8815"
+   },
+   {
+    "identity": "21978/35",
+    "arm": "mixed",
+    "name": "21978/35/mixed",
+    "indices": 1,
+    "capacities": {
+     "mesh_axis_nodes": 1089,
+     "state_size": 1089,
+     "wall_node_capacity": 37,
+     "mesh_cell_capacity": null,
+     "support_capacity": null,
+     "arc_capacity": null,
+     "sample_node_capacity": null
+    },
+    "program_arrays": {
+     "radius": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "height": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "flux": [
+      [
+       33,
+       33
+      ],
+      "<f8"
+     ],
+     "wall": [
+      [
+       37,
+       2
+      ],
+      "<f8"
+     ],
+     "axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "selected_saddle": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "binding_flux": [
+      [],
+      "<f8"
+     ]
+    },
+    "receipt_arrays": {
+     "efit_lcfs": [
+      [
+       153,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_x_points": [
+      [
+       2,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "active_set_residuals": [
+      [
+       0
+      ],
+      "<f8"
+     ],
+     "active_set_mask_differences": [
+      [
+       0
+      ],
+      "<f8"
+     ],
+     "active_set_cycle_damping_activations": [
+      [
+       0
+      ],
+      "<f8"
+     ]
+    },
+    "program_signature": "d7f6fd0ec1c1e605",
+    "receipt_signature": "b3bd6652816215a4"
+   },
+   {
+    "identity": "21983/35",
+    "arm": "pure",
+    "name": "21983/35/pure",
+    "indices": 2,
+    "capacities": {
+     "mesh_axis_nodes": 1089,
+     "state_size": 1089,
+     "wall_node_capacity": 37,
+     "mesh_cell_capacity": null,
+     "support_capacity": null,
+     "arc_capacity": null,
+     "sample_node_capacity": null
+    },
+    "program_arrays": {
+     "radius": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "height": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "flux": [
+      [
+       33,
+       33
+      ],
+      "<f8"
+     ],
+     "wall": [
+      [
+       37,
+       2
+      ],
+      "<f8"
+     ],
+     "axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "selected_saddle": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "binding_flux": [
+      [],
+      "<f8"
+     ]
+    },
+    "receipt_arrays": {
+     "efit_lcfs": [
+      [
+       155,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_x_points": [
+      [
+       2,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "active_set_residuals": [
+      [
+       9
+      ],
+      "<f8"
+     ],
+     "active_set_mask_differences": [
+      [
+       9
+      ],
+      "<i8"
+     ],
+     "active_set_cycle_damping_activations": [
+      [
+       9
+      ],
+      "<i8"
+     ]
+    },
+    "program_signature": "d7f6fd0ec1c1e605",
+    "receipt_signature": "bc938b21e9b10cbe"
+   },
+   {
+    "identity": "21983/35",
+    "arm": "mixed",
+    "name": "21983/35/mixed",
+    "indices": 3,
+    "capacities": {
+     "mesh_axis_nodes": 1089,
+     "state_size": 1089,
+     "wall_node_capacity": 37,
+     "mesh_cell_capacity": null,
+     "support_capacity": null,
+     "arc_capacity": null,
+     "sample_node_capacity": null
+    },
+    "program_arrays": {
+     "radius": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "height": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "flux": [
+      [
+       33,
+       33
+      ],
+      "<f8"
+     ],
+     "wall": [
+      [
+       37,
+       2
+      ],
+      "<f8"
+     ],
+     "axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "selected_saddle": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "binding_flux": [
+      [],
+      "<f8"
+     ]
+    },
+    "receipt_arrays": {
+     "efit_lcfs": [
+      [
+       155,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_x_points": [
+      [
+       2,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "active_set_residuals": [
+      [
+       0
+      ],
+      "<f8"
+     ],
+     "active_set_mask_differences": [
+      [
+       0
+      ],
+      "<f8"
+     ],
+     "active_set_cycle_damping_activations": [
+      [
+       0
+      ],
+      "<f8"
+     ]
+    },
+    "program_signature": "d7f6fd0ec1c1e605",
+    "receipt_signature": "2325577db6582e76"
+   },
+   {
+    "identity": "21985/51",
+    "arm": "pure",
+    "name": "21985/51/pure",
+    "indices": 4,
+    "capacities": {
+     "mesh_axis_nodes": 1089,
+     "state_size": 1089,
+     "wall_node_capacity": 37,
+     "mesh_cell_capacity": null,
+     "support_capacity": null,
+     "arc_capacity": null,
+     "sample_node_capacity": null
+    },
+    "program_arrays": {
+     "radius": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "height": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "flux": [
+      [
+       33,
+       33
+      ],
+      "<f8"
+     ],
+     "wall": [
+      [
+       37,
+       2
+      ],
+      "<f8"
+     ],
+     "axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "selected_saddle": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "binding_flux": [
+      [],
+      "<f8"
+     ]
+    },
+    "receipt_arrays": {
+     "efit_lcfs": [
+      [
+       147,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_x_points": [
+      [
+       2,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "active_set_residuals": [
+      [
+       5
+      ],
+      "<f8"
+     ],
+     "active_set_mask_differences": [
+      [
+       5
+      ],
+      "<i8"
+     ],
+     "active_set_cycle_damping_activations": [
+      [
+       5
+      ],
+      "<i8"
+     ]
+    },
+    "program_signature": "d7f6fd0ec1c1e605",
+    "receipt_signature": "08c50b031a5f97d4"
+   },
+   {
+    "identity": "21985/51",
+    "arm": "mixed",
+    "name": "21985/51/mixed",
+    "indices": 5,
+    "capacities": {
+     "mesh_axis_nodes": 1089,
+     "state_size": 1089,
+     "wall_node_capacity": 37,
+     "mesh_cell_capacity": null,
+     "support_capacity": null,
+     "arc_capacity": null,
+     "sample_node_capacity": null
+    },
+    "program_arrays": {
+     "radius": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "height": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "flux": [
+      [
+       33,
+       33
+      ],
+      "<f8"
+     ],
+     "wall": [
+      [
+       37,
+       2
+      ],
+      "<f8"
+     ],
+     "axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "selected_saddle": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "binding_flux": [
+      [],
+      "<f8"
+     ]
+    },
+    "receipt_arrays": {
+     "efit_lcfs": [
+      [
+       147,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_x_points": [
+      [
+       2,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "active_set_residuals": [
+      [
+       0
+      ],
+      "<f8"
+     ],
+     "active_set_mask_differences": [
+      [
+       0
+      ],
+      "<f8"
+     ],
+     "active_set_cycle_damping_activations": [
+      [
+       0
+      ],
+      "<f8"
+     ]
+    },
+    "program_signature": "d7f6fd0ec1c1e605",
+    "receipt_signature": "aba4e447a214f129"
+   },
+   {
+    "identity": "21986/46",
+    "arm": "pure",
+    "name": "21986/46/pure",
+    "indices": 6,
+    "capacities": {
+     "mesh_axis_nodes": 1089,
+     "state_size": 1089,
+     "wall_node_capacity": 37,
+     "mesh_cell_capacity": null,
+     "support_capacity": null,
+     "arc_capacity": null,
+     "sample_node_capacity": null
+    },
+    "program_arrays": {
+     "radius": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "height": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "flux": [
+      [
+       33,
+       33
+      ],
+      "<f8"
+     ],
+     "wall": [
+      [
+       37,
+       2
+      ],
+      "<f8"
+     ],
+     "axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "selected_saddle": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "binding_flux": [
+      [],
+      "<f8"
+     ]
+    },
+    "receipt_arrays": {
+     "efit_lcfs": [
+      [
+       139,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_x_points": [
+      [
+       2,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "active_set_residuals": [
+      [
+       4
+      ],
+      "<f8"
+     ],
+     "active_set_mask_differences": [
+      [
+       4
+      ],
+      "<i8"
+     ],
+     "active_set_cycle_damping_activations": [
+      [
+       4
+      ],
+      "<i8"
+     ]
+    },
+    "program_signature": "d7f6fd0ec1c1e605",
+    "receipt_signature": "81f8ece2d188c848"
+   },
+   {
+    "identity": "21986/46",
+    "arm": "mixed",
+    "name": "21986/46/mixed",
+    "indices": 7,
+    "capacities": {
+     "mesh_axis_nodes": 1089,
+     "state_size": 1089,
+     "wall_node_capacity": 37,
+     "mesh_cell_capacity": null,
+     "support_capacity": null,
+     "arc_capacity": null,
+     "sample_node_capacity": null
+    },
+    "program_arrays": {
+     "radius": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "height": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "flux": [
+      [
+       33,
+       33
+      ],
+      "<f8"
+     ],
+     "wall": [
+      [
+       37,
+       2
+      ],
+      "<f8"
+     ],
+     "axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "selected_saddle": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "binding_flux": [
+      [],
+      "<f8"
+     ]
+    },
+    "receipt_arrays": {
+     "efit_lcfs": [
+      [
+       139,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_x_points": [
+      [
+       2,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "active_set_residuals": [
+      [
+       0
+      ],
+      "<f8"
+     ],
+     "active_set_mask_differences": [
+      [
+       0
+      ],
+      "<f8"
+     ],
+     "active_set_cycle_damping_activations": [
+      [
+       0
+      ],
+      "<f8"
+     ]
+    },
+    "program_signature": "d7f6fd0ec1c1e605",
+    "receipt_signature": "6be1091506e6b9b3"
+   },
+   {
+    "identity": "21989/55",
+    "arm": "pure",
+    "name": "21989/55/pure",
+    "indices": 8,
+    "capacities": {
+     "mesh_axis_nodes": 1089,
+     "state_size": 1089,
+     "wall_node_capacity": 37,
+     "mesh_cell_capacity": null,
+     "support_capacity": null,
+     "arc_capacity": null,
+     "sample_node_capacity": null
+    },
+    "program_arrays": {
+     "radius": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "height": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "flux": [
+      [
+       33,
+       33
+      ],
+      "<f8"
+     ],
+     "wall": [
+      [
+       37,
+       2
+      ],
+      "<f8"
+     ],
+     "axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "selected_saddle": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "binding_flux": [
+      [],
+      "<f8"
+     ]
+    },
+    "receipt_arrays": {
+     "efit_lcfs": [
+      [
+       145,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_x_points": [
+      [
+       2,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "active_set_residuals": [
+      [
+       8
+      ],
+      "<f8"
+     ],
+     "active_set_mask_differences": [
+      [
+       8
+      ],
+      "<i8"
+     ],
+     "active_set_cycle_damping_activations": [
+      [
+       8
+      ],
+      "<i8"
+     ]
+    },
+    "program_signature": "d7f6fd0ec1c1e605",
+    "receipt_signature": "2717ba2da9017671"
+   },
+   {
+    "identity": "21989/55",
+    "arm": "mixed",
+    "name": "21989/55/mixed",
+    "indices": 9,
+    "capacities": {
+     "mesh_axis_nodes": 1089,
+     "state_size": 1089,
+     "wall_node_capacity": 37,
+     "mesh_cell_capacity": null,
+     "support_capacity": null,
+     "arc_capacity": null,
+     "sample_node_capacity": null
+    },
+    "program_arrays": {
+     "radius": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "height": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "flux": [
+      [
+       33,
+       33
+      ],
+      "<f8"
+     ],
+     "wall": [
+      [
+       37,
+       2
+      ],
+      "<f8"
+     ],
+     "axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "selected_saddle": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "binding_flux": [
+      [],
+      "<f8"
+     ]
+    },
+    "receipt_arrays": {
+     "efit_lcfs": [
+      [
+       145,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_x_points": [
+      [
+       2,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "active_set_residuals": [
+      [
+       0
+      ],
+      "<f8"
+     ],
+     "active_set_mask_differences": [
+      [
+       0
+      ],
+      "<f8"
+     ],
+     "active_set_cycle_damping_activations": [
+      [
+       0
+      ],
+      "<f8"
+     ]
+    },
+    "program_signature": "d7f6fd0ec1c1e605",
+    "receipt_signature": "0db555a8dbba2229"
+   },
+   {
+    "identity": "22086/43",
+    "arm": "pure",
+    "name": "22086/43/pure",
+    "indices": 10,
+    "capacities": {
+     "mesh_axis_nodes": 1089,
+     "state_size": 1089,
+     "wall_node_capacity": 37,
+     "mesh_cell_capacity": null,
+     "support_capacity": null,
+     "arc_capacity": null,
+     "sample_node_capacity": null
+    },
+    "program_arrays": {
+     "radius": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "height": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "flux": [
+      [
+       33,
+       33
+      ],
+      "<f8"
+     ],
+     "wall": [
+      [
+       37,
+       2
+      ],
+      "<f8"
+     ],
+     "axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "selected_saddle": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "binding_flux": [
+      [],
+      "<f8"
+     ]
+    },
+    "receipt_arrays": {
+     "efit_lcfs": [
+      [
+       151,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_x_points": [
+      [
+       2,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "active_set_residuals": [
+      [
+       3
+      ],
+      "<f8"
+     ],
+     "active_set_mask_differences": [
+      [
+       3
+      ],
+      "<i8"
+     ],
+     "active_set_cycle_damping_activations": [
+      [
+       3
+      ],
+      "<i8"
+     ]
+    },
+    "program_signature": "d7f6fd0ec1c1e605",
+    "receipt_signature": "62b32590f10ff49a"
+   },
+   {
+    "identity": "22086/43",
+    "arm": "mixed",
+    "name": "22086/43/mixed",
+    "indices": 11,
+    "capacities": {
+     "mesh_axis_nodes": 1089,
+     "state_size": 1089,
+     "wall_node_capacity": 37,
+     "mesh_cell_capacity": null,
+     "support_capacity": null,
+     "arc_capacity": null,
+     "sample_node_capacity": null
+    },
+    "program_arrays": {
+     "radius": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "height": [
+      [
+       33
+      ],
+      "<f8"
+     ],
+     "flux": [
+      [
+       33,
+       33
+      ],
+      "<f8"
+     ],
+     "wall": [
+      [
+       37,
+       2
+      ],
+      "<f8"
+     ],
+     "axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "selected_saddle": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "binding_flux": [
+      [],
+      "<f8"
+     ]
+    },
+    "receipt_arrays": {
+     "efit_lcfs": [
+      [
+       151,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_x_points": [
+      [
+       2,
+       2
+      ],
+      "<f8"
+     ],
+     "efit_axis": [
+      [
+       2
+      ],
+      "<f8"
+     ],
+     "active_set_residuals": [
+      [
+       0
+      ],
+      "<f8"
+     ],
+     "active_set_mask_differences": [
+      [
+       0
+      ],
+      "<f8"
+     ],
+     "active_set_cycle_damping_activations": [
+      [
+       0
+      ],
+      "<f8"
+     ]
+    },
+    "program_signature": "d7f6fd0ec1c1e605",
+    "receipt_signature": "bb010a27c737f513"
+   }
+  ],
+  "certificate": [
+   {
+    "case": "weak-rotation-reactor-static",
+    "name": "weak-rotation-reactor-static",
+    "requested_cells": -300,
+    "seconds": 28.889,
+    "capacities": {
+     "mesh_cell_capacity": 342,
+     "mesh_axis_nodes": 342,
+     "wall_node_capacity": 121,
+     "sample_node_capacity": 1066,
+     "state_size": 1529,
+     "support_capacity": 24,
+     "arc_capacity": 3072
+    },
+    "dimensions": {
+     "realised_cells": 342,
+     "grid_nodes": 342,
+     "wall_nodes": 121,
+     "sample_nodes": 1066,
+     "solve_state_size": 1529,
+     "atomic_support_capacity": 24,
+     "spline_chain_samples_per_chord": 128,
+     "exact_support_capacity": 3072,
+     "quadrature_nodes_per_axis": 8,
+     "quadrature_nodes_per_triangle": 64,
+     "exact_quadrature_points_per_cell": 196480,
+     "whole_cell_quadrature_points_per_cell": 1408,
+     "cell_polynomial_terms": 6,
+     "newton_steps": 10,
+     "gmres_iterations": 30,
+     "active_set_steps": 16
+    },
+    "dimension_shapes": {}
+   },
+   {
+    "case": "moderate-rotation-conventional-static",
+    "name": "moderate-rotation-conventional-static",
+    "requested_cells": -300,
+    "seconds": 20.337,
+    "capacities": {
+     "mesh_cell_capacity": 341,
+     "mesh_axis_nodes": 341,
+     "wall_node_capacity": 121,
+     "sample_node_capacity": 1073,
+     "state_size": 1535,
+     "support_capacity": 24,
+     "arc_capacity": 3072
+    },
+    "dimensions": {
+     "realised_cells": 341,
+     "grid_nodes": 341,
+     "wall_nodes": 121,
+     "sample_nodes": 1073,
+     "solve_state_size": 1535,
+     "atomic_support_capacity": 24,
+     "spline_chain_samples_per_chord": 128,
+     "exact_support_capacity": 3072,
+     "quadrature_nodes_per_axis": 8,
+     "quadrature_nodes_per_triangle": 64,
+     "exact_quadrature_points_per_cell": 196480,
+     "whole_cell_quadrature_points_per_cell": 1408,
+     "cell_polynomial_terms": 6,
+     "newton_steps": 10,
+     "gmres_iterations": 30,
+     "active_set_steps": 16
+    },
+    "dimension_shapes": {}
+   },
+   {
+    "case": "strong-rotation-compact-static",
+    "name": "strong-rotation-compact-static",
+    "requested_cells": -300,
+    "seconds": 20.801,
+    "capacities": {
+     "mesh_cell_capacity": 341,
+     "mesh_axis_nodes": 341,
+     "wall_node_capacity": 121,
+     "sample_node_capacity": 1063,
+     "state_size": 1525,
+     "support_capacity": 24,
+     "arc_capacity": 3072
+    },
+    "dimensions": {
+     "realised_cells": 341,
+     "grid_nodes": 341,
+     "wall_nodes": 121,
+     "sample_nodes": 1063,
+     "solve_state_size": 1525,
+     "atomic_support_capacity": 24,
+     "spline_chain_samples_per_chord": 128,
+     "exact_support_capacity": 3072,
+     "quadrature_nodes_per_axis": 8,
+     "quadrature_nodes_per_triangle": 64,
+     "exact_quadrature_points_per_cell": 196480,
+     "whole_cell_quadrature_points_per_cell": 1408,
+     "cell_polynomial_terms": 6,
+     "newton_steps": 10,
+     "gmres_iterations": 30,
+     "active_set_steps": 16
+    },
+    "dimension_shapes": {}
+   },
+   {
+    "case": "diverted-single-null",
+    "name": "diverted-single-null",
+    "requested_cells": -300,
+    "seconds": 26.204,
+    "capacities": {
+     "mesh_cell_capacity": 340,
+     "mesh_axis_nodes": 340,
+     "wall_node_capacity": 121,
+     "sample_node_capacity": 1086,
+     "state_size": 1547,
+     "support_capacity": 26,
+     "arc_capacity": 3328
+    },
+    "dimensions": {
+     "realised_cells": 340,
+     "grid_nodes": 340,
+     "wall_nodes": 121,
+     "sample_nodes": 1086,
+     "solve_state_size": 1547,
+     "atomic_support_capacity": 26,
+     "spline_chain_samples_per_chord": 128,
+     "exact_support_capacity": 3328,
+     "quadrature_nodes_per_axis": 8,
+     "quadrature_nodes_per_triangle": 64,
+     "exact_quadrature_points_per_cell": 212864,
+     "whole_cell_quadrature_points_per_cell": 1536,
+     "cell_polynomial_terms": 6,
+     "newton_steps": 10,
+     "gmres_iterations": 30,
+     "active_set_steps": 16
+    },
+    "dimension_shapes": {}
+   }
+  ]
+ }
+}

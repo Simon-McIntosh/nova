@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T11:33:45",
+  "updated": "2026-09-18T11:42:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4546,6 +4546,15 @@
           "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"read-only\"}": "01a0a911-8b21-7b20-8319-f54e0e1dc209"
         },
         "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-cank-discriminator-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-18"
       },
       {
         "id": "s19c-cank-refused-c",
@@ -190643,6 +190652,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2784
+    "_version": 2785
   }
 }

@@ -1136,10 +1136,17 @@ def reread_gauge_readings(
     """
     output_root.mkdir(parents=True, exist_ok=True)
     arms: list[dict[str, Any]] = []
+    skipped: list[dict[str, str]] = []
     for arm in ("positive", "negative"):
         path = source_root / f"control-{arm}.json"
         if not path.exists():
-            raise FileNotFoundError(f"banked control receipt absent: {path}")
+            # A bank holding one arm is still readable: the absent arm is
+            # recorded rather than raised, so a single-arm read cannot be
+            # mistaken for a two-arm one.
+            skipped.append(
+                {"arm": arm, "reason": f"banked control receipt absent: {path}"}
+            )
+            continue
         stored = json.loads(path.read_text())
         case_name = str(stored["case"])
         topology = stored["solve"]["topology"]
@@ -1187,6 +1194,7 @@ def reread_gauge_readings(
         "source_root": str(source_root),
         "level_tolerance_of_span": LEVEL_TOLERANCE_OF_SPAN,
         "row_tolerance": oracle_probe.FIXED_POINT_TOLERANCE,
+        "skipped_arms": skipped,
         "gauge": (
             "solved and analytic flux levels are compared only as the span "
             "between the magnetic axis and the boundary; the compensator "
@@ -1287,10 +1295,10 @@ def main() -> None:
             flush=True,
         )
         return
+    if arguments.reread_gauge:
         report = reread_gauge_readings(
             arguments.source_root,
-            arguments.output_root,
-        )
+            arguments.output_root)
         for arm in report["arms"]:
             print(
                 "CENTROID_GAUGE_REREAD "
@@ -1300,6 +1308,12 @@ def main() -> None:
                 f"compensator_span_wb={arm['compensator_span_contribution_wb']:+.9e} "
                 f"row_scaled_residual_sup={arm['row_scaled_residual_sup']:+.9e} "
                 f"verdict={arm['fixed_point_verdict']}",
+                flush=True,
+            )
+        for skipped in report["skipped_arms"]:
+            print(
+                f"CENTROID_GAUGE_REREAD_SKIPPED arm={skipped['arm']} "
+                f"reason={skipped['reason']}",
                 flush=True,
             )
         return

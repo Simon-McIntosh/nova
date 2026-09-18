@@ -1,0 +1,544 @@
+{
+  "admission_rule": "written, semantically converged rows; conditioned exception with zero trips is reclassified as free; genuinely conditioned rows require a true branch guard and a finite, materially improved centroid error",
+  "aggregate": {
+    "all": {
+      "admitted_slice_count": 11,
+      "boundary_area_m2": {
+        "count": 11,
+        "maximum": 2.0523862374049244,
+        "median": 1.5687219924187912,
+        "minimum": 1.1581025244216008,
+        "p90": 1.9679681691418613
+      },
+      "boundary_not_fully_inside_count": 11,
+      "boundary_to_limiter_distance_mm": {
+        "count": 11,
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "p90": 0.0
+      },
+      "finding_category_counts": {
+        "floating_boundary": 0,
+        "no_qualifying_surface": 0,
+        "nominal_outer_surface_missing": 0
+      },
+      "floating_boundary_count": 0,
+      "floating_boundary_fraction": 0.0,
+      "floating_boundary_fraction_of_measured": 0.0,
+      "measured_slice_count": 11,
+      "measurement_unavailable_count": 0,
+      "nominal_outer_surface_missing_count": 0,
+      "nominal_outer_surface_missing_fraction": 0.0,
+      "surface_category_counts": {
+        "fallback_outermost_finite_surface": 0,
+        "no_qualifying_surface": 0,
+        "nominal_outer_surface": 11
+      },
+      "surface_category_fractions": {
+        "fallback_outermost_finite_surface": 0.0,
+        "no_qualifying_surface": 0.0,
+        "nominal_outer_surface": 1.0
+      }
+    },
+    "diverted_false": {
+      "admitted_slice_count": 11,
+      "boundary_area_m2": {
+        "count": 11,
+        "maximum": 2.0523862374049244,
+        "median": 1.5687219924187912,
+        "minimum": 1.1581025244216008,
+        "p90": 1.9679681691418613
+      },
+      "boundary_not_fully_inside_count": 11,
+      "boundary_to_limiter_distance_mm": {
+        "count": 11,
+        "maximum": 0.0,
+        "median": 0.0,
+        "minimum": 0.0,
+        "p90": 0.0
+      },
+      "finding_category_counts": {
+        "floating_boundary": 0,
+        "no_qualifying_surface": 0,
+        "nominal_outer_surface_missing": 0
+      },
+      "floating_boundary_count": 0,
+      "floating_boundary_fraction": 0.0,
+      "floating_boundary_fraction_of_measured": 0.0,
+      "measured_slice_count": 11,
+      "measurement_unavailable_count": 0,
+      "nominal_outer_surface_missing_count": 0,
+      "nominal_outer_surface_missing_fraction": 0.0,
+      "surface_category_counts": {
+        "fallback_outermost_finite_surface": 0,
+        "no_qualifying_surface": 0,
+        "nominal_outer_surface": 11
+      },
+      "surface_category_fractions": {
+        "fallback_outermost_finite_surface": 0.0,
+        "no_qualifying_surface": 0.0,
+        "nominal_outer_surface": 1.0
+      }
+    },
+    "diverted_true": {
+      "admitted_slice_count": 0,
+      "boundary_area_m2": {
+        "count": 0,
+        "maximum": null,
+        "median": null,
+        "minimum": null,
+        "p90": null
+      },
+      "boundary_not_fully_inside_count": 0,
+      "boundary_to_limiter_distance_mm": {
+        "count": 0,
+        "maximum": null,
+        "median": null,
+        "minimum": null,
+        "p90": null
+      },
+      "finding_category_counts": {
+        "floating_boundary": 0,
+        "no_qualifying_surface": 0,
+        "nominal_outer_surface_missing": 0
+      },
+      "floating_boundary_count": 0,
+      "floating_boundary_fraction": 0.0,
+      "floating_boundary_fraction_of_measured": 0.0,
+      "measured_slice_count": 0,
+      "measurement_unavailable_count": 0,
+      "nominal_outer_surface_missing_count": 0,
+      "nominal_outer_surface_missing_fraction": 0.0,
+      "surface_category_counts": {
+        "fallback_outermost_finite_surface": 0,
+        "no_qualifying_surface": 0,
+        "nominal_outer_surface": 0
+      },
+      "surface_category_fractions": {
+        "fallback_outermost_finite_surface": 0.0,
+        "no_qualifying_surface": 0.0,
+        "nominal_outer_surface": 0.0
+      }
+    }
+  },
+  "floating_boundary_threshold_mm": 50.0,
+  "floating_confined_to_non_diverted": false,
+  "generated_at": "2026-09-07T17:11:13.387258+00:00",
+  "limiter": {
+    "containment_helper": "imas_ambix.latent.wall_mask._inside_polygon",
+    "source": "imas_ambix.worldmodel.flux_conditioning.MAST_LIMITER_R/Z",
+    "vertex_count": 36
+  },
+  "measurement": "minimum Euclidean distance between the psi_norm=1 boundary polyline and the 36-vertex limiter polygon, plus shoelace enclosed area; when psi_norm=1 has fewer than three finite vertices, use the highest psi_norm level with at least three finite vertices and record it",
+  "missing_nominal_surface_census_reconciliation": {
+    "current_per_shot": {
+      "27079": 0
+    },
+    "current_total": 0,
+    "per_shot_delta": {
+      "21978": -22,
+      "21983": -24,
+      "21985": -22,
+      "21986": -16,
+      "21989": -25,
+      "22086": -10
+    },
+    "provided_per_shot": {
+      "21978": 22,
+      "21983": 24,
+      "21985": 22,
+      "21986": 16,
+      "21989": 25,
+      "22086": 10
+    },
+    "provided_total": 119,
+    "statement": "The supplied diagnostic counted 119 missing nominal surfaces; the pinned files currently contain 0.",
+    "total_delta": -119
+  },
+  "missing_outer_surface_confined_to_non_diverted": false,
+  "pins": {
+    "carrier_identity": "1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994",
+    "policy_digest": "b5f9ef456f665c593a40010b9756b16fb36abd4ebbd1fea4d83a3d628c77bc7d"
+  },
+  "schema": "boundary-wall-proximity",
+  "session_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-boundary-routing/docs/figures/playable-forward-solve/boundary-routing/relabelled-27079-fresh",
+  "shots": [
+    {
+      "dropped_slices": {
+        "conditioned_guard_failed": 0,
+        "conditioning_comparison_unavailable_rows": 0,
+        "conditioning_ineffective_rows": 0,
+        "semantically_unconverged": 5,
+        "unwritten": 11
+      },
+      "manifest_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-boundary-routing/docs/figures/playable-forward-solve/boundary-routing/relabelled-27079-fresh/27079.manifest.json",
+      "manifest_slice_count": 27,
+      "reclassified_as_free_count": 0,
+      "session_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-boundary-routing/docs/figures/playable-forward-solve/boundary-routing/relabelled-27079-fresh/27079.nc",
+      "shot_id": 27079,
+      "slices": [
+        {
+          "boundary_area_m2": 1.2225152056955204,
+          "boundary_points_inside_limiter": false,
+          "boundary_to_limiter_distance_mm": 0.0,
+          "conditioned": false,
+          "conditioned_branch_guard_ok": false,
+          "diverted": false,
+          "floating_boundary": false,
+          "manifest_row": 11,
+          "measurement_error": null,
+          "reclassified_as_free": false,
+          "recorded_conditioned": false,
+          "selected_surface_canonical_vertex_count": 64,
+          "selected_surface_index": 10,
+          "selected_surface_psi_norm": 1.0,
+          "selected_surface_raw_vertex_count": 64,
+          "session_index": 0,
+          "shot_id": 27079,
+          "surface_category": "nominal_outer_surface",
+          "time_s": 0.009999999776482582
+        },
+        {
+          "boundary_area_m2": 1.1581025244216008,
+          "boundary_points_inside_limiter": false,
+          "boundary_to_limiter_distance_mm": 0.0,
+          "conditioned": false,
+          "conditioned_branch_guard_ok": false,
+          "diverted": false,
+          "floating_boundary": false,
+          "manifest_row": 12,
+          "measurement_error": null,
+          "reclassified_as_free": false,
+          "recorded_conditioned": false,
+          "selected_surface_canonical_vertex_count": 64,
+          "selected_surface_index": 10,
+          "selected_surface_psi_norm": 1.0,
+          "selected_surface_raw_vertex_count": 64,
+          "session_index": 1,
+          "shot_id": 27079,
+          "surface_category": "nominal_outer_surface",
+          "time_s": 0.014999999664723873
+        },
+        {
+          "boundary_area_m2": 1.2364723045120223,
+          "boundary_points_inside_limiter": false,
+          "boundary_to_limiter_distance_mm": 0.0,
+          "conditioned": false,
+          "conditioned_branch_guard_ok": false,
+          "diverted": false,
+          "floating_boundary": false,
+          "manifest_row": 13,
+          "measurement_error": null,
+          "reclassified_as_free": false,
+          "recorded_conditioned": false,
+          "selected_surface_canonical_vertex_count": 64,
+          "selected_surface_index": 10,
+          "selected_surface_psi_norm": 1.0,
+          "selected_surface_raw_vertex_count": 64,
+          "session_index": 2,
+          "shot_id": 27079,
+          "surface_category": "nominal_outer_surface",
+          "time_s": 0.019999999552965164
+        },
+        {
+          "boundary_area_m2": 1.4052770748419552,
+          "boundary_points_inside_limiter": false,
+          "boundary_to_limiter_distance_mm": 0.0,
+          "conditioned": false,
+          "conditioned_branch_guard_ok": false,
+          "diverted": false,
+          "floating_boundary": false,
+          "manifest_row": 14,
+          "measurement_error": null,
+          "reclassified_as_free": false,
+          "recorded_conditioned": false,
+          "selected_surface_canonical_vertex_count": 64,
+          "selected_surface_index": 10,
+          "selected_surface_psi_norm": 1.0,
+          "selected_surface_raw_vertex_count": 64,
+          "session_index": 3,
+          "shot_id": 27079,
+          "surface_category": "nominal_outer_surface",
+          "time_s": 0.02499999850988388
+        },
+        {
+          "boundary_area_m2": 1.4982676526039589,
+          "boundary_points_inside_limiter": false,
+          "boundary_to_limiter_distance_mm": 0.0,
+          "conditioned": false,
+          "conditioned_branch_guard_ok": false,
+          "diverted": false,
+          "floating_boundary": false,
+          "manifest_row": 15,
+          "measurement_error": null,
+          "reclassified_as_free": false,
+          "recorded_conditioned": false,
+          "selected_surface_canonical_vertex_count": 64,
+          "selected_surface_index": 10,
+          "selected_surface_psi_norm": 1.0,
+          "selected_surface_raw_vertex_count": 64,
+          "session_index": 4,
+          "shot_id": 27079,
+          "surface_category": "nominal_outer_surface",
+          "time_s": 0.029999999329447746
+        },
+        {
+          "boundary_area_m2": 1.5687219924187912,
+          "boundary_points_inside_limiter": false,
+          "boundary_to_limiter_distance_mm": 0.0,
+          "conditioned": false,
+          "conditioned_branch_guard_ok": false,
+          "diverted": false,
+          "floating_boundary": false,
+          "manifest_row": 16,
+          "measurement_error": null,
+          "reclassified_as_free": false,
+          "recorded_conditioned": false,
+          "selected_surface_canonical_vertex_count": 64,
+          "selected_surface_index": 10,
+          "selected_surface_psi_norm": 1.0,
+          "selected_surface_raw_vertex_count": 64,
+          "session_index": 5,
+          "shot_id": 27079,
+          "surface_category": "nominal_outer_surface",
+          "time_s": 0.03500000014901161
+        },
+        {
+          "boundary_area_m2": 1.6853512388453842,
+          "boundary_points_inside_limiter": false,
+          "boundary_to_limiter_distance_mm": 0.0,
+          "conditioned": false,
+          "conditioned_branch_guard_ok": false,
+          "diverted": false,
+          "floating_boundary": false,
+          "manifest_row": 17,
+          "measurement_error": null,
+          "reclassified_as_free": false,
+          "recorded_conditioned": false,
+          "selected_surface_canonical_vertex_count": 64,
+          "selected_surface_index": 10,
+          "selected_surface_psi_norm": 1.0,
+          "selected_surface_raw_vertex_count": 64,
+          "session_index": 6,
+          "shot_id": 27079,
+          "surface_category": "nominal_outer_surface",
+          "time_s": 0.03999999910593033
+        },
+        {
+          "boundary_area_m2": 1.7905613848615087,
+          "boundary_points_inside_limiter": false,
+          "boundary_to_limiter_distance_mm": 0.0,
+          "conditioned": false,
+          "conditioned_branch_guard_ok": false,
+          "diverted": false,
+          "floating_boundary": false,
+          "manifest_row": 18,
+          "measurement_error": null,
+          "reclassified_as_free": false,
+          "recorded_conditioned": false,
+          "selected_surface_canonical_vertex_count": 64,
+          "selected_surface_index": 10,
+          "selected_surface_psi_norm": 1.0,
+          "selected_surface_raw_vertex_count": 64,
+          "session_index": 7,
+          "shot_id": 27079,
+          "surface_category": "nominal_outer_surface",
+          "time_s": 0.044999998062849045
+        },
+        {
+          "boundary_area_m2": 1.8793315842690501,
+          "boundary_points_inside_limiter": false,
+          "boundary_to_limiter_distance_mm": 0.0,
+          "conditioned": false,
+          "conditioned_branch_guard_ok": false,
+          "diverted": false,
+          "floating_boundary": false,
+          "manifest_row": 19,
+          "measurement_error": null,
+          "reclassified_as_free": false,
+          "recorded_conditioned": false,
+          "selected_surface_canonical_vertex_count": 64,
+          "selected_surface_index": 10,
+          "selected_surface_psi_norm": 1.0,
+          "selected_surface_raw_vertex_count": 64,
+          "session_index": 8,
+          "shot_id": 27079,
+          "surface_category": "nominal_outer_surface",
+          "time_s": 0.04999999701976776
+        },
+        {
+          "boundary_area_m2": 1.9679681691418613,
+          "boundary_points_inside_limiter": false,
+          "boundary_to_limiter_distance_mm": 0.0,
+          "conditioned": false,
+          "conditioned_branch_guard_ok": false,
+          "diverted": false,
+          "floating_boundary": false,
+          "manifest_row": 20,
+          "measurement_error": null,
+          "reclassified_as_free": false,
+          "recorded_conditioned": false,
+          "selected_surface_canonical_vertex_count": 64,
+          "selected_surface_index": 10,
+          "selected_surface_psi_norm": 1.0,
+          "selected_surface_raw_vertex_count": 64,
+          "session_index": 9,
+          "shot_id": 27079,
+          "surface_category": "nominal_outer_surface",
+          "time_s": 0.054999999701976776
+        },
+        {
+          "boundary_area_m2": 2.0523862374049244,
+          "boundary_points_inside_limiter": false,
+          "boundary_to_limiter_distance_mm": 0.0,
+          "conditioned": false,
+          "conditioned_branch_guard_ok": false,
+          "diverted": false,
+          "floating_boundary": false,
+          "manifest_row": 21,
+          "measurement_error": null,
+          "reclassified_as_free": false,
+          "recorded_conditioned": false,
+          "selected_surface_canonical_vertex_count": 64,
+          "selected_surface_index": 10,
+          "selected_surface_psi_norm": 1.0,
+          "selected_surface_raw_vertex_count": 64,
+          "session_index": 10,
+          "shot_id": 27079,
+          "surface_category": "nominal_outer_surface",
+          "time_s": 0.05999999865889549
+        }
+      ],
+      "summary": {
+        "all": {
+          "admitted_slice_count": 11,
+          "boundary_area_m2": {
+            "count": 11,
+            "maximum": 2.0523862374049244,
+            "median": 1.5687219924187912,
+            "minimum": 1.1581025244216008,
+            "p90": 1.9679681691418613
+          },
+          "boundary_not_fully_inside_count": 11,
+          "boundary_to_limiter_distance_mm": {
+            "count": 11,
+            "maximum": 0.0,
+            "median": 0.0,
+            "minimum": 0.0,
+            "p90": 0.0
+          },
+          "finding_category_counts": {
+            "floating_boundary": 0,
+            "no_qualifying_surface": 0,
+            "nominal_outer_surface_missing": 0
+          },
+          "floating_boundary_count": 0,
+          "floating_boundary_fraction": 0.0,
+          "floating_boundary_fraction_of_measured": 0.0,
+          "measured_slice_count": 11,
+          "measurement_unavailable_count": 0,
+          "nominal_outer_surface_missing_count": 0,
+          "nominal_outer_surface_missing_fraction": 0.0,
+          "surface_category_counts": {
+            "fallback_outermost_finite_surface": 0,
+            "no_qualifying_surface": 0,
+            "nominal_outer_surface": 11
+          },
+          "surface_category_fractions": {
+            "fallback_outermost_finite_surface": 0.0,
+            "no_qualifying_surface": 0.0,
+            "nominal_outer_surface": 1.0
+          }
+        },
+        "diverted_false": {
+          "admitted_slice_count": 11,
+          "boundary_area_m2": {
+            "count": 11,
+            "maximum": 2.0523862374049244,
+            "median": 1.5687219924187912,
+            "minimum": 1.1581025244216008,
+            "p90": 1.9679681691418613
+          },
+          "boundary_not_fully_inside_count": 11,
+          "boundary_to_limiter_distance_mm": {
+            "count": 11,
+            "maximum": 0.0,
+            "median": 0.0,
+            "minimum": 0.0,
+            "p90": 0.0
+          },
+          "finding_category_counts": {
+            "floating_boundary": 0,
+            "no_qualifying_surface": 0,
+            "nominal_outer_surface_missing": 0
+          },
+          "floating_boundary_count": 0,
+          "floating_boundary_fraction": 0.0,
+          "floating_boundary_fraction_of_measured": 0.0,
+          "measured_slice_count": 11,
+          "measurement_unavailable_count": 0,
+          "nominal_outer_surface_missing_count": 0,
+          "nominal_outer_surface_missing_fraction": 0.0,
+          "surface_category_counts": {
+            "fallback_outermost_finite_surface": 0,
+            "no_qualifying_surface": 0,
+            "nominal_outer_surface": 11
+          },
+          "surface_category_fractions": {
+            "fallback_outermost_finite_surface": 0.0,
+            "no_qualifying_surface": 0.0,
+            "nominal_outer_surface": 1.0
+          }
+        },
+        "diverted_true": {
+          "admitted_slice_count": 0,
+          "boundary_area_m2": {
+            "count": 0,
+            "maximum": null,
+            "median": null,
+            "minimum": null,
+            "p90": null
+          },
+          "boundary_not_fully_inside_count": 0,
+          "boundary_to_limiter_distance_mm": {
+            "count": 0,
+            "maximum": null,
+            "median": null,
+            "minimum": null,
+            "p90": null
+          },
+          "finding_category_counts": {
+            "floating_boundary": 0,
+            "no_qualifying_surface": 0,
+            "nominal_outer_surface_missing": 0
+          },
+          "floating_boundary_count": 0,
+          "floating_boundary_fraction": 0.0,
+          "floating_boundary_fraction_of_measured": 0.0,
+          "measured_slice_count": 0,
+          "measurement_unavailable_count": 0,
+          "nominal_outer_surface_missing_count": 0,
+          "nominal_outer_surface_missing_fraction": 0.0,
+          "surface_category_counts": {
+            "fallback_outermost_finite_surface": 0,
+            "no_qualifying_surface": 0,
+            "nominal_outer_surface": 0
+          },
+          "surface_category_fractions": {
+            "fallback_outermost_finite_surface": 0.0,
+            "no_qualifying_surface": 0.0,
+            "nominal_outer_surface": 0.0
+          }
+        }
+      },
+      "surface_storage_vertex_count": 16,
+      "written_slice_count": 16
+    }
+  ],
+  "shots_requested": [
+    27079
+  ],
+  "source_revision": "0c5bdf6092109a1cb1e71227af17aa1dbae8f9a1",
+  "verdict": "0/11 trainable slices (0.0%) carry a measured floating boundary beyond 50 mm; 0/11 lack a finite nominal outer surface (0 use a visible fallback and 0 have no qualifying level); the effect is not confined to the non-diverted group, and the missing nominal surfaces are not confined to the non-diverted group."
+}

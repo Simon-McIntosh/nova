@@ -30,7 +30,7 @@
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="196">
+<meta name="plan-version" content="197">
 </head>
 <body>
 <main class="plan-doc">
@@ -767,6 +767,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260918T121431723283-review-of-nia-anchor-trace-bisect" data-who="reckon-ship" data-when="2026-09-18T12:30:13.567Z">
     <div class="r-comment-body"><p>Independent review of nia-anchor-trace-bisect stored at the fence path, total 84, three record findings queued as a followup</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-nia-limited-boundary-floats" data-who="" data-when="">
+    <div class="r-comment-body">The lead reviewed docs/figures/null-identification-authority/contained-anchor/relabel-27079-flagged/row-16-35ms.png (MAST 27079, t 35 ms, converged, class limited) and ruled it fiction: a plasma is diverted with its boundary through the admitted X-point, or limited with its boundary touching the wall, and nothing else is a valid read. The receipt contained-route-replay.json shows why: boundary_route contained, boundary flux 0.28983 Wb (axis 0.29799 Wb) with its fitted anchor at R 0.19524 m, Z -0.0142 m on the centre column, while the closed contour traced at that level sits at R 0.30 to 0.55 m and encloses a quarter of EFIT's area (nearest_fully_contained_candidate_ratio 0.72). Either the wall-target flux used by _wall_anchor_selection and the interior field the contour is traced on disagree at the contact point, or the contained route moves the level inward until the contour is fully inside; both produce a floating surface reported as limited. Node nia-limited-boundary-touches-wall (r-20260918T161425539734) root-causes on this state, fixes the read so the limited boundary is the contour through the wall contact at the contact's own flux, and adds tests/test_limited_boundary_touches_wall.py asserting for every limited terminal state that the boundary's minimum wall distance is below one pitch and the boundary flux equals the field at the contact, and for every diverted state that the boundary passes through the admitted X-point.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

@@ -140,6 +140,8 @@ ROW_FIELDS: tuple[str, ...] = (
     "profile_normalisation",
     "constraint_row_reading_unnormalised",
     "constraint_row_normalisation",
+    "commensurability",
+    "convention_sentence",
     "readings",
     "sentence",
 )
@@ -243,6 +245,50 @@ def readings(combination_by_reading: dict[str, float | None]) -> dict[str, Any]:
         }
         for key in READING_KEYS
     }
+
+
+def convention_clause(
+    block: dict[str, Any], *, profile_combination: float | None
+) -> str:
+    """State what the stored moments' implied radius says about commensurability."""
+    implied = block.get("implied_radius_from_betap_m")
+    major = block.get("nova_major_radius_m")
+    minor = block.get("boundary_minor_radius_m")
+    rescaled = block.get("rescaled_efit_combination")
+    if implied is None or major is None or minor is None:
+        return (
+            "The reconstruction's stored moments do not imply a denominator "
+            "radius, so whether nova's own radius convention is commensurate "
+            "with them is unstated for this row."
+        )
+    shared = block.get("implied_radius_inductance_over_betap")
+    agreement = (
+        f"the two stored scalars imply the same radius to within "
+        f"{abs(shared - 1.0):.2%} (l_i implies "
+        f"{block['implied_radius_from_inductance_m']:.4f} m), so one convention "
+        f"difference explains both moments"
+        if shared is not None
+        else "l_i implies no finite radius, so only beta_p settles the scale"
+    )
+    return (
+        f"Commensurability: on nova's own volume integral and leading factor, "
+        f"the stored scalars are reproduced by a denominator radius of "
+        f"{implied_label(block)} m, against nova's volume-weighted major radius "
+        f"{major:.4f} m and the boundary's minor radius {minor:.4f} m; {agreement}. "
+        f"Rescaled onto nova's radius the reconstruction's own combination is "
+        f"{rescaled:.4f}"
+        + (
+            f", against the profiles' {profile_combination:.4f}."
+            if profile_combination is not None and rescaled is not None
+            else "."
+        )
+    )
+
+
+def implied_label(block: dict[str, Any]) -> str:
+    """Format the radius the stored moments imply."""
+    value = block.get("implied_radius_from_betap_m")
+    return "unstated" if value is None else f"{value:.4f}"
 
 
 def attribute(
@@ -358,6 +404,101 @@ def _efit_scalars(group, row: int) -> dict[str, float]:
         return float(np.asarray(group[name][...], dtype=float)[row])
 
     return {"betap": scalar("betap"), "li": scalar("li")}
+
+
+def implied_radius(
+    reported: float,
+    integral: float,
+    leading: float,
+    mu0_power: float,
+    plasma_current: float,
+) -> float | None:
+    r"""Return the radius a stored scalar is consistent with.
+
+    nova's definitions are
+
+    .. math::
+
+       \beta_p = \frac{4 \int p\, dV}{\mu_0 R I_p^2}, \qquad
+       l_i = \frac{2 \int B_p^2\, dV}{\mu_0^2 R I_p^2},
+
+    so a stored scalar, evaluated on the same integral with the same leading
+    factor, implies the denominator radius
+
+    .. math::
+
+       R_{\text{implied}}
+         = \frac{\text{leading} \cdot \text{integral}}
+                {\mu_0^{n} I_p^2 \cdot \text{reported}} .
+
+    Asking the store for this radius is what makes the commensurability question
+    answerable without assuming the reconstruction's convention: if the implied
+    radius is nova's own volume-weighted major radius, the two conventions agree;
+    if it is the boundary's minor radius, they differ by the aspect ratio, and
+    the difference is a stated factor rather than an unexplained gap.
+    """
+    denominator = mu0_power * plasma_current**2 * reported
+    if denominator == 0.0 or not np.isfinite(denominator):
+        return None
+    radius = leading * integral / denominator
+    return float(radius) if np.isfinite(radius) and radius > 0.0 else None
+
+
+def commensurability(
+    *,
+    efit: dict[str, float],
+    unit_check: dict[str, Any],
+    major_radius: float,
+    minor_radius: float,
+) -> dict[str, Any]:
+    """Ask the reconstruction's stored moments which radius they normalise with."""
+    current = float(unit_check["plasma_current_a"])
+    pressure = float(unit_check["pressure_integral_j"])
+    field = float(unit_check["poloidal_field_integral_t2_m3"])
+    from_beta = implied_radius(efit["betap"], pressure, 4.0, MU0, current)
+    from_inductance = implied_radius(efit["li"], field, 2.0, MU0**2, current)
+    shared = (
+        from_inductance / from_beta
+        if from_beta not in (None, 0.0) and from_inductance is not None
+        else None
+    )
+    major_over_minor = major_radius / minor_radius if minor_radius else None
+    rescaled = (
+        linear_combination(efit["betap"], efit["li"]) * from_beta / major_radius
+        if from_beta is not None and major_radius
+        else None
+    )
+    return {
+        "nova_definition": unit_check["definition"],
+        "nova_radius_convention": (
+            "beta_p = 4*int(p dV)/(mu0*R*Ip**2) and "
+            "l_i = 2*int(Bp**2 dV)/(mu0**2*R*Ip**2), with R the "
+            "volume-weighted major radius sum(radial volume elements)/volume"
+        ),
+        "stored_betap": _strict_float(efit["betap"]),
+        "stored_internal_inductance": _strict_float(efit["li"]),
+        "plasma_current_a": _strict_float(current),
+        "pressure_integral_j": _strict_float(pressure),
+        "poloidal_field_integral_t2_m3": _strict_float(field),
+        "nova_major_radius_m": _strict_float(major_radius),
+        "boundary_minor_radius_m": _strict_float(minor_radius),
+        "major_over_minor": _strict_float(major_over_minor),
+        "implied_radius_from_betap_m": _strict_float(from_beta),
+        "implied_radius_from_inductance_m": _strict_float(from_inductance),
+        "implied_radius_inductance_over_betap": _strict_float(shared),
+        "implied_over_major_from_betap": _strict_float(
+            from_beta / major_radius if from_beta is not None and major_radius else None
+        ),
+        "implied_over_major_from_inductance": _strict_float(
+            from_inductance / major_radius
+            if from_inductance is not None and major_radius
+            else None
+        ),
+        "implied_over_minor_from_betap": _strict_float(
+            from_beta / minor_radius if from_beta is not None and minor_radius else None
+        ),
+        "rescaled_efit_combination": _strict_float(rescaled),
+    }
 
 
 def constraint_context(flux, target_current, *, requested_class=None):
@@ -575,6 +716,12 @@ def _row_document(
             profile_combination - unnormalised_profile_combination
         ),
     }
+    convention = commensurability(
+        efit=efit,
+        unit_check=unit_check,
+        major_radius=shape["major_radius_m"],
+        minor_radius=minor,
+    )
     constraint_normalisation = {
         "requested_current_a": _strict_float(target_current),
         "observed_current_a": _strict_float(shape["observation_plasma_current_a"]),
@@ -617,6 +764,10 @@ def _row_document(
             shape["discrete"] - circular
         ),
         "inversion_tolerance": INVERSION_TOLERANCE,
+        "commensurability": convention,
+        "convention_sentence": convention_clause(
+            convention, profile_combination=profile_combination
+        ),
         "readings": readings(combinations),
         "unit_check": unit_check,
         "sentence": attribute(combinations)["sentence"],
@@ -722,6 +873,47 @@ def _draw_panel(receipt: dict[str, Any], path: Path, *, source: str) -> dict[str
     }
 
 
+def commensurability_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """State the convention reading across the rows, from their own implied radii."""
+    blocks = [
+        (row["identity"], row["commensurability"])
+        for row in rows
+        if row.get("commensurability") is not None
+    ]
+    if not blocks:
+        return {"reading": "no row carries a commensurability block"}
+    implied = {
+        identity: block["implied_over_major_from_betap"] for identity, block in blocks
+    }
+    return {
+        "questions": (
+            "whether the reconstruction's stored betap and li use the same "
+            "volume-weighted major radius and the same l_i convention nova's "
+            "definitions use, computed from the reconstruction's own stored "
+            "scalars and nova's own volume integrals rather than asserted"
+        ),
+        "resolution": (
+            "the stored scalars are evaluated on nova's own volume integrals and "
+            "leading factors; the only free parameter left for the row is the "
+            "denominator radius, and the radius that reproduces the store is "
+            "compared with nova's own volume-weighted major radius and with the "
+            "boundary's minor radius"
+        ),
+        "implied_over_major_from_betap": implied,
+        "implied_radius_inductance_over_betap": {
+            identity: block["implied_radius_inductance_over_betap"]
+            for identity, block in blocks
+        },
+        "major_over_minor": {
+            identity: block["major_over_minor"] for identity, block in blocks
+        },
+        "rescaled_efit_combination": {
+            identity: block["rescaled_efit_combination"] for identity, block in blocks
+        },
+        "readings": [row["convention_sentence"] for row in rows],
+    }
+
+
 def measure(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any]:
     """Read every bank row of the decomposition bank five ways."""
     configure_dtypes()
@@ -817,6 +1009,12 @@ def measure(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any
         (directory / "receipt.json").write_text(
             json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
         )
+    receipt["commensurability"] = commensurability_summary(receipt["rows_receipt"])
+    print(
+        "SHAFRANOV-COMMENSURABILITY "
+        + json.dumps(receipt["commensurability"], sort_keys=True),
+        flush=True,
+    )
     receipt["figure"] = _draw_panel(
         receipt,
         directory / "shafranov-combination-discriminator.png",

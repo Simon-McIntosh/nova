@@ -22,8 +22,11 @@ from benchmarks.shafranov_combination_discriminator import (
     READING_LABELS,
     attribute,
     boundary_shape,
+    commensurability,
     constraint_context,
+    convention_clause,
     identity_combination,
+    implied_radius,
     linear_combination,
     readings,
     recomputed_profile_moments,
@@ -173,6 +176,85 @@ def test_the_formula_free_route_is_named_and_not_claimed():
     text = MAGNETICS_PROVENANCE["magnetics_discrete"]
     assert "contour integral" in text
     assert "not a formula-free measurement" in text
+
+
+def _stored_moments(current, radius, pressure, field):
+    """Return the stored pair a reconstruction would report for one radius."""
+    return {
+        "betap": 4.0 * pressure / (MU0 * radius * current**2),
+        "li": 2.0 * field / (MU0**2 * radius * current**2),
+    }
+
+
+def _unit_check(current, pressure, field):
+    return {
+        "definition": "nova's own definition",
+        "plasma_current_a": current,
+        "pressure_integral_j": pressure,
+        "poloidal_field_integral_t2_m3": field,
+    }
+
+
+def test_implied_radius_recovers_the_radius_a_stored_scalar_used():
+    """A scalar built with a known denominator implies that radius back."""
+    current, radius, pressure, field = 8.0e5, 0.86, 3.0e4, 1.0e-1
+    stored = _stored_moments(current, radius, pressure, field)
+    assert implied_radius(
+        stored["betap"], pressure, 4.0, MU0, current
+    ) == pytest.approx(radius, rel=0.0)
+    assert implied_radius(stored["li"], field, 2.0, MU0**2, current) == pytest.approx(
+        radius, rel=0.0
+    )
+    assert implied_radius(0.0, pressure, 4.0, MU0, current) is None
+    assert implied_radius(stored["betap"], pressure, 0.0, MU0, current) is None
+
+
+def test_commensurability_reads_a_shared_convention_as_commensurate():
+    """The check must be able to say the two conventions agree, not only differ."""
+    current, major, pressure, field = 8.0e5, 0.86, 3.0e4, 1.0e-1
+    block = commensurability(
+        efit=_stored_moments(current, major, pressure, field),
+        unit_check=_unit_check(current, pressure, field),
+        major_radius=major,
+        minor_radius=0.58,
+    )
+    assert block["implied_over_major_from_betap"] == pytest.approx(1.0, rel=1.0e-12)
+    assert block["implied_over_major_from_inductance"] == pytest.approx(
+        1.0, rel=1.0e-12
+    )
+    assert block["implied_over_minor_from_betap"] == pytest.approx(
+        major / 0.58, rel=1.0e-12
+    )
+    assert block["implied_radius_inductance_over_betap"] == pytest.approx(
+        1.0, rel=1.0e-12
+    )
+    assert "volume-weighted major radius" in block["nova_radius_convention"]
+
+
+def test_commensurability_detects_a_minor_radius_convention():
+    """A store normalised with the minor radius implies that radius, not nova's."""
+    current, major, minor, pressure, field = 8.0e5, 0.86, 0.58, 3.0e4, 1.0e-1
+    efit = _stored_moments(current, minor, pressure, field)
+    block = commensurability(
+        efit=efit,
+        unit_check=_unit_check(current, pressure, field),
+        major_radius=major,
+        minor_radius=minor,
+    )
+    assert block["implied_over_major_from_betap"] == pytest.approx(
+        minor / major, rel=1.0e-12
+    )
+    assert block["implied_over_minor_from_betap"] == pytest.approx(1.0, rel=1.0e-12)
+    nova = linear_combination(
+        4.0 * pressure / (MU0 * major * current**2),
+        2.0 * field / (MU0**2 * major * current**2),
+    )
+    assert block["rescaled_efit_combination"] == pytest.approx(nova, rel=1.0e-12)
+    clause = convention_clause(block, profile_combination=nova)
+    assert clause.startswith("Commensurability")
+    slash = f"{nova:.4f}"
+    assert slash in clause
+    assert "boundary's minor radius" in clause
 
 
 def test_reading_keys_are_ordered_and_labelled():

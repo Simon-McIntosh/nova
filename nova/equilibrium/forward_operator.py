@@ -3383,7 +3383,14 @@ class ForwardFluxOperator:
             return active.internal(psi, requested_class, target_current)
 
         zero = jnp.asarray(0.0, dtype=function.normalisation.dtype)
-        _base, tangent = jax.jvp(image, (zero,), (jnp.asarray(amplitude),))
+        # The required normalisation is one scalar per source, and the image is
+        # formed about that scalar, so the perturbation is read at the primal's
+        # own shape: a compensator hands its amplitude in as a length-one row.
+        # A wider amplitude is not a perturbation this tangent can carry and
+        # fails loudly here rather than returning a mis-shaped field.
+        _base, tangent = jax.jvp(
+            image, (zero,), (jnp.reshape(jnp.asarray(amplitude), zero.shape),)
+        )
         return tangent
 
     def current_moment_image(self, moments: CellCurrentMoments) -> jax.Array:

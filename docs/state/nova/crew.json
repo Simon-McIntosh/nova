@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T17:18:13",
+  "updated": "2026-09-18T17:35:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -193867,6 +193867,356 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T183747545705-mulw-diiid-identity-single-member-build",
+        "plan": "multi-unit-limiter-wall",
+        "section": "",
+        "node": "mulw-diiid-identity-single-member-build",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 434,
+                "cached_input_tokens": 665452,
+                "input_tokens": 665890,
+                "output_tokens": 6,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 665896,
+                "uncached_input_tokens": 4
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "benchmarks/strict_exit_incidence.py exposes a function that builds exactly one member of the DIII-D width-five set from the machine description without building the others, with the existing whole-set builder unchanged in result (a test asserts member i from the single build equals member i from the whole build on one frame, CPU, in a fresh all_debug process); benchmarks/diiid_gate_frame_identity.py measures each frame in a re-exec child (never fork after the CUDA context) with a per-child timeout that reports a hang instead of waiting it out, persisting each frame's receipt as it lands; ONE H200 job on betelgeuse under reservation gpu_0003_grpA (--gres=gpu:1, 8 cores, --mem=128G, time limit 02:00:00, TMPDIR=/tmp exported at submit and inside the payload, the root interpreter with PYTHONPATH set to the worktree, no uv on the node, JAX_PLATFORMS=cuda,cpu, persistent compilation cache) runs the five frames and writes docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/run.json with per frame identity_row_count (positive or the EmptyIdentitySetError recorded), the maximum absolute terminal-state difference, both terminal residuals and converged flags, execution_route per_frame and route_qualification stating that the committed artifact was measured on the stacked vmap route the current tree refuses; the manifest states per frame bit-identical or the route-qualified difference; the vmap-route refusal (TracerArrayConversionError from argument_layout) is left in place and named in the record as a regression against the batched contract, not worked around inside forward.py; every uv command carries --no-sync and nothing runs uv sync; write files in short pieces and py_compile each before committing",
+          "estimated_hours": null,
+          "goal": "Measure the five DIII-D gate frames against the committed width-five artifact as one H200 job whose driver re-execs one child per frame, each child reconstructing only its own member through a single-member build added to benchmarks/strict_exit_incidence.py",
+          "id": "mulw-diiid-identity-single-member-build",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T18:37:51Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183747545705-mulw-diiid-identity-single-member-build/manifest.md",
+          "plan": "multi-unit-limiter-wall",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/strict_exit_incidence.py",
+            "benchmarks/diiid_gate_frame_identity.py",
+            "tests/test_strict_exit_incidence.py",
+            "docs/figures/multi-unit-limiter-wall",
+            "docs/evidence/archive/multi-unit-limiter-wall-landed.html",
+            "docs/plans/multi-unit-limiter-wall.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/diiid-single-member"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19c-mulw-member-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T18:38:13Z",
+        "completed_at": "2026-09-18T14:28:18.434Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 71395,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 71405,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "02462d3b50a04ff137a91fce6b1968affc6520f9",
+        "commits": [
+          "4404e68a58c32aaca66c0416ab343c239874e3e4",
+          "6995aa6232d147b43ade2efb149ac96de050570b",
+          "02462d3b50a04ff137a91fce6b1968affc6520f9",
+          "7c88c6a847360772853ef432c8c0f90c672ff32f",
+          "74b84466291033c156f67920f1e120d8305e9eef",
+          "f3488a004c7cfe6df93c92b924c90391e756f064",
+          "903459aab633a3eb1600760268789302c67a8699",
+          "a8f7e4e58663b3e6a4889f1ad021c160769440c5"
+        ],
+        "changed_lines": {
+          "added": 2793,
+          "removed": 76,
+          "files": 11
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "tests/test_strict_exit_incidence.py 9 passed in one all_debug process; H200 job 1273398 exit 0; independent review",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T183747545705-mulw-diiid-identity-single-member-build.json",
+          "log_digest": "sha256:08874779987c0e370b5be3ac4cc0f782a8e3e60ef7ef30ec71914a36be02d1a7"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183747545705-mulw-diiid-identity-single-member-build/manifest.md",
+        "scope_changed": false,
+        "session_id": "0b801ee6-493a-46f6-b6a4-3539954d37f8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6005359,
+            "input_tokens_cumulative": 6005359,
+            "output_tokens": 49736,
+            "output_tokens_cumulative": 49736,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T14:28:18.434Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1450,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 4750,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2440,
+              "log_fresh": false,
+              "manifest_commits": [
+                "f7fefbd7 (nova/equilibrium/separatrix_clip.py and tests/test_equilibrium_separatrix_clip.py: the derived capacity",
+                "its docstring derivation",
+                "and the above-bound refusal test)",
+                "128f5f57 (the receipts document",
+                "the memory receipts",
+                "the poloidal layout panel with its renderer and receipt",
+                "and the landing record in the plan section and the evidence anchor",
+                "in one commit)"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "c0b1ad3a03860608c46c16c87d60afa2ef6d8773987af5fe9f8d5c10edcde637",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T100810663195-ecq-capacity-sizing/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan exact-clip-moment-quadrature --section '\u00a74' --role review --spec-level exact --node review-of-ecq-capacity-sizing --goal 'attach an independent review to run r-20260917T100810663195-ecq-capacity-sizing' --done-when 'the review for r-20260917T100810663195-ecq-capacity-sizing parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T100810663195-ecq-capacity-sizing.json --time-budget 55m --session s19-codex-20260916 --local",
+              "node": "ecq-capacity-sizing",
+              "phase": "working",
+              "plan": "exact-clip-moment-quadrature",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T100810663195-ecq-capacity-sizing",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 2493,
+              "terminal_at": "2026-09-17T17:56:25Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-capacity-sizing"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 480,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: authored-artifact generation is corrupt in this session",
+              "elapsed_seconds": 3780,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 5410,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1d7f4bc3"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "cf0b29d1ca893684cc42e1cb2aed66bcccbc2905d84f4c44fee1ee5f98c0b1a7",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T160409157288-nia-drift-probe-remainder-and-panels/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T160409157288-nia-drift-probe-remainder-and-panels/manifest.md; resolve the blocker before resuming the run",
+              "node": "nia-drift-probe-remainder-and-panels",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T160409157288-nia-drift-probe-remainder-and-panels",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260917T160409157288-nia-drift-probe-remainder-and-panels",
+                "session_id": "adbaa40f-5934-438e-ae7e-db5c5f9da9ce",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 5569,
+              "terminal_at": "2026-09-17T17:05:09Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-drift-probe-remainder-and-panels"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 15,
+            "evidence": 16,
+            "fit": 17,
+            "goal_fidelity": 16,
+            "scope_discipline": 18
+          },
+          "absent": [],
+          "total": 82
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 6347179,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 4278.172,
+          "generated_tokens": 65616,
+          "generation_seconds": 4263.811,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 36.0,
+          "machine_seconds": 14.361,
+          "peak_input_tokens": 173040,
+          "tokens_per_second": 15.39,
+          "wall_tokens_per_second": 15.34
+        },
+        "follow_on_paths": [
+          "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+          "2868.83",
+          "2937.00",
+          "1579.19",
+          "169.03",
+          "/home"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 6,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/mulw-diiid-identity-single-member-build",
+          "session_id": "0b801ee6-493a-46f6-b6a4-3539954d37f8",
+          "session_source": "stream",
+          "retained_at": "2026-09-18T14:28:18.434Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 23.0,
+        "orientation_input_tokens": 1345360.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -194235,6 +194585,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2815
+    "_version": 2816
   }
 }

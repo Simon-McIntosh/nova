@@ -30,7 +30,7 @@
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="195">
+<meta name="plan-version" content="196">
 </head>
 <body>
 <main class="plan-doc">
@@ -205,6 +205,11 @@ for the lead before merge.</p>
     <h4 class="r-fu-title">Make the paired-probe panel test able to fail: distinct grids per archive and a contour-kind assertion</h4>
     <div class="r-fu-body"><p>From the 94/100 review of nia-drift-probe-record-repairs. In <code>tests/test_bank_drift_paired_probe.py</code> near lines 394 and 395: (1) the shared-level assertion cannot fail because both fixture archives are written from the same default radius and height, so a mutant computing each panel's levels from its own archive reproduces the expected levels; write the two archives on different grids so the assertion discriminates. (2) The line-contour assertion counts one collection carrying levels, which a filled contour also yields; assert the collection kind (unfilled line contour) so the plotting rule is actually pinned. Both are test-only edits; run in one fresh CPU process on all_debug.</p></div>
     <pre class="r-fu-prompt">/reckon-ship null-identification-authority — deliver f-nia-panel-test-strength: two fixture archives on distinct grids and a contour-kind assertion in the paired-probe panel test</pre>
+    </article>
+<article class="r-fu" data-id="f-nia-anchor-bisect-record-repairs" data-status="open" data-written-by="nova S19 coordinator" data-written-at="2026-09-18T12:35:00Z" data-recommends-skill="/reckon-ship" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Repair the anchor-bisect receipt on its three review findings</h4>
+    <div class="r-fu-body"><p>From the 84/100 review of nia-anchor-trace-bisect. (1) <code>benchmarks/bank_drift_anchor_bisect.py</code> near line 727: the verdict keys on the hook-name list alone, so an absent arm (the exception stub from <code>_load_arm</code> near line 619 carries an empty list) is reported as "the override did not take effect"; report absent arms as absent. (2) The receipt's mixed-arm finding sentence (receipt JSON near line 426) is a template that calls a 2.2e-16 against 3.1e-16 gap "the anchor partition is the carrier"; the sentence must compare the gap to the round-off floor before naming a carrier. (3) <code>receipt.html</code> near line 142 states the slowest compile as 4m18s while the log's slowest alarm is 4m30.6s. Record repairs only, re-run the receipt subcommand against the existing arm JSONs, no allocation.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship null-identification-authority §1 — deliver f-nia-anchor-bisect-record-repairs: absent arms reported as absent, the mixed finding compared to the round-off floor, the compile cell corrected</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

@@ -710,6 +710,13 @@ def _projected_profile(profile):
     other field of the source is carried across unchanged.  The projection is
     not allowed to move the observable state by itself, so the caller compares
     the combination before and after and reports the difference it finds.
+
+    The callable representation is a static property of the compiled program,
+    not a per-slice operand, so the source is bound by rebuilding the operator
+    on the same mesh rather than through the per-slice source binding, which
+    refuses a representation change outright.  Only the two flux functions
+    move: the mesh, the prescribed conductor field, the sampling rows and the
+    solve policy are carried across unchanged.
     """
     coordinate = np.linspace(0.0, 1.0, PROJECTION_SAMPLES)
     projection = project_domain_profile(
@@ -718,8 +725,9 @@ def _projected_profile(profile):
         maximum_order=PROJECTION_MAXIMUM_ORDER,
         tolerance=PROJECTION_TOLERANCE,
     )
-    return profile._with_source(
-        replace(profile.source, core=projection.core())
+    source = replace(profile.source, core=projection.core())
+    return replace(
+        profile, operator=replace(profile.operator, source=source)
     ), projection
 
 

@@ -44,6 +44,7 @@ from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 from nova.equilibrium.convention import (
     flux_function_pressure,
@@ -58,11 +59,16 @@ __all__ = [
     "ContinuationForm",
     "ContinuationLedger",
     "ContinuationRecord",
+    "CONDITIONED_MONOMIAL_ORDER",
     "DomainProfile",
+    "DomainProfileProjection",
+    "FluxFunctionFit",
     "ForwardSource",
     "NormalisationPolicy",
     "NormalisationRecord",
     "PolynomialFluxFunction",
+    "project_domain_profile",
+    "project_flux_function",
     "CurrentNormalisationError",
     "SCALAR_CURRENT_AMPLITUDE_BAND",
     "RotationClosure",
@@ -443,6 +449,266 @@ class DomainProfile:
         reports as undeclared.
         """
         return undeclared_continuation_record(dtype)
+
+
+#: Highest polynomial order whose raw monomial design stays resolvable on the
+#: uniform normalised-flux knots the extracted profiles declare.  Up to this
+#: order the Vandermonde matrix is the fit; one order further and its condition
+#: number grows by an order of magnitude per degree, so a higher fit is formed
+#: in the exact-end-value basis instead and re-expanded exactly to monomials.
+CONDITIONED_MONOMIAL_ORDER = 5
+
+
+def _monomial_design(coordinate: np.ndarray, order: int) -> np.ndarray:
+    """Return the power basis ``1, x, ..., x**order`` at every sample."""
+    return np.stack([coordinate**power for power in range(order + 1)], axis=1)
+
+
+def _end_value_design(coordinate: np.ndarray, order: int) -> np.ndarray:
+    """Return the interior design that leaves both sampled ends exact.
+
+    The two boundary samples fix the endpoint values by construction, so only
+    the interior shape is fitted, against the basis ``x (1 - x) x**k``.  That
+    basis vanishes at both ends, which removes the collinearity between the
+    constant and the higher monomial columns that dominates the Vandermonde
+    conditioning, so a high-order fit is solved at a condition number the
+    sampled knots can resolve rather than at one they cannot.
+    """
+    interior = coordinate * (1.0 - coordinate)
+    return np.stack(
+        [interior * coordinate**power for power in range(order - 1)], axis=1
+    )
+
+
+def _end_value_coefficients(
+    coordinate: np.ndarray, values: np.ndarray, resolved: np.ndarray, order: int
+) -> np.ndarray:
+    """Return the monomial coefficients of an endpoint-anchored fit.
+
+    ``resolved`` are the interior-basis weights; each contributes
+    ``x**k (1 - x)`` whose monomial expansion ``x**(k+1) - x**(k+2)`` is exact,
+    so the anchoring costs no conditioning in the coefficients the evaluator
+    consumes.
+    """
+    low, high = float(values[0]), float(values[-1])
+    coefficients = np.zeros(order + 1)
+    coefficients[0] += low
+    coefficients[1] += high - low
+    for power, weight in enumerate(resolved):
+        coefficients[power + 1] += weight
+        coefficients[power + 2] -= weight
+    return coefficients
+
+
+def _polyfit(
+    coordinate: np.ndarray, values: np.ndarray, order: int, basis: str
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return the fitted monomial coefficients and the design that solved them."""
+    if basis == "exact-end-value":
+        design = _end_value_design(coordinate, order)
+        resolved, _residuals, _rank, _singular = np.linalg.lstsq(
+            design, values, rcond=None
+        )
+        return _end_value_coefficients(coordinate, values, resolved, order), design
+    design = _monomial_design(coordinate, order)
+    resolved, _residuals, _rank, _singular = np.linalg.lstsq(design, values, rcond=None)
+    return resolved, design
+
+
+@dataclass(frozen=True)
+class FluxFunctionFit:
+    """One flux function projected onto the polynomial representation.
+
+    ``function`` is what the compiled solve consumes: shape coefficients
+    ordered by ascending power of normalised flux, with the SI magnitude
+    carried separately in the normalisation leaf, so the scale a compensator
+    moves is the profile's physical amplitude and the shape it leaves alone is
+    the dimensionless coefficient vector.
+    """
+
+    function: PolynomialFluxFunction
+    order: int
+    basis: str
+    si_scale: float
+    relative_residual: float
+    maximum_relative_residual: float
+    condition_number: float
+    monomial_condition_number: float
+    tolerance_met: bool
+    sample_count: int
+
+    def receipt(self) -> dict[str, object]:
+        """Return the fit's order, basis, condition number and residuals."""
+        return {
+            "order": self.order,
+            "basis": self.basis,
+            "condition_number": self.condition_number,
+            "monomial_condition_number": self.monomial_condition_number,
+            "si_scale": self.si_scale,
+            "relative_residual": self.relative_residual,
+            "maximum_relative_residual": self.maximum_relative_residual,
+            "tolerance_met": self.tolerance_met,
+            "sample_count": self.sample_count,
+        }
+
+
+@dataclass(frozen=True)
+class DomainProfileProjection:
+    """The polynomial projection of an extracted p' and FF' callable pair."""
+
+    p_prime: FluxFunctionFit
+    ff_prime: FluxFunctionFit
+    psi_nodes: np.ndarray
+
+    def core(self) -> DomainProfile:
+        """Return the two projected functions as a source core."""
+        return DomainProfile(self.p_prime.function, self.ff_prime.function)
+
+    def receipt(self) -> dict[str, object]:
+        """Return the per-component fit receipts and the sampled coordinate
+        they were taken on."""
+        return {
+            "p_prime": self.p_prime.receipt(),
+            "ff_prime": self.ff_prime.receipt(),
+            "sample_count": int(np.asarray(self.psi_nodes).size),
+            "psi_span": [
+                float(np.min(self.psi_nodes)),
+                float(np.max(self.psi_nodes)),
+            ],
+        }
+
+
+def project_flux_function(
+    function: Callable,
+    psi_nodes,
+    *,
+    order: int | None = None,
+    maximum_order: int = 6,
+    tolerance: float = 1.0e-3,
+) -> FluxFunctionFit:
+    """Project one sampled flux function onto :class:`PolynomialFluxFunction`.
+
+    The function is evaluated at the declared normalised-flux knots and fitted
+    by least squares.  With ``order`` unset the lowest order whose relative
+    residual meets ``tolerance`` is chosen, never exceeding ``maximum_order``;
+    a fit that meets no tolerance still returns its best order and reports the
+    residual rather than raising, because the residual is the projection's
+    error and belongs in the receipt.  Orders above
+    :data:`CONDITIONED_MONOMIAL_ORDER` are formed in the exact-end-value basis,
+    which requires the sample coordinate to span the closed interval
+    ``[0, 1]`` so both endpoint values are the sampled ones.
+    """
+    coordinate = np.asarray(psi_nodes, dtype=np.float64).reshape(-1)
+    if coordinate.size < 2 or not np.all(np.isfinite(coordinate)):
+        raise ValueError(
+            "the projection needs at least two finite knots on the "
+            "normalised-flux coordinate"
+        )
+    values = np.asarray(
+        function(jnp.asarray(coordinate, dtype=jnp.float64)), dtype=np.float64
+    ).reshape(-1)
+    if values.shape != coordinate.shape:
+        raise ValueError("the projected function must be scalar-valued at every knot")
+    if not np.all(np.isfinite(values)):
+        raise ValueError("the projected function must be finite at every knot")
+    maximum_order = int(maximum_order)
+    if maximum_order < 1:
+        raise ValueError("maximum_order must be at least one")
+    if order is not None:
+        order = int(order)
+        if order < 1 or order > maximum_order:
+            raise ValueError("order must lie in one .. maximum_order")
+        return _fit_at_order(coordinate, values, order, tolerance=tolerance, basis=None)
+    fitted = None
+    for candidate in range(1, maximum_order + 1):
+        fitted = _fit_at_order(
+            coordinate, values, candidate, tolerance=tolerance, basis=None
+        )
+        if fitted.tolerance_met:
+            return fitted
+    return fitted
+
+
+def project_domain_profile(
+    profile: DomainProfile,
+    psi_nodes,
+    *,
+    order: int | None = None,
+    maximum_order: int = 6,
+    tolerance: float = 1.0e-3,
+) -> DomainProfileProjection:
+    """Project an extracted ``p'`` and ``FF'`` pair onto the polynomial basis.
+
+    Both components are sampled on the same declared normalised-flux knots and
+    projected independently, so the pair keeps one shared coordinate and each
+    component reports its own order, scale and residual.  The returned core is
+    what a solve sees in place of the extracted callables, and its
+    normalisation leaves are the profile amplitudes a compensator can move.
+    """
+    if not isinstance(profile, DomainProfile):
+        raise TypeError("the projection takes a DomainProfile source core")
+    return DomainProfileProjection(
+        p_prime=project_flux_function(
+            profile.p_prime,
+            psi_nodes,
+            order=order,
+            maximum_order=maximum_order,
+            tolerance=tolerance,
+        ),
+        ff_prime=project_flux_function(
+            profile.ff_prime,
+            psi_nodes,
+            order=order,
+            maximum_order=maximum_order,
+            tolerance=tolerance,
+        ),
+        psi_nodes=np.asarray(psi_nodes, dtype=np.float64).reshape(-1),
+    )
+
+
+def _fit_at_order(
+    coordinate: np.ndarray,
+    values: np.ndarray,
+    order: int,
+    *,
+    tolerance: float,
+    basis: str | None,
+) -> FluxFunctionFit:
+    """Fit one order, choosing the fit's residual scale from the samples."""
+    if basis is None:
+        basis = "exact-end-value" if order > CONDITIONED_MONOMIAL_ORDER else "monomial"
+    if basis == "exact-end-value":
+        spans_interval = np.isclose(coordinate[0], 0.0, atol=1.0e-12) and np.isclose(
+            coordinate[-1], 1.0, atol=1.0e-12
+        )
+        if not spans_interval:
+            raise ValueError(
+                "an exact-end-value fit needs its sample coordinate to span "
+                "[0, 1] so both endpoint values are sampled"
+            )
+    coefficients, design = _polyfit(coordinate, values, order, basis)
+    scale = float(np.max(np.abs(values)))
+    if scale == 0.0:
+        scale = 1.0
+    residual = values - _monomial_design(coordinate, order) @ coefficients
+    relative = float(np.sqrt(np.mean(residual**2))) / scale
+    return FluxFunctionFit(
+        function=PolynomialFluxFunction(
+            coefficients=jnp.asarray(coefficients / scale, dtype=jnp.float64),
+            normalisation=jnp.asarray(scale, dtype=jnp.float64),
+        ),
+        order=order,
+        basis=basis,
+        si_scale=scale,
+        relative_residual=relative,
+        maximum_relative_residual=float(np.max(np.abs(residual))) / scale,
+        condition_number=float(np.linalg.cond(design)),
+        monomial_condition_number=float(
+            np.linalg.cond(_monomial_design(coordinate, order))
+        ),
+        tolerance_met=relative <= tolerance,
+        sample_count=int(coordinate.size),
+    )
 
 
 class NormalisationRecord(NamedTuple):

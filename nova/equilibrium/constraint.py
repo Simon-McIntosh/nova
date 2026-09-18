@@ -18,6 +18,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from nova.biot.greens import MU0
+from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.observation import MomentIntegralSupport
 
@@ -1132,6 +1133,12 @@ def sample_lattice_flux(lattice, grid: jax.Array, point: jax.Array) -> jax.Array
 def _lattice_grid(profile: ForwardProfile, flux: jax.Array) -> jax.Array:
     """Return the plasma-grid block of one flux state in lattice shape."""
     lattice = profile.lattice
+    if not isinstance(lattice, FluxLattice):
+        raise TypeError(
+            "a point-sampling row needs a structured FluxLattice carrier; "
+            "an unstructured mesh carries its flux on cells whose local "
+            "polynomial the operator samples through sample_flux_field"
+        )
     return jnp.reshape(jnp.asarray(flux)[: lattice.node_count], lattice.shape)
 
 
@@ -1487,9 +1494,7 @@ class ExternalShafranovConstraint:
     def _payload(self, payload: object) -> tuple[jax.Array, jax.Array]:
         """Return the external flux image and the reference minor radius."""
         if not isinstance(payload, Sequence) or len(payload) != 2:
-            raise ValueError(
-                "a shafranov row payload is (external_flux, minor_radius)"
-            )
+            raise ValueError("a shafranov row payload is (external_flux, minor_radius)")
         external_flux, minor_radius = payload
         return jnp.asarray(external_flux), jnp.asarray(minor_radius)
 
@@ -1516,9 +1521,7 @@ class ExternalShafranovConstraint:
         radius = observation.centroid_r
         height = observation.centroid_z
         lattice = profile.lattice
-        grid = jnp.reshape(
-            external_flux[: lattice.node_count], lattice.shape
-        )
+        grid = jnp.reshape(external_flux[: lattice.node_count], lattice.shape)
         step = lattice.radial_step
         point = jnp.stack((radius, height))
         upper = sample_lattice_flux(lattice, grid, point + jnp.stack((step, 0.0)))

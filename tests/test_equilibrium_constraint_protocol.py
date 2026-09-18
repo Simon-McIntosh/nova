@@ -940,6 +940,21 @@ def test_flux_level_row_dual_image_sums_to_one() -> None:
     )
 
 
+def test_flux_level_row_states_its_carrier_requirement() -> None:
+    configure_dtypes()
+    profile = SimpleNamespace(lattice=SimpleNamespace(node_count=4))
+    context = ConstraintContext(
+        flux=jnp.arange(4.0),
+        requested_class=None,
+        target_current=None,
+        shadow=None,
+    )
+    with np.testing.assert_raises_regex(TypeError, "structured FluxLattice"):
+        FluxLevelConstraint(point_count=1).observed(
+            profile, context, jnp.asarray([[2.0, 0.0]])
+        )
+
+
 def test_unbounded_exterior_amplitude_is_reported_outside_the_field_bound() -> None:
     configure_dtypes()
     field = BoundedExteriorFieldUnknown(
@@ -963,8 +978,10 @@ def test_unbounded_exterior_amplitude_is_reported_outside_the_field_bound() -> N
     assert float(np.asarray(step)[0]) == 0.0
     assert float(np.asarray(step)[2]) < 0.0
 
-    # the bounded components keep refusing exactly as before
+    # the bounded components keep refusing exactly as before, while the level
+    # component is held only by its own step cap -- a level amplitude is a flux
+    # offset, not a field, so the tesla bound never refuses a level step
     over_bound = jnp.asarray((2.0 * 2.5e-1 / 1.0e-3, 0.0, 1.0e6))
     step, refused = field.damped_step(over_bound, jnp.zeros(3))
     np.testing.assert_array_equal(np.asarray(step), np.zeros(3))
-    assert bool(np.asarray(refused).all())
+    np.testing.assert_array_equal(np.asarray(refused), np.asarray([True, True, False]))

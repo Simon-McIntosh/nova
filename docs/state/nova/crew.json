@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T15:34:34",
+  "updated": "2026-09-18T16:12:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -193275,6 +193275,288 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260918T092727465186-ecq-closed-form-record-and-budget",
+        "plan": "exact-clip-moment-quadrature",
+        "section": "\u00a72",
+        "node": "ecq-closed-form-record-and-budget",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4104,
+                "cached_input_tokens": 543588,
+                "input_tokens": 547694,
+                "output_tokens": 1845,
+                "reasoning_output_tokens": 238,
+                "total_tokens": 549539,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "benchmarks/exact_clip_closed_form_floor.py COUPLING_BUDGET (near line 213) and FALLBACK_BUDGET (near line 219) are the one-tenth values the plan's row-margin table and the file's own docstring state, not the whole other error term and fan floor they hold now, and the nine receipts under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-closed-form/parts/ are re-read (no new job: every vertex count's relative error is already in each receipt) to give the smallest arc vertex count meeting the tenth on each of the nine rows, with the 128-count margin; /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-closed-form/moment_convergence_figure.py normalises by the tenth so its annotation and its arithmetic agree, and the figure under docs/figures/exact-clip-closed-form is regenerated on an all_debug job; docs/evidence/archive/exact-clip-moment-quadrature-landed.html gains the closed-form section (Green's theorem reduction of the fifteen monomials, the two independent test checks, the relative-not-bitwise padding check at 1e-13, the nine-row table of smallest-met counts at the tenth, the figure with a caption naming what each panel shows) and docs/plans/exact-clip-moment-quadrature.html gains the landing record naming the merge of a78e6484 into main and the lead's decision to size the arc to the fit; a truncated draft of that section written by the exhausted predecessor is preserved outside the repository at /run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/8fac263d-04b1-4202-bc28-df1b0b73ec93/scratchpad/ecq-closed-form-evidence-draft.diff and may be read for its prose but every number is re-read from the receipts; write in short paragraphs and commit each section as it is finished so a degraded long write loses one paragraph, not the record; a text-only lane: never Read a PNG; every uv command carries --no-sync and nothing runs uv sync; python syntax is checked with /home/ITER/mcintos/Code/nova/.venv/bin/python -m py_compile before each commit",
+          "estimated_hours": null,
+          "goal": "record the closed-form polygon moments landing with the arc vertex budget read at one tenth of the row's other error term",
+          "id": "ecq-closed-form-record-and-budget",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-18T09:27:29Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T092727465186-ecq-closed-form-record-and-budget/manifest.md",
+          "plan": "exact-clip-moment-quadrature",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/exact_clip_closed_form_floor.py",
+            "docs/figures/exact-clip-closed-form",
+            "docs/evidence/archive/exact-clip-moment-quadrature-landed.html",
+            "docs/plans/exact-clip-moment-quadrature.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/exact-closed-form"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-ecq-cf-record-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-18T09:27:45Z",
+        "completed_at": "2026-09-18T14:09:00.530Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 16859,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 16875,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "cf7c524ea5b0ad0f75ca3034139cf71d5fa9c77b",
+        "commits": [
+          "ac4f066e4386dde570b32b9f88fe3d40104c4cd3",
+          "05f7cd92910747cf54617d6a1b9773ba445c6b01",
+          "69736230dd9379f5a0e612b55d8e7cef6be944b4",
+          "1189360d89e853b03ff9a21ae5d6de87776f6424",
+          "3f0cb5f0eeb88a3a41619d75768f6a0ba0eb5f27",
+          "ab6bb20f3edd0aea81268b77c4c0a1f6193993c5",
+          "13420d762b7626a1e8aa4524d2fe97116a7346bf"
+        ],
+        "changed_lines": {
+          "added": 104,
+          "removed": 9,
+          "files": 5
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "tests/test_exact_clip_closed_form_budget.py 2 passed; reread-all_debug.log REREAD_EXIT=0 (job 1273613); independent review",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260918T092727465186-ecq-closed-form-record-and-budget.json",
+          "log_digest": "sha256:288285814f0266dc5af49641524c9f67ce592b3a1072224bebc1db574bbb68f4"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T092727465186-ecq-closed-form-record-and-budget/manifest.md",
+        "scope_changed": false,
+        "session_id": "29427382-bdbb-46da-ba3f-f9e55b64d4a0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 12020941,
+            "input_tokens_cumulative": 12020941,
+            "output_tokens": 47485,
+            "output_tokens_cumulative": 47485,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T14:09:00.530Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 2613,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2179,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1892b73f675167c9dc3896ffcc9061785fc01b69"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "ac5b022daff336420d75a2ede4e65cb515f1b7309f19c875a80ae920948d0a8f",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T080721770101-nia-drift-probe-record-repairs/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan null-identification-authority --section '' --role review --spec-level exact --node review-of-nia-drift-probe-record-repairs --goal 'attach an independent review to run r-20260918T080721770101-nia-drift-probe-record-repairs' --done-when 'the review for r-20260918T080721770101-nia-drift-probe-record-repairs parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260918T080721770101-nia-drift-probe-record-repairs.json --time-budget 45m --session s19-codex-20260916 --local",
+              "node": "nia-drift-probe-record-repairs",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260918T080721770101-nia-drift-probe-record-repairs",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 2244,
+              "terminal_at": "2026-09-18T08:50:11Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-drift-probe-record-repairs"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 7,
+            "evidence": 16,
+            "fit": 18,
+            "goal_fidelity": 17,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 77
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 12188781,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3292.752,
+          "generated_tokens": 57090,
+          "generation_seconds": 3204.18,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.7,
+          "machine_seconds": 88.572,
+          "peak_input_tokens": 166662,
+          "tokens_per_second": 17.82,
+          "wall_tokens_per_second": 17.34
+        },
+        "follow_on_paths": [
+          "docs/evidence/archive/exact-clip-moment-quadrature-landed.html",
+          "docs/plans/exact-clip-moment-quadrature.html",
+          "class=\"r-dec-q\">moment-integration</p"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": [
+          {
+            "path": "tests/test_exact_clip_closed_form_budget.py",
+            "reason": "the review required a test pinning the budget constants; the coordinator asked for it on resume and it is the node's own deliverable"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-closed-form-record-and-budget",
+          "session_id": "29427382-bdbb-46da-ba3f-f9e55b64d4a0",
+          "session_source": "stream",
+          "retained_at": "2026-09-18T14:09:00.530Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 115.0,
+        "orientation_input_tokens": 2316186.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -193643,6 +193925,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2809
+    "_version": 2810
   }
 }

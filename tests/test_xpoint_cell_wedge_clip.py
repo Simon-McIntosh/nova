@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 from nova.equilibrium.clip_quadrature import saddle_wedge_current_moments
-from nova.equilibrium.separatrix_clip import AtomicCellMesh
+from nova.equilibrium.separatrix_clip import AtomicCellMesh, _traced_level_arc
 from nova.jax.config import configure_dtypes
 
 configure_dtypes()
@@ -22,6 +22,75 @@ def _saddle_cell() -> tuple[AtomicCellMesh, jax.Array]:
     mesh = AtomicCellMesh.from_cells([vertices], centroids=np.zeros((1, 2)))
     coordinates = mesh.node_coordinates
     return mesh, jnp.asarray(coordinates[:, 0] * coordinates[:, 1])
+
+
+def _saddle_level(points):
+    return points[..., 0] * points[..., 1]
+
+
+def test_spline_chain_admits_the_supplied_saddle_vertex():
+    mesh, signed_flux = _saddle_cell()
+
+    support = mesh.traced_clip(
+        signed_flux,
+        saddle_vertex=jnp.zeros(2),
+        curve_evaluator=_saddle_level,
+        arc_tracer=_traced_level_arc,
+    )
+
+    assert bool(support.saddle[0])
+    assert support.refused_cells() == 0
+    np.testing.assert_array_equal(support.saddle_vertex[0], np.zeros(2))
+    assert np.all(np.asarray(support.branch_vertex_count[0]) > mesh.support_capacity)
+    for vertices, count in zip(
+        np.asarray(support.branch_support_vertices[0]),
+        np.asarray(support.branch_vertex_count[0]),
+        strict=True,
+    ):
+        np.testing.assert_array_equal(vertices[0], np.zeros(2))
+        np.testing.assert_array_equal(vertices[count:], 0.0)
+
+
+def test_spline_chain_does_not_infer_a_saddle_from_crossing_chords():
+    mesh, signed_flux = _saddle_cell()
+
+    support = mesh.traced_clip(
+        signed_flux,
+        curve_evaluator=_saddle_level,
+        arc_tracer=_traced_level_arc,
+    )
+
+    assert not bool(support.saddle[0])
+    assert support.refused_cells() == 1
+    np.testing.assert_array_equal(support.saddle_vertex, 0.0)
+
+
+def test_spline_chain_emits_four_profile_owned_wedges():
+    mesh, signed_flux = _saddle_cell()
+
+    wedges = mesh.traced_saddle_wedges(
+        signed_flux,
+        saddle_vertex=jnp.zeros(2),
+        core_reference=jnp.ones(2),
+        curve_evaluator=_saddle_level,
+        arc_tracer=_traced_level_arc,
+    )
+    density = jnp.asarray([[2.0, 0.0, 0.0, 0.0]])
+    gradient = jnp.zeros((1, 4, 2), dtype=jnp.float64)
+    current, _first = wedges.linear_current_moments(density, gradient)
+
+    assert bool(wedges.saddle[0])
+    assert np.all(np.asarray(wedges.vertex_count[0]) > mesh.support_capacity)
+    np.testing.assert_allclose(wedges.area[0], np.ones(4), rtol=0.0, atol=2.0e-14)
+    np.testing.assert_allclose(current, [[2.0, 0.0, 0.0, 0.0]], atol=2.0e-14)
+    np.testing.assert_array_equal(wedges.saddle_vertex[0], np.zeros(2))
+    for vertices, count in zip(
+        np.asarray(wedges.support_vertices[0]),
+        np.asarray(wedges.vertex_count[0]),
+        strict=True,
+    ):
+        np.testing.assert_array_equal(vertices[0], np.zeros(2))
+        np.testing.assert_array_equal(vertices[count:], 0.0)
 
 
 class _FlatField:

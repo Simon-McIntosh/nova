@@ -1044,7 +1044,10 @@ def _traced_clip(
     packed_leaving = _pack_traced_values(
         crossing_edge & start_inside, unique_crossing, width
     )
-    saddle = (crossing_count == 4) & jnp.asarray(curve_evaluator is None)
+    supplied_saddle = saddle_vertex is not None
+    saddle = (crossing_count == 4) & jnp.asarray(
+        curve_evaluator is None or supplied_saddle
+    )
     first_line = crossing[:, 2] - crossing[:, 0]
     second_line = crossing[:, 3] - crossing[:, 1]
     denominator = _cross_2d(first_line, second_line)
@@ -1270,6 +1273,71 @@ def _traced_clip(
         branch_counts.append(counts)
     branch_support = jnp.stack(branch_vertices, axis=1)
     branch_vertex_count = jnp.stack(branch_counts, axis=1)
+
+    if curve_evaluator is not None:
+        expanded_branches = []
+        expanded_branch_counts = []
+        branch_overflow = jnp.zeros(cell_count, dtype=bool)
+        half_arc_slot = jnp.arange(0, _SPLINE_BOUNDARY_SEGMENTS + 1, 2)
+        second_half_slot = half_arc_slot[1:-1]
+        middle_slot = jnp.arange(2, chord_capacity)
+
+        for branch in range(2):
+            branch_polygon = branch_support[:, branch]
+            branch_count = branch_vertex_count[:, branch]
+            last_slot = jnp.maximum(branch_count - 1, 0)
+            previous_slot = jnp.maximum(branch_count - 2, 0)
+            first_root = branch_polygon[:, 1]
+            last_root = jnp.take_along_axis(
+                branch_polygon, last_slot[:, None, None], axis=1
+            )[:, 0]
+            first_inside = branch_polygon[:, 2]
+            last_inside = jnp.take_along_axis(
+                branch_polygon, previous_slot[:, None, None], axis=1
+            )[:, 0]
+            first_half = tracer(
+                saddle_point,
+                first_root,
+                curve_evaluator,
+                first_inside,
+            )[:, half_arc_slot]
+            second_half = tracer(
+                last_root,
+                saddle_point,
+                curve_evaluator,
+                last_inside,
+            )[:, second_half_slot]
+            middle = branch_polygon[:, middle_slot]
+            expanded_candidate = jnp.concatenate(
+                (first_half, middle, second_half), axis=1
+            )
+            expanded_valid = jnp.concatenate(
+                (
+                    jnp.broadcast_to(
+                        saddle[:, None], (cell_count, first_half.shape[1])
+                    ),
+                    saddle[:, None] & (middle_slot[None, :] < branch_count[:, None]),
+                    jnp.broadcast_to(
+                        saddle[:, None], (cell_count, second_half.shape[1])
+                    ),
+                ),
+                axis=1,
+            )
+            expanded_count = jnp.sum(expanded_valid, axis=1)
+            branch_overflow = branch_overflow | (expanded_count > support_capacity)
+            expanded_support, expanded_count = _pack_traced_vertices(
+                expanded_candidate, expanded_valid, support_capacity
+            )
+            expanded_branches.append(
+                jnp.where(saddle[:, None, None], expanded_support, branch_polygon)
+            )
+            expanded_branch_counts.append(
+                jnp.where(saddle, expanded_count, branch_count)
+            )
+
+        branch_support = jnp.stack(expanded_branches, axis=1)
+        branch_vertex_count = jnp.stack(expanded_branch_counts, axis=1)
+        overflow = overflow | branch_overflow
 
     full_area, _full_first, _full_second = _traced_polygon_moments(
         cell_start_point, count, centre
@@ -1855,6 +1923,8 @@ class AtomicCellMesh:
         saddle_vertex,
         core_reference,
         participating_cell=None,
+        curve_evaluator=None,
+        arc_tracer: Callable | None = None,
         edge_root_fraction=None,
         edge_root_count=None,
         edge_root_positive_after=None,
@@ -1878,6 +1948,10 @@ class AtomicCellMesh:
                 raise ValueError(
                     "explicit saddle roots do not accept a separate participation mask"
                 )
+            if curve_evaluator is not None or arc_tracer is not None:
+                raise ValueError(
+                    "explicit saddle roots do not accept a separate spline tracer"
+                )
             return _traced_saddle_wedges_from_edge_roots(
                 self.node_coordinates,
                 self.cell_nodes,
@@ -1894,12 +1968,23 @@ class AtomicCellMesh:
         positive = self.traced_clip(
             signed_flux,
             saddle_vertex=saddle_vertex,
+            curve_evaluator=curve_evaluator,
             participating_cell=participating_cell,
+            arc_tracer=arc_tracer,
         )
+        if curve_evaluator is None:
+            negative_evaluator = None
+        else:
+
+            def negative_evaluator(points):
+                return -curve_evaluator(points)
+
         negative = self.traced_clip(
             -jnp.asarray(signed_flux),
             saddle_vertex=saddle_vertex,
+            curve_evaluator=negative_evaluator,
             participating_cell=participating_cell,
+            arc_tracer=arc_tracer,
         )
         return _ordered_saddle_wedges(positive, negative, core_reference)
 

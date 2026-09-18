@@ -645,13 +645,23 @@ def contour_levels(
     rather than crowding the core. When a boundary value is given it replaces
     the nearest level, which keeps the count fixed while guaranteeing the
     separatrix is one of the drawn lines.
+
+    When BOTH the axis and the boundary flux are named, the levels span the
+    plasma range between them and the map's own extremes are not consulted.
+    The two named fluxes carry no fixed order -- a solution's axis flux is the
+    high end under one polarity and the low end under the other -- so the pair
+    is sorted, and a map whose extremes reach outside the plasma (coil-adjacent
+    flux is the usual case) no longer stretches the band to include it.
     """
     values = np.asarray(flux, dtype=float)
-    finite = values[np.isfinite(values)]
-    if finite.size == 0:
-        raise ValueError("the flux map carries no finite value")
-    low = float(np.min(finite)) if axis is None else float(axis)
-    high = float(np.max(finite))
+    if axis is not None and boundary is not None:
+        low, high = sorted((float(axis), float(boundary)))
+    else:
+        finite = values[np.isfinite(values)]
+        if finite.size == 0:
+            raise ValueError("the flux map carries no finite value")
+        low = float(np.min(finite)) if axis is None else float(axis)
+        high = float(np.max(finite))
     if low > high:
         low, high = high, low
     levels = np.linspace(low, high, int(count))

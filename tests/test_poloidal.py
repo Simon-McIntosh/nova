@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 from nova.equilibrium.wall_mask import material_unit, vessel_unit
 from nova.media.poloidal import (
+    contour_levels,
     draw_nulls,
     draw_separatrix_branches,
     draw_wall,
@@ -131,6 +132,31 @@ def test_separatrix_branches_skip_a_pad_that_lost_its_mask():
     assert tally == {"closed_drawn": 0, "open_drawn": 0}
     assert len(axes.lines) == 0
     plt.close(figure)
+
+
+def test_contour_levels_span_the_named_plasma_range_not_the_map_extremes():
+    """Naming both fluxes pins the band to them, whatever order they arrive.
+
+    A map carrying coil-adjacent flux reaches past the plasma on its own, and a
+    solve whose axis flux is the high end presents the pair reversed. Either
+    way the band is the plasma range, so the drawn lines stay on flux the
+    plasma occupies.
+    """
+    radius = np.linspace(0.5, 1.5, 9)
+    height = np.linspace(-0.5, 0.5, 9)
+    axis_flux, boundary_flux = 0.35, -0.12
+    values = np.where(
+        np.hypot(radius[None, :] - 1.0, height[:, None]) < 0.2,
+        axis_flux,
+        np.maximum(boundary_flux - 1.0, -4.0),
+    )
+
+    levels = contour_levels(values, 6, boundary=boundary_flux, axis=axis_flux)
+
+    assert levels.min() == boundary_flux
+    assert levels.max() == axis_flux
+    assert np.all(levels >= boundary_flux)
+    assert np.all(levels <= axis_flux)
 
 
 def test_separatrix_branches_apply_both_colours_on_one_set():

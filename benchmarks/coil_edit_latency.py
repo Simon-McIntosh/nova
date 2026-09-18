@@ -767,13 +767,19 @@ def _mechanism_of(row: dict[str, Any]) -> str:
 
 
 def _branches_of(profile: Any, state: Any, raster_flux: Any) -> dict[str, Any] | None:
-    """Assemble the closed lobe and its legs from the receiver-grid field.
+    """Assemble the closed lobe and its legs from the solved lattice field.
 
-    The raw receiver-grid level set is unsplit and unbounded: it starts inside
-    the centre column and leaves the raster at the top and bottom, so drawing
-    it as a boundary is what sprays coil-adjacent flux through the column.
-    Assembling the SAME field at the boundary flux splits it at the polished
-    saddle and keeps the axis-enclosing lobe as one cycle.
+    The field assembled is the solution's own lattice spline, whose cells the
+    contour arcs are traced on, and not the receiver raster: the raster is a
+    resampled image on a coarser fixed grid, and a level bracket it resolves
+    too coarsely yields no axis-enclosing cycle at all, so a raster would
+    report an empty boundary where the solved field has one.
+
+    The raw level set of either grid is unsplit and unbounded: it starts
+    inside the centre column and leaves the grid at the top and bottom, so
+    drawing it as a boundary is what sprays coil-adjacent flux through the
+    column. Assembling the solved field at the boundary flux splits it at the
+    polished saddle and keeps the axis-enclosing lobe as one cycle.
     """
     if raster_flux is None:
         return None
@@ -781,11 +787,15 @@ def _branches_of(profile: Any, state: Any, raster_flux: Any) -> dict[str, Any] |
         _masks, topology = profile.operator.read(state)
     except NoQualifiedAxisError:
         return None
+    lattice = profile.lattice
+    values = np.asarray(state[: lattice.node_count], dtype=float).reshape(
+        tuple(int(value) for value in np.asarray(lattice.shape))
+    )
     branches = jax.device_get(
         assemble_separatrix_branches(
-            jnp.asarray(_grid_field(raster_flux.psi, raster_flux.shape)),
-            jnp.asarray(np.asarray(raster_flux.radius, dtype=float)),
-            jnp.asarray(np.asarray(raster_flux.height, dtype=float)),
+            jnp.asarray(values.T),
+            jnp.asarray(np.asarray(lattice.radius, dtype=float)),
+            jnp.asarray(np.asarray(lattice.height, dtype=float)),
             jnp.asarray(topology.boundary_flux),
             jnp.asarray(np.asarray(topology.axis, dtype=float)),
         )

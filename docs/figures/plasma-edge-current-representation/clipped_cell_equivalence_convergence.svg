@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 610" role="img" aria-labelledby="title description">
+<title id="title">Clipped-cell equivalence convergence</title>
+<desc id="description">Worst relative disagreement over three cut positions for straight and curved supports at near and far targets.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<g font-family="system-ui, sans-serif" fill="#222">
+<text x="520" y="26" text-anchor="middle" font-size="17">Clipped fixed-cell moments vs refined low-order plasma elements</text>
+<rect x="78" y="60" width="290" height="205" fill="none" stroke="#777"/>
+<text x="223.0" y="48" text-anchor="middle" font-size="13">straight: psi</text>
+<polyline points="368.00,88.93 268.89,88.98 170.28,89.02 78.00,89.04" fill="none" stroke="#1769aa" stroke-width="1.8"/>
+<circle cx="368.00" cy="88.93" r="3" fill="#1769aa"/>
+<circle cx="268.89" cy="88.98" r="3" fill="#1769aa"/>
+<circle cx="170.28" cy="89.02" r="3" fill="#1769aa"/>
+<circle cx="78.00" cy="89.04" r="3" fill="#1769aa"/>
+<text x="90" y="81" font-size="10" fill="#1769aa">near, worst position</text>
+<polyline points="368.00,234.60 268.89,235.54 170.28,235.92 78.00,236.07" fill="none" stroke="#c44e52" stroke-width="1.8"/>
+<circle cx="368.00" cy="234.60" r="3" fill="#c44e52"/>
+<circle cx="268.89" cy="235.54" r="3" fill="#c44e52"/>
+<circle cx="170.28" cy="235.92" r="3" fill="#c44e52"/>
+<circle cx="78.00" cy="236.07" r="3" fill="#c44e52"/>
+<text x="90" y="97" font-size="10" fill="#c44e52">far, worst position</text>
+<text x="28" y="162.5" text-anchor="middle" font-size="11" transform="rotate(-90 28 162.5)">relative L2 disagreement</text>
+<rect x="416" y="60" width="290" height="205" fill="none" stroke="#777"/>
+<text x="561.0" y="48" text-anchor="middle" font-size="13">straight: B_R</text>
+<polyline points="706.00,79.84 606.89,79.89 508.28,79.92 416.00,79.93" fill="none" stroke="#1769aa" stroke-width="1.8"/>
+<circle cx="706.00" cy="79.84" r="3" fill="#1769aa"/>
+<circle cx="606.89" cy="79.89" r="3" fill="#1769aa"/>
+<circle cx="508.28" cy="79.92" r="3" fill="#1769aa"/>
+<circle cx="416.00" cy="79.93" r="3" fill="#1769aa"/>
+<text x="428" y="81" font-size="10" fill="#1769aa">near, worst position</text>
+<polyline points="706.00,243.33 606.89,244.48 508.28,244.97 416.00,245.16" fill="none" stroke="#c44e52" stroke-width="1.8"/>
+<circle cx="706.00" cy="243.33" r="3" fill="#c44e52"/>
+<circle cx="606.89" cy="244.48" r="3" fill="#c44e52"/>
+<circle cx="508.28" cy="244.97" r="3" fill="#c44e52"/>
+<circle cx="416.00" cy="245.16" r="3" fill="#c44e52"/>
+<text x="428" y="97" font-size="10" fill="#c44e52">far, worst position</text>
+<rect x="754" y="60" width="290" height="205" fill="none" stroke="#777"/>
+<text x="899.0" y="48" text-anchor="middle" font-size="13">straight: B_Z</text>
+<polyline points="1044.00,86.75 944.89,87.06 846.28,87.15 754.00,87.20" fill="none" stroke="#1769aa" stroke-width="1.8"/>
+<circle cx="1044.00" cy="86.75" r="3" fill="#1769aa"/>
+<circle cx="944.89" cy="87.06" r="3" fill="#1769aa"/>
+<circle cx="846.28" cy="87.15" r="3" fill="#1769aa"/>
+<circle cx="754.00" cy="87.20" r="3" fill="#1769aa"/>
+<text x="766" y="81" font-size="10" fill="#1769aa">near, worst position</text>
+<polyline points="1044.00,238.25 944.89,238.06 846.28,237.99 754.00,237.97" fill="none" stroke="#c44e52" stroke-width="1.8"/>
+<circle cx="1044.00" cy="238.25" r="3" fill="#c44e52"/>
+<circle cx="944.89" cy="238.06" r="3" fill="#c44e52"/>
+<circle cx="846.28" cy="237.99" r="3" fill="#c44e52"/>
+<circle cx="754.00" cy="237.97" r="3" fill="#c44e52"/>
+<text x="766" y="97" font-size="10" fill="#c44e52">far, worst position</text>
+<rect x="78" y="343" width="290" height="205" fill="none" stroke="#777"/>
+<text x="223.0" y="331" text-anchor="middle" font-size="13">curved: psi</text>
+<polyline points="368.00,373.53 265.46,373.58 167.75,373.61 78.00,373.62" fill="none" stroke="#1769aa" stroke-width="1.8"/>
+<circle cx="368.00" cy="373.53" r="3" fill="#1769aa"/>
+<circle cx="265.46" cy="373.58" r="3" fill="#1769aa"/>
+<circle cx="167.75" cy="373.61" r="3" fill="#1769aa"/>
+<circle cx="78.00" cy="373.62" r="3" fill="#1769aa"/>
+<text x="90" y="364" font-size="10" fill="#1769aa">near, worst position</text>
+<polyline points="368.00,513.26 265.46,515.95 167.75,517.04 78.00,517.47" fill="none" stroke="#c44e52" stroke-width="1.8"/>
+<circle cx="368.00" cy="513.26" r="3" fill="#c44e52"/>
+<circle cx="265.46" cy="515.95" r="3" fill="#c44e52"/>
+<circle cx="167.75" cy="517.04" r="3" fill="#c44e52"/>
+<circle cx="78.00" cy="517.47" r="3" fill="#c44e52"/>
+<text x="90" y="380" font-size="10" fill="#c44e52">far, worst position</text>
+<text x="28" y="445.5" text-anchor="middle" font-size="11" transform="rotate(-90 28 445.5)">relative L2 disagreement</text>
+<text x="223.0" y="582" text-anchor="middle" font-size="11">characteristic element size [m]</text>
+<rect x="416" y="343" width="290" height="205" fill="none" stroke="#777"/>
+<text x="561.0" y="331" text-anchor="middle" font-size="13">curved: B_R</text>
+<polyline points="706.00,367.13 603.46,367.30 505.75,367.27 416.00,367.27" fill="none" stroke="#1769aa" stroke-width="1.8"/>
+<circle cx="706.00" cy="367.13" r="3" fill="#1769aa"/>
+<circle cx="603.46" cy="367.30" r="3" fill="#1769aa"/>
+<circle cx="505.75" cy="367.27" r="3" fill="#1769aa"/>
+<circle cx="416.00" cy="367.27" r="3" fill="#1769aa"/>
+<text x="428" y="364" font-size="10" fill="#1769aa">near, worst position</text>
+<polyline points="706.00,523.47 603.46,523.73 505.75,523.83 416.00,523.87" fill="none" stroke="#c44e52" stroke-width="1.8"/>
+<circle cx="706.00" cy="523.47" r="3" fill="#c44e52"/>
+<circle cx="603.46" cy="523.73" r="3" fill="#c44e52"/>
+<circle cx="505.75" cy="523.83" r="3" fill="#c44e52"/>
+<circle cx="416.00" cy="523.87" r="3" fill="#c44e52"/>
+<text x="428" y="380" font-size="10" fill="#c44e52">far, worst position</text>
+<text x="561.0" y="582" text-anchor="middle" font-size="11">characteristic element size [m]</text>
+<rect x="754" y="343" width="290" height="205" fill="none" stroke="#777"/>
+<text x="899.0" y="331" text-anchor="middle" font-size="13">curved: B_Z</text>
+<polyline points="1044.00,364.41 941.46,364.34 843.75,364.34 754.00,364.33" fill="none" stroke="#1769aa" stroke-width="1.8"/>
+<circle cx="1044.00" cy="364.41" r="3" fill="#1769aa"/>
+<circle cx="941.46" cy="364.34" r="3" fill="#1769aa"/>
+<circle cx="843.75" cy="364.34" r="3" fill="#1769aa"/>
+<circle cx="754.00" cy="364.33" r="3" fill="#1769aa"/>
+<text x="766" y="364" font-size="10" fill="#1769aa">near, worst position</text>
+<polyline points="1044.00,526.67 941.46,526.40 843.75,526.29 754.00,526.25" fill="none" stroke="#c44e52" stroke-width="1.8"/>
+<circle cx="1044.00" cy="526.67" r="3" fill="#c44e52"/>
+<circle cx="941.46" cy="526.40" r="3" fill="#c44e52"/>
+<circle cx="843.75" cy="526.29" r="3" fill="#c44e52"/>
+<circle cx="754.00" cy="526.25" r="3" fill="#c44e52"/>
+<text x="766" y="380" font-size="10" fill="#c44e52">far, worst position</text>
+<text x="899.0" y="582" text-anchor="middle" font-size="11">characteristic element size [m]</text>
+</g>
+</svg>

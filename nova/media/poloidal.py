@@ -203,6 +203,109 @@ def draw_boundary(
     )
 
 
+def _sample_cubic_controls(
+    controls: np.ndarray,
+    valid: np.ndarray,
+    samples_per_segment: int = 8,
+) -> np.ndarray:
+    """Sample the active cubic segments of one branch into an ordered polyline.
+
+    The branch controls arrive fixed-capacity: an ordered active prefix and a
+    zeroed padded tail. Padding is skipped on BOTH facts, because either alone
+    can be wrong -- the mask is the authority on which slots are real, and an
+    all-zero control set is the pad the assembler writes, which would draw as a
+    spurious point at the origin if a caller handed over a mask that had lost
+    its tail.
+    """
+    cubics = np.asarray(controls, dtype=float)
+    active = np.asarray(valid, dtype=bool)
+    if cubics.ndim != 3 or cubics.shape[-2:] != (4, 2):
+        raise ValueError("controls must be shaped (capacity, 4, 2)")
+    if cubics.shape[0] != active.size:
+        raise ValueError("controls and validity mask must span the same capacity")
+    active = active & ~np.all(cubics == 0.0, axis=(1, 2))
+    selected = cubics[active]
+    if selected.shape[0] == 0:
+        return np.empty((0, 2), dtype=float)
+    parameter = np.linspace(0.0, 1.0, int(samples_per_segment), endpoint=False)
+    one_minus = 1.0 - parameter
+    weights = np.column_stack(
+        (
+            one_minus**3,
+            3.0 * one_minus**2 * parameter,
+            3.0 * one_minus * parameter**2,
+            parameter**3,
+        )
+    )
+    sampled = np.einsum("tc,scd->std", weights, selected).reshape(-1, 2)
+    return np.vstack((sampled, selected[-1, -1]))
+
+
+def draw_separatrix_branches(
+    axes: matplotlib.axes.Axes,
+    branches: dict[str, np.ndarray],
+    style: InkStyle = DEFAULT_INK,
+    samples_per_segment: int = 8,
+    **kwargs,
+) -> dict[str, int]:
+    """Draw one assembled level set as its closed lobe and open legs.
+
+    ``branches`` is the mapping returned by
+    :func:`nova.equilibrium.separatrix_branches.assemble_separatrix_branches`.
+    The axis-enclosing lobe in ``closed_*`` is the last closed flux surface and
+    is drawn solid. A leg in ``open_*`` runs from the saddle to wherever the
+    map ends and is not a loop, so it is dashed and never closed: joining a leg
+    to its neighbour would draw a chord across the private flux region that no
+    field line follows.
+
+    This is the painter for a level set that the assembler has already SPLIT
+    at its saddle. The raw contour a receiver grid yields is neither closed nor
+    bounded by the vessel -- unmasked and unsplit it starts inside the centre
+    column and leaves the grid at the top and bottom, and drawing it as a
+    boundary is what puts a spray of coil-adjacent flux through the column.
+
+    Returns the drawn branch counts, so a caller can record an empty set
+    rather than present it as a boundary.
+    """
+    tally = {"closed_drawn": 0, "open_drawn": 0}
+    closed = _sample_cubic_controls(
+        branches["closed_controls_rz"],
+        branches["closed_valid"],
+        samples_per_segment,
+    )
+    if closed.shape[0] >= 2:
+        tally["closed_drawn"] = 1
+        axes.plot(
+            closed[:, 0],
+            closed[:, 1],
+            color=kwargs.pop("closed_color", style.separatrix_color),
+            linewidth=kwargs.pop("closed_linewidth", style.separatrix_linewidth),
+            linestyle="solid",
+            zorder=kwargs.pop("zorder", style.zorder_separatrix),
+            **kwargs,
+        )
+    open_controls = np.asarray(branches["open_controls_rz"], dtype=float)
+    open_valid = np.asarray(branches["open_valid"], dtype=bool)
+    open_branch_valid = np.asarray(branches["open_branch_valid"], dtype=bool)
+    for index in np.flatnonzero(open_branch_valid):
+        leg = _sample_cubic_controls(
+            open_controls[index], open_valid[index], samples_per_segment
+        )
+        if leg.shape[0] < 2:
+            continue
+        tally["open_drawn"] += 1
+        axes.plot(
+            leg[:, 0],
+            leg[:, 1],
+            color=kwargs.pop("open_color", style.separatrix_color),
+            linewidth=kwargs.pop("open_linewidth", 1.5 * style.separatrix_linewidth),
+            linestyle="--",
+            zorder=kwargs.pop("zorder", style.zorder_separatrix),
+            **kwargs,
+        )
+    return tally
+
+
 def draw_surfaces(
     axes: matplotlib.axes.Axes,
     surfaces: Iterable[np.ndarray],
@@ -321,6 +424,7 @@ def draw_nulls(
     strike_points: np.ndarray | None = None,
     style: InkStyle = DEFAULT_INK,
     contain=None,
+    other_x_points: np.ndarray | None = None,
 ) -> dict[str, int]:
     """Mark the O-point, the X-points and the strike points.
 
@@ -349,6 +453,12 @@ def draw_nulls(
     contrast is what makes the x-point filter safe: those sit 17 to 32 mm
     outside with a maximum of 292 mm, which no boundary tolerance explains.
 
+    The remaining qualified nulls of a set arrive in ``other_x_points`` and are
+    drawn hollow, deliberately WITHOUT the containment filter. A diverted MAST
+    frame carries one saddle inside the vessel and one above it near Z=+1.2 m,
+    so filtering the second makes the set read as having a single saddle; a
+    reader has to see both, distinguished by fill rather than by absence.
+
     Subdivision does not change this. The operator's wall is 36 nodes at
     ``nwall=1`` and 72 at ``nwall=2`` over the IDENTICAL R span, so a finer
     setting densifies sampling along the same outline without adding
@@ -361,6 +471,7 @@ def draw_nulls(
         "x_points_drawn": 0,
         "x_points_dropped_outside_wall": 0,
         "strike_points_drawn": 0,
+        "other_x_points_drawn": 0,
     }
 
     def contained(points: np.ndarray) -> np.ndarray:
@@ -430,6 +541,28 @@ def draw_nulls(
             linestyle="none",
             zorder=style.zorder_markers,
         )
+    if other_x_points is not None:
+        # The remaining qualified nulls of a null set are drawn hollow and are
+        # NOT containment-filtered. A diverted MAST frame carries one saddle
+        # inside the vessel and one at Z near +1.2 m outside it, and a panel
+        # that shows only the inside one reads as if the set had a single
+        # saddle -- the reader has to see both, distinguished by fill rather
+        # than by absence.
+        other = np.atleast_2d(np.asarray(other_x_points, dtype=float))
+        other = other[np.all(np.isfinite(other[:, :2]), axis=1)]
+        if other.shape[0]:
+            tally["other_x_points_drawn"] += int(other.shape[0])
+            axes.plot(
+                other[:, 0],
+                other[:, 1],
+                marker=style.xpoint_marker,
+                markersize=style.xpoint_markersize,
+                markeredgewidth=style.xpoint_markeredgewidth,
+                color=style.xpoint_color,
+                markerfacecolor="none",
+                linestyle="none",
+                zorder=style.zorder_markers,
+            )
     return tally
 
 

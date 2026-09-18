@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T09:56:41",
+  "updated": "2026-09-18T09:56:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4555,6 +4555,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-cank-refusedrow-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-18"
       },
       {
         "id": "s19c-cank-shafranov-c",
@@ -186922,6 +186931,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2760
+    "_version": 2761
   }
 }

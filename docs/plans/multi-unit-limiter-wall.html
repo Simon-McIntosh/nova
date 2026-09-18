@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-impl" content="0.92">
 <meta name="plan-modified" content="2026-09-18">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;}">
 </head>
@@ -198,7 +198,10 @@
     <div class="r-comment-body"><p>Stopped on a coordinator decision after three H200 attempts with no frame receipt, correctly: (1) the stacked vmap batched-solve route the committed width-five artifact was measured with is refused by the current tree (TracerArrayConversionError from ForwardProfile.solve argument_layout when the target current is a vmap tracer), a regression against the batched contract recorded on the plan; (2) per-frame compiled programs accumulate host memory in one process (129 GiB at the second frame's compile, OOM at 128 GiB) and os.fork after the CUDA context hangs silently (job 1273188), so isolation must re-exec; the clean fix, a single-member build in benchmarks/strict_exit_incidence.py, is outside this node's scope and becomes the successor node. Driver commits 4404e68a, 6995aa62, 02462d3b compile and stay on the worktree</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260917T183747545705-mulw-diiid-identity-single-member-build" data-who="reckon-ship" data-when="2026-09-18T14:28:18.434Z">
-    <div class="r-comment-body"><p>DIII-D single-member gate-frame identity (merged into main): one frame built without its siblings from the same row builder, member 1 bit-equal to the whole-set build&#x27;s member 1 (9 passed); five frames measured in one H200 job (1273398, 4h21m44s, exit 0) after a first allocation lost frame 0 to a CUDA graph RESOURCE_EXHAUSTED at compile: identity_row_count 1173 on every frame, no frame converged (terminal residuals 0.04 to 0.85, strict exit fired on all five), per-frame compile 2869 to 2937 s against solve walls of 0.8 to 43 s. Review 82/100 with three findings queued as a followup: the per-frame solve list lives only in uncommitted exchange records, the record carries no contour panel because terminal states are persisted as digests rather than arrays, and identity_row_count names the state element count rather than a compared row count</p></div>
+    <div class="r-comment-body"><p>DIII-D single-member gate-frame identity (merged into main): one frame built without its siblings from the same row builder, member 1 bit-equal to the whole-set build's member 1 (9 passed); five frames measured in one H200 job (1273398, 4h21m44s, exit 0) after a first allocation lost frame 0 to a CUDA graph RESOURCE_EXHAUSTED at compile: identity_row_count 1173 on every frame, no frame converged (terminal residuals 0.04 to 0.85, strict exit fired on all five), per-frame compile 2869 to 2937 s against solve walls of 0.8 to 43 s. Review 82/100 with three findings queued as a followup: the per-frame solve list lives only in uncommitted exchange records, the record carries no contour panel because terminal states are persisted as digests rather than arrays, and identity_row_count names the state element count rather than a compared row count</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260918T142913790840-review-of-mulw-diiid-identity-single-member-build" data-who="reckon-ship" data-when="2026-09-18T15:35:55.968Z">
+    <div class="r-comment-body"><p>Independent review of mulw-diiid-identity-single-member-build stored at the fence path, total 82, three findings queued as a followup</p></div>
 </div>
 </section>
 </main>

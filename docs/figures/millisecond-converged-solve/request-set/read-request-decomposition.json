@@ -1,0 +1,48 @@
+{
+ "schema": "nova.read-request-decomposition-figure",
+ "sources": {
+  "parents": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/request-set/decomposition/parents-solve.json",
+  "narrative": "read-body-multiplication.md"
+ },
+ "chain_depth_definition": "number of caller edges from the computation carrying the read's marker up to the entry computation, i.e. the parent chain's segment count",
+ "moment_copies_by_chain_depth": {
+  "2": 4,
+  "3": 5,
+  "4": 7,
+  "5": 9,
+  "6": 13,
+  "7": 10,
+  "8": 25,
+  "9": 15,
+  "10": 17,
+  "11": 11,
+  "12": 3,
+  "13": 1
+ },
+ "topology_copies_by_chain_depth": {
+  "1": 1,
+  "2": 1,
+  "3": 3,
+  "4": 4,
+  "5": 6,
+  "6": 8,
+  "7": 12,
+  "8": 15,
+  "9": 8,
+  "10": 9,
+  "11": 6,
+  "12": 1
+ },
+ "moment_depth_mode": 8,
+ "topology_depth_mode": 8,
+ "moment_total": 120,
+ "topology_total": 74,
+ "topology_flavours": {
+  "primal jit(read_qualification)": 39,
+  "jvp twin": 25,
+  "transpose(jvp) twin": 3,
+  "second consumer (polish)": 7
+ },
+ "topology_flavour_source": "read-body-multiplication.md, the decomposition receipt's own table",
+ "reading": "the count is a fan of distinct enclosing compiled computations, one copy each, not a call site count; the moment histogram's mode is depth 8 and the topology read carries 28 derivative twins"
+}

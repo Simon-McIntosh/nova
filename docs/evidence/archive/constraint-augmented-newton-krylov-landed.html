@@ -424,6 +424,26 @@
     against the previous receipts is twelve lines, all of them this field, and the target, the observed combination, the gap, the refusal
     reason, the figure provenance and the panel images are unchanged. A committed test pins the rule on the replay path with the seeded field
     restored, and beside it a positive control in which an imposed row keeps the combination its emission carries.</p>
+    <p><strong>The replay's row-set guard, and the tests that pin it.</strong> The receipts are republished by a replay that refuses a
+    banked lane log whose row set differs from the receipt the directory holds, before it writes anything; a later change that dropped that
+    guard would rewrite the receipt from a partial row set rather than fail. The guard previously had no committed caller, so two tests now
+    exercise both branches against the committed receipts: a truncated log raises <code>ValueError</code> with every file compared byte for
+    byte across the refusal, so the refusal is shown to write nothing, and a log matching the receipt regenerates all six rows with the
+    terminal combination still null on each refused row, which shows the refusal is the row-set check rather than a mechanism that never
+    writes. The committed receipts were corroborated as exactly the banked replay output: replaying the banked log of job 1272973 into a
+    scratch copy is byte-identical in every JSON file — the only difference is the six panels, which the replay does not re-render but
+    carries forward — with all six rows <code>refused</code>, <code>converged: false</code> and a null terminal combination (21978/35 keeps
+    observed 0.3126 against a target of 0.4613). Gate: <strong>5 passed</strong> in one fresh <code>all_debug</code> job over
+    <code>tests/test_shafranov_pair_receipt.py</code>.</p>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov/refused-rows-terminal-and-replay-guard.png"
+           alt="Left: per row, the combination the extracted profiles imply against the combination the external magnetics imply, joined by the gap. Right: the replay's row-set guard as two branches.">
+      <figcaption>The six bank rows and the replay that republishes them. Left: each row's constraint target (the combination its extracted
+      profiles imply) against the row's own observed reading (the combination the external magnetics imply), joined by the gap the row exists
+      to close — between &minus;0.121 and &minus;0.166 across the six, i.e. the magnetics imply a lower value throughout. Every row is
+      refused, so no row carries a terminal combination: the field is null, not the target. Right: the replay's row-set guard, whose refusal
+      and admission branches the two committed tests exercise.</figcaption>
+    </figure>
     <p><strong>Decision:</strong> the row is delivered and behaves as specified — it converges to the imposed amplitude on a profile whose
     gradient is a polynomial, and it refuses, with the reason recorded, where the amplitude is not a free unknown. What the bank measurement
     establishes is the precondition for the measurement deliverable D asks for: the current bank rows cannot be measured with this row at

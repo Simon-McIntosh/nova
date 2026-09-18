@@ -13,11 +13,16 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import shutil
+
+import pytest
 
 from benchmarks.shafranov_pair_receipt import (
+    EMISSION_PREFIX,
     ROW_FIELDS,
     _emission_entry,
     _terminal_combination,
+    regenerate,
 )
 
 #: The committed bank receipts, which are what a reader of the plan sees.
@@ -43,6 +48,24 @@ def _refused_identities(receipt: dict) -> list[str]:
         for entry in receipt["rows_receipt"]
         if entry["status"] == "refused"
     ]
+
+
+def _committed_identities() -> list[str]:
+    receipt = json.loads((DIRECTORY / "receipt.json").read_text(encoding="utf-8"))
+    return [entry["identity"] for entry in receipt["rows_receipt"]]
+
+
+def _emissions_log(path: Path, identities: list[str]) -> Path:
+    """Write the row emissions a banked lane log carries for ``identities``."""
+    path.write_text(
+        "\n".join(
+            EMISSION_PREFIX + json.dumps(_banked_emission(identity), sort_keys=True)
+            for identity in identities
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return path
 
 
 def test_a_refused_row_replays_without_the_target_as_its_terminal_combination():
@@ -115,3 +138,62 @@ def test_every_committed_refused_row_states_a_null_terminal_combination():
             assert completed[field] == entry[field]
         assert completed["target_combination"] is not None
         assert completed["observed_combination_at_reference"] is not None
+
+
+def test_a_lane_log_that_drops_a_row_is_refused_before_anything_is_written(tmp_path):
+    """The replay's row-set guard fires, and the refusal is not silently partial.
+
+    A lane log holding fewer rows than the receipt names must be refused
+    outright: were the guard dropped, a truncated nine-row lane would rewrite
+    the receipt from a partial row set, so the guard is exercised here rather
+    than left to the absence of a caller.  The check is the write itself --
+    every committed file is compared byte for byte across the refusal.
+    """
+    directory = tmp_path / "shafranov"
+    shutil.copytree(DIRECTORY, directory)
+    identities = _committed_identities()
+    assert len(identities) == 6
+    emissions = _emissions_log(tmp_path / "truncated.log", identities[:-1])
+
+    before = {
+        path.name: path.read_bytes() for path in directory.iterdir() if path.is_file()
+    }
+
+    with pytest.raises(ValueError, match="different row set"):
+        regenerate(emissions=emissions, directory=directory)
+
+    after = {
+        path.name: path.read_bytes() for path in directory.iterdir() if path.is_file()
+    }
+    assert after == before
+
+
+def test_a_lane_log_matching_the_receipt_regenerates_the_null_terminal(tmp_path):
+    """The positive control for that guard: a replay it admits must write.
+
+    The same call with the full row set replays every row, so the refusal
+    above is the row-set check and not a mechanism that never writes.  Each
+    refused row still carries a null terminal combination after the replay.
+    """
+    directory = tmp_path / "shafranov"
+    shutil.copytree(DIRECTORY, directory)
+    identities = _committed_identities()
+    emissions = _emissions_log(tmp_path / "complete.log", identities)
+
+    receipt = regenerate(emissions=emissions, directory=directory)
+
+    assert len(receipt["rows_receipt"]) == len(identities)
+    assert sorted(entry["identity"] for entry in receipt["rows_receipt"]) == sorted(
+        identities
+    )
+    for entry in receipt["rows_receipt"]:
+        assert entry["status"] == "refused"
+        assert entry["terminal_profile_combination"] is None
+        assert entry["target_combination"] is not None
+        written = json.loads(
+            (directory / f"row-{entry['identity'].replace('/', '-')}.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        assert written["terminal_profile_combination"] is None
+        assert written["figure"] is not None

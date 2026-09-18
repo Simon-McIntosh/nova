@@ -1,0 +1,193 @@
+{
+ "anchors": {
+  "declared_axis_flux": {
+   "dtype": "float64",
+   "present": true,
+   "shape": [],
+   "values": [
+    0.3139541104088807
+   ],
+   "where": "specialisation"
+  },
+  "declared_boundary_flux": {
+   "dtype": "float64",
+   "present": true,
+   "shape": [],
+   "values": [
+    -0.06830239871478015
+   ],
+   "where": "specialisation"
+  },
+  "declared_support": {
+   "dtype": "bool",
+   "present": true,
+   "shape": [
+    1089
+   ],
+   "true_count": 248,
+   "where": "specialisation"
+  }
+ },
+ "carrier_identity": "mast:21978:35:1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994:constant",
+ "converged": true,
+ "exception": null,
+ "flux_digest": "1a6899f0578cc4d8",
+ "geometry_digests": {
+  "axis": "d9c70309c4d3aca4",
+  "class_margin": "9e09211058c77fcd",
+  "flux": "a1e21674c54174c3",
+  "height": "3a66374813f2f90c",
+  "radius": "39edd644e2a70398",
+  "selected_x": "ee60466af6670819",
+  "typed_saddle_coordinates_m": "329cbf40fa0785f9",
+  "typed_saddles_inside_wall": "f46ba8694ca26200",
+  "wall": "a8294a08dee65e76"
+ },
+ "geometry_path": "arm-21978-35-mixed-constant.npz",
+ "hook_names": [],
+ "identity": "21978/35",
+ "partition": {
+  "structure_digest": "dca863866a4c328a",
+  "summary": {
+   "is_pytree": true,
+   "leaf_count": 73,
+   "leaf_dtypes": [
+    "bool",
+    "float64",
+    "int32",
+    "int64"
+   ],
+   "operator_type": "benchmarks.efit_forward_parity_slice.DeclaredAnchorOperator",
+   "pytree_repr": "PyTreeDef(CustomNode(DeclaredAnchorOperator[_OperatorPytreeAux(identity='0eef9f00a11a686853c0db35b739bdb86559cb8b7e94182f2713646db1d22c95:nova.equilibrium.source.ForwardSource:nova.equilibrium.source.DomainProfile:static:26cac655b5db3b16265cc61258b5978bba61ac5128433d56a5e2276c9836bcbc:static:63a971a903d4d797ac3bd51a933990ab0f1c07eeab2aff7765cbf9dca30f0d84:3dd47b0fdc5a070a7e82269d389fa97ab874b35865",
+   "tree_node_count": 87
+  },
+  "values_digest": "689612da6a6541af"
+ },
+ "profile_support": {
+  "digest": "5683f88ca97c076e",
+  "parts": {
+   "inside_material": "7406355ef5eb56a2",
+   "physical_node_number": "e706f97a7d7d60e5"
+  }
+ },
+ "resolved_defaults": {
+  "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+  "deviations": {},
+  "nova_version": "0.11.0.post4732+g7ee33926.d20260907",
+  "policy": {
+   "active_set_steps": 16,
+   "best_iterate_retention": true,
+   "cached_machine": true,
+   "compilation_cache": true,
+   "continuation": true,
+   "current_pin": true,
+   "exact_kernels": true,
+   "gmres_iterations": 30,
+   "kernel_tolerance": 1e-08,
+   "newton_steps": 10,
+   "own_mask_acceptance": true,
+   "qualification_tolerance": 1e-10,
+   "relaxation": 0.5,
+   "route": "newton_krylov",
+   "settled_exit": true,
+   "stagnation_stop": true,
+   "step_cap": 10.0,
+   "warmup": 0
+  }
+ },
+ "solve_class": "mixed",
+ "target_current": 801493.25,
+ "terminal_residual": 3.0996518101046146e-16,
+ "termination_reason": "converged",
+ "treatment": "constant",
+ "trip_trace": {
+  "active_set_cycle_damping_activations": {
+   "present": true,
+   "shape": [
+    16
+   ],
+   "size": 16,
+   "truncated": false,
+   "values": [
+    0,
+    0,
+    0,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1
+   ]
+  },
+  "active_set_iterations": {
+   "present": true,
+   "shape": [],
+   "size": 1,
+   "truncated": false,
+   "values": [
+    3
+   ]
+  },
+  "active_set_mask_differences": {
+   "present": true,
+   "shape": [
+    16
+   ],
+   "size": 16,
+   "truncated": false,
+   "values": [
+    48,
+    42,
+    0,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1
+   ]
+  },
+  "active_set_residuals": {
+   "last_finite": 3.0996518101046146e-16,
+   "present": true,
+   "shape": [
+    16
+   ],
+   "size": 16,
+   "truncated": false,
+   "values": [
+    0.006854576672723186,
+    3.0996518101046146e-16,
+    3.0996518101046146e-16,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN,
+    NaN
+   ]
+  }
+ }
+}

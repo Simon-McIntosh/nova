@@ -7,7 +7,12 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from nova.equilibrium.wall_mask import material_unit, vessel_unit
-from nova.media.poloidal import draw_nulls, draw_wall
+from nova.media.poloidal import (
+    contour_levels,
+    draw_nulls,
+    draw_separatrix_branches,
+    draw_wall,
+)
 from nova.media.sources.frame import MachineGeometry, inside_wall_units
 from nova.media.sources.plasma_mesh import clip_to_boundary
 
@@ -56,6 +61,142 @@ def test_machine_geometry_and_mesh_accept_the_unit_collection():
     )
     clipped = clip_to_boundary(cells, units)
     assert len(clipped) == 1
+
+
+def _padded_branch_set():
+    """One closed lobe, one leg, and a padded slot that must never be drawn."""
+    zero = np.zeros((4, 2))
+    closed = np.stack(
+        (
+            np.array([[0.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, 0.0]]),
+            np.array([[1.0, 0.0], [1.0, -1.0], [0.0, -1.0], [0.0, 0.0]]),
+            zero,
+            zero,
+        )
+    )
+    open_controls = np.stack(
+        (
+            np.stack(
+                (
+                    np.array([[0.0, 0.0], [0.2, -0.5], [0.4, -1.0], [0.5, -1.5]]),
+                    zero,
+                    zero,
+                )
+            ),
+            np.stack((zero, zero, zero)),
+        )
+    )
+    return {
+        "closed_controls_rz": closed,
+        "closed_valid": np.array([True, True, False, True]),
+        "open_controls_rz": open_controls,
+        "open_valid": np.array([[True, False, False], [False, False, False]]),
+        "open_branch_valid": np.array([True, False]),
+    }
+
+
+def test_separatrix_branches_draw_the_closed_lobe_and_dashed_legs():
+    """A padded branch set draws its lobe and its legs, and never the pad
+    slot that carries a cleared mask."""
+    figure, axes = plt.subplots()
+    tally = draw_separatrix_branches(axes, _padded_branch_set())
+
+    assert tally["closed_drawn"] == 1
+    assert tally["open_drawn"] == 1
+    assert len(axes.lines) == 2
+    lobe = axes.lines[0].get_xydata()
+    assert lobe.shape[0] == 2 * 8 + 1
+    np.testing.assert_allclose(lobe[0], lobe[-1])
+    assert axes.lines[0].get_linestyle() == "-"
+    assert axes.lines[1].get_linestyle() == "--"
+    leg = axes.lines[1].get_xydata()
+    assert leg.shape[0] == 1 * 8 + 1
+    assert not np.allclose(leg[0], leg[-1])
+    plt.close(figure)
+
+
+def test_separatrix_branches_skip_a_pad_that_lost_its_mask():
+    """An all-zero slot is padding even when the mask says yes."""
+    zero = np.zeros((2, 4, 2))
+    figure, axes = plt.subplots()
+    tally = draw_separatrix_branches(
+        axes,
+        {
+            "closed_controls_rz": zero,
+            "closed_valid": np.array([False, True]),
+            "open_controls_rz": zero,
+            "open_valid": np.zeros((2, 4), dtype=bool),
+            "open_branch_valid": np.array([False, False]),
+        },
+    )
+    assert tally == {"closed_drawn": 0, "open_drawn": 0}
+    assert len(axes.lines) == 0
+    plt.close(figure)
+
+
+def test_contour_levels_span_the_named_plasma_range_not_the_map_extremes():
+    """Naming both fluxes pins the band to them, whatever order they arrive.
+
+    A map carrying coil-adjacent flux reaches past the plasma on its own, and a
+    solve whose axis flux is the high end presents the pair reversed. Either
+    way the band is the plasma range, so the drawn lines stay on flux the
+    plasma occupies.
+    """
+    radius = np.linspace(0.5, 1.5, 9)
+    height = np.linspace(-0.5, 0.5, 9)
+    axis_flux, boundary_flux = 0.35, -0.12
+    values = np.where(
+        np.hypot(radius[None, :] - 1.0, height[:, None]) < 0.2,
+        axis_flux,
+        np.maximum(boundary_flux - 1.0, -4.0),
+    )
+
+    levels = contour_levels(values, 6, boundary=boundary_flux, axis=axis_flux)
+
+    assert levels.min() == boundary_flux
+    assert levels.max() == axis_flux
+    assert np.all(levels >= boundary_flux)
+    assert np.all(levels <= axis_flux)
+
+
+def test_separatrix_branches_apply_both_colours_on_one_set():
+    """Both branch colours are consumed, whichever branch draws first.
+
+    A caller naming the lobe and leg colours separately must not have either
+    reach matplotlib as an unknown line property: a keyword popped only at its
+    own branch's plot call survives into the other one's.
+    """
+    figure, axes = plt.subplots()
+    draw_separatrix_branches(
+        axes,
+        _padded_branch_set(),
+        closed_color="#3366cc",
+        open_color="#cc7722",
+    )
+
+    assert len(axes.lines) == 2
+    assert axes.lines[0].get_color() == "#3366cc"
+    assert axes.lines[1].get_color() == "#cc7722"
+    plt.close(figure)
+
+
+def test_other_qualified_nulls_draw_hollow_beyond_the_wall():
+    """A saddle outside the limiter's interior draws hollow and unfilled."""
+    figure, axes = plt.subplots()
+    tally = draw_nulls(
+        axes,
+        magnetic_axis=np.array([0.4, 0.0]),
+        x_points=np.array([[0.5, 0.0]]),
+        other_x_points=np.array([[1.25, 1.23]]),
+        contain=_units(),
+    )
+
+    assert tally["x_points_drawn"] == 1
+    assert tally["other_x_points_drawn"] == 1
+    assert len(axes.lines) == 3
+    hollow = axes.lines[-1]
+    assert hollow.get_markerfacecolor() == "none"
+    plt.close(figure)
 
 
 def test_nulls_use_the_occupiable_region_for_markers():

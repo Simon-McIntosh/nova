@@ -4,7 +4,7 @@
   "efit_poloidal_beta": 0.43646058440208435,
   "efit_internal_inductance": 0.9248143434524536,
   "profile_implied_combination": 0.6061068398024014,
-  "magnetics_implied_combination": 0.4797315370890942,
+  "magnetics_implied_combination": 0.47920586922703867,
   "minor_radius_m": 0.5762977376580238,
   "unnormalised_minor_radius_m": 0.5762977376580238,
   "elongation": 1.9570389536318542,
@@ -13,7 +13,28 @@
   "vertical_field_t": -0.16234274263274906,
   "identity_round_trip_residual": 0.0,
   "identity_round_trip_residual_elongated": 0.0,
+  "row_kernel_versus_circular_residual": 0.0,
   "inversion_tolerance": 1e-09,
+  "commensurability": {
+    "nova_definition": "beta_p = 4 * pressure_integral / (mu0 * major_radius * I_p**2); l_i = 2 * poloidal_field_integral / (mu0**2 * major_radius * I_p**2)",
+    "nova_radius_convention": "beta_p = 4*int(p dV)/(mu0*R*Ip**2) and l_i = 2*int(Bp**2 dV)/(mu0**2*R*Ip**2), with R the volume-weighted major radius sum(radial volume elements)/volume",
+    "stored_betap": 0.43646058440208435,
+    "stored_internal_inductance": 0.9248143434524536,
+    "plasma_current_a": 934383.8750000002,
+    "pressure_integral_j": 69552.14748617138,
+    "poloidal_field_integral_t2_m3": 0.3521019435925485,
+    "nova_major_radius_m": 0.7931332374722937,
+    "boundary_minor_radius_m": 0.5762977376580238,
+    "major_over_minor": 1.3762560316399168,
+    "implied_radius_from_betap_m": 0.5809850686472808,
+    "implied_radius_from_inductance_m": 0.5522979904525172,
+    "implied_radius_inductance_over_betap": 0.9506233813176018,
+    "implied_over_major_from_betap": 0.7325188772807876,
+    "implied_over_major_from_inductance": 0.6963495719996358,
+    "implied_over_minor_from_betap": 1.008133523147784,
+    "rescaled_efit_combination": 0.6584375995430113
+  },
+  "convention_sentence": "Commensurability: on nova's own volume integral and leading factor, the stored scalars are reproduced by a denominator radius of 0.5810 m, against nova's volume-weighted major radius 0.7931 m and the boundary's minor radius 0.5763 m; the two stored scalars imply the same radius to within 4.94% (l_i implies 0.5523 m), so one convention difference explains both moments. Rescaled onto nova's radius the reconstruction's own combination is 0.6584, against the profiles' 0.6061.",
   "readings": {
     "efit_own": {
       "label": "EFIT betap + li/2",
@@ -32,8 +53,8 @@
       "combination": 0.8149221657191839
     },
     "magnetics_discrete": {
-      "label": "magnetics (discrete)",
-      "combination": 0.4797315370890942
+      "label": "magnetics (row kernel)",
+      "combination": 0.47920586922703867
     }
   },
   "unit_check": {
@@ -51,5 +72,67 @@
     "internal_inductance_relative_difference": 2.64065562830989e-10,
     "cocos": "neither quantity carries a sign factor: each is a ratio of a volume integral to mu0 * R_ax * I_p**2, and the poloidal field enters squared, so a COCOS convention that flips the sign of the poloidal flux leaves the pressure integral, the squared-field integral and the plasma current's own sign unchanged. The magnetics side is signed through B_v, so its inversion is stated with the plasma current's signed value."
   },
-  "sentence": "EFIT's own 0.8989 sits above the profiles' 0.6061; the closest magnetics reading is magnetics (a sqrt k) at 0.8149 (residual -0.0839), against the magnetics set magnetics (a) 0.4792, magnetics (a sqrt k) 0.8149, magnetics (discrete) 0.4797."
+  "sentence": "EFIT's own 0.8989 sits above the profiles' 0.6061; the closest magnetics reading is magnetics (a sqrt k) at 0.8149 (residual -0.0839), against the magnetics set magnetics (a) 0.4792, magnetics (a sqrt k) 0.8149, magnetics (row kernel) 0.4792.",
+  "profile_implied_combination_unnormalised": 0.6065693483250655,
+  "profile_normalisation": {
+    "requested_current_a": 934383.875,
+    "observation_plasma_current_a": 934383.8750000002,
+    "observation_relative_difference": 2.4918093075382924e-16,
+    "operator_use_linear_moments": false,
+    "path": "unnormalised: the operator's moment path resolves moments from the flux directly and ignores the requested current, so the profile column is the unnormalised observation",
+    "normalised_combination": 0.6061068398024014,
+    "unnormalised_combination": 0.6065693483250655,
+    "combination_shift": -0.0004625085226640513
+  },
+  "constraint_row_reading_unnormalised": 0.4797315370890942,
+  "constraint_row_normalisation": {
+    "requested_current_a": 934383.875,
+    "observed_current_a": 934383.8750000002,
+    "unnormalised_current_a": 934027.5736811716,
+    "current_relative_difference": 0.0003814676663391752,
+    "observed_reading": 0.47920586922703867,
+    "unnormalised_reading": 0.4797315370890942,
+    "reading_shift": -0.0005256678620555455
+  },
+  "state_panel": {
+    "png": {
+      "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-discriminator-2/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.png",
+      "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.png",
+      "sha256": "c560abd93bd58aa1796713a511b35e2ef112011b1b669ebbc76b9de09ecd6b84"
+    },
+    "svg": {
+      "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-discriminator-2/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.svg",
+      "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.svg",
+      "sha256": "d16fc400aaeb1751c0e0cccfa6531e97dd9c65f8b3c5d24c82147880a4df4a56"
+    },
+    "levels_wb": [
+      -1.461588756167263,
+      -1.2979570988172424,
+      -1.134325441467222,
+      -0.9706937841172016,
+      -0.8070621267671811,
+      -0.6434304694171606,
+      -0.47979881206714026,
+      -0.31616715471711987,
+      -0.15253549736709937,
+      0.011096159982921128,
+      0.17472781733294163,
+      0.338359474682962
+    ],
+    "topology": {
+      "read_status": "qualified",
+      "class": "1",
+      "axis_rz_m": [
+        0.8993211781585156,
+        0.004630443500216432
+      ],
+      "x_point_rz_m": [
+        [
+          0.5587266601714519,
+          -1.1259795343799603
+        ]
+      ]
+    },
+    "wall_unit_count": 1
+  }
 }

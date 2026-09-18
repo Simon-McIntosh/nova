@@ -1137,10 +1137,10 @@ def _lattice_grid(profile: ForwardProfile, flux: jax.Array) -> jax.Array:
         for name in ("shape", "radius", "radial_step", "height", "vertical_step")
     ):
         raise TypeError(
-            "a point-sampling row needs a structured lattice carrier with a "
-            "shape, an origin and a step per axis; an unstructured mesh "
+            "a point-sampling row needs a structured FluxLattice carrier: a "
+            "shape, an origin and a step per axis. An unstructured cell mesh "
             "carries its flux on cells whose local polynomial the operator "
-            "samples through sample_flux_field"
+            "reads through sample_flux_field"
         )
     return jnp.reshape(jnp.asarray(flux)[: lattice.node_count], lattice.shape)
 

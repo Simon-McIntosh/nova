@@ -56,6 +56,7 @@ import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.interpolate import LinearNDInterpolator
 import zarr
 
 from benchmarks import settled_mask_stall as settled
@@ -71,6 +72,10 @@ from nova.equilibrium.diagnostics import (
     shafranov_vertical_field_elongated,
 )
 from nova.equilibrium.observation import MomentIntegralSupport
+from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
+from nova.equilibrium.wall_mask import WallUnit
+from nova.media import poloidal
+from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.jax.config import (
     configure_dtypes,
     configure_persistent_compilation_cache,
@@ -84,6 +89,8 @@ DEFAULT_DIRECTORY = (
 )
 #: Store group the reconstruction scalars and the terminal state are read from.
 EFIT_GROUP = "efm"
+#: Display raster resolution for the per-row state contour panels.
+RASTER_SAMPLES = 181
 #: Reading keys, in the order every row document and the panel order them.
 READING_KEYS: tuple[str, ...] = (
     "efit_own",
@@ -142,6 +149,7 @@ ROW_FIELDS: tuple[str, ...] = (
     "constraint_row_normalisation",
     "commensurability",
     "convention_sentence",
+    "state_panel",
     "readings",
     "sentence",
 )
@@ -782,6 +790,129 @@ def _row_document(
     }
 
 
+def _state_topology(operator, state) -> dict[str, Any]:
+    """Return the state's read nulls, or a recorded refusal."""
+    try:
+        _masks, topology = operator.read(jnp.asarray(state))
+    except NoQualifiedAxisError:
+        return {"read_status": "no_qualified_axis"}
+    diverted = bool(np.asarray(topology.diverted))
+    return {
+        "read_status": "qualified",
+        "class": str(TopologyClass.DIVERTED if diverted else TopologyClass.LIMITED),
+        "axis_rz_m": np.asarray(topology.axis, dtype=float).reshape(-1)[:2].tolist(),
+        "x_point_rz_m": np.asarray(topology.x_point, dtype=float)
+        .reshape(-1, 2)
+        .tolist(),
+    }
+
+
+def _wall_units(operator) -> tuple[WallUnit, ...]:
+    """Return the operator's wall as its own typed units.
+
+    The wall is stored flat with unit offsets and per-unit closure and kind, so
+    a panel draws every unit on its own terms rather than one invented ring.
+    """
+    coordinate = np.asarray(operator.wall.coordinate, dtype=float).reshape(-1, 2)
+    offsets = np.asarray(operator.wall_unit_offsets, dtype=int)
+    closed = np.asarray(operator.wall_unit_closed, dtype=bool)
+    kinds = tuple(operator.wall_unit_kinds)
+    return tuple(
+        WallUnit(
+            coordinate[start:stop, 0],
+            coordinate[start:stop, 1],
+            kind=kinds[index],
+            closed=bool(closed[index]),
+        )
+        for index, (start, stop) in enumerate(
+            zip(offsets[:-1], offsets[1:], strict=True)
+        )
+    )
+
+
+def _state_raster(profile, state, units, *, samples: int = RASTER_SAMPLES):
+    """Interpolate one banked state onto a display raster for line contours."""
+    points = np.asarray(profile.lattice.coordinate, dtype=float)
+    field = np.asarray(state, dtype=float).reshape(-1)[: points.shape[0]]
+    finite = np.all(np.isfinite(points), axis=1) & np.isfinite(field)
+    points, field = points[finite], field[finite]
+    if points.shape[0] < 3:
+        raise ValueError("the state carries too few finite samples to contour")
+    limits = np.vstack(
+        (points, *[np.asarray(unit.vertices, dtype=float) for unit in units])
+    )
+    radial = np.linspace(
+        float(np.min(limits[:, 0])), float(np.max(limits[:, 0])), samples
+    )
+    height = np.linspace(
+        float(np.min(limits[:, 1])), float(np.max(limits[:, 1])), samples
+    )
+    radius_grid, height_grid = np.meshgrid(radial, height)
+    raster = LinearNDInterpolator(points, field, fill_value=np.nan)(
+        radius_grid, height_grid
+    )
+    return radial, height, np.asarray(raster, dtype=float)
+
+
+def _render_state_panel(
+    profile,
+    state,
+    *,
+    path: Path,
+    title: str,
+    note: str,
+) -> dict[str, Any]:
+    """Draw one banked terminal state as shared-level line contours.
+
+    The panel follows the project's plotting rules: unfilled contours on one
+    physical level array so two panels cannot hide a mismatch behind their own
+    colour scales, the state's stationary points marked in the ``draw_nulls``
+    vocabulary, the vessel drawn unit-faithfully, and no axes or grid.
+    """
+    units = _wall_units(profile.operator)
+    radial, height, field = _state_raster(profile, state, units)
+    levels = poloidal.contour_levels(field, count=12)
+    topology = _state_topology(profile.operator, state)
+    figure, axis = plt.subplots(figsize=(4.8, 4.2), constrained_layout=True)
+    poloidal.draw_flux_contours(axis, radial, height, field, levels)
+    poloidal.draw_wall(axis, units=units)
+    if topology.get("read_status") == "qualified":
+        poloidal.draw_nulls(
+            axis,
+            magnetic_axis=topology["axis_rz_m"],
+            x_points=np.asarray(topology["x_point_rz_m"], dtype=float),
+            style=DEFAULT_INK,
+            contain=units,
+        )
+    poloidal_axes(axis)
+    axis.set_title(f"{title}\n{note}", fontsize=8)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    figure.savefig(path.with_suffix(".svg"))
+    plt.close(figure)
+    return {
+        "png": {
+            "filesystem_path": str(path),
+            "project_absolute_src": (
+                "/nova/figures/constraint-augmented-newton-krylov/"
+                f"shafranov-discriminator/{path.name}"
+            ),
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        },
+        "svg": {
+            "filesystem_path": str(path.with_suffix(".svg")),
+            "project_absolute_src": (
+                "/nova/figures/constraint-augmented-newton-krylov/"
+                f"shafranov-discriminator/{path.with_suffix('.svg').name}"
+            ),
+            "sha256": hashlib.sha256(path.with_suffix(".svg").read_bytes()).hexdigest(),
+        },
+        "levels_wb": [float(level) for level in levels],
+        "topology": topology,
+        "wall_unit_count": len(units),
+    }
+
+
 def _draw_panel(receipt: dict[str, Any], path: Path, *, source: str) -> dict[str, Any]:
     """Draw one strip per row, all five readings on a shared axis.
 
@@ -1000,6 +1131,20 @@ def measure(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any
             target_current=target_current,
             efit=_efit_scalars(group, row_index),
             boundary=np.asarray(case["boundary"], dtype=float),
+        )
+        entry["state_panel"] = _render_state_panel(
+            profile,
+            state,
+            path=directory / f"row-{shot}-{row_index}-state.png",
+            title=(
+                f"{shot}/{row_index}: banked terminal state, "
+                f"kappa = {entry['elongation']:.3f}"
+            ),
+            note=(
+                f"profiles {entry['profile_implied_combination']:.4f}, "
+                f"EFIT {entry['efit_own_combination']:.4f}, "
+                f"magnetics {entry['magnetics_implied_combination']:.4f}"
+            ),
         )
         receipt["rows_receipt"].append(entry)
         write_row(directory, entry)

@@ -870,6 +870,11 @@ def _render_projection(
     figure.suptitle(f"MAST {identity}: {caption}", fontsize=9)
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=170)
+    # The vector companion carries the same panels in a form a text-only reader
+    # can inspect, so a lane that cannot open the raster still sees the labels,
+    # the fitted orders and the curves the record cites.
+    svg_path = path.with_suffix(".svg")
+    figure.savefig(svg_path)
     plt.close(figure)
     return {
         "filesystem_path": str(path),
@@ -878,6 +883,12 @@ def _render_projection(
             f"flux-function-fit/{path.name}"
         ),
         "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "vector_filesystem_path": str(svg_path),
+        "vector_project_absolute_src": (
+            "/nova/figures/constraint-augmented-newton-krylov/"
+            f"flux-function-fit/{svg_path.name}"
+        ),
+        "vector_sha256": hashlib.sha256(svg_path.read_bytes()).hexdigest(),
     }
 
 

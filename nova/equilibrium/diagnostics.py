@@ -60,6 +60,16 @@ def shafranov_vertical_field(
     Parameters are the plasma current [A], major and minor radii [m], and the
     dimensionless combination :math:`\beta_p + l_i/2`. Invalid ring geometry
     returns NaN. The result changes sign exactly when the plasma current does.
+
+    This is a diagnostic identity, not the observed side of a constraint. It
+    assumes a large aspect ratio and a circular cross-section, and at the
+    aspect and elongation ratios of a spherical tokamak the neglected
+    :math:`a/R` and shaping terms are of order the bracket itself, so the
+    number it returns states the field a circular ring of the given radii
+    would require rather than the field the plasma's own current distribution
+    implies. The exact magnetics-implied combination is a contour integral of
+    the poloidal field; use that wherever the value is compared against a
+    measurement.
     """
     current = float(plasma_current)
     radius = float(major_radius)
@@ -87,6 +97,12 @@ def shafranov_vertical_field_elongated(
     term is :math:`\ln(8R/(a\sqrt{\kappa}))`. Unit elongation reproduces
     :func:`shafranov_vertical_field` exactly. Non-positive or non-finite
     elongation returns NaN.
+
+    Like :func:`shafranov_vertical_field` this is a diagnostic identity and
+    not the observed side of a constraint: the elongation correction reduces
+    the leading geometric bias but leaves the neglected higher-order shaping
+    and triangularity terms, so it is not the exact combination the external
+    magnetics imply.
     """
     current = float(plasma_current)
     radius = float(major_radius)

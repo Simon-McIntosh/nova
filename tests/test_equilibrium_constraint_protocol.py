@@ -995,9 +995,7 @@ def _cell_mesh_profile() -> SimpleNamespace:
     return SimpleNamespace(lattice=mesh, operator=_CellMeshOperator(node_number=3))
 
 
-# one carried value per cell, one extra physical node between the cells and the
-# sampling nodes, then one sampling node per cell
-_CELL_MESH_STATE = jnp.asarray([0.1, 0.2, 0.3, 0.9, 10.0, 20.0, 30.0])
+_CELL_MESH_VALUES = (0.1, 0.2, 0.3, 0.9, 10.0, 20.0, 30.0)
 _CELL_MESH_MIX = (
     0.5 * (0.1 + 10.0),
     0.5 * (0.2 + 20.0),
@@ -1005,12 +1003,23 @@ _CELL_MESH_MIX = (
 )
 
 
+def _cell_mesh_state():
+    """Return the test state, built only after extended precision is enabled.
+
+    One carried value per cell, one extra physical node between the cells and
+    the sampling nodes, then one sampling node per cell.  Building the array at
+    import time would capture it in single precision and leave a float32
+    residue on the compared values.
+    """
+    return jnp.asarray(_CELL_MESH_VALUES)
+
+
 def test_flux_level_row_reads_a_cell_carried_mesh_through_its_owner() -> None:
     """A cell-carried carrier is read, and an offset moves the row by itself."""
     configure_dtypes()
     profile = _cell_mesh_profile()
     row = FluxLevelConstraint(point_count=1)
-    state = _CELL_MESH_STATE
+    state = _cell_mesh_state()
     context = ConstraintContext(
         flux=state,
         requested_class=None,

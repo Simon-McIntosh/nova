@@ -23,6 +23,7 @@ from nova.equilibrium.constraint import (
     ConstraintPair,
     ConstraintRecord,
     ExternalShafranovConstraint,
+    FluxLevelConstraint,
     ProfileAmplitudeUnknown,
     assemble_augmented_system,
     constraint_residual_jvp,
@@ -864,3 +865,106 @@ def test_shafranov_row_refuses_a_target_its_compensator_cannot_reach() -> None:
     np.testing.assert_allclose(
         np.asarray(drivable_record.observed), [target], rtol=0.0, atol=1.0e-12
     )
+
+
+def _level_row_state(profile) -> tuple[jax.Array, ConstraintContext]:
+    """Return a linear radial flux map and the context the level row reads."""
+    lattice = profile.lattice
+    radius = jnp.asarray(lattice.radius)[:, None]
+    grid = jnp.broadcast_to(radius, lattice.shape)
+    flux = grid.reshape(-1)
+    return flux, ConstraintContext(
+        flux=flux,
+        requested_class=None,
+        target_current=None,
+        shadow=None,
+    )
+
+
+def test_flux_level_row_reads_the_level_and_scales_its_residual() -> None:
+    configure_dtypes()
+    profile = _shafranov_profile()
+    row = FluxLevelConstraint(point_count=1)
+    _flux, context = _level_row_state(profile)
+    payload = jnp.asarray([[2.0, 0.0]])
+
+    assert row.row_count == 1
+    np.testing.assert_allclose(
+        np.asarray(row.observed(profile, context, payload)),
+        [2.0],
+        rtol=0.0,
+        atol=1.0e-12,
+        err_msg="the row reads the map's own level at the declared point",
+    )
+
+    # the residual is signed against the commanded level and scaled by the
+    # binding, so a level above and below the target report opposite signs
+    np.testing.assert_allclose(
+        np.asarray(
+            row.residual(
+                profile, context, None, payload, jnp.asarray([1.0]), jnp.asarray([0.5])
+            )
+        ),
+        [2.0],
+        rtol=0.0,
+        atol=1.0e-12,
+    )
+    np.testing.assert_allclose(
+        np.asarray(
+            row.residual(
+                profile, context, None, payload, jnp.asarray([3.0]), jnp.asarray([0.5])
+            )
+        ),
+        [-2.0],
+        rtol=0.0,
+        atol=1.0e-12,
+    )
+
+
+def test_flux_level_row_dual_image_sums_to_one() -> None:
+    configure_dtypes()
+    profile = _shafranov_profile()
+    row = FluxLevelConstraint(point_count=1)
+    flux, context = _level_row_state(profile)
+
+    image = row.dual_flux_image(profile, context, jnp.asarray([[2.0, 0.0]]))
+    assert image.shape == (flux.size, 1)
+    # an interpolated read of the level has unit total leverage on the map:
+    # the reported level enters through one partition of interpolation weights
+    np.testing.assert_allclose(
+        float(np.sum(np.asarray(image))),
+        1.0,
+        rtol=0.0,
+        atol=1.0e-12,
+        err_msg="the level row's flux image is a partition of unity",
+    )
+
+
+def test_unbounded_exterior_amplitude_is_reported_outside_the_field_bound() -> None:
+    configure_dtypes()
+    field = BoundedExteriorFieldUnknown(
+        direction=jnp.eye(3),
+        field_scale=jnp.asarray((1.0e-3, 1.0e-3, 1.0)),
+        field_bound=jnp.asarray((2.5e-1, 2.5e-1, jnp.inf)),
+        step_limit=jnp.asarray((1.0, 1.0, 1.0)),
+    )
+
+    np.testing.assert_array_equal(
+        np.asarray(field.field_bound_applies), np.asarray([True, True, False])
+    )
+    np.testing.assert_allclose(
+        np.asarray(field.physical_value(jnp.asarray((0.0, 0.0, 1.0e4)))),
+        [0.0, 0.0, 1.0e4],
+        rtol=0.0,
+    )
+    # a level past the tesla bound is never refused by the field bound
+    step, refused = field.damped_step(jnp.zeros(3), jnp.asarray((0.0, 0.0, 1.0e6)))
+    assert not bool(np.asarray(refused).any())
+    assert float(np.asarray(step)[0]) == 0.0
+    assert float(np.asarray(step)[2]) < 0.0
+
+    # the bounded components keep refusing exactly as before
+    over_bound = jnp.asarray((2.0 * 2.5e-1 / 1.0e-3, 0.0, 1.0e6))
+    step, refused = field.damped_step(over_bound, jnp.zeros(3))
+    np.testing.assert_array_equal(np.asarray(step), np.zeros(3))
+    assert bool(np.asarray(refused).all())

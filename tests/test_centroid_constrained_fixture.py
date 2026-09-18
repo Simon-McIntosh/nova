@@ -10,14 +10,18 @@ import numpy as np
 from scripts.analytic_oracle_fixtures.centroid_row import (
     DEFAULT_FIELD_BOUND_T,
     DEFAULT_FIELD_SCALE_T,
+    DEFAULT_LEVEL_SCALE_WB,
     DEFAULT_STEP_LIMIT,
     centroid_constraint_pair,
     exterior_field_identity,
+    fixture_constraint_pairs,
+    level_constraint_pair,
 )
 from scripts.analytic_oracle_fixtures.measure import (
     analytic_case,
     exact_state,
     gauge_free_flux_read,
+    uniform_exterior_compensation_response,
     uniform_exterior_field_flux,
     uniform_exterior_field_response,
 )
@@ -121,7 +125,10 @@ def test_centroid_pair_maps_rows_to_bounded_field_directions() -> None:
     )
 
     assert pair.functional.components == ("centroid_r", "centroid_z")
-    np.testing.assert_array_equal(pair.unknown.direction, np.eye(2))
+    np.testing.assert_array_equal(
+        np.asarray(pair.unknown.direction),
+        np.asarray(((1.0, 0.0), (0.0, 1.0), (0.0, 0.0))),
+    )
     np.testing.assert_allclose(pair.unknown.field_bound, DEFAULT_FIELD_BOUND_T)
     assert exterior_field_identity()["centroid_r_compensator"] == (
         "uniform vertical field"
@@ -150,3 +157,86 @@ def test_centroid_pair_step_control_caps_and_records_refusal() -> None:
     step, refused = pair.unknown.damped_step(over_bound, jnp.zeros(2))
     np.testing.assert_array_equal(step, np.zeros(2))
     assert bool(np.asarray(refused).all())
+
+
+def _sample_machine(points: np.ndarray) -> SimpleNamespace:
+    """Return a three-part target layout over the given coordinates in order."""
+    return SimpleNamespace(
+        node=points[:2],
+        wall_node=points[2:3],
+        sample_coordinates=points[3:],
+    )
+
+
+def test_compensation_family_level_column_is_a_uniform_offset() -> None:
+    case = analytic_case()
+    points = np.asarray(
+        ((1.1, -0.2), (1.1, 0.3), (1.6, -0.2), (1.6, 0.3)),
+        dtype=np.float64,
+    )
+    machine = _sample_machine(points)
+
+    family = uniform_exterior_compensation_response(case, machine)
+    fields = uniform_exterior_field_response(case, machine)
+    assert family.shape[1] == 3
+    np.testing.assert_allclose(family[:, :2], fields, rtol=0.0, atol=0.0)
+    # the level column is constant at every target, so its gradient vanishes
+    # and it contributes no poloidal field
+    np.testing.assert_array_equal(family[:, 2], np.ones(len(points)))
+
+    # the fixture closed form reads the same level the third column applies
+    level_only = uniform_exterior_field_flux(
+        case, points, np.asarray((0.0, 0.0, DEFAULT_LEVEL_SCALE_WB))
+    )
+    np.testing.assert_allclose(level_only, family[:, 2] * DEFAULT_LEVEL_SCALE_WB)
+
+
+def test_level_pair_carries_its_amplitude_outside_the_field_bound() -> None:
+    pairs = fixture_constraint_pairs(
+        jnp.asarray([1.42, 0.0]),
+        level_point=np.asarray((1.7, 0.0)),
+        level_target=jnp.asarray([1.38]),
+        pitch=0.05,
+    )
+    centroid_pair, level_pair = pairs
+
+    np.testing.assert_array_equal(
+        np.asarray(centroid_pair.unknown.direction[2]), np.zeros(2)
+    )
+    assert level_pair.functional.row_count == 1
+    np.testing.assert_array_equal(
+        np.asarray(level_pair.unknown.direction), np.asarray(((0.0,), (0.0,), (1.0,)))
+    )
+    assert not bool(np.asarray(level_pair.unknown.field_bound_applies)[0])
+    assert np.isinf(float(np.asarray(level_pair.unknown.field_bound)[0]))
+
+    # the level amplitude keeps its own scale and its own 1e-12 clause
+    payload = np.asarray(level_pair.binding.payload)
+    np.testing.assert_allclose(payload, np.asarray(((1.7, 0.0),)))
+    np.testing.assert_allclose(
+        np.asarray(level_pair.binding.scale), DEFAULT_LEVEL_SCALE_WB
+    )
+    np.testing.assert_allclose(
+        np.asarray(level_pair.binding.tolerance),
+        DEFAULT_LEVEL_SCALE_WB * 1.0e-12,
+    )
+
+    # a level amplitude far past the tesla bound is never refused
+    step, refused = level_pair.unknown.damped_step(jnp.zeros(1), jnp.asarray([1.0e6]))
+    assert not bool(np.asarray(refused).any())
+    assert float(np.asarray(step)[0]) < 1.0e6
+
+    identity = exterior_field_identity()
+    assert identity["response_columns"] == ["vertical", "radial", "level"]
+    assert identity["level_bound_wb"] is None
+    assert identity["level_bound_is_field_bound"] is False
+    assert identity["level_compensator"] == "uniform flux offset in weber"
+
+
+def test_level_pair_rejects_a_non_level_centroid_component() -> None:
+    with np.testing.assert_raises_regex(ValueError, "level column"):
+        centroid_constraint_pair(
+            jnp.asarray([1.42, 0.0]), pitch=0.05, components=("centroid_r", "level")
+        )
+    with np.testing.assert_raises_regex(ValueError, "one target value"):
+        level_constraint_pair(np.asarray((1.7, 0.0)), jnp.asarray([1.38, 0.0, 0.0]))

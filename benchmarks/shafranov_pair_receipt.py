@@ -759,31 +759,17 @@ def _component_field(component: str) -> str:
     return "p_prime" if component == "pressure_gradient" else "ff_prime"
 
 
-def _render_projection(
-    profile,
-    *,
-    core,
-    projection,
-    scales,
-    reference,
-    terminal,
-    units,
-    identity: str,
-    caption: str,
-    path: Path,
-) -> dict:
-    """Draw one row's component curves beside its terminal poloidal state.
+def _draw_component_panels(
+    axes, *, core, projection, scales, coordinate: np.ndarray
+) -> None:
+    """Draw one axis pair per component: extracted, projected, freed scale.
 
-    The two component panels carry the extracted profile and the projected one
-    the row was stated against, and on top of those each freed-scale variant
-    at its own terminal amplitude, so a reader sees whether a uniform scale
-    reaches the source curve's shape.  The third panel is the terminal flux as
-    unfilled line contours on the reference's own levels with both null sets
-    and the wall, per the project's plotting rules.
+    The curve the row was read from and the curve the row is imposed against
+    share one axis pair, so the source and fitted flux functions are compared
+    directly rather than across panels; a freed-scale variant is drawn on the
+    same pair at its own terminal amplitude.
     """
-    coordinate = np.linspace(0.0, 1.0, PROJECTION_REFERENCE_SAMPLES)
-    figure, axes = plt.subplots(1, 3, figsize=(13.6, 4.4), constrained_layout=True)
-    for axis, component in zip(axes[:2], PROJECTION_COMPONENTS):
+    for axis, component in zip(axes, PROJECTION_COMPONENTS):
         fit = (
             projection.p_prime
             if component == "pressure_gradient"
@@ -824,33 +810,53 @@ def _render_projection(
             fontsize=8,
         )
         axis.legend(fontsize=7)
-    _, _, reference_field = _raster(profile, reference, units)
-    radial, height, terminal_field = _raster(profile, terminal, units)
-    levels = poloidal.contour_levels(reference_field, count=12)
-    poloidal.draw_flux_contours(
-        axes[2], radial, height, terminal_field, levels, color="#cc7722"
+
+
+def _render_projection(
+    profile,
+    *,
+    core,
+    projection,
+    scales,
+    reference,
+    terminal,
+    units,
+    identity: str,
+    caption: str,
+    path: Path,
+    write_raster: bool = True,
+) -> dict:
+    """Draw one row's component curves beside its terminal poloidal state.
+
+    The two component panels carry the extracted profile and the projected one
+    the row was stated against, and on top of those each freed-scale variant
+    at its own terminal amplitude, so a reader sees whether a uniform scale
+    reaches the source curve's shape.  The third panel is the terminal flux as
+    unfilled line contours on the reference's own levels with both null sets
+    and the wall, per the project's plotting rules.
+
+    A caller holding no terminal state passes ``terminal=None`` with
+    ``write_raster=False``: the third panel then carries the reference state's
+    own flux and its nulls and says so in its title, because a state that was
+    never persisted cannot be redrawn and must not be drawn as if it had been.
+    """
+    coordinate = np.linspace(0.0, 1.0, PROJECTION_REFERENCE_SAMPLES)
+    figure, axes = plt.subplots(1, 3, figsize=(13.6, 4.4), constrained_layout=True)
+    _draw_component_panels(
+        axes[:2], core=core, projection=projection, scales=scales, coordinate=coordinate
     )
+    _, _, reference_field = _raster(profile, reference, units)
+    levels = poloidal.contour_levels(reference_field, count=12)
+    drawn = (
+        ((reference, "#3366cc", "P"), (terminal, "#cc7722", "X"))
+        if terminal is not None
+        else ((reference, "#3366cc", "P"),)
+    )
+    for state, color, marker in drawn:
+        radial, height, field = _raster(profile, state, units)
+        poloidal.draw_flux_contours(axes[2], radial, height, field, levels, color=color)
     poloidal.draw_wall(axes[2], units=units)
-    for state, style in (
-        (
-            reference,
-            DEFAULT_INK.variant(
-                axis_color="#3366cc",
-                xpoint_color="#3366cc",
-                axis_marker="^",
-                xpoint_marker="P",
-            ),
-        ),
-        (
-            terminal,
-            DEFAULT_INK.variant(
-                axis_color="#cc7722",
-                xpoint_color="#cc7722",
-                axis_marker="^",
-                xpoint_marker="X",
-            ),
-        ),
-    ):
+    for state, color, marker in drawn:
         topology = _topology(profile.operator, state)
         if topology.get("read_status") != "qualified":
             continue
@@ -858,38 +864,58 @@ def _render_projection(
             axes[2],
             magnetic_axis=topology["axis_rz_m"],
             x_points=np.asarray(topology["x_point_rz_m"], dtype=float),
-            style=style,
+            style=DEFAULT_INK.variant(
+                axis_color=color,
+                xpoint_color=color,
+                axis_marker="^",
+                xpoint_marker=marker,
+            ),
             contain=units,
         )
     poloidal_axes(axes[2])
     axes[2].set_title(
-        "terminal flux, line contours on shared levels\n"
-        "reference blue (^ axis, P x-point) / terminal orange (^ axis, X x-point)",
+        (
+            "terminal flux, line contours on shared levels\n"
+            "reference blue (^ axis, P x-point) / terminal orange (^ axis, X x-point)"
+            if terminal is not None
+            else "reference flux, line contours on its own levels\n"
+            "the row receipt persists no terminal field, so the constrained "
+            "solve's terminal state cannot be redrawn here"
+        ),
         fontsize=8,
     )
     figure.suptitle(f"MAST {identity}: {caption}", fontsize=9)
     path.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(path, dpi=170)
+    block: dict[str, Any] = {}
+    if write_raster:
+        figure.savefig(path, dpi=170)
+        block.update(
+            {
+                "filesystem_path": str(path),
+                "project_absolute_src": (
+                    "/nova/figures/constraint-augmented-newton-krylov/"
+                    f"flux-function-fit/{path.name}"
+                ),
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            }
+        )
     # The vector companion carries the same panels in a form a text-only reader
-    # can inspect, so a lane that cannot open the raster still sees the labels,
+    # can inspect, so a lane that cannot open the raster still reads the labels,
     # the fitted orders and the curves the record cites.
     svg_path = path.with_suffix(".svg")
     figure.savefig(svg_path)
     plt.close(figure)
-    return {
-        "filesystem_path": str(path),
-        "project_absolute_src": (
-            "/nova/figures/constraint-augmented-newton-krylov/"
-            f"flux-function-fit/{path.name}"
-        ),
-        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-        "vector_filesystem_path": str(svg_path),
-        "vector_project_absolute_src": (
-            "/nova/figures/constraint-augmented-newton-krylov/"
-            f"flux-function-fit/{svg_path.name}"
-        ),
-        "vector_sha256": hashlib.sha256(svg_path.read_bytes()).hexdigest(),
-    }
+    block.update(
+        {
+            "vector_filesystem_path": str(svg_path),
+            "vector_project_absolute_src": (
+                "/nova/figures/constraint-augmented-newton-krylov/"
+                f"flux-function-fit/{svg_path.name}"
+            ),
+            "vector_sha256": hashlib.sha256(svg_path.read_bytes()).hexdigest(),
+        }
+    )
+    return block
 
 
 def _projection_row_receipt(
@@ -1115,6 +1141,119 @@ def project_rows(*, directory: Path, cache_root: Path | None = None) -> dict[str
     return receipt
 
 
+def _check_receipt_projection(entry: dict[str, Any], projection) -> None:
+    """Refuse to redraw a row whose receipt describes a different projection.
+
+    A vector companion is only evidence in the receipt's hands if the curves it
+    draws are the curves the receipt reports: the fit is re-derived here, so the
+    order, the basis and every fitted number are compared against the record
+    before anything is written.  A mismatch means the code or the data moved
+    since the row was measured, and the record would then be republished with
+    figures that no longer belong to it.
+    """
+    for name, fit in (
+        ("p_prime", projection.p_prime),
+        ("ff_prime", projection.ff_prime),
+    ):
+        recorded = entry["projection"][name]
+        if int(recorded["order"]) != int(fit.order) or recorded["basis"] != fit.basis:
+            raise ValueError(
+                f"receipt {entry['identity']} {name} was measured at order "
+                f"{recorded['order']} {recorded['basis']}, this code fits "
+                f"{fit.order} {fit.basis}"
+            )
+        for field in ("si_scale", "condition_number", "relative_residual"):
+            if not np.isclose(
+                float(recorded[field]), float(getattr(fit, field)), rtol=1.0e-9
+            ):
+                raise ValueError(
+                    f"receipt {entry['identity']} {name}.{field} does not reproduce"
+                )
+
+
+def render_vector_companion(
+    *, directory: Path, cache_root: Path | None = None
+) -> dict[str, Any]:
+    """Redraw a receipted row's component panels as a vector figure.
+
+    The receipt persists the projection's own numbers and the amplitude each
+    arm reached, which is enough to reproduce the curves the raster carries
+    without entering the solver: the profiles are re-extracted and re-projected
+    on CPU, and each freed-scale curve is drawn at the amplitude the solve
+    reported.  A row's terminal flux field is not persisted, so the contour
+    panel carries the reference state and says so in its title, with the
+    terminal residual and converged flag each arm reported in the caption.
+    """
+    configure_dtypes()
+    configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+        if cache_root is None
+        else cache_root
+    )
+    response_cache, _evidence = settled._persisted_response_cache(
+        settled.response_carrier.DEFAULT_CARRIER,
+        settled.response_carrier.DEFAULT_RECEIPT,
+    )
+    selected = _selection()
+    receipt_path = directory / "receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    drawn: list[str] = []
+    for entry in receipt["rows_receipt"]:
+        if entry.get("figure") is None:
+            continue
+        shot, row_index = (int(part) for part in entry["identity"].split("/"))
+        selected_row, qualification = selected[(shot, row_index)]
+        case, context = settled._mast_case_from_selection(
+            settled.SHOT_STORE, selected_row, qualification
+        )
+        passive_case, profile, _policy = settled._passive_inclusive_case(
+            case, context, response_cache
+        )
+        projected, projection = _projected_profile(profile)
+        _check_receipt_projection(entry, projection)
+        scales = {
+            variant["component"]: 1.0 + variant["compensating_amplitude_fraction"]
+            for variant in entry["variants"]
+            if variant.get("compensating_amplitude_fraction") is not None
+        }
+        terminals = ", ".join(
+            f"{variant['component']} residual "
+            f"{variant['terminal_residual']:.3g} converged {variant['converged']}"
+            for variant in entry["variants"]
+        )
+        caption = (
+            f"gap on the combination {entry['reference_combination_gap']:+.3e}; "
+            f"after freeing one scale at a time: {terminals}; "
+            + (
+                "scale alone closes it"
+                if entry["scale_alone_closes_the_gap"]
+                else "shape needed"
+            )
+        )
+        block = _render_projection(
+            projected,
+            core=profile.source.core,
+            projection=projection,
+            scales=scales,
+            reference=jnp.asarray(passive_case["state"]),
+            terminal=None,
+            units=_wall_units(projected.operator),
+            identity=entry["identity"],
+            caption=caption,
+            path=directory / f"row-{entry['identity'].replace('/', '-')}.png",
+            write_raster=False,
+        )
+        entry["figure"].update(block)
+        drawn.append(entry["identity"])
+        print(
+            "FLUX-FIT-VECTOR "
+            + json.dumps({"identity": entry["identity"], **block}, sort_keys=True),
+            flush=True,
+        )
+    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    return {"rows": drawn, "receipt": str(receipt_path)}
+
+
 def main(argv=None):
     """Run the Shafranov-row receipt from the command line."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -1133,8 +1272,20 @@ def main(argv=None):
         help="project each row's extracted profiles and free their scales "
         "under the Shafranov row, writing to this directory",
     )
+    parser.add_argument(
+        "--vector-directory",
+        type=Path,
+        default=None,
+        help="redraw a receipted row's component panels as vector figures "
+        "without solving, so a published raster gains its vector companion",
+    )
     arguments = parser.parse_args(argv)
-    if arguments.projection_directory is not None:
+    if arguments.vector_directory is not None:
+        render_vector_companion(
+            directory=arguments.vector_directory,
+            cache_root=arguments.cache_root,
+        )
+    elif arguments.projection_directory is not None:
         project_rows(
             directory=arguments.projection_directory,
             cache_root=arguments.cache_root,

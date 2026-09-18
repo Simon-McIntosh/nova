@@ -30,6 +30,7 @@ import platform
 from pathlib import Path
 import subprocess
 from typing import Any
+from dataclasses import replace
 
 import jax
 import jax.numpy as jnp
@@ -45,7 +46,10 @@ from nova.equilibrium.constraint import (
     ExternalShafranovConstraint,
     ProfileAmplitudeUnknown,
 )
-from nova.equilibrium.source import PolynomialFluxFunction
+from nova.equilibrium.source import (
+    PolynomialFluxFunction,
+    project_domain_profile,
+)
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.equilibrium.wall_mask import WallUnit
 from nova.jax.config import (
@@ -650,6 +654,448 @@ def measure(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any
     return receipt
 
 
+PROJECTION_DIRECTORY = (
+    ROOT / "docs/figures/constraint-augmented-newton-krylov/flux-function-fit"
+)
+#: The prefix the projection lane prints one row emission under.
+PROJECTION_EMISSION_PREFIX = "FLUX-FIT-ROW "
+#: Normalised-flux base the extracted gradients are sampled and fitted on.  It
+#: is the bank's own declared extraction base, so the projection is stated
+#: against the profiles the row is measured from rather than a re-grid.
+PROJECTION_SAMPLES = 65
+#: Highest polynomial order the projection may fit.
+PROJECTION_MAXIMUM_ORDER = 6
+#: Relative residual a fitted component must meet for its lowest order to stand.
+PROJECTION_TOLERANCE = 1.0e-3
+#: The compensator components whose scales are freed against the single scalar
+#: row.  The row is one equation, so freeing both components in one solve is
+#: singular; each is freed on its own solve and both are reported, which is
+#: what tells a reader whether scale alone closes the gap and on which
+#: component.
+PROJECTION_COMPONENTS = ("pressure_gradient", "ff_prime")
+#: Samples per component curve in the figure.
+PROJECTION_REFERENCE_SAMPLES = 257
+
+
+def _elongation(boundary) -> float:
+    """Return the stored boundary's elongation, height over width."""
+    points = np.asarray(boundary, dtype=float).reshape(-1, 2)
+    points = points[np.all(np.isfinite(points), axis=1)]
+    if points.shape[0] < 2:
+        raise ValueError("the stored boundary carries too few finite nodes")
+    width = float(np.ptp(points[:, 0]))
+    if width <= 0.0:
+        raise ValueError("the stored boundary has no radial extent")
+    return float(np.ptp(points[:, 1])) / width
+
+
+def _elongated_minor_radius(boundary) -> tuple[float, float, float]:
+    """Return the elongation-corrected minor radius and its two operands.
+
+    The vertical-field identity is stated on a circular model plasma, so the
+    horizontal half-width alone understates the radius of the elongated
+    boundary it is applied to; ``a sqrt(kappa)`` is the radius of the
+    equivalent circular column carrying the same poloidal flux.
+    """
+    elongation = _elongation(boundary)
+    geometric = _minor_radius(boundary)
+    return geometric * float(np.sqrt(elongation)), geometric, elongation
+
+
+def _projected_profile(profile):
+    """Return one row's profile with its source core projected onto polynomials.
+
+    The extracted gradients are sampled on the declared uniform base, fitted,
+    and the fitted pair replaces the interpolant in the source while every
+    other field of the source is carried across unchanged.  The projection is
+    not allowed to move the observable state by itself, so the caller compares
+    the combination before and after and reports the difference it finds.
+    """
+    coordinate = np.linspace(0.0, 1.0, PROJECTION_SAMPLES)
+    projection = project_domain_profile(
+        profile.source.core,
+        coordinate,
+        maximum_order=PROJECTION_MAXIMUM_ORDER,
+        tolerance=PROJECTION_TOLERANCE,
+    )
+    return profile._with_source(
+        replace(profile.source, core=projection.core())
+    ), projection
+
+
+def _projection_pair(profile, *, target: float, minor_radius: float, component: str):
+    """Return the Shafranov row with one component's scale left free."""
+    functional = ExternalShafranovConstraint(
+        minor_radius=jnp.asarray(minor_radius),
+    )
+    binding = ConstraintBinding(
+        target=jnp.atleast_1d(jnp.asarray(target)),
+        tolerance=jnp.asarray([ROW_TOLERANCE]),
+        scale=jnp.asarray([1.0]),
+        initial_unknown=jnp.asarray([0.0]),
+        payload=(jnp.asarray(_external_image(profile)), jnp.asarray(minor_radius)),
+        policy="imposed",
+    )
+    unknown = ProfileAmplitudeUnknown(component, jnp.asarray([1.0]))
+    return ConstraintPair(functional, unknown, binding)
+
+
+def _component_curve(function, coordinate, scale: float) -> np.ndarray:
+    """Return one component sampled on a coordinate under an amplitude scale."""
+    values = np.asarray(function(jnp.asarray(coordinate)), dtype=float)
+    return values * float(scale)
+
+
+def _component_field(component: str) -> str:
+    """Return the source-core field name one compensator component moves."""
+    return "p_prime" if component == "pressure_gradient" else "ff_prime"
+
+
+def _render_projection(
+    profile,
+    *,
+    core,
+    projection,
+    scales,
+    reference,
+    terminal,
+    units,
+    identity: str,
+    caption: str,
+    path: Path,
+) -> dict:
+    """Draw one row's component curves beside its terminal poloidal state.
+
+    The two component panels carry the extracted profile and the projected one
+    the row was stated against, and on top of those each freed-scale variant
+    at its own terminal amplitude, so a reader sees whether a uniform scale
+    reaches the source curve's shape.  The third panel is the terminal flux as
+    unfilled line contours on the reference's own levels with both null sets
+    and the wall, per the project's plotting rules.
+    """
+    coordinate = np.linspace(0.0, 1.0, PROJECTION_REFERENCE_SAMPLES)
+    figure, axes = plt.subplots(1, 3, figsize=(13.6, 4.4), constrained_layout=True)
+    for axis, component in zip(axes[:2], PROJECTION_COMPONENTS):
+        fit = (
+            projection.p_prime
+            if component == "pressure_gradient"
+            else projection.ff_prime
+        )
+        extracted = getattr(core, _component_field(component))
+        axis.plot(
+            coordinate,
+            _component_curve(extracted, coordinate, 1.0),
+            color="#888888",
+            linewidth=1.0,
+            label="extracted",
+        )
+        axis.plot(
+            coordinate,
+            _component_curve(fit.function, coordinate, 1.0),
+            color="#3366cc",
+            linewidth=1.6,
+            label="projected",
+        )
+        scale = scales.get(component)
+        if scale is not None:
+            axis.plot(
+                coordinate,
+                _component_curve(fit.function, coordinate, scale),
+                color="#cc7722",
+                linewidth=1.6,
+                linestyle="--",
+                label=f"freed scale {(scale - 1.0) * 100:+.2f} %",
+            )
+        axis.set_xlabel(r"$\psi_N$")
+        axis.set_ylabel(
+            r"$p'$ [Pa/Wb]" if component == "pressure_gradient" else r"$FF'$ [T m/Wb]"
+        )
+        axis.set_title(
+            f"{component}: order {fit.order}, {fit.basis}, "
+            f"cond {fit.condition_number:.3g}",
+            fontsize=8,
+        )
+        axis.legend(fontsize=7)
+    _, _, reference_field = _raster(profile, reference, units)
+    radial, height, terminal_field = _raster(profile, terminal, units)
+    levels = poloidal.contour_levels(reference_field, count=12)
+    poloidal.draw_flux_contours(
+        axes[2], radial, height, terminal_field, levels, color="#cc7722"
+    )
+    poloidal.draw_wall(axes[2], units=units)
+    for state, style in (
+        (
+            reference,
+            DEFAULT_INK.variant(
+                axis_color="#3366cc",
+                xpoint_color="#3366cc",
+                axis_marker="^",
+                xpoint_marker="P",
+            ),
+        ),
+        (
+            terminal,
+            DEFAULT_INK.variant(
+                axis_color="#cc7722",
+                xpoint_color="#cc7722",
+                axis_marker="^",
+                xpoint_marker="X",
+            ),
+        ),
+    ):
+        topology = _topology(profile.operator, state)
+        if topology.get("read_status") != "qualified":
+            continue
+        poloidal.draw_nulls(
+            axes[2],
+            magnetic_axis=topology["axis_rz_m"],
+            x_points=np.asarray(topology["x_point_rz_m"], dtype=float),
+            style=style,
+            contain=units,
+        )
+    poloidal_axes(axes[2])
+    axes[2].set_title(
+        "terminal flux, line contours on shared levels\n"
+        "reference blue (^ axis, P x-point) / terminal orange (^ axis, X x-point)",
+        fontsize=8,
+    )
+    figure.suptitle(f"MAST {identity}: {caption}", fontsize=9)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=170)
+    plt.close(figure)
+    return {
+        "filesystem_path": str(path),
+        "project_absolute_src": (
+            "/nova/figures/constraint-augmented-newton-krylov/"
+            f"flux-function-fit/{path.name}"
+        ),
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+    }
+
+
+def _projection_row_receipt(
+    profile,
+    *,
+    identity: str,
+    reference_state,
+    target_current,
+    minor_radius: float,
+    geometric_minor_radius: float,
+    elongation: float,
+    requested,
+    directory: Path,
+) -> dict[str, Any]:
+    """Project one bank row's profiles and free their scales under the row.
+
+    The row is imposed with the single scalar compensator the solve already
+    carries, freed one component at a time: the row is one equation, so a pair
+    of free scales in one solve leaves the target underdetermined.  What each
+    variant reports is whether a uniform scale on that component alone reaches
+    the target, which is the question the record has to answer before a shape
+    unknown is designed.
+    """
+    source_core = profile.source.core
+    projected, projection = _projected_profile(profile)
+    projection_only = _combination(profile, reference_state, target_current)
+    target = _combination(projected, reference_state, target_current)
+    print(
+        f"PROJECTION {identity} order_p={projection.p_prime.order} "
+        f"order_ff={projection.ff_prime.order} "
+        f"projection_only_delta={target - projection_only!r}",
+        flush=True,
+    )
+    variants: list[dict[str, Any]] = []
+    scales: dict[str, float] = {}
+    terminal = None
+    for component in PROJECTION_COMPONENTS:
+        pair = _projection_pair(
+            projected,
+            target=target,
+            minor_radius=minor_radius,
+            component=component,
+        )
+        branch = projected.solve_branch(
+            jnp.asarray(reference_state),
+            requested,
+            target_current=target_current,
+            constraint_pairs=(pair,),
+        )
+        equilibrium = branch.equilibrium
+        flux = equilibrium.flux
+        flux.block_until_ready()
+        terminal = np.asarray(flux)
+        records = list(equilibrium.constraints)
+        record = records[0] if records else None
+        fraction = (
+            None if record is None else float(np.asarray(record.physical_unknown[0]))
+        )
+        achieved = None if record is None else float(np.asarray(record.observed[0]))
+        if fraction is not None:
+            scales[component] = 1.0 + fraction
+        variant: dict[str, Any] = {
+            "component": component,
+            "achieved_combination": _strict_float(achieved),
+            "combination_gap_after": _strict_float(
+                None if achieved is None else achieved - target
+            ),
+            "compensating_amplitude_fraction": _strict_float(fraction),
+            "terminal_residual": _strict_float(branch.residual),
+            "outer_steps": int(
+                np.asarray(equilibrium.fixed_point.active_set_iterations)
+            ),
+            "converged": bool(np.asarray(branch.converged)),
+            "topology_consistent": bool(np.asarray(branch.topology_consistent)),
+            "termination": settled._termination_name(
+                equilibrium.fixed_point.termination_reason
+            ),
+        }
+        variants.append(variant)
+        print(
+            PROJECTION_EMISSION_PREFIX
+            + json.dumps(
+                {"identity": identity, **variant},
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+    best = min(
+        (
+            variant
+            for variant in variants
+            if variant["combination_gap_after"] is not None
+        ),
+        key=lambda variant: abs(variant["combination_gap_after"]),
+        default=None,
+    )
+    scale_alone_closes = (
+        best is not None and abs(best["combination_gap_after"]) <= ROW_TOLERANCE
+    )
+    entry: dict[str, Any] = {
+        "identity": identity,
+        "status": "imposed" if best is not None else "no_terminal_state",
+        "minor_radius_m": _strict_float(minor_radius),
+        "geometric_minor_radius_m": _strict_float(geometric_minor_radius),
+        "elongation": _strict_float(elongation),
+        "plasma_current_a": _strict_float(target_current),
+        "target_combination": _strict_float(target),
+        "source_combination_at_reference": _strict_float(projection_only),
+        "projected_combination_at_reference": _strict_float(target),
+        "reference_combination_gap": _strict_float(target - projection_only),
+        "projection": projection.receipt(),
+        "scale_alone_closes_the_gap": scale_alone_closes,
+        "variants": variants,
+    }
+    if terminal is not None:
+        gap_after = ", ".join(
+            f"{variant['component']} {variant['combination_gap_after']:+.3e}"
+            if variant["combination_gap_after"] is not None
+            else f"{variant['component']} n/a"
+            for variant in variants
+        )
+        entry["figure"] = _render_projection(
+            projected,
+            core=source_core,
+            projection=projection,
+            scales=scales,
+            reference=reference_state,
+            terminal=terminal,
+            units=_wall_units(projected.operator),
+            identity=identity,
+            caption=(
+                f"gap on the combination {entry['reference_combination_gap']:+.3e}; "
+                f"after freeing one scale at a time: {gap_after}; "
+                + ("scale alone closes it" if scale_alone_closes else "shape needed")
+            ),
+            path=directory / f"row-{identity.replace('/', '-')}.png",
+        )
+    return entry
+
+
+def project_rows(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any]:
+    """Project every qualified bank row and free its scales under the row."""
+    configure_dtypes()
+    cache = configure_persistent_compilation_cache(
+        default_persistent_compilation_cache_root()
+        if cache_root is None
+        else cache_root
+    )
+    response_cache, carrier_evidence = settled._persisted_response_cache(
+        settled.response_carrier.DEFAULT_CARRIER,
+        settled.response_carrier.DEFAULT_RECEIPT,
+    )
+    selected = _selection()
+    directory.mkdir(parents=True, exist_ok=True)
+    receipt: dict[str, Any] = {
+        "receipt": "projected extracted flux functions with their scales freed "
+        "under the Shafranov row",
+        "row_set": "every row the decomposition bank qualifies",
+        "rows": [list(key) for key in sorted(selected)],
+        "source": {
+            "revision": _source_revision(),
+            "python": platform.python_version(),
+            "jax": jax.__version__,
+            "devices": [str(device) for device in jax.devices()],
+        },
+        "configuration": {
+            "projection": "project_domain_profile on the declared uniform "
+            f"{PROJECTION_SAMPLES}-point normalised-flux base",
+            "projection_maximum_order": PROJECTION_MAXIMUM_ORDER,
+            "projection_tolerance": PROJECTION_TOLERANCE,
+            "row": "ExternalShafranovConstraint at the elongation-corrected "
+            "minor radius a sqrt(kappa)",
+            "compensating_unknown": "ProfileAmplitudeUnknown freed one "
+            "component at a time: the row is one equation",
+            "row_tolerance": ROW_TOLERANCE,
+            "persistent_compilation_cache": {
+                "directory": str(cache.directory),
+                "version": cache.version_key,
+            },
+        },
+        "inputs": {"carrier_evidence": carrier_evidence},
+        "rows_receipt": [],
+    }
+    for shot, row_index in sorted(selected):
+        key = (shot, row_index)
+        selected_row, qualification = selected[key]
+        case, context = settled._mast_case_from_selection(
+            settled.SHOT_STORE, selected_row, qualification
+        )
+        passive_case, profile, _policy = settled._passive_inclusive_case(
+            case, context, response_cache
+        )
+        minor_radius, geometric, elongation = _elongated_minor_radius(
+            np.asarray(case["boundary"], dtype=float)
+        )
+        entry = _projection_row_receipt(
+            profile,
+            identity=f"{shot}/{row_index}",
+            reference_state=jnp.asarray(passive_case["state"]),
+            target_current=abs(float(passive_case["reference"]["plasma_current_a"])),
+            minor_radius=minor_radius,
+            geometric_minor_radius=geometric,
+            elongation=elongation,
+            requested=jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8),
+            directory=directory,
+        )
+        receipt["rows_receipt"].append(entry)
+        (directory / "receipt.json").write_text(
+            json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
+        )
+        print(
+            PROJECTION_EMISSION_PREFIX
+            + json.dumps(
+                {key: value for key, value in entry.items() if key != "figure"},
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+    (directory / "receipt.json").write_text(
+        json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
+    )
+    print("FLUX-FIT-DONE", flush=True)
+    return receipt
+
+
 def main(argv=None):
     """Run the Shafranov-row receipt from the command line."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -661,8 +1107,20 @@ def main(argv=None):
         default=None,
         help="rewrite the receipts from a banked lane log instead of solving",
     )
+    parser.add_argument(
+        "--projection-directory",
+        type=Path,
+        default=None,
+        help="project each row's extracted profiles and free their scales "
+        "under the Shafranov row, writing to this directory",
+    )
     arguments = parser.parse_args(argv)
-    if arguments.emissions is None:
+    if arguments.projection_directory is not None:
+        project_rows(
+            directory=arguments.projection_directory,
+            cache_root=arguments.cache_root,
+        )
+    elif arguments.emissions is None:
         measure(directory=arguments.directory, cache_root=arguments.cache_root)
     else:
         regenerate(emissions=arguments.emissions, directory=arguments.directory)

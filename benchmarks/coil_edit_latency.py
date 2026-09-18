@@ -809,6 +809,10 @@ def _branches_of(profile: Any, state: Any, raster_flux: Any) -> dict[str, Any] |
         "boundary_flux": float(np.asarray(topology.boundary_flux)),
         "axis_flux": float(np.asarray(topology.axis_flux)),
         "well_formed": bool(np.asarray(branches["well_formed"])),
+        "closed_candidate_count": int(
+            np.asarray(branches["closed_candidate_count"]).item()
+        ),
+        "overflow": bool(np.asarray(branches["overflow"])),
     }
 
 
@@ -900,6 +904,15 @@ def _persist_branches(
         payload[f"{prefix}{key}"] = np.asarray(branches[key])
     payload[f"{prefix}boundary_flux"] = np.asarray(branches["boundary_flux"])
     payload[f"{prefix}axis_flux"] = np.asarray(branches["axis_flux"])
+    # The assembler returns zero geometry for any violation, so the verdict it
+    # took is persisted beside the geometry: without it an archive of zeros
+    # cannot say whether the level carried no axis-enclosing cycle, the graph
+    # carried a junction, or a slot overflowed.
+    payload[f"{prefix}well_formed"] = np.asarray(branches["well_formed"])
+    payload[f"{prefix}closed_candidate_count"] = np.asarray(
+        branches["closed_candidate_count"]
+    )
+    payload[f"{prefix}overflow"] = np.asarray(branches["overflow"])
 
 
 def _write_panel_data(

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T17:43:29",
+  "updated": "2026-09-18T17:44:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4853,6 +4853,15 @@
       },
       {
         "id": "s19c-fsa-coiledit-repairs-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-18"
+      },
+      {
+        "id": "s19c-fsa-lcfs2-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -195130,6 +195139,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2818
+    "_version": 2819
   }
 }

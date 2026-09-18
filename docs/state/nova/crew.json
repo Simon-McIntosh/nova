@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T10:28:32",
+  "updated": "2026-09-18T10:41:47",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4595,6 +4595,15 @@
           "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "b5cd904c-9186-4461-bae4-7540dd209677"
         },
         "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-cca-xpoint-design-c",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-18"
       },
       {
         "id": "s19c-cco-bound-c",
@@ -187997,6 +188006,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2772
+    "_version": 2773
   }
 }

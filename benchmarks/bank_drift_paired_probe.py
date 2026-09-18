@@ -31,7 +31,8 @@ compiled once for the process rather than once per arm:
     <interpreter> bank_drift_paired_probe.py compare \\
         --left <label>.json --right <label>.json --out receipt.json
     <interpreter> bank_drift_paired_probe.py merge \\
-        --arms-dir <dir> --out receipt.json --expected-rows 12
+        --arms-dir <dir> --out receipt.json --expected-rows 12 \\
+        [--compile-log <JAX_LOG_COMPILES capture>]
 
 `--out-dir` writes one emission file per arm as each identity's solve lands, so
 an allocation that ends early still leaves every identity it finished as a pair
@@ -42,6 +43,14 @@ is passed in rather than inferred, so the whole sweep of a tree compiles against
 the one directory the caller names.  The cache receipt the producer returns is
 stored in each emission, so the directory a given row was compiled against is
 evidence rather than an assumption.
+
+Every location a receipt carries is stated from the checkout root -- the parent
+of the shared git directory -- rather than from the worktree the driver ran in,
+because a worktree root sits at whatever depth it was created at and a path
+stated from it resolves only from a checkout of that exact depth.  The paired
+contour panel reads each archive whole, so each panel draws the grid and the
+wall its own archive holds, and the record written beside the figure states
+whether the two archives' walls and grids were bit-identical.
 """
 
 from __future__ import annotations
@@ -53,6 +62,7 @@ from importlib.util import module_from_spec, spec_from_file_location
 import json
 import os
 from pathlib import Path
+import subprocess
 from typing import Any
 
 import numpy as np
@@ -79,20 +89,58 @@ _STAGE_DEFINITIONS = {
 }
 
 
-def _repo_relative(path: Any) -> str:
-    """Return a path stated relative to the repository, never absolute.
+def _checkout_root() -> Path:
+    """Return the checkout the receipts are stated from, independent of depth.
 
-    The receipt is committed, and a worktree path it names is removed at the
-    end of the sprint, so an absolute path in the record is a reference that
-    stops resolving.  Every location the receipt carries is therefore stated
-    from the repository root.
+    The probe runs from a worktree, and a worktree root sits at a depth chosen
+    when the worktree was created, so a path stated relative to it carries a
+    depth that means nothing to a reader at another depth.  The shared git
+    directory is one fixed place for every worktree of the checkout, so its
+    parent is the anchor every recorded path is stated from and resolves from.
+    """
+
+    try:
+        finished = subprocess.run(
+            ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=30,
+        )
+    except OSError, subprocess.SubprocessError:
+        return ROOT
+    located = finished.stdout.strip()
+    if not located:
+        return ROOT
+    common = Path(located)
+    return common.parent if common.name == ".git" else ROOT
+
+
+CHECKOUT_ROOT = _checkout_root()
+"""Every location a receipt carries is stated from here, so it re-resolves."""
+
+
+def _repo_relative(path: Any) -> str:
+    """Return a path stated relative to the checkout, never to this worktree.
+
+    The receipt is committed and the worktree that produced it is removed at
+    the end of the sprint, so an absolute path in the record is a reference
+    that stops resolving -- and a path relative to this worktree's own root
+    resolves only from a checkout of the same depth.  Stating every location
+    from the checkout root makes the record resolve from the checkout at any
+    worktree depth.  A relative input is read as already stated from that
+    anchor, which is the only convention a stored relative root follows.
     """
 
     if path in (None, ""):
         return path
     try:
-        return os.path.relpath(Path(str(path)).resolve(), ROOT)
-    except (OSError, ValueError):
+        located = Path(str(path))
+        if not located.is_absolute():
+            located = CHECKOUT_ROOT / located
+        return os.path.relpath(located.resolve(), CHECKOUT_ROOT)
+    except OSError, ValueError:
         return str(path)
 
 
@@ -543,7 +591,44 @@ def _compare(left_path: Path, right_path: Path, out_path: Path) -> int:
     return 0
 
 
-def _merge(arms_dir: Path, out_path: Path, expected_rows: int) -> int:
+COMPILE_LINE_MARKER = "Compiling "
+SOLVE_COMPILE_MARKER = "Compiling jit(solve)"
+
+
+def _compile_evidence(log_path: Path) -> dict[str, Any]:
+    """Count the compile lines a JAX_LOG_COMPILES capture holds.
+
+    The count is evidence only beside its source: a number in a receipt cannot
+    be checked without the capture it was counted from, so the record carries
+    the capture's own path and digest next to the counts, and a marker that
+    finds nothing raises rather than reporting a zero that reads as "compiled
+    cheaply".
+    """
+
+    text = log_path.read_text()
+    lines = [line for line in text.splitlines() if COMPILE_LINE_MARKER in line]
+    if not lines:
+        raise SystemExit(
+            f"no line carrying {COMPILE_LINE_MARKER!r} under {log_path}; "
+            "refusing to record a zero compile count"
+        )
+    digest = hashlib.sha256(text.encode()).hexdigest()
+    return {
+        "log": _repo_relative(log_path),
+        "sha256": digest,
+        "marker": COMPILE_LINE_MARKER,
+        "compile_lines": len(lines),
+        "solve_compile_marker": SOLVE_COMPILE_MARKER,
+        "solve_compiles": sum(SOLVE_COMPILE_MARKER in line for line in lines),
+    }
+
+
+def _merge(
+    arms_dir: Path,
+    out_path: Path,
+    expected_rows: int,
+    compile_log: Path | None = None,
+) -> int:
     """Join the per-arm receipts into one campaign receipt.
 
     One arm per allocation means the arms land independently, so the campaign
@@ -615,6 +700,9 @@ def _merge(arms_dir: Path, out_path: Path, expected_rows: int) -> int:
             "residual_moved": moved,
             "focus_21983_35_mixed": focus,
         },
+        "compile_evidence": (
+            _compile_evidence(compile_log) if compile_log is not None else None
+        ),
         "source_receipts": sources,
         "generated_at": datetime.now(UTC).isoformat(),
     }
@@ -734,13 +822,19 @@ def _load_resolved(path: Path) -> dict[str, Any]:
         return {name: archive[name] for name in archive.files}
 
 
-def _panel(old_path: Path, new_path: Path, out_path: Path, levels: int) -> int:
-    """Draw the producer and current terminal states as one contour pair.
+def _panel_figure(
+    old_path: Path, new_path: Path, levels: int
+) -> tuple[Any, dict[str, Any]]:
+    """Build the producer and current terminal states as one contour pair.
 
     Both panels share one physical level array computed from the producer state,
     so a difference between them cannot hide behind independent level choices.
-    Each panel draws its own stationary points in the committed vocabulary and
-    the other state's in a hollow grey, and both carry the wall.
+    Each panel reads its own archive whole -- its grid, its wall and its
+    stationary points -- and draws the counterpart's nulls in a hollow grey, so
+    a panel states the state it was handed instead of borrowing the other
+    side's geometry.  The two archives behind this pair carry bit-identical
+    walls and grids, which the record written beside the figure states rather
+    than assumes: a panel whose archive carried a different wall would draw it.
 
     The panel's own nulls stay solid and the counterpart's are hollowed, so a
     reader can tell which state a marker belongs to without reading the marker
@@ -761,14 +855,10 @@ def _panel(old_path: Path, new_path: Path, out_path: Path, levels: int) -> int:
         draw_wall,
     )
 
+    old_path, new_path = Path(old_path), Path(new_path)
     old = _load_resolved(old_path)
     new = _load_resolved(new_path)
-    old_flux = np.asarray(old["flux"], dtype=float)
-    new_flux = np.asarray(new["flux"], dtype=float)
-    radius = np.asarray(old["radius"], dtype=float)
-    height = np.asarray(old["height"], dtype=float)
-    wall = np.asarray(old["wall"], dtype=float)
-    shared_levels = contour_levels(old_flux, count=levels)
+    shared_levels = contour_levels(np.asarray(old["flux"], dtype=float), count=levels)
 
     own = DEFAULT_INK.variant(
         axis_marker="^",
@@ -785,56 +875,58 @@ def _panel(old_path: Path, new_path: Path, out_path: Path, levels: int) -> int:
         xpoint_color="#666666",
     )
 
-    panels = (
+    panels = tuple(
         {
-            "state": old,
-            "flux": old_flux,
+            "state": state,
+            "role": role,
+            "flux": np.asarray(state["flux"], dtype=float),
+            "radius": np.asarray(state["radius"], dtype=float),
+            "height": np.asarray(state["height"], dtype=float),
+            "wall": np.asarray(state["wall"], dtype=float),
             "title": (
-                f"producer tree {old['tree_label']}  "
-                f"converged={bool(old['converged'])}  "
-                f"residual={float(old['terminal_residual']):.3e}"
+                f"{role} tree {state['tree_label']}  "
+                f"converged={bool(state['converged'])}  "
+                f"residual={float(state['terminal_residual']):.3e}"
             ),
-        },
-        {
-            "state": new,
-            "flux": new_flux,
-            "title": (
-                f"current tree {new['tree_label']}  "
-                f"converged={bool(new['converged'])}  "
-                f"residual={float(new['terminal_residual']):.3e}"
-            ),
-        },
+        }
+        for role, state in (("producer", old), ("current", new))
     )
 
-    r_min, r_max = float(np.nanmin(wall[:, 0])), float(np.nanmax(wall[:, 0]))
-    z_min, z_max = float(np.nanmin(wall[:, 1])), float(np.nanmax(wall[:, 1]))
+    r_min = min(float(np.nanmin(panel["wall"][:, 0])) for panel in panels)
+    r_max = max(float(np.nanmax(panel["wall"][:, 0])) for panel in panels)
+    z_min = min(float(np.nanmin(panel["wall"][:, 1])) for panel in panels)
+    z_max = max(float(np.nanmax(panel["wall"][:, 1])) for panel in panels)
     span = max(r_max - r_min, z_max - z_min)
     pad = 0.04 * span
     extent = (r_min - pad, r_max + pad, z_min - pad, z_max + pad)
+
+    def nulls(state: dict[str, Any]) -> tuple[np.ndarray, np.ndarray]:
+        return (
+            np.asarray(state["axis"], dtype=float),
+            np.asarray(state["selected_x"], dtype=float).reshape(1, 2),
+        )
 
     figure, axes_row = plt.subplots(
         1, 2, figsize=(9.0, 5.0), dpi=DEFAULT_INK.figure_dpi
     )
     for axes, panel in zip(axes_row, panels, strict=True):
+        wall = panel["wall"]
+        own_axis, own_x = nulls(panel["state"])
         poloidal_axes(axes)
-        draw_flux_contours(axes, radius, height, panel["flux"], shared_levels)
+        draw_flux_contours(
+            axes, panel["radius"], panel["height"], panel["flux"], shared_levels
+        )
         draw_wall(axes, radius=wall[:, 0], height=wall[:, 1])
-        state = panel["state"]
-        before = len(axes.lines)
         draw_nulls(
-            axes,
-            magnetic_axis=np.asarray(state["axis"], dtype=float),
-            x_points=np.asarray(state["selected_x"], dtype=float).reshape(1, 2),
-            style=own,
-            contain=wall,
+            axes, magnetic_axis=own_axis, x_points=own_x, style=own, contain=wall
         )
         counterpart = panels[1] if panel is panels[0] else panels[0]
-        other_state = counterpart["state"]
+        other_axis, other_x = nulls(counterpart["state"])
         before = len(axes.lines)
         draw_nulls(
             axes,
-            magnetic_axis=np.asarray(other_state["axis"], dtype=float),
-            x_points=np.asarray(other_state["selected_x"], dtype=float).reshape(1, 2),
+            magnetic_axis=other_axis,
+            x_points=other_x,
             style=other,
             contain=wall,
         )
@@ -843,17 +935,52 @@ def _panel(old_path: Path, new_path: Path, out_path: Path, levels: int) -> int:
         axes.set_ylim(extent[2], extent[3])
         axes.set_autoscale_on(False)
         axes.set_title(panel["title"], fontsize=7.0)
+
+    identity = str(old["identity"]) if "identity" in old else old_path.stem
     figure.suptitle(
-        "MAST 21978/35 pure terminal state on one shared level array.\n"
+        f"{identity} terminal state pair on one shared level array.\n"
         "solid red: this panel's axis (triangle) and admitted saddle (cross); "
         "hollow grey: the other state's",
         fontsize=8.0,
     )
     figure.tight_layout(rect=(0.0, 0.0, 1.0, 0.90))
+    evidence = {
+        "shared_levels": [float(level) for level in shared_levels],
+        "wall_bit_identical": bool(np.array_equal(old["wall"], new["wall"])),
+        "grid_bit_identical": bool(
+            np.array_equal(old["radius"], new["radius"])
+            and np.array_equal(old["height"], new["height"])
+        ),
+    }
+    return figure, evidence
+
+
+def _panel(old_path: Path, new_path: Path, out_path: Path, levels: int) -> int:
+    """Render the terminal-state pair and record the inputs it was drawn from."""
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    figure, evidence = _panel_figure(old_path, new_path, levels)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(out_path, facecolor=figure.get_facecolor())
     plt.close(figure)
+    record = {
+        "artifact": "paired terminal-state poloidal contour panel",
+        "old": _repo_relative(old_path),
+        "new": _repo_relative(new_path),
+        "panel": _repo_relative(out_path),
+        "levels": int(levels),
+        "generated_at": datetime.now(UTC).isoformat(),
+        **evidence,
+    }
+    out_path.with_suffix(".json").write_text(
+        json.dumps(record, indent=1, sort_keys=True)
+    )
     print(f"wrote {out_path}", flush=True)
+    print(json.dumps(record, indent=1, sort_keys=True), flush=True)
     return 0
 
 
@@ -905,6 +1032,15 @@ def _parse() -> argparse.Namespace:
     merge.add_argument("--arms-dir", type=Path, required=True)
     merge.add_argument("--out", type=Path, required=True)
     merge.add_argument("--expected-rows", type=int, required=True)
+    merge.add_argument(
+        "--compile-log",
+        type=Path,
+        default=None,
+        help=(
+            "JAX_LOG_COMPILES capture for the campaign's remainder emission; "
+            "its path and digest are recorded beside the counts it yields"
+        ),
+    )
     resolve = sub.add_parser("resolve")
     resolve.add_argument("--tree-root", type=Path, required=True)
     resolve.add_argument("--label", required=True)
@@ -935,7 +1071,7 @@ def main() -> int:
             args.prefix,
         )
     if args.command == "merge":
-        return _merge(args.arms_dir, args.out, args.expected_rows)
+        return _merge(args.arms_dir, args.out, args.expected_rows, args.compile_log)
     if args.command == "panel":
         return _panel(args.old, args.new, args.out, args.levels)
     if args.command == "resolve":

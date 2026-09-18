@@ -1,0 +1,24 @@
+{
+ "artifact": "paired terminal-state poloidal contour panel",
+ "generated_at": "2026-09-18T08:35:19.171524+00:00",
+ "grid_bit_identical": true,
+ "levels": 12,
+ "new": "../../.config/reckon/crew/reports/nova/s19-local/bank-drift-remainder/panel/21978-35-pure-new.npz",
+ "old": "../../.config/reckon/crew/reports/nova/s19-local/bank-drift-remainder/panel/21978-35-pure-old.npz",
+ "panel": "../.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-drift-probe-record-repairs/docs/figures/null-identification-authority/bank-drift-probe/21978-35-pure-panels.png",
+ "shared_levels": [
+  -1.0073719398350316,
+  -0.8872113927927334,
+  -0.7670508457504353,
+  -0.6468902987081371,
+  -0.5267297516658389,
+  -0.40656920462354085,
+  -0.2864086575812427,
+  -0.1662481105389445,
+  -0.04608756349664633,
+  0.07407298354565173,
+  0.1942335305879499,
+  0.314394077630248
+ ],
+ "wall_bit_identical": true
+}

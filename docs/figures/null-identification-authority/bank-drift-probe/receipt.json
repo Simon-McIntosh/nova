@@ -1,20 +1,28 @@
 {
  "artifact": "paired old-tree against current-tree MAST operand-solve probe",
+ "compile_evidence": {
+  "compile_lines": 462,
+  "log": "../../.config/reckon/crew/reports/nova/s19-local/drift-probe-repairs/compile-22086-43.txt",
+  "marker": "Compiling ",
+  "sha256": "b96f7b6d80277ce11c3ddb737b5e0dc854626e49768ce1e08d7c8b7123aeffb0",
+  "solve_compile_marker": "Compiling jit(solve)",
+  "solve_compiles": 2
+ },
  "definitions": {
   "first_differing_stage": "the earliest stage in stage_order whose digest differs between the two trees; a difference at an earlier stage propagates into every later one, so this names where the trees first diverge, not necessarily the stage that moved the residual",
   "residual_moved": "the terminal residual differs between the trees in any bit; residual_ratio carries the magnitude, so a difference in the last bit and a difference of twelve decades both read as true here",
   "residual_ratio": "right-tree terminal residual divided by left-tree residual"
  },
- "generated_at": "2026-09-17T20:48:07.525407+00:00",
+ "generated_at": "2026-09-18T08:44:20.906108+00:00",
  "left": {
   "compile_cache": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
   "label": "fae50f15",
-  "root": "../../../../../.config/reckon/crew/reports/nova/s19-local/bank-drift/faefloor-tree"
+  "root": "../../.config/reckon/crew/reports/nova/s19-local/bank-drift/faefloor-tree"
  },
  "right": {
   "compile_cache": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
   "label": "main",
-  "root": "."
+  "root": "../.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-drift-probe-remainder-and-panels-2"
  },
  "rows": [
   {

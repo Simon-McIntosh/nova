@@ -121,8 +121,6 @@ def test_unit_check_recomputes_beta_and_inductance_from_the_integrals():
 def test_reading_keys_are_ordered_and_labelled():
     """Every reading the panel draws carries its label in one order."""
     combination = dict.fromkeys(READING_KEYS, 0.0)
-    from benchmarks.shafranov_combination_discriminator import readings
-
     block = readings(combination)
     assert list(block) == list(READING_KEYS)
     assert all(entry["label"] for entry in block.values())

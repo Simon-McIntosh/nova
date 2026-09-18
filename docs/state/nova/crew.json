@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T05:45:51",
+  "updated": "2026-09-18T09:56:41",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -186362,6 +186362,254 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T224621767999-review-of-nia-drift-support-row-audit",
+        "plan": "null-identification-authority",
+        "section": "\u00a71",
+        "node": "review-of-nia-drift-support-row-audit",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4025,
+                "cached_input_tokens": 926446,
+                "input_tokens": 930503,
+                "output_tokens": 333,
+                "reasoning_output_tokens": 148,
+                "total_tokens": 930836,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the review for r-20260917T205231194685-nia-drift-support-row-audit parses all five score dimensions, is stored at the fence path through reckon.crew.review store_review, and its findings check by reading that docs/figures/null-identification-authority/support-audit/support-audit.md tables every paired arm with the columns' provenance (emissions versus receipts) stated, that the three readings it rests on are traceable (the bank builder's declared-anchor occurrences identical between fae50f15 and HEAD, the profile_support digest identical per arm, no constraint_pairs on either tree), that the mechanism claim (a single constant partition digest with empty values on the producer tree against per-identity digests on the current tree, anchors as host constants versus traced member data through _dynamic_extra_names at forward_operator.py:2121-2131) is supported by the digests the receipts carry, and that the five commits touch only the declared write paths",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260917T205231194685-nia-drift-support-row-audit",
+          "id": "review-of-nia-drift-support-row-audit",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T22:46:22Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T224621767999-review-of-nia-drift-support-row-audit/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T205231194685-nia-drift-support-row-audit.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19c-review-niasup-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T22:46:36Z",
+        "completed_at": "2026-09-18T07:50:45.467Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 32561,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 32649,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "607ba5f238c62aa95c84a61a29bdcbcc78a03cb9",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "parse_review round trip on the stored review file",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T205231194685-nia-drift-support-row-audit.json",
+          "log_digest": "sha256:62608efe75caa03bd3e65e6561a3ac7d4a4a632a440038409d480e43920a6069"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T224621767999-review-of-nia-drift-support-row-audit/manifest.md",
+        "scope_changed": false,
+        "session_id": "da44e48d-95e9-40ef-aafd-15ca8b2a63e0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 1718369,
+            "input_tokens_cumulative": 1718369,
+            "output_tokens": 14644,
+            "output_tokens_cumulative": 14644,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T07:50:45.467Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 3449,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 6749,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2874,
+              "log_fresh": false,
+              "manifest_commits": [],
+              "manifest_derived": false,
+              "manifest_digest": "38b42ebe76cd6d73df513ae078a79efab4d4fcf14ca2f0523cfe09554350c8e5",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan null-identification-authority --section '\u00a71' --role review --spec-level exact --node review-of-nia-drift-probe-remainder-and-panels-2 --goal 'attach an independent review to run r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2' --done-when 'the review for r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2 parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2.json --time-budget 55m --session s19-codex-20260916 --local",
+              "node": "nia-drift-probe-remainder-and-panels-2",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T200541067292-nia-drift-probe-remainder-and-panels-2",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 2903,
+              "terminal_at": "2026-09-17T21:58:02Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-drift-probe-remainder-and-panels-2"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 1718369,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 451.724,
+          "generated_tokens": 14644,
+          "generation_seconds": 447.359,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.2,
+          "machine_seconds": 4.365,
+          "peak_input_tokens": 164382,
+          "tokens_per_second": 32.73,
+          "wall_tokens_per_second": 32.42
+        },
+        "follow_on_paths": [
+          "docs/figures/null-identification-authority/support-audit/support-audit.md:116",
+          "benchmarks/efit_forward_parity_slice.py",
+          "benchmarks/bank_drift_support_audit.py:207"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "review role; the deliverable is the stored review record outside the repository",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-nia-drift-support-row-audit",
+          "session_id": "da44e48d-95e9-40ef-aafd-15ca8b2a63e0",
+          "session_source": "stream",
+          "retained_at": "2026-09-18T07:50:45.467Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 22.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -186674,6 +186922,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2759
+    "_version": 2760
   }
 }

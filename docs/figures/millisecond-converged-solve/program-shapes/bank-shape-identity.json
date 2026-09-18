@@ -53,7 +53,7 @@
    "radius_max_abs_difference": 0.0,
    "height_max_abs_difference": 0.0,
    "wall_max_abs_difference": 0.0,
-   "flux_max_abs_difference": 0.0,
+   "flux_max_abs_difference": 0.482,
    "reading": "the twelve arms carry bit-identical mesh coordinates and wall geometry; the only array that differs across them is flux (max abs difference 0.482), which is a traced operand, so the value-keyed geometry_identity is shared across the twelve rather than distinct"
   },
   "distinct_program_reaching_shape_signatures_note": "shape-identical and geometry-identical: see geometry_value_agreement"
@@ -73,7 +73,7 @@
   "runtime_key_directories": 12,
   "entries": 3958,
   "bytes": 20044389103,
-  "gib": 18.662,
+  "gib": 18.668,
   "largest_directory": {
    "name": "runtime-0745ecebea4cb264e054",
    "entries": 1442,
@@ -93,7 +93,7 @@
   },
   "bound_is_per_directory": "LRUCache._evict enforces max_size against a single cache directory, and nova configures 8 GiB (nova/jax/config.py:27). Twelve runtime-version keys therefore carry twelve independent bounds: the aggregate ceiling is up to 12 x 8 GiB = 96 GiB, and the observed 18.7 GiB is a sum across twelve directories rather than a reading against one bound",
   "observed_overshoot": "runtime-0745ecebea4cb264e054 holds 8.707 GiB, above the 8 GiB bound: _evict runs while dir_size > max_size - additional_size on each put, so a directory can settle just above the bound once no further put has flushed it",
-  "bound_correction_to_plan": "f-msc-program-size-budget records '1907 entries totalling 7.6 GB' for the persistent cache: that figure is one runtime key, not the cache. The installed cache today is 3958 entries / 18.662 GiB across twelve keys",
+  "bound_correction_to_plan": "f-msc-program-size-budget records '1907 entries totalling 7.6 GB' for the persistent cache: that figure is one runtime key, not the cache. The installed cache today is 3958 entries / 18.668 GiB across twelve keys, measured in this census's own capture",
   "entries_the_twelve_identities_need": "one entry today: the twelve arms are shape-identical and carry bit-identical mesh exactly because they share one program; the four certificate cases need four entries today, one per realised capacity, under the census's 300-cell rung"
  },
  "method": [

@@ -78,6 +78,17 @@ def traced_polygon_vertex_capacity(straight_vertex_capacity: int) -> int:
     return _SPLINE_BOUNDARY_SEGMENTS + int(straight_vertex_capacity)
 
 
+class TracedCapacityRefusalError(RuntimeError):
+    """Raised when a clipped layout exceeds the derived traced-polygon capacity.
+
+    The refusal is carried rather than dropped: a cell whose live vertex count
+    passes :func:`traced_polygon_vertex_capacity` cannot be packed into the
+    fixed shape, so :meth:`TracedClippedSupports.assert_no_refusal` makes the
+    count a failure the solve can surface instead of an included flag that
+    reads as an empty cell.
+    """
+
+
 def _signed_area(vertices: np.ndarray) -> float:
     if len(vertices) < 3:
         return 0.0
@@ -201,7 +212,14 @@ class LinearCurrentMoments:
 
 
 class TracedClippedSupports(NamedTuple):
-    """JAX arrays describing fixed-capacity supports for one flux map."""
+    """JAX arrays describing fixed-capacity supports for one flux map.
+
+    ``vertex_capacity`` is the derived traced-polygon bound the layout is
+    packed against, and ``refused_cell_count`` counts the cells whose live
+    vertex count passed the bound. A refused cell carries zero geometry, so
+    the geometry fields alone cannot distinguish it from a cell the clip
+    legitimately left outside; the count is what reports it.
+    """
 
     support_vertices: object
     vertex_count: object
@@ -221,6 +239,27 @@ class TracedClippedSupports(NamedTuple):
     branch_second_area_moment: object
     saddle: object
     saddle_vertex: object
+    vertex_capacity: object = 0
+    refused_cell_count: object = 0
+
+    def refused_cells(self) -> int:
+        """Return how many cells were refused for exceeding the capacity."""
+        return int(np.asarray(self.refused_cell_count))
+
+    def assert_no_refusal(self) -> None:
+        """Fail closed when any cell exceeded the derived vertex capacity.
+
+        A refused cell is packed as an empty inclusion, which is
+        indistinguishable from a cell the clip placed outside the plasma and
+        would otherwise be dropped from the support in silence. A caller that
+        must not lose a cell calls this and gets the count in the message.
+        """
+        refused = self.refused_cells()
+        if refused:
+            raise TracedCapacityRefusalError(
+                f"{refused} clipped cell(s) exceeded the derived traced-polygon "
+                f"vertex capacity {int(np.asarray(self.vertex_capacity))}"
+            )
 
     def qualify(self, participation):
         """Zero every geometric measure outside a topology participation mask."""
@@ -1306,6 +1345,8 @@ def _traced_clip(
         branch_second_area_moment=branch_second,
         saddle=saddle,
         saddle_vertex=saddle_point,
+        vertex_capacity=jnp.asarray(support_capacity, dtype=jnp.int32),
+        refused_cell_count=jnp.sum(overflow).astype(jnp.int32),
     )
 
 

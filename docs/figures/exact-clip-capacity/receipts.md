@@ -63,6 +63,26 @@ The included mask and the per-cell vertex count are equal bit-for-bit on all
 three rows as well (`mismatch_count: 0` on every array), so the narrower
 capacity moved no produced number and no cell's polygon.
 
+### These identity receipts are compare-only reruns
+
+`identity-{110,300,1000}.json` is **not** one job's before/after. It is a
+comparison of two separately captured snapshots: `snap-<cells>-{base,current}.npz`
+are each written by their own process with `PYTHONPATH` naming that revision's
+tree (`benchmarks.exact_clip_identity.py`, module-level import selects the code
+under measurement), and `compare-<cells>.log` is a third process that reads the
+two snapshots and differs them last-bit. Three fresh processes per row, not one.
+
+Two consequences of that shape, both visible in the receipt:
+
+- The receipt's own `base_revision` and `current_revision` fields read the
+  literal strings `"base"` and `"current"` — the role of each arm, not a
+  revision. The revision each arm measured is not carried in the receipt and
+  has to be taken from the run's tree, so a reader cannot check the receipt
+  against a commit from the receipt alone.
+- The per-row identity allocations that were meant to sit behind these
+  receipts ended in a `TypeError` and produced no entry, so the `arrays` block
+  holds only the compare-only result and no per-row allocation identity.
+
 ## Memory scaling before and after
 
 `benchmarks/exact_clip_memory_scaling.py` unchanged, one `all_debug` allocation

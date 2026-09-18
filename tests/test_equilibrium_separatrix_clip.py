@@ -13,6 +13,7 @@ from nova.equilibrium.separatrix_clip import (
     complete_polynomial_powers,
     padded_linear_current_moments,
     padded_polynomial_current_moments,
+    TracedCapacityRefusalError,
     traced_polygon_vertex_capacity,
 )
 from nova.equilibrium.observation import clipped_support_quadrature
@@ -697,7 +698,7 @@ def test_traced_polygon_capacity_is_the_arc_plus_the_straight_chain():
 
 
 def test_spline_clip_refuses_a_polygon_above_the_derived_capacity():
-    """A layout wider than one arc plus its straight chain is refused."""
+    """A two-arc layout is refused, counted on the result (not silently dropped)."""
     configure_dtypes()
     cell = np.asarray([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
     mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.5, 0.5]]))
@@ -712,6 +713,10 @@ def test_spline_clip_refuses_a_polygon_above_the_derived_capacity():
 
     live = int(np.sum(np.asarray(signed) > 0.0))
     assert live >= 2, "the fixture must leave the level set on two runs"
+    assert int(support.refused_cells()) == 1, "the refusal must be counted"
+    assert int(np.asarray(support.vertex_capacity)) == capacity
+    with pytest.raises(TracedCapacityRefusalError):
+        support.assert_no_refusal()
     assert int(np.asarray(support.included[0])) == 0
     assert int(support.vertex_count[0]) == 0
     assert float(support.area[0]) == 0.0

@@ -3651,7 +3651,7 @@ def _certificate_compile_problem(
     chord_capacity = int(atomic_mesh.support_capacity)
     chain_samples = int(separatrix_clip._SPLINE_BOUNDARY_SEGMENTS)
     quadrature_axis_nodes = len(observation._UNIT_NODE)
-    exact_capacity = chord_capacity * chain_samples
+    exact_capacity = separatrix_clip.traced_polygon_vertex_capacity(chord_capacity)
     return (
         profile,
         seed,
@@ -3932,8 +3932,10 @@ def _write_memory_identification_report(
         "",
         f"- `{dimensions['realised_cells']}` carried cells;",
         f"- atomic polygon capacity `{dimensions['atomic_support_capacity']}` "
-        f"expanded by `{dimensions['spline_chain_samples_per_chord']}` spline-chain "
-        f"samples to fixed support capacity `{dimensions['exact_support_capacity']}`;",
+        f"raised by the derived traced-polygon bound "
+        f"(`{dimensions['spline_chain_samples_per_chord']}` arc samples plus the "
+        f"straight chain) to fixed support capacity "
+        f"`{dimensions['exact_support_capacity']}`;",
         f"- `(support capacity - 2) * 8 * 8 = ({dimensions['exact_support_capacity']} "
         f"- 2) * 64 = {exact_q}` degree-fifteen Duffy quadrature points per cell;",
         "- `6` local quadratic flux-basis terms.",

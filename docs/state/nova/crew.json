@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T14:17:59",
+  "updated": "2026-09-18T14:20:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -190835,6 +190835,312 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260918T085211696309-review-of-nia-drift-probe-record-repairs",
+        "plan": "null-identification-authority",
+        "section": "",
+        "node": "review-of-nia-drift-probe-record-repairs",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1294,
+                "cached_input_tokens": 474427,
+                "input_tokens": 475753,
+                "output_tokens": 1030,
+                "reasoning_output_tokens": 110,
+                "total_tokens": 476783,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the review for r-20260918T080721770101-nia-drift-probe-record-repairs parses all five score dimensions, is stored at the fence path through reckon.crew.review store_review as soon as every dimension has a first score and then refined in place, and its findings check by reading that benchmarks/bank_drift_paired_probe.py now draws or records each panel's wall source honestly, that the merged receipt under docs/figures/null-identification-authority/bank-drift-probe/ states repository-relative roots and the compile-line count with its log path, that tests/test_bank_drift_paired_probe.py pins line contours on the shared levels, both null sets and the wall through the figure's artists, that the re-rendered panel came from existing arm emissions with no new solve on an all_debug job whose log sits under the node's reports fence, and that the single commit 1892b73f touches only the declared write paths",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260918T080721770101-nia-drift-probe-record-repairs",
+          "id": "review-of-nia-drift-probe-record-repairs",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-18T08:52:13Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T085211696309-review-of-nia-drift-probe-record-repairs/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260918T080721770101-nia-drift-probe-record-repairs.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19c-review-niaprobe-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-18T08:52:37Z",
+        "completed_at": "2026-09-18T12:14:05.238Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 12035,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 12088,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "1892b73f675167c9dc3896ffcc9061785fc01b69",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "parse_review round trip on the stored review file",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260918T080721770101-nia-drift-probe-record-repairs.json",
+          "log_digest": "sha256:ecddba7c5113bafcd82516d63d3b86d8427bb5608da38addc8427455a18d502f"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T085211696309-review-of-nia-drift-probe-record-repairs/manifest.md",
+        "scope_changed": false,
+        "session_id": "1d11a71e-4012-401f-a5ec-d759ad2ef4a6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 314939,
+            "input_tokens_cumulative": 314939,
+            "output_tokens": 2186,
+            "output_tokens_cumulative": 2186,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T12:14:05.238Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "promotable",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+              "elapsed_seconds": 525,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 3659,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9bd309a3",
+                "efe5f857",
+                "7e58967b",
+                "2e848df7"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0967b66f73cf743370bf4410085fd85f02b8472236f964f547895efd08e65451",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T204844553132-msc-canonical-program-shapes-census/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260917T204844553132-msc-canonical-program-shapes-census --gate <verdict> --commit 9bd309a3 --commit efe5f857 --commit 7e58967b --commit 2e848df7",
+              "node": "msc-canonical-program-shapes-census",
+              "phase": "working",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "promote",
+              "recovery_classification": "promotable",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": true,
+              "review_status": "parsed",
+              "run_id": "r-20260917T204844553132-msc-canonical-program-shapes-census",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 3887,
+              "terminal_at": "2026-09-18T07:47:33Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-canonical-program-shapes-census"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1458,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1477,
+              "log_fresh": false,
+              "manifest_commits": [
+                "7df99f0fbdbbdf4d283b3f1ff55037e709c800b1",
+                "17f7eb8c12d38e39715736cd8ae50def36a50a4c"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "f7c483d359936c360034cb4d1ad1e6815f1bf07a77ae2e2d24bc0c083825acda",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T080316545538-cank-shafranov-refused-row-field/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan constraint-augmented-newton-krylov --section '' --role review --spec-level exact --node review-of-cank-shafranov-refused-row-field --goal 'attach an independent review to run r-20260918T080316545538-cank-shafranov-refused-row-field' --done-when 'the review for r-20260918T080316545538-cank-shafranov-refused-row-field parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260918T080316545538-cank-shafranov-refused-row-field.json --time-budget 45m --session s19-codex-20260916 --local",
+              "node": "cank-shafranov-refused-row-field",
+              "phase": "starting",
+              "plan": "constraint-augmented-newton-krylov",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260918T080316545538-cank-shafranov-refused-row-field",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 1532,
+              "terminal_at": "2026-09-18T08:26:51Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-refused-row-field"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 314939,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 282.367,
+          "generated_tokens": 2186,
+          "generation_seconds": 281.167,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.8,
+          "machine_seconds": 1.2,
+          "peak_input_tokens": 167220,
+          "tokens_per_second": 7.77,
+          "wall_tokens_per_second": 7.74
+        },
+        "follow_on_paths": [
+          "tests/test_bank_drift_paired_probe.py:395",
+          "/tmp/review-niadpr/mut-m2.log.",
+          "tests/test_bank_drift_paired_probe.py:394",
+          "/tmp/review-niadpr/mut-m3.log).",
+          "right.root",
+          "docs/figures/"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "review role; the deliverable is the stored review record outside the repository",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-nia-drift-probe-record-repairs",
+          "session_id": "1d11a71e-4012-401f-a5ec-d759ad2ef4a6",
+          "session_source": "stream",
+          "retained_at": "2026-09-18T12:14:05.238Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 79.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -191147,6 +191453,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2793
+    "_version": 2794
   }
 }

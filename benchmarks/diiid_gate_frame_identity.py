@@ -23,7 +23,16 @@ all and holds no compiled program.
 
 Each child runs under a wall-clock timeout.  A child that exceeds it is killed
 and reported as a hang with the timeout that expired, so a frame that never
-returns does not consume the allocation it was granted.
+returns does not consume the allocation it was granted.  While a child holds
+its frame it reports its wall time, its CPU time and its host memory once a
+minute: a compiling child prints no instrument output for many minutes, and
+CPU time advancing with wall time is what separates a long compile from a
+child blocked against the card.  The hang names the child's last line, so the
+report says which of the two it was.  Each child also records the device
+memory the card reports as available at its frame's start, beside the pool
+policy the process inherited, because the compile completes before the
+executable's command buffers are instantiated and it is that instantiation
+which the card has to have room for.
 
 The child writes its own frame receipt before it exits.  The parent reads those
 receipts back rather than rebuilding them, and it carries on to the next frame
@@ -51,9 +60,12 @@ import json
 import numpy as np
 import os
 import re
+import resource
 import subprocess
 import sys
 import tempfile
+import threading
+import time
 import traceback
 from pathlib import Path
 from typing import Any
@@ -80,16 +92,27 @@ DEFAULT_MACHINE_CACHE = Path(
 ARTIFACT_ARMS = ("base", "head")
 PRIMARY_ARTIFACT_ARM = "head"
 SCHEDULED_CORE_COUNT = 8
-# One frame's compile plus both strict-exit passes runs well inside this; the
-# value exists to bound a hang rather than to pace the work.
-DEFAULT_FRAME_TIMEOUT_SECONDS = 1800.0
+# One frame's cold compile was measured at 682 s and the batch this compares
+# against compiled cold in 1579 s, so the ceiling is set well above both: it
+# exists to bound a hang, not to pace a compile that is still working.
+DEFAULT_FRAME_TIMEOUT_SECONDS = 3600.0
+# A compiling child prints no instrument output for many minutes.  The
+# heartbeat separates a long compile from a child blocked against the card:
+# a compile's CPU time advances with its wall time, a blocked child's does not.
+HEARTBEAT_INTERVAL_SECONDS = 60.0
 # A child holds one frame's compiled program, so the floor mirrors the
 # instrument's own 128 GiB H200 requirement rather than the footprint the
 # whole-set batch reaches when it accumulates five frames in one process.
 MINIMUM_NODE_MEMORY_MIB = 128 * 1024
-DEFAULT_CACHE_ROOT = Path(
-    "/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile"
-)
+# The width-one frame is far smaller than the width-five batch that ran on this
+# card class, so a device offering less than this cannot serve the measurement
+# and says so before the frame's compile rather than after it.
+MINIMUM_DEVICE_AVAILABLE_MIB = 32 * 1024
+# The root the committed batch artifact's run recorded, so a frame's compile
+# is keyed against the same hardware autotuning measurements the artifact was
+# produced with.  The frames are new programs and miss the whole-program
+# entries either way; the per-fusion autotune entries are what they share.
+DEFAULT_CACHE_ROOT = Path("/home/ITER/mcintos/.cache")
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -532,6 +555,8 @@ def run(arguments: argparse.Namespace) -> int:
             "role": "frame_child" if child else "driver",
         }
     )
+    if child:
+        header["device_memory"] = _device_memory_receipt()
     print("IDENTITY_HEADER=" + json.dumps(header, sort_keys=True), flush=True)
     for key, value in header.items():
         print(f"HEADER_FIELD {key}={value}", flush=True)
@@ -586,6 +611,115 @@ def _measure(
     return _persist(arguments, header, frames, artifact_index, arguments.repeats)
 
 
+def _device_memory_receipt() -> dict[str, Any]:
+    """What the assigned device reports about the memory it has left.
+
+    A child that cannot get device memory for its frame answers here, at the
+    frame's start, rather than after eleven minutes of compile: the first
+    allocation's frame 0 reached its compile's end and then failed to
+    instantiate the executable's command buffers, so the memory a frame needs
+    is not knowable from the host footprint alone.  The pool policy the
+    process inherited is recorded beside it, because it is what decides
+    whether the instantiation has room.
+    """
+    import jax
+
+    devices = jax.devices("gpu")
+    stats: dict[str, Any] | None = None
+    if len(devices) == 1:
+        stats = devices[0].memory_stats()
+    available_mib = None
+    if stats and stats.get("bytes_available") is not None:
+        available_mib = float(stats["bytes_available"]) / (1024.0 * 1024.0)
+    return {
+        "device_count": len(devices),
+        "device_kind": devices[0].device_kind if devices else None,
+        "available_mib": available_mib,
+        "stats_mib": (
+            {
+                key: float(value) / (1024.0 * 1024.0)
+                for key, value in stats.items()
+                if isinstance(value, int | float)
+            }
+            if stats
+            else None
+        ),
+        "minimum_available_mib": MINIMUM_DEVICE_AVAILABLE_MIB,
+        "xla_python_client_preallocate": os.environ.get(
+            "XLA_PYTHON_CLIENT_PREALLOCATE"
+        ),
+        "xla_python_client_mem_fraction": os.environ.get(
+            "XLA_PYTHON_CLIENT_MEM_FRACTION"
+        ),
+    }
+
+
+class _Heartbeat:
+    """Report a child's wall time, CPU time and host memory while it works.
+
+    A compiling child prints no instrument output for many minutes, so silence
+    alone does not say whether it is compiling or blocked against the card.
+    CPU time advancing with wall time says the compile is still working, and
+    the reading survives in the child's log when the parent kills it, which is
+    what lets a hang report name what the child was doing.
+    """
+
+    def __init__(self, identity: str, interval: float) -> None:
+        self.identity = identity
+        self.interval = interval
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+        self._started = 0.0
+
+    @staticmethod
+    def _cpu_seconds() -> float:
+        usage = resource.getrusage(resource.RUSAGE_SELF)
+        return usage.ru_utime + usage.ru_stime
+
+    def _report(self) -> None:
+        from benchmarks import strict_exit_incidence as instrument
+
+        print(
+            f"STAGE DIIID_FRAME_HEARTBEAT identity={self.identity!r} "
+            f"elapsed_s={time.monotonic() - self._started:.3f} "
+            f"cpu_s={self._cpu_seconds():.3f} "
+            f"rss_mib={instrument._PeakRssSampler._current_mib():.3f}",
+            flush=True,
+        )
+
+    def _loop(self) -> None:
+        while not self._stop.wait(self.interval):
+            try:
+                self._report()
+            except BaseException:
+                return
+
+    def __enter__(self) -> _Heartbeat:
+        self._started = time.monotonic()
+        self._thread = threading.Thread(target=self._loop, daemon=True)
+        self._thread.start()
+        return self
+
+    def __exit__(self, *exception: Any) -> bool:
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout=5.0)
+        return False
+
+
+def _last_log_line(path: Path) -> str | None:
+    """The last line a child wrote, which its own process is gone to explain."""
+    try:
+        lines = [
+            line.strip()
+            for line in path.read_text(encoding="utf-8", errors="replace").splitlines()
+            if line.strip()
+        ]
+    except OSError:
+        return None
+    return lines[-1] if lines else None
+
+
 def _frame_child(
     arguments: argparse.Namespace,
     header: dict[str, Any],
@@ -612,7 +746,10 @@ def _frame_child(
     outcome_path = Path(arguments.exchange) / f"{_slug(identity)}.json"
     outcome: dict[str, Any]
     try:
-        result = instrument._measure_machine([member], arguments.repeats, name="DIIID")
+        with _Heartbeat(identity, HEARTBEAT_INTERVAL_SECONDS):
+            result = instrument._measure_machine(
+                [member], arguments.repeats, name="DIIID"
+            )
         row = result["members"][0]
         try:
             receipt = _frame_receipt(
@@ -663,6 +800,7 @@ def _frame_child(
             "index": index,
             "error": traceback.format_exc(),
         }
+    outcome["device_memory"] = header.get("device_memory")
     _write_json(outcome_path, outcome)
     return 0 if outcome["status"] != "failed" else 1
 
@@ -707,6 +845,7 @@ def _frame_in_child(
             exit_code = completed.returncode
         except subprocess.TimeoutExpired:
             timed_out = True
+    last_line = _last_log_line(stdout_path)
     outcome: dict[str, Any]
     if timed_out:
         outcome = {
@@ -715,7 +854,9 @@ def _frame_in_child(
             "index": index,
             "error": (
                 "the child exceeded the per-frame timeout of "
-                f"{arguments.frame_timeout_seconds:.0f} s and was killed"
+                f"{arguments.frame_timeout_seconds:.0f} s and was killed; its "
+                f"last line was {last_line!r}, whose cpu_s against elapsed_s "
+                "says whether it was still compiling when the ceiling expired"
             ),
         }
     elif outcome_path.exists():
@@ -742,6 +883,7 @@ def _frame_in_child(
             "timed_out": timed_out,
             "child_command": command,
             "child_stdout_log": _relative(stdout_path),
+            "last_child_line": last_line,
             "receipt_path": str(receipt_path),
         }
     )

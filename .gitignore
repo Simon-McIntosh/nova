@@ -180,3 +180,11 @@ nova/_version.py
 
 # Reckon runtime lock files (session-scoped, never committed)
 docs/.reckon/locks/
+
+# Figures under docs/figures are published artefacts served by the reckon docs
+# mount. Track them despite the global image ignore above and the Python
+# template's parts/ ignore, so publishing one never needs git add -f.
+!docs/figures/**/*.png
+!docs/figures/**/*.svg
+!docs/figures/**/parts/
+!docs/figures/**/parts/*.json

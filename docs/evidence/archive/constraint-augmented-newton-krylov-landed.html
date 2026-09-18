@@ -493,9 +493,18 @@
       null sets — the reference state's and the terminal state's — in the committed null vocabulary. Both arms terminated unconverged with
       <code>active_set_cycle_detected</code>; terminal residuals 0.0507 (pressure-gradient arm) and 0.2242 (<code>FF&#8242;</code> arm), with the caption
       and legend carrying the same figures. The panel set is produced by the committed
-      <code>nova.media</code> painters on an H200 node. The vector companion of this figure (<code>row-21978-35.svg</code>) is emitted beside
-      the raster by the same renderer; its own lane is queued and had not started when this record was written, so only the raster is
-      published here.</p>
+      <code>nova.media</code> painters on an H200 node.
+      The vector companion <a href="/nova/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.svg"><code>row-21978-35.svg</code></a>
+      is published beside the raster, so a reader that cannot open a PNG still reads the two component panels, the fitted orders, the
+      condition numbers and the caption. It was redrawn on a CPU <code>all_debug</code> allocation from the persisted receipt rather than by
+      the lane that produced the raster: no solve runs for the component panels, only the row's profiles re-extracted and re-projected, and
+      each freed-scale curve drawn at the amplitude the banked solve reported. Before anything is written the redraw re-derives the fit and
+      refuses the row unless the order, the basis, the SI scale, the condition number and the relative residual all reproduce the receipt to
+      <code>rtol=1e-9</code>; this row reproduced all six, which is why the companion is evidence about the same projection, but the identity
+      is a comparison against the record — not a byte identity with the raster. Only the raster's third panel carries the terminal state:
+      the receipt persists the terminal residual and the converged flag but <em>not</em> the terminal flux field, so the redraw has nothing
+      to redraw there and its third panel carries the reference state alone, saying so in its own title. The two figures must therefore be
+      read as one measurement with one panel short of the other, and the caption each carries states the same two terminal residuals.</figcaption>
     </figure>
     <p><strong>What the run cost, and what it did not reach.</strong> One H200 job (betelgeuse 1273593, <code>gpu_0003_grpA</code>, one
     card, 8 CPUs, 128G, the root environment's interpreter running the worktree through <code>PYTHONPATH</code>, versioned persistent

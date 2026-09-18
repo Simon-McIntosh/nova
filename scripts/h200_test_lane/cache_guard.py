@@ -8,6 +8,15 @@ the lane serves and the miss budget, and prints one row per program. A lane run
 whose miss count exceeds the budget prints WALL-CLOCK-UNRELIABLE and fails; a run
 that declares itself a pre-warm prints the same rows with no budget enforced,
 because compiling those programs is the work it is there to do.
+
+A write is only a write when the persistent cache is enabled. JAX calls
+``put_executable_and_time`` on every compile that clears the minimum compile
+time and returns without touching the disk when ``jax_compilation_cache_dir`` is
+unset, which is the state ``JAX_ENABLE_COMPILATION_CACHE=1`` alone leaves it in.
+Recording that call as a miss alone therefore reports a compile cost the run
+never persisted, so each write also records whether the cache was enabled and a
+run whose writes were not persisted fails with CACHE-NOT-PERSISTED rather than
+reporting a populated cache.
 """
 
 from __future__ import annotations
@@ -22,6 +31,7 @@ from typing import Any
 
 __all__ = [
     "WALL_CLOCK_UNRELIABLE",
+    "CACHE_NOT_PERSISTED",
     "PREWARM_RUN_MARKER",
     "DEFAULT_MISS_BUDGET",
     "PINNED_CACHE_ROOT",
@@ -39,6 +49,7 @@ __all__ = [
 ]
 
 WALL_CLOCK_UNRELIABLE = "WALL-CLOCK-UNRELIABLE"
+CACHE_NOT_PERSISTED = "CACHE-NOT-PERSISTED"
 PREWARM_RUN_MARKER = "pre-warm-run"
 DEFAULT_MISS_BUDGET = 0
 MISS_BUDGET_VARIABLE = "NOVA_CACHE_MISS_BUDGET"
@@ -85,8 +96,16 @@ class CacheLedger:
 
     entries: dict[str, dict[str, Any]] = field(default_factory=dict)
     installed: bool = False
+    unpersisted_misses: int = 0
 
-    def record(self, key: str, program: str, seconds: float, outcome: str) -> None:
+    def record(
+        self,
+        key: str,
+        program: str,
+        seconds: float,
+        outcome: str,
+        persisted: bool = True,
+    ) -> None:
         entry = self.entries.get(key)
         if entry is None:
             entry = {"cache_key": key, "program": program, "hits": 0, "misses": 0}
@@ -99,6 +118,9 @@ class CacheLedger:
         else:
             entry["misses"] += 1
             entry["compile_seconds"] = seconds
+            if not persisted:
+                entry["unpersisted_misses"] = entry.get("unpersisted_misses", 0) + 1
+                self.unpersisted_misses += 1
 
     def hit_count(self) -> int:
         return sum(entry["hits"] for entry in self.entries.values())
@@ -146,7 +168,8 @@ def install() -> CacheLedger:
     def put_executable_and_time(
         cache_key, module_name, executable, backend, compile_time
     ):
-        _LEDGER.record(cache_key, module_name, float(compile_time), "miss")
+        persisted = bool(compilation_cache.is_persistent_cache_enabled())
+        _LEDGER.record(cache_key, module_name, float(compile_time), "miss", persisted)
         return original_put(cache_key, module_name, executable, backend, compile_time)
 
     compilation_cache.get_executable_and_time = get_executable_and_time
@@ -171,15 +194,38 @@ def pinned_cache_directory() -> Path:
     return Path(reference["directory"])
 
 
+def served_directory_state() -> dict[str, Any]:
+    """Report the directory this process writes executables into, if any.
+
+    The persistent cache is only enabled when a directory is configured, so a
+    run whose compilations were never persisted shows up here as a named
+    directory holding nothing rather than as a populated cache.
+    """
+    import jax
+
+    configured = jax.config.jax_compilation_cache_dir
+    return {
+        "served_directory": str(configured) if configured else "",
+        "served_entries": directory_entry_count(configured) if configured else 0,
+    }
+
+
+def directory_entry_count(directory: Path | str) -> int:
+    """Return the number of files written under a cache directory."""
+    path = Path(directory)
+    if not path.is_dir():
+        return 0
+    return sum(1 for entry in path.rglob("*") if entry.is_file())
+
+
 def verify_pinned_directory() -> dict[str, Any]:
     """Report the pinned directory's entry count and the pre-warm revision."""
     directory = pinned_cache_directory()
-    entries = 0
+    entries = directory_entry_count(directory)
     bytes_on_disk = 0
     if directory.is_dir():
-        for path in directory.iterdir():
+        for path in directory.rglob("*"):
             if path.is_file():
-                entries += 1
                 bytes_on_disk += path.stat().st_size
     reference = pin_reference() or {}
     return {
@@ -229,15 +275,21 @@ def _gpu_utilisation(command: list[str]) -> str:
 
 def emit_header(cache_directory: Path | str, version_key: str = "") -> None:
     """Print the cache contract this run is measured under."""
+    import jax
+
     reference = pin_reference()
     print("CACHE_GUARD_DIRECTORY=%s" % pinned_cache_directory(), flush=True)
     print("CACHE_GUARD_ROOT=%s" % PINNED_CACHE_ROOT, flush=True)
     print("CACHE_GUARD_SERVED=%s" % cache_directory, flush=True)
+    print(
+        "CACHE_GUARD_CACHE_ENABLED=%s"
+        % (jax.config.jax_compilation_cache_dir or "none"),
+        flush=True,
+    )
     print("CACHE_GUARD_VERSION_KEY=%s" % version_key, flush=True)
     budget = miss_budget()
     print(
-        "CACHE_GUARD_MISS_BUDGET=%s"
-        % ("not-enforced" if budget is None else budget),
+        "CACHE_GUARD_MISS_BUDGET=%s" % ("not-enforced" if budget is None else budget),
         flush=True,
     )
     print(
@@ -269,6 +321,11 @@ def emit_receipt(version_key: str = "", revision: str = "unknown") -> dict[str, 
         marker = "%s misses=%d budget=%d" % (WALL_CLOCK_UNRELIABLE, misses, budget)
     else:
         marker = "wall-clock-reliable misses=%d budget=%d" % (misses, budget)
+    unpersisted = _LEDGER.unpersisted_misses
+    receipt["unpersisted_misses"] = unpersisted
+    receipt.update(served_directory_state())
+    if unpersisted:
+        marker += " unpersisted=%d" % unpersisted
     receipt["marker"] = marker
     print("CACHE_GUARD_MARKER=%s" % marker, flush=True)
     print("CACHE_GUARD_RECEIPT=%s" % json.dumps(receipt, sort_keys=True), flush=True)
@@ -282,11 +339,19 @@ def pytest_sessionstart(session, **_kwargs):
 
 
 def pytest_sessionfinish(session, **_kwargs):
-    """Emit the receipt; refuse a wall-clock result above the miss budget."""
+    """Emit the receipt; refuse a result the run cannot support."""
     receipt = emit_receipt(
         version_key=os.environ.get("NOVA_PREWARM_VERSION_KEY", ""),
         revision=os.environ.get("H200_LANE_EXPECTED_REVISION", "unknown"),
     )
+    if receipt["unpersisted_misses"]:
+        print(
+            "CACHE_GUARD_PERSISTENCE=%s misses=%d"
+            % (CACHE_NOT_PERSISTED, receipt["unpersisted_misses"]),
+            flush=True,
+        )
+        session.exitstatus = 1
+        return
     if not receipt["enforced"]:
         return
     refuse = os.environ.get(REFUSE_TIMING_VARIABLE, "1") not in {"0", "false", "no"}

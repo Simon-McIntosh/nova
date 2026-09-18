@@ -3,10 +3,13 @@
 #
 # The pinned root is on shared storage and outside every pruner root: not under
 # $HOME/.cache, and not inside a worktree, so a pre-warm survives until the next
-# merge-time pre-warm replaces it. The committed drivers select their cache
-# through default_persistent_compilation_cache_root(), which reads
-# NOVA_COMPILATION_CACHE_ROOT, so a launch that names the pinned root composes
-# its directory from that root alone and the lane resolves the same directory.
+# merge-time pre-warm replaces it. Naming that root is not enough to fill it:
+# only some drivers configure the persistent cache themselves, and
+# JAX_ENABLE_COMPILATION_CACHE on its own leaves the cache directory unset, in
+# which state every compile is recorded as a miss and written nowhere. The
+# payload therefore resolves the runtime directory through
+# default_persistent_compilation_cache_root() and exports it as
+# JAX_COMPILATION_CACHE_DIR, which is what makes each row's compilations land.
 #
 # This run declares itself a pre-warm, so the cache guard records its misses and
 # leaves the budget unenforced: filling the cache is what the job is for.
@@ -54,6 +57,22 @@ run_payload() {
   export JAX_PLATFORMS=cuda,cpu
   export JAX_ENABLE_COMPILATION_CACHE=1
   export JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS=0
+
+  # JAX_ENABLE_COMPILATION_CACHE alone enables nothing: it leaves
+  # jax_compilation_cache_dir unset, and a compile then reports a miss it never
+  # persists. The directory is resolved through nova's own runtime identity here
+  # and exported, so every row inherits a configured persistent cache whatever
+  # its drivers do with their own configuration.
+  local served_directory
+  if ! served_directory="$(
+    "${PYTHON}" -c 'from nova.jax.config import default_persistent_compilation_cache_root as resolve_root, configure_persistent_compilation_cache as configure; print(configure(resolve_root()).directory)'
+  )"; then
+    printf 'PREWARM_DIRECTORY_UNRESOLVED\n'
+    printf 'PREWARM_EXIT_STATUS=1\n'
+    return 1
+  fi
+  export JAX_COMPILATION_CACHE_DIR="${served_directory}"
+  printf 'PREWARM_SERVED_DIRECTORY=%s\n' "${served_directory}"
 
   printf 'PREWARM_START=%(%Y-%m-%dT%H:%M:%S%z)T\n' -1
   printf 'SLURM_JOB_ID=%s\n' "${SLURM_JOB_ID:-unknown}"
@@ -108,6 +127,17 @@ run_payload() {
 
   "${PYTHON}" "${LANE_DIRECTORY}/publish_prewarm_pin.py" \
     --receipt "${receipt}" --pin "${pin}" --revision "${actual_revision}" || status=$?
+
+  # A pre-warm that exits 0 while persisting nothing is the failure this job
+  # cannot report from its own rows alone: the receipts record compile cost
+  # whether or not the write reached the disk, so the directory is counted.
+  local served_entries
+  served_entries="$(find "${served_directory}" -type f | wc -l)"
+  printf 'PREWARM_SERVED_ENTRIES=%s\n' "${served_entries}"
+  if [[ "${served_entries}" -eq 0 ]]; then
+    printf 'PREWARM_UNPERSISTED_DIRECTORY=%s\n' "${served_directory}"
+    status=1
+  fi
 
   printf 'PREWARM_EXIT_STATUS=%s\n' "${status}"
   printf 'PREWARM_END=%(%Y-%m-%dT%H:%M:%S%z)T\n' -1

@@ -36,16 +36,19 @@ def run_command(argv: list[str]) -> int:
 def build_receipt(label: str, argv: list[str], status: int, seconds: float) -> dict:
     """Return one program's compile accounting as a receipt row."""
     ledger = cache_guard.ledger()
-    return {
+    row = {
         "label": label,
         "argv": argv,
         "status": status,
         "wall_seconds": round(seconds, 3),
         "hits": ledger.hit_count(),
         "misses": ledger.miss_count(),
+        "unpersisted_misses": ledger.unpersisted_misses,
         "compile_seconds": round(ledger.compile_seconds(), 3),
         "programs": ledger.rows(),
     }
+    row.update(cache_guard.served_directory_state())
+    return row
 
 
 def main() -> int:
@@ -70,6 +73,18 @@ def main() -> int:
     with open(args.receipt, "a", encoding="utf-8") as stream:
         stream.write(json.dumps(record, sort_keys=True) + "\n")
     print("PREWARM_ROW=%s" % json.dumps(record, sort_keys=True), flush=True)
+    if record["unpersisted_misses"]:
+        print(
+            "PREWARM_ROW_UNPERSISTED=%s label=%s misses=%d served_directory=%s"
+            % (
+                cache_guard.CACHE_NOT_PERSISTED,
+                args.label,
+                record["unpersisted_misses"],
+                record["served_directory"] or "none",
+            ),
+            flush=True,
+        )
+        return 1
     return status
 
 

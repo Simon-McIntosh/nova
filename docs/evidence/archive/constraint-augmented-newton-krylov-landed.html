@@ -511,7 +511,7 @@
         <tr><td>1281</td><td>1.4685123</td><td>1.2322838</td><td>1.9170e&minus;1</td><td>1.49e&minus;4, 1.41e&minus;4, 5.64e&minus;5</td></tr>
       </tbody>
     </table>
-    <p>The member residuals fall monotonically with the grid, and the assembled combination falls with them but far more slowly, which is the
+    <p>The radial and vertical member residuals fall with the grid while the toroidal member does not fall monotonically (2.91e-6 at 641 contour points, 5.64e-5 at 1281, per receipt.json), and the assembled combination falls far more slowly than any member, which is the
     cancellation above showing up exactly where the earlier paragraph predicts it would.</p>
     <figure>
       <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-integral/shafranov-integral-certificate.png"
@@ -541,7 +541,7 @@
     <p><strong>What that means for the number above.</strong> The certificate's contour field is the analytic row's own field sampled on the
     boundary, not a field imaged once on the grid and interpolated &mdash; so the identity it grades is the integral against the volume
     definition, which is what part one of the ruling asked to gate on. The grid-imaged route is not yet exercised by any committed evidence, and
-    the figure's title and its receipt both say so rather than leaving the omission to be inferred.</p>
+    the figure's title names the missing build-once timing; the receipt itself carries no statement about the grid-imaged route, so that omission is recorded here rather than in the receipt.</p>
     <p><strong>Follow-on.</strong> <code>nova/equilibrium/__init__.py</code> is outside this node's fence, so the two names are imported from
     <code>nova.equilibrium.diagnostics</code> directly in the tests; the proposed two-line export is archived at
     <code>~/.config/reckon/crew/reports/nova/s19-local/shafranov-integral-3/init_proposed.patch</code> for whoever owns that file. The plan's

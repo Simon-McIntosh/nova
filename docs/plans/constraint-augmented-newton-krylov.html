@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-18">
-<meta name="plan-version" content="73">
+<meta name="plan-version" content="74">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-commits" content="00ef0610,506c9fa9,eb77480b,e7d90cc8,84b23ee6,0081c3e9,4264668e,595cdd0f,6b9c4f25,989d561c,a283f243,5dd6b790,04ea37b0">
 <meta name="plan-artifacts" content="docs/evidence/archive/constraint-augmented-newton-krylov-landed.html,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.png,nova/equilibrium/constraint.py,benchmarks/constraint_centroid_receipt.py,tests/test_wall_null_flux_tangent.py,nova/geometry/select.py,tests/test_wall_polish_continuity.py,benchmarks/constraint_shape_receipt.py,tests/test_shape_constraints.py,docs/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png,docs/figures/constraint-augmented-newton-krylov/shape-control/two-arms.json,docs/figures/constraint-augmented-newton-krylov/shape-control/vertical-shift.json,docs/figures/constraint-augmented-newton-krylov/shape-control/elongation-raise.json,docs/figures/constraint-augmented-newton-krylov/shape-control/converged.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png">
@@ -473,6 +473,9 @@ evidence record at <code>docs/evidence/archive/constraint-augmented-newton-krylo
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260918T095022981007-cank-shafranov-integral" data-who="reckon-ship" data-when="2026-09-18T09:52:21.152Z">
     <div class="r-comment-body"><p>Stopped by the coordinator eight minutes in: the brief told the node to read the poloidal field on the contour from the mesh gradient stencil, and the lead ruled the field must come from the exact Biot-Savart evaluation on this grid, never from flux gradients. Redispatched as cank-shafranov-integral-2 with the corrected source; no commit landed.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260918T100204348033-cank-shafranov-integral-2" data-who="reckon-ship" data-when="2026-09-18T10:17:21.044Z">
+    <div class="r-comment-body"><p>Stopped by the coordinator minutes after dispatch: the brief allowed a Biot field target built at the contour points, which would recompute Biot interactions on every evaluation as the contour moves. The lead ruled that no Biot interaction is recalculated: field response matrices are computed once on the grid nodes like the flux response, currents are the only update, and the contour field is interpolated from the grid. Redispatched as cank-shafranov-integral-3; no commit landed.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

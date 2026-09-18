@@ -560,12 +560,14 @@ def reader_facts(output_root: Path) -> dict[str, Any]:
             for level in (True, False)
         }
         steps = {level: jax.jit(system.map_fn) for level, system in systems.items()}
-        initial = np.asarray(systems[True].initial, dtype=np.float64)
-        initial_state = jnp.asarray(initial)
-        newton_step_wall = _wall_per_evaluation(steps[True], initial_state)
-        # the same map without the level row, measured on the same state so the
-        # pair differs by the row alone rather than by the point it is asked at
-        newton_step_wall_without = _wall_per_evaluation(steps[False], initial_state)
+        # each map is evaluated at its own initial state: the two systems carry
+        # one unknown per row, so the level row's system holds one more
+        newton_step_wall = _wall_per_evaluation(
+            steps[True], jnp.asarray(systems[True].initial, dtype=jnp.float64)
+        )
+        newton_step_wall_without = _wall_per_evaluation(
+            steps[False], jnp.asarray(systems[False].initial, dtype=jnp.float64)
+        )
 
         builds = {}
         for level in (True, False):
@@ -586,6 +588,8 @@ def reader_facts(output_root: Path) -> dict[str, Any]:
         observed_seconds = observed_wall["seconds_per_evaluation"]
         step_seconds = newton_step_wall["seconds_per_evaluation"]
         level_cost = {
+            "unknowns_with_level_row": int(systems[True].initial.shape[0]),
+            "unknowns_without_level_row": int(systems[False].initial.shape[0]),
             "observed_seconds_per_evaluation": observed_seconds,
             "observed_repeats": observed_wall["repeats"],
             "one_newton_step_seconds": step_seconds,

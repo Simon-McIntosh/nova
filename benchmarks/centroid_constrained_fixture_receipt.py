@@ -132,6 +132,8 @@ def _lane(required: str) -> dict[str, Any]:
         raise RuntimeError("TMPDIR must be /tmp inside the allocation")
     return {
         "job_id": int(job_id),
+        "lane_requirement": required,
+        "scientific_receipt": required == "h200",
         "partition": os.environ["SLURM_JOB_PARTITION"],
         "node": os.environ.get("SLURMD_NODENAME", socket.gethostname()),
         "allocated_cpus": int(os.environ.get("SLURM_CPUS_PER_TASK", "1")),
@@ -951,19 +953,30 @@ def _control_verdict(
     return verdict
 
 
-def control_arm(output_root: Path, figure_path: Path, arm: str) -> dict[str, Any]:
+def control_arm(
+    output_root: Path,
+    figure_path: Path,
+    arm: str,
+    lane_requirement: str = "h200",
+) -> dict[str, Any]:
     """Solve one displaced-seed control and draw its own panel.
 
     The positive arm imposes the centroid row on a seed displaced from the
     analytic centroid; the negative arm runs the same displaced seed with no
     row. Each arm is its own job because one H200 job does not hold the four
     programs of a full receipt inside an hour.
+
+    The lane requirement is a parameter rather than a constant because a
+    displaced-seed solve is also the only route back to a terminal state the
+    record never persisted, and that route has to be reachable from a CPU debug
+    partition when the H200 reservation is held. The receipt records which lane
+    it ran on and whether it is the scientific one.
     """
     if arm not in ("positive", "negative"):
         raise ValueError(f"unknown control arm {arm!r}")
     configure_dtypes()
     configure_persistent_compilation_cache(default_forward_compilation_cache_root())
-    lane = _lane("h200")
+    lane = _lane(lane_requirement)
     constrained = arm == "positive"
     previous_mode = support_clip_mode()
     set_support_clip_mode("exact")
@@ -1242,6 +1255,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compile-probe-arm", choices=("unconstrained", "constrained"))
     parser.add_argument("--first-step", action="store_true")
     parser.add_argument("--control-arm", choices=("positive", "negative"))
+    parser.add_argument(
+        "--control-lane",
+        choices=("h200", "cpu"),
+        default="h200",
+        help="lane the control arm must run on; cpu means one all_debug allocation",
+    )
     parser.add_argument("--merge-controls", action="store_true")
     parser.add_argument("--reread-gauge", action="store_true")
     parser.add_argument(
@@ -1304,9 +1323,7 @@ def main() -> None:
         )
         return
     if arguments.reread_gauge:
-        report = reread_gauge_readings(
-            arguments.source_root,
-            arguments.output_root)
+        report = reread_gauge_readings(arguments.source_root, arguments.output_root)
         for arm in report["arms"]:
             print(
                 "CENTROID_GAUGE_REREAD "
@@ -1334,11 +1351,17 @@ def main() -> None:
         return
     if arguments.control_arm is not None:
         arm_figure = arguments.figure.with_name(f"control-{arguments.control_arm}.png")
-        control = control_arm(arguments.output_root, arm_figure, arguments.control_arm)
+        control = control_arm(
+            arguments.output_root,
+            arm_figure,
+            arguments.control_arm,
+            arguments.control_lane,
+        )
         solve = control["solve"]
         print(
             "CENTROID_CONTROL "
             f"arm={control['arm']} constrained={solve['constrained']} "
+            f"lane={control['lane']['partition']} "
             f"centroid_error_pitches={solve['centroid_error_pitches']:+.9e} "
             f"row_scaled_residual_sup={solve['row_scaled_residual_sup']:+.9e} "
             f"terminal_residual={solve['terminal_residual']:+.9e} "

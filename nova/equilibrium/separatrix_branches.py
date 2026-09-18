@@ -272,6 +272,15 @@ def assemble_separatrix_branches(
     )
 
     safe_labels = jnp.where(valid, labels, 0)
+    # The candidate count is a conjunction: a component must be closed AND
+    # enclose the axis.  Counting the halves separately says which of the two
+    # failed -- an open lobe that lost its cycle, or a closed lobe the parity
+    # read places outside the axis -- and the two need different repairs.
+    representative = valid & (safe_labels == jnp.arange(edge_count, dtype=jnp.int32))
+    cycle_component_count = jnp.sum(representative & cycle, dtype=jnp.int32)
+    axis_enclosing_component_count = jnp.sum(
+        representative & encloses_axis, dtype=jnp.int32
+    )
     component_has_saddle = jnp.zeros((edge_count,), dtype=bool)
     component_has_saddle = component_has_saddle.at[safe_labels].max(
         valid & edge_from_saddle
@@ -301,13 +310,17 @@ def assemble_separatrix_branches(
     open_valid &= open_slot_valid[:, None]
     open_controls = jnp.where(open_valid[..., None, None], open_controls, 0.0)
 
-    overflow = (closed_count > branch_capacity) | (open_count > open_branch_capacity)
-    overflow |= jnp.any(open_slot_valid & (open_segment_count > branch_capacity))
+    branch_overflow = (closed_count > branch_capacity) | jnp.any(
+        open_slot_valid & (open_segment_count > branch_capacity)
+    )
+    open_slot_overflow = open_count > open_branch_capacity
+    overflow = branch_overflow | open_slot_overflow
     graph_well_formed = jnp.all(
         ~valid | ((degree[nodes[:, 0]] <= 2) & (degree[nodes[:, 1]] <= 2))
     )
+    contour_well_formed = contour["well_formed"]
     well_formed = (
-        contour["well_formed"]
+        contour_well_formed
         & graph_well_formed
         & (closed_candidate_count == 1)
         & ~overflow
@@ -329,4 +342,15 @@ def assemble_separatrix_branches(
         "closed_candidate_count": closed_candidate_count,
         "overflow": overflow,
         "well_formed": well_formed,
+        # The invalidation is reported term by term because the geometry alone
+        # cannot distinguish a missing cycle from a non-unique one, a graph
+        # junction from a capacity overflow, or a branch overflow from an open
+        # slot overflow: all five return the same zeros, and each needs a
+        # different repair.
+        "contour_well_formed": contour_well_formed,
+        "graph_well_formed": graph_well_formed,
+        "branch_overflow": branch_overflow,
+        "open_slot_overflow": open_slot_overflow,
+        "cycle_component_count": cycle_component_count,
+        "axis_enclosing_component_count": axis_enclosing_component_count,
     }

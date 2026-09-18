@@ -1,0 +1,316 @@
+{
+  "schema": "writer-boundary-anchor-receipts",
+  "nova_revision": "04cf1244a2d02d13519cd4f929a14086f92d07ea",
+  "shot": 27079,
+  "written_frame_count": 16,
+  "boundary_gate_counts": {
+    "applied": 0,
+    "absent": 16
+  },
+  "rows": [
+    {
+      "manifest_row": 11,
+      "time_s": 0.009999999776482582,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6078280467588386,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6078280467588386,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.38322624529911076
+    },
+    {
+      "manifest_row": 12,
+      "time_s": 0.014999999664723873,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6061145667924808,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6061145667924808,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.3612410080542883
+    },
+    {
+      "manifest_row": 13,
+      "time_s": 0.019999999552965164,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6059339449365888,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6059339449365888,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.3419977940027408
+    },
+    {
+      "manifest_row": 14,
+      "time_s": 0.02499999850988388,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6057837773528248,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6057837773528248,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.3238364146325695
+    },
+    {
+      "manifest_row": 15,
+      "time_s": 0.029999999329447746,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6052100137499623,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6052100137499623,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.30447091554442274
+    },
+    {
+      "manifest_row": 16,
+      "time_s": 0.03500000014901161,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6050537429434033,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6050537429434033,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.2869457556754375
+    },
+    {
+      "manifest_row": 17,
+      "time_s": 0.03999999910593033,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6053884305779653,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6053884305779653,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.27124404929482954
+    },
+    {
+      "manifest_row": 18,
+      "time_s": 0.044999998062849045,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6057701556715609,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6057701556715609,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.2542924255675192
+    },
+    {
+      "manifest_row": 19,
+      "time_s": 0.04999999701976776,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6056552207512255,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6056552207512255,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.2364298222759731
+    },
+    {
+      "manifest_row": 20,
+      "time_s": 0.054999999701976776,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6050492428463243,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6050492428463243,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.21767387843993777
+    },
+    {
+      "manifest_row": 21,
+      "time_s": 0.05999999865889549,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6045779650605849,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6045779650605849,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.19936384013987574
+    },
+    {
+      "manifest_row": 22,
+      "time_s": 0.06499999761581421,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6040554692258795,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6040554692258795,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.1813152006666727
+    },
+    {
+      "manifest_row": 23,
+      "time_s": 0.07000000029802322,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6030080531680468,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6030080531680468,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.16812312230298465
+    },
+    {
+      "manifest_row": 24,
+      "time_s": 0.07499999552965164,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6007490022579915,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.6007490022579915,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.16138190299091185
+    },
+    {
+      "manifest_row": 25,
+      "time_s": 0.07999999821186066,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.598859789113823,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.598859789113823,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.1567343269703772
+    },
+    {
+      "manifest_row": 26,
+      "time_s": 0.08500000089406967,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.5970196887546664,
+        1.7280815839767456
+      ],
+      "boundary_position_m": [
+        0.5970196887546664,
+        1.7280815839767456
+      ],
+      "boundary_flux_wb": 0.14785544424590946
+    }
+  ]
+}

@@ -1,0 +1,421 @@
+{
+  "schema": "drawn-boundary-frame-table",
+  "nova_revision": "04cf1244a2d02d13519cd4f929a14086f92d07ea",
+  "shot": 27079,
+  "target_enclosed_area_ratio": 1.0,
+  "option_two_drawn_of_written": {
+    "drawn": 12,
+    "written": 16
+  },
+  "support_gated_drawn_of_written": {
+    "drawn": 11,
+    "written": 16
+  },
+  "baseline_drawn_of_written": {
+    "drawn": 81,
+    "written": 114
+  },
+  "boundary_gate_counts_all_written": {
+    "applied": 0,
+    "absent": 16
+  },
+  "matched_baseline_rows": [
+    {
+      "manifest_row": 15,
+      "time_s": 0.029999999329447746,
+      "baseline_ratio": 0.0418457614254097,
+      "option_two_ratio": 0.041845748037558514,
+      "difference": -1.3387851188761957e-08
+    },
+    {
+      "manifest_row": 16,
+      "time_s": 0.03500000014901161,
+      "baseline_ratio": 0.3353593144459693,
+      "option_two_ratio": 0.3353593144180556,
+      "difference": -2.7913671374335536e-11
+    },
+    {
+      "manifest_row": 17,
+      "time_s": 0.03999999910593033,
+      "baseline_ratio": 0.5710731397903278,
+      "option_two_ratio": 0.5710731411820676,
+      "difference": 1.3917398344887033e-09
+    }
+  ],
+  "drawn_rows": [
+    {
+      "manifest_row": 15,
+      "time_s": 0.029999999329447746,
+      "boundary_area_m2": 0.03177838978941498,
+      "efm_plasma_area_m2": 0.7594174146652222,
+      "enclosed_area_ratio": 0.041845748037558514,
+      "boundary_vertices_inside_wall": 64,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 1.0,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6052100137499623,
+        1.7280815839767456
+      ]
+    },
+    {
+      "manifest_row": 16,
+      "time_s": 0.03500000014901161,
+      "boundary_area_m2": 0.26971298911701486,
+      "efm_plasma_area_m2": 0.8042507767677307,
+      "enclosed_area_ratio": 0.3353593144180556,
+      "boundary_vertices_inside_wall": 64,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 1.0,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6050537429434033,
+        1.7280815839767456
+      ]
+    },
+    {
+      "manifest_row": 17,
+      "time_s": 0.03999999910593033,
+      "boundary_area_m2": 0.5240258911039235,
+      "efm_plasma_area_m2": 0.917616069316864,
+      "enclosed_area_ratio": 0.5710731411820676,
+      "boundary_vertices_inside_wall": 64,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 1.0,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6053884305779653,
+        1.7280815839767456
+      ]
+    },
+    {
+      "manifest_row": 18,
+      "time_s": 0.044999998062849045,
+      "boundary_area_m2": 0.7083267568942737,
+      "efm_plasma_area_m2": 0.9750321507453918,
+      "enclosed_area_ratio": 0.7264650261560838,
+      "boundary_vertices_inside_wall": 64,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 1.0,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6057701556715609,
+        1.7280815839767456
+      ]
+    },
+    {
+      "manifest_row": 19,
+      "time_s": 0.04999999701976776,
+      "boundary_area_m2": 0.9256278286945342,
+      "efm_plasma_area_m2": 1.0586656332015991,
+      "enclosed_area_ratio": 0.874334444857028,
+      "boundary_vertices_inside_wall": 64,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 1.0,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6056552207512255,
+        1.7280815839767456
+      ]
+    },
+    {
+      "manifest_row": 20,
+      "time_s": 0.054999999701976776,
+      "boundary_area_m2": 1.1645238362192663,
+      "efm_plasma_area_m2": 1.1675567626953125,
+      "enclosed_area_ratio": 0.9974023305992895,
+      "boundary_vertices_inside_wall": 64,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 1.0,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6050492428463243,
+        1.7280815839767456
+      ]
+    },
+    {
+      "manifest_row": 21,
+      "time_s": 0.05999999865889549,
+      "boundary_area_m2": 1.3438608569948425,
+      "efm_plasma_area_m2": 1.2348334789276123,
+      "enclosed_area_ratio": 1.0882931827876214,
+      "boundary_vertices_inside_wall": 64,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 1.0,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6045779650605849,
+        1.7280815839767456
+      ]
+    },
+    {
+      "manifest_row": 22,
+      "time_s": 0.06499999761581421,
+      "boundary_area_m2": 1.5082592166180437,
+      "efm_plasma_area_m2": 1.3292348384857178,
+      "enclosed_area_ratio": 1.1346822795709093,
+      "boundary_vertices_inside_wall": 64,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 1.0,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6040554692258795,
+        1.7280815839767456
+      ]
+    },
+    {
+      "manifest_row": 23,
+      "time_s": 0.07000000029802322,
+      "boundary_area_m2": 1.603390790303539,
+      "efm_plasma_area_m2": 1.3977807760238647,
+      "enclosed_area_ratio": 1.1470974689354032,
+      "boundary_vertices_inside_wall": 64,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 1.0,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6030080531680468,
+        1.7280815839767456
+      ]
+    },
+    {
+      "manifest_row": 24,
+      "time_s": 0.07499999552965164,
+      "boundary_area_m2": 1.5372664722625458,
+      "efm_plasma_area_m2": 1.4133433103561401,
+      "enclosed_area_ratio": 1.0876808635229462,
+      "boundary_vertices_inside_wall": 64,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 1.0,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.6007490022579915,
+        1.7280815839767456
+      ]
+    },
+    {
+      "manifest_row": 25,
+      "time_s": 0.07999999821186066,
+      "boundary_area_m2": 1.447486959401152,
+      "efm_plasma_area_m2": 1.443063497543335,
+      "enclosed_area_ratio": 1.003065327246755,
+      "boundary_vertices_inside_wall": 64,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 1.0,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.598859789113823,
+        1.7280815839767456
+      ]
+    },
+    {
+      "manifest_row": 26,
+      "time_s": 0.08500000089406967,
+      "boundary_area_m2": 1.4436702289710346,
+      "efm_plasma_area_m2": 1.4980894327163696,
+      "enclosed_area_ratio": 0.9636742623258072,
+      "boundary_vertices_inside_wall": 64,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 1.0,
+      "boundary_gate": "absent",
+      "selected_anchor_node_index": 10,
+      "selected_anchor_node_position_m": [
+        0.5649306774139404,
+        1.7280815839767456
+      ],
+      "fitted_wall_anchor_position_m": [
+        0.5970196887546664,
+        1.7280815839767456
+      ]
+    }
+  ],
+  "support_gated_drawn_rows": [
+    {
+      "manifest_row": 11,
+      "time_s": 0.009999999776482582,
+      "boundary_area_m2": 1.2225152056955204,
+      "efm_plasma_area_m2": 0.45848312973976135,
+      "enclosed_area_ratio": 2.6664344365068127,
+      "boundary_vertices_inside_wall": 39,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 0.609375,
+      "selected_anchor_node_position_m": null,
+      "anchor_evidence": "not persisted by the preceding run"
+    },
+    {
+      "manifest_row": 12,
+      "time_s": 0.014999999664723873,
+      "boundary_area_m2": 1.1581025244216008,
+      "efm_plasma_area_m2": 0.4250595271587372,
+      "enclosed_area_ratio": 2.7245655030080314,
+      "boundary_vertices_inside_wall": 39,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 0.609375,
+      "selected_anchor_node_position_m": null,
+      "anchor_evidence": "not persisted by the preceding run"
+    },
+    {
+      "manifest_row": 13,
+      "time_s": 0.019999999552965164,
+      "boundary_area_m2": 1.2364723045120223,
+      "efm_plasma_area_m2": 0.5052688121795654,
+      "enclosed_area_ratio": 2.4471573837662426,
+      "boundary_vertices_inside_wall": 39,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 0.609375,
+      "selected_anchor_node_position_m": null,
+      "anchor_evidence": "not persisted by the preceding run"
+    },
+    {
+      "manifest_row": 14,
+      "time_s": 0.02499999850988388,
+      "boundary_area_m2": 1.4052770748419552,
+      "efm_plasma_area_m2": 0.6313509345054626,
+      "enclosed_area_ratio": 2.2258256035412525,
+      "boundary_vertices_inside_wall": 39,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 0.609375,
+      "selected_anchor_node_position_m": null,
+      "anchor_evidence": "not persisted by the preceding run"
+    },
+    {
+      "manifest_row": 15,
+      "time_s": 0.029999999329447746,
+      "boundary_area_m2": 1.4982676526039589,
+      "efm_plasma_area_m2": 0.7594174146652222,
+      "enclosed_area_ratio": 1.9729171647511505,
+      "boundary_vertices_inside_wall": 40,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 0.625,
+      "selected_anchor_node_position_m": null,
+      "anchor_evidence": "not persisted by the preceding run"
+    },
+    {
+      "manifest_row": 16,
+      "time_s": 0.03500000014901161,
+      "boundary_area_m2": 1.5687219924187912,
+      "efm_plasma_area_m2": 0.8042507767677307,
+      "enclosed_area_ratio": 1.9505383615835057,
+      "boundary_vertices_inside_wall": 41,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 0.640625,
+      "selected_anchor_node_position_m": null,
+      "anchor_evidence": "not persisted by the preceding run"
+    },
+    {
+      "manifest_row": 17,
+      "time_s": 0.03999999910593033,
+      "boundary_area_m2": 1.6853512388453842,
+      "efm_plasma_area_m2": 0.917616069316864,
+      "enclosed_area_ratio": 1.8366627342305313,
+      "boundary_vertices_inside_wall": 41,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 0.640625,
+      "selected_anchor_node_position_m": null,
+      "anchor_evidence": "not persisted by the preceding run"
+    },
+    {
+      "manifest_row": 18,
+      "time_s": 0.044999998062849045,
+      "boundary_area_m2": 1.7905613848615087,
+      "efm_plasma_area_m2": 0.9750321507453918,
+      "enclosed_area_ratio": 1.8364126593083743,
+      "boundary_vertices_inside_wall": 41,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 0.640625,
+      "selected_anchor_node_position_m": null,
+      "anchor_evidence": "not persisted by the preceding run"
+    },
+    {
+      "manifest_row": 19,
+      "time_s": 0.04999999701976776,
+      "boundary_area_m2": 1.8793315842690501,
+      "efm_plasma_area_m2": 1.0586656332015991,
+      "enclosed_area_ratio": 1.7751889976683257,
+      "boundary_vertices_inside_wall": 41,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 0.640625,
+      "selected_anchor_node_position_m": null,
+      "anchor_evidence": "not persisted by the preceding run"
+    },
+    {
+      "manifest_row": 20,
+      "time_s": 0.054999999701976776,
+      "boundary_area_m2": 1.9679681691418613,
+      "efm_plasma_area_m2": 1.1675567626953125,
+      "enclosed_area_ratio": 1.6855438913297833,
+      "boundary_vertices_inside_wall": 41,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 0.640625,
+      "selected_anchor_node_position_m": null,
+      "anchor_evidence": "not persisted by the preceding run"
+    },
+    {
+      "manifest_row": 21,
+      "time_s": 0.05999999865889549,
+      "boundary_area_m2": 2.0523862374049244,
+      "efm_plasma_area_m2": 1.2348334789276123,
+      "enclosed_area_ratio": 1.6620753100955066,
+      "boundary_vertices_inside_wall": 41,
+      "boundary_vertex_count": 64,
+      "boundary_vertex_containment_fraction": 0.640625,
+      "selected_anchor_node_position_m": null,
+      "anchor_evidence": "not persisted by the preceding run"
+    }
+  ]
+}

@@ -632,6 +632,35 @@
 </div>
 </section>
 
+
+<section id="c-run-r-20260918T133650330007-figure-recovery-stranded-worktrees">
+  <h2 id="c-run-r-20260918T133650330007-figure-recovery-stranded-worktrees-h">Figures stranded in worker worktrees recovered</h2>
+  <p>Worked the stranded-figure inventory (139 rows, 90 distinct figure paths across 11 plans)
+  against HEAD <code>ff7216f</code>. Rows in 36 recovery directories were resolved to one
+  source each (last-wins where several worktrees carry the same path): 86 figure paths,
+  read by <code>git show &lt;sha&gt;:&lt;path&gt;</code> for committed rows and from the
+  working tree for untracked rows, with the file digest compared against the source blob
+  for every one (86 of 86 matched).</p>
+  <p><strong>75 of the 86 were already present at HEAD.</strong> The 'stranded' claim does not
+  reproduce for them: the image is already in the tree and served, and for 25 paths the
+  worktree copy differs from the landed blob (for example
+  <code>docs/figures/hex-cell-single-grid/topology-parity.png</code>, landed by
+  <code>79024057</code> after the worktree's render). The landed blob was kept for those and
+  the copies undone, rather than regressing a served figure with an older variant.
+  <strong>11 figure paths are new</strong> and are the ones committed here:
+  cut-cell-current-attribution 4, null-identification-authority 2, playable-forward-solve 2,
+  millisecond-converged-solve 1, plasma-edge-current-representation 1,
+  solver-convergence-regression 1. Sources: cca-cold-seed-clip-compatibility at 1e79e056, cca-rung-a2-frozen-support at 1046dc4f, clipped-cell-equivalence at a803cd7d, msc-per-trip-kernel-breakdown at 5c0410b4, nia-contained-anchor-corpus-route at f074cd5e, pfs-boundary-routing at 6ab5ae30, scr-vertical-mode-elimination-step-regrowth at a69100a4.</p>
+  <p>Three directories are left to their live nodes as the fence directs and were not touched:
+  <code>constraint-augmented-newton-krylov/shafranov-discriminator</code> and the two
+  <code>forward-solve-api</code> directories.</p>
+  <p><strong>Publication.</strong> <code>.gitignore</code> now re-includes
+  <code>docs/figures/**/*.png</code>, <code>**.svg</code> and <code>**/parts/*.json</code>, so a
+  published figure no longer needs <code>git add -f</code>. The AGENTS.md sentence saying it
+  does is stale and is held by another node, so the correction is listed in the manifest for the
+  coordinator to carry.</p>
+</section>
+
 </main>
 </body>
 </html>

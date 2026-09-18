@@ -588,84 +588,109 @@ def _diiid_machine_artifact_evidence(
     )
 
 
-def _build_diiid_members(
-    machine_cache: Path, *, member_count: int = 5
-) -> tuple[list[Member], dict[str, Any]]:
+def _diiid_bank_rows() -> list[dict[str, Any]]:
+    """The five DIII-D gate frames the committed bank pins."""
     bank = _read_json(DIIID_BANK)
     rows = bank.get("result", {}).get("frame_records")
     if not isinstance(rows, list) or len(rows) != 5:
         raise RuntimeError("the DIII-D bank must carry five frame records")
-    members = []
-    surface_receipts = []
-    if not 1 <= member_count <= len(rows):
-        raise ValueError(f"DIII-D member count must be in [1, {len(rows)}]")
-    for number, bank_row in enumerate(rows[:member_count], start=1):
-        shot = str(bank_row["shot"])
-        frame = int(bank_row["frame"])
-        row = _wall_topology_row(DIIID_DATA / shot)
-        built = _build_profile(
-            row,
-            frame,
-            None,
-            machine_artifact_cache=machine_cache,
-            machine_artifact_digest=DEFAULT_MACHINE_ARTIFACT_DIGEST,
+    return rows
+
+
+def diiid_member_identity(bank_row: dict[str, Any]) -> str:
+    """The identity a bank row's member carries, without building the member."""
+    return f"{str(bank_row['shot'])} frame {int(bank_row['frame'])}"
+
+
+def _validate_diiid_member_number(
+    member_number: int, member_count: int, total: int
+) -> None:
+    if not 1 <= member_count <= total:
+        raise ValueError(f"DIII-D member count must be in [1, {total}]")
+    if not 1 <= member_number <= member_count:
+        raise ValueError(
+            f"DIII-D member number must be in [1, {member_count}], "
+            f"received {member_number}"
         )
-        surface_receipts.append(built.surface_receipt)
-        time_ms = float(row["efit_times"][frame])
-        machine = dataset_machine_description(row, source_row=str(row["_source_path"]))
-        shipped = shipped_current_at(
-            row, machine.physical, POLOIDAL_CONDUCTORS, time_ms
-        )
-        adapter = complete_profile_current_adapter(
-            built.profile,
-            shipped_names=POLOIDAL_CONDUCTORS,
-            shipped_current_a=shipped,
-            use_circuit=True,
-        )
-        profile = adapter.profile
-        current = jnp.asarray(adapter.resolution.current(()), dtype=jnp.float64)
-        target = float(_target_current(row, time_ms))
-        count = int(row["efit_lcfs_n"][frame])
-        contour = np.c_[
-            np.asarray(row["efit_lcfs_r"][frame][:count], dtype=float),
-            np.asarray(row["efit_lcfs_z"][frame][:count], dtype=float),
-        ]
-        axis = np.asarray(
-            (row["efit_r_axis"][frame], row["efit_z_axis"][frame]), dtype=float
-        )
-        saddle = contour[int(np.argmin(contour[:, 1]))]
-        cold = profile.cold_seed_portfolio(
-            target,
-            axis,
-            current=current,
-            diverted_geometry=SaddleSeedGeometry(tuple(axis), tuple(saddle)),
-        )
-        state = cold.branches.flux[int(TopologyClass.DIVERTED)]
-        members.append(
-            Member(
-                identity=f"{shot} frame {frame}",
-                profile=profile,
-                state=state,
-                current=current,
-                target_current=target,
-                tolerance=GATE_RESIDUAL_TOLERANCE,
-                options={
-                    "newton_steps": REGISTERED_ACCELERATED_NEWTON_STEPS,
-                    "gmres_iterations": REGISTERED_ACCELERATED_GMRES_ITERATIONS,
-                    "warmup": REGISTERED_ACCELERATED_WARMUP,
-                    "relaxation": REGISTERED_ACCELERATED_RELAXATION,
-                    "step_cap": REGISTERED_ACCELERATED_STEP_CAP,
-                    "active_set_steps": TRIP_LIMIT,
-                },
-                state_authority="production cold diverted seed for committed frame",
-            )
-        )
-        print(
-            f"STAGE DIIID_MEMBER_READY member={number}/5 "
-            f"rss_mib={_PeakRssSampler._current_mib():.3f}",
-            flush=True,
-        )
-    return members, {
+
+
+def _build_diiid_member_row(
+    bank_row: dict[str, Any], *, number: int, machine_cache: Path
+) -> tuple[Member, dict[str, Any]]:
+    """Build one gate frame from its bank row and the machine description.
+
+    Reads one shot's parquet, one cached machine description and one cold seed
+    portfolio.  Nothing here reaches a sibling frame, so a caller that needs a
+    single frame pays for a single frame.
+    """
+    shot = str(bank_row["shot"])
+    frame = int(bank_row["frame"])
+    row = _wall_topology_row(DIIID_DATA / shot)
+    built = _build_profile(
+        row,
+        frame,
+        None,
+        machine_artifact_cache=machine_cache,
+        machine_artifact_digest=DEFAULT_MACHINE_ARTIFACT_DIGEST,
+    )
+    time_ms = float(row["efit_times"][frame])
+    machine = dataset_machine_description(row, source_row=str(row["_source_path"]))
+    shipped = shipped_current_at(row, machine.physical, POLOIDAL_CONDUCTORS, time_ms)
+    adapter = complete_profile_current_adapter(
+        built.profile,
+        shipped_names=POLOIDAL_CONDUCTORS,
+        shipped_current_a=shipped,
+        use_circuit=True,
+    )
+    profile = adapter.profile
+    current = jnp.asarray(adapter.resolution.current(()), dtype=jnp.float64)
+    target = float(_target_current(row, time_ms))
+    count = int(row["efit_lcfs_n"][frame])
+    contour = np.c_[
+        np.asarray(row["efit_lcfs_r"][frame][:count], dtype=float),
+        np.asarray(row["efit_lcfs_z"][frame][:count], dtype=float),
+    ]
+    axis = np.asarray(
+        (row["efit_r_axis"][frame], row["efit_z_axis"][frame]), dtype=float
+    )
+    saddle = contour[int(np.argmin(contour[:, 1]))]
+    cold = profile.cold_seed_portfolio(
+        target,
+        axis,
+        current=current,
+        diverted_geometry=SaddleSeedGeometry(tuple(axis), tuple(saddle)),
+    )
+    state = cold.branches.flux[int(TopologyClass.DIVERTED)]
+    member = Member(
+        identity=diiid_member_identity(bank_row),
+        profile=profile,
+        state=state,
+        current=current,
+        target_current=target,
+        tolerance=GATE_RESIDUAL_TOLERANCE,
+        options={
+            "newton_steps": REGISTERED_ACCELERATED_NEWTON_STEPS,
+            "gmres_iterations": REGISTERED_ACCELERATED_GMRES_ITERATIONS,
+            "warmup": REGISTERED_ACCELERATED_WARMUP,
+            "relaxation": REGISTERED_ACCELERATED_RELAXATION,
+            "step_cap": REGISTERED_ACCELERATED_STEP_CAP,
+            "active_set_steps": TRIP_LIMIT,
+        },
+        state_authority="production cold diverted seed for committed frame",
+    )
+    print(
+        f"STAGE DIIID_MEMBER_READY member={number}/5 "
+        f"rss_mib={_PeakRssSampler._current_mib():.3f}",
+        flush=True,
+    )
+    return member, built.surface_receipt
+
+
+def _diiid_evidence(
+    machine_cache: Path, surface_receipts: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """The governed artifact and corpus behind a member build's coordinates."""
+    return {
         "bank": {
             "path": str(DIIID_BANK.relative_to(ROOT)),
             "sha256": _sha256(DIIID_BANK),
@@ -674,8 +699,47 @@ def _build_diiid_members(
             machine_cache, surface_receipts
         ),
         "corpus_root": str(DIIID_DATA),
-        "member_count": len(members),
+        "member_count": len(surface_receipts),
     }
+
+
+def _build_diiid_members(
+    machine_cache: Path, *, member_count: int = 5
+) -> tuple[list[Member], dict[str, Any]]:
+    """Build the whole DIII-D gate set, in the bank's frame order."""
+    rows = _diiid_bank_rows()
+    _validate_diiid_member_number(1, member_count, len(rows))
+    members: list[Member] = []
+    surface_receipts: list[dict[str, Any]] = []
+    for number, bank_row in enumerate(rows[:member_count], start=1):
+        member, surface_receipt = _build_diiid_member_row(
+            bank_row, number=number, machine_cache=machine_cache
+        )
+        members.append(member)
+        surface_receipts.append(surface_receipt)
+    return members, _diiid_evidence(machine_cache, surface_receipts)
+
+
+def build_diiid_member(
+    machine_cache: Path, member_number: int, *, member_count: int = 5
+) -> tuple[Member, dict[str, Any]]:
+    """Build exactly one DIII-D gate frame and none of its siblings.
+
+    ``member_number`` is 1-based and indexes the bank exactly as the whole-set
+    builder does, so the member built for ``member_number = i`` is the member
+    ``_build_diiid_members`` returns at position ``i``, at the cost of that one
+    frame's parquet read, machine description and cold seed rather than five.
+    """
+    rows = _diiid_bank_rows()
+    _validate_diiid_member_number(member_number, member_count, len(rows))
+    bank_row = rows[member_number - 1]
+    member, surface_receipt = _build_diiid_member_row(
+        bank_row, number=member_number, machine_cache=machine_cache
+    )
+    evidence = _diiid_evidence(machine_cache, [surface_receipt])
+    evidence["member_number"] = member_number
+    evidence["member_identity"] = member.identity
+    return member, evidence
 
 
 class _PeakRssSampler:

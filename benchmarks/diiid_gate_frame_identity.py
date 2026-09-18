@@ -1,0 +1,1040 @@
+"""Compare every DIII-D gate frame's terminal state against the committed batch.
+
+The five frames of the DIII-D forward-GS gate bank each supply their own stored
+boundary and their own cold diverted seed.  This driver solves the five frames
+in one reserved H200 job, one compiled program per frame, and runs each frame's
+paired strict-exit passes on its own program.  It then compares each frame's
+terminal state and terminal residual against the committed batched artifact
+left by the earlier width-five measurement, which was taken on the stacked vmap
+route: this revision's accelerated history program builds its argument layout
+with numpy and so refuses the stacked route as well as the batched solve.  One
+receipt is written per frame as that frame's comparison is read out, so a
+scheduler expiry loses at most one frame.
+
+The frames are measured one at a time, each in its own child process started by
+re-executing this driver with ``--frame-index``: a frame's compiled program is
+host memory that process exit returns, and five frames in one process held
+131 GiB resident after the first frame.  The children are re-executed rather
+than forked because a fork taken after a CUDA context is up deadlocks silently,
+and this driver proves the reserved device before it starts any child.  Each
+child builds only its own frame through
+``strict_exit_incidence.build_diiid_member``; the parent builds no member at
+all and holds no compiled program.
+
+Each child runs under a wall-clock timeout.  A child that exceeds it is killed
+and reported as a hang with the timeout that expired, so a frame that never
+returns does not consume the allocation it was granted.  While a child holds
+its frame it reports its wall time, its CPU time and its host memory once a
+minute: a compiling child prints no instrument output for many minutes, and
+CPU time advancing with wall time is what separates a long compile from a
+child blocked against the card.  The hang names the child's last line, so the
+report says which of the two it was.  Each child also records the device
+memory the card reports as available at its frame's start, beside the pool
+policy the process inherited, because the compile completes before the
+executable's command buffers are instantiated and it is that instantiation
+which the card has to have room for.
+
+The child writes its own frame receipt before it exits.  The parent reads those
+receipts back rather than rebuilding them, and it carries on to the next frame
+when one fails.
+
+Every frame's comparison states its identity row count through the certificate
+identity comparator's refusal, so a comparison over no state values cannot read
+as a machine-precision match.
+
+The committed artifact carries terminal-state hashes and terminal residuals
+rather than state arrays.  A frame's absolute terminal-state difference is
+therefore taken between its two strict-exit passes at the driver's device, and
+the artifact is compared by terminal-state hash and by absolute
+terminal-residual difference.  A difference against the artifact is
+device-qualified: the artifact was produced under a different H200 allocation.
+"""
+
+from __future__ import annotations
+
+import argparse
+from datetime import UTC, datetime
+import gc
+import hashlib
+import json
+import numpy as np
+import os
+import re
+import resource
+import subprocess
+import sys
+import tempfile
+import threading
+import time
+import traceback
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+
+# The identity comparator's refusal is shared with the certificate identity gate
+# rather than restated here: an identity set with no rows must not read as a
+# machine-precision match.
+from benchmarks.solve_program_size_gate import (  # noqa: E402
+    EmptyIdentitySetError,
+    _require_identity_rows,
+)
+
+DEFAULT_ARTIFACT = (
+    ROOT / "docs/figures/batched-operator-boundary/exit-incidence/diiid-width5.json"
+)
+DEFAULT_RECEIPT_DIR = (
+    ROOT / "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity"
+)
+DEFAULT_MACHINE_CACHE = Path(
+    "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache"
+)
+ARTIFACT_ARMS = ("base", "head")
+PRIMARY_ARTIFACT_ARM = "head"
+SCHEDULED_CORE_COUNT = 8
+# One frame's cold compile was measured at 682 s and the batch this compares
+# against compiled cold in 1579 s, so the ceiling is set well above both: it
+# exists to bound a hang, not to pace a compile that is still working.
+DEFAULT_FRAME_TIMEOUT_SECONDS = 3600.0
+# A compiling child prints no instrument output for many minutes.  The
+# heartbeat separates a long compile from a child blocked against the card:
+# a compile's CPU time advances with its wall time, a blocked child's does not.
+HEARTBEAT_INTERVAL_SECONDS = 60.0
+# A child holds one frame's compiled program, so the floor mirrors the
+# instrument's own 128 GiB H200 requirement rather than the footprint the
+# whole-set batch reaches when it accumulates five frames in one process.
+MINIMUM_NODE_MEMORY_MIB = 128 * 1024
+# The width-one frame is far smaller than the width-five batch that ran on this
+# card class, so a device offering less than this cannot serve the measurement
+# and says so before the frame's compile rather than after it.
+MINIMUM_DEVICE_AVAILABLE_MIB = 32 * 1024
+# The root the committed batch artifact's run recorded, so a frame's compile
+# is keyed against the same hardware autotuning measurements the artifact was
+# produced with.  The frames are new programs and miss the whole-program
+# entries either way; the per-fusion autotune entries are what they share.
+DEFAULT_CACHE_ROOT = Path("/home/ITER/mcintos/.cache")
+
+
+def _read_json(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise TypeError(f"{path} must contain one JSON object")
+    return value
+
+
+def _file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _git(*arguments: str) -> str:
+    return subprocess.check_output(
+        ["git", "-C", str(ROOT), *arguments], text=True
+    ).strip()
+
+
+def _slug(identity: str) -> str:
+    return re.sub(r"[^0-9a-z]+", "-", identity.lower()).strip("-") or "frame"
+
+
+def _converged(termination: Any) -> bool | None:
+    if termination is None:
+        return None
+    return str(termination) == "converged"
+
+
+def _write_json(path: Path, payload: Any) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.tmp")
+    temporary.write_text(
+        json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(path)
+
+
+def _artifact_index(artifact: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    """Index the committed artifact's per-frame rows by frame identity."""
+    rows = artifact.get("members")
+    if not isinstance(rows, list) or not rows:
+        raise RuntimeError("the committed batched artifact carries no member rows")
+    indexed: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        identity = str(row["identity"])
+        reference: dict[str, Any] = {}
+        for arm in ARTIFACT_ARMS:
+            arm_row = row.get(arm)
+            if not isinstance(arm_row, dict):
+                raise RuntimeError(f"artifact row {identity!r} carries no {arm} arm")
+            passes: dict[str, Any] = {}
+            for pass_name in ("without_exit", "with_exit"):
+                passed = arm_row.get(pass_name)
+                if not isinstance(passed, dict):
+                    raise RuntimeError(
+                        f"artifact row {identity!r} arm {arm} carries no "
+                        f"{pass_name} pass"
+                    )
+                passes[pass_name] = {
+                    "terminal_residual": passed.get("terminal_residual"),
+                    "terminal_state_sha256": passed.get("terminal_state_sha256"),
+                    "termination": passed.get("termination"),
+                    "converged": _converged(passed.get("termination")),
+                }
+            reference[arm] = passes
+        indexed[identity] = reference
+    return indexed
+
+
+def _main_arm(passed: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "executed_trips": passed.get("executed_trips"),
+        "terminal_residual": passed.get("terminal_residual"),
+        "terminal_state_sha256": passed.get("terminal_state_sha256"),
+        "termination": passed.get("termination"),
+        "converged": _converged(passed.get("termination")),
+        "batch_elapsed_ms": passed.get("batch_elapsed_ms"),
+        "batched_ms_per_member": passed.get("batched_ms_per_member"),
+    }
+
+
+def _difference(left: Any, right: Any) -> float | None:
+    if left is None or right is None:
+        return None
+    return abs(float(left) - float(right))
+
+
+def _against_artifact(
+    main_arm: dict[str, Any], artifact_arm: dict[str, Any]
+) -> dict[str, Any]:
+    """Compare one pass at the driver's device against one artifact pass."""
+    return {
+        "main_terminal_residual": main_arm["terminal_residual"],
+        "artifact_terminal_residual": artifact_arm["terminal_residual"],
+        "absolute_terminal_residual_difference": _difference(
+            main_arm["terminal_residual"], artifact_arm["terminal_residual"]
+        ),
+        "terminal_state_sha256_identical": (
+            main_arm["terminal_state_sha256"] == artifact_arm["terminal_state_sha256"]
+        ),
+        "main_converged": main_arm["converged"],
+        "artifact_converged": artifact_arm["converged"],
+    }
+
+
+def _relative(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def _bit_identity(comparisons: dict[str, Any] | None) -> bool | None:
+    """Whether the primary arm's two passes match the committed artifact."""
+    primary = (comparisons or {}).get(PRIMARY_ARTIFACT_ARM)
+    if primary is None:
+        return None
+    return all(
+        comparison["terminal_state_sha256_identical"] for comparison in primary.values()
+    )
+
+
+def _comparator_self_check() -> str:
+    """Prove the shared refusal fires before trusting any comparison."""
+    try:
+        _require_identity_rows(0, "comparator self-check")
+    except EmptyIdentitySetError as error:
+        return str(error)
+    raise RuntimeError("the identity comparator accepted an empty identity set")
+
+
+def _flush_output() -> None:
+    sys.stdout.flush()
+    sys.stderr.flush()
+
+
+def _spread(values: list[float]) -> dict[str, float] | None:
+    if not values:
+        return None
+    array = np.asarray(values, dtype=float)
+    return {
+        "count": int(array.size),
+        "mean": float(array.mean()),
+        "minimum": float(array.min()),
+        "maximum": float(array.max()),
+    }
+
+
+def _summarize(rows: list[dict[str, Any]], repeats: int) -> dict[str, Any]:
+    """Summarize the frames that landed, one forked process each."""
+    return {
+        "landed_frames": len(rows),
+        "strict_exit_fired_members": sum(
+            row["strict_qualification"] == "fired" for row in rows
+        ),
+        "strict_exit_never_members": sum(
+            row["strict_qualification"] == "never" for row in rows
+        ),
+        "bit_identical_converged_members": sum(
+            row["terminal_state_bit_identical_where_both_arms_converged"] is True
+            for row in rows
+        ),
+        "saved_executed_trips": sum(
+            row["without_exit"]["executed_trips"] - row["with_exit"]["executed_trips"]
+            for row in rows
+        ),
+        "per_frame_compile_seconds": {
+            str(row["identity"]): row.get("compile_seconds") for row in rows
+        },
+        "compile_seconds": _spread(
+            [
+                row["compile_seconds"]
+                for row in rows
+                if row.get("compile_seconds") is not None
+            ]
+        ),
+        "without_exit_solve_ms": _spread(
+            [row["without_exit"]["timing"]["compile_warm_solve_ms"] for row in rows]
+        ),
+        "with_exit_solve_ms": _spread(
+            [row["with_exit"]["timing"]["compile_warm_solve_ms"] for row in rows]
+        ),
+        "additional_repetitions_after_first_compiled_solve": repeats,
+    }
+
+
+def _require_h200_allocation(
+    *, expected_cpu_count: int, minimum_memory_mib: int, probe_device: bool = True
+) -> dict[str, Any]:
+    """Prove this process holds the reserved H200 the fence names.
+
+    The proof mirrors the instrument's own, with a memory floor in place of the
+    instrument's fixed request: a child holds one frame's compiled program, so
+    the floor is one frame's footprint rather than the whole set's.
+
+    ``probe_device`` false proves the allocation without initialising a CUDA
+    context, which is what the parent uses: it starts the children before it has
+    any reason to hold device memory, and each child proves the device for
+    itself.
+    """
+    import jax
+
+    job_id = os.environ.get("SLURM_JOB_ID")
+    if not job_id:
+        raise RuntimeError("the measurement requires a SLURM allocation")
+    if os.environ.get("SLURM_JOB_PARTITION") != "betelgeuse":
+        raise RuntimeError("the measurement requires the betelgeuse partition")
+    if os.environ.get("SLURM_JOB_RESERVATION") != "gpu_0003_grpA":
+        raise RuntimeError("the measurement requires reservation gpu_0003_grpA")
+    if int(os.environ.get("SLURM_CPUS_PER_TASK", "0")) != expected_cpu_count:
+        raise RuntimeError(
+            f"the measurement requires exactly {expected_cpu_count} allocated CPU(s)"
+        )
+    if os.environ.get("TMPDIR") != "/tmp":
+        raise RuntimeError("the measurement requires TMPDIR=/tmp")
+    if os.environ.get("JAX_PLATFORMS") != "cuda,cpu":
+        raise RuntimeError("the measurement requires JAX_PLATFORMS=cuda,cpu")
+    requested_memory_mib = int(os.environ.get("SLURM_MEM_PER_NODE", "0"))
+    if requested_memory_mib < minimum_memory_mib:
+        raise RuntimeError(
+            f"the measurement requires at least {minimum_memory_mib} MiB of node "
+            f"memory, received {requested_memory_mib} MiB"
+        )
+    devices = None
+    if probe_device:
+        devices = jax.devices("gpu")
+        if len(devices) != 1 or "H200" not in devices[0].device_kind:
+            raise RuntimeError(f"the measurement requires one H200, received {devices}")
+    return {
+        "job_id": int(job_id),
+        "job_name": os.environ.get("SLURM_JOB_NAME"),
+        "node": os.environ.get("SLURMD_NODENAME"),
+        "partition": os.environ.get("SLURM_JOB_PARTITION"),
+        "reservation": os.environ.get("SLURM_JOB_RESERVATION"),
+        "cpu_count": int(os.environ["SLURM_CPUS_PER_TASK"]),
+        "device": devices[0].device_kind if devices else None,
+        "device_probed": probe_device,
+        "jax_platforms": os.environ["JAX_PLATFORMS"].split(","),
+        "tmpdir": os.environ["TMPDIR"],
+        "requested_time_limit": os.environ.get("SLURM_TIMELIMIT"),
+        "requested_memory_mib": requested_memory_mib,
+    }
+
+
+def _child_command(
+    arguments: argparse.Namespace, frame_index: int, exchange: Path
+) -> list[str]:
+    """The argument vector that re-executes this driver as one frame's child."""
+    return [
+        sys.executable,
+        str(Path(__file__).resolve()),
+        "--frame-index",
+        str(frame_index),
+        "--exchange",
+        str(exchange),
+        "--receipt-dir",
+        str(arguments.receipt_dir),
+        "--artifact",
+        str(arguments.artifact),
+        "--machine-cache",
+        str(arguments.machine_cache),
+        "--cache-root",
+        str(arguments.cache_root),
+        "--member-count",
+        str(arguments.member_count),
+        "--cpu-count",
+        str(arguments.cpu_count),
+        "--repeats",
+        str(arguments.repeats),
+    ]
+
+
+def _frame_receipt(
+    *,
+    header: dict[str, Any],
+    row: dict[str, Any],
+    index: int,
+    member_state_count: int,
+    artifact_reference: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """One frame's identity comparison, written by the frame's own process."""
+    identity = str(row["identity"])
+    identity_row_count = _require_identity_rows(
+        member_state_count, f"DIII-D gate frame {identity!r} terminal state"
+    )
+    main_arms = {
+        "without_exit": _main_arm(row["without_exit"]),
+        "with_exit": _main_arm(row["with_exit"]),
+    }
+    comparisons = None
+    if artifact_reference is not None:
+        comparisons = {
+            arm: {
+                pass_name: _against_artifact(
+                    main_arms[pass_name], artifact_reference[arm][pass_name]
+                )
+                for pass_name in ("without_exit", "with_exit")
+            }
+            for arm in ARTIFACT_ARMS
+        }
+    return {
+        "schema": "nova.diiid-gate-frame-identity/1",
+        "header": header,
+        "frame": {"identity": identity, "index": index},
+        "identity_row_count": identity_row_count,
+        "comparison_kind": (
+            "one DIII-D gate frame's terminal state at the driver's device "
+            "against the committed batched artifact"
+        ),
+        "maximum_absolute_terminal_state_difference": row["terminal_state_difference"][
+            "max_absolute_flux_difference"
+        ],
+        "main": main_arms,
+        "artifact_reference": artifact_reference,
+        "maximum_absolute_terminal_state_difference_scope": (
+            "between this frame's two strict-exit passes at the driver's device; "
+            "the committed artifact carries terminal-state hashes rather than "
+            "state arrays, so a state-array difference against it cannot be formed"
+        ),
+        "strict_qualification": row["strict_qualification"],
+        "main_against_artifact": comparisons,
+        "primary_artifact_arm": PRIMARY_ARTIFACT_ARM,
+        "bit_identical_to_artifact": _bit_identity(comparisons),
+    }
+
+
+def _frame_narrative(receipt: dict[str, Any]) -> str:
+    identity = receipt["frame"]["identity"]
+    difference = receipt["maximum_absolute_terminal_state_difference"]
+    comparisons = receipt["main_against_artifact"]
+    if comparisons is None:
+        return (
+            f"{identity}: no committed artifact row carries this frame; paired-pass "
+            f"terminal-state difference {difference:.3e}"
+        )
+    if receipt["bit_identical_to_artifact"]:
+        return (
+            f"{identity}: bit-identical terminal state to the committed batched "
+            "artifact on both strict-exit passes"
+        )
+    magnitudes = [
+        comparison["absolute_terminal_residual_difference"]
+        if comparison["absolute_terminal_residual_difference"] is not None
+        else 0.0
+        for comparison in comparisons[PRIMARY_ARTIFACT_ARM].values()
+    ]
+    return (
+        f"{identity}: differs from the committed batched artifact; largest absolute "
+        f"terminal-residual difference {max(magnitudes):.3e}; paired-pass "
+        f"terminal-state difference {difference:.3e}"
+    )
+
+
+def run(arguments: argparse.Namespace) -> int:
+    from nova.jax.config import (
+        configure_dtypes,
+        configure_persistent_compilation_cache,
+    )
+
+    from benchmarks import strict_exit_incidence as instrument
+
+    artifact = _read_json(arguments.artifact)
+    artifact_index = _artifact_index(artifact)
+    header: dict[str, Any] = {
+        "recorded_at": datetime.now(UTC).isoformat(),
+        "artifact_path": str(arguments.artifact),
+        "artifact_sha256": _file_sha256(arguments.artifact),
+        "artifact_schema": artifact.get("schema"),
+        "artifact_primary_arm": PRIMARY_ARTIFACT_ARM,
+        "artifact_secondary_arm": "base",
+        "artifact_revisions": artifact.get("source"),
+        "device_sha": _git("rev-parse", "HEAD"),
+        "device_tree": str(ROOT),
+        "driver": str(Path(__file__).relative_to(ROOT)),
+        "driver_sha256": _file_sha256(Path(__file__)),
+        "machine_cache": str(arguments.machine_cache),
+        "machine_artifact_digest": instrument.DEFAULT_MACHINE_ARTIFACT_DIGEST,
+        "identity_comparator": (
+            "benchmarks.solve_program_size_gate._require_identity_rows"
+        ),
+        "scheduled_core_count": arguments.cpu_count,
+        "declared_member_count": arguments.member_count,
+        "requested_repeats": arguments.repeats,
+        "cache_root": str(arguments.cache_root),
+        "execution_route": (
+            "one_compiled_program_per_frame, both strict-exit passes on the same "
+            "program: the stacked vmap program the committed artifact was measured "
+            "with is refused by this revision's accelerated history program, whose "
+            "argument layout converts the vmapped target current with numpy"
+        ),
+        "route_qualification": (
+            "a difference measured on the per-frame route against an artifact "
+            "measured on the stacked vmap route is device- and route-qualified"
+        ),
+        "process_isolation": (
+            "one re-executed child per frame, each started as a fresh "
+            "`python <this driver> --frame-index <i>` that builds only its own "
+            "member through strict_exit_incidence.build_diiid_member, with each "
+            "frame's receipt written by its own child and a fresh process for the "
+            "next: five frames in one process held 131 GiB resident after the "
+            "first frame, and process exit is what returns it"
+        ),
+        "minimum_node_memory_mib": MINIMUM_NODE_MEMORY_MIB,
+        "re_exec_not_fork": (
+            "children are re-executed rather than forked: a fork taken after a "
+            "CUDA context is up deadlocks silently, so no process here forks"
+        ),
+        "frame_timeout_seconds": arguments.frame_timeout_seconds,
+        "allocation_proof": (
+            "driver-local proof of the reserved H200, mirroring the instrument's with "
+            "a memory floor: the instrument's proof requires exactly 128 GiB, which "
+            "one frame's 131 GiB compile footprint does not fit"
+        ),
+    }
+
+    configure_dtypes()
+    import jax
+
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("extended precision was not enabled before array build")
+    cache = configure_persistent_compilation_cache(arguments.cache_root)
+    child = arguments.frame_index is not None
+    allocation = _require_h200_allocation(
+        expected_cpu_count=arguments.cpu_count,
+        minimum_memory_mib=MINIMUM_NODE_MEMORY_MIB,
+        probe_device=child,
+    )
+    header.update(
+        {
+            "job_id": allocation["job_id"],
+            "node": allocation["node"],
+            "device": allocation["device"],
+            "partition": allocation["partition"],
+            "reservation": allocation["reservation"],
+            "persistent_compilation_cache": cache.receipt(),
+            "allocation": allocation,
+            "role": "frame_child" if child else "driver",
+        }
+    )
+    if child:
+        header["device_memory"] = _device_memory_receipt()
+    print("IDENTITY_HEADER=" + json.dumps(header, sort_keys=True), flush=True)
+    for key, value in header.items():
+        print(f"HEADER_FIELD {key}={value}", flush=True)
+    if child:
+        return _frame_child(arguments, header, artifact_index)
+    return _measure(arguments, header, instrument, artifact_index)
+
+
+def _measure(
+    arguments: argparse.Namespace,
+    header: dict[str, Any],
+    instrument: Any,
+    artifact_index: dict[str, Any],
+) -> int:
+    """Measure one frame per re-executed child, each writing its own receipt.
+
+    The parent builds no member and holds no compiled program.  Each child is a
+    fresh ``python <this driver> --frame-index i`` whose only member is its own,
+    so a frame's compile footprint is returned by that child's exit rather than
+    accumulated.
+    """
+    rows = instrument._diiid_bank_rows()
+    identities = [instrument.diiid_member_identity(row) for row in rows]
+    if arguments.member_count != len(identities):
+        raise RuntimeError(
+            "this driver measures the whole DIII-D gate set: asked for "
+            f"{arguments.member_count} of {len(identities)} frames"
+        )
+    header["member_identities"] = identities
+    header["comparator_self_check"] = _comparator_self_check()
+    print(f"COMPARATOR_SELF_CHECK=PASS {header['comparator_self_check']}", flush=True)
+    exchange = arguments.exchange or Path(tempfile.mkdtemp(prefix="nova-diiid-frames-"))
+    exchange = Path(exchange)
+    exchange.mkdir(parents=True, exist_ok=True)
+    header["frame_exchange_directory"] = str(exchange)
+    frames = []
+    for index, identity in enumerate(identities):
+        frame = _frame_in_child(
+            arguments=arguments,
+            index=index,
+            identity=identity,
+            exchange=exchange,
+        )
+        frames.append(frame)
+        print(
+            f"FRAME_OUTCOME {frame['identity']} status={frame['status']} "
+            f"exit_code={frame['child_exit_code']} "
+            f"timed_out={frame['timed_out']}",
+            flush=True,
+        )
+    gc.collect()
+    return _persist(arguments, header, frames, artifact_index, arguments.repeats)
+
+
+def _device_memory_receipt() -> dict[str, Any]:
+    """What the assigned device reports about the memory it has left.
+
+    A child that cannot get device memory for its frame answers here, at the
+    frame's start, rather than after eleven minutes of compile: the first
+    allocation's frame 0 reached its compile's end and then failed to
+    instantiate the executable's command buffers, so the memory a frame needs
+    is not knowable from the host footprint alone.  The pool policy the
+    process inherited is recorded beside it, because it is what decides
+    whether the instantiation has room.
+    """
+    import jax
+
+    devices = jax.devices("gpu")
+    stats: dict[str, Any] | None = None
+    if len(devices) == 1:
+        stats = devices[0].memory_stats()
+    available_mib = None
+    if stats and stats.get("bytes_available") is not None:
+        available_mib = float(stats["bytes_available"]) / (1024.0 * 1024.0)
+    return {
+        "device_count": len(devices),
+        "device_kind": devices[0].device_kind if devices else None,
+        "available_mib": available_mib,
+        "stats_mib": (
+            {
+                key: float(value) / (1024.0 * 1024.0)
+                for key, value in stats.items()
+                if isinstance(value, int | float)
+            }
+            if stats
+            else None
+        ),
+        "minimum_available_mib": MINIMUM_DEVICE_AVAILABLE_MIB,
+        "xla_python_client_preallocate": os.environ.get(
+            "XLA_PYTHON_CLIENT_PREALLOCATE"
+        ),
+        "xla_python_client_mem_fraction": os.environ.get(
+            "XLA_PYTHON_CLIENT_MEM_FRACTION"
+        ),
+    }
+
+
+class _Heartbeat:
+    """Report a child's wall time, CPU time and host memory while it works.
+
+    A compiling child prints no instrument output for many minutes, so silence
+    alone does not say whether it is compiling or blocked against the card.
+    CPU time advancing with wall time says the compile is still working, and
+    the reading survives in the child's log when the parent kills it, which is
+    what lets a hang report name what the child was doing.
+    """
+
+    def __init__(self, identity: str, interval: float) -> None:
+        self.identity = identity
+        self.interval = interval
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+        self._started = 0.0
+
+    @staticmethod
+    def _cpu_seconds() -> float:
+        usage = resource.getrusage(resource.RUSAGE_SELF)
+        return usage.ru_utime + usage.ru_stime
+
+    def _report(self) -> None:
+        from benchmarks import strict_exit_incidence as instrument
+
+        print(
+            f"STAGE DIIID_FRAME_HEARTBEAT identity={self.identity!r} "
+            f"elapsed_s={time.monotonic() - self._started:.3f} "
+            f"cpu_s={self._cpu_seconds():.3f} "
+            f"rss_mib={instrument._PeakRssSampler._current_mib():.3f}",
+            flush=True,
+        )
+
+    def _loop(self) -> None:
+        while not self._stop.wait(self.interval):
+            try:
+                self._report()
+            except BaseException:
+                return
+
+    def __enter__(self) -> _Heartbeat:
+        self._started = time.monotonic()
+        self._thread = threading.Thread(target=self._loop, daemon=True)
+        self._thread.start()
+        return self
+
+    def __exit__(self, *exception: Any) -> bool:
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout=5.0)
+        return False
+
+
+def _last_log_line(path: Path) -> str | None:
+    """The last line a child wrote, which its own process is gone to explain."""
+    try:
+        lines = [
+            line.strip()
+            for line in path.read_text(encoding="utf-8", errors="replace").splitlines()
+            if line.strip()
+        ]
+    except OSError:
+        return None
+    return lines[-1] if lines else None
+
+
+def _frame_child(
+    arguments: argparse.Namespace,
+    header: dict[str, Any],
+    artifact_index: dict[str, Any],
+) -> int:
+    """Measure this process's one frame through the single-member build.
+
+    This is the ``--frame-index`` entry point.  The member it builds is the
+    only member whose parquet, machine description and cold seed this process
+    reads, and the receipt is written before the process returns so a child
+    that dies after it has landed is still recoverable.
+    """
+    from benchmarks import strict_exit_incidence as instrument
+
+    index = int(arguments.frame_index)
+    member, evidence_inputs = instrument.build_diiid_member(
+        arguments.machine_cache, index + 1, member_count=arguments.member_count
+    )
+    identity = str(member.identity)
+    header["member_identities"] = [identity]
+    header["evidence_inputs"] = evidence_inputs
+    member_state_count = int(np.asarray(member.state).size)
+    receipt_path = arguments.receipt_dir / f"{_slug(identity)}.json"
+    outcome_path = Path(arguments.exchange) / f"{_slug(identity)}.json"
+    outcome: dict[str, Any]
+    try:
+        with _Heartbeat(identity, HEARTBEAT_INTERVAL_SECONDS):
+            result = instrument._measure_machine(
+                [member], arguments.repeats, name="DIIID"
+            )
+        row = result["members"][0]
+        try:
+            receipt = _frame_receipt(
+                header=header,
+                row=row,
+                index=index,
+                member_state_count=member_state_count,
+                artifact_reference=artifact_index.get(identity),
+            )
+        except EmptyIdentitySetError as error:
+            _write_json(
+                receipt_path,
+                {
+                    "schema": "nova.diiid-gate-frame-identity/1",
+                    "header": header,
+                    "frame": {"identity": identity, "index": index},
+                    "identity_row_count": 0,
+                    "identity_refused": str(error),
+                    "identity_refused_note": (
+                        "the frame's terminal state carried no identity rows, "
+                        "so no comparison is formed for it"
+                    ),
+                },
+            )
+            outcome = {
+                "status": "refused",
+                "identity": identity,
+                "index": index,
+                "receipt": _relative(receipt_path),
+                "refusal": str(error),
+            }
+        else:
+            _write_json(receipt_path, receipt)
+            outcome = {
+                "status": "measured",
+                "identity": identity,
+                "index": index,
+                "receipt": _relative(receipt_path),
+                "row": row,
+                "execution_contract": result["execution_contract"],
+            }
+        print(f"FRAME_LANDED {identity} {receipt_path}", flush=True)
+    except BaseException:
+        traceback.print_exc()
+        outcome = {
+            "status": "failed",
+            "identity": identity,
+            "index": index,
+            "error": traceback.format_exc(),
+        }
+    outcome["device_memory"] = header.get("device_memory")
+    _write_json(outcome_path, outcome)
+    return 0 if outcome["status"] != "failed" else 1
+
+
+def _frame_in_child(
+    *,
+    arguments: argparse.Namespace,
+    index: int,
+    identity: str,
+    exchange: Path,
+) -> dict[str, Any]:
+    """Run one frame as a re-executed child and read back its record.
+
+    The child writes the frame's own receipt before it exits
+    and hands the measurement back through a JSON record in the exchange
+    directory: the parent cannot read the child's memory, and the record is
+    what lets the run receipt summarize frames that no longer share a process.
+
+    A child that outlives the frame timeout is killed and reported as a hang,
+    so a frame that never returns names the timeout that expired rather than
+    consuming the rest of the allocation.
+    """
+    slug = _slug(identity)
+    receipt_path = arguments.receipt_dir / f"{slug}.json"
+    outcome_path = exchange / f"{slug}.json"
+    if outcome_path.exists():
+        outcome_path.unlink()
+    command = _child_command(arguments, index, exchange)
+    stdout_path = exchange / f"{slug}.stdout.log"
+    _flush_output()
+    timed_out = False
+    exit_code: int | None = None
+    with stdout_path.open("w", encoding="utf-8") as stream:
+        try:
+            completed = subprocess.run(
+                command,
+                stdout=stream,
+                stderr=subprocess.STDOUT,
+                timeout=arguments.frame_timeout_seconds,
+                check=False,
+            )
+            exit_code = completed.returncode
+        except subprocess.TimeoutExpired:
+            timed_out = True
+    last_line = _last_log_line(stdout_path)
+    outcome: dict[str, Any]
+    if timed_out:
+        outcome = {
+            "status": "hung",
+            "identity": identity,
+            "index": index,
+            "error": (
+                "the child exceeded the per-frame timeout of "
+                f"{arguments.frame_timeout_seconds:.0f} s and was killed; its "
+                f"last line was {last_line!r}, whose cpu_s against elapsed_s "
+                "says whether it was still compiling when the ceiling expired"
+            ),
+        }
+    elif outcome_path.exists():
+        try:
+            outcome = _read_json(outcome_path)
+        except (OSError, ValueError) as error:
+            outcome = {
+                "status": "failed",
+                "identity": identity,
+                "index": index,
+                "error": f"the child's outcome record is unreadable: {error}",
+            }
+    else:
+        outcome = {
+            "status": "failed",
+            "identity": identity,
+            "index": index,
+            "error": "the child wrote no outcome record",
+        }
+    outcome.update(
+        {
+            "child_pid": None,
+            "child_exit_code": exit_code,
+            "timed_out": timed_out,
+            "child_command": command,
+            "child_stdout_log": _relative(stdout_path),
+            "last_child_line": last_line,
+            "receipt_path": str(receipt_path),
+        }
+    )
+    return outcome
+
+
+def _frame_failures(failed: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "identity": str(frame["identity"]),
+            "status": frame["status"],
+            "timed_out": frame["status"] == "hung",
+            "child_command": frame.get("child_command"),
+            "child_stdout_log": frame.get("child_stdout_log"),
+            "error": frame.get("error"),
+        }
+        for frame in failed
+    ]
+
+
+def _persist(
+    arguments: argparse.Namespace,
+    header: dict[str, Any],
+    frames: list[dict[str, Any]],
+    artifact_index: dict[str, Any],
+    repeats: int,
+) -> int:
+    """Write the run's own record over the frames whose children landed.
+
+    Each frame's receipt was written by the child that measured it, so this
+    reads those receipts back rather than rebuilding them: the run record then
+    states what is on disk rather than what the parent believes; a frame whose
+    child failed or refused is listed as such and does not abort the others.
+    """
+    measured = [frame for frame in frames if frame["status"] == "measured"]
+    refused = [frame for frame in frames if frame["status"] == "refused"]
+    failed = [frame for frame in frames if frame["status"] in ("failed", "hung")]
+    hung = [frame for frame in frames if frame["status"] == "hung"]
+    receipts = []
+    for frame in measured:
+        path = Path(frame["receipt_path"])
+        receipt = _read_json(path)
+        receipts.append((path, receipt))
+        print(f"FRAME_RECEIPT={path} {_frame_narrative(receipt)}", flush=True)
+    rows = [frame["row"] for frame in measured]
+    contracts = [
+        frame["execution_contract"]
+        for frame in measured
+        if frame.get("execution_contract") is not None
+    ]
+    execution_contract = None
+    if contracts:
+        execution_contract = dict(contracts[0])
+        execution_contract["member_count"] = len(contracts)
+        execution_contract["one_re_exec_child_per_frame"] = True
+        execution_contract["child_after_cuda_context_never_forks"] = True
+        execution_contract["child_process_count"] = len(frames)
+    host_memory = {
+        str(frame["identity"]): (frame.get("row") or {}).get("host_memory")
+        for frame in frames
+    }
+    exit_codes = {str(frame["identity"]): frame["child_exit_code"] for frame in frames}
+    run_receipt = {
+        "schema": "nova.diiid-gate-frame-identity-run/1",
+        "header": header,
+        "frame_receipts": [_relative(path) for path, _ in receipts],
+        "frames": {
+            str(receipt["frame"]["identity"]): {
+                "identity_row_count": receipt["identity_row_count"],
+                "bit_identical_to_artifact": receipt["bit_identical_to_artifact"],
+                "maximum_absolute_terminal_state_difference": (
+                    receipt["maximum_absolute_terminal_state_difference"]
+                ),
+                "child_exit_code": exit_codes[str(receipt["frame"]["identity"])],
+                "child_host_memory": host_memory[str(receipt["frame"]["identity"])],
+            }
+            for _, receipt in receipts
+        },
+        "artifact_frames_without_a_measured_member": sorted(
+            set(artifact_index) - {str(row["identity"]) for row in rows}
+        ),
+        "execution_contract": execution_contract,
+        "summary": _summarize(rows, repeats),
+        "frame_failures": _frame_failures(failed),
+        "frame_hang_timeouts": {
+            "frame_timeout_seconds": arguments.frame_timeout_seconds,
+            "frames": [str(frame["identity"]) for frame in hung],
+        },
+        "narrative": [_frame_narrative(receipt) for _, receipt in receipts],
+        "identity_refusals": [str(frame["refusal"]) for frame in refused],
+    }
+    _write_json(arguments.receipt_dir / "run.json", run_receipt)
+    print(f"RUN_RECEIPT={arguments.receipt_dir / 'run.json'}", flush=True)
+    if failed:
+        raise RuntimeError(
+            "the run record is written and these frames did not land: "
+            + ", ".join(f"{frame['identity']} ({frame['status']})" for frame in failed)
+        )
+    if refused:
+        refusals = "; ".join(str(frame["refusal"]) for frame in refused)
+        raise EmptyIdentitySetError(refusals)
+    return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--receipt-dir", type=Path, default=DEFAULT_RECEIPT_DIR)
+    parser.add_argument("--artifact", type=Path, default=DEFAULT_ARTIFACT)
+    parser.add_argument("--machine-cache", type=Path, default=DEFAULT_MACHINE_CACHE)
+    parser.add_argument("--member-count", type=int, default=5)
+    parser.add_argument("--cpu-count", type=int, default=SCHEDULED_CORE_COUNT)
+    parser.add_argument("--repeats", type=int, default=1)
+    parser.add_argument("--cache-root", type=Path, default=DEFAULT_CACHE_ROOT)
+    parser.add_argument(
+        "--frame-index",
+        type=int,
+        default=None,
+        help=(
+            "measure only this zero-based bank frame and exit; the driver sets "
+            "this when it re-executes itself as one frame's child"
+        ),
+    )
+    parser.add_argument(
+        "--exchange",
+        type=Path,
+        default=None,
+        help="the directory the driver and its children exchange frame records in",
+    )
+    parser.add_argument(
+        "--frame-timeout-seconds",
+        type=float,
+        default=DEFAULT_FRAME_TIMEOUT_SECONDS,
+        help="a child still running after this many seconds is killed and reported",
+    )
+    parser.add_argument("--probe", action="store_true")
+    arguments = parser.parse_args()
+
+    if arguments.probe:
+        from benchmarks import strict_exit_incidence as instrument
+
+        print(
+            "IMPORT_PROBE=PASS "
+            f"comparator={_require_identity_rows.__module__} "
+            f"instrument={instrument.__name__} "
+            f"receipt_dir={arguments.receipt_dir} artifact={arguments.artifact}",
+            flush=True,
+        )
+        return 0
+
+    return run(arguments)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

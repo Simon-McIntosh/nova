@@ -4,13 +4,16 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+import jax
 import numpy as np
+from nova.equilibrium.solve_request import SampledFluxFunction
+from nova.equilibrium.source import DomainProfile, ForwardSource
 import pytest
 
 from benchmarks import strict_exit_incidence as incidence
+from benchmarks.diiid_gate_frame_identity import DEFAULT_MACHINE_CACHE
+from nova.jax.config import configure_dtypes
 from benchmarks.efit_forward_parity_slice import _profile_function
-from nova.equilibrium.solve_request import SampledFluxFunction
-from nova.equilibrium.source import DomainProfile, ForwardSource
 
 
 def _converged_arm(executed_trips: int, terminal_residual: float, state_sha: str):
@@ -213,3 +216,86 @@ def test_cross_arm_identity_refuses_a_both_converged_member_with_differing_state
 
     with pytest.raises(RuntimeError, match="changed terminal state bits"):
         incidence._assert_cross_arm_identity(rows)
+
+
+def _array_like(value) -> bool:
+    """Whether a leaf carries an array whose bits this comparison can read."""
+    return isinstance(value, np.ndarray | jax.Array)
+
+
+def _values_equal(left, right) -> bool:
+    """Compare two pytree leaves, requiring matching array shape and dtype."""
+    left_is_array = _array_like(left)
+    right_is_array = _array_like(right)
+    if left_is_array != right_is_array:
+        return False
+    if left_is_array:
+        left_array = np.asarray(left)
+        right_array = np.asarray(right)
+        if left_array.shape != right_array.shape:
+            return False
+        if left_array.dtype != right_array.dtype:
+            return False
+        equal_nan = bool(np.issubdtype(left_array.dtype, np.floating))
+        return bool(np.array_equal(left_array, right_array, equal_nan=equal_nan))
+    return bool(left == right)
+
+
+def _assert_pytrees_equal(left, right, label: str) -> int:
+    """Require two pytrees to carry the same tree and equal leaves.
+
+    Returns the leaf count so the caller can assert the comparison was not
+    formed over an empty leaf set, which would read as a match without having
+    compared anything.
+    """
+    left_leaves, left_tree = jax.tree_util.tree_flatten(left)
+    right_leaves, right_tree = jax.tree_util.tree_flatten(right)
+    assert str(left_tree) == str(right_tree), f"{label} carries a different tree"
+    assert len(left_leaves) == len(right_leaves), f"{label} leaf counts differ"
+    for index, (left_leaf, right_leaf) in enumerate(zip(left_leaves, right_leaves)):
+        assert _values_equal(left_leaf, right_leaf), f"{label} leaf {index} differs"
+    return len(left_leaves)
+
+
+@pytest.mark.slow
+def test_single_member_build_matches_whole_set_build_on_one_frame():
+    """One frame built alone is the member the whole-set builder returns there.
+
+    Both builds read their own shot's parquet, machine description and cold
+    seed portfolio, so this compares two independent constructions rather than
+    one and the same call.  Extended precision is enabled before either build:
+    a member built while it is still off carries single-precision profile
+    tables, so leaving the order to chance would report a container difference
+    as a build difference.  It is a bit-identity contract over CPU arithmetic,
+    so it runs on the CPU lane in a fresh process.
+    """
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    single, single_evidence = incidence.build_diiid_member(DEFAULT_MACHINE_CACHE, 1)
+    whole, whole_evidence = incidence._build_diiid_members(
+        DEFAULT_MACHINE_CACHE, member_count=1
+    )
+    other = whole[0]
+
+    assert single is not other
+    assert single.identity == other.identity
+    assert single.target_current == other.target_current
+    assert single.tolerance == other.tolerance
+    assert single.state_authority == other.state_authority
+    assert single.options == other.options
+    assert single_evidence["member_number"] == 1
+    assert single_evidence["member_identity"] == single.identity
+    assert whole_evidence["member_count"] == 1
+
+    state_leaf_count = _assert_pytrees_equal(single.state, other.state, "state")
+    assert state_leaf_count == 1
+    assert np.asarray(single.state).size > 1
+    current_leaf_count = _assert_pytrees_equal(single.current, other.current, "current")
+    assert current_leaf_count == 1
+    assert np.asarray(single.current).size > 1
+
+    profile_leaf_count = _assert_pytrees_equal(
+        single.profile.operator, other.profile.operator, "profile operator"
+    )
+    assert profile_leaf_count > 0
+    print(f"PROFILE_OPERATOR_LEAVES={profile_leaf_count}")

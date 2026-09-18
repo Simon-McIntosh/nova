@@ -978,10 +978,13 @@ def test_unbounded_exterior_amplitude_is_reported_outside_the_field_bound() -> N
     assert float(np.asarray(step)[0]) == 0.0
     assert float(np.asarray(step)[2]) < 0.0
 
-    # the bounded components keep refusing exactly as before, while the level
-    # component is held only by its own step cap -- a level amplitude is a flux
-    # offset, not a field, so the tesla bound never refuses a level step
+    # only the component whose physical value is past the bound refuses, and the
+    # level component never does: a level amplitude is a flux offset, not a
+    # field, so the tesla bound is not the control that holds it. A refusal
+    # check that drives every component past its bound cannot tell a
+    # per-component rule from an all-or-nothing one, so the middle component
+    # here sits inside the bound on purpose.
     over_bound = jnp.asarray((2.0 * 2.5e-1 / 1.0e-3, 0.0, 1.0e6))
     step, refused = field.damped_step(over_bound, jnp.zeros(3))
     np.testing.assert_array_equal(np.asarray(step), np.zeros(3))
-    np.testing.assert_array_equal(np.asarray(refused), np.asarray([True, True, False]))
+    np.testing.assert_array_equal(np.asarray(refused), np.asarray([True, False, False]))

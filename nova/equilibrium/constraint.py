@@ -18,7 +18,6 @@ import jax.numpy as jnp
 import numpy as np
 
 from nova.biot.greens import MU0
-from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.observation import MomentIntegralSupport
 
@@ -1133,11 +1132,15 @@ def sample_lattice_flux(lattice, grid: jax.Array, point: jax.Array) -> jax.Array
 def _lattice_grid(profile: ForwardProfile, flux: jax.Array) -> jax.Array:
     """Return the plasma-grid block of one flux state in lattice shape."""
     lattice = profile.lattice
-    if not isinstance(lattice, FluxLattice):
+    if not all(
+        hasattr(lattice, name)
+        for name in ("shape", "radius", "radial_step", "height", "vertical_step")
+    ):
         raise TypeError(
-            "a point-sampling row needs a structured FluxLattice carrier; "
-            "an unstructured mesh carries its flux on cells whose local "
-            "polynomial the operator samples through sample_flux_field"
+            "a point-sampling row needs a structured lattice carrier with a "
+            "shape, an origin and a step per axis; an unstructured mesh "
+            "carries its flux on cells whose local polynomial the operator "
+            "samples through sample_flux_field"
         )
     return jnp.reshape(jnp.asarray(flux)[: lattice.node_count], lattice.shape)
 

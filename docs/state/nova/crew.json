@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T11:26:40",
+  "updated": "2026-09-18T11:33:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -190030,6 +190030,307 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260918T084149725600-cca-xpoint-cell-design",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a73",
+        "node": "cca-xpoint-cell-design",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3872,
+                "cached_input_tokens": 406769,
+                "input_tokens": 410643,
+                "output_tokens": 2319,
+                "reasoning_output_tokens": 1271,
+                "total_tokens": 412962,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "a design record under the reports fence names, with file and line, where the ordered spline-chain clip (nova/equilibrium/separatrix_clip.py, the traced clip and its arc tracer argument) admits the fitted saddle as a clip vertex, how the four edge roots of the saddle cell are paired by branch using the existing null census and typed-saddle selector outputs, how the four wedges are emitted as fixed-capacity polygons with exact-zero padding inside the derived traced-polygon capacity (128 plus the straight chain) or why that capacity must grow and by how much, how each wedge's moments are integrated with that wedge's profile through the landed closed-form polygon moments (nova/equilibrium/polygon_moments.py on the worktree lineage a78e6484 if not yet on main) or the sampled-arc route, and how the plasma-cell partition and null census see the split cell; the record states the oracle gate (the X-point cell at three resolutions on all_debug) and the H200 gate (one job, eight certificate rows, the four limited rows as a bit-identical negative control) as concrete commands with their expected receipts, lists every file the implement node must write, and names each reuse candidate it rejected and why; no source file is edited, nothing is compiled, and the manifest opens changed_paths with the word none followed by the record path",
+          "estimated_hours": null,
+          "goal": "write the implementation design for the X-point cell treatment on the held clip stack so the implement node that follows starts from named functions and fixed shapes",
+          "id": "cca-xpoint-cell-design",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-18T08:41:51Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T084149725600-cca-xpoint-cell-design/manifest.md",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/xpoint-cell-design"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "s19c-cca-xpoint-design-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-18T08:42:11Z",
+        "completed_at": "2026-09-18T09:22:47.872Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2418,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2436,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "a2a5f90da35f8424023c911a372cb53522e8f456",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only investigation verified against the worktree at base a2a5f90d; findings recorded in the manifest",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T084149725600-cca-xpoint-cell-design/manifest.md",
+          "log_digest": "sha256:9091716f83da1692e9d129b3354526f254c37da42763a3ea33d0d062934d5e8d"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T084149725600-cca-xpoint-cell-design/manifest.md",
+        "scope_changed": false,
+        "session_id": "4d5ad74b-1b57-4b74-9f87-a8998965b0ea",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 4412440,
+            "input_tokens_cumulative": 4412440,
+            "output_tokens": 33530,
+            "output_tokens_cumulative": 33530,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T09:22:47.872Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 525,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 3037,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9bd309a3",
+                "efe5f857",
+                "7e58967b",
+                "2e848df7"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "0967b66f73cf743370bf4410085fd85f02b8472236f964f547895efd08e65451",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T204844553132-msc-canonical-program-shapes-census/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan millisecond-converged-solve --section '' --role review --spec-level exact --node review-of-msc-canonical-program-shapes-census --goal 'attach an independent review to run r-20260917T204844553132-msc-canonical-program-shapes-census' --done-when 'the review for r-20260917T204844553132-msc-canonical-program-shapes-census parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260917T204844553132-msc-canonical-program-shapes-census.json --time-budget 55m --session s19-codex-20260916 --local",
+              "node": "msc-canonical-program-shapes-census",
+              "phase": "working",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260917T204844553132-msc-canonical-program-shapes-census",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 3265,
+              "terminal_at": "2026-09-18T07:47:33Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-canonical-program-shapes-census"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1458,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 855,
+              "log_fresh": true,
+              "manifest_commits": [
+                "7df99f0fbdbbdf4d283b3f1ff55037e709c800b1",
+                "17f7eb8c12d38e39715736cd8ae50def36a50a4c"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "f7c483d359936c360034cb4d1ad1e6815f1bf07a77ae2e2d24bc0c083825acda",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T080316545538-cank-shafranov-refused-row-field/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan constraint-augmented-newton-krylov --section '' --role review --spec-level exact --node review-of-cank-shafranov-refused-row-field --goal 'attach an independent review to run r-20260918T080316545538-cank-shafranov-refused-row-field' --done-when 'the review for r-20260918T080316545538-cank-shafranov-refused-row-field parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260918T080316545538-cank-shafranov-refused-row-field.json --time-budget 45m --session s19-codex-20260916 --local",
+              "node": "cank-shafranov-refused-row-field",
+              "phase": "starting",
+              "plan": "constraint-augmented-newton-krylov",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260918T080316545538-cank-shafranov-refused-row-field",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 909,
+              "terminal_at": "2026-09-18T08:26:51Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-refused-row-field"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 4412440,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2432.114,
+          "generated_tokens": 33530,
+          "generation_seconds": 2401.108,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 32.2,
+          "machine_seconds": 31.006,
+          "peak_input_tokens": 154383,
+          "tokens_per_second": 13.96,
+          "wall_tokens_per_second": 13.79
+        },
+        "follow_on_paths": [
+          "polygon_moments.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "investigate role; the deliverable is the design findings carried in the manifest evidence_inputs, the report file being a degraded long-form draft",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-xpoint-cell-design",
+          "session_id": "4d5ad74b-1b57-4b74-9f87-a8998965b0ea",
+          "session_source": "stream",
+          "retained_at": "2026-09-18T09:22:47.872Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 46.0,
+        "orientation_input_tokens": 3207493.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -190342,6 +190643,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2783
+    "_version": 2784
   }
 }

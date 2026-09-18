@@ -895,12 +895,17 @@ def _draw_state(
     poloidal_axes(axis)
     axis.set_title(f"{title}\nanalytic blue / terminal coloured", fontsize=8)
     path.parent.mkdir(parents=True, exist_ok=True)
+    vector_path = path.with_suffix(".svg")
+    figure.savefig(vector_path)
     figure.savefig(path, dpi=180)
     plt.close(figure)
     return {
         "filesystem_path": str(path),
         "project_absolute_src": project_src,
         "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "vector_filesystem_path": str(vector_path),
+        "vector_project_absolute_src": str(Path(project_src).with_suffix(".svg")),
+        "vector_sha256": hashlib.sha256(vector_path.read_bytes()).hexdigest(),
     }
 
 
@@ -982,7 +987,10 @@ def control_arm(output_root: Path, figure_path: Path, arm: str) -> dict[str, Any
         )
     finally:
         set_support_clip_mode(previous_mode)
+    state_path = output_root / f"control-{arm}-state.npy"
+    np.save(state_path, np.asarray(state, dtype=np.float64))
     control = {
+        "terminal_state_path": str(state_path),
         "schema": "nova.centroid-displaced-control",
         "arm": arm,
         "constrained": constrained,

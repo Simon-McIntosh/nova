@@ -393,7 +393,12 @@ and appends both the pytest wall time and exit status to the named log. It serve
 the pinned pre-warm cache published by `scripts/h200_test_lane/prewarm.sh` under
 `/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm`, prints the cache
 contract and one row per program with its compile seconds and hit or miss
-outcome, samples GPU utilisation at 10, 30 and 60 seconds from allocation, and
+outcome, and samples GPU utilisation at 10, 30 and 60 seconds from allocation.
+The samples are taken while pytest runs, so a reading above zero is the test
+run's own use of the device, and the allocation's device inventory is printed
+ahead of them so an idle device is distinguishable from one the job never
+received: a run that misses the cache compiles on the host and reads zero at all
+three samples. The launcher
 prints WALL-CLOCK-UNRELIABLE with a nonzero exit when a run misses the cache
 more often than `NOVA_CACHE_MISS_BUDGET` allows. Preserve
 GPU failures from CPU-specific identity assertions as device-qualified evidence;

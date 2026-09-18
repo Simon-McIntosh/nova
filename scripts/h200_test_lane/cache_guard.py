@@ -240,31 +240,39 @@ def verify_pinned_directory() -> dict[str, Any]:
 
 
 def sample_gpu_utilisation(offsets: tuple[int, ...] = (10, 30, 60)) -> None:
-    """Print GPU utilisation at the requested seconds from this call.
+    """Print the device inventory, then GPU utilisation at the requested seconds.
 
-    The device a lane actually received is only visible if something is running
-    on it, so the caller issues a pre-flight dispatch beside this sampler: a
-    pre-warmed lane then reads above zero inside the allocation rather than a
-    flat zero that cannot be told from a lane with no device at all.
+    The samples are taken while the target program runs, so a reading above zero
+    is the target's own use of the device and is not masked by a dispatch issued
+    from here. A zero reading only says something about the target when the
+    allocation's device is known to be present, so the inventory row is printed
+    first: a device listed there and idle is a run that stayed on the host,
+    while a device missing or erroring there is an allocation that never reached
+    one.
     """
-    command = [
+    inventory = [
+        "nvidia-smi",
+        "--query-gpu=index,name,memory.total",
+        "--format=csv,noheader,nounits",
+    ]
+    utilisation = [
         "nvidia-smi",
         "--query-gpu=index,utilization.gpu",
         "--format=csv,noheader,nounits",
     ]
+    print("GPU_DEVICE_INVENTORY=%s" % _gpu_reading(inventory), flush=True)
     started = time.monotonic()
     for offset in offsets:
         remaining = offset - (time.monotonic() - started)
         if remaining > 0:
             time.sleep(remaining)
-        reading = _gpu_utilisation(command)
         print(
-            "GPU_UTILISATION_AT_%dS=%s" % (offset, reading),
+            "GPU_UTILISATION_AT_%dS=%s" % (offset, _gpu_reading(utilisation)),
             flush=True,
         )
 
 
-def _gpu_utilisation(command: list[str]) -> str:
+def _gpu_reading(command: list[str]) -> str:
     """Return one nvidia-smi reading, or the failure name if it is unavailable."""
     try:
         completed = subprocess.run(command, capture_output=True, text=True, check=True)

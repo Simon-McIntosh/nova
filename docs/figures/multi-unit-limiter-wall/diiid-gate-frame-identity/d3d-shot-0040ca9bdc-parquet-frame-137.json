@@ -1,0 +1,250 @@
+{
+  "artifact_reference": {
+    "base": {
+      "with_exit": {
+        "converged": false,
+        "terminal_residual": 0.21539421976016987,
+        "terminal_state_sha256": "6a4412f00cf27fbc86b25ddc968ec2f66f54a6cf2e1753ef9ce9ce7f88da7f3f",
+        "termination": "active_set_settled"
+      },
+      "without_exit": {
+        "converged": false,
+        "terminal_residual": 0.21539421976016987,
+        "terminal_state_sha256": "6a4412f00cf27fbc86b25ddc968ec2f66f54a6cf2e1753ef9ce9ce7f88da7f3f",
+        "termination": "active_set_stagnated"
+      }
+    },
+    "head": {
+      "with_exit": {
+        "converged": false,
+        "terminal_residual": 0.21538382135114667,
+        "terminal_state_sha256": "04c0470176e38d9f6767522fe7bcf58e0675cd4a4050c3a30e99dd3aaa0a92a3",
+        "termination": "active_set_settled"
+      },
+      "without_exit": {
+        "converged": false,
+        "terminal_residual": 0.21538382135114667,
+        "terminal_state_sha256": "04c0470176e38d9f6767522fe7bcf58e0675cd4a4050c3a30e99dd3aaa0a92a3",
+        "termination": "active_set_stagnated"
+      }
+    }
+  },
+  "bit_identical_to_artifact": false,
+  "comparison_kind": "one DIII-D gate frame's terminal state at the driver's device against the committed batched artifact",
+  "frame": {
+    "identity": "d3d_shot_0040ca9bdc.parquet frame 137",
+    "index": 4
+  },
+  "header": {
+    "allocation": {
+      "cpu_count": 8,
+      "device": "NVIDIA H200 NVL",
+      "device_probed": true,
+      "jax_platforms": [
+        "cuda",
+        "cpu"
+      ],
+      "job_id": 1273398,
+      "job_name": "diiid-gate-frame-20260918",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "requested_memory_mib": 131072,
+      "requested_time_limit": null,
+      "reservation": "gpu_0003_grpA",
+      "tmpdir": "/tmp"
+    },
+    "allocation_proof": "driver-local proof of the reserved H200, mirroring the instrument's with a memory floor: the instrument's proof requires exactly 128 GiB, which one frame's 131 GiB compile footprint does not fit",
+    "artifact_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/mulw-diiid-identity-single-member-build/docs/figures/batched-operator-boundary/exit-incidence/diiid-width5.json",
+    "artifact_primary_arm": "head",
+    "artifact_revisions": {
+      "base_materialisation": "git archive with the current row-persistence instrument overlaid",
+      "base_revision": "9f220e854d484aaf4a2d1dc0056bdcfb811526f3",
+      "base_selection": "first parent of the merge that landed the unit-aware wall consumers",
+      "change_commit": "04cb76c48b76a34335f7ac1c10f6958e15e7cccc",
+      "head_revision": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab",
+      "landing_merge": "beeff98f09b2863f29e0ee71514634d49df8bf4d"
+    },
+    "artifact_schema": "nova.diiid-strict-exit-paired/1",
+    "artifact_secondary_arm": "base",
+    "artifact_sha256": "95706db87178b96351007a693334bc2dc8a9433c063b711f6f12e95681fb1d42",
+    "cache_root": "/home/ITER/mcintos/.cache",
+    "declared_member_count": 5,
+    "device": "NVIDIA H200 NVL",
+    "device_memory": {
+      "available_mib": null,
+      "device_count": 1,
+      "device_kind": "NVIDIA H200 NVL",
+      "minimum_available_mib": 32768,
+      "stats_mib": {
+        "bytes_in_use": 0.000244140625,
+        "bytes_limit": 107370.0,
+        "bytes_reserved": 0.0,
+        "largest_alloc_size": 0.000244140625,
+        "largest_free_block_bytes": 1.99951171875,
+        "num_allocs": 1.9073486328125e-06,
+        "peak_bytes_in_use": 0.00048828125,
+        "peak_bytes_reserved": 0.0,
+        "peak_pool_bytes": 2.0,
+        "pool_bytes": 2.0
+      },
+      "xla_python_client_mem_fraction": null,
+      "xla_python_client_preallocate": "false"
+    },
+    "device_sha": "903459aab633a3eb1600760268789302c67a8699",
+    "device_tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/mulw-diiid-identity-single-member-build",
+    "driver": "benchmarks/diiid_gate_frame_identity.py",
+    "driver_sha256": "425f394073dab20dace6c65fc711cabc4116517daa477b02ed42945b922c341c",
+    "evidence_inputs": {
+      "bank": {
+        "path": "docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_receipt.json",
+        "sha256": "4e8f3519936e99705f97e57799adcf9afeed45d63cb62515376da28faafe4537"
+      },
+      "corpus_root": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train",
+      "machine_artifact": {
+        "cache": "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache",
+        "digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
+        "manifest_sha256": "c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e"
+      },
+      "member_count": 1,
+      "member_identity": "d3d_shot_0040ca9bdc.parquet frame 137",
+      "member_number": 5
+    },
+    "execution_route": "one_compiled_program_per_frame, both strict-exit passes on the same program: the stacked vmap program the committed artifact was measured with is refused by this revision's accelerated history program, whose argument layout converts the vmapped target current with numpy",
+    "frame_timeout_seconds": 3600.0,
+    "identity_comparator": "benchmarks.solve_program_size_gate._require_identity_rows",
+    "job_id": 1273398,
+    "machine_artifact_digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
+    "machine_cache": "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache",
+    "member_identities": [
+      "d3d_shot_0040ca9bdc.parquet frame 137"
+    ],
+    "minimum_node_memory_mib": 131072,
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 1.0,
+      "root": "/home/ITER/mcintos/.cache",
+      "runtime_identity": {
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "NVIDIA H200 NVL",
+            "platform": "gpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
+      },
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-0745ecebea4cb264e054"
+    },
+    "process_isolation": "one re-executed child per frame, each started as a fresh `python <this driver> --frame-index <i>` that builds only its own member through strict_exit_incidence.build_diiid_member, with each frame's receipt written by its own child and a fresh process for the next: five frames in one process held 131 GiB resident after the first frame, and process exit is what returns it",
+    "re_exec_not_fork": "children are re-executed rather than forked: a fork taken after a CUDA context is up deadlocks silently, so no process here forks",
+    "recorded_at": "2026-09-18T11:44:12.828920+00:00",
+    "requested_repeats": 1,
+    "reservation": "gpu_0003_grpA",
+    "role": "frame_child",
+    "route_qualification": "a difference measured on the per-frame route against an artifact measured on the stacked vmap route is device- and route-qualified",
+    "scheduled_core_count": 8
+  },
+  "identity_row_count": 1173,
+  "main": {
+    "with_exit": {
+      "batch_elapsed_ms": null,
+      "batched_ms_per_member": null,
+      "converged": false,
+      "executed_trips": 2,
+      "terminal_residual": 0.2153838213511468,
+      "terminal_state_sha256": "5ba9e0cc5cc3671961838f70d3f4a0057b2e6caae452ed9356bc5bddbc571c70",
+      "termination": "active_set_settled"
+    },
+    "without_exit": {
+      "batch_elapsed_ms": null,
+      "batched_ms_per_member": null,
+      "converged": false,
+      "executed_trips": 2,
+      "terminal_residual": 0.2153838213511468,
+      "terminal_state_sha256": "5ba9e0cc5cc3671961838f70d3f4a0057b2e6caae452ed9356bc5bddbc571c70",
+      "termination": "active_set_stagnated"
+    }
+  },
+  "main_against_artifact": {
+    "base": {
+      "with_exit": {
+        "absolute_terminal_residual_difference": 1.0398409023060218e-05,
+        "artifact_converged": false,
+        "artifact_terminal_residual": 0.21539421976016987,
+        "main_converged": false,
+        "main_terminal_residual": 0.2153838213511468,
+        "terminal_state_sha256_identical": false
+      },
+      "without_exit": {
+        "absolute_terminal_residual_difference": 1.0398409023060218e-05,
+        "artifact_converged": false,
+        "artifact_terminal_residual": 0.21539421976016987,
+        "main_converged": false,
+        "main_terminal_residual": 0.2153838213511468,
+        "terminal_state_sha256_identical": false
+      }
+    },
+    "head": {
+      "with_exit": {
+        "absolute_terminal_residual_difference": 1.3877787807814457e-16,
+        "artifact_converged": false,
+        "artifact_terminal_residual": 0.21538382135114667,
+        "main_converged": false,
+        "main_terminal_residual": 0.2153838213511468,
+        "terminal_state_sha256_identical": false
+      },
+      "without_exit": {
+        "absolute_terminal_residual_difference": 1.3877787807814457e-16,
+        "artifact_converged": false,
+        "artifact_terminal_residual": 0.21538382135114667,
+        "main_converged": false,
+        "main_terminal_residual": 0.2153838213511468,
+        "terminal_state_sha256_identical": false
+      }
+    }
+  },
+  "maximum_absolute_terminal_state_difference": 0.0,
+  "maximum_absolute_terminal_state_difference_scope": "between this frame's two strict-exit passes at the driver's device; the committed artifact carries terminal-state hashes rather than state arrays, so a state-array difference against it cannot be formed",
+  "primary_artifact_arm": "head",
+  "schema": "nova.diiid-gate-frame-identity/1",
+  "strict_qualification": "fired"
+}

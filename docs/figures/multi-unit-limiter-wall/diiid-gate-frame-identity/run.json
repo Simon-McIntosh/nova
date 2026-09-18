@@ -1,0 +1,264 @@
+{
+  "artifact_frames_without_a_measured_member": [],
+  "execution_contract": {
+    "additional_repetitions_after_first_compiled_solve": 1,
+    "arm_order_per_member": [
+      "without_exit",
+      "with_exit"
+    ],
+    "child_after_cuda_context_never_forks": true,
+    "child_process_count": 5,
+    "member_count": 5,
+    "one_compiled_program_per_member": true,
+    "one_re_exec_child_per_frame": true,
+    "same_program_reused_for_both_arms": true,
+    "settlement_flag_is_runtime_argument": true,
+    "unique_member_inputs": 1,
+    "width": 1
+  },
+  "frame_failures": [],
+  "frame_hang_timeouts": {
+    "frame_timeout_seconds": 3600.0,
+    "frames": []
+  },
+  "frame_receipts": [
+    "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-00000c4a7b-parquet-frame-179.json",
+    "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-0003ff34e7-parquet-frame-44.json",
+    "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-001554e054-parquet-frame-144.json",
+    "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-002495e835-parquet-frame-146.json",
+    "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/d3d-shot-0040ca9bdc-parquet-frame-137.json"
+  ],
+  "frames": {
+    "d3d_shot_00000c4a7b.parquet frame 179": {
+      "bit_identical_to_artifact": false,
+      "child_exit_code": 0,
+      "child_host_memory": {
+        "final_rss_mib": 128177.828125,
+        "initial_rss_mib": 2719.0625,
+        "max_rss_mib": 128177.84765625,
+        "released_rss_mib": 126159.671875,
+        "sample_count": 57426,
+        "sampling_interval_seconds": 0.05
+      },
+      "identity_row_count": 1173,
+      "maximum_absolute_terminal_state_difference": 0.0
+    },
+    "d3d_shot_0003ff34e7.parquet frame 44": {
+      "bit_identical_to_artifact": false,
+      "child_exit_code": 0,
+      "child_host_memory": {
+        "final_rss_mib": 128033.3671875,
+        "initial_rss_mib": 2701.52734375,
+        "max_rss_mib": 128033.38671875,
+        "released_rss_mib": 126015.40625,
+        "sample_count": 57623,
+        "sampling_interval_seconds": 0.05
+      },
+      "identity_row_count": 1173,
+      "maximum_absolute_terminal_state_difference": 0.0
+    },
+    "d3d_shot_001554e054.parquet frame 144": {
+      "bit_identical_to_artifact": false,
+      "child_exit_code": 0,
+      "child_host_memory": {
+        "final_rss_mib": 128290.01953125,
+        "initial_rss_mib": 2747.34765625,
+        "max_rss_mib": 128290.0390625,
+        "released_rss_mib": 126273.2421875,
+        "sample_count": 59557,
+        "sampling_interval_seconds": 0.05
+      },
+      "identity_row_count": 1173,
+      "maximum_absolute_terminal_state_difference": 1.0536016503692736e-13
+    },
+    "d3d_shot_002495e835.parquet frame 146": {
+      "bit_identical_to_artifact": false,
+      "child_exit_code": 0,
+      "child_host_memory": {
+        "final_rss_mib": 128362.265625,
+        "initial_rss_mib": 2770.9296875,
+        "max_rss_mib": 128362.28515625,
+        "released_rss_mib": 126344.984375,
+        "sample_count": 56504,
+        "sampling_interval_seconds": 0.05
+      },
+      "identity_row_count": 1173,
+      "maximum_absolute_terminal_state_difference": 0.0
+    },
+    "d3d_shot_0040ca9bdc.parquet frame 137": {
+      "bit_identical_to_artifact": false,
+      "child_exit_code": 0,
+      "child_host_memory": {
+        "final_rss_mib": 128279.78125,
+        "initial_rss_mib": 2757.53125,
+        "max_rss_mib": 128279.796875,
+        "released_rss_mib": 126262.25390625,
+        "sample_count": 56377,
+        "sampling_interval_seconds": 0.05
+      },
+      "identity_row_count": 1173,
+      "maximum_absolute_terminal_state_difference": 0.0
+    }
+  },
+  "header": {
+    "allocation": {
+      "cpu_count": 8,
+      "device": null,
+      "device_probed": false,
+      "jax_platforms": [
+        "cuda",
+        "cpu"
+      ],
+      "job_id": 1273398,
+      "job_name": "diiid-gate-frame-20260918",
+      "node": "98dci4-gpu-0003",
+      "partition": "betelgeuse",
+      "requested_memory_mib": 131072,
+      "requested_time_limit": null,
+      "reservation": "gpu_0003_grpA",
+      "tmpdir": "/tmp"
+    },
+    "allocation_proof": "driver-local proof of the reserved H200, mirroring the instrument's with a memory floor: the instrument's proof requires exactly 128 GiB, which one frame's 131 GiB compile footprint does not fit",
+    "artifact_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/mulw-diiid-identity-single-member-build/docs/figures/batched-operator-boundary/exit-incidence/diiid-width5.json",
+    "artifact_primary_arm": "head",
+    "artifact_revisions": {
+      "base_materialisation": "git archive with the current row-persistence instrument overlaid",
+      "base_revision": "9f220e854d484aaf4a2d1dc0056bdcfb811526f3",
+      "base_selection": "first parent of the merge that landed the unit-aware wall consumers",
+      "change_commit": "04cb76c48b76a34335f7ac1c10f6958e15e7cccc",
+      "head_revision": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab",
+      "landing_merge": "beeff98f09b2863f29e0ee71514634d49df8bf4d"
+    },
+    "artifact_schema": "nova.diiid-strict-exit-paired/1",
+    "artifact_secondary_arm": "base",
+    "artifact_sha256": "95706db87178b96351007a693334bc2dc8a9433c063b711f6f12e95681fb1d42",
+    "cache_root": "/home/ITER/mcintos/.cache",
+    "comparator_self_check": "identity set for comparator self-check carries 0 rows; a comparison over no rows cannot read as within drift",
+    "declared_member_count": 5,
+    "device": null,
+    "device_sha": "f3488a004c7cfe6df93c92b924c90391e756f064",
+    "device_tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/mulw-diiid-identity-single-member-build",
+    "driver": "benchmarks/diiid_gate_frame_identity.py",
+    "driver_sha256": "425f394073dab20dace6c65fc711cabc4116517daa477b02ed42945b922c341c",
+    "execution_route": "one_compiled_program_per_frame, both strict-exit passes on the same program: the stacked vmap program the committed artifact was measured with is refused by this revision's accelerated history program, whose argument layout converts the vmapped target current with numpy",
+    "frame_exchange_directory": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/diiid-single-member/h200-diiid-gate-frames-exchange-run20260918",
+    "frame_timeout_seconds": 3600.0,
+    "identity_comparator": "benchmarks.solve_program_size_gate._require_identity_rows",
+    "job_id": 1273398,
+    "machine_artifact_digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
+    "machine_cache": "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache",
+    "member_identities": [
+      "d3d_shot_00000c4a7b.parquet frame 179",
+      "d3d_shot_0003ff34e7.parquet frame 44",
+      "d3d_shot_001554e054.parquet frame 144",
+      "d3d_shot_002495e835.parquet frame 146",
+      "d3d_shot_0040ca9bdc.parquet frame 137"
+    ],
+    "minimum_node_memory_mib": 131072,
+    "node": "98dci4-gpu-0003",
+    "partition": "betelgeuse",
+    "persistent_compilation_cache": {
+      "directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
+      "entry_key_fields": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ],
+      "invalidation_scope": {
+        "directory_version_key": [
+          "backend and compiler options",
+          "device topology",
+          "jax and jaxlib/XLA build"
+        ],
+        "jax_entry_key": [
+          "serialized computation",
+          "jaxlib version",
+          "backend version",
+          "XLA flags",
+          "compile options",
+          "accelerator topology"
+        ]
+      },
+      "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+      "maximum_bytes": 8589934592,
+      "minimum_compile_seconds": 1.0,
+      "root": "/home/ITER/mcintos/.cache",
+      "runtime_identity": {
+        "backend": "gpu",
+        "backend_version": "PJRT C API\ncuda 12090",
+        "compiler_options": {
+          "jax_compilation_cache_include_metadata_in_key": false,
+          "jax_default_matmul_precision": null,
+          "jax_enable_x64": true,
+          "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+          "xla_flags": null
+        },
+        "device_topology": [
+          {
+            "id": 0,
+            "kind": "NVIDIA H200 NVL",
+            "platform": "gpu",
+            "process_index": 0
+          }
+        ],
+        "jax_version": "0.11.0",
+        "jaxlib_version": "0.11.0"
+      },
+      "selection": "explicit_per_recipe",
+      "version_key": "runtime-0745ecebea4cb264e054"
+    },
+    "process_isolation": "one re-executed child per frame, each started as a fresh `python <this driver> --frame-index <i>` that builds only its own member through strict_exit_incidence.build_diiid_member, with each frame's receipt written by its own child and a fresh process for the next: five frames in one process held 131 GiB resident after the first frame, and process exit is what returns it",
+    "re_exec_not_fork": "children are re-executed rather than forked: a fork taken after a CUDA context is up deadlocks silently, so no process here forks",
+    "recorded_at": "2026-09-18T08:13:48.478154+00:00",
+    "requested_repeats": 1,
+    "reservation": "gpu_0003_grpA",
+    "role": "driver",
+    "route_qualification": "a difference measured on the per-frame route against an artifact measured on the stacked vmap route is device- and route-qualified",
+    "scheduled_core_count": 8
+  },
+  "identity_refusals": [],
+  "narrative": [
+    "d3d_shot_00000c4a7b.parquet frame 179: differs from the committed batched artifact; largest absolute terminal-residual difference 9.937e-02; paired-pass terminal-state difference 0.000e+00",
+    "d3d_shot_0003ff34e7.parquet frame 44: differs from the committed batched artifact; largest absolute terminal-residual difference 2.776e-16; paired-pass terminal-state difference 0.000e+00",
+    "d3d_shot_001554e054.parquet frame 144: differs from the committed batched artifact; largest absolute terminal-residual difference 1.202e-13; paired-pass terminal-state difference 1.054e-13",
+    "d3d_shot_002495e835.parquet frame 146: differs from the committed batched artifact; largest absolute terminal-residual difference 1.110e-16; paired-pass terminal-state difference 0.000e+00",
+    "d3d_shot_0040ca9bdc.parquet frame 137: differs from the committed batched artifact; largest absolute terminal-residual difference 1.388e-16; paired-pass terminal-state difference 0.000e+00"
+  ],
+  "schema": "nova.diiid-gate-frame-identity-run/1",
+  "summary": {
+    "additional_repetitions_after_first_compiled_solve": 1,
+    "bit_identical_converged_members": 0,
+    "compile_seconds": {
+      "count": 5,
+      "maximum": 2937.004198802635,
+      "mean": 2908.0685622295364,
+      "minimum": 2868.827464716509
+    },
+    "landed_frames": 5,
+    "per_frame_compile_seconds": {
+      "d3d_shot_00000c4a7b.parquet frame 179": 2921.6095497058704,
+      "d3d_shot_0003ff34e7.parquet frame 44": 2933.2340078558773,
+      "d3d_shot_001554e054.parquet frame 144": 2937.004198802635,
+      "d3d_shot_002495e835.parquet frame 146": 2879.6675900667906,
+      "d3d_shot_0040ca9bdc.parquet frame 137": 2868.827464716509
+    },
+    "saved_executed_trips": 1,
+    "strict_exit_fired_members": 5,
+    "strict_exit_never_members": 0,
+    "with_exit_solve_ms": {
+      "count": 5,
+      "maximum": 23985.378435500003,
+      "mean": 5474.269057500001,
+      "minimum": 820.5346965
+    },
+    "without_exit_solve_ms": {
+      "count": 5,
+      "maximum": 43082.5305845,
+      "mean": 24290.3767237,
+      "minimum": 17331.183362000003
+    }
+  }
+}

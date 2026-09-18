@@ -30,7 +30,7 @@
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="194">
+<meta name="plan-version" content="195">
 </head>
 <body>
 <main class="plan-doc">
@@ -339,6 +339,7 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260917T224621767999-review-of-nia-drift-support-row-audit" data-who="reckon-ship" data-when="2026-09-18T07:50:45.467Z">
     <div class="r-comment-body"><p>Independent review of nia-drift-support-row-audit stored at the fence path, total 83, two record findings recorded on the reviewed run's completion</p></div>
+</div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260917T224621772891-nia-anchor-trace-bisect" data-who="nia-anchor-trace-bisect" data-when="2026-09-18T09:40:00Z">
     <div class="r-comment-body"><p>The traced-anchor hook is exonerated on the drifting arm. One H200 allocation (job 1273425, 52m51s) solved 21978/35 in four arms: traced and host-constant anchor, each under the pure and mixed classes. On pure, both treatments terminate at 2.4506488565449e-03 under active_set_cycle_detected while the hook moves the operand partition on four instruments (76 to 73 leaves, structure 0fe0dcdf920a9b66 to dca863866a4c328a, values 35c0be67ae2abdd8 to 689612da6a6541af, geometry identity 6dda07ba to 0eef9f00), so the anchor arrangement does not decide which cycle is entered; the traced arm reproduces the bank's current-tree digests exactly and the pre-flight control bit-matched the bank on the login node before the allocation. On mixed the arms separate only at round-off: host-constant reproduces the producer's 3.0996518101046146e-16 to all seventeen digits against the traced 2.2041968427410595e-16, a delta of 8.95e-17 across two converged states — arithmetic order, not drift. The limit is stated with it: constant_matches_bank_producer_stage=false on both classes, because the constant arm is a 73-leaf pytree while the producer's partition_values is empty. What remains is the partition's content, not the anchor names: fae50f15 holds zero dynamic_extra, the hook arrives at 879a33ee, 175 solve-path commits follow, and the leaf-adding families are the traced profile coefficients (a4de1caf, 77b149b4, a8443a12, merge 45048423) and traced polygon capacity (f7fefbd7, merge be29cb0e). Receipt, four arms, panel and evidence anchor landed; the traced-anchor and support-row routes are both now closed and the next node narrows the partition's content</p></div>
 </div>
@@ -757,7 +758,10 @@ for the lead before merge.</p>
     <div class="r-comment-body"><p>Independent review of nia-drift-probe-record-repairs stored at the fence path, total 94, two test-strength findings queued as a followup</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260918T080721770101-nia-drift-probe-record-repairs" data-who="reckon-ship" data-when="2026-09-18T12:13:11.639Z">
-    <div class="r-comment-body"><p>Drift probe record repairs (merged into main): each panel draws its own archive&#x27;s wall and the sidecar states the measured bit-identity of the two walls; the merged receipt states repository-relative roots (the two 22086/43 arm receipts had carried a five-deep relative root that the sorted merge took last) and carries the compile-line count with its log path; the panel test pins line contours on the shared levels, both null sets and the wall through the figure&#x27;s artists. Review 94/100 with two test-strength findings queued as f-nia-panel-test-strength</p></div>
+    <div class="r-comment-body"><p>Drift probe record repairs (merged into main): each panel draws its own archive's wall and the sidecar states the measured bit-identity of the two walls; the merged receipt states repository-relative roots (the two 22086/43 arm receipts had carried a five-deep relative root that the sorted merge took last) and carries the compile-line count with its log path; the panel test pins line contours on the shared levels, both null sets and the wall through the figure's artists. Review 94/100 with two test-strength findings queued as f-nia-panel-test-strength</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260918T121431723283-review-of-nia-anchor-trace-bisect" data-who="reckon-ship" data-when="2026-09-18T12:30:13.567Z">
+    <div class="r-comment-body"><p>Independent review of nia-anchor-trace-bisect stored at the fence path, total 84, three record findings queued as a followup</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

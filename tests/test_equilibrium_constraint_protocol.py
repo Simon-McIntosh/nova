@@ -955,6 +955,72 @@ def test_flux_level_row_states_its_carrier_requirement() -> None:
         )
 
 
+class _CellMeshOperator:
+    """Operator stub whose point read returns the owning cell's own value.
+
+    Each cell answers with its own carried value at the query the caller
+    supplied for that cell, which is what the mesh read does with a locally
+    fit quadratic: linear in the carried flux in the constant and in the
+    query point through its own slot.
+    """
+
+    physical_node_number = 3
+
+    def sample_node_flux(self, state):
+        return jnp.asarray(state)[self.physical_node_number :]
+
+    def sample_flux_field(self, centroid_flux, sample_flux, points):
+        pool = jnp.concatenate([jnp.asarray(centroid_flux), jnp.asarray(sample_flux)])
+        query = jnp.asarray(points)[:, :, 0]
+        values = jnp.broadcast_to(pool[: points.shape[0]][:, None], query.shape) + query
+        zeros = jnp.zeros_like(values)
+        return values, zeros, zeros
+
+
+def _cell_mesh_profile() -> SimpleNamespace:
+    """Return a three-cell carrier whose centroids sit on the inboard axis."""
+    mesh = SimpleNamespace(coordinate=np.asarray([[1.0, 0.0], [2.0, 0.0], [3.0, 0.0]]))
+    return SimpleNamespace(lattice=mesh, operator=_CellMeshOperator())
+
+
+def test_flux_level_row_reads_a_cell_carried_mesh_through_its_owner() -> None:
+    """A cell-carried carrier is read, and an offset moves the row by itself."""
+    configure_dtypes()
+    profile = _cell_mesh_profile()
+    row = FluxLevelConstraint(point_count=1)
+    state = jnp.asarray([0.1, 0.2, 0.3, 0.0])
+    context = ConstraintContext(
+        flux=state,
+        requested_class=None,
+        target_current=None,
+        shadow=None,
+    )
+
+    # the query is nearest the second cell's centroid, so the row reads that
+    # cell: the ownership follows the point rather than a fixed slot
+    point = jnp.asarray([[2.05, 0.05]])
+    centre = float(np.asarray(row.observed(profile, context, point))[0])
+    np.testing.assert_allclose(profile.lattice.coordinate[1, 0], 2.0, rtol=0.0)
+    np.testing.assert_allclose(centre, 0.2 + 2.05, rtol=0.0, atol=1.0e-12)
+
+    outboard = float(
+        np.asarray(row.observed(profile, context, jnp.asarray([[3.05, 0.0]])))[0]
+    )
+    np.testing.assert_allclose(outboard, 0.3 + 3.05, rtol=0.0, atol=1.0e-12)
+
+    # the level column's whole property: an offset carried identically by every
+    # cell moves the row by exactly that offset, so its leverage is unit and a
+    # target at the declared point is reachable by the level term alone
+    offset = 5.0
+    shifted = context._replace(flux=state + offset)
+    np.testing.assert_allclose(
+        np.asarray(row.observed(profile, shifted, jnp.asarray([[2.05, 0.05]]))),
+        centre + offset,
+        rtol=0.0,
+        atol=1.0e-12,
+    )
+
+
 def test_unbounded_exterior_amplitude_is_reported_outside_the_field_bound() -> None:
     configure_dtypes()
     field = BoundedExteriorFieldUnknown(

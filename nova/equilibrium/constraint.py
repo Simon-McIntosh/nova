@@ -1008,6 +1008,14 @@ class FluxLevelConstraint:
     The points arrive as the binding payload with shape ``(point_count, 2)``
     in ``(R, Z)``, so moving a point is a new payload rather than a new
     compiled program.
+
+    Two carriers state a flux the row can read.  A structured
+    :class:`~nova.equilibrium.conservation.FluxLattice` is read by the cubic
+    lattice interpolation every shape row shares.  A cell-carried mesh states
+    its per-cell centroids instead and is read through the owning cell's
+    own-node quadratic, which the operator evaluates with weights it fit on
+    the host when the mesh was built; both reads return the point's flux in
+    the state's own unit and neither adds a host callback to the traced read.
     """
 
     point_count: int
@@ -1031,6 +1039,10 @@ class FluxLevelConstraint:
         if supplied.shape[0] < self.point_count:
             raise ValueError("a flux-level row needs one (R, Z) point per row")
         points = supplied[: self.point_count]
+        if _carries_cell_flux_mesh(profile.lattice):
+            return jax.vmap(
+                lambda point: _mesh_carried_point_flux(profile, context.flux, point)
+            )(points)
         grid = _lattice_grid(profile, context.flux)
         return jax.vmap(
             lambda point: sample_lattice_flux(profile.lattice, grid, point)
@@ -1129,20 +1141,60 @@ def sample_lattice_flux(lattice, grid: jax.Array, point: jax.Array) -> jax.Array
     return radial_weight @ block @ vertical_weight
 
 
+_LATTICE_CARRIER_ATTRIBUTES = (
+    "shape",
+    "radius",
+    "radial_step",
+    "height",
+    "vertical_step",
+)
+
+
 def _lattice_grid(profile: ForwardProfile, flux: jax.Array) -> jax.Array:
     """Return the plasma-grid block of one flux state in lattice shape."""
     lattice = profile.lattice
-    if not all(
-        hasattr(lattice, name)
-        for name in ("shape", "radius", "radial_step", "height", "vertical_step")
-    ):
+    if not all(hasattr(lattice, name) for name in _LATTICE_CARRIER_ATTRIBUTES):
         raise TypeError(
-            "a point-sampling row needs a structured FluxLattice carrier: a "
-            "shape, an origin and a step per axis. An unstructured cell mesh "
-            "carries its flux on cells whose local polynomial the operator "
-            "reads through sample_flux_field"
+            "a point-sampling row needs a structured FluxLattice carrier -- a "
+            "shape, an origin and a step per axis -- or a cell-carried mesh "
+            "whose per-cell flux the operator reads through sample_flux_field"
         )
     return jnp.reshape(jnp.asarray(flux)[: lattice.node_count], lattice.shape)
+
+
+def _carries_cell_flux_mesh(lattice: object) -> bool:
+    """Return whether a carrier states a per-cell centroid coordinate."""
+    return hasattr(lattice, "coordinate")
+
+
+def _mesh_carried_point_flux(
+    profile: ForwardProfile, flux: jax.Array, point: jax.Array
+) -> jax.Array:
+    """Read the cell-carried flux at one point through the cell that owns it.
+
+    The operator's point read evaluates each carried cell's own-node quadratic
+    at the query the caller supplies *for that cell* and scatters the result
+    back to that cell, so one point is placed in the slot of the cell whose
+    centroid lies nearest and read from that same slot.  Nearest centroid is
+    the mesh's own ownership rule, and a point on a shared edge is read by one
+    of the two cells whose polynomials agree there to the fit's accuracy.
+
+    The flux values enter the read linearly, so the read returns the point's
+    flux in the state's own unit, and an offset carried identically by every
+    cell moves it by exactly that offset.
+    """
+    operator = profile.operator
+    state = jnp.asarray(flux, dtype=jnp.float64)
+    centres = jnp.asarray(profile.lattice.coordinate, dtype=state.dtype)
+    owner = jnp.argmin(jnp.sum((centres - point[None, :]) ** 2, axis=-1))
+    points = jnp.zeros((centres.shape[0], 1, 2), dtype=state.dtype)
+    points = points.at[owner, 0].set(jnp.asarray(point, dtype=state.dtype))
+    values, _radial, _vertical = operator.sample_flux_field(
+        state[: operator.physical_node_number],
+        operator.sample_node_flux(state),
+        points,
+    )
+    return values[owner, 0]
 
 
 IsofluxReference = Literal["boundary", "reference_point"]

@@ -201,6 +201,33 @@ def fixture_constraint_pairs(
     )
 
 
+def reader_identity() -> dict[str, object]:
+    """Return what the level row's point read is built from, with its sources.
+
+    The statement is static because the row does not choose its reader by
+    value: a cell-carried carrier is always read through the owning cell's
+    own-node quadratic, whose weights are solved once on the host when the mesh
+    is built and are then fixed arrays in the traced read.
+    """
+    return {
+        "carrier": "cell-carried mesh (per-cell centroid coordinate)",
+        "reader": "own-node quadratic of the owning cell, evaluated at the point",
+        "fit": "one local 6-coefficient quadratic per node ring, host-solved",
+        "interpolation": "local per node, not a global spline",
+        "neighbourhood": "the node's sampling polygon, centre-first and complete",
+        "normalisation": "ring centred on its own node and scaled to unit width",
+        "ownership": "the cell whose centroid is nearest the point",
+        "weights_source": "nova/equilibrium/stencil_mesh.py:817",
+        "weights_expression": "np.linalg.pinv(_quadratic_design(ring_local))",
+        "design_source": "nova/equilibrium/stencil_mesh.py:433",
+        "device_read_source": "nova/equilibrium/stencil_mesh.py:245",
+        "operator_read_source": "nova/equilibrium/forward_operator.py:2682",
+        "row_read_source": "nova/equilibrium/constraint.py:_mesh_carried_point_flux",
+        "host_solved_at_build": True,
+        "global_spline": False,
+    }
+
+
 def exterior_field_identity() -> dict[str, object]:
     """Return the semantic direction and finite-bound identity for receipts."""
     return {

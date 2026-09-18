@@ -24,7 +24,11 @@ import numpy as np
 from benchmarks import oracle_start_newton_probe as oracle_probe
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import ForwardProfile, fixed_point
-from nova.equilibrium.constraint import assemble_augmented_system
+from nova.equilibrium.constraint import (
+    ConstraintContext,
+    ConstraintPair,
+    assemble_augmented_system,
+)
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.solve_request import default_forward_compilation_cache_root
@@ -44,6 +48,7 @@ from scripts.analytic_oracle_fixtures.centroid_row import (
     centroid_constraint_pair,
     exterior_field_identity,
     fixture_constraint_pairs,
+    reader_identity,
 )
 
 
@@ -220,15 +225,68 @@ def _context(case_name: str, requested_cells: int) -> dict[str, Any]:
     }
 
 
-def _solve(
-    context: dict[str, Any], seed: np.ndarray, *, constrained: bool
-) -> tuple[dict[str, Any], np.ndarray]:
+def _certificate_request(context: dict[str, Any]) -> Any:
+    return certificate._certificate_solve_request(
+        context["profile"],
+        context["seed"],
+        context["target_current"],
+        carrier_identity="centroid-fixture-certificate",
+    )
+
+
+def _certificate_pairs(
+    context: dict[str, Any], *, level: bool
+) -> tuple[ConstraintPair, ...]:
+    """Return this fixture's pairs, with or without the flux-level row.
+
+    Dropping the level pair leaves the centroid pair exactly as declared, so
+    two programs built from these lists differ by the level row alone.
+    """
     pairs = fixture_constraint_pairs(
         jnp.asarray(context["centroid"]),
         level_point=context["axis_point"],
         level_target=jnp.asarray((context["level_target_wb"],)),
         pitch=context["pitch"],
     )
+    return pairs if level else (pairs[0],)
+
+
+def _augmented_system(
+    context: dict[str, Any], request: Any, pairs: tuple[ConstraintPair, ...]
+):
+    """Assemble the fixture's augmented system for one pair list."""
+    profile = context["profile"]
+    return assemble_augmented_system(
+        profile,
+        jnp.asarray(context["seed"]),
+        pairs,
+        base_map=profile.flux_map(
+            request.current,
+            None,
+            request.target_current,
+            request.prescribed_current,
+        ),
+        base_shadow_mask=lambda state: profile.operator.residual_shadow_mask(
+            state, None
+        ),
+        base_promoted_shadow_mask=lambda state, previous: (
+            profile.operator.residual_shadow_mask(state, None, previous_shadow=previous)
+        ),
+        base_shadowed_map=profile.operator.flux_map_with_shadow(
+            request.current,
+            None,
+            request.target_current,
+            request.prescribed_current,
+        ),
+        requested_class=None,
+        target_current=jnp.asarray(context["target_current"]),
+    )
+
+
+def _solve(
+    context: dict[str, Any], seed: np.ndarray, *, constrained: bool
+) -> tuple[dict[str, Any], np.ndarray]:
+    pairs = _certificate_pairs(context, level=True)
     request = certificate._certificate_solve_request(
         context["profile"],
         seed,
@@ -331,16 +389,16 @@ def _solve(
 
 
 def _compile_probe_program(
-    context: dict[str, Any], *, constrained: bool
+    context: dict[str, Any], *, constrained: bool, level: bool = True
 ) -> tuple[Any, tuple[jax.Array, ...]]:
-    """Return the production solve program and explicit array arguments."""
+    """Return the production solve program and explicit array arguments.
+
+    ``level=False`` assembles the same bounded solve with the flux-level pair
+    dropped, so the two programs differ by the level row alone and their build
+    walls are a paired measurement of what the row adds to the compiled program.
+    """
     profile = context["profile"]
-    request = certificate._certificate_solve_request(
-        profile,
-        context["seed"],
-        context["target_current"],
-        carrier_identity=f"centroid-compile:{'bounded' if constrained else 'control'}",
-    )
+    request = _certificate_request(context)
     options = request.policy.kernel_options()
     if not constrained:
         program = profile._accelerated_history_program(
@@ -354,44 +412,8 @@ def _compile_probe_program(
         )
         return program, (jnp.asarray(context["seed"]), external)
 
-    pairs = fixture_constraint_pairs(
-        jnp.asarray(context["centroid"]),
-        level_point=context["axis_point"],
-        level_target=jnp.asarray((context["level_target_wb"],)),
-        pitch=context["pitch"],
-    )
-    mapped = profile.flux_map(
-        request.current,
-        None,
-        request.target_current,
-        request.prescribed_current,
-    )
-    shadowed = profile.operator.flux_map_with_shadow(
-        request.current,
-        None,
-        request.target_current,
-        request.prescribed_current,
-    )
-
-    def shadow_mask(state):
-        return profile.operator.residual_shadow_mask(state, None)
-
-    def promoted_shadow_mask(state, previous):
-        return profile.operator.residual_shadow_mask(
-            state, None, previous_shadow=previous
-        )
-
-    system = assemble_augmented_system(
-        profile,
-        jnp.asarray(context["seed"]),
-        pairs,
-        base_map=mapped,
-        base_shadow_mask=shadow_mask,
-        base_promoted_shadow_mask=promoted_shadow_mask,
-        base_shadowed_map=shadowed,
-        requested_class=None,
-        target_current=jnp.asarray(context["target_current"]),
-    )
+    pairs = _certificate_pairs(context, level=level)
+    system = _augmented_system(context, request, pairs)
 
     def solve(initial):
         return fixed_point.newton_krylov(
@@ -452,6 +474,162 @@ def compile_probe_arm(output_root: Path, arm: str) -> dict[str, Any]:
         partial["completed"] = True
         _write_json(state_path, partial)
         return partial
+    finally:
+        set_support_clip_mode(previous_mode)
+
+
+def _callback_counts(text: str) -> dict[str, int]:
+    """Count the host-callback tokens a traced or compiled program carries."""
+    return {
+        "pure_callback": text.count("pure_callback"),
+        "callback": text.count("callback"),
+    }
+
+
+def _wall_per_evaluation(function, argument, *, repeats: int = 50) -> dict[str, float]:
+    """Return the blocked wall per evaluation of one callable.
+
+    The call is blocked on every repeat, so the figure is the dispatch-plus-
+    compute wall of one evaluation rather than the time to queue it.
+    """
+    jax.block_until_ready(function(argument))
+    started = perf_counter()
+    for _ in range(repeats):
+        jax.block_until_ready(function(argument))
+    total = perf_counter() - started
+    return {
+        "repeats": repeats,
+        "total_seconds": total,
+        "seconds_per_evaluation": total / repeats,
+    }
+
+
+def reader_facts(output_root: Path) -> dict[str, Any]:
+    """Record what the level row's point read is built from and what it costs.
+
+    Three facts, each measured rather than asserted: the reader's static
+    construction (host-solved per-node weights over the owning cell's own
+    polygon, with source lines); the absence of a host callback in the traced
+    row and in the compiled program; and the row's own cost -- the observed()
+    wall per evaluation beside one augmented map evaluation, and the build wall
+    of the program with the level row against the same program without it.
+    """
+    configure_dtypes()
+    configure_persistent_compilation_cache(default_forward_compilation_cache_root())
+    lane = _lane("h200")
+    previous_mode = support_clip_mode()
+    set_support_clip_mode("exact")
+    try:
+        context = _context("weak-rotation-reactor-static", -110)
+        profile = context["profile"]
+        pairs = _certificate_pairs(context, level=True)
+        centroid_pair, level_pair = pairs
+        binding = level_pair.binding
+        flux = jnp.asarray(context["seed"], dtype=jnp.float64)
+
+        def read(flux_state, pair):
+            ctx = ConstraintContext(
+                flux=flux_state,
+                requested_class=None,
+                target_current=jnp.asarray(context["target_current"]),
+                shadow=None,
+            )
+            return pair.functional.residual(
+                profile,
+                ctx,
+                jnp.zeros(1, dtype=jnp.float64),
+                binding.payload,
+                binding.target,
+                binding.scale,
+            )
+
+        row_jaxpr = jax.make_jaxpr(lambda state: read(state, level_pair))(flux)
+        centroid_jaxpr = jax.make_jaxpr(lambda state: read(state, centroid_pair))(flux)
+        row_text = str(row_jaxpr)
+        centroid_text = str(centroid_jaxpr)
+        row_callbacks = _callback_counts(row_text)
+
+        row_observed = jax.jit(lambda state: read(state, level_pair))
+        observed_wall = _wall_per_evaluation(row_observed, flux)
+
+        request = _certificate_request(context)
+        systems = {
+            level: _augmented_system(
+                context, request, _certificate_pairs(context, level=level)
+            )
+            for level in (True, False)
+        }
+        steps = {level: jax.jit(system.map_fn) for level, system in systems.items()}
+        initial = np.asarray(systems[True].initial, dtype=np.float64)
+        initial_state = jnp.asarray(initial)
+        newton_step_wall = _wall_per_evaluation(steps[True], initial_state)
+        # the same map without the level row, measured on the same state so the
+        # pair differs by the row alone rather than by the point it is asked at
+        newton_step_wall_without = _wall_per_evaluation(steps[False], initial_state)
+
+        builds = {}
+        for level in (True, False):
+            program, arguments = _compile_probe_program(
+                context, constrained=True, level=level
+            )
+            lowered = program.lower(*arguments)
+            text = lowered.as_text(dialect="stablehlo")
+            started = perf_counter()
+            lowered.compile()
+            builds["with_level_row" if level else "without_level_row"] = {
+                "compile_seconds": perf_counter() - started,
+                "stablehlo_instruction_count": _stablehlo_instruction_count(text),
+                "stablehlo_callback_counts": _callback_counts(text),
+                "stablehlo_sha256": hashlib.sha256(text.encode()).hexdigest(),
+            }
+
+        observed_seconds = observed_wall["seconds_per_evaluation"]
+        step_seconds = newton_step_wall["seconds_per_evaluation"]
+        level_cost = {
+            "observed_seconds_per_evaluation": observed_seconds,
+            "observed_repeats": observed_wall["repeats"],
+            "one_newton_step_seconds": step_seconds,
+            "one_newton_step_repeats": newton_step_wall["repeats"],
+            "observed_to_step_ratio": observed_seconds / step_seconds,
+            "one_newton_step_seconds_without_level_row": newton_step_wall_without[
+                "seconds_per_evaluation"
+            ],
+            "one_newton_step_repeats_without_level_row": newton_step_wall_without[
+                "repeats"
+            ],
+            "compile_seconds_with_level_row": builds["with_level_row"][
+                "compile_seconds"
+            ],
+            "compile_seconds_without_level_row": builds["without_level_row"][
+                "compile_seconds"
+            ],
+            "compile_seconds_delta": builds["with_level_row"]["compile_seconds"]
+            - builds["without_level_row"]["compile_seconds"],
+            "stablehlo_instruction_delta": builds["with_level_row"][
+                "stablehlo_instruction_count"
+            ]
+            - builds["without_level_row"]["stablehlo_instruction_count"],
+        }
+        receipt = {
+            "schema": "nova.centroid-flux-level-reader-facts",
+            "source_revision": _revision(),
+            "lane": lane,
+            "support_clip_mode": "exact",
+            "case": "weak-rotation-reactor-static",
+            "requested_cells": -110,
+            "carrier": type(profile.lattice).__name__,
+            "reader_identity": reader_identity(),
+            "row_jaxpr_callback_counts": row_callbacks,
+            "row_jaxpr_has_host_callback": bool(
+                row_callbacks["pure_callback"] or row_callbacks["callback"]
+            ),
+            "centroid_row_jaxpr_callback_counts": _callback_counts(centroid_text),
+            "compiled_program": builds,
+            "level_cost": level_cost,
+            "level_amplitude_slot_wb": float(DEFAULT_LEVEL_SCALE_WB),
+        }
+        _write_json(output_root / "reader-facts.json", receipt)
+        return receipt
     finally:
         set_support_clip_mode(previous_mode)
 
@@ -1047,6 +1225,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--merge-controls", action="store_true")
     parser.add_argument("--reread-gauge", action="store_true")
     parser.add_argument(
+        "--reader-facts",
+        action="store_true",
+        help="record the level row's reader construction, purity and cost",
+    )
+    parser.add_argument(
         "--source-root",
         type=Path,
         default=DEFAULT_SOURCE_ROOT,
@@ -1082,7 +1265,24 @@ def main() -> None:
             flush=True,
         )
         return
-    if arguments.reread_gauge:
+    if arguments.reader_facts:
+        receipt = reader_facts(arguments.output_root)
+        cost = receipt["level_cost"]
+        print(
+            "CENTROID_READER_FACTS "
+            f"carrier={receipt['carrier']} "
+            f"host_callback_in_row={receipt['row_jaxpr_has_host_callback']} "
+            f"observed_us={cost['observed_seconds_per_evaluation'] * 1.0e6:.3f} "
+            f"newton_step_us={cost['one_newton_step_seconds'] * 1.0e6:.3f} "
+            f"newton_step_us_without_level_row="
+            f"{cost['one_newton_step_seconds_without_level_row'] * 1.0e6:.3f} "
+            f"compile_s_with_level_row={cost['compile_seconds_with_level_row']:.3f} "
+            f"compile_s_without_level_row="
+            f"{cost['compile_seconds_without_level_row']:.3f} "
+            f"stablehlo_instruction_delta={cost['stablehlo_instruction_delta']}",
+            flush=True,
+        )
+        return
         report = reread_gauge_readings(
             arguments.source_root,
             arguments.output_root,

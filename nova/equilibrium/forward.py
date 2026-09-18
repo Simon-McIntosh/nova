@@ -1920,6 +1920,10 @@ class ForwardProfile:
             array = np.asarray(value)
             return tuple(array.shape), str(array.dtype)
 
+        trace_bound = any(
+            isinstance(value, jax.core.Tracer)
+            for value in (requested_class, target_current)
+        )
         key = (
             route,
             static_value(requested_class),
@@ -1928,9 +1932,10 @@ class ForwardProfile:
                 (name, static_value(value)) for name, value in sorted(options.items())
             ),
         )
-        cached = self._accelerated_program_cache.get(key)
-        if cached is not None:
-            return cached
+        if not trace_bound:
+            cached = self._accelerated_program_cache.get(key)
+            if cached is not None:
+                return cached
 
         mapped = self.operator.traced_flux_map(requested_class, target_current)
         shadowed_map = self.operator.traced_flux_map_with_shadow(
@@ -1989,7 +1994,8 @@ class ForwardProfile:
                 )
 
         program = jax.jit(solve)
-        self._accelerated_program_cache[key] = program
+        if not trace_bound:
+            self._accelerated_program_cache[key] = program
         return program
 
     def constraint_response_matrix(

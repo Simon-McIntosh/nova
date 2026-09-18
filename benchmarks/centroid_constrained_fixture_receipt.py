@@ -39,9 +39,11 @@ from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.analytic_oracle_fixtures.centroid_row import (
     DEFAULT_FIELD_BOUND_T,
     DEFAULT_FIELD_SCALE_T,
+    DEFAULT_LEVEL_SCALE_WB,
     DEFAULT_STEP_LIMIT,
     centroid_constraint_pair,
     exterior_field_identity,
+    fixture_constraint_pairs,
 )
 
 
@@ -167,7 +169,9 @@ def _context(case_name: str, requested_cells: int) -> dict[str, Any]:
     exact_moments, baseline, cache = oracle_fixture.cached_fixture_exterior(
         source_case, exact, machine, empty, analytic
     )
-    operator = oracle_fixture.forward_operator(source_case, machine, baseline)
+    operator = oracle_fixture.forward_operator(
+        source_case, machine, baseline, compensation=True
+    )
     profile = ForwardProfile(
         operator,
         StencilMesh(machine.node, machine.stencil, machine.area),
@@ -180,9 +184,19 @@ def _context(case_name: str, requested_cells: int) -> dict[str, Any]:
         profile, case_name, target_current, centroid, current_receipt
     )
     pitch = float(np.sqrt(np.median(np.asarray(machine.area))))
-    response = np.asarray(operator.prescribed_current_field.response)
-    if response.shape[1] != 2 or not np.all(np.max(np.abs(response), axis=0) > 0.0):
+    response = np.asarray(operator.prescribed_current_field.response, dtype=np.float64)
+    if response.shape[1] != len(oracle_fixture.EXTERIOR_COMPENSATION_COLUMNS):
+        raise RuntimeError("the compensation response lost a declared column")
+    if not np.all(np.max(np.abs(response), axis=0) > 0.0):
         raise RuntimeError("the uniform exterior response failed its positive control")
+    if not np.all(response[:, 2] == response[0, 2]):
+        raise RuntimeError("the level column is not a uniform flux offset")
+    # the level row is declared at the analytic magnetic axis, where both
+    # solenoidal field columns read exactly zero, so the row reads the level
+    axis_point = np.asarray(exact.magnetic_axis, dtype=np.float64).reshape(1, 2)
+    level_target = float(
+        np.asarray(certificate._exact_state(case_name, exact, axis_point))[0]
+    )
     return {
         "case_name": case_name,
         "requested_cells": requested_cells,
@@ -201,14 +215,18 @@ def _context(case_name: str, requested_cells: int) -> dict[str, Any]:
         "cache": cache,
         "baseline": np.asarray(baseline, dtype=np.float64),
         "response": response,
+        "axis_point": axis_point,
+        "level_target_wb": level_target,
     }
 
 
 def _solve(
     context: dict[str, Any], seed: np.ndarray, *, constrained: bool
 ) -> tuple[dict[str, Any], np.ndarray]:
-    pair = centroid_constraint_pair(
-        context["centroid"],
+    pairs = fixture_constraint_pairs(
+        jnp.asarray(context["centroid"]),
+        level_point=context["axis_point"],
+        level_target=jnp.asarray((context["level_target_wb"],)),
         pitch=context["pitch"],
     )
     request = certificate._certificate_solve_request(
@@ -225,23 +243,45 @@ def _solve(
         ),
     )
     if constrained:
-        request = replace(request, constraint_pairs=(pair,))
+        request = replace(request, constraint_pairs=pairs)
     started = perf_counter()
     receipt = context["profile"].solve(request)
     equilibrium = receipt.equilibrium
     state = np.asarray(jax.block_until_ready(equilibrium.flux), dtype=np.float64)
     topology = oracle_probe._topology(context["profile"].operator, state)
     if constrained:
-        record = equilibrium.constraints[0]
-        observed = np.asarray(record.observed, dtype=np.float64)
-        physical = np.asarray(record.physical_unknown, dtype=np.float64)
-        scaled_residual = np.asarray(record.scaled_residual, dtype=np.float64)
-        qualified = bool(np.asarray(record.qualified).all())
-        bound_refusal = (
-            None
-            if record.bound_refusal is None
-            else [bool(value) for value in np.asarray(record.bound_refusal).reshape(-1)]
+        centroid_record, level_record = equilibrium.constraints
+        observed = np.asarray(centroid_record.observed, dtype=np.float64)
+        amplitudes = np.concatenate(
+            (
+                np.asarray(centroid_record.physical_unknown, dtype=np.float64),
+                np.asarray(level_record.physical_unknown, dtype=np.float64),
+            )
         )
+        field = amplitudes[:2]
+        level_amplitude = float(amplitudes[2])
+        centroid_residual = np.asarray(
+            centroid_record.scaled_residual, dtype=np.float64
+        )
+        level_residual = float(
+            np.max(np.abs(np.asarray(level_record.scaled_residual, dtype=np.float64)))
+        )
+        scaled_residual = np.concatenate(
+            (
+                centroid_residual,
+                np.asarray(level_record.scaled_residual, dtype=np.float64),
+            )
+        )
+        qualified = bool(
+            np.asarray(centroid_record.qualified).all()
+            and np.asarray(level_record.qualified).all()
+        )
+        bound_refusal = [
+            bool(value)
+            for record in (centroid_record, level_record)
+            if record.bound_refusal is not None
+            for value in np.asarray(record.bound_refusal).reshape(-1)
+        ] or None
     else:
         observation = context["profile"].current_moment_observation(
             jnp.asarray(state),
@@ -251,7 +291,10 @@ def _solve(
         observed = np.asarray(
             (observation.centroid_r, observation.centroid_z), dtype=np.float64
         )
-        physical = np.full(2, np.nan)
+        field = np.full(2, np.nan)
+        amplitudes = np.full(3, np.nan)
+        level_amplitude = float("nan")
+        level_residual = float("nan")
         scaled_residual = (observed - context["centroid"]) / context["pitch"]
         qualified = False
         bound_refusal = None
@@ -268,11 +311,17 @@ def _solve(
                 np.linalg.norm(observed - context["centroid"]) / context["pitch"]
             ),
             "row_scaled_residual_sup": float(np.max(np.abs(scaled_residual))),
+            "level_row_scaled_residual": level_residual,
             "bound_refusal": bound_refusal,
-            "compensating_field_t": physical,
-            "compensating_field_t_abs_sup": float(np.max(np.abs(physical))),
+            "compensating_field_t": field,
+            "compensating_field_t_abs_sup": float(np.max(np.abs(field))),
+            "compensating_amplitudes": amplitudes,
+            "level_amplitude_wb": level_amplitude,
+            "level_target_wb": context["level_target_wb"],
+            "level_error_wb": level_amplitude - context["level_target_wb"],
             "field_bound_t": DEFAULT_FIELD_BOUND_T,
             "field_scale_t": DEFAULT_FIELD_SCALE_T,
+            "level_scale_wb": DEFAULT_LEVEL_SCALE_WB,
             "wall_seconds": perf_counter() - started,
             "topology": topology,
             "state_sha256_binary64": _digest(state),
@@ -305,8 +354,10 @@ def _compile_probe_program(
         )
         return program, (jnp.asarray(context["seed"]), external)
 
-    pair = centroid_constraint_pair(
-        context["centroid"],
+    pairs = fixture_constraint_pairs(
+        jnp.asarray(context["centroid"]),
+        level_point=context["axis_point"],
+        level_target=jnp.asarray((context["level_target_wb"],)),
         pitch=context["pitch"],
     )
     mapped = profile.flux_map(
@@ -333,7 +384,7 @@ def _compile_probe_program(
     system = assemble_augmented_system(
         profile,
         jnp.asarray(context["seed"]),
-        (pair,),
+        pairs,
         base_map=mapped,
         base_shadow_mask=shadow_mask,
         base_promoted_shadow_mask=promoted_shadow_mask,
@@ -485,7 +536,10 @@ def _row(case_name: str, requested_cells: int) -> tuple[dict[str, Any], dict[str
         "characteristic_pitch_m": context["pitch"],
         "baseline_sha256_binary64": _digest(context["baseline"]),
         "fixture_exterior_cache": context["cache"],
-        "response_column_sup_wb_per_t": np.max(np.abs(context["response"]), axis=0),
+        "response_column_sup_wb_per_t": np.max(
+            np.abs(context["response"][:, :2]), axis=0
+        ),
+        "level_column_flux_per_wb": context["response"][0, 2],
         "field_identity": exterior_field_identity(),
         "seed": context["seed_receipt"],
         "solve": result,
@@ -695,6 +749,12 @@ def _control_verdict(
         ),
         "positive_centroid_within_tenth_pitch": (
             positive["centroid_error_pitches"] <= 0.1
+        ),
+        "positive_level_row_at_or_below_1e_12": (
+            positive["level_row_scaled_residual"] <= 1.0e-12
+        ),
+        "positive_level_amplitude_is_finite": bool(
+            np.isfinite(positive["level_amplitude_wb"])
         ),
         "negative_remains_outside_tenth_pitch": (
             negative["centroid_error_pitches"] > 0.1

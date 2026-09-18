@@ -81,7 +81,8 @@ def main() -> int:
 
     figure.tight_layout()
     figure.savefig(OUTPUT, dpi=160)
-    print("wrote", OUTPUT)
+    figure.savefig(OUTPUT.with_suffix(".svg"))
+    print("wrote", OUTPUT, "and", OUTPUT.with_suffix(".svg"))
     return 0
 
 

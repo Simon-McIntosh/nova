@@ -450,6 +450,103 @@
     all, because their extracted source carries arbitrary callables. Closing the gap needs the extracted profiles to be represented with a
     traced gradient amplitude, or a compensator that is a free unknown on a callable source.</p>
   </section>
+
+  <section id="shafranov-contour-integrals">
+    <h2>Exact &beta;<sub>p</sub> + l<sub>i</sub>/2 from the Shafranov contour integrals of the boundary field</h2>
+    <p><strong>Node:</strong> <code>cank-shafranov-integral-3</code>, run <code>r-20260918T102146762772</code>. Part one of
+    <code>f-cank-shafranov-integral</code>: the exact observed functional, with the analytic gate. Part two &mdash; wiring it into
+    <code>ExternalShafranovConstraint.observed</code> and the bank driver &mdash; stays open, because <code>nova/equilibrium/constraint.py</code>
+    and <code>benchmarks/shafranov_pair_receipt.py</code> are outside this node's fence.</p>
+    <p><strong>Commits:</strong> <code>237eea78</code> (the three contour integrals, the assembly, the analytic gate),
+    <code>2c9615c6</code> (the certificate figure and its receipt), on top of <code>0318fb6e</code>, which marks the two
+    large-aspect-ratio helpers as diagnostics only and says in their docstrings that they are not the constraint's observed side.</p>
+    <p><strong>The derivation, and why the two prior nodes were blocked.</strong> In a static axisymmetric equilibrium the stress tensor
+    <code>T = B&#x2297;B/&mu;<sub>0</sub> &minus; (B&sup2;/2&nbsp;mu;<sub>0</sub> + p) I</code> is divergence-free inside the plasma, so
+    <code>&int;<sub>&Omega;</sub> T : &nabla;&xi; dV = &oint;<sub>C</sub> &xi;&middot;T&middot;n dS</code> with the toroidal surface element
+    <code>dS = 2&pi;R dl</code> and the volume element <code>dV = 2&pi;R dA</code>. The fields <code>&xi; = R e<sub>R</sub></code>,
+    <code>&xi; = R e<sub>R</sub> + Z e<sub>Z</sub></code> and <code>&xi; = e<sub>R</sub></code> give the radial moment, the vertical moment
+    and the toroidal stress of the boundary field on <code>C</code>. Deriving them locally from the divergence theorem is what clears the
+    citation gap that stopped <code>cank-shafranov-integral</code> and <code>cank-shafranov-integral-2</code>: the S<sub>1</sub>, S<sub>2</sub>
+    integrands of Shafranov 1971 and Lao et al. 1985 were not available by citation, so each identity is written out and every symbol and
+    sign convention is defined in the docstring, in raw SI with &mu;<sub>0</sub> explicit. The poloidal field alone does not close them,
+    which is why the toroidal field is an argument rather than something the contour route eliminates.</p>
+    <p><strong>What landed.</strong> <code>nova/equilibrium/diagnostics.py</code> gains
+    <code>shafranov_contour_integrals(contour, radial_field, vertical_field, toroidal_field, count)</code>, traced end to end, taking the
+    boundary as points of shape <code>(N, 2)</code> in exact-zero-padded form with a valid count, and returning the radial moment, the
+    vertical moment, the toroidal stress, the perimeter and the enclosed area. <code>beta_p_plus_half_internal_inductance</code> assembles
+    <code>4P + W/&mu;<sub>0</sub></code> through <code>W = &minus;2&mu;<sub>0</sub>S<sub>v</sub> &minus; 6&mu;<sub>0</sub>P &minus; Z</code>,
+    reproducing the definitions <code>nova/equilibrium/observation.py</code> <code>observe_moments</code> actually uses
+    (<code>poloidal_beta = 4P/(&mu;<sub>0</sub>R&#772;I<sub>p</sub>&sup2;)</code>,
+    <code>internal_inductance = W/(&frac12;&mu;<sub>0</sub>&sup2;I<sub>p</sub>&sup2;R&#772;)</code>) rather than the classical
+    perimeter-normalised pair, which nova does not compute. <code>tests/test_equilibrium_diagnostics.py</code> carries the identity gate at
+    three resolutions, the trace / jit / grad contract on the contour field, a compact spherical-tokamak row where the shaping terms are large,
+    and the formula-before measurement. Gate: <strong>62 passed</strong> in one fresh <code>all_debug</code> CPU job
+    (<code>JAX_PLATFORMS=cpu</code>, exit 0), with the two probe logs that fixed the order and the conditioning numbers under the crew report
+    fence. The existing large-aspect-ratio helpers stay in place as diagnostics.</p>
+    <p><strong>A negative finding that bounds the claim: &beta;<sub>p</sub> + l<sub>i</sub>/2 is not a functional of the boundary field
+    alone.</strong> Eliminating <code>B<sub>&phi;</sub>&sup2;</code> from the vertical moment needs <code>Z = &int;B<sub>&phi;</sub>&sup2; dV</code>,
+    and the pressure term needs <code>P = &int;p dV</code>, so the contour route always carries two volume integrals as inputs: the boundary
+    supplies <code>S<sub>v</sub></code>, the plasma volume supplies <code>P</code> and <code>Z</code>. A single <code>&xi;</code> cannot produce
+    <code>4P + W/&mu;<sub>0</sub></code>: the integrability constraint on an axisymmetric <code>&xi;</code>, with <code>c = f/R</code> the
+    toroidal component and <code>a = df/dR</code> the radial diagonal, forces <code>a = c + R&nbsp;dc/dR</code>, which makes the required
+    coefficient set infeasible; and because the identity for a sum of fields is the sum of the identities of each, no combination of
+    <code>&xi;</code> cancels the toroidal term. This is recorded because it is the difference between the delivered functional and the
+    boundary-field-only functional the plan's wording could be read to promise.</p>
+    <p><strong>Conditioning, and why the gate is a falling error with a stated order rather than a tolerance.</strong> On the
+    conventional-aspect-ratio single-null row the two large terms cancel to a remainder three and a half orders of magnitude smaller:
+    <code>&minus;2&mu;<sub>0</sub>S<sub>v</sub> = 5.8810737</code> and <code>Z = 5.8737563</code> leave
+    <code>W/&mu;<sub>0</sub> = 8.1055865e&minus;4</code>, one part in 7.3e3. A fixed relative tolerance on the assembled combination therefore
+    measures the volume-side quadrature, not the identity, so the assertion is that the error falls with a fitted order and the order is
+    printed in the failure message. The graded coarser range (solve-grid resolution 201 to 801) fitted order <strong>1.2262</strong>; the
+    certificate's wider range fits <strong>0.3529</strong>, so the order is range-dependent and is reported with its range rather than as a
+    single number.</p>
+    <table>
+      <thead>
+        <tr><th>Solve-grid resolution</th><th>contour route</th><th>volume definition</th><th>relative error</th><th>member residuals (S<sub>v</sub>, S<sub>R</sub>, S<sub>&phi;</sub>)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>161</td><td>2.1842350</td><td>1.2324467</td><td>7.7228e&minus;1</td><td>6.00e&minus;4, 4.20e&minus;4, 5.83e&minus;4</td></tr>
+        <tr><td>321</td><td>1.6173798</td><td>1.2323521</td><td>3.1243e&minus;1</td><td>2.43e&minus;4, 2.31e&minus;4, 7.24e&minus;5</td></tr>
+        <tr><td>641</td><td>1.5329600</td><td>1.2323020</td><td>2.4398e&minus;1</td><td>1.89e&minus;4, 1.55e&minus;4, 2.91e&minus;6</td></tr>
+        <tr><td>1281</td><td>1.4685123</td><td>1.2322838</td><td>1.9170e&minus;1</td><td>1.49e&minus;4, 1.41e&minus;4, 5.64e&minus;5</td></tr>
+      </tbody>
+    </table>
+    <p>The member residuals fall monotonically with the grid, and the assembled combination falls with them but far more slowly, which is the
+    cancellation above showing up exactly where the earlier paragraph predicts it would.</p>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-integral/shafranov-integral-certificate.png"
+           alt="Left: the boundary contour that is the integral's domain. Middle: the contour route against the volume definition against grid
+           resolution. Right: log-log relative error with the three member residuals and the circular formula's shaping bias marked.">
+      <figcaption>The certificate, every number computed in the renderer rather than transcribed. Left: the last closed flux surface, 2001
+      contour points. Middle: the contour route (dots) against the volume definition (dashes); four resolutions. Right: log-log error panel with
+      the three member residuals and a horizontal line at the circular large-aspect-ratio formula's shaping bias, 1.3991e&minus;1, measured once on
+      the compact MAST-shaped case (major radius 0.9327 m, elongation 1.8, triangularity 0.40).</figcaption>
+    </figure>
+    <p><strong>The formula's bias, measured once and written down.</strong> On the compact case (major radius 0.9327 m, area-equivalent minor
+    radius 0.7083 m, <code>ln(8R/a) = 2.3546</code>, exact combination 1.2460) the circular identity returns
+    &minus;0.055550 and the elongation-corrected variant &minus;0.047778: a shaping bias of <strong>1.3991e&minus;1</strong> in the field, which
+    is the order the plan predicted for MAST aspect and elongation. That is the second test's purpose &mdash; the bias is a recorded number in
+    the assertion message, not a tolerance to absorb.</p>
+    <p><strong>Not landed, and honestly reported: the larger half of the fence.</strong> (1) the operator's radial and vertical field response
+    matrices on the grid nodes, built once at operator build beside the flux response (conductor circuits, plus the plasma cell-current and
+    first-moment field responses beside the plasma flux coupling), with the same fixed shapes, geometry-identity digest and cache path, so a
+    solve images them with one matmul and evaluates no Biot kernel; (2) the contour field interpolated to the boundary with the mesh's own
+    fixed-weight stencil (<code>StencilMesh.shared_node_flux_stencil</code>, already used at
+    <code>nova/equilibrium/forward_operator.py:2128</code>); (5)'s build-once-versus-per-evaluation timing half. The two call sites the wiring
+    node must change, all in <code>nova/equilibrium/forward_operator.py</code>: the pytree node <code>PrescribedCurrentField</code>
+    (line 1524), which carries the single flux response and must carry the two field responses beside it; that response's fixed-shape
+    validation (lines 1529&ndash;1542); the imaged-response property near line 1560; and the pytree threading at <code>tree_flatten</code>
+    (line 2337) and <code>tree_unflatten</code> (line 2394), which must flatten the new children, with <code>geometry_identity</code>
+    (line 2281) extended so one digest covers all three responses. Line numbers verified at commit <code>237eea78</code>.</p>
+    <p><strong>What that means for the number above.</strong> The certificate's contour field is the analytic row's own field sampled on the
+    boundary, not a field imaged once on the grid and interpolated &mdash; so the identity it grades is the integral against the volume
+    definition, which is what part one of the ruling asked to gate on. The grid-imaged route is not yet exercised by any committed evidence, and
+    the figure's title and its receipt both say so rather than leaving the omission to be inferred.</p>
+    <p><strong>Follow-on.</strong> <code>nova/equilibrium/__init__.py</code> is outside this node's fence, so the two names are imported from
+    <code>nova.equilibrium.diagnostics</code> directly in the tests; the proposed two-line export is archived at
+    <code>~/.config/reckon/crew/reports/nova/s19-local/shafranov-integral-3/init_proposed.patch</code> for whoever owns that file. The plan's
+    <code>f-cank-shafranov-integral</code> stays open with part two beside it.</p>
+  </section>
 </main>
 </body>
 </html>

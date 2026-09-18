@@ -8,22 +8,61 @@ the five readings.
 
 from __future__ import annotations
 
+import re
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
+from benchmarks import shafranov_combination_discriminator as discriminator
 from benchmarks.shafranov_combination_discriminator import (
     READING_KEYS,
     attribute,
     boundary_shape,
+    constraint_context,
     identity_combination,
     linear_combination,
     readings,
     recomputed_profile_moments,
 )
 from nova.biot.greens import MU0
+from nova.equilibrium.constraint import ConstraintContext
 from nova.equilibrium.diagnostics import shafranov_vertical_field
+
+
+def test_constraint_context_places_the_current_in_its_own_field():
+    """Pin the field placement of the context a constraint's observed sees.
+
+    ``ConstraintContext``'s middle two fields are both optional
+    currents-or-classes, so a positional construction exchanges them: the plasma
+    current lands in ``requested_class`` and the row is handed
+    ``target_current=None``, which resolves its moments on the unnormalised path
+    and reports a different combination.  The driver names every field at one
+    constructor, and this test is what pins the placement.
+    """
+    assert ConstraintContext._fields == (
+        "flux",
+        "requested_class",
+        "target_current",
+        "shadow",
+    )
+    options = {"requested_class": "ITER"}
+    context = constraint_context("flux-sentinel", 8.0e5, **options)
+    assert context.flux == "flux-sentinel"
+    assert context.requested_class == "ITER"
+    assert context.target_current == 8.0e5
+    assert context.shadow is None
+
+
+def test_the_driver_never_builds_a_context_positionally():
+    """Every context in the driver names its fields, so the exchange cannot recur."""
+    source = Path(discriminator.__file__).read_text(encoding="utf-8")
+    calls = re.findall(r"ConstraintContext\((.*?)\)", source, flags=re.S)
+    assert calls
+    for call in calls:
+        assert "flux=" in call
+        assert "target_current=" in call
 
 
 def test_identity_inversion_round_trips_the_forward_identity():

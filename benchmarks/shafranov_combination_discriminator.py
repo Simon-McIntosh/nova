@@ -114,6 +114,10 @@ ROW_FIELDS: tuple[str, ...] = (
     "plasma_current_a",
     "vertical_field_t",
     "identity_round_trip_residual",
+    "profile_implied_combination_unnormalised",
+    "profile_normalisation",
+    "constraint_row_reading_unnormalised",
+    "constraint_row_normalisation",
     "readings",
     "sentence",
 )
@@ -125,6 +129,15 @@ def _strict_float(value: Any) -> float | None:
         return None
     result = float(np.asarray(value))
     return result if np.isfinite(result) else None
+
+
+def _relative_difference(left: float | None, right: float | None) -> float | None:
+    """Return ``|left - right| / |right|``, or ``None`` where it is undefined."""
+    if left is None or right is None:
+        return None
+    if not (np.isfinite(left) and np.isfinite(right)) or right == 0.0:
+        return None
+    return float(abs(left - right) / abs(right))
 
 
 def _source_revision() -> str:
@@ -325,6 +338,26 @@ def _efit_scalars(group, row: int) -> dict[str, float]:
     return {"betap": scalar("betap"), "li": scalar("li")}
 
 
+def constraint_context(flux, target_current, *, requested_class=None):
+    """Build the traced context a constraint's ``observed`` is called with.
+
+    The context's fields are ``(flux, requested_class, target_current, shadow)``,
+    and the two middle ones are both optional currents-or-classes, so a
+    positional construction silently exchanges them: the plasma current lands in
+    ``requested_class`` and the row is handed ``target_current=None``, which
+    reads its moments on the unnormalised path and reports a different
+    combination.  Naming every field at one constructor is what makes that
+    exchange impossible to write, and the constructor is what the regression
+    test exercises.
+    """
+    return ConstraintContext(
+        flux=flux,
+        requested_class=requested_class,
+        target_current=target_current,
+        shadow=None,
+    )
+
+
 def _metrics(
     profile, state, target_current: float, minor_radius: float
 ) -> dict[str, Any]:
@@ -350,7 +383,7 @@ def _metrics(
         np.asarray(
             row.observed(
                 profile,
-                ConstraintContext(state, target_current, None, None),
+                constraint_context(state, target_current),
                 payload,
             )
         ).reshape(-1)[0]
@@ -362,11 +395,29 @@ def _metrics(
     vertical_field = float(
         np.asarray((upper - lower) / (2.0 * step * TOTAL_FLUX_FACTOR * radius))
     )
+    unnormalised = profile.current_moment_observation(
+        state,
+        support=MomentIntegralSupport.ALL_DOMAIN,
+        target_current=None,
+    )
+    discrete_unnormalised = float(
+        np.asarray(
+            row.observed(
+                profile,
+                constraint_context(state, None),
+                payload,
+            )
+        ).reshape(-1)[0]
+    )
     return {
         "major_radius_m": radius,
         "plasma_current_a": current,
         "vertical_field_t": vertical_field,
         "discrete": discrete,
+        "discrete_unnormalised": discrete_unnormalised,
+        "observation_plasma_current_a": current,
+        "unnormalised_plasma_current_a": float(np.asarray(unnormalised.plasma_current)),
+        "unnormalised_major_radius_m": float(np.asarray(unnormalised.centroid_r)),
         "payload": payload,
         "lattice": lattice,
         "grid": grid,
@@ -435,9 +486,14 @@ def _row_document(
     minor, elongation = boundary_shape(boundary)
     shape = _metrics(profile, state, target_current, minor)
     observation = profile.integral_observation(state, target_current)
+    unnormalised_observation = profile.integral_observation(state)
     profile_combination = linear_combination(
         np.asarray(observation.poloidal_beta),
         np.asarray(observation.internal_inductance),
+    )
+    unnormalised_profile_combination = linear_combination(
+        np.asarray(unnormalised_observation.poloidal_beta),
+        np.asarray(unnormalised_observation.internal_inductance),
     )
     unit_check = recomputed_profile_moments(observation)
     circular = identity_combination(
@@ -458,6 +514,58 @@ def _row_document(
         "magnetics_circular": circular,
         "magnetics_elongated": elongated,
         "magnetics_discrete": shape["discrete"],
+    }
+    profile_current = _strict_float(observation.plasma_current)
+    profile_current_difference = _relative_difference(
+        profile_current, _strict_float(target_current)
+    )
+    if not bool(profile.operator.use_linear_moments):
+        profile_path = (
+            "unnormalised: the operator's moment path resolves moments from the "
+            "flux directly and ignores the requested current, so the profile "
+            "column is the unnormalised observation"
+        )
+    elif profile_current_difference == 0.0:
+        profile_path = (
+            "normalised: the observation's own current equals the requested "
+            "current, so the requested normalisation is the identity"
+        )
+    elif profile_current_difference is None:
+        profile_path = (
+            "unstated: the observation's own current or the requested current is "
+            "not finite, so the normalisation path cannot be read"
+        )
+    else:
+        profile_path = (
+            "normalised: the observation's own current differs from the requested "
+            "current by a stated relative difference, so the profile column is "
+            "the current-normalised observation"
+        )
+    profile_normalisation = {
+        "requested_current_a": _strict_float(target_current),
+        "observation_plasma_current_a": profile_current,
+        "observation_relative_difference": profile_current_difference,
+        "operator_use_linear_moments": bool(profile.operator.use_linear_moments),
+        "path": profile_path,
+        "normalised_combination": _strict_float(profile_combination),
+        "unnormalised_combination": _strict_float(unnormalised_profile_combination),
+        "combination_shift": _strict_float(
+            profile_combination - unnormalised_profile_combination
+        ),
+    }
+    constraint_normalisation = {
+        "requested_current_a": _strict_float(target_current),
+        "observed_current_a": _strict_float(shape["observation_plasma_current_a"]),
+        "unnormalised_current_a": _strict_float(shape["unnormalised_plasma_current_a"]),
+        "current_relative_difference": _relative_difference(
+            _strict_float(shape["observation_plasma_current_a"]),
+            _strict_float(shape["unnormalised_plasma_current_a"]),
+        ),
+        "observed_reading": _strict_float(shape["discrete"]),
+        "unnormalised_reading": _strict_float(shape["discrete_unnormalised"]),
+        "reading_shift": _strict_float(
+            shape["discrete"] - shape["discrete_unnormalised"]
+        ),
     }
     return {
         "identity": identity,
@@ -487,6 +595,14 @@ def _row_document(
         "readings": readings(combinations),
         "unit_check": unit_check,
         "sentence": attribute(combinations)["sentence"],
+        "profile_implied_combination_unnormalised": _strict_float(
+            unnormalised_profile_combination
+        ),
+        "profile_normalisation": profile_normalisation,
+        "constraint_row_reading_unnormalised": _strict_float(
+            shape["discrete_unnormalised"]
+        ),
+        "constraint_row_normalisation": constraint_normalisation,
     }
 
 

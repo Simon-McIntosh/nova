@@ -1,0 +1,14 @@
+{
+  "arc_sample_count": 128,
+  "capacity_headroom": 28,
+  "case": "diverted-single-null",
+  "derived_vertex_capacity": 162,
+  "included_cells": 85,
+  "realised_cells": 132,
+  "realised_maximum_vertex_count": 134,
+  "refused_cell_count": 1,
+  "requested_cells": 110,
+  "schema": "nova.exact-clip-realised-layout-census.v1",
+  "straight_vertex_capacity": 34,
+  "superseded_swept_capacity": 4352
+}

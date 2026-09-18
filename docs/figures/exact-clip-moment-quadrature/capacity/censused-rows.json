@@ -1,0 +1,58 @@
+[
+  {
+    "arc_sample_count": 128,
+    "capacity_headroom": 24,
+    "case": "weak-rotation-reactor-static",
+    "derived_vertex_capacity": 158,
+    "included_cells": 121,
+    "realised_cells": 135,
+    "realised_maximum_vertex_count": 134,
+    "refused_cell_count": 0,
+    "requested_cells": 110,
+    "schema": "nova.exact-clip-realised-layout-census.v1",
+    "straight_vertex_capacity": 30,
+    "superseded_swept_capacity": 3840
+  },
+  {
+    "arc_sample_count": 128,
+    "capacity_headroom": 26,
+    "case": "moderate-rotation-conventional-static",
+    "derived_vertex_capacity": 160,
+    "included_cells": 121,
+    "realised_cells": 136,
+    "realised_maximum_vertex_count": 134,
+    "refused_cell_count": 0,
+    "requested_cells": 110,
+    "schema": "nova.exact-clip-realised-layout-census.v1",
+    "straight_vertex_capacity": 32,
+    "superseded_swept_capacity": 4096
+  },
+  {
+    "arc_sample_count": 128,
+    "capacity_headroom": 24,
+    "case": "strong-rotation-compact-static",
+    "derived_vertex_capacity": 158,
+    "included_cells": 121,
+    "realised_cells": 135,
+    "realised_maximum_vertex_count": 134,
+    "refused_cell_count": 0,
+    "requested_cells": 110,
+    "schema": "nova.exact-clip-realised-layout-census.v1",
+    "straight_vertex_capacity": 30,
+    "superseded_swept_capacity": 3840
+  },
+  {
+    "arc_sample_count": 128,
+    "capacity_headroom": 28,
+    "case": "diverted-single-null",
+    "derived_vertex_capacity": 162,
+    "included_cells": 85,
+    "realised_cells": 132,
+    "realised_maximum_vertex_count": 134,
+    "refused_cell_count": 1,
+    "requested_cells": 110,
+    "schema": "nova.exact-clip-realised-layout-census.v1",
+    "straight_vertex_capacity": 34,
+    "superseded_swept_capacity": 4352
+  }
+]

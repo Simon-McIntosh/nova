@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T11:42:33",
+  "updated": "2026-09-18T11:50:19",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4558,6 +4558,15 @@
       },
       {
         "id": "s19c-cank-fluxfit-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-18"
+      },
+      {
+        "id": "s19c-cank-integral-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -190661,6 +190670,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2786
+    "_version": 2787
   }
 }

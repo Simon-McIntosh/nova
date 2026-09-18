@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-18">
-<meta name="plan-version" content="191">
+<meta name="plan-version" content="192">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html,docs/figures/null-identification-authority/bank-integrated/bank-integrated.json,docs/figures/null-identification-authority/bank-drift-probe/receipt.json,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json,docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087,7b0311d2,e76bc389">
 <meta name="plan-impl" content="0.97">
@@ -187,6 +187,11 @@ for the lead before merge.</p>
     <h4 class="r-fu-title">Repair the support-audit record on its two review findings</h4>
     <div class="r-fu-body"><p>The independent review of the drift support audit (83/100, merge 9b635869) found two record defects. (1) The corroboration paragraph in <code>docs/figures/null-identification-authority/support-audit/support-audit.md</code> (near line 116) states the bank builder is byte-identical between fae50f15 and 299e4b64, but <code>benchmarks/efit_forward_parity_slice.py</code> differs by about 100 lines between the two trees; restate what was compared (the declared-anchor rows and the augmented row set) and drop the builder identity claim, or measure it and state the diff. (2) <code>benchmarks/bank_drift_support_audit.py</code> has no committed test for the audit program or its refusal paths (the receipt-cell guard near line 207, the EMPTY@source form it emits, the NO STAGE EVIDENCE refusal near line 319); add a test that presents each refusal and asserts the emitted form.</p></div>
     <pre class="r-fu-prompt">/reckon-ship null-identification-authority — deliver f-nia-support-audit-record-repairs: correct the builder identity sentence in the support-audit record and test the audit program&#x27;s refusal paths</pre>
+    </article>
+<article class="r-fu" data-id="f-nia-panel-test-strength" data-status="open" data-written-by="nova S19 coordinator" data-written-at="2026-09-18T12:20:00Z" data-recommends-skill="/reckon-ship" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make the paired-probe panel test able to fail: distinct grids per archive and a contour-kind assertion</h4>
+    <div class="r-fu-body"><p>From the 94/100 review of nia-drift-probe-record-repairs. In <code>tests/test_bank_drift_paired_probe.py</code> near lines 394 and 395: (1) the shared-level assertion cannot fail because both fixture archives are written from the same default radius and height, so a mutant computing each panel's levels from its own archive reproduces the expected levels; write the two archives on different grids so the assertion discriminates. (2) The line-contour assertion counts one collection carrying levels, which a filled contour also yields; assert the collection kind (unfilled line contour) so the plotting rule is actually pinned. Both are test-only edits; run in one fresh CPU process on all_debug.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship null-identification-authority — deliver f-nia-panel-test-strength: two fixture archives on distinct grids and a contour-kind assertion in the paired-probe panel test</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -729,6 +734,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260917T095445459266-review-of-nia-bank-drift-paired-probe" data-who="reckon-ship" data-when="2026-09-17T11:03:42.061Z">
     <div class="r-comment-body"><p>Independent review of nia-bank-drift-paired-probe stored at the fence path, total 76, five findings recorded on the reviewed run's completion</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-nia-anchor-bisect-finding" data-who="" data-when="">
+    <div class="r-comment-body"><p>Holding the three anchors constant (host constants, as the producer tree carried them) on the banked 21978/35 pure arm reproduces the identical terminal residual 2.4506e-3 under <code>active_set_cycle_detected</code> that the traced treatment reaches, with the traced treatment bit-matching the committed bank operands (partition structure 0fe0dcdf920a9b66, values 35c0be67ae2abdd8). The mixed arm converges under both treatments (2.2e-16 traced, 3.1e-16 constant). So the anchor partition's move from host constants to traced member data is exonerated as the cause of the bank drift; the cause is downstream of that hook. The two pure arms share the residual but differ in trip-trace digest, terminal flux and axis, which is the next thing to bisect: the trip loop's acceptance path between the producer tree fae50f15 and the current tree, with the support audit (declared anchors identical, no augmented rows missing) and this bisect both closing the input side. Review pending on run r-20260917T224621772891.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

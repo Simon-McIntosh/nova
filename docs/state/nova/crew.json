@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T18:47:16",
+  "updated": "2026-09-19T18:50:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -211014,6 +211014,286 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T150340341603-nia-certificate-record-repairs",
+        "plan": "null-identification-authority",
+        "section": "",
+        "node": "nia-certificate-record-repairs",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1939,
+                "cached_input_tokens": 511382,
+                "input_tokens": 513323,
+                "output_tokens": 421,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 513744,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "Read /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/review-of-nia-certificate-analytic-nulls/review-record.md first; its four findings are the scope and its verification scripts are beside it. In docs/evidence/archive/null-identification-authority-landed.html near lines 894 to 896: (1) the sentence claiming no reference X-point exists in the persisted parts and that the analytic saddle vocabulary cannot fire from shipped data is replaced by what the parts carry, namely fourteen of sixteen persisted parts limited with a null x_point_rz_m and the diverted single-null case at 500 and 1000 cells diverted with an analytic X-point at about (1.5014, -1.0176) m and (1.5025, -1.0188) m, whose redrawn panel places the analytic cross 1.199e-03 m from the closed-form constant, so the vocabulary fires on two of the sixteen panels; (2) the cited re-render digest 9a2dff44c99e5637, which exists nowhere as an artifact, is replaced by the digest a re-render of the merged tree actually produces for the weak-rotation-reactor-static cells-1000 part, measured first-hand, with the pinned-digest half 6b0a38974ee8b43c kept since it checks out; (3) the EXIT=0 attributed to render-job.log, which carries no exit line, is re-attributed to the aggregate's aggregation_lane for the same job where SOLOVEV_AGGREGATE_EXIT=0 is recorded, or the claim is dropped; (4) the thirteen-of-sixteen staleness count is either reproduced by running the pre-change renderer against the old pin and kept with its measurement, or stated as not reproduced and removed. The same three sentences appear in the body of commit edb02142 and cannot be rewritten there, so the record says so once. Nothing in benchmarks or tests is changed and no panel is re-rendered except as measurement. Gate: /home/ITER/mcintos/Code/nova/.venv/bin/python -m reckon.doccheck on the edited record if that entry point exists, else reckon audit-doc, captured once to a log in the reports directory with the exit status. Commits carry a body. Every uv command carries --no-sync and nothing runs uv sync.",
+          "estimated_hours": 0.75,
+          "goal": "Correct the four record defects the certificate null-pair review found, so the landed record states what the persisted parts and the job logs actually carry.",
+          "id": "nia-certificate-record-repairs",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-19T15:03:40Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T150340341603-nia-certificate-record-repairs/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/archive/null-identification-authority-landed.html",
+            "docs/plans/null-identification-authority.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/nia-certificate-record-repairs"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-nia-certrec-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-19T15:03:50Z",
+        "completed_at": "2026-09-19T16:47:37.854Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6217,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6227,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "2093accd5ed05a53b9bf0dec36c48956d6f9ed97",
+        "commits": [
+          "bcc0cf679f7b42f914fb71d2ab433c913b2296e6"
+        ],
+        "changed_lines": {
+          "added": 7,
+          "removed": 3,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "/home/ITER/mcintos/Code/reckon/.venv/bin/python -m reckon.doccheck docs/evidence/archive/null-identification-authority-landed.html docs/plans/null-identification-authority.html",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/nia-certificate-record-repairs/doccheck.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "Four record defects corrected against the persisted parts and the job logs; the reference-X-point claim is replaced by what fourteen limited and two diverted parts carry, and the record notes once that the same sentences live in immutable commit history.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T150340341603-nia-certificate-record-repairs/manifest.md",
+        "scope_changed": false,
+        "session_id": "9234690d-3755-4f81-a923-0520726d87b2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 411875,
+            "input_tokens_cumulative": 411875,
+            "output_tokens": 2684,
+            "output_tokens_cumulative": 2684,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-19T16:47:37.854Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 529,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: The exact accelerator route test has failed twice under different repairs. Job 1273977 exposed an unqualified terminal after label-aware partition promotion; job 1273996 timed out at 59:25 when all topology/domain reads were kept live. A third repair requires a coordinator-selected design: live warmup followed by a post-warmup frozen Newton partition; admission-aware outer rollback/damping; or a widened performance fence for the current live-map route.",
+              "elapsed_seconds": 4129,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 4397,
+              "log_fresh": false,
+              "manifest_commits": [
+                "1b54057a",
+                "4992bcc3",
+                "bff52fa8",
+                "bebd067e",
+                "bed0155b",
+                "8e0f3bbc"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "5c3f84b3a00e2c6056c05de45de6134f228d9a8a9a031120ea093b299bdccf63",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T090428129698-msc-newton-krylov-route-regression/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T090428129698-msc-newton-krylov-route-regression/manifest.md; resolve the blocker before resuming the run",
+              "node": "msc-newton-krylov-route-regression",
+              "phase": "working",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260919T090428129698-msc-newton-krylov-route-regression",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260919T090428129698-msc-newton-krylov-route-regression",
+                "session_id": "01a0b8e9-250a-7b11-9eaf-3e11f0912bc7",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 4427,
+              "terminal_at": "2026-09-19T13:49:54Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-newton-krylov-route-regression"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 5143168,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 46.518,
+          "generated_tokens": 36541,
+          "generation_seconds": 45.479,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 30.0,
+          "machine_seconds": 1.039,
+          "peak_input_tokens": 144057,
+          "tokens_per_second": 803.47,
+          "wall_tokens_per_second": 785.52
+        },
+        "follow_on_paths": [
+          "gate.log",
+          "22.82s"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-certificate-record-repairs",
+          "session_id": "9234690d-3755-4f81-a923-0520726d87b2",
+          "session_source": "stream",
+          "retained_at": "2026-09-19T16:47:37.854Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.998,
+        "impl_move": {
+          "plan": "null-identification-authority",
+          "at_dispatch": 0.998,
+          "at_complete": 0.999,
+          "verdict": "moved"
+        },
+        "tool_steps": 47.0,
+        "orientation_input_tokens": 2435710.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -211452,6 +211732,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2926
+    "_version": 2927
   }
 }

@@ -896,6 +896,93 @@ Gate on the login node: the new test module plus <code>tests/test_bank_drift_pai
   <p><strong>Evidence that could have failed.</strong> Fourteen of the sixteen persisted parts read limited, each with a null <code>x_point_rz_m</code>, so on those rows an absent analytic X-point is absence by construction. The diverted single-null case at 500 and 1000 cells is the exception: it reads diverted and carries an analytic X-point at about (1.5014, -1.0176) m and (1.5025, -1.0188) m, and its redrawn 500-cell panel places the analytic cross 1.199e-03 m from the module's closed-form <code>X_POINT_M</code>, so the analytic saddle vocabulary does fire from shipped data on two of the sixteen panels. The rung the test pins (cells-300) is limited, so the test injects a saddle onto the reference axis and asserts it is absent again in the persisted part afterwards, and it asserts the negative directly: suppressing the analytic <code>draw_nulls</code> call drops the analytic colour from the marker census, and a <code>contourf</code> trips the unfilled-collection assertion. Artifacts: <code>docs/figures/gs-absolute-accuracy/solovev/*.png</code> and their SVG siblings, once per row, with the pin at <code>docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json</code>.</p>
   <p><strong>Where the corrected sentences also live, stated once.</strong> The reference-X-point claim, the intermediate digest and the attributed exit status also appear in the body of commit <code>edb02142</code>, which is immutable history that cannot be rewritten; this record is the corrected account of what the persisted parts and the job logs carry.</p>
 </section>
+<section id="the-frozen-read-that-admitted-no-finite-axis">
+  <h2>The frozen read that admitted no finite axis</h2>
+  <p>Node <code>nia-promotion-fallback-nan</code> (s19-codex, implement spec exact). Sources
+  <code>nova/equilibrium/forward_operator.py</code>, <code>nova/equilibrium/fixed_point.py</code>;
+  guard <code>tests/test_promotion_fallback_amplitude.py</code>.</p>
+  <p><strong>The reproduction, quoted before anything was repaired.</strong> The promotion
+  fallback carry (<code>c5e1498a</code>, whose contract is that it carries a frozen topology read
+  unchanged across the inner iterations of a trip) makes the diverted single-null Solovev rung at
+  300 cells raise <code>CurrentNormalisationError</code> with a non-finite source amplitude out of
+  <code>current_normalisation_amplitude</code>, while its predecessor <code>e0eb4956</code>
+  terminates finite and unqualified. A carried quantity that changed no value must reproduce what a
+  fresh read returns, so the question was which carried quantity became non-finite.</p>
+  <p><strong>The carried quantity, named with its shape and finite count.</strong> It is the frozen
+  read's <em>normalising pair</em>: <code>topology.axis_flux</code> and
+  <code>topology.flux_span</code> arrive <code>nan</code> while <code>topology.boundary_flux</code>
+  stays finite at <code>0.004708612000369493</code>. Measured by instrumenting the refusal
+  predicate with <code>jax.debug.callback</code> over the diverted &minus;300 run: every refusal
+  printed the same pair, <code>axis=nan span=nan</code>, six times across the run. The source
+  amplitude divides the target current by the cell-current sum, so the non-finite divisor reaches
+  the amplitude directly and the cell-current sum was the first suspect: it is the quantity the
+  frozen scale multiplies, and a non-finite scale makes that sum a fabricated number rather than a
+  measured one.</p>
+  <p><strong>What refusing it does not do.</strong> The lead's premise for the refusal was that a
+  carried non-finite normaliser has already broken the carry's contract, so refusing to freeze that
+  partition restores the rung. The premise is half right and the conclusion does not follow, which
+  the arms below measure rather than argue. Refusing only the reads whose normaliser is non-finite
+  leaves the terminal residual bit-identical to the unrefused carry (<code>6.3706933429737305</code>
+  both ways), at the map level and at the reconcile level alike. Only removing the carry moves the
+  rung (<code>2.248351582217136</code>). So the divergence this node was dispatched against is not
+  produced by the non-finite read alone: a carried partition whose normalisers are <em>finite</em>
+  moves the terminal residual too, which is the same shape as the stale discrete partition the
+  carry holds (label, profile support, residual shadow) and is a separate defect from the
+  non-finite scale.</p>
+  <table>
+    <caption>Diverted single-null Solovev, &minus;300 cells, terminal fixed-point residual. One
+    fresh process per arm, all_debug CPU, root interpreter with the worktree on PYTHONPATH.</caption>
+    <thead><tr><th>arm</th><th>terminal residual</th></tr></thead>
+    <tbody>
+      <tr><td>carry off (un-carried, the <code>e0eb4956</code>-contract value)</td><td><code>2.248351582217136</code></td></tr>
+      <tr><td>carry on, <code>target_current</code> guard suppressed</td><td><code>6.3706933429737305</code></td></tr>
+      <tr><td>carry on, non-finite reads refused at the map level</td><td><code>6.3706933429737305</code></td></tr>
+      <tr><td>carry on, non-finite reads refused at the reconcile level</td><td><code>6.3706933429737305</code></td></tr>
+      <tr><td>every carried evaluation refused</td><td><code>2.248351582217136</code></td></tr>
+    </tbody>
+  </table>
+  <p><strong>What landed.</strong> Two halves. The operator exposes
+  <code>ForwardFluxOperator.frozen_partition_usable</code>, attached to the shadowed map beside the
+  other carry hooks, which admits a frozen read only when both normalising scalars are finite and
+  the span is non-zero; and the active-set reconcile consults it, falling back to a fresh read of
+  its own state for a partition it may not carry, so the trip re-reads instead of revaluing against
+  an undefined scale. The refusal is a bounded safety net: where the non-finite read is legitimate
+  at that state a fresh read returns non-finite too, so the cost is one re-read and never a wrong
+  answer. The un-carried rung itself is held finite by the <code>target_current is None</code>
+  guard, which is already committed; the new cases drive the carry through the state that produced
+  the non-finite amplitude, so neither that guard nor the refusal can be removed silently. The
+  positive controls are explicit: a read with a finite admitted axis must pass the refusal, a
+  usable read must reach the carried map, and the refused read must leave the trip finite with the
+  plain map evaluated instead.</p>
+  <p><strong>Gate.</strong> One <code>all_debug</code> CPU allocation, both arms in one job
+  (<code>--cpus-per-task=8 --mem=64G</code>, <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>,
+  the shared root environment interpreter invoked directly and <code>uv</code> never invoked on the
+  compute node), captured once with the exit status. The base arm is stated as a failure set so the
+  delta is a set difference. The changed tree reads <strong>1 failed, 8 passed</strong> and the
+  base revision's own sources read <strong>5 failed, 4 passed</strong>: the added failure set is
+  empty, and the removed set is the four cases that cannot import the predicate at base. The one
+  failure common to both arms is the pre-existing axes case below. Gate log under the reports fence
+  at <code>~/.config/reckon/crew/reports/nova/s19-local/nia-promotion-fallback-nan/gate3.log</code>,
+  with <code>gate.log</code> and <code>gate2.log</code> from the two earlier drafts of the guard
+  module, the arm probes <code>refusal-probe.log</code> and <code>refusal-probe3.log</code>, and the
+  test-order probe <code>order.log</code>.</p>
+  <p><strong>Reported, not repaired.</strong> Two failures sit in this node's gate that are not this
+  node's change. <code>tests/test_forward_operator_axes.py::test_tensor_product_grid_class_margin_is_read_on_the_spline</code>
+  fails with <code>inf</code> where it expects <code>-0.31887492472951007</code>, identically on the
+  base revision's own sources and on the changed tree, alone and in file order, so it is
+  pre-existing at the base revision and the delta this node adds is empty. And
+  <code>tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback</code>
+  pins <code>0.025515711279493654</code> where the un-carried arm terminates at
+  <code>2.248351582217136</code>; it is marked slow, so the default lane never sees it red.</p>
+  <p>A third observation belongs to whoever owns the figure pins: the driver's render stage writes
+  <code>docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.{png,svg}</code>
+  directly, and a run of it against the current tree changed both files' bytes. They are restored to
+  the committed revision here rather than committed, so the digest pin stays green, and whether that
+  move is a real change in the drawn panels or renderer metadata is not established. The guard
+  module therefore redirects the figure, diagnostic and part roots into a scratch subtree of its own
+  under <code>docs</code> and removes it afterwards, because the driver receipts a panel against the
+  served docs mount and refuses a figure outside it.</p>
+</section>
 </main>
 </body>
 </html>

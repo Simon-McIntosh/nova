@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="88">
+<meta name="plan-version" content="89">
 <meta name="plan-impl" content="0.92">
 <meta name="plan-commits" content="00ef0610,506c9fa9,eb77480b,e7d90cc8,84b23ee6,0081c3e9,4264668e,595cdd0f,6b9c4f25,989d561c,a283f243,5dd6b790,04ea37b0">
 <meta name="plan-artifacts" content="docs/evidence/archive/constraint-augmented-newton-krylov-landed.html,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.png,nova/equilibrium/constraint.py,benchmarks/constraint_centroid_receipt.py,tests/test_wall_null_flux_tangent.py,nova/geometry/select.py,tests/test_wall_polish_continuity.py,benchmarks/constraint_shape_receipt.py,tests/test_shape_constraints.py,docs/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png,docs/figures/constraint-augmented-newton-krylov/shape-control/two-arms.json,docs/figures/constraint-augmented-newton-krylov/shape-control/vertical-shift.json,docs/figures/constraint-augmented-newton-krylov/shape-control/elongation-raise.json,docs/figures/constraint-augmented-newton-krylov/shape-control/converged.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png">
@@ -561,6 +561,9 @@ number and residual.</p>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260918T203029970629-cank-shafranov-field-responses" data-who="cank-shafranov-field-responses" data-when="2026-09-19T07:10:00Z">
     <div class="r-comment-body"><p>Grid-imaged Shafranov field responses landed at <code>796df350</code>. The operator now carries exact radial and vertical matrices for conductor circuits plus plasma cell current and both first moments under one response identity, images changed currents with no Biot kernel or flux gradient, and interpolates the grid field to a boundary through <code>shared_node_flux_stencil</code>. The analytic grid route converges across 21, 31 and 41 nodes per axis with fitted order above 0.5; one <code>all_debug</code> CPU allocation passed 70 tests in 156.24 s. Its exact-kernel certificate measured 76 kernel calls at the 7.1573 s build, zero per evaluation, and a 62.67 µs median over 31 changed-current images (114,199× build/evaluation). Receipt and PNG/SVG: <a href="/nova/evidence/archive/constraint-augmented-newton-krylov-landed#shafranov-grid-field-responses">grid field response evidence</a>. The receipt says the grid-imaged route is exercised and the toroidal volume term is the solved state's own integral. Constraint-row and bank-driver wiring remains outside this node's live scope, so the driving followup stays open for the coordinator.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260918T094416317124-cank-flux-function-fit" data-who="reckon-ship" data-when="2026-09-18T17:42:35.839Z">
+    <div class="r-comment-body"><p>Flux functions projected onto the anchored basis; neither scale alone closes the Shafranov gap on 21978/35; compensator repaired; review 92/100</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

@@ -1,0 +1,153 @@
+{
+  "assignment": {
+    "job_id": "1274080",
+    "node": "98dci4-clu-3141",
+    "partition": "all_debug",
+    "platform": "cpu"
+  },
+  "baseline_revision": "4e82bafb3abbd972096f84f306dfc8b28577e2fe",
+  "baseline_state_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-certificate-across-two-revisions/docs/figures/millisecond-converged-solve/program-size/semantic/receipt.json",
+  "candidate_revision": "42e6ade05335ec1b952ca8ed543717c327e17cd8",
+  "captured_at": "2026-09-19T23:15:11.324655+00:00",
+  "comparison": "terminal state recorded at the base revision against the head accelerated program",
+  "identity_row_count": 4,
+  "measurement_revision": "42e6ade05335ec1b952ca8ed543717c327e17cd8",
+  "panel_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-certificate-across-two-revisions/docs/figures/millisecond-converged-solve/program-size/cross-revision/panels",
+  "passed": null,
+  "pending_rows": [
+    [
+      "strong-rotation-compact-static",
+      -300
+    ],
+    [
+      "diverted-single-null",
+      -500
+    ]
+  ],
+  "persistent_compilation_cache": {
+    "directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+    "entry_key_fields": [
+      "serialized computation",
+      "jaxlib version",
+      "backend version",
+      "XLA flags",
+      "compile options",
+      "accelerator topology"
+    ],
+    "invalidation_scope": {
+      "directory_version_key": [
+        "backend and compiler options",
+        "device topology",
+        "jax and jaxlib/XLA build"
+      ],
+      "jax_entry_key": [
+        "serialized computation",
+        "jaxlib version",
+        "backend version",
+        "XLA flags",
+        "compile options",
+        "accelerator topology"
+      ]
+    },
+    "layout": "<root>/nova/jax-compilation/<runtime-version-key>",
+    "maximum_bytes": 8589934592,
+    "minimum_compile_seconds": 0.0,
+    "root": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+    "runtime_identity": {
+      "backend": "cpu",
+      "backend_version": "cpu",
+      "compiler_options": {
+        "jax_compilation_cache_include_metadata_in_key": false,
+        "jax_default_matmul_precision": null,
+        "jax_enable_x64": true,
+        "jax_persistent_cache_enable_xla_caches": "xla_gpu_per_fusion_autotune_cache_dir",
+        "xla_flags": null
+      },
+      "device_topology": [
+        {
+          "id": 0,
+          "kind": "cpu",
+          "platform": "cpu",
+          "process_index": 0
+        }
+      ],
+      "jax_version": "0.11.0",
+      "jaxlib_version": "0.11.0"
+    },
+    "selection": "explicit_per_recipe",
+    "version_key": "runtime-ea5c55820be3d80549fe"
+  },
+  "rows": [
+    {
+      "baseline_arm_source": "recorded base-revision terminal state",
+      "baseline_recorded_seconds": 104.17620991263539,
+      "baseline_revision": "4e82bafb3abbd972096f84f306dfc8b28577e2fe",
+      "baseline_seconds": null,
+      "baseline_state_finite": true,
+      "baseline_state_sha256_binary64": "f9598a166437ef23dc46e6d9f5d6cbade584fe299b5ee0771f071332eaf914ed",
+      "baseline_terminal_residual": 3.4707767690226504e-16,
+      "baseline_terminal_residual_finite": true,
+      "candidate_arm_source": "head-revision solve",
+      "candidate_revision": "42e6ade05335ec1b952ca8ed543717c327e17cd8",
+      "candidate_seconds": 385.55188603140414,
+      "candidate_state_finite": true,
+      "candidate_state_sha256_binary64": "08fa9fe0b218a2b7f2da77b1652643cb634824868af0afd53a515fe864607bb6",
+      "candidate_terminal_residual": 2.4295437383158535e-15,
+      "candidate_terminal_residual_finite": true,
+      "case": "weak-rotation-reactor-static",
+      "converged_equal": null,
+      "identity_row_count": 1529,
+      "maximum_absolute_state_difference": null,
+      "maximum_absolute_state_difference_measure": "unavailable from a recorded digest; the baseline arm is a binary64 sha256 rather than the state array",
+      "panel": {
+        "bit_identical": false,
+        "filesystem_path": "docs/figures/millisecond-converged-solve/program-size/cross-revision/panels/weak-rotation-reactor-static-cells-300-across-revisions.png",
+        "project_absolute_src": "/nova/figures/millisecond-converged-solve/program-size/cross-revision/panels/weak-rotation-reactor-static-cells-300-across-revisions.png",
+        "sha256": "ce06c523a6d2604fcfa437ee6a3b2b16dc7bad1f0098d7841f8c7783a03e9438",
+        "terminal_residual": 2.4295437383158535e-15,
+        "vector_filesystem_path": "docs/figures/millisecond-converged-solve/program-size/cross-revision/panels/weak-rotation-reactor-static-cells-300-across-revisions.svg",
+        "vector_project_absolute_src": "/nova/figures/millisecond-converged-solve/program-size/cross-revision/panels/weak-rotation-reactor-static-cells-300-across-revisions.svg",
+        "vector_sha256": "735634a265bef1ca8ca3c036395835ad466be5961c8c333d2b1980c1843421d5"
+      },
+      "realised_state_values": 1529,
+      "requested_cells": -300,
+      "terminal_state_bit_identical": false
+    },
+    {
+      "baseline_arm_source": "recorded base-revision terminal state",
+      "baseline_recorded_seconds": 102.04228826612234,
+      "baseline_revision": "4e82bafb3abbd972096f84f306dfc8b28577e2fe",
+      "baseline_seconds": null,
+      "baseline_state_finite": true,
+      "baseline_state_sha256_binary64": "887ae18a0600051aa31b1f31bbabea4ae11923334a06a08f46965248d00129ce",
+      "baseline_terminal_residual": 1.9588366260638553e-16,
+      "baseline_terminal_residual_finite": true,
+      "candidate_arm_source": "head-revision solve",
+      "candidate_revision": "42e6ade05335ec1b952ca8ed543717c327e17cd8",
+      "candidate_seconds": 397.0964361652732,
+      "candidate_state_finite": true,
+      "candidate_state_sha256_binary64": "b87d82f65d4ccfafadd7121b921a6172219cc57ef5fc9410680811a8ac5f212d",
+      "candidate_terminal_residual": 1.1753019756383131e-15,
+      "candidate_terminal_residual_finite": true,
+      "case": "moderate-rotation-conventional-static",
+      "converged_equal": null,
+      "identity_row_count": 1535,
+      "maximum_absolute_state_difference": null,
+      "maximum_absolute_state_difference_measure": "unavailable from a recorded digest; the baseline arm is a binary64 sha256 rather than the state array",
+      "panel": {
+        "bit_identical": false,
+        "filesystem_path": "docs/figures/millisecond-converged-solve/program-size/cross-revision/panels/moderate-rotation-conventional-static-cells-300-across-revisions.png",
+        "project_absolute_src": "/nova/figures/millisecond-converged-solve/program-size/cross-revision/panels/moderate-rotation-conventional-static-cells-300-across-revisions.png",
+        "sha256": "40a852e6d76cf1b111737b122db3108230f43c5de89d55e1d23256039d514d4d",
+        "terminal_residual": 1.1753019756383131e-15,
+        "vector_filesystem_path": "docs/figures/millisecond-converged-solve/program-size/cross-revision/panels/moderate-rotation-conventional-static-cells-300-across-revisions.svg",
+        "vector_project_absolute_src": "/nova/figures/millisecond-converged-solve/program-size/cross-revision/panels/moderate-rotation-conventional-static-cells-300-across-revisions.svg",
+        "vector_sha256": "15470bf0851b63d475aa85e8b58227688c8ad1175d78d4dd9d362645bc2a70c6"
+      },
+      "realised_state_values": 1535,
+      "requested_cells": -300,
+      "terminal_state_bit_identical": false
+    }
+  ],
+  "schema": "nova.solve-program-certificate-identity"
+}

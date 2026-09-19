@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="122">
+<meta name="plan-version" content="123">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
 <meta name="plan-impl" content="0.6">
@@ -625,6 +625,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260918T202207266011-cca-xpoint-cell-treatment-landed" data-who="s19x-cca-xpoint-x" data-when="2026-09-19T06:55:00Z">
     <div class="r-comment-body"><p><strong>The CPU oracle half of the spline X-point-cell treatment landed in commits <code>0e18d6df</code>, <code>6ef26316</code>, <code>1f21b58c</code> and <code>aca7dda6</code>.</strong> Before repair, a supplied saddle on the spline-chain route still returned <code>support.saddle == false</code>. The repaired carrier admits only an externally supplied saddle, detects up to two ordered roots per edge, splits before arc expansion, and emits the core, private-flux and two common-SOL wedges with exact-zero padding in the existing 136-slot capacity. One <code>all_debug</code> CPU job, 1273843, passed 13 tests in 52.07 s. Core-current relative error was 1.0592653460397069e-13 at 110 cells, 3.9298727478012714e-13 at 300, and 7.582948143696231e-14 at 500; private-flux and both common-SOL currents were exactly 0.0 on every row. The 300-cell line-contour panel was regenerated as <a href="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-300.svg">SVG</a> with a <a href="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-300.png">PNG companion</a>. The held <code>forward_operator.py</code> companion wiring from the typed census into this carrier and the eight-row H200 certificate gate remain follow-ons; this worker does not resolve <code>f-cca-002</code> or close the section.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260918T202207266011-cca-xpoint-cell-treatment" data-who="reckon-ship" data-when="2026-09-19T07:00:20Z">
+    <div class="r-comment-body"><p>Spline-chain clip splits the saddle cell into four wedges; core current within 1e-13 of the analytic wedge integral at 110, 300 and 500 cells; review 87/100; production wiring follows</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s19h-s5-prerequisites" data-who="reckon-ship s19-handoff" data-when="2026-09-16T06:40:00Z">
     <div class="r-comment-body">Coordinator rule for promoting the exact clip to the production default (this section's acceptance): dispatch only after centroid-constrained-oracle-solve section 3 and exact-clip-moment-quadrature section 3 have landed, because the certificate rows reach the oracle under the exact clip only when the centroid row keeps the iteration out of the displaced basin, and the exact-clip solve is affordable only once the clipped-cell moments are integrated at the coupling's order. Section 3 (the X-point cell) follows the promotion. Recorded as a rule rather than a depends_on wire because those two plans consume this plan's evidence and a plan-level wire would hide this plan's section 2 items, which stay dispatchable.</div>

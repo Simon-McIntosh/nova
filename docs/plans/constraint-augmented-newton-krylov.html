@@ -22,8 +22,8 @@
   <title>Constraint-augmented Newton–Krylov | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-18">
-<meta name="plan-version" content="83">
+<meta name="plan-modified" content="2026-09-19">
+<meta name="plan-version" content="84">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-commits" content="00ef0610,506c9fa9,eb77480b,e7d90cc8,84b23ee6,0081c3e9,4264668e,595cdd0f,6b9c4f25,989d561c,a283f243,5dd6b790,04ea37b0">
 <meta name="plan-artifacts" content="docs/evidence/archive/constraint-augmented-newton-krylov-landed.html,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.png,nova/equilibrium/constraint.py,benchmarks/constraint_centroid_receipt.py,tests/test_wall_null_flux_tangent.py,nova/geometry/select.py,tests/test_wall_polish_continuity.py,benchmarks/constraint_shape_receipt.py,tests/test_shape_constraints.py,docs/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png,docs/figures/constraint-augmented-newton-krylov/shape-control/two-arms.json,docs/figures/constraint-augmented-newton-krylov/shape-control/vertical-shift.json,docs/figures/constraint-augmented-newton-krylov/shape-control/elongation-raise.json,docs/figures/constraint-augmented-newton-krylov/shape-control/converged.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png">
@@ -372,6 +372,9 @@ number and residual.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-cank-shafranov-integral-reviewed" data-who="" data-when="">
     <div class="r-comment-body">Run r-20260918T102146762772 (six commits, merged at d370b081, f5c9598f and 97460c12) landed shafranov_contour_integrals and beta_p_plus_half_internal_inductance in nova/equilibrium/diagnostics.py with the three virial identities derived in the docstring and an analytic gate that measures a convergence order across three resolutions (62 passed, re-run first-hand by the review r-20260918T171814677542). Scores: goal fidelity 13, evidence 15, scope 17, durability 19, fit 18. The goal-fidelity deduction is that the Biot poloidal field imaged once on the grid and interpolated to the contour is not landed; it is the wiring followup below. Two record sentences were corrected by the coordinator: the toroidal member residual does not fall monotonically (2.91e-6 at 641 points, 5.64e-5 at 1281), and the receipt carries no statement about the grid-imaged route. The review also notes the plan-version meta line was advanced by hand in two worker commits; the coordinator's union merges renumber it, so provenance is the ledger, not that line. The physics finding stands: the assembled functional W = -2 mu0 S_v - 6 mu0 P - Z carries the volume integrals P and Z, so the observed side needs the toroidal-field term as an input; the worker asks whether Z comes from the solved state or a diamagnetic loop, and that ruling is the lead's.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260918T174513387542-review-of-cank-flux-function-fit" data-who="reckon-ship" data-when="2026-09-18T20:36:18.466Z">
+    <div class="r-comment-body"><p>Review stored: 92/100, four findings</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260904T143226377752-cank-constraint-interface-design" data-who="cank-interface-design-x" data-when="2026-09-04T14:48:16Z">
     <div class="r-comment-body"><p>read-only design scout: no code to gate, the report under reports/nova/cank/constraint-interface-design.md is the delivery (505 lines, typed protocol, ten-row Krylov entry table, fifteen-file change list, landing order)</p></div>

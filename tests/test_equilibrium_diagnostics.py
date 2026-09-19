@@ -23,6 +23,10 @@ from nova.equilibrium.diagnostics import (
     beta_p_plus_half_internal_inductance,
     shafranov_contour_integrals,
 )
+from nova.equilibrium.conservation import FluxLattice
+from nova.equilibrium.forward_operator import PrescribedCurrentField
+from nova.equilibrium.stencil_mesh import StencilMesh
+from nova.geometry.hexstencil import hex_stencil
 from nova.jax.config import configure_dtypes
 
 #: Extended precision is enabled lazily by the executable paths, so a module
@@ -534,6 +538,83 @@ def test_beta_p_plus_half_internal_inductance_matches_the_volume_definition():
         f"error gate above is only meaningful while this control still fails; "
         f"fitted order {order:.3f} from errors {errors} at resolutions "
         f"{resolutions}"
+    )
+
+
+def test_grid_imaged_biot_field_converges_to_the_volume_definition():
+    """The exact field-response route converges after grid interpolation.
+
+    The positive control images analytic Biot field values through one fixed
+    response column, then uses the operator mesh's shared-node stencil at the
+    moving contour.  The direct analytic contour field is never passed to the
+    integral, so this test distinguishes the grid-imaged route from the
+    analytic-row gate above.
+    """
+    case = cerfon_freidberg_single_null()
+    row = _analytic_row(case, sampling=501, resolution=401)
+    exact = 4.0 * row.pressure_integral / (
+        MU0 * row.major_radius * row.plasma_current**2
+    ) + row.poloidal_field_integral / (
+        MU0**2 * row.plasma_current**2 * row.major_radius
+    )
+    lower = row.contour.min(axis=0)
+    upper = row.contour.max(axis=0)
+    margin = 0.05 * (upper - lower)
+    errors = []
+    resolutions = (21, 31, 41)
+    contour_samples = (501, 1001, 2001)
+    for resolution, sampling in zip(resolutions, contour_samples, strict=True):
+        contour = np.asarray(case.separatrix(sampling), dtype=np.float64)
+        lattice = FluxLattice(
+            np.linspace(lower[0] - margin[0], upper[0] + margin[0], resolution),
+            np.linspace(lower[1] - margin[1], upper[1] + margin[1], resolution),
+        )
+        coordinate = np.asarray(lattice.coordinate)
+        gradient = case.gradient(coordinate)
+        radial = -gradient[:, 1] / coordinate[:, 0]
+        vertical = gradient[:, 0] / coordinate[:, 0]
+        response = PrescribedCurrentField(
+            response=jnp.zeros((lattice.node_count, 1)),
+            current=jnp.ones(1),
+            radial_response=jnp.asarray(radial[:, None]),
+            vertical_response=jnp.asarray(vertical[:, None]),
+        )
+        grid_field = response.poloidal_field()
+        stencil = StencilMesh(
+            coordinate, hex_stencil(lattice.shape), lattice.cell_area
+        ).shared_node_flux_stencil(contour)
+        contour_radial = stencil(grid_field.radial)
+        contour_vertical = stencil(grid_field.vertical)
+        count = contour.shape[0]
+        size = count + 7
+        integrals = shafranov_contour_integrals(
+            jnp.asarray(_padded(contour, size)),
+            jnp.asarray(_padded(np.asarray(contour_radial), size)),
+            jnp.asarray(_padded(np.asarray(contour_vertical), size)),
+            jnp.asarray(_padded(1.0 / contour[:, 0], size)),
+            count,
+        )
+        observed = float(
+            beta_p_plus_half_internal_inductance(
+                integrals,
+                row.pressure_integral,
+                row.toroidal_field_integral,
+                row.major_radius,
+                row.plasma_current,
+            )
+        )
+        errors.append(abs(observed - exact) / abs(exact))
+
+    assert errors[-1] < errors[0], (
+        "grid-imaged route did not converge at "
+        f"grid {resolutions}, contour {contour_samples}: {errors}"
+    )
+    order = math.log(errors[0] / errors[-1]) / math.log(
+        resolutions[-1] / resolutions[0]
+    )
+    assert order > 0.5, (
+        f"grid-imaged route fitted order {order:.3f} at grid {resolutions}, "
+        f"contour {contour_samples}: {errors}"
     )
 
 

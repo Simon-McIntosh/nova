@@ -1520,12 +1520,34 @@ class _FixedDesignNull2D:
         return cls(*children, **aux_data)
 
 
+class PoloidalField(NamedTuple):
+    """Radial and vertical poloidal-field components on common targets."""
+
+    radial: jax.Array
+    vertical: jax.Array
+
+
 @dataclass(frozen=True)
 class PrescribedCurrentField:
-    """Fixed conductor currents and their total-flux response matrix."""
+    """Fixed currents with exact flux and operator-grid field responses.
+
+    The radial and vertical conductor blocks carry the same circuit columns as
+    ``response``.  Each optional plasma tuple carries, in order, the response
+    to cell current, radial first moment and vertical first moment.  These are
+    interaction matrices: evaluating a field only contracts current vectors
+    through blocks built with the Biot kernels when the operator was built.
+    """
 
     response: jnp.ndarray = field(repr=False)
     current: jnp.ndarray = field(repr=False)
+    radial_response: jnp.ndarray | None = field(default=None, repr=False)
+    vertical_response: jnp.ndarray | None = field(default=None, repr=False)
+    plasma_radial_response: tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray] | None = field(
+        default=None, repr=False
+    )
+    plasma_vertical_response: tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray] | None = (
+        field(default=None, repr=False)
+    )
 
     def __post_init__(self):
         """Validate one response column for every prescribed current."""
@@ -1541,6 +1563,57 @@ class PrescribedCurrentField:
             )
         object.__setattr__(self, "response", response)
         object.__setattr__(self, "current", current)
+        conductor_blocks = (self.radial_response, self.vertical_response)
+        if (conductor_blocks[0] is None) != (conductor_blocks[1] is None):
+            raise ValueError(
+                "radial and vertical field responses must be supplied together"
+            )
+        plasma_blocks = (
+            self.plasma_radial_response,
+            self.plasma_vertical_response,
+        )
+        if (plasma_blocks[0] is None) != (plasma_blocks[1] is None):
+            raise ValueError(
+                "radial and vertical plasma field responses must be supplied together"
+            )
+        if conductor_blocks[0] is None:
+            if plasma_blocks[0] is not None:
+                raise ValueError(
+                    "plasma field responses require conductor field responses"
+                )
+            return
+        radial = jnp.asarray(conductor_blocks[0])
+        vertical = jnp.asarray(conductor_blocks[1])
+        if radial.ndim != 2 or vertical.shape != radial.shape:
+            raise ValueError(
+                "radial and vertical field responses must be same-shaped matrices"
+            )
+        if radial.shape[1] != current.size:
+            raise ValueError(
+                "field response columns must match the prescribed current vector"
+            )
+        object.__setattr__(self, "radial_response", radial)
+        object.__setattr__(self, "vertical_response", vertical)
+        if plasma_blocks[0] is None:
+            return
+        radial_plasma = tuple(jnp.asarray(block) for block in plasma_blocks[0])
+        vertical_plasma = tuple(jnp.asarray(block) for block in plasma_blocks[1])
+        if len(radial_plasma) != 3 or len(vertical_plasma) != 3:
+            raise ValueError(
+                "plasma field response must carry current and two first moments"
+            )
+        expected_shape = radial_plasma[0].shape
+        if (
+            len(expected_shape) != 2
+            or expected_shape[0] != radial.shape[0]
+            or any(block.shape != expected_shape for block in radial_plasma)
+            or any(block.shape != expected_shape for block in vertical_plasma)
+        ):
+            raise ValueError(
+                "plasma field response matrices must share grid rows and cell columns"
+            )
+        object.__setattr__(self, "plasma_radial_response", radial_plasma)
+        object.__setattr__(self, "plasma_vertical_response", vertical_plasma)
 
     @property
     def circuit_count(self) -> int:
@@ -1569,6 +1642,122 @@ class PrescribedCurrentField:
                 "prescribed current delta must match the stored circuit vector shape"
             )
         return self.response @ delta
+
+    @property
+    def has_field_response(self) -> bool:
+        """Return whether exact operator-grid field interactions are carried."""
+        return self.radial_response is not None
+
+    @property
+    def response_identity(self) -> str:
+        """Return one digest over the flux and both field-response families."""
+        digest = hashlib.sha256()
+        _digest_array(digest, "flux", self.response)
+        for name, value in (
+            ("radial", self.radial_response),
+            ("vertical", self.vertical_response),
+        ):
+            if value is None:
+                digest.update(f"{name}:absent".encode())
+            else:
+                _digest_array(digest, name, value)
+        for name, blocks in (
+            ("plasma_radial", self.plasma_radial_response),
+            ("plasma_vertical", self.plasma_vertical_response),
+        ):
+            if blocks is None:
+                digest.update(f"{name}:absent".encode())
+            else:
+                for index, block in enumerate(blocks):
+                    _digest_array(digest, f"{name}_{index}", block)
+        return digest.hexdigest()
+
+    def poloidal_field(
+        self,
+        current_moments: CellCurrentMoments | None = None,
+        current=None,
+    ) -> PoloidalField:
+        """Image currents through the exact operator-grid Biot responses [T]."""
+        if not self.has_field_response:
+            raise ValueError("operator-grid field responses are not available")
+        conductor = self.current if current is None else jnp.asarray(current)
+        if conductor.shape != self.current.shape:
+            raise ValueError(
+                "prescribed current must match the stored circuit vector shape"
+            )
+        radial = self.radial_response @ conductor
+        vertical = self.vertical_response @ conductor
+        if current_moments is None:
+            return PoloidalField(radial, vertical)
+        if self.plasma_radial_response is None:
+            raise ValueError("plasma field responses are not available")
+        moment_shapes = {tuple(jnp.shape(moment)) for moment in current_moments}
+        expected = (self.plasma_radial_response[0].shape[1],)
+        if moment_shapes != {expected}:
+            raise ValueError(
+                "plasma current moments must match the field response columns"
+            )
+        radial = radial + sum(
+            block @ moment
+            for block, moment in zip(
+                self.plasma_radial_response, current_moments, strict=True
+            )
+        )
+        vertical = vertical + sum(
+            block @ moment
+            for block, moment in zip(
+                self.plasma_vertical_response, current_moments, strict=True
+            )
+        )
+        return PoloidalField(radial, vertical)
+
+    def tree_flatten(self):
+        """Carry every immutable response block and the traced current as leaves."""
+        radial_plasma = (
+            (None, None, None)
+            if self.plasma_radial_response is None
+            else self.plasma_radial_response
+        )
+        vertical_plasma = (
+            (None, None, None)
+            if self.plasma_vertical_response is None
+            else self.plasma_vertical_response
+        )
+        return (
+            (
+                self.response,
+                self.current,
+                self.radial_response,
+                self.vertical_response,
+                *radial_plasma,
+                *vertical_plasma,
+            ),
+            {
+                "plasma_radial": self.plasma_radial_response is not None,
+                "plasma_vertical": self.plasma_vertical_response is not None,
+            },
+        )
+
+    @classmethod
+    def tree_unflatten(cls, aux_data, children):
+        """Rebuild a response carrier without evaluating any interaction."""
+        (
+            response,
+            current,
+            radial,
+            vertical,
+            *plasma,
+        ) = children
+        radial_plasma = tuple(plasma[:3]) if aux_data["plasma_radial"] else None
+        vertical_plasma = tuple(plasma[3:]) if aux_data["plasma_vertical"] else None
+        instance = object.__new__(cls)
+        object.__setattr__(instance, "response", response)
+        object.__setattr__(instance, "current", current)
+        object.__setattr__(instance, "radial_response", radial)
+        object.__setattr__(instance, "vertical_response", vertical)
+        object.__setattr__(instance, "plasma_radial_response", radial_plasma)
+        object.__setattr__(instance, "plasma_vertical_response", vertical_plasma)
+        return instance
 
 
 def _host_array(value, *, dtype=None) -> np.ndarray:
@@ -2247,6 +2436,11 @@ class ForwardFluxOperator:
             "wall_unit_offsets": self.wall_unit_offsets,
             "wall_unit_closed": self.wall_unit_closed,
             "wall_unit_kinds": self.wall_unit_kinds,
+            "prescribed_response_identity": (
+                None
+                if self.prescribed_field is None
+                else self.prescribed_field.response_identity
+            ),
         }
         dynamic_extras = set(self._dynamic_extra_names())
         base_fields = {
@@ -2374,9 +2568,9 @@ class ForwardFluxOperator:
             prescribed=prescribed,
         )
         prescribed_children = (
-            (None, None)
+            (None,) * 10
             if self.prescribed_field is None
-            else (self.prescribed_field.response, self.prescribed_field.current)
+            else self.prescribed_field.tree_flatten()[0]
         )
         children = (
             self.grid,
@@ -2401,6 +2595,14 @@ class ForwardFluxOperator:
             external_current,
             prescribed_response,
             prescribed_current,
+            prescribed_radial,
+            prescribed_vertical,
+            prescribed_plasma_radial_current,
+            prescribed_plasma_radial_radial,
+            prescribed_plasma_radial_vertical,
+            prescribed_plasma_vertical_current,
+            prescribed_plasma_vertical_radial,
+            prescribed_plasma_vertical_vertical,
             *tail,
         ) = children
         extra_count = len(aux.dynamic_extra_names)
@@ -2426,6 +2628,36 @@ class ForwardFluxOperator:
             prescribed_field = object.__new__(PrescribedCurrentField)
             object.__setattr__(prescribed_field, "response", prescribed_response)
             object.__setattr__(prescribed_field, "current", prescribed_current)
+            object.__setattr__(prescribed_field, "radial_response", prescribed_radial)
+            object.__setattr__(
+                prescribed_field, "vertical_response", prescribed_vertical
+            )
+            object.__setattr__(
+                prescribed_field,
+                "plasma_radial_response",
+                (
+                    None
+                    if prescribed_plasma_radial_current is None
+                    else (
+                        prescribed_plasma_radial_current,
+                        prescribed_plasma_radial_radial,
+                        prescribed_plasma_radial_vertical,
+                    )
+                ),
+            )
+            object.__setattr__(
+                prescribed_field,
+                "plasma_vertical_response",
+                (
+                    None
+                    if prescribed_plasma_vertical_current is None
+                    else (
+                        prescribed_plasma_vertical_current,
+                        prescribed_plasma_vertical_radial,
+                        prescribed_plasma_vertical_vertical,
+                    )
+                ),
+            )
             instance.prescribed_field = prescribed_field
         else:
             instance.prescribed_field = None
@@ -3399,6 +3631,69 @@ class ForwardFluxOperator:
         if self.sample is None:
             return physical
         return jnp.r_[physical, self.sample.internal(moments)]
+
+    def grid_poloidal_field(
+        self,
+        psi,
+        *,
+        requested_class=None,
+        target_current=None,
+        prescribed_current=None,
+    ) -> PoloidalField:
+        """Return the exact Biot field imaged once on every operator-grid node.
+
+        Interaction matrices are operator state; only conductor currents and
+        the plasma cell-current moments vary between evaluations.  No flux
+        gradient or Biot kernel is evaluated on this path.
+        """
+        if self.prescribed_field is None:
+            raise ValueError("operator-grid field imaging requires a prescribed field")
+        if target_current is None:
+            moments = self.cell_current_moments(psi, requested_class)
+        else:
+            moments, _amplitude = self.normalised_current_moments(
+                psi, target_current, requested_class
+            )
+        return self.prescribed_field.poloidal_field(moments, prescribed_current)
+
+    def interpolate_grid_poloidal_field(
+        self, contour, grid_field: PoloidalField
+    ) -> PoloidalField:
+        """Interpolate an imaged grid field to one boundary contour."""
+        points = np.asarray(contour, dtype=np.float64)
+        if points.ndim != 2 or points.shape[1] != 2:
+            raise ValueError("boundary contour must have shape (points, 2)")
+        expected = (self.grid.node_number,)
+        if (
+            tuple(jnp.shape(grid_field.radial)) != expected
+            or tuple(jnp.shape(grid_field.vertical)) != expected
+        ):
+            raise ValueError("grid field must carry one value per operator node")
+        mesh = StencilMesh(
+            np.asarray(self.grid.coordinate),
+            np.asarray(self.grid.null.stencil),
+            np.asarray(self.area),
+        )
+        stencil = mesh.shared_node_flux_stencil(points)
+        return PoloidalField(stencil(grid_field.radial), stencil(grid_field.vertical))
+
+    def boundary_poloidal_field(
+        self,
+        psi,
+        contour,
+        *,
+        requested_class=None,
+        target_current=None,
+        prescribed_current=None,
+    ) -> PoloidalField:
+        """Image the exact grid field and interpolate it to a boundary contour."""
+        grid_field = self.grid_poloidal_field(
+            psi,
+            requested_class=requested_class,
+            target_current=target_current,
+            prescribed_current=prescribed_current,
+        )
+        return self.interpolate_grid_poloidal_field(contour, grid_field)
 
     def __call__(
         self,

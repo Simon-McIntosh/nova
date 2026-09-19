@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T14:52:47",
+  "updated": "2026-09-19T14:54:21",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4904,6 +4904,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-18"
+      },
+      {
+        "id": "s19c-fsa-persist-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-19"
       },
       {
         "id": "s19c-fsa-records-c",
@@ -205592,6 +205601,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2887
+    "_version": 2888
   }
 }

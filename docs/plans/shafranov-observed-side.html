@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-blocks" content="constraint-augmented-newton-krylov">
 <meta name="plan-impl" content="0.2">
 </head>
@@ -137,6 +137,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-sos-grid-route-order-reviewed" data-who="" data-when="">
     <div class="r-comment-body">Run r-20260919T111700847506 (local lane, commits 3818bd05 f633a00a c6dae3cb, merged at e9683030; review r-20260919T115006363350) found the first-order stage: shafranov_contour_integrals sampled the contour metric at the leading vertex; sampled at the chord midpoint with each field averaged to it the fitted order is 2.064 and the test persists it. The fix exposed what a 5e-4 bound had hidden, and the review sharpened it: the receipt's errors converge to their own limit 0.22281 against exact 1.23255, a 22 percent offset, so the measured order is the order of departure from a plateau, not of convergence to the exact value. The node's probes name the plateau's sources: a first-order surface term surviving in the radial moment, and the volume side's cell-centre mask (inside = flux greater than zero) carrying no boundary correction, orders 0.82 and 0.93 on the vertical moment and toroidal stress. Both are the next node's work before section 3 wires the constraint; the gate for this run therefore records the three exposed identity tests as pre-existing failures, not regressions. Two review findings for the next node: the test rewrites the tracked receipt.json on every run (a side effect the manifest did not name), and the certificate figure still shows the assembly-order ladder rather than the 21, 41 and 81 grid ladder.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260919T111700847506-sos-grid-route-order" data-who="reckon-ship" data-when="2026-09-19T11:47:43.637Z">
+    <div class="r-comment-body"><p>Contour quadrature made second order (fitted 2.064) and the grid route order persisted; the fix exposes three volume-side identity tests hidden by a 5e-4 bound whose sources are named for the next node; review 89/100</p></div>
 </div>
 </section>
 </main>

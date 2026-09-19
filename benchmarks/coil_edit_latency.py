@@ -45,7 +45,10 @@ from benchmarks import mast_response_carrier_warm as response_carrier
 from benchmarks.diiid_forward_gs_match import _margin_graded_newton_krylov
 from nova.equilibrium import reduced_newton
 from nova.equilibrium.fixed_point import FixedPointResult, FixedPointTerminationReason
-from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
+from nova.equilibrium.separatrix_branches import (
+    assemble_separatrix_branches,
+    boundary_flux_at_admitted_saddle,
+)
 from nova.equilibrium.topology import NoQualifiedAxisError, TopologyClass
 from nova.equilibrium.wall_mask import WallUnit
 from nova.imas.mast_solve_inputs import SHOT_STORE
@@ -812,6 +815,16 @@ def _branches_of(profile: Any, state: Any, raster_flux: Any) -> dict[str, Any] |
         "closed_candidate_count": int(
             np.asarray(branches["closed_candidate_count"]).item()
         ),
+        "cycle_component_count": int(
+            np.asarray(branches["cycle_component_count"]).item()
+        ),
+        "axis_enclosing_component_count": int(
+            np.asarray(branches["axis_enclosing_component_count"]).item()
+        ),
+        "closed_segment_count": int(
+            np.asarray(branches["closed_segment_count"]).item()
+        ),
+        "open_branch_count": int(np.asarray(branches["open_branch_count"]).item()),
         "overflow": bool(np.asarray(branches["overflow"])),
     }
 
@@ -912,6 +925,13 @@ def _persist_branches(
     payload[f"{prefix}closed_candidate_count"] = np.asarray(
         branches["closed_candidate_count"]
     )
+    for name in (
+        "cycle_component_count",
+        "axis_enclosing_component_count",
+        "closed_segment_count",
+        "open_branch_count",
+    ):
+        payload[f"{prefix}{name}"] = np.asarray(branches[name])
     payload[f"{prefix}overflow"] = np.asarray(branches["overflow"])
 
 
@@ -1040,6 +1060,20 @@ def _optional_scalar(data: Any, name: str) -> float | None:
     return value if np.isfinite(value) else None
 
 
+def _optional_flag(data: Any, name: str) -> bool | None:
+    """Return one persisted boolean, or None where the archive predates it."""
+    if name not in data.files:
+        return None
+    return bool(np.asarray(data[name]))
+
+
+def _optional_int(data: Any, name: str) -> int | None:
+    """Return one persisted integer, or None where the archive predates it."""
+    if name not in data.files:
+        return None
+    return int(np.asarray(data[name]))
+
+
 def _load_branches(data: Any, prefix: str) -> dict[str, Any] | None:
     """Return one persisted branch set under a prefix, or None if absent."""
     key = f"{prefix}closed_controls_rz"
@@ -1057,7 +1091,125 @@ def _load_branches(data: Any, prefix: str) -> dict[str, Any] | None:
     }
     loaded["boundary_flux"] = _optional_scalar(data, f"{prefix}boundary_flux")
     loaded["axis_flux"] = _optional_scalar(data, f"{prefix}axis_flux")
+    loaded["well_formed"] = _optional_flag(data, f"{prefix}well_formed")
+    loaded["closed_candidate_count"] = _optional_int(
+        data, f"{prefix}closed_candidate_count"
+    )
+    loaded["cycle_component_count"] = _optional_int(
+        data, f"{prefix}cycle_component_count"
+    )
+    loaded["axis_enclosing_component_count"] = _optional_int(
+        data, f"{prefix}axis_enclosing_component_count"
+    )
+    loaded["closed_segment_count"] = _optional_int(
+        data, f"{prefix}closed_segment_count"
+    )
+    loaded["open_branch_count"] = _optional_int(data, f"{prefix}open_branch_count")
+    loaded["source"] = "archive"
     return loaded
+
+
+def _raster_boundary_flux(
+    radius: Any,
+    height: Any,
+    psi: Any,
+    axis: Any,
+    xpoints: Any,
+    saddle_index: int,
+) -> float:
+    """Return a persisted raster field's own boundary flux at its admitted saddle.
+
+    The level a field is traced at has to be that field's own stationary value.
+    A level carried in from the solve lattice the raster resamples misses the
+    raster's stationary value by far more than the decision tolerance, and the
+    four-crossing cell holding the saddle then pairs by corner sign and runs
+    the axis-enclosing lobe out along a divertor leg. The reference point only
+    has to land in the saddle's cell; the value returned is that cell's own
+    polished stationary value.
+    """
+    candidates = np.atleast_2d(np.asarray(xpoints, dtype=float))
+    if 0 <= saddle_index < candidates.shape[0]:
+        reference = candidates[saddle_index]
+    else:
+        reference = np.asarray(axis, dtype=float).reshape(2)
+    level = boundary_flux_at_admitted_saddle(
+        jnp.asarray(np.asarray(psi, dtype=float)),
+        jnp.asarray(np.asarray(radius, dtype=float)),
+        jnp.asarray(np.asarray(height, dtype=float)),
+        jnp.asarray(np.asarray(axis, dtype=float).reshape(2)),
+        jnp.asarray(reference, dtype=jnp.float64),
+    )
+    return float(np.asarray(level))
+
+
+def _raster_axis_flux(psi: Any, inside: Any) -> float:
+    """Return a raster field's own axis flux as its interior extremum.
+
+    The axis is the field's extremum inside the vessel, and masking to the wall
+    interior is what keeps coil-adjacent flux from stretching the drawn band
+    past the plasma.
+    """
+    values = np.where(
+        np.asarray(inside, dtype=bool), np.asarray(psi, dtype=float), -np.inf
+    )
+    finite = values[np.isfinite(values)]
+    if finite.size == 0:
+        raise ValueError("the raster field carries no value inside the wall")
+    return float(np.max(finite))
+
+
+def _assemble_raster_branches(
+    radius: Any,
+    height: Any,
+    psi: Any,
+    axis: Any,
+    xpoints: Any,
+    saddle_index: int,
+    inside: Any,
+) -> dict[str, Any]:
+    """Assemble a persisted raster field's own lobe and legs for the panel.
+
+    A sweep persists the lattice-field assembly; an archive written before that
+    landed carries only the raster, and the raster is the field this panel
+    contours. Tracing the raster at the raster's own boundary flux keeps the
+    drawn branch and the drawn contours the same field, which an assembly
+    imported from the lattice is not.
+    """
+    configure_dtypes()
+    level = _raster_boundary_flux(radius, height, psi, axis, xpoints, saddle_index)
+    assembled = jax.device_get(
+        assemble_separatrix_branches(
+            jnp.asarray(np.asarray(psi, dtype=float)),
+            jnp.asarray(np.asarray(radius, dtype=float)),
+            jnp.asarray(np.asarray(height, dtype=float)),
+            jnp.asarray(level),
+            jnp.asarray(np.asarray(axis, dtype=float).reshape(2)),
+        )
+    )
+    return {
+        "closed_controls_rz": np.asarray(assembled["closed_controls_rz"], dtype=float),
+        "closed_valid": np.asarray(assembled["closed_valid"], dtype=bool),
+        "open_controls_rz": np.asarray(assembled["open_controls_rz"], dtype=float),
+        "open_valid": np.asarray(assembled["open_valid"], dtype=bool),
+        "open_branch_valid": np.asarray(assembled["open_branch_valid"], dtype=bool),
+        "boundary_flux": level,
+        "axis_flux": _raster_axis_flux(psi, inside),
+        "well_formed": bool(np.asarray(assembled["well_formed"])),
+        "closed_candidate_count": int(
+            np.asarray(assembled["closed_candidate_count"]).item()
+        ),
+        "cycle_component_count": int(
+            np.asarray(assembled["cycle_component_count"]).item()
+        ),
+        "axis_enclosing_component_count": int(
+            np.asarray(assembled["axis_enclosing_component_count"]).item()
+        ),
+        "closed_segment_count": int(
+            np.asarray(assembled["closed_segment_count"]).item()
+        ),
+        "open_branch_count": int(np.asarray(assembled["open_branch_count"]).item()),
+        "source": "raster-saddle",
+    }
 
 
 def _panel_load(data_path: Path) -> dict[str, Any]:
@@ -1067,33 +1219,60 @@ def _panel_load(data_path: Path) -> dict[str, Any]:
         height = np.asarray(data["height"], dtype=float)
         reference = np.asarray(data["reference_psi"], dtype=float)
         wall = _panel_wall(data)
+        inside = _wall_interior(radius, height, wall)
+        reference_axis = np.asarray(data["reference_axis"], dtype=float)
+        reference_xpoints = np.asarray(data["reference_xpoints"], dtype=float)
+        reference_saddle_index = (
+            int(np.asarray(data["reference_saddle_index"]))
+            if "reference_saddle_index" in data.files
+            else 0
+        )
+        reference_branches = _load_branches(data, "reference_")
+        if reference_branches is None:
+            reference_branches = _assemble_raster_branches(
+                radius,
+                height,
+                reference,
+                reference_axis,
+                reference_xpoints,
+                reference_saddle_index,
+                inside,
+            )
+        boundary_flux = reference_branches["boundary_flux"]
+        if boundary_flux is None:
+            boundary_flux = _raster_boundary_flux(
+                radius,
+                height,
+                reference,
+                reference_axis,
+                reference_xpoints,
+                reference_saddle_index,
+            )
+        axis_flux = reference_branches["axis_flux"]
+        if axis_flux is None:
+            axis_flux = _raster_axis_flux(reference, inside)
         # The reference set's own plasma range, so the shared levels lie on the
         # flux the plasma occupies instead of spanning the whole raster: the
         # raw span reaches coil-adjacent flux and contours it into the column.
         levels = poloidal.contour_levels(
-            reference,
-            count=14,
-            boundary=_optional_scalar(data, "reference_boundary_flux"),
-            axis=_optional_scalar(data, "reference_axis_flux"),
+            reference, count=14, boundary=boundary_flux, axis=axis_flux
         )
         loaded: dict[str, Any] = {
             "radius": radius,
             "height": height,
             "reference": reference,
             "levels": levels,
-            "reference_axis": np.asarray(data["reference_axis"], dtype=float),
+            "reference_axis": reference_axis,
             "reference_separatrix": np.asarray(
                 data["reference_separatrix"], dtype=float
             ),
-            "reference_xpoints": np.asarray(data["reference_xpoints"], dtype=float),
-            "reference_branches": _load_branches(data, "reference_"),
-            "reference_saddle_index": (
-                int(np.asarray(data["reference_saddle_index"]))
-                if "reference_saddle_index" in data.files
-                else 0
-            ),
+            "reference_xpoints": reference_xpoints,
+            "reference_branches": reference_branches,
+            "reference_boundary_flux": float(boundary_flux),
+            "reference_axis_flux": float(axis_flux),
+            "reference_saddle_index": reference_saddle_index,
             "wall": wall,
-            "inside": _wall_interior(radius, height, wall),
+            "inside": inside,
         }
         passed, failed = _panel_edits(data)
         selected = (("converged", passed), ("failed", failed))
@@ -1110,14 +1289,24 @@ def _panel_load(data_path: Path) -> dict[str, Any]:
             panel["termination"] = str(np.asarray(data["termination"])[position])
             panel["class_name"] = str(np.asarray(data["achieved_class"])[position])
 
-            for key in ("psi", "separatrix", "axis", "xpoints"):
-                name = "%s_%d" % (key, position)
-                panel[key] = np.asarray(data[name], dtype=float)
-            panel["branches"] = _load_branches(data, "branches_%d_" % position)
             saddle_name = "saddle_index_%d" % position
             panel["saddle_index"] = (
                 int(np.asarray(data[saddle_name])) if saddle_name in data.files else 0
             )
+            for key in ("psi", "separatrix", "axis", "xpoints"):
+                name = "%s_%d" % (key, position)
+                panel[key] = np.asarray(data[name], dtype=float)
+            panel["branches"] = _load_branches(data, "branches_%d_" % position)
+            if panel["branches"] is None:
+                panel["branches"] = _assemble_raster_branches(
+                    radius,
+                    height,
+                    panel["psi"],
+                    panel["axis"],
+                    panel["xpoints"],
+                    panel["saddle_index"],
+                    inside,
+                )
     return loaded
 
 
@@ -1134,26 +1323,35 @@ def _wall_interior(radius: Any, height: Any, wall: Any) -> np.ndarray:
 def _draw_branch_set(
     axis: Any, branches: dict[str, Any] | None, color: str, fallback: Any = None
 ) -> dict[str, int]:
-    """Draw an assembled branch set, or a raw contour when none was stored.
+    """Draw an assembled branch set, or the raw level set where none assembled.
 
-    The raw receiver-grid level set is unsplit and leaves the raster at the top
-    and bottom, so an archive carrying only that array draws dashed and reports
-    an unassembled set rather than presenting it as a boundary.
+    The assembler returns zero geometry for any violation of its terms, so a
+    present set is not the same as a drawn boundary: a rejected set falls back
+    to the raw level set, dashed, and reports the fallback beside its zero
+    counts rather than leaving the panel without the boundary the reader is
+    looking for.  A set whose terms did not travel with it -- an archive written
+    before the terms accompanied the geometry -- is drawn as stored.
     """
-    if branches is not None:
-        return poloidal.draw_separatrix_branches(
-            axis,
-            branches,
-            style=DEFAULT_INK.variant(separatrix_color=color),
-            closed_color=color,
-            open_color=color,
+    tally = {"closed_drawn": 0, "open_drawn": 0, "unassembled": 0}
+    verdict = None if branches is None else branches.get("well_formed")
+    if branches is not None and (verdict is None or bool(verdict)):
+        tally.update(
+            poloidal.draw_separatrix_branches(
+                axis,
+                branches,
+                style=DEFAULT_INK.variant(separatrix_color=color),
+                closed_color=color,
+                open_color=color,
+            )
         )
+        return tally
     array = (
         np.asarray(fallback, dtype=float) if fallback is not None else np.empty((0, 2))
     )
     if array.size:
         axis.plot(array[:, 0], array[:, 1], color=color, linewidth=0.7, linestyle="--")
-    return {"closed_drawn": 0, "open_drawn": 0}
+        tally["unassembled"] = 1
+    return tally
 
 
 def _draw_null_set(
@@ -1249,6 +1447,30 @@ def _paint_panel(axis: Any, loaded: dict[str, Any], panel: dict[str, Any]) -> No
     poloidal_axes(axis)
 
 
+def _branch_terms(branches: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Return an assembled set's verdict terms, or None where none was drawn.
+
+    The assembler returns zero geometry for any violation, so the terms travel
+    beside the geometry in the receipt: an empty drawn set alone cannot say
+    whether the level carried no axis-enclosing cycle, the graph carried a
+    junction, or a slot overflowed.
+    """
+    if branches is None:
+        return None
+    return {
+        "source": branches.get("source"),
+        "well_formed": branches.get("well_formed"),
+        "closed_candidate_count": branches.get("closed_candidate_count"),
+        "cycle_component_count": branches.get("cycle_component_count"),
+        "axis_enclosing_component_count": branches.get(
+            "axis_enclosing_component_count"
+        ),
+        "closed_segment_count": branches.get("closed_segment_count"),
+        "open_branch_count": branches.get("open_branch_count"),
+        "boundary_flux": branches.get("boundary_flux"),
+    }
+
+
 def _panel_summary(panel: dict[str, Any]) -> dict[str, Any]:
     """Return the json-safe scalars the panel caption reports."""
     return {
@@ -1260,6 +1482,7 @@ def _panel_summary(panel: dict[str, Any]) -> dict[str, Any]:
         "termination": panel["termination"],
         "achieved_class": panel["class_name"],
         "branches_drawn": dict(panel.get("branches_drawn", {})),
+        "branches": _branch_terms(panel.get("branches")),
     }
 
 
@@ -1270,6 +1493,19 @@ def _saddle_note(x_points: Any, saddle_index: int) -> str:
         return "saddle absent"
     point = array[saddle_index]
     return "saddle (%.3f, %+.3f) m" % (point[0], point[1])
+
+
+def _branch_style_note(drawn: dict[str, int]) -> str:
+    """Return the caption fragment describing how one set was drawn.
+
+    A set the assembler rejected carries zero geometry, so it is drawn as its
+    own solved separatrix, dashed; the caption has to say which of the two
+    drawings the reader is looking at, because the two are indistinguishable on
+    the panel and one of them is not an assembled boundary.
+    """
+    if drawn.get("unassembled"):
+        return "unassembled at its own saddle level, drawn dashed from its separatrix"
+    return "lobe solid, legs dashed"
 
 
 def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
@@ -1298,19 +1534,36 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
         loaded["failed"]["xpoints"], loaded["failed"]["saddle_index"]
     )
     figure.suptitle(
-        "terminal poloidal flux on shared plasma-range levels  |  reference "
-        "set blue: lobe solid, legs dashed, admitted %s, other qualified "
-        "nulls hollow  |  solved set orange: admitted %s, other hollow  |  "
-        "wall drawn" % (reference_note, solved_note),
+        "terminal poloidal flux on shared levels between the axis and boundary "
+        "flux (%.4f to %.4f Wb)  |  reference set blue: %s, admitted %s, other "
+        "qualified nulls hollow  |  solved set orange: %s, admitted %s, other "
+        "hollow  |  wall drawn"
+        % (
+            loaded["reference_axis_flux"],
+            loaded["reference_boundary_flux"],
+            _branch_style_note(loaded.get("reference_branches_drawn", {})),
+            reference_note,
+            _branch_style_note(loaded["failed"].get("branches_drawn", {})),
+            solved_note,
+        ),
         fontsize=9,
     )
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(figure_path, dpi=140)
+    vector_path = figure_path.with_suffix(".svg")
+    figure.savefig(vector_path)
     plt.close(figure)
 
     return {
         "figure": str(figure_path),
+        "figure_vector": str(vector_path),
         "levels": [float(value) for value in loaded["levels"]],
+        "level_band": {
+            "axis_flux": loaded["reference_axis_flux"],
+            "boundary_flux": loaded["reference_boundary_flux"],
+        },
+        "reference_branches": _branch_terms(loaded["reference_branches"]),
+        "reference_branches_drawn": dict(loaded.get("reference_branches_drawn", {})),
         "converged": _panel_summary(loaded["converged"]),
         "non_converged": _panel_summary(loaded["failed"]),
     }

@@ -678,6 +678,13 @@ def _paired_edge_values(values: jnp.ndarray, indices: jnp.ndarray) -> jnp.ndarra
     return jnp.take_along_axis(values[..., None, :, :], indices[..., None], axis=-2)
 
 
+# A cell boundary can meet one edge of the lattice more than once, so a node id
+# names a crossing on an edge and not the edge alone.  The node of a crossing is
+# ``EDGE_CROSSING_CAPACITY * edge_id + rank_along_edge``, which leaves the four
+# crossing slots of one cell a distinct id each.
+EDGE_CROSSING_CAPACITY = 4
+
+
 def _structured_edge_nodes(radial_size: int, vertical_size: int) -> jnp.ndarray:
     """Return canonical global node ids for each cell's four physical edges."""
     cell_radial = radial_size - 1
@@ -1414,6 +1421,7 @@ def traced_spline_contour(
     bisection_steps: int = 40,
     saddle_steps: int = 8,
     surface: TensorBSpline | None = None,
+    axis_rz: jnp.ndarray | None = None,
 ) -> dict[str, jnp.ndarray]:
     """Extract fixed-capacity cubic contour arcs from a global tensor spline.
 
@@ -1430,6 +1438,15 @@ def traced_spline_contour(
     interior value indistinguishable from the requested level uses the declared
     deterministic pairing.  The returned masks distinguish resolved cells from
     those tie-broken cells.
+
+    A tie is the boundary level itself passing through the saddle, where the
+    signed delta carries no information the pairing can follow.  When
+    ``axis_rz`` is supplied, the pairing of such a cell is instead taken from
+    the separatrix asymptotes at the saddle, the Hessian eigenvector
+    directions.  Opposite sectors of the indefinite quadratic form share a
+    sign, so the two crossings joined by one hyperbola branch agree in it.  The
+    axis lies in the lobe sector, which is what separates that sector from the
+    leg sectors by a scalar test on the crossings.
 
     This function returns contour geometry only.  It neither imports nor calls
     the polygonal clipped-support integration path.
@@ -1450,33 +1467,92 @@ def traced_spline_contour(
         axis=-1,
     )
     corner_delta = corners - level
-    edge_start_delta = corner_delta
-    edge_end_delta = jnp.roll(corner_delta, shift=-1, axis=-1)
-    edge_crossing = (edge_start_delta >= 0.0) != (edge_end_delta >= 0.0)
-    crossing_count = jnp.sum(edge_crossing, axis=-1, dtype=jnp.int32)
 
     edge_start, edge_end = _structured_cell_edges(radial, vertical)
     edge_vector = edge_end - edge_start
-    lower = jnp.zeros(edge_crossing.shape, dtype=values.dtype)
-    upper = jnp.ones(edge_crossing.shape, dtype=values.dtype)
-    lower_value = edge_start_delta
 
-    def bisect(_iteration, state):
-        low, high, low_value = state
-        middle = 0.5 * (low + high)
-        point = edge_start + middle[..., None] * edge_vector
-        middle_value = spline(point[..., 0], point[..., 1]) - level
-        same_side = (low_value >= 0.0) == (middle_value >= 0.0)
-        next_low = jnp.where(same_side, middle, low)
-        next_high = jnp.where(same_side, high, middle)
-        next_value = jnp.where(same_side, middle_value, low_value)
-        return next_low, next_high, next_value
-
-    lower, upper, _ = jax.lax.fori_loop(
-        0, bisection_steps, bisect, (lower, upper, lower_value)
+    # Sample each cell edge at fixed interior parameters and bracket a root on
+    # every sub-interval whose ends straddle the level.  A cubic restricted to
+    # one edge can leave both endpoints on the same side of the level and still
+    # cross twice between them, and at the boundary level the field's saddle
+    # produces exactly that pair, so a corner-sign test alone loses both of its
+    # crossings and the lobe the saddle pinches stops closing.
+    subdivision = jnp.asarray((0.0, 0.25, 0.5, 0.75, 1.0), dtype=values.dtype)
+    sample_point = (
+        edge_start[..., None, :] + subdivision[..., None] * edge_vector[..., None, :]
     )
-    edge_parameter = 0.5 * (lower + upper)
-    edge_point = edge_start + edge_parameter[..., None] * edge_vector
+    sample_delta = spline(sample_point[..., 0], sample_point[..., 1]) - level
+    sub_low_delta = sample_delta[..., :-1]
+    sub_high_delta = sample_delta[..., 1:]
+    sub_crossing = (sub_low_delta >= 0.0) != (sub_high_delta >= 0.0)
+    edge_count = jnp.sum(sub_crossing.astype(jnp.int32), axis=-1)
+
+    def bisect_sub(low_parameter, high_parameter, low_value):
+        """Locate one root on each sub-interval whose ends straddle the level."""
+        lower = jnp.broadcast_to(low_parameter, low_value.shape)
+        upper = jnp.broadcast_to(high_parameter, low_value.shape)
+
+        def bisect(_iteration, state):
+            low, high, value_at_low = state
+            middle = 0.5 * (low + high)
+            point = (
+                edge_start[..., None, :]
+                + middle[..., None] * edge_vector[..., None, :]
+            )
+            middle_value = spline(point[..., 0], point[..., 1]) - level
+            same_side = (value_at_low >= 0.0) == (middle_value >= 0.0)
+            return (
+                jnp.where(same_side, middle, low),
+                jnp.where(same_side, high, middle),
+                jnp.where(same_side, middle_value, value_at_low),
+            )
+
+        low, high, _ = jax.lax.fori_loop(
+            0, bisection_steps, bisect, (lower, upper, low_value)
+        )
+        return 0.5 * (low + high)
+
+    sub_parameter = bisect_sub(
+        jnp.broadcast_to(subdivision[:-1], sub_crossing.shape),
+        jnp.broadcast_to(subdivision[1:], sub_crossing.shape),
+        sub_low_delta,
+    )
+    sub_edge = jnp.broadcast_to(
+        jnp.arange(4, dtype=jnp.int32).reshape((1, 1, 4, 1)), sub_crossing.shape
+    )
+
+    # Pack the crossings into the fixed four-slot ring in edge order and, on an
+    # edge carrying two, ascending parameter order.  A cell whose boundary the
+    # level crosses more than four times exceeds the ring and is reported
+    # through the well-formed mask rather than silently truncated.
+    candidate_index = (
+        (jnp.cumsum(edge_count, axis=-1) - edge_count)[..., :, None]
+        + jnp.cumsum(sub_crossing.astype(jnp.int32), axis=-1)
+        - sub_crossing.astype(jnp.int32)
+    )
+    ring_shape = candidate_index.shape[:-2]
+    index_flat = candidate_index.reshape(ring_shape + (16,))
+    valid_flat = sub_crossing.reshape(ring_shape + (16,))
+    parameter_flat = sub_parameter.reshape(ring_shape + (16,))
+    edge_flat = sub_edge.reshape(ring_shape + (16,))
+    slot_parameters = []
+    slot_edges = []
+    slot_valid = []
+    for slot in range(4):
+        occupied = (index_flat == slot) & valid_flat
+        slot_parameters.append(jnp.where(occupied, parameter_flat, 0.0).sum(axis=-1))
+        slot_edges.append(jnp.where(occupied, edge_flat, 0).sum(axis=-1))
+        slot_valid.append(jnp.any(occupied, axis=-1))
+    edge_parameter = jnp.stack(slot_parameters, axis=-1)
+    edge_source_index = jnp.stack(slot_edges, axis=-1)
+    edge_crossing = jnp.stack(slot_valid, axis=-1)
+    crossing_count = jnp.sum(edge_count, axis=-1, dtype=jnp.int32)
+    crossing_overflow = crossing_count > 4
+
+    slot_edge = jnp.clip(edge_source_index, 0, 3)
+    slot_start = jnp.take_along_axis(edge_start, slot_edge[..., None], axis=-2)
+    slot_vector = jnp.take_along_axis(edge_vector, slot_edge[..., None], axis=-2)
+    edge_point = slot_start + edge_parameter[..., None] * slot_vector
     edge_evaluation = spline.evaluate(edge_point[..., 0], edge_point[..., 1])
     gradient_norm = jnp.hypot(
         edge_evaluation.radial_derivative,
@@ -1532,6 +1608,8 @@ def traced_spline_contour(
     )
     decision_tolerance = 128.0 * jnp.finfo(values.dtype).eps * field_scale
     decision_tie = jnp.abs(decision_delta) <= decision_tolerance
+    # The tie value is the orientation-only fallback: it is what remains when
+    # no axis is supplied to select the lobe sector from.
     same_side_as_first_corner = jnp.where(
         decision_tie,
         True,
@@ -1540,6 +1618,37 @@ def traced_spline_contour(
 
     packed = _ordered_crossing_indices(edge_crossing)
     edge_node = _structured_edge_nodes(radial.size, vertical.size)
+    # A ring slot is not an edge once an edge carries two crossings, so the
+    # node and the reported edge of each slot are gathered through the physical
+    # edge the slot's crossing lies on.  Sharing a node with the neighbouring
+    # cell requires that physical edge, not the slot ordinal.
+    slot_edge = jnp.clip(edge_source_index, 0, 3)
+    edge_node = jnp.take_along_axis(edge_node, slot_edge, axis=-1)
+    # An edge can carry two crossings, and they are distinct points that must
+    # stay distinct nodes.  Each slot therefore numbers itself among the
+    # crossings of its own edge in a direction-independent order -- ascending
+    # vertical for a radial edge, ascending radius for a vertical one -- so the
+    # two cells sharing the edge agree on the number and a crossing keeps one
+    # node identity across the cells it separates.
+    edge_spans_radius = (slot_edge % 2) == 0
+    crossing_key = jnp.where(
+        edge_spans_radius, edge_point[..., 1], edge_point[..., 0]
+    )
+    slot_ordinal = jnp.arange(4, dtype=jnp.int32)
+    same_edge = slot_edge[..., :, None] == slot_edge[..., None, :]
+    lower_key = crossing_key[..., :, None] < crossing_key[..., None, :]
+    tied_key = (crossing_key[..., :, None] == crossing_key[..., None, :]) & (
+        slot_ordinal[..., :, None] > slot_ordinal[..., None, :]
+    )
+    edge_rank = jnp.sum(
+        (
+            same_edge
+            & edge_crossing[..., None, :]
+            & (lower_key | tied_key)
+        ).astype(jnp.int32),
+        axis=-1,
+    )
+    slot_node = EDGE_CROSSING_CAPACITY * edge_node + edge_rank
     regular_pairs = jnp.stack(
         (
             jnp.stack((packed[..., 0], packed[..., 1]), axis=-1),
@@ -1555,6 +1664,84 @@ def traced_spline_contour(
         paired_around_first_and_third,
     )
     ambiguous = crossing_count == 4
+    # A tie is the level passing through the saddle, where the signed delta
+    # that decides every other diagonal cell carries no information.  The four
+    # crossings are then grouped by the sign of the quadratic form at the
+    # saddle, which is constant on each separatrix sector and opposite between
+    # opposite sectors.  The lobe sector holds the axis, so it is the sector
+    # whose sign agrees with the axis's, and pairing its two crossings closes
+    # the lobe instead of running it out along a leg.  Around the cell the sign
+    # runs in two blocks of two, so exactly one of the two pairings groups
+    # equal signs.
+    asymptote_pairing_applied = jnp.zeros_like(ambiguous)
+    if axis_rz is not None:
+        hessian_radial = saddle_evaluation.radial_second_derivative
+        hessian_vertical = saddle_evaluation.vertical_second_derivative
+        hessian_mixed = saddle_evaluation.mixed_derivative
+
+        def _quadratic_form(offset):
+            r = hessian_radial[..., None]
+            m = hessian_mixed[..., None]
+            z = hessian_vertical[..., None]
+            u = offset[..., 0]
+            v = offset[..., 1]
+            return r * u * u + 2.0 * m * u * v + z * v * v
+
+        axis = jnp.asarray(axis_rz, dtype=values.dtype)
+        crossing_lobe_side = _quadratic_form(edge_point - saddle_point[..., None, :])
+        axis_lobe_side = _quadratic_form(axis - saddle_point[..., None, :])
+        # A crossing lies on the level set, where the form's leading term
+        # cancels, so its magnitude carries no sector information and only its
+        # sign does.  Comparing the signs is what labels the sector each
+        # crossing lies in.
+        crossing_on_axis_side = (crossing_lobe_side >= 0.0) == (
+            axis_lobe_side >= 0.0
+        )
+        # The two crossings bounding the lobe sector are the pair that closes
+        # it, so they are joined to each other and the two leg-side crossings
+        # are left to join each other.  The pairs are read from the sector
+        # labels rather than chosen between two fixed ring arrangements, so a
+        # cell whose sector pair is not adjacent in slot order is grouped
+        # correctly as well.
+        axis_rank = (
+            jnp.cumsum(crossing_on_axis_side.astype(jnp.int32), axis=-1)
+            - crossing_on_axis_side.astype(jnp.int32)
+        )
+        leg_rank = (
+            jnp.cumsum((~crossing_on_axis_side).astype(jnp.int32), axis=-1)
+            - (~crossing_on_axis_side).astype(jnp.int32)
+        )
+        slot_index = jnp.arange(4, dtype=jnp.int32)
+
+        def _sector_partner(on_axis_side, rank):
+            """Return the slot of the numbered crossing on one side of the saddle."""
+            within_sector_rank = jnp.where(on_axis_side, axis_rank, leg_rank)
+            match = (crossing_on_axis_side == on_axis_side) & (
+                within_sector_rank == rank
+            )
+            return jnp.sum(jnp.where(match, slot_index, 0), axis=-1)
+
+        tie_pairs = jnp.stack(
+            (
+                jnp.stack(
+                    (_sector_partner(True, 0), _sector_partner(True, 1)), axis=-1
+                ),
+                jnp.stack(
+                    (_sector_partner(False, 0), _sector_partner(False, 1)), axis=-1
+                ),
+            ),
+            axis=-2,
+        )
+        # Only a cell whose four crossings split two and two across the saddle
+        # has two sectors to group; anything else is left to the corner-sign
+        # pairing rather than joined to a defaulted slot.
+        sector_split = jnp.sum(crossing_on_axis_side.astype(jnp.int32), axis=-1) == 2
+        asymptote_pairing_applied = (
+            ambiguous & decision_tie & saddle_stationary & sector_split
+        )
+        saddle_pairs = jnp.where(
+            asymptote_pairing_applied[..., None, None], tie_pairs, saddle_pairs
+        )
     pair_indices = jnp.where(ambiguous[..., None, None], saddle_pairs, regular_pairs)
     segment_valid = jnp.stack((crossing_count == 2, jnp.zeros_like(ambiguous)), axis=-1)
     segment_valid = jnp.where(
@@ -1562,7 +1749,10 @@ def traced_spline_contour(
     )
 
     segment_point = _paired_edge_values(edge_point, pair_indices)
-    segment_node = jnp.take_along_axis(edge_node[..., None, :], pair_indices, axis=-1)
+    segment_node = jnp.take_along_axis(slot_node[..., None, :], pair_indices, axis=-1)
+    segment_source = jnp.take_along_axis(
+        jnp.clip(edge_source_index, 0, 3)[..., None, :], pair_indices, axis=-1
+    )
     segment_tangent = _paired_edge_values(edge_tangent, pair_indices)
     chord = segment_point[..., 1, :] - segment_point[..., 0, :]
     reverse = (
@@ -1610,7 +1800,9 @@ def traced_spline_contour(
     canonical_edge_parameter = jnp.where(edge_crossing, edge_parameter, 0.0)
     canonical_edge_point = jnp.where(edge_crossing[..., None], edge_point, 0.0)
     canonical_edge_tangent = jnp.where(edge_crossing[..., None], edge_tangent, 0.0)
-    canonical_pair_indices = jnp.where(segment_valid[..., None], pair_indices, 0)
+    canonical_segment_source = jnp.where(
+        segment_valid[..., None], segment_source, 0
+    )
     canonical_segment_point = jnp.where(
         segment_valid[..., None, None], segment_point, 0.0
     )
@@ -1628,7 +1820,7 @@ def traced_spline_contour(
         "edge_crossing_rz": canonical_edge_point,
         "edge_tangent_rz": canonical_edge_tangent,
         "segment_valid": segment_valid,
-        "segment_edge_indices": canonical_pair_indices,
+        "segment_edge_indices": canonical_segment_source,
         "segment_endpoints_rz": canonical_segment_point,
         "segment_node_indices": canonical_segment_node,
         "segment_endpoint_tangents_rz": canonical_segment_tangent,
@@ -1637,6 +1829,7 @@ def traced_spline_contour(
         "ambiguous_saddle": ambiguous,
         "ambiguous_resolved": ambiguous & ~decision_tie,
         "ambiguous_tie_broken": ambiguous & decision_tie,
+        "asymptote_pairing_applied": asymptote_pairing_applied,
         "saddle_stationary": ambiguous & saddle_stationary,
         "saddle_rz": canonical_saddle_point,
         "saddle_value": canonical_saddle_value,
@@ -1650,10 +1843,16 @@ def traced_spline_contour(
         "segment_at_saddle": segment_valid
         & (ambiguous & decision_tie & saddle_stationary)[..., None],
         "edge_node_capacity": jnp.asarray(
-            vertical.size * (radial.size - 1) + (vertical.size - 1) * radial.size,
+            EDGE_CROSSING_CAPACITY
+            * (
+                vertical.size * (radial.size - 1)
+                + (vertical.size - 1) * radial.size
+            ),
             dtype=jnp.int32,
         ),
+        "crossing_overflow": crossing_overflow,
         "well_formed": jnp.all(
-            (crossing_count == 0) | (crossing_count == 2) | (crossing_count == 4)
+            ((crossing_count == 0) | (crossing_count == 2) | (crossing_count == 4))
+            & ~crossing_overflow
         ),
     }

@@ -15,10 +15,67 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 
-from nova.equilibrium.flux_surface_connectivity import traced_spline_contour
+from nova.equilibrium.flux_surface_connectivity import (
+    EDGE_CROSSING_CAPACITY,
+    traced_spline_contour,
+)
+from nova.linalg.tensor_spline import fit_tensor_spline
 
 
-__all__ = ["assemble_separatrix_branches"]
+__all__ = [
+    "assemble_separatrix_branches",
+    "boundary_flux_at_admitted_saddle",
+]
+
+
+def boundary_flux_at_admitted_saddle(
+    values: jnp.ndarray,
+    radial: jnp.ndarray,
+    vertical: jnp.ndarray,
+    axis_rz: jnp.ndarray,
+    xpoint_rz: jnp.ndarray,
+    *,
+    bisection_steps: int = 40,
+    saddle_steps: int = 8,
+) -> jnp.ndarray:
+    """Read the traced field's own boundary flux at its admitted saddle.
+
+    The boundary level of a solved field is its flux at the X-point, and the
+    level that pairs the crossings of a saddle's own cell is that cell's
+    stationary value.  A level read from another grid -- a refit, or the flux
+    at a coordinate carried over from a different lattice -- misses the cell's
+    stationary value by far more than the decision tolerance, so the
+    four-crossing cell falls back on the corner-sign pairing and runs the
+    axis-enclosing lobe out along a leg.  Reading the level from the same field
+    the crossings are traced on keeps the pairing decision and the saddle
+    inside one fit.
+
+    ``xpoint_rz`` only has to land in the saddle's cell: it selects which
+    stationary cell is meant, and the returned value is that cell's own
+    polished stationary value.  Where the field carries no stationary cell --
+    an undiverted state -- the flux at ``xpoint_rz`` is returned unchanged.
+    """
+    surface = fit_tensor_spline(radial, vertical, values)
+    locator = surface(xpoint_rz[0], xpoint_rz[1])
+    contour = traced_spline_contour(
+        values,
+        radial,
+        vertical,
+        locator,
+        bisection_steps,
+        saddle_steps,
+        surface=surface,
+        axis_rz=axis_rz,
+    )
+    stationary = contour["saddle_stationary"].reshape(-1)
+    saddle_value = contour["saddle_value"].reshape(-1)
+    saddle_rz = contour["saddle_rz"].reshape(-1, 2)
+    distance = jnp.linalg.norm(
+        saddle_rz - jnp.asarray(xpoint_rz, dtype=saddle_rz.dtype)[None, :], axis=-1
+    )
+    distance = jnp.where(stationary, distance, jnp.inf)
+    nearest = jnp.argmin(distance)
+    return jnp.where(jnp.isfinite(distance[nearest]), saddle_value[nearest], locator)
 
 
 def _split_cubic_at_saddle(controls, saddle):
@@ -229,7 +286,13 @@ def assemble_separatrix_branches(
     slot overflow invalidates the whole result and returns only zero geometry.
     """
     contour = traced_spline_contour(
-        values, radial, vertical, level, bisection_steps, saddle_steps
+        values,
+        radial,
+        vertical,
+        level,
+        bisection_steps,
+        saddle_steps,
+        axis_rz=axis_rz,
     )
     (
         controls,
@@ -240,12 +303,15 @@ def assemble_separatrix_branches(
         unique_floor,
     ) = _expanded_graph(contour)
     edge_count = controls.shape[0]
-    saddle_node_floor = (
+    saddle_node_floor = EDGE_CROSSING_CAPACITY * (
         vertical.shape[0] * (radial.shape[0] - 1)
         + (vertical.shape[0] - 1) * radial.shape[0]
     )
-    cell_count = edge_count // 4
-    node_capacity = saddle_node_floor + cell_count + edge_count
+    # The synthetic saddle nodes are numbered from the first id past the real
+    # crossings and grouped nodes, two per unsplit segment, so the node arrays
+    # must reach that far.  A capacity below it clamps every scatter past its
+    # end, and the degrees read back are then not the graph's degrees.
+    node_capacity = saddle_node_floor + edge_count // 4 + edge_count
     labels = _component_labels(nodes, valid, node_capacity)
     degree, _component_valid, _cycle, _encloses_axis = _component_properties(
         controls, nodes, valid, labels, axis_rz, node_capacity

@@ -21,6 +21,7 @@ from __future__ import annotations
 import importlib.util
 import inspect
 import math
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -34,6 +35,7 @@ with skip_import("jax"):
     import jax.numpy as jnp
 
     from nova.equilibrium import flux_surface_connectivity as fsc
+    from nova.equilibrium import separatrix_branches as branches
 
 
 def _f64(value):
@@ -824,6 +826,76 @@ def test_traced_contour_assigns_shared_edge_nodes_and_saddle_segments():
     np.testing.assert_array_equal(
         np.asarray(result["segment_saddle_rz"])[~saddle_segment], 0.0
     )
+
+
+PANEL_STATES = (
+    Path(__file__).resolve().parents[1]
+    / "docs"
+    / "figures"
+    / "forward-solve-api"
+    / "coil-edit-nonconvergence"
+    / "panel-states.npz"
+)
+
+# The persisted states carry the terms their own solved field produces, read at
+# that field's admitted saddle.  State 0 holds a saddle cell, so its lobe meets
+# two divertor legs; state 13 carries no saddle cell at all and its lobe is the
+# whole closed boundary.
+PERSISTED_STATE_TERMS = {
+    0: {"closed_segment_count": 67, "open_branch_count": 2},
+    13: {"closed_segment_count": 66, "open_branch_count": 0},
+}
+
+
+def _persisted_state(index):
+    """Load one coil-edit panel state: its raster field, axis and X-point."""
+    if not PANEL_STATES.exists():
+        pytest.skip("the coil-edit panel states are absent from this checkout")
+    with np.load(PANEL_STATES, allow_pickle=False) as data:
+        return (
+            _f64(np.asarray(data["psi_%d" % index])),
+            _f64(np.asarray(data["radius"])),
+            _f64(np.asarray(data["height"])),
+            _f64(np.asarray(data["axis_%d" % index])),
+            _f64(np.asarray(data["xpoints_%d" % index]).reshape(-1, 2)[0]),
+        )
+
+
+@pytest.mark.parametrize("index", sorted(PERSISTED_STATE_TERMS))
+def test_persisted_state_closes_the_axis_enclosing_lobe(index):
+    """A solved state's own X-point flux yields its closed boundary branch.
+
+    The level is read from the field's admitted saddle rather than reconstructed
+    by refitting the same field elsewhere, and the difference is the whole
+    result: the displaced-level control below assembles no cycle on either
+    state, while the saddle level gives exactly one axis-enclosing cycle.
+    """
+    psi, radial, vertical, axis, xpoint = _persisted_state(index)
+    level = branches.boundary_flux_at_admitted_saddle(
+        psi, radial, vertical, axis, xpoint
+    )
+    result = branches.assemble_separatrix_branches(psi, radial, vertical, level, axis)
+
+    assert bool(np.asarray(result["well_formed"]))
+    assert int(np.asarray(result["closed_candidate_count"])) == 1
+    assert int(np.asarray(result["cycle_component_count"])) == 1
+    assert int(np.asarray(result["axis_enclosing_component_count"])) == 1
+    assert not bool(np.asarray(result["overflow"]))
+    closed_valid = np.asarray(result["closed_valid"])
+    assert closed_valid.any()
+    assert np.count_nonzero(np.asarray(result["closed_controls_rz"])[closed_valid]) > 0
+    expected = PERSISTED_STATE_TERMS[index]
+    assert (
+        int(np.asarray(result["closed_segment_count"]))
+        == expected["closed_segment_count"]
+    )
+    assert int(np.asarray(result["open_branch_count"])) == expected["open_branch_count"]
+
+    displaced = branches.assemble_separatrix_branches(
+        psi, radial, vertical, level - _f64(1.0e-3), axis
+    )
+    assert int(np.asarray(displaced["closed_candidate_count"])) == 0
+    assert not bool(np.asarray(displaced["well_formed"]))
 
 
 if __name__ == "__main__":

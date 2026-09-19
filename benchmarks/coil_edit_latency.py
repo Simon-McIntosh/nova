@@ -45,6 +45,10 @@ from benchmarks import mast_response_carrier_warm as response_carrier
 from benchmarks.diiid_forward_gs_match import _margin_graded_newton_krylov
 from nova.equilibrium import reduced_newton
 from nova.equilibrium.fixed_point import FixedPointResult, FixedPointTerminationReason
+from nova.equilibrium.flux_surface_connectivity import (
+    fit_tensor_spline,
+    traced_spline_contour,
+)
 from nova.equilibrium.separatrix_branches import (
     assemble_separatrix_branches,
     boundary_flux_at_admitted_saddle,
@@ -957,6 +961,62 @@ def _persist_branches(
     payload[f"{prefix}overflow"] = np.asarray(branches["overflow"])
 
 
+SADDLE_FLUX_TOLERANCE = 1.0e-9
+
+
+def _field_admitted_saddle(
+    radius: Any,
+    height: Any,
+    psi: Any,
+    axis: Any,
+    xpoint_rz: Any,
+) -> tuple[np.ndarray, float, Any]:
+    """Read a persisted field's own admitted saddle coordinate and level.
+
+    A persisted field's X-point coordinate and its boundary flux have to be
+    read off the same field the panel contours, inside one tensor-spline fit.
+    A coordinate carried over from the solve lattice names a point in a
+    different field, and the flux read beside it -- or a level carried from the
+    lattice -- misses the raster's own stationary cell by far more than the
+    pairing tolerance, so the traced lobe leaves through a divertor leg instead
+    of closing on its separatrix.
+
+    ``xpoint_rz`` only has to land in the saddle's cell; the returned
+    coordinate and value are that cell's own polished stationary pair. Where
+    the field carries no stationary cell the locator and its flux are returned
+    unchanged.
+    """
+    surface = fit_tensor_spline(
+        jnp.asarray(radius), jnp.asarray(height), jnp.asarray(psi)
+    )
+    locator = surface(jnp.asarray(xpoint_rz[0]), jnp.asarray(xpoint_rz[1]))
+    contour = traced_spline_contour(
+        jnp.asarray(psi),
+        jnp.asarray(radius),
+        jnp.asarray(height),
+        locator,
+        40,
+        8,
+        surface=surface,
+        axis_rz=jnp.asarray(axis).reshape(2),
+    )
+    stationary = np.asarray(contour["saddle_stationary"]).reshape(-1)
+    saddle_value = np.asarray(contour["saddle_value"]).reshape(-1)
+    saddle_rz = np.asarray(contour["saddle_rz"]).reshape(-1, 2)
+    reference = np.asarray(xpoint_rz, dtype=float).reshape(2)
+    distance = np.where(
+        stationary, np.linalg.norm(saddle_rz - reference[None, :], axis=-1), np.inf
+    )
+    nearest = int(np.argmin(distance))
+    if not np.isfinite(distance[nearest]):
+        return reference, float(np.asarray(locator)), surface
+    return (
+        np.asarray(saddle_rz[nearest], dtype=float),
+        float(np.asarray(saddle_value[nearest])),
+        surface,
+    )
+
+
 def _write_panel_data(
     path: Path,
     *,
@@ -1016,23 +1076,59 @@ def _write_panel_data(
     payload["achieved_class"] = np.asarray(
         [state["class"] for state in panel_states], dtype=str
     )
+    wall = profile.operator.wall
+    inside = _wall_interior(payload["radius"], payload["height"], wall)
     for position, state in enumerate(panel_states):
         if state["psi"] is None:
             continue
-        payload[f"psi_{position}"] = _grid_field(state["psi"], state["shape"])
+        field = _grid_field(state["psi"], state["shape"])
+        payload[f"psi_{position}"] = field
         payload[f"separatrix_{position}"] = np.asarray(state["separatrix"], dtype=float)
-        payload[f"axis_{position}"] = np.asarray(state["nulls"]["axis"], dtype=float)
-        payload[f"xpoints_{position}"] = np.asarray(
-            state["nulls"]["x_points"], dtype=float
+        axis = np.asarray(state["nulls"]["axis"], dtype=float).reshape(2)
+        payload[f"axis_{position}"] = axis
+        x_points = np.asarray(state["nulls"]["x_points"], dtype=float).reshape(-1, 2)
+        saddle_index = int(np.asarray(state["nulls"]["saddle_index"]))
+        locator = (
+            x_points[saddle_index] if 0 <= saddle_index < x_points.shape[0] else axis
         )
-        _persist_branches(payload, f"branches_{position}_", state.get("branches"))
-        payload[f"xpoint_flux_{position}"] = np.asarray(
-            state["nulls"]["x_point_flux"], dtype=float
+        # Every persisted quantity of this edit is read off the field persisted
+        # for this edit, so the coordinate the panel marks and the level the
+        # census traces belong to one terminal state.
+        coordinate, level, surface = _field_admitted_saddle(
+            payload["radius"], payload["height"], field, axis, locator
         )
-        payload[f"saddle_index_{position}"] = np.asarray(
-            state["nulls"]["saddle_index"], dtype=int
+        residual = abs(float(np.asarray(surface(coordinate[0], coordinate[1]))) - level)
+        if residual > SADDLE_FLUX_TOLERANCE:
+            raise ValueError(
+                "panel state %d persists an xpoint_flux that is not its own "
+                "field at its own X-point coordinate: residual %.3e Wb exceeds "
+                "%.1e" % (position, residual, SADDLE_FLUX_TOLERANCE)
+            )
+        payload[f"saddle_flux_residual_{position}"] = np.asarray(residual, dtype=float)
+        flux = (
+            np.asarray(state["nulls"]["x_point_flux"], dtype=float).reshape(-1).copy()
         )
-    path.parent.mkdir(parents=True, exist_ok=True)
+        x_points = x_points.copy()
+        if 0 <= saddle_index < x_points.shape[0]:
+            x_points[saddle_index] = coordinate
+        if 0 <= saddle_index < flux.shape[0]:
+            flux[saddle_index] = level
+        payload[f"xpoints_{position}"] = x_points
+        payload[f"xpoint_flux_{position}"] = flux
+        payload[f"saddle_index_{position}"] = np.asarray(saddle_index, dtype=int)
+        _persist_branches(
+            payload,
+            f"branches_{position}_",
+            _assemble_raster_branches(
+                payload["radius"],
+                payload["height"],
+                field,
+                axis,
+                x_points,
+                saddle_index,
+                inside,
+            ),
+        )
     path.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(path, **payload)
 

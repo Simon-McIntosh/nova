@@ -30,7 +30,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="96">
+<meta name="plan-version" content="97">
 </head>
 <body>
 <main class="plan-doc">
@@ -458,6 +458,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260917T204844555429-msc-cache-prewarm-and-lane-guard" data-who="reckon-ship" data-when="2026-09-18T17:50:47.370Z">
     <div class="r-comment-body"><p>Pinned pre-warm cache and lane guard landed; warm arm 353 s against 877 s cold; review 94/100</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260918T175059555501-review-of-msc-cache-prewarm-and-lane-guard" data-who="reckon-ship" data-when="2026-09-18T20:36:15.789Z">
+    <div class="r-comment-body"><p>Review stored: 94/100, two plan-comment findings</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s19h-s3-certificate-prerequisite" data-who="reckon-ship s19-handoff" data-when="2026-09-15T10:15:00Z">
     <div class="r-comment-body">Section 3 prerequisite, held by the coordinator rather than by a plan-level wire: the certified millisecond measurement runs only once gs-absolute-accuracy-gates section 3 (the certificate artifact and its pin) is current on the exact cut-cell participation and the joint qualification, because it reports cost for certificate-passing solves. The stage-scoped dependency gs-absolute-accuracy-gates#s3 was authored and withdrawn the same hour: the roadmap's anchor resolver did not recognise that section (reported to reckon), and a plan-level dependency on the whole certificate plan would hold section 2, which never needed it. gs-absolute-accuracy-gates now informs this plan; no section 3 node is dispatched before the certificate lands.</div>

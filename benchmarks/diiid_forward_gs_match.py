@@ -1398,13 +1398,15 @@ def _grid_axis_rz(
 
     Flux is extremal at the magnetic axis and monotone toward the LCFS, so the
     sign of the boundary-minus-axis span selects which grid extremum is the
-    axis.  The branch assembler reads the axis coordinate only to choose the
-    lobe that encloses it, so a grid-index location is sufficient.
+    axis: a boundary above the axis value makes the axis the flux minimum, and
+    a boundary below it makes the axis the flux maximum.  The branch assembler
+    reads the axis coordinate only to choose the lobe that encloses it, so a
+    grid-index location is sufficient.
     """
 
-    normalised = (np.asarray(flux, dtype=float) - axis) / (boundary - axis)
-    flat = np.nanargmin(normalised) if boundary > axis else np.nanargmax(normalised)
-    radial_index, vertical_index = np.unravel_index(flat, normalised.shape)
+    field = np.asarray(flux, dtype=float)
+    flat = np.nanargmin(field) if boundary > axis else np.nanargmax(field)
+    radial_index, vertical_index = np.unravel_index(flat, field.shape)
     return np.asarray(
         [
             np.asarray(radius, dtype=float)[radial_index],

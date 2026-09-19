@@ -82,6 +82,11 @@ SWEEP_FRACTIONS = np.arange(-0.20, 0.201, 0.02, dtype=np.float64)
 EDIT_FRACTIONS = SWEEP_FRACTIONS[1:]
 EDIT_COUNT = len(EDIT_FRACTIONS)
 BOUNDARY_COIL_FAMILIES = frozenset({"p4_lower", "p4_upper", "p5_lower", "p5_upper"})
+# Set to the reason a run is not on the measurement host.  A CPU re-run
+# regenerates the persisted sweep states only; its per-edit walls are not the
+# interactive measurement, and the receipt echoes the marker so the lowered
+# provenance travels with the artefact.
+CPU_PROVENANCE_MARKER = "NOVA_COIL_EDIT_CPU_PROVENANCE"
 INTERACTIVE_LATENCY_TARGET_MILLISECONDS = 100.0
 # The compiled slice route's own production budgets (the kernel's declared
 # constants), not the parity-driver Newton budgets the endpoint prep uses.
@@ -158,7 +163,26 @@ def _read_scheduler() -> dict[str, Any]:
 
 
 def _require_measurement_host() -> None:
+    """Require the H200 measurement host, or an explicitly marked CPU re-run.
+
+    The persisted sweep states can be regenerated while the shared reservation
+    is held, so a run that names its own reason on a CPU platform is accepted;
+    the receipt records the host, the partition, the reservation and the JAX
+    platform of whatever ran, so the lowered provenance is read from the
+    artefact rather than inferred from a field the refusal removed.  An
+    unmarked run off the reservation is still refused.
+    """
+    if os.environ.get("TMPDIR") != "/tmp":
+        raise RuntimeError("TMPDIR=/tmp must be set in the job body")
     device = jax.devices()[0]
+    provenance = os.environ.get(CPU_PROVENANCE_MARKER, "").strip()
+    if provenance:
+        if device.platform != "cpu":
+            raise RuntimeError(
+                "the CPU provenance marker requires a CPU platform, got "
+                f"{device.platform} on {device.device_kind}"
+            )
+        return
     if device.platform != "gpu" or "H200" not in device.device_kind:
         raise RuntimeError(f"one H200 is required, got {device}")
     if os.environ.get("SLURM_JOB_PARTITION") != "betelgeuse":
@@ -172,8 +196,6 @@ def _require_measurement_host() -> None:
         raise RuntimeError("the measurement requires a 128 GiB memory allocation")
     if os.environ.get("JAX_PLATFORMS") != "cuda,cpu":
         raise RuntimeError("JAX_PLATFORMS=cuda,cpu must be set in the job body")
-    if os.environ.get("TMPDIR") != "/tmp":
-        raise RuntimeError("TMPDIR=/tmp must be set in the job body")
 
 
 def _heartbeat(stop: threading.Event, started: float) -> None:
@@ -1565,8 +1587,10 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
     )
     figure.suptitle(
         "terminal poloidal flux on shared levels between the axis and boundary "
-        "flux (%.4f to %.4f Wb)  |  reference is the unedited equilibrium "
-        "(blue, admitted saddle %s)  |  reference set blue: %s, admitted %s, "
+        "flux (%.4f to %.4f Wb)  |  reference is the unedited equilibrium, an "
+        "upper-null state whose admitted saddle sits above its axis, while every "
+        "solved state admits a lower null (blue, admitted saddle %s)  |  "
+        "reference set blue: %s, admitted %s, "
         "other qualified nulls hollow  |  solved set orange: %s, admitted %s, "
         "other hollow  |  wall drawn"
         % (
@@ -1738,6 +1762,7 @@ def _receipt_document(
             "platform": jax.devices()[0].platform,
             "jax_platforms": os.environ.get("JAX_PLATFORMS"),
             "tmpdir": os.environ.get("TMPDIR"),
+            "measurement_host_marker": os.environ.get(CPU_PROVENANCE_MARKER),
             "elapsed_seconds": elapsed_seconds,
             "exit_marker": marker,
         },

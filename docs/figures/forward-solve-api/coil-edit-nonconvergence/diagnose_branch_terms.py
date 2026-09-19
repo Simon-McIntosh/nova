@@ -2,8 +2,10 @@
 
 The panel states are the twenty terminal rasters of one coil-edit sweep.  For
 each edit, this driver assembles the separatrix branches at that state's own
-boundary level and reports the term counts, then decomposes the traced level
-set into connected components and states where an open arc ends.  A state
+boundary level -- the flux read at the state's own admitted saddle, which is
+the level that pairs that saddle cell's crossings -- and reports which term
+fires, then decomposes the traced level set into connected components and
+states where an open arc ends.  A state
 whose axis-enclosing component is not a cycle is reported with the coordinates
 of the two degree-one ends, which is what tells a box-boundary exit from a
 saddle join that merged the lobe into a leg.
@@ -19,15 +21,16 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.equilibrium.flux_surface_connectivity import (
-    fit_tensor_spline,
-    traced_spline_contour,
+from nova.equilibrium.flux_surface_connectivity import traced_spline_contour
+from nova.equilibrium.separatrix_branches import (
+    assemble_separatrix_branches,
+    boundary_flux_at_admitted_saddle,
 )
-from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 
 ROOT = Path(__file__).resolve().parents[4]
-STATES = ROOT / "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz"
-OUTPUT = ROOT / "docs/figures/forward-solve-api/coil-edit-nonconvergence/branch-terms.json"
+CASE = ROOT / "docs/figures/forward-solve-api/coil-edit-nonconvergence"
+STATES = CASE / "panel-states.npz"
+OUTPUT = CASE / "branch-terms.json"
 
 
 def components(contour):
@@ -75,6 +78,22 @@ def components(contour):
     return found
 
 
+def failing_terms(branches) -> list[str]:
+    """Return the names of the well-formedness terms a state fails."""
+    terms = []
+    if not bool(branches["contour_well_formed"]):
+        terms.append("contour")
+    if not bool(branches["graph_well_formed"]):
+        terms.append("graph_junction")
+    if int(branches["closed_candidate_count"]) != 1:
+        terms.append("closed_candidate_count!=1")
+    if bool(branches["branch_overflow"]):
+        terms.append("branch_overflow")
+    if bool(branches["open_slot_overflow"]):
+        terms.append("open_slot_overflow")
+    return terms
+
+
 def main() -> None:
     jax.config.update("jax_enable_x64", True)
     states = np.load(STATES, allow_pickle=False)
@@ -85,7 +104,7 @@ def main() -> None:
         psi = jnp.asarray(states[f"psi_{index}"])
         axis = jnp.asarray(states[f"axis_{index}"])
         xpoint = jnp.asarray(states[f"xpoints_{index}"]).reshape(-1, 2)
-        level = fit_tensor_spline(radius, height, psi)(xpoint[0, 0], xpoint[0, 1])
+        level = boundary_flux_at_admitted_saddle(psi, radius, height, axis, xpoint[0])
         branches = assemble_separatrix_branches(psi, radius, height, level, axis)
         parts = components(traced_spline_contour(psi, radius, height, level))
         rows.append(
@@ -102,11 +121,7 @@ def main() -> None:
                 "closed_segment_count": int(jnp.sum(branches["closed_valid"])),
                 "component_count": len(parts),
                 "components": parts,
-                "term_that_fires": (
-                    "none"
-                    if bool(branches["well_formed"])
-                    else "closed_candidate_count!=1"
-                ),
+                "terms_that_fire": failing_terms(branches),
             }
         )
     OUTPUT.write_text(json.dumps(rows, indent=2))
@@ -116,8 +131,12 @@ def main() -> None:
         ends = sum(len(part["ends"]) for part in row["components"])
         print(
             f"{row['edit_index']:2d} well={int(row['well_formed'])} "
-            f"cycle={row['cycle_component_count']} axis={row['axis_enclosing_component_count']} "
-            f"open={row['open_branch_count']} comps={row['component_count']} ends={ends}"
+            f"cycle={row['cycle_component_count']} "
+            f"axis={row['axis_enclosing_component_count']} "
+            f"open={row['open_branch_count']} closed={row['closed_segment_count']} "
+            f"comps={row['component_count']} ends={ends} "
+            f"terms={','.join(row['terms_that_fire']) or 'none'} "
+            f"level={row['level']:.9f}"
         )
 
 

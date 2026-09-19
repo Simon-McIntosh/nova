@@ -576,14 +576,22 @@
       </tbody>
     </table>
     <p><strong>Why the profile-implied column could not move.</strong> Every one of the six rows emits
-    <code>operator_use_linear_moments</code> &mdash; precisely <code>operator_use_linear_moments: false</code> &mdash; beside a
-    <code>profile_normalisation.path</code> that names the reason in the receipt itself: <em>&ldquo;unnormalised: the operator's moment path
-    resolves moments from the flux directly and ignores the requested current, so the profile column is the unnormalised observation&rdquo;</em>.
-    On this operator the moment path reads the flux and never consults the requested current, so the slot the argument order exchanged is a
-    slot this column does not read. The reviewed defect is real in the code — it was worth fixing, since the same field reaches other
-    quantities — and it has a <strong>nil</strong> effect on the number it had been assumed to contaminate. The two columns the receipt
-    carries for the comparison differ by 1.1&times;10<sup>&minus;4</sup> to 3.5&times;10<sup>&minus;2</sup> (the
-    <code>combination_shift</code> field), and the committed column is the one the moment path actually used.</p>
+    <code>operator_use_linear_moments: false</code> beside a <code>profile_normalisation.path</code> that names the mechanism in the receipt
+    itself: <em>&ldquo;normalised: the operator's moment path rescales the current moments and the support integrals by
+    <code>current_normalisation_amplitude</code> on the requested current, so the profile column is the current-normalised
+    observation&rdquo;</em>. That column is built by <code>profile.integral_observation(state, target_current)</code> from the driver's own
+    keyword argument, and the point-current path takes a normalising branch as soon as a current is supplied: the guarded amplitude
+    <code>target_current / sum(cell_current)</code> scales every integrated current moment <em>and</em> the support integrals
+    (<code>ClippedIntegralMeasure.with_current_amplitude</code>) before the moments are read. What reaches this column is a flux and a
+    current, never a <code>ConstraintContext</code>: the exchanged slots are read by the constraint row kernel alone, which <em>is</em> the
+    column that moved. So the reviewed defect is real in the code — it was worth fixing, since the same field reaches other quantities — and it
+    has a <strong>nil</strong> effect on the number it had been assumed to contaminate.</p>
+    <p>The receipt states the two columns separately, and its own numbers say the reported one is the normalised reading: on every row
+    <code>profile_implied_combination</code> equals <code>profile_normalisation.normalised_combination</code> bit for bit and differs from
+    <code>profile_implied_combination_unnormalised</code>, which equals that block's <code>unnormalised_combination</code> just as exactly.
+    The gap between the two columns is the <code>combination_shift</code> field, 1.1&times;10<sup>&minus;4</sup> to
+    3.5&times;10<sup>&minus;2</sup> across the rows — nonzero on all six, which is what a reader can check without re-running anything, and
+    which the emission's own text had denied.</p>
     <p><strong>The extraction-floor headline survives.</strong> The profiles still sit below the reconstruction's own combination on every
     row, by 0.16 to 0.29:</p>
     <table>
@@ -636,23 +644,36 @@
             <th>implied / minor</th><th>implied / major</th><th>major / minor</th><th>l<sub>i</sub> vs &beta;<sub>p</sub></th></tr>
       </thead>
       <tbody>
-        <tr><td>21978/35</td><td>0.5823</td><td>0.5802</td><td>0.9960</td><td>0.7562</td><td>1.3170</td><td>0.36%</td></tr>
-        <tr><td>21983/35</td><td>0.5601</td><td>0.5681</td><td>0.9439</td><td>0.7316</td><td>1.2903</td><td>1.42%</td></tr>
-        <tr><td>21985/51</td><td>0.5810</td><td>0.5523</td><td>1.0081</td><td>0.7325</td><td>1.3763</td><td>4.94%</td></tr>
-        <tr><td>21986/46</td><td>0.6635</td><td>0.6464</td><td>1.1833</td><td>0.8299</td><td>1.4258</td><td>2.59%</td></tr>
-        <tr><td>21989/55</td><td>0.6117</td><td>0.5960</td><td>1.0667</td><td>0.7551</td><td>1.4126</td><td>2.57%</td></tr>
-        <tr><td>22086/43</td><td>0.5783</td><td>0.5803</td><td>1.0016</td><td>0.7517</td><td>1.3323</td><td>0.33%</td></tr>
+        <tr><td>21978/35</td><td>0.5823</td><td>0.5802</td><td>0.9960</td><td>0.6714</td><td>1.4835</td><td>0.36%</td></tr>
+        <tr><td>21983/35</td><td>0.5601</td><td>0.5681</td><td>0.9439</td><td>0.6609</td><td>1.4283</td><td>1.42%</td></tr>
+        <tr><td>21985/51</td><td>0.5810</td><td>0.5523</td><td>1.0081</td><td>0.6919</td><td>1.4571</td><td>4.94%</td></tr>
+        <tr><td>21986/46</td><td>0.6635</td><td>0.6464</td><td>1.1833</td><td>0.7479</td><td>1.5821</td><td>2.59%</td></tr>
+        <tr><td>21989/55</td><td>0.6117</td><td>0.5960</td><td>1.0667</td><td>0.7023</td><td>1.5190</td><td>2.57%</td></tr>
+        <tr><td>22086/43</td><td>0.5783</td><td>0.5803</td><td>1.0016</td><td>0.6828</td><td>1.4668</td><td>0.33%</td></tr>
       </tbody>
     </table>
     <p><strong>Reading the table.</strong> The two stored scalars imply the <em>same</em> radius to within 0.33% to 4.94% on every row, so one
-    convention difference accounts for both moments rather than two. That shared radius sits near the boundary's minor radius — 0.4% to 18.3%
-    away from the minor radius against 17% to 27% away from nova's volume-weighted major radius — and the two comparisons differ by exactly the
-    aspect ratio, so the statement is a factor rather than a fitted residual. On five of six rows the implied radius is much nearer the minor
-    row. <strong>One caveat: on 21986/46 the two distances are nearly equal</strong> (18.3% from the minor radius, 17.0% from the major), so
-    that row alone does not discriminate between the two conventions; it is named here rather than smoothed into a mean. The practical
-    consequence for the gap is immediate: rescaled onto nova's own radius, the reconstruction's own combination is 0.5206, 0.5533, 0.6584,
-    0.5010, 0.6806 and 0.5411, against the profiles' 0.4613, 0.5035, 0.6061, 0.4437, 0.6251 and 0.4924 — so the stored-moment convention
-    accounts for part of the extraction floor and does not close it: a gap of 0.0487 to 0.0593 remains on every row after the rescale.</p>
+    convention difference accounts for both moments rather than two. That shared radius sits near the boundary's minor radius — 0.2% to 18.3%
+    away from the minor radius against 25.2% to 33.9% away from nova's volume-weighted major radius — and the two comparisons differ by
+    the aspect ratio the table's own column carries, 1.43 to 1.58 on these rows, so the statement is a factor rather than a fitted residual.
+    On all six rows the implied radius is nearer the minor radius than the volume-weighted major radius: most sharply on 22086/43 (0.2% from
+    the minor radius, 31.7% from the major) and least on 21986/46 (18.3% from the minor radius, 25.2% from the major), which is the closest
+    of the six and still separates cleanly. The practical consequence for the gap is immediate: rescaled onto nova's own radius by the ratio
+    the store's own moments imply, the reconstruction's own combination is 0.4622, 0.4998, 0.6219, 0.4515, 0.6329 and 0.4915, against the
+    profiles' 0.4613, 0.5035, 0.6061, 0.4437, 0.6251 and 0.4924 — a residual of &minus;0.0037 to +0.0158 against an extraction floor of
+    0.1600 to 0.2928, so the stored-moment convention accounts for the bulk of that floor on every row rather than only part of it.</p>
+    <p><strong>Which numbers moved when the commensurability baseline was corrected.</strong> The driver had been handing
+    <code>commensurability</code> the solved state's current centroid (the row's own <code>major_radius_m</code>) while the
+    <code>nova_radius_convention</code> string it evaluates against names the volume-weighted major radius. On every row the two differ by
+    10.1% to 12.6% (0.7700 against 0.8673 on 21978/35; 0.7693 against 0.8470 on 22086/43), so the correction moves: each row's
+    <code>commensurability.nova_major_radius_m</code>; <code>major_over_minor</code>, 1.29&ndash;1.43 to 1.43&ndash;1.58;
+    both <code>implied_over_major_*</code> ratios, 0.73&ndash;0.83 to 0.66&ndash;0.75; <code>rescaled_efit_combination</code>, 0.5010&ndash;0.6806
+    to 0.4515&ndash;0.6329; every row's <code>convention_sentence</code>; and the top-level <code>commensurability</code> block's
+    <code>implied_over_major_from_betap</code>, <code>major_over_minor</code>, <code>rescaled_efit_combination</code> and <code>readings</code>.
+    The implied radii themselves, the minor-radius comparisons and the two stored scalars are unmoved — they are computed from the stored
+    scalars and nova's own volume integrals, which the baseline never entered. The profile column's label moved with a different repair, and
+    the <code>reference_combination_gap</code> of the imposed receipt is not the <code>projection_move_of_target</code> of the projection
+    receipt: the two modes now carry distinct names for the row's own gap and for the projection-only move of the target.</p>
     <figure>
       <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.png"
            alt="One strip per bank row: EFIT's own combination, the extracted profiles, and the magnetics read three ways, as markers with the profile and EFIT values drawn as vertical rules.">
@@ -688,8 +709,9 @@
     <figure>
       <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21986-46-state.png"
            alt="MAST 21986/46 banked terminal state as line contours on shared levels, with its magnetic axis, admitted X-point and the wall">
-      <figcaption>21986/46: 0.4437 profiles, 0.6037 EFIT's own, 0.1600 floor. This is also the row whose implied radius does not separate the
-      two conventions.</figcaption>
+      <figcaption>21986/46: 0.4437 profiles, 0.6037 EFIT's own, 0.1600 floor. This row's implied radius is the least sharply separated of the
+      six — 18.3% from the boundary's minor radius against 25.2% from nova's volume-weighted major radius — and it still falls nearer the
+      minor radius, so it separates the two conventions as the other five do.</figcaption>
     </figure>
     <figure>
       <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21989-55-state.png"
@@ -710,9 +732,10 @@
     <p><strong>What this node leaves behind, and what it does not settle.</strong> The corrections are stated as the receipt carries them,
     recomputed from the banked states with no new solve: the profile-implied column is unmoved, the extraction-floor headline survives at 0.16
     to 0.29, the production row kernel now agrees bit-for-bit with the analytic identity it inverts, and the reconstruction's stored moments
-    are shown to normalise on a radius near the boundary's minor radius rather than nova's volume-weighted major radius, with one row
-    (21986/46) that rescaled onto nova's own radius leaves a residual gap of 0.0487 to 0.0593 unexplained by convention alone. A
-    formula-free reading — the contour integral of the poloidal field over a contour enclosing the plasma — is named in the receipt as not
+    are shown to normalise on a radius near the boundary's minor radius rather than nova's volume-weighted major radius — the commensurability
+    comparison now runs against that volume-weighted radius, which is the one the row's own <code>nova_radius_convention</code> string names,
+    so rescaling the reconstruction's own combination by the ratio its stored moments imply leaves a residual of at most 0.0158 against an
+    extraction floor of 0.1600 to 0.2928. A formula-free reading — the contour integral of the poloidal field over a contour enclosing the plasma — is named in the receipt as not
     computed by this driver; it is the reading that would separate a genuine external-field mismatch from a profile-extraction one, and it
     belongs to the integral node's register rather than to this measurement.</p>
     <p><strong>Evidence inputs.</strong> One <code>all_debug</code> CPU job (<code>JAX_PLATFORMS=cpu</code>, the root virtual environment's
@@ -722,6 +745,18 @@
     inversion ran in one fresh <code>all_debug</code> process: <strong>15 passed</strong>. The six bank rows, the receipt, the six state
     panels as PNG and SVG and this section's strip were committed as four revisions, the last of which re-rendered the strip's vector sibling
     from the committed receipt with no new job.</p>
+    <p><strong>Repair evidence.</strong> The corrected baseline, the corrected profile-column label and the two pair-receipt field names were
+    regenerated from the banked states in one <code>all_debug</code> CPU job (<strong>exit 0:0 in 5 m 46 s</strong>, 8 CPUs, 64G): the
+    discriminator receipt, its six row documents, the six state panels and the strip; the imposed pair-receipt replayed from its banked lane
+    log (<strong>byte-identical to the committed receipt</strong>, so the rename touched the projection mode only); the projection receipt
+    replayed and its vector companion re-rendered on the renamed field. The gate module then ran in the same allocation:
+    <strong>16 passed</strong>, against <strong>15 passed and 1 failed</strong> before the regeneration — the failing test was the added one
+    reading the committed receipt, and it failed on <code>normalisation["path"].startswith("normalised")</code> and on the centroid baseline,
+    which is the positive control for both repairs. The marked test's collection behaviour was measured three ways: the named file under the
+    default lane's own marker expression collects 4 of 5 with the marked test deselected, its explicit node id collects alone, and the
+    path-free default lane collects none of the keyword-matched set. The state panels and the strip raster came back byte-identical to their
+    committed copies, so nothing in the plotted geometry moved; the SVG siblings differ only in the renderer's per-run element-id hashes and
+    RDF timestamp, except the projection companion, whose caption carries the renamed field.</p>
   </section>
   <section id="flux-function-fit">
     <h2>Projecting the extracted flux functions, and whether a uniform scale closes the gap</h2>

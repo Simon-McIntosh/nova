@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T14:34:15",
+  "updated": "2026-09-19T14:51:29",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -204654,6 +204654,247 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T112104763452-fsa-coil-edit-records",
+        "plan": "forward-solve-api",
+        "section": "\u00a75",
+        "node": "fsa-coil-edit-records",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1470,
+                "cached_input_tokens": 806832,
+                "input_tokens": 808334,
+                "output_tokens": 8566,
+                "reasoning_output_tokens": 2326,
+                "total_tokens": 816900,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "followup f-fsa-coil-edit-records-and-reference on the plan: (1) regenerate docs/figures/forward-solve-api/coil-edit-nonconvergence/branch-terms.json from the merged tracer so it no longer records closed_candidate_count 0 at states 9 to 12 beside a record that says 0 of 20 fail; (2) state the upper-null reference equilibrium in the panel title as well as the caption, or select a same-orientation reference if one is persisted; (3) benchmarks/diiid_poloidal_figures.py draws its boundary level set from the same tracer and inherits the fix: regenerate its figures under docs/figures/forward-solve-api/diiid-poloidal (or the directory it writes today, name it in the manifest) as PNG and SVG and record the delta against the committed ones; (4) relax _require_measurement_host in benchmarks/coil_edit_latency.py to accept a provenance-marked CPU re-run whose receipt names host, partition and platform, and regenerate panel-states.npz with xpoint_flux on all_debug so the persisted fixture is no longer stale against the driver; the gate is tests/test_flux_surface_connectivity.py and tests/test_separatrix_branches.py plus the twenty-state census at 0 of 20, one all_debug job; a text-only lane, never Read a PNG, verify figures through their SVG; call configure_dtypes before building any array; every uv command carries --no-sync and nothing runs uv sync; heavy work runs in one all_debug job with JAX_PLATFORMS=cpu through the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python directly (never uv on a compute node), TMPDIR=/tmp in the submit environment and the payload, scripts inside the worktree; nothing goes to betelgeuse; py_compile with the project interpreter before each commit; manifest at the first commit; a wait, if declared, carries wait_condition, wait_probe as a JSON list command, wait_terminal and a filled resume_brief; status words complete, waiting or blocked only; figures follow the plotting rules (line contours on shared levels, both null sets, the wall, no axes) as PNG and SVG; the plan landing comment and the evidence anchor are yours to write",
+          "estimated_hours": null,
+          "goal": "regenerate the coil-edit records from the merged tracer, name the reference orientation, propagate the tracer fix to the DIII-D figures, and let the sweep re-run on CPU",
+          "id": "fsa-coil-edit-records",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-19T11:21:05Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T112104763452-fsa-coil-edit-records/manifest.md",
+          "plan": "forward-solve-api",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/coil_edit_latency.py",
+            "benchmarks/diiid_poloidal_figures.py",
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence",
+            "docs/figures/forward-solve-api/coil-edit-latency",
+            "docs/figures/forward-solve-api/diiid-poloidal",
+            "docs/plans/forward-solve-api.html",
+            "docs/evidence/archive/forward-solve-api-landed.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/fsa-coil-edit-records"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-fsa-records-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-19T11:21:15Z",
+        "completed_at": "2026-09-19T12:25:51.335Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3868,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3876,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "902f22dbc713202fa3ef37fcaabf20ffeb86aef6",
+        "commits": [
+          "df4791d1db860768eb1bafaef7e4e4ced6ac3ff7",
+          "5738d3f7caa62c8ce8018d0757974609de4065ef",
+          "298bef8b7a354b5266617ff38c973309d6efe9ed",
+          "a0149cc817d125cddfa5c3557841457c3499850b",
+          "960c4864fd0c7bac17c3a3c0b8f1bb437cb9e721"
+        ],
+        "changed_lines": {
+          "added": 115,
+          "removed": 41,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "all_debug job 1273958: tests/test_flux_surface_connectivity.py tests/test_separatrix_branches.py (34 passed) and the twenty-state census (0 of 20)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T112104763452-fsa-coil-edit-records/logs/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "Coil-edit records regenerated from the merged tracer; the regenerated fixture is retained as evidence, its eight open lobes traced by review to a sweep persistence defect; review 83/100",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T112104763452-fsa-coil-edit-records/manifest.md",
+        "scope_changed": false,
+        "session_id": "c4706a5a-be4c-41f9-9fa8-ac485d12a923",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 1382182,
+            "input_tokens_cumulative": 1382182,
+            "output_tokens": 8969,
+            "output_tokens_cumulative": 8969,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-19T12:25:51.335Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 18,
+            "evidence": 16,
+            "fit": 15,
+            "goal_fidelity": 15,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 83
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 11838456,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 116.39,
+          "generated_tokens": 82527,
+          "generation_seconds": 112.885,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 30.2,
+          "machine_seconds": 3.505,
+          "peak_input_tokens": 144999,
+          "tokens_per_second": 731.07,
+          "wall_tokens_per_second": 709.06
+        },
+        "follow_on_paths": [
+          "1.238749",
+          "1.236945",
+          "0.103",
+          "0.024",
+          "benchmarks/diiid_poloidal_figures.py",
+          "nova.media.ink",
+          "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+          "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train",
+          "coil-edit-latency/terminal-raster-flux.png"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-coil-edit-records",
+          "session_id": "c4706a5a-be4c-41f9-9fa8-ac485d12a923",
+          "session_source": "stream",
+          "retained_at": "2026-09-19T12:25:51.335Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.88,
+        "impl_move": {
+          "plan": "forward-solve-api",
+          "at_dispatch": 0.88,
+          "at_complete": 0.9,
+          "verdict": "moved"
+        },
+        "tool_steps": 59.0,
+        "orientation_input_tokens": 1854958.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -205034,8 +205275,64 @@
         "reason": "utilisation 95% with burn multiple 1.3x and projected exhaustion 2026-09-20T18:49:39Z is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve); the account surface was read at 2026-09-19T07:24:05Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260919124817",
+        "backend": "codex",
+        "purpose": "dispatch",
+        "opened_at": "2026-09-19T12:48:17Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 98.0,
+        "resets_at": "2026-09-21T05:57:31Z",
+        "effective_ceiling_pct": 92.0,
+        "reason": "utilisation 98% with burn multiple 1.3x and projected exhaustion 2026-09-20T20:30:39Z is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve); the account surface was read at 2026-09-19T12:48:13Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
+        "closed_by_purpose": null,
+        "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-luna-20260919124817",
+        "backend": "codex-luna",
+        "purpose": "dispatch",
+        "opened_at": "2026-09-19T12:48:17Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 98.0,
+        "resets_at": "2026-09-21T05:57:31Z",
+        "effective_ceiling_pct": 92.0,
+        "reason": "utilisation 98% with burn multiple 1.3x and projected exhaustion 2026-09-20T20:30:39Z is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve); the account surface was read at 2026-09-19T12:48:13Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
+        "closed_by_purpose": null,
+        "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-spark-20260919124817",
+        "backend": "codex-spark",
+        "purpose": "dispatch",
+        "opened_at": "2026-09-19T12:48:17Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 98.0,
+        "resets_at": "2026-09-21T05:57:31Z",
+        "effective_ceiling_pct": 92.0,
+        "reason": "utilisation 98% with burn multiple 1.3x and projected exhaustion 2026-09-20T20:30:39Z is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve); the account surface was read at 2026-09-19T12:48:13Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
+        "closed_by_purpose": null,
+        "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-terra-20260919124817",
+        "backend": "codex-terra",
+        "purpose": "dispatch",
+        "opened_at": "2026-09-19T12:48:17Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 98.0,
+        "resets_at": "2026-09-21T05:57:31Z",
+        "effective_ceiling_pct": 92.0,
+        "reason": "utilisation 98% with burn multiple 1.3x and projected exhaustion 2026-09-20T20:30:39Z is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve); the account surface was read at 2026-09-19T12:48:13Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
+        "closed_by_purpose": null,
+        "resumption_fired": false
       }
     ],
-    "_version": 2884
+    "_version": 2886
   }
 }

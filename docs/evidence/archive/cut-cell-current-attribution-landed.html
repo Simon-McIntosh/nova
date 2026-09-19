@@ -1426,6 +1426,62 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   terminal moment.</p>
 </section>
 </section>
+<section id="xpoint-cell-spline-treatment">
+  <h2 id="xpoint-cell-spline-treatment-h">Spline-chain X-point cell: branch-paired fixed-capacity wedges</h2>
+
+  <p><strong>Landed 2026-09-19 in commits <code>0e18d6df</code>,
+  <code>6ef26316</code>, <code>1f21b58c</code> and <code>aca7dda6</code>.</strong>
+  The pre-repair refusal was reproduced directly: with a supplied saddle and an explicit
+  spline tracer, <code>test_spline_chain_admits_the_supplied_saddle_vertex</code> failed at
+  <code>assert bool(support.saddle[0])</code> because the value was <code>False</code>. The
+  repaired carrier admits a saddle only from the supplied authority, samples and polishes up
+  to two ordered roots on each cell edge, splits the four roots by branch before expanding the
+  spline chains, and keeps every wedge inside the existing 136-vertex capacity. The core,
+  private-flux and two common scrape-off-layer polygons all begin at the supplied saddle and
+  every unused coordinate remains exactly zero.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Requested / realised cells</th>
+        <th>X-point cell</th>
+        <th>Wedge vertex counts</th>
+        <th>Core current relative error</th>
+        <th>Private / common-SOL current (A)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>110 / 132</td><td>9</td><td>130, 130, 132, 130</td><td>1.0592653460397069e-13</td><td>0.0 / [0.0, 0.0]</td></tr>
+      <tr><td>300 / 340</td><td>5</td><td>130, 131, 129, 132</td><td>3.9298727478012714e-13</td><td>0.0 / [0.0, 0.0]</td></tr>
+      <tr><td>500 / 550</td><td>8</td><td>131, 129, 131, 131</td><td>7.582948143696231e-14</td><td>0.0 / [0.0, 0.0]</td></tr>
+    </tbody>
+  </table>
+
+  <p>One <code>all_debug</code> CPU allocation, job 1273843, selected
+  <code>JAX_PLATFORMS=cpu</code>, used the shared project interpreter directly, and passed all
+  13 focused tests in 52.07 s. The gate covered the spline-chain refusal and admission, the
+  same-sign edge whose two roots would be invisible to endpoint signs, static non-saddle
+  shapes, exact-zero padding, per-wedge profile isolation, and the three analytic current
+  rows above. The largest core-current relative error was
+  <strong>3.9298727478012714e-13</strong>, against the <code>1e-6</code> limit. The complete log
+  is <code>~/.config/reckon/crew/reports/nova/s19-codex/xpoint-cell/oracle-gate.log</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-300.png" alt="Single-null 300-cell line-contour panel with the X-point cell partitioned into four spline wedges">
+    <figcaption>Requested 300 / realised 340 cells. Analytic flux is drawn as unfilled shared
+    line contours; the wall, analytic and production null reads, the X-point cell outline and
+    all four spline-expanded wedges are shown. The SVG source is
+    <a href="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-300.svg">served beside the PNG</a>.</figcaption>
+  </figure>
+
+  <p><strong>Remaining scope.</strong> This landing supplies the spline wedge carrier and the
+  CPU oracle half only. The companion call from <code>forward_operator.py</code> must pass the
+  typed census saddle into the carrier and consume the four per-region moment profiles after
+  the concurrent owner of that file lands. The four diverted and four limited certificate
+  rows remain the H200 acceptance half; they were not started because the reservation cannot
+  admit Nova jobs. The limited rows therefore have no bit-identity receipt here, and this
+  record does not resolve the driving followup or close the plan section.</p>
+</section>
 <section id="s-recovered-figures-cut-cell-current-attribution">
   <h2 id="s-recovered-figures-cut-cell-current-attribution-h">Figures recovered from stranded worker worktrees, captions unattributed where no receipt-derived source exists</h2>
   <p>These panels were produced by worker nodes whose commits never merged; each is

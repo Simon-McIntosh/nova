@@ -538,7 +538,27 @@ in words. Commit <code>df4791d1</code>.</p>
 <code>benchmarks/coil_edit_latency.py</code> accepts an explicitly marked CPU platform in place of the
 H200 reservation, and the receipt echoes the marker beside the host, partition, reservation and platform
 it already records, so a regenerated sweep is provenance-marked rather than unmarked. An unmarked run off
-the reservation is still refused.</p>
+the reservation is still refused. Exercised end to end as job 1273959 on <code>all_debug</code>: the
+receipt it wrote names host <code>98dci4-clu-3142.iter.org</code>, partition <code>all_debug</code>,
+platform <code>cpu</code> and the marker's own reason.</p>
+<p><strong>The refreshed fixture is not committed, because it falsifies the 0 of 20 above.</strong> The
+CPU sweep re-run did refresh <code>panel-states.npz</code> from the current code, and the twenty-state
+census over that refreshed fixture reads <strong>8 of 20 failing</strong> — states 0 to 6 and 13 — where
+the persisted fixture reads 0 of 20.
+<code>test_persisted_state_closes_the_axis_enclosing_lobe</code> fails at states 0 and 13 on the refreshed
+fixture and passes at both on the persisted one. The mechanism is that the persisted fixture predates the
+equilibrium changes merged after <code>0797f64f</code>: the unedited reference it carries is no longer the
+one this code builds — reference <code>max|psi|</code> 1.238749 against 1.236945, its admitted-saddle level
+-0.122930 against -0.123763, with the axis and X-point positions identical to 1e-14 — so the twenty states
+differ by up to 0.103 Wb in flux and the early indices carry levels 0.024 Wb higher. Neither JAX backend nor
+the marker produced that difference; the reference field itself moved. The 0 of 20 is therefore a true and
+reproducible statement about the persisted fixture and not about the current equilibrium path, and the open
+lobe terms the edge-root bracket closed for states 9 to 12 reappear at states 0 to 6 and 13 on the refreshed
+states. The refreshed fixture, its census (8 of 20), the redrawn panel and both CPU receipts are kept as
+evidence under the run directory
+<code>~/.config/reckon/crew/runs/r-20260919T112104763452-fsa-coil-edit-records/regenerated-fixture-evidence/</code>
+and are deliberately not committed; committing them would leave the persisted-state test red and the census
+record at odds with itself.</p>
 <p><strong>Not propagated.</strong> <code>benchmarks/diiid_poloidal_figures.py</code> imports no tracer and
 draws its boundary from the EFIT LCFS columns, so it does not inherit the tracer defect the followup
 assumed.</p>

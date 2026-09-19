@@ -50,7 +50,7 @@ from nova.equilibrium import (
 )
 from nova.equilibrium.forward import RasterFluxReceiptStatus
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
-from nova.equilibrium import observation, separatrix_clip
+from nova.equilibrium import clip_quadrature, separatrix_clip
 from nova.equilibrium.analytic_single_null import (
     CerfonFreidbergSingleNull,
     cerfon_freidberg_single_null,
@@ -3650,7 +3650,7 @@ def _certificate_compile_problem(
     atomic_mesh = operator.moment_geometry.atomic_mesh
     chord_capacity = int(atomic_mesh.support_capacity)
     chain_samples = int(separatrix_clip._SPLINE_BOUNDARY_SEGMENTS)
-    quadrature_axis_nodes = len(observation._UNIT_NODE)
+    quadrature_axis_nodes = len(clip_quadrature._UNIT_NODE)
     exact_capacity = separatrix_clip.traced_polygon_vertex_capacity(chord_capacity)
     return (
         profile,

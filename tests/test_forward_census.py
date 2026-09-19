@@ -425,6 +425,99 @@ def test_forward_census_exact_diverted_oracle():
     assert not np.any(np.asarray(fine_census["overflow"]))
 
 
+@pytest.mark.parametrize("requested_cells", (110, 300, 500))
+def test_forward_census_spline_wedge_current_oracle(requested_cells):
+    """The production spline carrier preserves the analytic saddle-cell current."""
+    from benchmarks import topology_read_resolution_ladder as topology_ladder
+    from benchmarks import xpoint_cell_wedge_oracle as wedge_oracle
+    from nova.equilibrium.separatrix_clip import AtomicCellMesh
+
+    machine, _operator, _analytic = topology_ladder._machine_and_field(requested_cells)
+    exact = topology_ladder.ANALYTIC
+    x_point = np.asarray(exact.x_point, dtype=np.float64)
+    magnetic_axis = np.asarray(exact.magnetic_axis, dtype=np.float64)
+    boundary_flux = float(exact.flux(x_point[None, :])[0])
+    axis_flux = float(exact.flux(magnetic_axis[None, :])[0])
+    polarity = np.copysign(1.0, axis_flux - boundary_flux)
+    cell, _candidates = wedge_oracle._xpoint_cell(machine, x_point)
+    polygon = np.asarray(machine.cell_polygons[cell], dtype=np.float64)
+    centre = np.asarray(machine.node[cell], dtype=np.float64)
+    mesh = AtomicCellMesh.from_cells([polygon], centroids=centre[None, :])
+
+    def analytic_level(points):
+        shape = jax.ShapeDtypeStruct(points.shape[:-1], points.dtype)
+        return jax.pure_callback(
+            lambda value: np.asarray(
+                polarity * (exact.flux(value) - boundary_flux),
+                dtype=np.asarray(value).dtype,
+            ),
+            shape,
+            points,
+        )
+
+    signed_flux = jnp.asarray(
+        polarity * (exact.flux(mesh.node_coordinates) - boundary_flux)
+    )
+    wedges = mesh.traced_saddle_wedges(
+        signed_flux,
+        saddle_vertex=jnp.asarray(x_point),
+        core_reference=jnp.asarray(magnetic_axis),
+        curve_evaluator=analytic_level,
+    )
+    profile = wedge_oracle._AnalyticCurrentProfile(
+        source_parameter=float(exact.source_parameter),
+        flux_scale=float(exact.flux_scale_per_radian_wb),
+        major_radius=float(exact.major_radius),
+    )
+    zero = wedge_oracle._ZeroCurrentProfile()
+    profiles = (profile, zero, zero, zero)
+    measured = wedge_oracle.saddle_wedge_current_moments(
+        wedges, wedge_oracle._FluxPlaceholder(), profiles
+    )
+    actual = np.stack(
+        (
+            np.asarray(measured.cell_current)[0],
+            np.asarray(measured.radial_moment)[0],
+            np.asarray(measured.vertical_moment)[0],
+        ),
+        axis=1,
+    )
+    expected = np.asarray(
+        [
+            wedge_oracle._analytic_polygon_moments(
+                wedge_oracle._support_vertices(wedges, slot), centre, item
+            )
+            for slot, item in enumerate(profiles)
+        ]
+    )
+    relative_error = np.abs(actual - expected) / np.maximum(np.abs(expected), 1.0e-12)
+    counts = np.asarray(wedges.vertex_count)[0]
+    vertices = np.asarray(wedges.support_vertices)[0]
+
+    print(
+        "XPOINT_WEDGE_ORACLE "
+        + json.dumps(
+            {
+                "requested_cells": requested_cells,
+                "realised_cells": len(machine.node),
+                "xpoint_cell": cell,
+                "core_current_relative_error": float(relative_error[0, 0]),
+                "private_flux_current_a": float(actual[1, 0]),
+                "common_sol_current_a": actual[2:, 0].tolist(),
+                "vertex_counts": counts.tolist(),
+            },
+            sort_keys=True,
+        )
+    )
+
+    assert bool(wedges.saddle[0])
+    assert relative_error[0, 0] <= 1.0e-6
+    np.testing.assert_array_equal(actual[1:], 0.0)
+    for wedge, count in zip(vertices, counts, strict=True):
+        np.testing.assert_array_equal(wedge[0], x_point)
+        np.testing.assert_array_equal(wedge[count:], 0.0)
+
+
 def test_forward_census_refuses_polish_outside_detected_cell():
     """A sign seed one cell from its root is reported but never retained."""
     with np.load(_bank_path(), allow_pickle=True) as archive:

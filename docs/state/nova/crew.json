@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T22:02:06",
+  "updated": "2026-09-20T00:22:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -212464,6 +212464,245 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T200510357550-nia-promotion-fallback-nan",
+        "plan": "null-identification-authority",
+        "section": "",
+        "node": "nia-promotion-fallback-nan",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 733,
+                "cached_input_tokens": 834001,
+                "input_tokens": 834736,
+                "output_tokens": 2217,
+                "reasoning_output_tokens": 129,
+                "total_tokens": 836953,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "Read the followup f-20260908T110200-promotion-fallback-nan on docs/plans/null-identification-authority.html. Commit c5e1498a carries unchanged promotion fallbacks and makes the diverted -300 Solovev rung raise CurrentNormalisationError with a non-finite source amplitude out of current_normalisation_amplitude in nova/equilibrium/forward_operator.py near line 3351, reached through normalised_current_moments_and_observation, while its immediate predecessor e0eb4956 terminates finite and unqualified at residual 0.0256. A carry described as unchanged must change no value, so either the carried quantity is stale where the original recomputed it or the carry reaches a case the original did not. Name which carried quantity becomes non-finite and on which trip, printing the array name with its full shape and its finite count rather than a scalar, with the cell-current sum entering the amplitude as the first suspect since the amplitude is the target current divided by it. Reproduce on CPU with the reduced hex oracle in a fresh process on all_debug, which runs in minutes. Repair so the rung terminates finite with its residual equal to the e0eb4956 value wherever the carry is legitimately unchanged, and add a case driving the carried fallback through the state that produced the non-finite amplitude. Gate: the new case plus tests/test_forward_operator_axes.py in one all_debug job (srun --partition=all_debug --time=00:59:00 --cpus-per-task=8 --mem=64G, TMPDIR=/tmp, JAX_PLATFORMS=cpu, the root environment interpreter directly and never uv), captured once with the exit status, with the base arm stated as a failure set so the delta is a set difference. Commits carry a body. Every uv command carries --no-sync and nothing runs uv sync.",
+          "estimated_hours": 2.0,
+          "goal": "Find which carried quantity turns the diverted 300-cell amplitude non-finite and repair it so the rung terminates finite again.",
+          "id": "nia-promotion-fallback-nan",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-19T20:05:11Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T200510357550-nia-promotion-fallback-nan/manifest.md",
+          "negative_control": "revert the repair so the carried fallback reaches the amplitude unrecomputed again; the case pinning a finite amplitude on the diverted -300 rung must redden",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/forward_operator.py",
+            "tests/test_forward_operator_axes.py",
+            "tests/test_promotion_fallback_amplitude.py",
+            "docs/plans/null-identification-authority.html",
+            "docs/evidence/archive/null-identification-authority-landed.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/nia-promotion-fallback-nan"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-nia-fallbacknan-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-19T20:05:20Z",
+        "completed_at": "2026-09-19T22:09:14.301Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 7425,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 7434,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "4c5cb8603e334cdc15a18b6705639918dbb2b86c",
+        "commits": [
+          "fd42ffc6516083c9262aa5f15772b9c18d33a9a0"
+        ],
+        "changed_lines": {
+          "added": 321,
+          "removed": 13,
+          "files": 4
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=8 --mem=64G bash run-gate.sh (both arms, one allocation)",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/nia-promotion-fallback-nan/gate3.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T200510357550-nia-promotion-fallback-nan/manifest.md",
+        "scope_changed": false,
+        "session_id": "b49dde36-7db1-44dd-97c2-716010c11041",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 379522,
+            "input_tokens_cumulative": 379522,
+            "output_tokens": 1325,
+            "output_tokens_cumulative": 1325,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-19T22:09:14.301Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260908T110218147436-nia-promotion-fallback-nan",
+          "root_run_id": "r-20260908T110218147436-nia-promotion-fallback-nan"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 24978735,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 13.21,
+          "generated_tokens": 178688,
+          "generation_seconds": -80.353,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.9,
+          "machine_seconds": 93.563,
+          "peak_input_tokens": 167637,
+          "wall_tokens_per_second": 13526.72
+        },
+        "follow_on_paths": [
+          "tests/test_forward_operator_axes.py::test_tensor_product_grid_class_margin_is_read_on_the_spline",
+          "tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback",
+          "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.{png"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 5,
+        "duration_measurement": null,
+        "scope_acceptances": [
+          {
+            "path": "nova/equilibrium/fixed_point.py",
+            "reason": "the active-set reconcile that must consult the usability predicate lives here; the operator-side predicate alone leaves the unusable read carried at every reconcile-site map, so the repair is only half itself without this file"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-promotion-fallback-nan",
+          "session_id": "b49dde36-7db1-44dd-97c2-716010c11041",
+          "session_source": "stream",
+          "retained_at": "2026-09-19T22:09:14.301Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.999,
+        "impl_move": {
+          "plan": "null-identification-authority",
+          "at_dispatch": 0.999,
+          "at_complete": 0.9995,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/test_forward_operator_axes.py",
+            "tests/test_promotion_fallback_amplitude.py"
+          ],
+          "declaration": "revert the repair so the carried fallback reaches the amplitude unrecomputed again; the case pinning a finite amplitude on the diverted -300 rung must redden",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/nia-promotion-fallback-nan/ab2-300.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/nia-promotion-fallback-nan/ab2-300.log"
+        },
+        "tool_steps": 65.0,
+        "orientation_input_tokens": 2838924.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -212902,6 +213141,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2932
+    "_version": 2933
   }
 }

@@ -3841,14 +3841,20 @@ class ForwardFluxOperator:
         ):
 
             def read_partition(
-                psi, previous_shadow=None, _external=None, operator=None
+                psi,
+                previous_shadow=None,
+                _external=None,
+                operator=None,
+                _target_value=None,
             ):
                 active = self if operator is None else operator
                 return active._frozen_topology_partition(
                     psi, requested_class, previous_shadow
                 )
 
-            def map_partition(psi, partition, external, operator=None):
+            def map_partition(
+                psi, partition, external, operator=None, _target_value=None
+            ):
                 active = self if operator is None else operator
                 image = external + active._internal_on_partition(
                     psi, partition, target_current

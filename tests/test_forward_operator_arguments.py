@@ -110,3 +110,27 @@ def test_fixed_point_program_carries_the_operator_as_an_argument() -> None:
     image = mapped(initial, external, operator)
     expected = initial + 0.5 * (image - initial)
     np.testing.assert_array_equal(result.state, expected)
+
+
+def test_the_bound_frozen_partition_hooks_take_the_map_operand_order() -> None:
+    """A bound shadowed map reads its partition through the same operand list.
+
+    The solver binds the exterior flux, the operator and the per-slice current
+    target onto the map, so the hooks it lifts from that map receive all three
+    after the state. A hook that declares fewer operands refuses the bound call
+    before any partition is read.
+    """
+    configure_dtypes()
+    operator = _operator()
+    external = operator.external()
+    initial = jnp.linspace(-1.0, 1.0, operator.node_number)
+    shadowed = operator.traced_flux_map_with_shadow()
+    assert shadowed._read_frozen_partition is not None
+
+    bound = fixed_point._bind_traced_map_arguments(
+        shadowed, (external, operator, None)
+    )
+    partition = bound._read_frozen_partition(initial, None)
+    assert partition is not None
+    mapped = bound._map_frozen_partition(initial, partition)
+    assert mapped.shape == initial.shape

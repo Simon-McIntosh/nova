@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T16:36:55",
+  "updated": "2026-09-19T16:38:05",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -208486,6 +208486,226 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T125709902038-msc-census-gate-and-unit-node",
+        "plan": "millisecond-converged-solve",
+        "section": "",
+        "node": "msc-census-gate-and-unit-node",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2013,
+                "cached_input_tokens": 950636,
+                "input_tokens": 952651,
+                "output_tokens": 4329,
+                "reasoning_output_tokens": 754,
+                "total_tokens": 956980,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "followups f-msc-census-record-gate-committed and f-msc-certificate-unit-node-attribute on the plan: (1) a test tests/test_census_record_receipts.py reads docs/figures/millisecond-converged-solve/program-shapes/bank-shape-identity.json, program-shape-census.json and the evidence anchor in docs/evidence/archive/millisecond-converged-solve-landed.html and asserts the byte and GiB pairs divide, the cited paths exist and the caption bar values match the receipts (the 25 structural checks of the run-directory script gate_record_repairs.py under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/census-record are the source), and corrects bank-shape-identity.json line 7 from 89486 bytes to the file's real size (89486 is the group id from an ls column); (2) benchmarks/solovev_certificate.py reads observation._UNIT_NODE, which does not exist: find what the certificate builder needs there (the unit-node name publication the census disclosed, see the plan's c-msc-census-record-repairs-reviewed comment), replace the read with the attribute nova.equilibrium.observation actually exports, and add a collection-time test that the certificate builder imports and constructs on the 110-cell analytic row on CPU; gate is the new tests plus tests/test_forward_census.py in one all_debug job with zero added failures against base; no H200 job; a text-only lane, never Read a PNG, verify figures through their SVG; call configure_dtypes before building any array; every uv command carries --no-sync and nothing runs uv sync; heavy work runs in one all_debug job with JAX_PLATFORMS=cpu through the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python directly (never uv on a compute node), TMPDIR=/tmp in the submit environment and the payload, scripts inside the worktree; nothing goes to betelgeuse; py_compile with the project interpreter before each commit; manifest at the first commit; a wait, if declared, carries wait_condition, wait_probe as a JSON list command, wait_terminal and a filled resume_brief; status words complete, waiting or blocked only; the plan landing comment and the evidence anchor are yours to write",
+          "estimated_hours": null,
+          "goal": "commit the census record gate as a test and repair the certificate builder's missing unit-node attribute",
+          "id": "msc-census-gate-and-unit-node",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-19T12:57:10Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T125709902038-msc-census-gate-and-unit-node/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/solovev_certificate.py",
+            "tests/test_census_record_receipts.py",
+            "tests/test_solovev_certificate_builder.py",
+            "docs/figures/millisecond-converged-solve/program-shapes",
+            "docs/plans/millisecond-converged-solve.html",
+            "docs/evidence/archive/millisecond-converged-solve-landed.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/msc-census-gate"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-msc-records-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-19T12:57:20Z",
+        "completed_at": "2026-09-19T13:19:20.312Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1313,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1320,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "1bbde0d29c3210ba89828b863467136c51c4ec7f",
+        "commits": [
+          "3587b93980ac29de96ef72a848f2cc017e43ad82",
+          "a6e5187771eacec9a92e297c3cd661e101d51050",
+          "f14605be307c6a1165d5e2894bdb051a49d3cb36"
+        ],
+        "changed_lines": {
+          "added": 210,
+          "removed": 3,
+          "files": 6
+        },
+        "tests_added": 11,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun all_debug: /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_census_record_receipts.py tests/test_solovev_certificate_builder.py tests/test_forward_census.py",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/msc-census-gate/gate-20260919.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T125709902038-msc-census-gate-and-unit-node/manifest.md",
+        "scope_changed": false,
+        "session_id": "9d256613-5654-4db6-9881-5e3398205c0a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 9403175,
+            "input_tokens_cumulative": 9403175,
+            "output_tokens": 60933,
+            "output_tokens_cumulative": 60933,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-19T13:19:20.312Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 9570368,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1317.349,
+          "generated_tokens": 69445,
+          "generation_seconds": 906.414,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.6,
+          "machine_seconds": 410.935,
+          "peak_input_tokens": 165893,
+          "tokens_per_second": 76.62,
+          "wall_tokens_per_second": 52.72
+        },
+        "follow_on_paths": [
+          "tests/test_forward_census.py::test_forward_census_exact_diverted_oracle",
+          "observation.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-census-gate-and-unit-node",
+          "session_id": "9d256613-5654-4db6-9881-5e3398205c0a",
+          "session_source": "stream",
+          "retained_at": "2026-09-19T13:19:20.312Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.88,
+        "impl_move": {
+          "plan": "millisecond-converged-solve",
+          "at_dispatch": 0.88,
+          "at_complete": 0.9,
+          "verdict": "moved"
+        },
+        "tool_steps": 87.0,
+        "orientation_input_tokens": 2608821.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -208924,6 +209144,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2916
+    "_version": 2917
   }
 }

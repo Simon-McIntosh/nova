@@ -1598,6 +1598,7 @@ def run_certificate_identity(
         ),
         "panel_directory": str(panel_dir) if panel_dir is not None else None,
         "rows": [],
+        "pending_rows": [list(row) for row in CERTIFICATE_ROWS],
         "passed": None,
     }
     _write_json(output, receipt)
@@ -1615,6 +1616,15 @@ def run_certificate_identity(
             ),
         )
         receipt["rows"].append(row)
+        receipt["pending_rows"] = [
+            list(pending)
+            for pending in CERTIFICATE_ROWS
+            if (pending[0], pending[1]) != (case_name, requested_cells)
+            and not any(
+                landed["case"] == pending[0] and landed["requested_cells"] == pending[1]
+                for landed in receipt["rows"]
+            )
+        ]
         _write_json(output, receipt)
         print(
             f"CERTIFICATE_DONE case={case_name} cells={requested_cells} "

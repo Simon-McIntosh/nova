@@ -29,7 +29,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="109">
+<meta name="plan-version" content="110">
 </head>
 <body>
 <main class="plan-doc">
@@ -519,6 +519,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260919T140543659843-msc-diverted-oracle-census-linearring" data-who="reckon-ship" data-when="2026-09-19T14:55:40.819Z">
     <div class="r-comment-body"><p>Crash repaired at the source; base arm fails, head passes; the re-baselined assertions expose that no rung contains the divertor saddle, carried as a followup to the topology saddle detector.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-msc-shim-review-stale-capture" data-who="coordinator" data-when="2026-09-19T15:15:00Z">
+    <div class="r-comment-body"><p>The independent review of the shim deletion returns pass: the shim is dead by grep over the whole tree, the control reproduces first-hand, the arc_capacity attribution to the traced-polygon capacity refactor holds with its producing commits named, and the receipt guard fires on the pre-change receipt. Five findings stand, and together they say one thing: the figure and two documents still rest on the retired capture. The committed bucket figure's arc bar encodes ratio 1.2308 from the retired 3328 while the receipt it cites now gives 1.6623 from 154; docs/research/compile-cost-evidence.html still tables 3072 and 3328 with the old ratios and still discloses the retired shim; and the landing record's claim that no figure needed regenerating enumerates counts only, while the bars are drawn from a ratio that moved. The strongest is the last: tests/test_census_record_receipts.py holds only the two caption counts in the SVG to the receipt and not the per-axis ratio bars the renderer draws, so a figure drawn from the retired capture passes the gate. A repair node carries all five.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s19h-s3-certificate-prerequisite" data-who="reckon-ship s19-handoff" data-when="2026-09-15T10:15:00Z">
     <div class="r-comment-body">Section 3 prerequisite, held by the coordinator rather than by a plan-level wire: the certified millisecond measurement runs only once gs-absolute-accuracy-gates section 3 (the certificate artifact and its pin) is current on the exact cut-cell participation and the joint qualification, because it reports cost for certificate-passing solves. The stage-scoped dependency gs-absolute-accuracy-gates#s3 was authored and withdrawn the same hour: the roadmap's anchor resolver did not recognise that section (reported to reckon), and a plan-level dependency on the whole certificate plan would hold section 2, which never needed it. gs-absolute-accuracy-gates now informs this plan; no section 3 node is dispatched before the certificate lands.</div>

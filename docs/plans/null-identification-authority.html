@@ -843,9 +843,3 @@ for the lead before merge.</p>
 </main>
 </body>
 </html>
-ery little compared with a matrix norm of the coil currents, the axis-free path is correct: there is genuinely no axis to find, the computation must proceed without one, and IT MUST RETURN FINITE VALUES RATHER THAN NaN. When there IS plasma current, and supporting measurements, an unqualified axis read does not mean the iteration should proceed without an axis. It means the solution needs CONDITIONING: place a plasma current patch at the machine&#x27;s R0, or close to the vessel centroid, and construct a Grad-Shafranov solution from there. WHAT THIS REJECTS. Consuming the unqualified axis for normalisation, which is the NaN this work began with. Carrying the previous qualified axis, which is the same shape as the frozen-partition carry that silently corrupted three certificate rungs. And strict refusal alone, which is what is implemented today and which degrades the exact-oracle residual on both required rungs, 0.021636666445981268 on the reduced diverted rung after 256 REFUSALS and 0.08946861339242938 on -342 after one. That refusal count is now explained: the iteration was meeting trials with real plasma current and no qualified axis, and the correct response there is to condition the trial, not to reject it. TWO CONSEQUENCES RECORDED ELSEWHERE. The all-NaN axisless vacuum flux map on solver-convergence-regression is the same mechanism and is settled by the same rule: at negligible plasma current the map must compute finite values without an axis. And the lead&#x27;s related observation that a reactor-scale Solovev trial SHOULD NEVER TOUCH THE MACHINE AXIS, being unphysical, means any evaluation reaching the r equals zero branch on those cases is itself a defect to be found rather than a case to be handled.</p>
-    </div>
-</section>
-</main>
-</body>
-</html>

@@ -412,9 +412,7 @@ on those that do not. State 0 goes from one open arc to
 open branch.</p>
 <p><strong>The residual four.</strong> States 9, 10, 11 and 12 still fail, all with
 <code>closed_candidate_count</code> 0 and the same signature as before. The mechanism is different
-from the one repaired here and is measured, not inferred. In these states the level set through the
-admitted saddle crosses only <em>two</em> of that saddle's cell's four edges, so the trace never
-counts the cell ambiguous and the sector tie cannot fire: at state 9 the trace reports crossing count
+from the one repaired here and is measured, not inferred. In these states the tracer counts only <em>two</em> crossings on the saddle cell's edges, so the trace never counts the cell ambiguous and the sector tie cannot fire; the independent review measured the fitted spline crossing all four edges of cell (5,&nbsp;9) on state 9, twice on the left edge 19.4&nbsp;mm apart, so the missing pair is lost inside one five-sample sub-interval and the count belongs to the detector, not the geometry: at state 9 the trace reports crossing count
 2 at cell (5,&nbsp;9) and an empty four-crossing set, and the degree histogram is
 <code>[0, 2, 123]</code> with one component of 124 valid segments that encloses the axis without being
 a cycle. The polished stationary point is (0.614825&nbsp;m,&nbsp;&minus;1.305531&nbsp;m) with flux

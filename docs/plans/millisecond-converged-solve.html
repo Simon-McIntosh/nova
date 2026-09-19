@@ -29,7 +29,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="111">
+<meta name="plan-version" content="112">
 </head>
 <body>
 <main class="plan-doc">
@@ -528,6 +528,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-msc-retired-capture-repaired" data-who="coordinator" data-when="2026-09-19T16:50:00Z">
     <div class="r-comment-body"><p>All five findings of the shim review are repaired at 759df871, 6b9de4c6 and 10ff2c18, merged 8bd52890. The bucket figure is regenerated so its arc bar encodes the current ratio rather than the one computed from the retired 3328; the compile-cost document tables the current capacities and no longer discloses the retired shim or its receipt key; and the landing claim now says which marks moved rather than resting on the counts that did not. The one that mattered is fixed with its own control: tests/test_census_record_receipts.py holds the per-axis ratio bars the renderer draws, not only the two caption counts, and it is red against the superseded figure (1 failed, 6 passed, the arc bar drawn at 1.3333 against the receipt) and green against the regenerated one (7 passed). The gate can now fail for the reason it exists, which is what it could not do before.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260919T151137310965-msc-retired-capture-repairs" data-who="reckon-ship" data-when="2026-09-19T15:20:45.267Z">
+    <div class="r-comment-body"><p>Five findings repaired; the receipt test holds the per-axis bars and carries both arms, red on the superseded figure and green on the regenerated one.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s19h-s3-certificate-prerequisite" data-who="reckon-ship s19-handoff" data-when="2026-09-15T10:15:00Z">
     <div class="r-comment-body">Section 3 prerequisite, held by the coordinator rather than by a plan-level wire: the certified millisecond measurement runs only once gs-absolute-accuracy-gates section 3 (the certificate artifact and its pin) is current on the exact cut-cell participation and the joint qualification, because it reports cost for certificate-passing solves. The stage-scoped dependency gs-absolute-accuracy-gates#s3 was authored and withdrawn the same hour: the roadmap's anchor resolver did not recognise that section (reported to reckon), and a plan-level dependency on the whole certificate plan would hold section 2, which never needed it. gs-absolute-accuracy-gates now informs this plan; no section 3 node is dispatched before the certificate lands.</div>

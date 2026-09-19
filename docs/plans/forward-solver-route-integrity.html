@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 </head>
 <body>
@@ -148,6 +148,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-fsri-nk-attempt-fence" data-who="coordinator" data-when="2026-09-19T13:55:00Z">
     <div class="r-comment-body"><p>§1 attempts now stand at two on the codex node plus the earlier local-lane partial, so the next dispatch is the third attempt and takes the strongest capability class available with the design fixed by the decision <code>newton-krylov-third-repair</code>. The codex run <code>r-20260919T090428129698</code> holds nova/equilibrium/forward.py and forward_operator.py while blocked; its worktree carries route telemetry tests, a frozen-domain label tracker, the live-map Newton repair and a staged residual-against-step renderer under docs/figures/millisecond-converged-solve/newton-krylov-route/render.py that has not yet produced its figure.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-fsri-compile-blocks-a-cpu-control" data-who="coordinator" data-when="2026-09-19T16:55:00Z">
+    <div class="r-comment-body"><p>The program size this section owns now blocks another plan's evidence, measured 2026-09-19 on the centroid-constrained positive control. Two all_debug jobs aborted inside LLVM compiling <code>jit_scan</code>, the first at 64G and the second at 180G, both with <code>allocateMappedMemory failed</code> and a core dump at exit 134, the second after a slow-compile alarm and 38 minutes. Tripling the allocation changed nothing, so the constraint is the compiled module rather than the job's memory request. Two things follow for this section. The gate for section 2 should include a CPU arm, since an executable that cannot be compiled on a 180G node is a failure a device-only budget would not catch. And the scheduler signal is not trustworthy here: <code>sacct</code> reported <code>COMPLETED 0:0</code> for both jobs and for every sub-step while the payload aborted, so the payload log is the only evidence of what happened. The centroid plan's positive control waits on this section rather than on its own node.</p></div>
 </div>
 </section>
 </main>

@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="74">
+<meta name="plan-version" content="75">
 <meta name="plan-impl" content="0.88">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
@@ -273,6 +273,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-fsa-edge-root-bracket-reviewed" data-who="" data-when="">
     <div class="r-comment-body">Run r-20260919T090619820972 (local lane, commit 1037c68a, merged at 9baca163; review r-20260919T092900844447) replaced the fixed five-sample edge subdivision with a bracket from the edge cubic's own stationary points, three monotone pieces per edge with exact-zero padding through the slot mask and EDGE_CROSSING_CAPACITY honoured. The review re-derived the census through the public entry points: 0 of 20 states failing at the merge against 4 of 20 at the parent, cell (5,9) on state 9 now counting four crossings with its left-edge pair 19.364 mm apart, gate 34 passed. The panel reference is drawn as unconnected crossings with the caption naming the upper-null reference equilibrium. Three record findings: the evidence paragraph states the pre-fix tracer's per-edge tally as [1, 1, 0, 2] where the parent tracer reads [1, 1, 0, 0] and [1, 1, 0, 2] is the dense scan's count (corrected by the coordinator); the coordinator's merge commit body says the reference is drawn as assembled branches where the panel draws unconnected crossings (corrected by a git note on 9baca163); and branch-terms.json beside the figure still records the pre-fix verdict at states 9 to 12 and was not regenerated. The followup below carries that regeneration with the remaining items.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260919T092900844447-review-of-fsa-edge-root-bracket" data-who="reckon-ship" data-when="2026-09-19T09:44:32.885Z">
+    <div class="r-comment-body"><p>Review stored: 92/100, three record findings</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260915T082752949902-fsa-transport-shim-delta-gate" data-who="fsa-transport-shim-delta-gate" data-when="2026-09-15T11:35:00+02:00">
     <div class="r-comment-body"><p>Transport test delta gate did not complete in its single exact scheduler allocation. Job <code>1271211</code> on <code>all_debug</code> ran the base archive <code>0f872fd6</code> through seven modules: 35 passed, 0 failed and 1 xfailed; it reached <code>tests/test_transport_geometry_reference.py</code> at the 59-minute wall and exited <code>143</code> before a terminal receipt. The shim-removal revision <code>fb402f8f</code> was not run, so the added-failure set is <strong>NOT MEASURABLE</strong>, not assumed empty. Full per-module logs and JUnit receipts are under <code>~/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate/</code>; the next action is a fresh allocation with sufficient time or an exact plan-approved test selection.</p></div>

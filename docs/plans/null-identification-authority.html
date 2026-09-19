@@ -22,15 +22,15 @@
 <title>Null identification authority | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-19">
+<meta name="plan-modified" content="2026-09-20">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html,docs/figures/null-identification-authority/bank-integrated/bank-integrated.json,docs/figures/null-identification-authority/bank-drift-probe/receipt.json,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json,docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087,7b0311d2,e76bc389">
-<meta name="plan-impl" content="0.999">
+<meta name="plan-impl" content="0.9995">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="216">
+<meta name="plan-version" content="217">
 </head>
 <body>
 <main class="plan-doc">
@@ -178,10 +178,11 @@ for the lead before merge.</p>
     <pre class="r-fu-prompt">/reckon-ship null-identification-authority §1</pre>
     <p class="r-fu-outcome">Both closed: a3fa8b9b moves the exact oracle target by moving the traced separatrix support onto the tensor spline (defensible, re-base rather than repair), and c5e1498a introduces the diverted -300 NaN (a genuine added failure, opened for repair). A second, unattributed 210.3 A target movement between a3fa8b9b and head was found and is opened separately.</p>
     </article>
-<article class="r-fu" data-id="f-20260908T110200-promotion-fallback-nan" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-08T11:02:00Z" data-recommends-skill="/reckon-ship null-identification-authority" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-20260908T110200-promotion-fallback-nan" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-08T11:02:00Z" data-recommends-skill="/reckon-ship null-identification-authority" data-resolved-at="2026-09-19T22:03:03+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Repair the NaN source amplitude the promotion-fallback carry introduced on the reduced diverted rung</h4>
     <div class="r-fu-body">c5e1498a (perf(equilibrium): carry unchanged promotion fallbacks) makes the diverted -300 Solovev rung raise CurrentNormalisationError with a NaN source amplitude from current_normalisation_amplitude via normalised_current_moments_and_observation; the immediately preceding commit e0eb4956 terminates finite and unqualified at residual 0.0256. A performance change that carries an unchanged promotion fallback should not alter any value, so either the carried fallback is stale in a case the original recomputed, or the carry is applied where the original did not reach. Read the c5e1498a diff, identify which carried quantity becomes NaN and on which trip (the cell-current sum entering the amplitude is the first suspect, since the amplitude is the target current divided by it), and reproduce it on the CPU with the reduced hex oracle in a fresh-process all_debug lane, which runs in minutes. Repair so the rung terminates finite again with its residual equal to the e0eb4956 value where the carry is legitimately unchanged, and add a test that drives the carried fallback through the case that produced the NaN. State whether any other rung or bank row was silently affected by the same carry, since only this rung was probed.</div>
     <pre class="r-fu-prompt">/reckon-ship null-identification-authority §1</pre>
+    <p class="r-fu-outcome">Repaired at fd42ffc6 (merged 50e575b0), verified live in the served module. The carried quantity is named by measurement rather than inference: the frozen partition's axis flux, taken at an intermediate promoted state, arrives non-finite and takes the derived flux span with it, leaving normalised flux finite in none of 340 cells and the sampled norm none of 1086, so cell current is none of 340 finite and the amplitude's divisor is non-finite. Inside the Newton inner map the guard returns rather than raising, so the rung absorbed it and terminated at 6.3707 against the carry-off arm's 2.2484. Both halves of the locked decision landed: the operator exposes a predicate testing axis flux, boundary flux and flux span for finiteness, and the reconcile side refuses to carry a read that fails it, sending the trip back to a fresh read of its own state as an unfrozen solve does. The comment records a consequence I had not: carrying it would also have recorded the mask it produced as the trip's own. Five failures at base, one at head, and that one verified pre-existing at the base revision in a separate isolation job, so four fixed and none added.</p>
     </article>
 <article class="r-fu" data-id="f-20260908T110200-second-target-movement" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-08T11:02:00Z" data-recommends-skill="/reckon-ship null-identification-authority" data-resolved-at="2026-09-08T12:41:30+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Attribute the second exact-oracle target movement before re-basing the certificate</h4>
@@ -257,6 +258,11 @@ for the lead before merge.</p>
 <article class="r-fu" data-id="f-nia-stale-pin-in-a-slow-test" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship null-identification-authority" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">A slow test pins a certificate residual that no longer holds, and the default lane never sees it red</h4>
     <div class="r-fu-body">Reported by the promotion-fallback node from outside its scope. tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback pins the terminal residual at 0.025515711279493654, while the carry-off arm at this revision terminates at 2.248351582217136. The test carries the slow marker, so the path-free default lane excludes it and it can be red for as long as nobody selects it. Establish which of the two recorded movements of the certificate target moved this row, restate the pin against the current value with the revision that moved it named, or state why the old value is the correct one and the code is wrong. While there, count how many other slow-marked tests pin a numeric value that the default lane cannot check, since a pin nobody runs is the same defect as a guard that never fires.</div>
+    <pre class="r-fu-prompt">/reckon-ship null-identification-authority</pre>
+    </article>
+<article class="r-fu" data-id="f-nia-tensor-grid-class-margin" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-20" data-recommends-skill="/reckon-ship null-identification-authority" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The tensor-product grid class margin is read off the spline and disagrees with its pinned value</h4>
+    <div class="r-fu-body">Reported with evidence by the promotion-fallback node and confirmed outside its scope. tests/test_forward_operator_axes.py::test_tensor_product_grid_class_margin_is_read_on_the_spline fails with the same assertion text and identical values in both arms of that node's gate, and again in an isolation job against the base revision's own sources alone, both as a single node id and as the whole file in a fresh process. So it is pre-existing rather than anything the frozen-partition refusal introduced. Establish whether the pinned margin or the spline read moved, name the commit that moved it, and correct whichever is wrong; a margin read off the spline is the quantity several class decisions rest on, so a pin that disagrees with it is worth settling rather than carrying.</div>
     <pre class="r-fu-prompt">/reckon-ship null-identification-authority</pre>
     </article>
 </section>

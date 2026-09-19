@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="91">
+<meta name="plan-version" content="92">
 <meta name="plan-impl" content="0.94">
 <meta name="plan-commits" content="00ef0610,506c9fa9,eb77480b,e7d90cc8,84b23ee6,0081c3e9,4264668e,595cdd0f,6b9c4f25,989d561c,a283f243,5dd6b790,04ea37b0">
 <meta name="plan-artifacts" content="docs/evidence/archive/constraint-augmented-newton-krylov-landed.html,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.png,nova/equilibrium/constraint.py,benchmarks/constraint_centroid_receipt.py,tests/test_wall_null_flux_tangent.py,nova/geometry/select.py,tests/test_wall_polish_continuity.py,benchmarks/constraint_shape_receipt.py,tests/test_shape_constraints.py,docs/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png,docs/figures/constraint-augmented-newton-krylov/shape-control/two-arms.json,docs/figures/constraint-augmented-newton-krylov/shape-control/vertical-shift.json,docs/figures/constraint-augmented-newton-krylov/shape-control/elongation-raise.json,docs/figures/constraint-augmented-newton-krylov/shape-control/converged.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png">
@@ -403,6 +403,9 @@ number and residual.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-cank-receipt-repairs-reviewed" data-who="" data-when="">
     <div class="r-comment-body">Run r-20260919T111835 (local lane, commits c3f82561 db1ea7b4 e41f4401, merged at c07066f8; review r-20260919T115330810315) marked the 833 s compensator test slow, named the projection move of the target apart from the row gap in the pair receipt, made the discriminator compute commensurability on the volume-weighted major radius with its normalisation text matching its numbers, regenerated both receipts from the banked states, and pinned the committed discriminator receipt to its own stored numbers with a test. Two record findings, both fixed by the coordinator or carried here: the collection receipt named for the default lane shows the filter-cleared case (a named path clears the inherited marker expression), so the deselection claim rests on the marker-expression run beside it; and the evidence paragraph's envelope for the radius-convention correction (10.1 to 12.6 percent on every row) was refuted at its floor by two rows at 5.87 and 7.53 percent, corrected to the measured range. The node also found that two DIII-D test modules fail at collection on a missing separatrix import, queued on the DIII-D force-balance plan.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260919T115330810315-review-of-cank-receipt-repairs" data-who="reckon-ship" data-when="2026-09-19T12:15:09.155Z">
+    <div class="r-comment-body"><p>Review stored: 92/100, two record findings</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260904T143226377752-cank-constraint-interface-design" data-who="cank-interface-design-x" data-when="2026-09-04T14:48:16Z">
     <div class="r-comment-body"><p>read-only design scout: no code to gate, the report under reports/nova/cank/constraint-interface-design.md is the delivery (505 lines, typed protocol, ten-row Krylov entry table, fifteen-file change list, landing order)</p></div>

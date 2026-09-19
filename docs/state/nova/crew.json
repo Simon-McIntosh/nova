@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T14:25:08",
+  "updated": "2026-09-19T14:26:24",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -203998,6 +203998,217 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T115330810315-review-of-cank-receipt-repairs",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "",
+        "node": "review-of-cank-receipt-repairs",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3901,
+                "cached_input_tokens": 865215,
+                "input_tokens": 869148,
+                "output_tokens": 1644,
+                "reasoning_output_tokens": 121,
+                "total_tokens": 870792,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the review of run r-20260919T111824560297-cank-receipt-repairs (node cank-receipt-repairs, commits c3f82561 db1ea7b4 e41f4401, merged into main at 7d5ff54cf0827b53ad8ad2e79274ff77ff7e71e9, worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs) is stored at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260919T111824560297-cank-receipt-repairs.json through reckon.crew.review.store_review with SCORE and JUSTIFICATION lines for goal_fidelity, evidence, scope_discipline, durability and fit and FINDING lines with file and line; the fence checks are: tests/test_forward_profile_arguments.py line 212 carries the slow marker and the collection receipts (collect-default.txt, collect-nodeid.txt under the run's reports directory) show the default lane deselects the compensator test while an explicit node id collects it; benchmarks/shafranov_pair_receipt.py names the projection move of the target apart from the row gap and docs/figures/constraint-augmented-newton-krylov/flux-function-fit/receipt.json carries the new key with the old gap reading unchanged; benchmarks/shafranov_combination_discriminator.py calls commensurability with the volume-weighted major radius and its profile_normalisation.path text matches the stored numbers, verified by exercising tests/test_shafranov_combination_discriminator.py first-hand in one all_debug job with JAX_PLATFORMS=cpu through the shared interpreter (never uv on a compute node) and by recomputing the implied radii from receipt.json; the six row SVGs and the strip SVG are read as text for line contours, wall and null markers; the record's commensurability baseline correction is checked against the receipt; the manifest's follow-on that tests/imas/test_diiid_circuit_driven_forward_validation.py and tests/imas/test_diiid_diverted_solve_overlay.py fail to import _separatrix from benchmarks.diiid_forward_gs_match is confirmed pre-existing at base; every commit has a body and no attribution; the manifest reads changed_paths: none under the repository; the sole deliverable is the stored review record",
+          "estimated_hours": null,
+          "goal": "review run r-20260919T111824560297-cank-receipt-repairs independently on five dimensions",
+          "id": "review-of-cank-receipt-repairs",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-19T11:53:31Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T115330810315-review-of-cank-receipt-repairs/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260919T111824560297-cank-receipt-repairs.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19c-review-cankrec-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-19T11:53:42Z",
+        "completed_at": "2026-09-19T12:15:09.155Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1276,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1287,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "7d5ff54cf0827b53ad8ad2e79274ff77ff7e71e9",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "first-hand all_debug exercise of tests/test_shafranov_combination_discriminator.py and recomputation of the implied radii",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260919T111824560297-cank-receipt-repairs.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T115330810315-review-of-cank-receipt-repairs/manifest.md",
+        "scope_changed": false,
+        "session_id": "ee70f3cb-1c5d-4768-9bb3-b6c13bd6a0a8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6938364,
+            "input_tokens_cumulative": 6938364,
+            "output_tokens": 71771,
+            "output_tokens_cumulative": 71771,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-19T12:15:09.155Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 7104969,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1284.272,
+          "generated_tokens": 81923,
+          "generation_seconds": 1248.546,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.4,
+          "machine_seconds": 35.726,
+          "peak_input_tokens": 165305,
+          "tokens_per_second": 65.61,
+          "wall_tokens_per_second": 63.79
+        },
+        "follow_on_paths": [
+          "docs/plans/constraint-augmented-newton-krylov.html:573",
+          "docs/evidence/archive/constraint-augmented-newton-krylov-landed.html:668",
+          "21985/51",
+          "21989/55",
+          "tests/imas",
+          "docs/plans/diiid-vertical-force-balance.html)."
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "review role; the sole deliverable is the stored review record",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-cank-receipt-repairs",
+          "session_id": "ee70f3cb-1c5d-4768-9bb3-b6c13bd6a0a8",
+          "session_source": "stream",
+          "retained_at": "2026-09-19T12:15:09.155Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.92,
+        "impl_move": {
+          "plan": "constraint-augmented-newton-krylov",
+          "at_dispatch": 0.92,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "tool_steps": 90.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -204380,6 +204591,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2880
+    "_version": 2881
   }
 }

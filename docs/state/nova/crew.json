@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T08:55:41",
+  "updated": "2026-09-19T08:57:29",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -198027,6 +198027,265 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260918T172036691590-review-of-cank-shafranov-discriminator-2",
+        "plan": "constraint-augmented-newton-krylov",
+        "section": "",
+        "node": "review-of-cank-shafranov-discriminator-2",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 774,
+                "cached_input_tokens": 247141,
+                "input_tokens": 247947,
+                "output_tokens": 2822,
+                "reasoning_output_tokens": 143,
+                "total_tokens": 250769,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the review of run r-20260918T145159571009-cank-shafranov-discriminator-2 (node cank-shafranov-discriminator-2, commits 389dedb8 6255587a 82165c48 6cf3e19e ec1d72d2 7a7b70ed, merged into main at 97460c12, worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-discriminator-2) is stored at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260918T145159571009-cank-shafranov-discriminator-2.json through reckon.crew.review.store_review with SCORE and JUSTIFICATION lines for goal_fidelity, evidence, scope_discipline, durability and fit and FINDING lines with file and line; the fence checks are: the receipt docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/receipt.json was recomputed on the corrected ConstraintContext argument order (flux, requested_class, target_current, shadow) and its constraint_row_reading equals the circular magnetics reading at the minor radius on every row (row_kernel_versus_circular_residual 0.0), so the corrected context moved nothing measurable, and the record says so plainly; the commensurability claim that the reconstruction's stored beta_p and l_i are reproduced by a denominator radius near 0.58 m against nova's volume-weighted major radius 0.77 m, with l_i and beta_p implying the same radius within 5 percent on every row, is recomputed from the receipt's stored scalars and nova's definitions, and the review states whether the implied radius is the boundary minor radius or another convention; the six state panels are read through their SVGs as text (never Read a PNG) and checked for line contours, a wall polyline and null markers, and the manifest's own deviation that only one null set is drawn is confirmed and weighed; the gate tests/test_shafranov_combination_discriminator.py is re-run first-hand in one all_debug job with JAX_PLATFORMS=cpu through the shared interpreter (never uv on a compute node) and its log recorded; every commit has a body and no attribution; the manifest reads changed_paths: none under the repository; the sole deliverable is the stored review record",
+          "estimated_hours": null,
+          "goal": "review run r-20260918T145159571009-cank-shafranov-discriminator-2 independently on five dimensions",
+          "id": "review-of-cank-shafranov-discriminator-2",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-18T17:20:38Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T172036691590-review-of-cank-shafranov-discriminator-2/manifest.md",
+          "plan": "constraint-augmented-newton-krylov",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260918T145159571009-cank-shafranov-discriminator-2.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19c-review-disc2-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-18T17:21:00Z",
+        "completed_at": "2026-09-19T06:49:45.458Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 48329,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 48525,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "97460c128de13ca64db2dbc3f057b50095a2e1a3",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "first-hand re-run of tests/test_shafranov_combination_discriminator.py on all_debug (15 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T172036691590-review-of-cank-shafranov-discriminator-2/slurm-gate-1273770.out",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T172036691590-review-of-cank-shafranov-discriminator-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "501661ff-8e96-4bcf-8443-c73ad43937d6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 569516,
+            "input_tokens_cumulative": 569516,
+            "output_tokens": 8400,
+            "output_tokens_cumulative": 8400,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-19T06:49:45.458Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 452,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 3752,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 357,
+              "log_fresh": true,
+              "manifest_commits": [
+                "389dedb8",
+                "6255587a",
+                "82165c48",
+                "6cf3e19e",
+                "ec1d72d2",
+                "7a7b70ed"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "17e6e36442e4f26038f5173f766d7411ec4d3b3e350ed4275943083e81795f76",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T145159571009-cank-shafranov-discriminator-2/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan constraint-augmented-newton-krylov --section '\u00a74' --role review --spec-level exact --node review-of-cank-shafranov-discriminator-2 --goal 'attach an independent review to run r-20260918T145159571009-cank-shafranov-discriminator-2' --done-when 'the review for r-20260918T145159571009-cank-shafranov-discriminator-2 stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260918T145159571009-cank-shafranov-discriminator-2.json --time-budget 55m --session s19-codex-20260916 --local",
+              "node": "cank-shafranov-discriminator-2",
+              "phase": "working",
+              "plan": "constraint-augmented-newton-krylov",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260918T145159571009-cank-shafranov-discriminator-2",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 982,
+              "terminal_at": "2026-09-18T17:04:22Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-discriminator-2"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 4843842,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 161.77,
+          "generated_tokens": 95433,
+          "generation_seconds": 159.077,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.1,
+          "machine_seconds": 2.693,
+          "peak_input_tokens": 149402,
+          "tokens_per_second": 599.92,
+          "wall_tokens_per_second": 589.93
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "review role; the sole deliverable is the stored review record",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-cank-shafranov-discriminator-2",
+          "session_id": "501661ff-8e96-4bcf-8443-c73ad43937d6",
+          "session_source": "stream",
+          "retained_at": "2026-09-19T06:49:45.458Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.9,
+        "impl_move": {
+          "plan": "constraint-augmented-newton-krylov",
+          "at_dispatch": 0.9,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "tool_steps": 27.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -198395,6 +198654,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2840
+    "_version": 2841
   }
 }

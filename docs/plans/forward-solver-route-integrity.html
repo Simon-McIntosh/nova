@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 </head>
 <body>
@@ -125,6 +125,16 @@
       </p>
     <p class="r-dec-rat">The interim that moved the single-null 500 row by 2.2e-3 and produced a non-finite residual is the measured cost of a tolerance; the certificate is the exact pin and stays the gate.</p>
     </div>
+<div class="r-dec" data-key="newton-krylov-third-repair" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which design does the third Newton-Krylov route repair implement?</p>
+    <p class="r-dec-ctx">The codex node r-20260919T090428129698 stopped at the two-attempt fence. Attempt one (label-aware partition promotion with label identity) reached NoQualifiedAxisError in job 1273977. Attempt two (every topology and domain read kept live, committed as bed0155b) passed its focused refusal test but the exact route test timed out at 59:25 in job 1273996 on all_debug, so the live-map route is correct where measured and too slow to gate. Six commits (1b54057a, 4992bcc3, bff52fa8, bebd067e, bed0155b, 8e0f3bbc) sit unmerged in the run worktree; the run stays blocked so its session remains resumable. Coordinator recommendation: live-warmup-frozen-newton, because the route before dd7d8286 warmed on the live map and froze the partition for Newton, which is the behaviour the regression lost, and it costs one partition read per solve where the live route re-reads every step (the 5.9x cost the support re-read showed on the bank); a widened fence accepts a slower solver on a millisecond plan. Lead to confirm before the codex reset at 2026-09-21T05:57Z.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="live-warmup-frozen-newton">live topology reads through the picard warmup, then a frozen Newton partition taken from the warmed state</button>
+      <button class="r-opt" data-value="admission-aware-rollback">keep every read live and add admission-aware outer rollback and damping so the Newton steps that lose the equilibrium are refused</button>
+      <button class="r-opt" data-value="widened-fence">keep the live-map route as committed and widen the performance fence for the route test</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -135,6 +145,11 @@
     <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §1</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-fsri-nk-attempt-fence" data-who="coordinator" data-when="2026-09-19T13:55:00Z">
+    <div class="r-comment-body"><p>§1 attempts now stand at two on the codex node plus the earlier local-lane partial, so the next dispatch is the third attempt and takes the strongest capability class available with the design fixed by the decision <code>newton-krylov-third-repair</code>. The codex run <code>r-20260919T090428129698</code> holds nova/equilibrium/forward.py and forward_operator.py while blocked; its worktree carries route telemetry tests, a frozen-domain label tracker, the live-map Newton repair and a staged residual-against-step renderer under docs/figures/millisecond-converged-solve/newton-krylov-route/render.py that has not yet produced its figure.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

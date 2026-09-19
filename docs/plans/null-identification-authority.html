@@ -30,7 +30,7 @@
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="204">
+<meta name="plan-version" content="205">
 </head>
 <body>
 <main class="plan-doc">
@@ -802,6 +802,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-nia-containment-anchor-reviewed" data-who="" data-when="">
     <div class="r-comment-body">Run r-20260919T075817963210 (codex, commits a491e6de and e7cd121d, merged at fe0689ce; review r-20260919T090130854993) builds a fixed-shape bracket table over every wall node, vmaps the quadratic fit, and admits a contact only when the axis-connected component at that contact's own spline level reaches it within one lattice pitch, decided inside the traced program by the same saddle-aware flood the production read uses. On MAST 27079 row 16 the published contact moves from the detached upper-divertor lobe (0.893 m from the axis contour) to the centre column at R 0.19524 m, Z -0.01179 m at 0.256735 Wb, and the traced axis-enclosing contour passes 1.25 mm from it; every number reproduces from the persisted fixture with an independent spline to 4e-16. The traversed-reference test now requires zero vertical-half-plane disagreements, the historical 51 being the disagreement the spline-authored contact removed. Four findings: the receipt's contour_min_wall_distance_m key means different things in its before rows and its after rows; the after panel draws the two detached divertor lobes of the boundary level set in boundary style with nothing marking them as not the boundary; containment_required is computed once from the pre-containment provisional pass, so a class-free read on this fixture keeps the detached contact and ends classified diverted, self-consistent but untested; and the cited gate of 33 spans four test files, the three named ones alone give 27. The followup below carries the class-free contract and the two record repairs.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260919T090130854993-review-of-nia-containment-aware-anchor" data-who="reckon-ship" data-when="2026-09-19T09:15:12.703Z">
+    <div class="r-comment-body"><p>Review stored: 84/100, four findings</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

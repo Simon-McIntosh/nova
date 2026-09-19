@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T11:18:50",
+  "updated": "2026-09-19T11:20:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -202611,6 +202611,210 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T090130854993-review-of-nia-containment-aware-anchor",
+        "plan": "null-identification-authority",
+        "section": "",
+        "node": "review-of-nia-containment-aware-anchor",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1287,
+                "cached_input_tokens": 559935,
+                "input_tokens": 561254,
+                "output_tokens": 3574,
+                "reasoning_output_tokens": 346,
+                "total_tokens": 564828,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the review of run r-20260919T075817963210-nia-containment-aware-anchor (node nia-containment-aware-anchor, commits a491e6de and e7cd121d, merged into main at fe0689ce, worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-containment-aware-anchor) is stored at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260919T075817963210-nia-containment-aware-anchor.json through reckon.crew.review.store_review with SCORE and JUSTIFICATION lines for goal_fidelity, evidence, scope_discipline, durability and fit and FINDING lines with file and line; the fence checks are: in nova/equilibrium/topology.py the wall anchor selection now takes, among wall nodes, the extreme of polarity times flux over those whose level set encloses the axis, and the review states how containment is decided inside the traced program and whether the program stays fixed-shape; from the persisted fixture docs/figures/null-identification-authority/limited-touch/row-16-terminal-state.npz, without a new solve, the review reproduces that the published contact is now R 0.19524 m Z -0.01179 m at 0.256735 Wb on the centre column, that the axis-enclosing component of the level set at that level passes within 1.25 mm of the contact, and that the old contact (R 0.599, Z 1.728) sat 0.893 m from the axis contour; the test tests/test_limited_boundary_touches_wall.py is read to confirm it asserts the contact lies on the axis-enclosing component with an independent spline evaluation and that the component's closest approach to the wall is at the contact, not a tautology; the rewritten traversed-reference assertion in tests/test_jax_topology.py now requires zero vertical-half-plane label differences and its docstring says the historical 51 was the disagreement before the spline-authored contact; the gate (the three topology test files, 33 passed) is re-run first-hand in one all_debug job with JAX_PLATFORMS=cpu through the shared interpreter (never uv on a compute node); the figure row-16-before-after.svg is read as text for the contact marker on the inboard boundary, both null markers, the wall and shared levels, and the review notes whether the small detached lobe still drawn near the upper divertor at the boundary level should be shown or suppressed as not the boundary; the evidence anchor and plan landing comment carry the receipt numbers; every commit has a body and no attribution; the manifest reads changed_paths: none under the repository; the sole deliverable is the stored review record",
+          "estimated_hours": null,
+          "goal": "review run r-20260919T075817963210-nia-containment-aware-anchor independently on five dimensions",
+          "id": "review-of-nia-containment-aware-anchor",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-19T09:01:31Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T090130854993-review-of-nia-containment-aware-anchor/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260919T075817963210-nia-containment-aware-anchor.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s19c-review-anchor-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-19T09:01:42Z",
+        "completed_at": "2026-09-19T09:15:12.703Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 800,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 810,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9bc02503bbd7dd1aa6b49bdde91af0bdf69908ca",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "first-hand re-run of the four topology test files on all_debug (33 passed) and fixture reproduction with an independent spline",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T090130854993-review-of-nia-containment-aware-anchor/gate_four.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T090130854993-review-of-nia-containment-aware-anchor/manifest.md",
+        "scope_changed": false,
+        "session_id": "4c48811a-44e8-43b0-a8aa-b72e9c7cee46",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 7508476,
+            "input_tokens_cumulative": 7508476,
+            "output_tokens": 55690,
+            "output_tokens_cumulative": 55690,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-19T09:15:12.703Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 7675977,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 807.24,
+          "generated_tokens": 64675,
+          "generation_seconds": 659.015,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.6,
+          "machine_seconds": 148.225,
+          "peak_input_tokens": 166201,
+          "tokens_per_second": 98.14,
+          "wall_tokens_per_second": 80.12
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "review role; the sole deliverable is the stored review record",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-nia-containment-aware-anchor",
+          "session_id": "4c48811a-44e8-43b0-a8aa-b72e9c7cee46",
+          "session_source": "stream",
+          "retained_at": "2026-09-19T09:15:12.703Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.98,
+        "impl_move": {
+          "plan": "null-identification-authority",
+          "at_dispatch": 0.98,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "tool_steps": 76.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -202993,6 +203197,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2864
+    "_version": 2865
   }
 }

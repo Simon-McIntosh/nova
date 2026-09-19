@@ -24,7 +24,6 @@ import jax.numpy as jnp
 import numpy as np
 
 from benchmarks import solovev_certificate as certificate
-from nova.equilibrium import clip_quadrature
 from nova.equilibrium import forward_operator
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.jax.config import configure_dtypes
@@ -198,8 +197,6 @@ def measure(
     landed.
     """
     configure_dtypes()
-    if not hasattr(certificate.observation, "_UNIT_NODE"):
-        certificate.observation._UNIT_NODE = clip_quadrature._UNIT_NODE
     original_mode = support_clip_mode()
     rows: list[dict[str, Any]] = []
     source_revision = certificate._source_revision()
@@ -274,8 +271,6 @@ def solve_and_measure(
     output = output.resolve()
     figure_root = figure_root.resolve()
     part_root = part_root.resolve()
-    if not hasattr(certificate.observation, "_UNIT_NODE"):
-        certificate.observation._UNIT_NODE = clip_quadrature._UNIT_NODE
     device = jax.devices()[0]
     original_mode = support_clip_mode()
     original_figure_root = certificate.FIGURE_ROOT
@@ -569,8 +564,6 @@ def measure_jvp_accuracy(
     configure_dtypes()
     if not jax.config.jax_enable_x64:
         raise RuntimeError("exact-clip JVP validation requires binary64")
-    if not hasattr(certificate.observation, "_UNIT_NODE"):
-        certificate.observation._UNIT_NODE = clip_quadrature._UNIT_NODE
     original_mode = support_clip_mode()
     rows: list[dict[str, Any]] = []
     try:

@@ -139,7 +139,7 @@ commit, and the record does not pretend it does.</p>
 <tr><td>job</td><td>SLURM <code>1273425</code> on <code>98dci4-gpu-0003</code>, <code>betelgeuse</code> reservation <code>gpu_0003_grpA</code>, <code>gres/gpu:1</code>, 8 cores, 128G, wall 52m51s</td></tr>
 <tr><td>revision</td><td><code>b3c5c2f8</code> (driver committed at <code>78b8d9a7</code>, control fixes at <code>b3c5c2f8</code>)</td></tr>
 <tr><td>platforms, precision</td><td><code>cuda,cpu</code>; <code>jax_enable_x64 true</code> asserted before any array</td></tr>
-<tr><td>compilation</td><td>four <code>jit(solve)</code> compilations in the allocation, the slowest reported at 4m18s; the persistent cache served primitive-level entries only and could not refresh its <code>-atime</code> sidecar entries</td></tr>
+<tr><td>compilation</td><td>four <code>jit(solve)</code> compilations in the allocation, the slowest reported at 4m30.6s; the two slow-operation alarms in the log read <code>4m18.232613536s</code> and <code>4m30.589312894s</code>, so the allocation's slowest compile is the second, not the first; the persistent cache served primitive-level entries only and could not refresh its <code>-atime</code> sidecar entries</td></tr>
 <tr><td>reproduction control</td><td>the traced arm's operand partition reproduces the committed bank reference exactly (<code>0fe0dcdf920a9b66</code>, <code>35c0be67ae2abdd8</code>, profile support <code>5683f88ca97c076e</code>) on device as well as on the login-node control</td></tr>
 <tr><td>pre-flight control</td><td>before any allocation the two treatments were shown to separate on four instruments (hook answer, leaf count 76/73, structure digests, cached geometry identity <code>6dda07ba…</code>/<code>0eef9f00…</code>) on the login node in 68s</td></tr>
 <tr><td>artifacts</td><td><code>receipt-21978-35-anchor-bisect.json</code>, <code>arms/arm-21978-35-{pure,mixed}-{traced,constant}.{json,npz}</code>, <code>arms/emission.json</code>, this page's panel</td></tr>
@@ -152,8 +152,13 @@ directory at the report directory, and the producer's response-carrier check res
 <code>docs/figures/plateau-input-attribution/mast-response-carrier.json</code> relative to the
 repository root; reproduced by hand as <code>FileNotFoundError</code> and exit 1 from that directory
 against exit 0 from the worktree. Its receipt then printed
-<em>"the override did not take effect"</em> for want of any arm to compare — a misleading reading of
-absent arms that the driver's receipt path owes a repair.</p>
+<em>"the override did not take effect"</em> for want of any arm to compare, which reads as a
+measurement of the hook when nothing was measured at all. The receipt path now names its absent
+arms — <code>arms_absent</code> carries each treatment's reason, and the finding states that the
+record compares nothing about the hook — and the mixed class's carrier finding now compares the
+two residuals' gap to the round-off floor rather than to the bit, so a difference of
+<code>8.95e-17</code> at the floor is reported as the arithmetic order it is rather than as a
+carrier.</p>
 
 </main>
 </body>

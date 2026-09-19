@@ -67,6 +67,34 @@
 
 <p>Evidence: <a href="/nova/evidence/archive/null-identification-authority-landed">the anchor-bisect record</a> (receipt <code>docs/figures/null-identification-authority/anchor-bisect/receipt.html</code>), which carries the four-arm table, the trip-trace and terminal-state digests, the reproduction and pre-flight controls, and the launcher defect that preceded the run.</p>
 
+<h3>The bisect receipt's three review findings are repaired (2026-09-19)</h3>
+<p><strong>Repaired: an absent arm is reported as absent.</strong> The receipt's verdict keyed on the hook-name list alone, and an arm that never landed (<code>_load_arm</code>'s exception stub) carries no hook names, so its empty list matched the other arm's empty list and the receipt answered <em>"the override did not take effect"</em> — a sentence that reads as a measurement of the hook when no measurement exists. The verdict now keys on the arm's absence first, publishing <code>arms_absent</code> with each treatment's reason and a finding that says the record compares nothing about the hook. Reproduced on the committed driver with an empty arm directory: both classes answered <em>"the override did not take effect"</em>; the repaired path answers <code>absent arms: traced carries no terminal state (missing arm file …); constant carries no terminal state (…), so this record compares nothing about the hook</code>.</p>
+
+<p><strong>Repaired: the mixed-class finding is compared to the round-off floor before a carrier is named.</strong> The two mixed residuals, <code>2.2041968427410595e-16</code> and <code>3.0996518101046146e-16</code>, differ bitwise, so <code>terminal_residual_differ</code> is true and the template named the anchor partition the carrier of an <code>8.95e-17</code> gap — which is below the round-off floor <code>2.220446049250313e-16</code>, one machine epsilon, the smallest a normalised residual can report. The finding now compares that gap to the floor and reports the two arms as having reached the same state by a different arithmetic order; the gap, the floor and the below-floor boolean are published as data beside the sentence. The pure class's arms agree exactly, so its finding is unchanged.</p>
+
+<p><strong>Repaired: the compile figure is read from the log's slowest alarm.</strong> The receipt's instrument table stated the allocation's slowest <code>jit(solve)</code> compile as 4m18s, which is the log's first slow-operation alarm; the log's alarms read <code>4m18.232613536s</code> and <code>4m30.589312894s</code>, so 4m30.6s is the slowest of the four compilations. The receipt and the landed record now state it.</p>
+
+<p><strong>The regenerate, quoted.</strong> The <code>receipt</code> subcommand was re-run against the committed arm records on the login node with no allocation, so the machine-readable receipt is regenerated rather than hand-edited. The diff against the prior receipt is the mixed finding, the new diagnostic keys, and the timestamp — nothing else; the pure class's keys are untouched apart from the added diagnostics:</p>
+<pre><code>    "verdict": {
+     "active_set_cycle_present": false,
++    "arms_absent": {},
+     "bank_current_residual": 2.2041968427410595e-16,
+     "bank_producer_residual": 3.0996518101046146e-16,
+     "constant_matches_bank_producer_residual": true,
+     "constant_matches_bank_producer_stage": false,
+-    "finding": "the anchor partition is the carrier: holding the three anchors constant changes the terminal state",
++    "finding": "the anchor partition is not the carrier at this resolution: the two terminal residuals differ by 8.95e-17 against a round-off floor of 2.22e-16, so the two arms reached the same state by a different arithmetic order",
+     "hook_names_differ": true,
+     "partition_leaf_delta": 3,
+     "partition_structure_differ": true,
+     "profile_support_invariant": true,
++    "round_off_floor": 2.220446049250313e-16,
+     "terminal_residual_differ": true,
++    "terminal_residual_gap": 8.954549673635552e-17,
++    "terminal_residual_gap_below_round_off": true,</code></pre>
+
+<p><strong>Gate, and the control the new contract needs.</strong> <code>tests/test_bank_drift_anchor_bisect.py</code> pins both contracts on synthetic arm records: a missing arm file and a raised arm each report absent with their reason, a below-floor gap does not name a carrier, identical residuals keep the flatten reading, and — the control that stops the floor from swallowing every carrier — a separation far above the floor still names the carrier. Run with <code>tests/test_bank_drift_paired_probe.py</code> on the login node: 18 passed, exit 0 (log <code>~/.config/reckon/crew/reports/nova/s19-local/nia-anchor-bisect-record-repairs/pytest-anchor-bisect-record-repairs.log</code>). No allocation was spent; only record repairs landed.</p>
+
 <h2 id="s2"><span class="badge badge-shipped">✓ landed 2026-09-04</span> §2 — Connected, contained stationary points on the read the solve uses</h2>
 <p class="landed-summary">The solve's own read path is containment-aware for the single closed ring: X candidates are masked by first-wall containment before the flux ranking (<code>nova/equilibrium/topology.py</code> lines 352–368, commit <code>54e8911b</code>), O admission uses one shared seed mask and requires a material-connected component rather than accepting a private well (lines 754–812), the fixed-shape candidate census keeps overflow visible instead of truncating (<code>nova/equilibrium/forward_operator.py</code> lines 404–412, 620–652), private wall anchors are masked (<code>20f3a40c</code>), and the out-of-vessel saddle regression is pinned (<code>tests/test_stationary_point_admission.py</code>). The generalisation from one ring to the occupiable region of a multi-unit wall is owned by <code>multi-unit-limiter-wall</code> §3. Record: <a href="/nova/evidence/archive/null-identification-authority-landed">landed evidence</a>.</p>
 

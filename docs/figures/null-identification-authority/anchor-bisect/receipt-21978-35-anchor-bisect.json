@@ -419,16 +419,20 @@
    },
    "verdict": {
     "active_set_cycle_present": false,
+    "arms_absent": {},
     "bank_current_residual": 2.2041968427410595e-16,
     "bank_producer_residual": 3.0996518101046146e-16,
     "constant_matches_bank_producer_residual": true,
     "constant_matches_bank_producer_stage": false,
-    "finding": "the anchor partition is the carrier: holding the three anchors constant changes the terminal state",
+    "finding": "the anchor partition is not the carrier at this resolution: the two terminal residuals differ by 8.95e-17 against a round-off floor of 2.22e-16, so the two arms reached the same state by a different arithmetic order",
     "hook_names_differ": true,
     "partition_leaf_delta": 3,
     "partition_structure_differ": true,
     "profile_support_invariant": true,
+    "round_off_floor": 2.220446049250313e-16,
     "terminal_residual_differ": true,
+    "terminal_residual_gap": 8.954549673635552e-17,
+    "terminal_residual_gap_below_round_off": true,
     "termination_reason_differ": false,
     "traced_matches_bank_current_residual": true,
     "traced_matches_bank_current_stage": true,
@@ -865,6 +869,7 @@
    },
    "verdict": {
     "active_set_cycle_present": true,
+    "arms_absent": {},
     "bank_current_residual": 0.0024506488565449,
     "bank_producer_residual": 3.857344474796854e-16,
     "constant_matches_bank_producer_residual": false,
@@ -874,7 +879,10 @@
     "partition_leaf_delta": 3,
     "partition_structure_differ": true,
     "profile_support_invariant": true,
+    "round_off_floor": 2.220446049250313e-16,
     "terminal_residual_differ": false,
+    "terminal_residual_gap": 0.0,
+    "terminal_residual_gap_below_round_off": true,
     "termination_reason_differ": false,
     "traced_matches_bank_current_residual": true,
     "traced_matches_bank_current_stage": true,
@@ -887,6 +895,6 @@
   }
  },
  "engine": "benchmarks/bank_drift_anchor_bisect.py",
- "generated_at": "2026-09-18T09:30:05.940860+00:00",
+ "generated_at": "2026-09-19T14:06:39.719233+00:00",
  "identity": "21978/35"
 }

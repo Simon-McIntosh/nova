@@ -64,6 +64,7 @@ TRACE_FIELDS = (
     "active_set_cycle_damping_activations",
 )
 TRACE_LIMIT = 64
+ROUND_OFF_FLOOR = float(np.finfo(np.float64).eps)
 GEOMETRY_KEYS = (
     "radius",
     "height",
@@ -631,6 +632,39 @@ def _close(left: float | None, right: float | None) -> bool | None:
     return float(left) == float(right)
 
 
+def _arm_absence(record: dict[str, Any]) -> str | None:
+    """Return why an arm carries no terminal state, or None when it does.
+
+    An arm file that never landed is loaded as an exception stub and an arm
+    whose solve raised is persisted with its traceback; neither carries a
+    terminal residual, so neither supports a comparison of the treatments.
+    """
+
+    if record.get("terminal_residual") is not None:
+        return None
+    exception = record.get("exception")
+    if exception:
+        return str(exception).splitlines()[0]
+    return "no terminal residual recorded"
+
+
+def _residual_gap_below_round_off(
+    left: float | None, right: float | None
+) -> bool | None:
+    """Whether two terminal residuals differ by less than the round-off floor.
+
+    The terminal residual is the fixed point's normalised residual, so a solve
+    that reaches the floor reports order one machine epsilon and no smaller.
+    Two such values differ by the order their arithmetic ran in, not by a
+    different terminal state, and reading that difference as a carrier would be
+    reporting the summation order as physics.
+    """
+
+    if left is None or right is None:
+        return None
+    return abs(float(left) - float(right)) <= ROUND_OFF_FLOOR
+
+
 def _receipt(out_dir: Path, identity: str, bank_dir: Path, out_path: Path) -> int:
     """Join this run's arms and the committed bank reference into one record."""
 
@@ -659,6 +693,11 @@ def _receipt(out_dir: Path, identity: str, bank_dir: Path, out_path: Path) -> in
         if rows:
             bank = rows[0]
         verdict: dict[str, Any] = {}
+        verdict["arms_absent"] = {
+            treatment: why
+            for treatment, arm in arms.items()
+            if (why := _arm_absence(arm))
+        }
         traced_trace = traced.get("trip_trace") or {}
         constant_trace = constant.get("trip_trace") or {}
         verdict["hook_names_differ"] = list(traced.get("hook_names") or []) != list(
@@ -713,7 +752,39 @@ def _receipt(out_dir: Path, identity: str, bank_dir: Path, out_path: Path) -> in
             for arm in arms.values()
         )
         verdict["active_set_cycle_present"] = active_set_cycle
-        if verdict["hook_names_differ"] and verdict["terminal_residual_differ"]:
+        traced_residual = traced.get("terminal_residual")
+        constant_residual = constant.get("terminal_residual")
+        verdict["round_off_floor"] = ROUND_OFF_FLOOR
+        verdict["terminal_residual_gap"] = (
+            abs(float(traced_residual) - float(constant_residual))
+            if traced_residual is not None and constant_residual is not None
+            else None
+        )
+        verdict["terminal_residual_gap_below_round_off"] = (
+            _residual_gap_below_round_off(traced_residual, constant_residual)
+        )
+        if verdict["arms_absent"]:
+            verdict["finding"] = (
+                "absent arms: "
+                + "; ".join(
+                    f"{treatment} carries no terminal state ({why})"
+                    for treatment, why in verdict["arms_absent"].items()
+                )
+                + ", so this record compares nothing about the hook"
+            )
+        elif (
+            verdict["hook_names_differ"]
+            and verdict["terminal_residual_differ"]
+            and verdict["terminal_residual_gap_below_round_off"]
+        ):
+            verdict["finding"] = (
+                "the anchor partition is not the carrier at this resolution: the "
+                "two terminal residuals differ by "
+                f"{verdict['terminal_residual_gap']:.3g} against a round-off "
+                f"floor of {ROUND_OFF_FLOOR:.3g}, so the two arms reached the same "
+                "state by a different arithmetic order"
+            )
+        elif verdict["hook_names_differ"] and verdict["terminal_residual_differ"]:
             verdict["finding"] = (
                 "the anchor partition is the carrier: holding the three anchors "
                 "constant changes the terminal state"
@@ -758,6 +829,8 @@ def _receipt(out_dir: Path, identity: str, bank_dir: Path, out_path: Path) -> in
             f"constant_residual={record['constant'].get('terminal_residual')} "
             f"constant_reason={record['constant'].get('termination_reason')} "
             f"hook_moved={verdict['hook_names_differ']} "
+            f"arms_absent={json.dumps(verdict['arms_absent'])} "
+            f"residual_gap={verdict['terminal_residual_gap']} "
             f"finding={verdict['finding']}",
             flush=True,
         )

@@ -34,6 +34,107 @@ CERTIFICATE_ROWS = (
     ("diverted-single-null", -500),
 )
 BANKED_BOUNDARY_MS_PER_TRIP = 46.1
+CERTIFICATE_BASE_REVISION = "4e82bafb3abbd972096f84f306dfc8b28577e2fe"
+CERTIFICATE_BASELINE_RECEIPT = (
+    Path(__file__).resolve().parents[1]
+    / "docs/figures/millisecond-converged-solve/program-size/semantic/receipt.json"
+)
+
+
+class CertificateBaselineRefusal(RuntimeError):
+    """Raised when the recorded base terminal state cannot be used as a baseline.
+
+    The certificate compares a terminal state *recorded at the base revision*
+    against one solved at head.  A record whose own revision key is not the
+    recorded base revision, or a record that omits the baseline digest for a
+    row, cannot serve as that baseline: reading it would report a bit-identity
+    between two states that were never two revisions, which is the comparison
+    this gate exists to make.
+    """
+
+
+def load_certificate_baseline(
+    path: Path,
+    expected_revision: str = CERTIFICATE_BASE_REVISION,
+) -> dict[str, Any]:
+    """Load the recorded base-revision terminal states, keyed by that revision.
+
+    The record is a certificate identity receipt, either bare or embedded as the
+    ``certificate`` object of a semantic gate receipt.  Each arm is keyed by the
+    revision that produced it: the baseline states carry the revision recorded
+    beside them and the caller's expected base revision must match it, so a
+    record made at another revision is refused rather than compared.
+    """
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    certificate = payload.get("certificate", payload)
+    revision = certificate.get("measurement_revision")
+    if not revision:
+        raise CertificateBaselineRefusal(
+            f"baseline receipt {path} records no revision, so the arm it carries "
+            "cannot be attributed to the recorded base revision"
+        )
+    if revision != expected_revision:
+        raise CertificateBaselineRefusal(
+            f"baseline receipt {path} was recorded at revision {revision}, which "
+            f"is not the recorded base revision {expected_revision}; a baseline "
+            "arm must come from the base revision or the comparison is between "
+            "two arms of one revision"
+        )
+    rows: dict[tuple[str, int], dict[str, Any]] = {}
+    for row in certificate.get("rows", []):
+        key = (str(row.get("case")), int(row.get("requested_cells")))
+        digest = row.get("baseline_state_sha256_binary64")
+        if not digest:
+            raise CertificateBaselineRefusal(
+                f"baseline receipt {path} records no baseline state digest for "
+                f"{key[0]} at {key[1]} cells"
+            )
+        rows[key] = {
+            "revision": revision,
+            "state_sha256_binary64": str(digest),
+            "realised_state_values": row.get("realised_state_values"),
+            "terminal_residual": row.get("baseline_terminal_residual"),
+            "terminal_residual_finite": row.get("baseline_terminal_residual_finite"),
+            "state_finite": row.get("baseline_state_finite"),
+            "seconds": row.get("baseline_seconds"),
+        }
+    if not rows:
+        raise CertificateBaselineRefusal(
+            f"baseline receipt {path} at revision {revision} carries no rows"
+        )
+    return {"revision": revision, "receipt": str(path), "rows": rows}
+
+
+def certificate_identity_arms(
+    candidate_revision: str,
+    baseline: dict[str, Any],
+    case_name: str,
+    requested_cells: int,
+) -> dict[str, Any]:
+    """Select each arm's source and its revision key for one certificate row.
+
+    The baseline arm is the terminal state recorded at the base revision and the
+    candidate arm is the state solved at head.  Both keys are carried out of
+    here onto the emitted row, so a reader can see that the two arms belong to
+    two revisions rather than to one.
+    """
+    key = (str(case_name), int(requested_cells))
+    recorded = baseline["rows"].get(key)
+    if recorded is None:
+        raise CertificateBaselineRefusal(
+            f"baseline receipt {baseline['receipt']} carries no row for "
+            f"{case_name} at {requested_cells} cells"
+        )
+    return {
+        "baseline": {
+            "source": "recorded base-revision terminal state",
+            "revision": baseline["revision"],
+        },
+        "candidate": {
+            "source": "head-revision solve",
+            "revision": candidate_revision,
+        },
+    }
 
 
 def _load_rungs(directory: Path) -> dict[int, dict[str, Any]]:
@@ -1183,51 +1284,37 @@ def _require_identity_rows(identity_row_count: int, label: str) -> int:
     return count
 
 
-def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str, Any]:
-    """Compare the pre-wrapper and frozen-partition terminal states exactly."""
+def _certificate_identity_row(
+    case_name: str,
+    requested_cells: int,
+    *,
+    baseline: dict[str, Any],
+    candidate_revision: str,
+) -> dict[str, Any]:
+    """Compare the head terminal state with the state recorded at the base revision.
+
+    The baseline arm is read from the terminal state recorded at the base
+    revision and the candidate arm is solved here at head, so the comparison is
+    base against head rather than one revision against itself.  A recorded state
+    carries a binary64 digest rather than the array, so the identity is
+    established on the digest and the realised width; a maximum element
+    difference is unavailable from a digest and is reported as unmeasured rather
+    than as zero.
+    """
     import jax
     import jax.numpy as jnp
     import numpy as np
 
-    from nova.equilibrium import fixed_point
-
+    arms = certificate_identity_arms(
+        candidate_revision, baseline, case_name, requested_cells
+    )
+    baseline_row = baseline["rows"][(str(case_name), int(requested_cells))]
     profile, seed, requested_class, target_current, request = _certificate_operands(
         case_name, requested_cells
     )
     state = jnp.asarray(seed)
     external = profile.operator.external()
-    mapped = profile.operator.traced_flux_map(requested_class, target_current)
-    shadowed = profile.operator.traced_flux_map_with_shadow(
-        requested_class, target_current
-    )
-
-    def shadow_mask(value, operator):
-        return operator.residual_shadow_mask(value, requested_class)
-
-    def promoted_shadow_mask(value, previous, operator):
-        return operator.residual_shadow_mask(
-            value, requested_class, previous_shadow=previous
-        )
-
     options = request.policy.kernel_options()
-
-    def baseline_solve(initial, exterior):
-        return fixed_point.newton_krylov(
-            mapped,
-            initial,
-            shadow_mask_fn=shadow_mask,
-            promoted_shadow_mask_fn=promoted_shadow_mask,
-            shadowed_map_fn=shadowed,
-            map_arguments=(exterior, profile.operator),
-            callback_arguments=(profile.operator,),
-            **options,
-        )
-
-    baseline_program = jax.jit(baseline_solve)
-    baseline_started = time.perf_counter()
-    baseline = baseline_program(state, external)
-    jax.block_until_ready(baseline.state)
-    baseline_seconds = time.perf_counter() - baseline_started
     candidate_program = profile._accelerated_history_program(
         "newton_krylov",
         requested_class=requested_class,
@@ -1238,54 +1325,51 @@ def _certificate_identity_row(case_name: str, requested_cells: int) -> dict[str,
     candidate = candidate_program(state, external, profile.operator)
     jax.block_until_ready(candidate.state)
     candidate_seconds = time.perf_counter() - candidate_started
-    baseline_state = np.asarray(baseline.state, dtype=np.float64)
     candidate_state = np.asarray(candidate.state, dtype=np.float64)
     identity_row_count = _require_identity_rows(
-        baseline_state.size, f"solovev:{case_name}:{requested_cells}"
+        candidate_state.size, f"solovev:{case_name}:{requested_cells}"
     )
-    baseline_hash = hashlib.sha256(baseline_state.tobytes()).hexdigest()
     candidate_hash = hashlib.sha256(candidate_state.tobytes()).hexdigest()
-    baseline_state_finite = bool(np.all(np.isfinite(baseline_state)))
     candidate_state_finite = bool(np.all(np.isfinite(candidate_state)))
-    difference = np.abs(candidate_state - baseline_state)
-    max_absolute_difference = (
-        float(np.max(difference, initial=0.0))
-        if bool(np.all(np.isfinite(difference)))
-        else None
-    )
-    baseline_residual = float(baseline.residual)
     candidate_residual = float(candidate.residual)
+    baseline_hash = baseline_row["state_sha256_binary64"]
     return {
         "case": case_name,
         "requested_cells": requested_cells,
         "identity_row_count": identity_row_count,
         "realised_state_values": identity_row_count,
-        "baseline_seconds": baseline_seconds,
+        "baseline_revision": arms["baseline"]["revision"],
+        "candidate_revision": arms["candidate"]["revision"],
+        "baseline_arm_source": arms["baseline"]["source"],
+        "candidate_arm_source": arms["candidate"]["source"],
+        "baseline_seconds": None,
+        "baseline_recorded_seconds": baseline_row["seconds"],
         "candidate_seconds": candidate_seconds,
         "baseline_state_sha256_binary64": baseline_hash,
         "candidate_state_sha256_binary64": candidate_hash,
-        "baseline_state_finite": baseline_state_finite,
+        "baseline_state_finite": baseline_row["state_finite"],
         "candidate_state_finite": candidate_state_finite,
-        "terminal_state_bit_identical": bool(
-            np.array_equal(candidate_state, baseline_state)
+        "terminal_state_bit_identical": candidate_hash == baseline_hash,
+        "maximum_absolute_state_difference": None,
+        "maximum_absolute_state_difference_measure": (
+            "unavailable from a recorded digest; the baseline arm is a binary64 "
+            "sha256 rather than the state array"
         ),
-        "maximum_absolute_state_difference": max_absolute_difference,
-        "baseline_terminal_residual": (
-            baseline_residual if math.isfinite(baseline_residual) else None
-        ),
+        "baseline_terminal_residual": baseline_row["terminal_residual"],
         "candidate_terminal_residual": (
             candidate_residual if math.isfinite(candidate_residual) else None
         ),
-        "baseline_terminal_residual_finite": math.isfinite(baseline_residual),
+        "baseline_terminal_residual_finite": baseline_row["terminal_residual_finite"],
         "candidate_terminal_residual_finite": math.isfinite(candidate_residual),
-        "converged_equal": bool(
-            np.asarray(candidate.converged).item()
-            == np.asarray(baseline.converged).item()
-        ),
+        "converged_equal": None,
     }
 
 
-def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str, Any]:
+def run_certificate_identity(
+    output: Path,
+    cache_root: Path | None,
+    baseline_receipt: Path | None = None,
+) -> dict[str, Any]:
     """Persist the four certificate identity rows as each comparison lands."""
     identity_row_count = _require_identity_rows(
         len(CERTIFICATE_ROWS), "certificate identity rows"
@@ -1302,10 +1386,17 @@ def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str,
     configure_dtypes()
     if os.environ.get("SLURM_JOB_ID") is None:
         raise RuntimeError("certificate identity requires a SLURM allocation")
+    baseline = load_certificate_baseline(
+        baseline_receipt or CERTIFICATE_BASELINE_RECEIPT
+    )
+    candidate_revision = _require_revision()
     receipt: dict[str, Any] = {
         "schema": "nova.solve-program-certificate-identity",
         "identity_row_count": identity_row_count,
-        "measurement_revision": _require_revision(),
+        "measurement_revision": candidate_revision,
+        "baseline_revision": baseline["revision"],
+        "candidate_revision": candidate_revision,
+        "baseline_state_receipt": baseline["receipt"],
         "captured_at": datetime.now(UTC).isoformat(),
         "assignment": {
             "job_id": os.environ["SLURM_JOB_ID"],
@@ -1319,7 +1410,8 @@ def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str,
             minimum_compile_seconds=0.0,
         ).receipt(),
         "comparison": (
-            "pre-wrapper traced map against the frozen-partition accelerated program"
+            "terminal state recorded at the base revision against the head "
+            "accelerated program"
         ),
         "rows": [],
         "passed": None,
@@ -1327,20 +1419,63 @@ def run_certificate_identity(output: Path, cache_root: Path | None) -> dict[str,
     _write_json(output, receipt)
     for case_name, requested_cells in CERTIFICATE_ROWS:
         print(f"CERTIFICATE_START case={case_name} cells={requested_cells}", flush=True)
-        row = _certificate_identity_row(case_name, requested_cells)
+        row = _certificate_identity_row(
+            case_name,
+            requested_cells,
+            baseline=baseline,
+            candidate_revision=candidate_revision,
+        )
         receipt["rows"].append(row)
         _write_json(output, receipt)
         print(
             f"CERTIFICATE_DONE case={case_name} cells={requested_cells} "
-            f"bit_identical={int(row['terminal_state_bit_identical'])}",
+            f"bit_identical={int(row['terminal_state_bit_identical'])} "
+            f"baseline_revision={row['baseline_revision']} "
+            f"candidate_revision={row['candidate_revision']}",
             flush=True,
         )
     receipt["passed"] = len(receipt["rows"]) == identity_row_count and all(
-        row["terminal_state_bit_identical"] and row["converged_equal"]
-        for row in receipt["rows"]
+        row["terminal_state_bit_identical"] for row in receipt["rows"]
     )
     _write_json(output, receipt)
     return receipt
+
+
+def certificate_baseline_source(
+    baseline_receipt: Path | None = None,
+    candidate_revision: str | None = None,
+) -> dict[str, Any]:
+    """Report the arm selection for the smallest certificate row, solving nothing.
+
+    This is the arm-selection path on its own: it loads the recorded baseline,
+    selects both arm sources for ``CERTIFICATE_ROWS[0]``, and returns their
+    revision keys, so the selection can be exercised and logged without paying
+    for a compile.
+    """
+    from benchmarks.trip_quantum_width_one import _require_revision
+
+    baseline = load_certificate_baseline(
+        baseline_receipt or CERTIFICATE_BASELINE_RECEIPT
+    )
+    case_name, requested_cells = CERTIFICATE_ROWS[0]
+    arms = certificate_identity_arms(
+        candidate_revision or _require_revision(),
+        baseline,
+        case_name,
+        requested_cells,
+    )
+    baseline_row = baseline["rows"][(str(case_name), int(requested_cells))]
+    return {
+        "schema": "nova.certificate-baseline-arm-selection",
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "baseline_revision": arms["baseline"]["revision"],
+        "candidate_revision": arms["candidate"]["revision"],
+        "baseline_arm_source": arms["baseline"]["source"],
+        "candidate_arm_source": arms["candidate"]["source"],
+        "arms_differ": arms["baseline"]["revision"] != arms["candidate"]["revision"],
+        "baseline_state_sha256_binary64": baseline_row["state_sha256_binary64"],
+    }
 
 
 def measure_300_program(output: Path, cache_root: Path | None) -> dict[str, Any]:
@@ -1677,6 +1812,22 @@ def main() -> int:
     parser.add_argument("--cache-root", type=Path)
     parser.add_argument("--semantic-report", action="store_true")
     parser.add_argument("--certificate-receipt", type=Path)
+    parser.add_argument(
+        "--certificate-baseline-receipt",
+        type=Path,
+        help=(
+            "recorded terminal state at the base revision that the baseline arm "
+            "reads; defaults to the committed certificate receipt"
+        ),
+    )
+    parser.add_argument(
+        "--certificate-baseline-source",
+        action="store_true",
+        help=(
+            "report the arm selection for the smallest certificate row without "
+            "solving; exits nonzero when a baseline receipt is refused"
+        ),
+    )
     parser.add_argument("--mast-receipt", type=Path)
     parser.add_argument("--dispatch-receipt", type=Path)
     parser.add_argument(
@@ -1704,8 +1855,30 @@ def main() -> int:
     if args.measure_300_output is not None:
         result = measure_300_program(args.measure_300_output, args.cache_root)
         return 0 if result["passed"] else 1
+    if args.certificate_baseline_source:
+        result = certificate_baseline_source(args.certificate_baseline_receipt)
+        for key in (
+            "case",
+            "requested_cells",
+            "baseline_revision",
+            "candidate_revision",
+            "baseline_arm_source",
+            "candidate_arm_source",
+            "baseline_state_sha256_binary64",
+        ):
+            print(f"CERTIFICATE_BASELINE_{key.upper()}={result[key]}", flush=True)
+        print(
+            "CERTIFICATE_BASELINE_SOURCE_GATE="
+            f"{'PASS' if result['arms_differ'] else 'FAIL'}",
+            flush=True,
+        )
+        return 0 if result["arms_differ"] else 1
     if args.certificate_output is not None:
-        result = run_certificate_identity(args.certificate_output, args.cache_root)
+        result = run_certificate_identity(
+            args.certificate_output,
+            args.cache_root,
+            args.certificate_baseline_receipt,
+        )
         print(
             f"CERTIFICATE_IDENTITY_GATE={'PASS' if result['passed'] else 'FAIL'}",
             flush=True,

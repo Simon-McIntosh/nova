@@ -1,0 +1,302 @@
+{
+  "head": {
+    "admitted_vertex_count": [
+      0
+    ],
+    "area": [
+      0.0
+    ],
+    "derived_capacity": 136,
+    "refused_cells": 1,
+    "support_capacity_mesh": 8,
+    "vertex_capacity": 136
+  },
+  "head_pack_calls": [
+    {
+      "capacity": 4,
+      "live_vertex_count": [
+        4
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        4
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        4,
+        2
+      ]
+    },
+    {
+      "capacity": 8,
+      "live_vertex_count": [
+        6
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        12
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        12,
+        2
+      ]
+    },
+    {
+      "capacity": 8,
+      "live_vertex_count": [
+        6
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        8
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        8,
+        2
+      ]
+    },
+    {
+      "capacity": 136,
+      "live_vertex_count": [
+        260
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        1024
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        1024,
+        2
+      ]
+    },
+    {
+      "capacity": 136,
+      "live_vertex_count": [
+        136
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        136
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        136,
+        2
+      ]
+    },
+    {
+      "capacity": 136,
+      "live_vertex_count": [
+        0
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        136
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        136,
+        2
+      ]
+    },
+    {
+      "capacity": 136,
+      "live_vertex_count": [
+        0
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        134
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        134,
+        2
+      ]
+    },
+    {
+      "capacity": 136,
+      "live_vertex_count": [
+        0
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        134
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        134,
+        2
+      ]
+    }
+  ],
+  "raised": {
+    "admitted_vertex_count": [
+      260
+    ],
+    "area": [
+      0.7499999999999982
+    ],
+    "raised_capacity": 4096,
+    "refused_cells": 0,
+    "support_capacity_mesh": 8,
+    "vertex_capacity": 4096
+  },
+  "raised_pack_calls": [
+    {
+      "capacity": 4,
+      "live_vertex_count": [
+        4
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        4
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        4,
+        2
+      ]
+    },
+    {
+      "capacity": 8,
+      "live_vertex_count": [
+        6
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        12
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        12,
+        2
+      ]
+    },
+    {
+      "capacity": 8,
+      "live_vertex_count": [
+        6
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        8
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        8,
+        2
+      ]
+    },
+    {
+      "capacity": 4096,
+      "live_vertex_count": [
+        260
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        1024
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        1024,
+        2
+      ]
+    },
+    {
+      "capacity": 4096,
+      "live_vertex_count": [
+        260
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        4096
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        4096,
+        2
+      ]
+    },
+    {
+      "capacity": 4096,
+      "live_vertex_count": [
+        0
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        4096
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        4096,
+        2
+      ]
+    },
+    {
+      "capacity": 4096,
+      "live_vertex_count": [
+        0
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        134
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        134,
+        2
+      ]
+    },
+    {
+      "capacity": 4096,
+      "live_vertex_count": [
+        0
+      ],
+      "source": "separatrix_clip._pack_traced_vertices",
+      "valid_shape": [
+        1,
+        134
+      ],
+      "vertices_name": "_pack_traced_vertices.vertices",
+      "vertices_shape": [
+        1,
+        134,
+        2
+      ]
+    }
+  ]
+}

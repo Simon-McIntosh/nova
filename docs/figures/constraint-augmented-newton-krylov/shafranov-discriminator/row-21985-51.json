@@ -23,18 +23,18 @@
     "plasma_current_a": 934383.8750000002,
     "pressure_integral_j": 69552.14748617138,
     "poloidal_field_integral_t2_m3": 0.3521019435925485,
-    "nova_major_radius_m": 0.7931332374722937,
+    "nova_major_radius_m": 0.8397259377121569,
     "boundary_minor_radius_m": 0.5762977376580238,
-    "major_over_minor": 1.3762560316399168,
+    "major_over_minor": 1.4571043452723942,
     "implied_radius_from_betap_m": 0.5809850686472808,
     "implied_radius_from_inductance_m": 0.5522979904525172,
     "implied_radius_inductance_over_betap": 0.9506233813176018,
-    "implied_over_major_from_betap": 0.7325188772807876,
-    "implied_over_major_from_inductance": 0.6963495719996358,
+    "implied_over_major_from_betap": 0.6918746254643288,
+    "implied_over_major_from_inductance": 0.6577121959067497,
     "implied_over_minor_from_betap": 1.008133523147784,
-    "rescaled_efit_combination": 0.6584375995430113
+    "rescaled_efit_combination": 0.621903792113237
   },
-  "convention_sentence": "Commensurability: on nova's own volume integral and leading factor, the stored scalars are reproduced by a denominator radius of 0.5810 m, against nova's volume-weighted major radius 0.7931 m and the boundary's minor radius 0.5763 m; the two stored scalars imply the same radius to within 4.94% (l_i implies 0.5523 m), so one convention difference explains both moments. Rescaled onto nova's radius the reconstruction's own combination is 0.6584, against the profiles' 0.6061.",
+  "convention_sentence": "Commensurability: on nova's own volume integral and leading factor, the stored scalars are reproduced by a denominator radius of 0.5810 m, against nova's volume-weighted major radius 0.8397 m and the boundary's minor radius 0.5763 m; the two stored scalars imply the same radius to within 4.94% (l_i implies 0.5523 m), so one convention difference explains both moments. Rescaled onto nova's radius the reconstruction's own combination is 0.6219, against the profiles' 0.6061.",
   "readings": {
     "efit_own": {
       "label": "EFIT betap + li/2",
@@ -79,7 +79,7 @@
     "observation_plasma_current_a": 934383.8750000002,
     "observation_relative_difference": 2.4918093075382924e-16,
     "operator_use_linear_moments": false,
-    "path": "unnormalised: the operator's moment path resolves moments from the flux directly and ignores the requested current, so the profile column is the unnormalised observation",
+    "path": "normalised: the operator's moment path rescales the current moments and the support integrals by current_normalisation_amplitude on the requested current, so the profile column is the current-normalised observation",
     "normalised_combination": 0.6061068398024014,
     "unnormalised_combination": 0.6065693483250655,
     "combination_shift": -0.0004625085226640513
@@ -96,14 +96,14 @@
   },
   "state_panel": {
     "png": {
-      "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-discriminator-2/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.png",
+      "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.png",
       "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.png",
       "sha256": "c560abd93bd58aa1796713a511b35e2ef112011b1b669ebbc76b9de09ecd6b84"
     },
     "svg": {
-      "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-shafranov-discriminator-2/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.svg",
+      "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.svg",
       "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21985-51-state.svg",
-      "sha256": "d16fc400aaeb1751c0e0cccfa6531e97dd9c65f8b3c5d24c82147880a4df4a56"
+      "sha256": "ebce4040f935cdfdf0ce39ef88bad4d083a4b2b9e887ef231151b3b31dc20eb5"
     },
     "levels_wb": [
       -1.461588756167263,

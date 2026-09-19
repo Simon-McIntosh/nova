@@ -92,68 +92,68 @@
       "target_combination": 0.46136082239669995,
       "source_combination_at_reference": 0.46130870196012286,
       "projected_combination_at_reference": 0.46136082239669995,
-      "reference_combination_gap": 5.212043657709664e-05,
+      "projection_move_of_target": 5.212043657709664e-05,
       "projection": {
-        "p_prime": {
-          "order": 2,
-          "basis": "monomial",
-          "condition_number": 22.236523085551795,
-          "monomial_condition_number": 22.236523085551795,
-          "si_scale": 36737.21328674518,
-          "relative_residual": 1.5607145344909264e-08,
-          "maximum_relative_residual": 3.435720511688854e-08,
-          "tolerance_met": true,
-          "sample_count": 65
-        },
         "ff_prime": {
-          "order": 2,
           "basis": "monomial",
           "condition_number": 22.236523085551795,
-          "monomial_condition_number": 22.236523085551795,
-          "si_scale": 0.08508896937382944,
-          "relative_residual": 1.7897634912945847e-08,
           "maximum_relative_residual": 5.449373143914642e-08,
-          "tolerance_met": true,
-          "sample_count": 65
+          "monomial_condition_number": 22.236523085551795,
+          "order": 2,
+          "relative_residual": 1.7897634912945847e-08,
+          "sample_count": 65,
+          "si_scale": 0.08508896937382944,
+          "tolerance_met": true
         },
-        "sample_count": 65,
+        "p_prime": {
+          "basis": "monomial",
+          "condition_number": 22.236523085551795,
+          "maximum_relative_residual": 3.435720511688854e-08,
+          "monomial_condition_number": 22.236523085551795,
+          "order": 2,
+          "relative_residual": 1.5607145344909264e-08,
+          "sample_count": 65,
+          "si_scale": 36737.21328674518,
+          "tolerance_met": true
+        },
         "psi_span": [
           0.0,
           1.0
-        ]
+        ],
+        "sample_count": 65
       },
       "scale_alone_closes_the_gap": false,
       "variants": [
         {
-          "component": "pressure_gradient",
           "achieved_combination": 0.6572848589748193,
           "combination_gap_after": 0.1959240365781193,
           "compensating_amplitude_fraction": -3.667517867130625,
-          "terminal_residual": 0.05071230303477289,
-          "outer_steps": 8,
+          "component": "pressure_gradient",
           "converged": false,
-          "topology_consistent": true,
-          "termination": "active_set_cycle_detected"
+          "outer_steps": 8,
+          "terminal_residual": 0.05071230303477289,
+          "termination": "active_set_cycle_detected",
+          "topology_consistent": true
         },
         {
-          "component": "ff_prime",
           "achieved_combination": 0.6570137553234869,
           "combination_gap_after": 0.19565293292678698,
           "compensating_amplitude_fraction": 0.30830243834996773,
-          "terminal_residual": 0.22424184909597797,
-          "outer_steps": 3,
+          "component": "ff_prime",
           "converged": false,
-          "topology_consistent": true,
-          "termination": "active_set_cycle_detected"
+          "outer_steps": 3,
+          "terminal_residual": 0.22424184909597797,
+          "termination": "active_set_cycle_detected",
+          "topology_consistent": true
         }
       ],
       "figure": {
         "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-flux-function-fit/docs/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.png",
         "project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.png",
         "sha256": "3cc36cb4886f7245c5ee12b6643fc76f33d059be111d8832db9b339d01a00945",
-        "vector_filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-flux-function-fit/docs/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.svg",
+        "vector_filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cank-receipt-repairs/docs/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.svg",
         "vector_project_absolute_src": "/nova/figures/constraint-augmented-newton-krylov/flux-function-fit/row-21978-35.svg",
-        "vector_sha256": "3e1ab667343969e2a249610a349e75496b64b622114ccc438f274a0e03e2abb0"
+        "vector_sha256": "b1b0e420a08e52af51ce06f648b0a9ff11569430d0523c4f81e7357935450afb"
       }
     }
   ]

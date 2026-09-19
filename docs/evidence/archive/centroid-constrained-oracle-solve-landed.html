@@ -452,16 +452,30 @@
       </tbody>
       <caption>Weak-rotation-reactor-static at <code>-110</code> requested cells, displaced seed <code>062b465a7364914f&hellip;</code> 20 mm radially, exact clip. The level amplitude is the third column's own contribution in weber and is not comparable with the two field amplitudes, nor is it held to the field bound.</caption>
     </table>
-    <p><strong>One reported field is a mixed difference and must not be read as an
-    error.</strong> The receipt's <code>level_error_wb</code> is <code>-48.70235527547112</code>,
-    computed as the level column's amplitude (<code>1.2383665193033397 Wb</code>) against
-    the authored axis level (<code>49.94072179477446 Wb</code>). Those are not the same
-    kind of quantity: the first is the offset the column supplies in its own gauge, the
-    second an absolute level in the authored gauge, and the two gauges differ by exactly
-    such a constant. Subtracting one from the other is not a residual. The row's physical
-    error is its scaled residual on the <code>1.0 Wb</code> scale,
-    <code>2.3214644865632295e-03 Wb</code>, and that is the quantity the clause, the
-    re-read below and the verdict all use.</p>
+    <p><strong>The receipt no longer reports a mixed difference.</strong> The
+    <code>level_error_wb</code> key that this record first carried held
+    <code>-48.70235527547112</code>, computed as the level column's amplitude
+    (<code>1.2383665193033397 Wb</code>) against the authored axis level
+    (<code>49.94072179477446 Wb</code>). Those are not the same kind of quantity: the
+    first is the offset the column supplies in its own gauge, the second an absolute
+    level in the authored gauge, and the two gauges differ by exactly such a constant, so
+    subtracting one from the other is not a residual. The key has been removed from the
+    control receipt rather than left to be captioned around; the two readings stay on the
+    receipt unsubtracted, for a reader who wants the column's own contribution and the
+    authored level side by side. The row's physical error is its scaled residual on the
+    <code>1.0 Wb</code> scale, <code>2.3214644865632295e-03 Wb</code>, which needs no
+    gauge, and that is the quantity the clause, the re-read below and the verdict all
+    use.</p>
+    <p><strong>The pool-order guard now bounds the slice it checks.</strong> The guard
+    that accompanied the reader repair compared the carrier's cell count with the
+    operator's, two attributes that agree whichever prefix the read slices its pool by,
+    so it was silent under both indexings and the one-block shift rested on the stub test
+    alone. The sampled pool is now bounded and checked against the cell count the stencil
+    convention states, at the slice that is handed to the read: the fixed indexing reads
+    the owning cell's own mixture, and a pool declared from the flux vector's physical
+    prefix is refused with <code>ValueError: a point-sampled pool carries the operator's
+    cells first, so the slice handed to the read is the first 3 flux values; got a
+    declared pool of 4</code>.</p>
 
     <h3>Re-reading the level in one gauge, with the third column active</h3>
     <p>The gauge-free substitute is again the axis-to-boundary span, which no additive

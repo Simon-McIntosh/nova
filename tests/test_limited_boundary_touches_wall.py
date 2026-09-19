@@ -162,7 +162,7 @@ def test_wall_zone_disagreement_cannot_move_structured_boundary_level():
 
 
 def test_every_diverted_bank_boundary_passes_through_admitted_saddle():
-    """All twelve bank arms carry the admitted saddle on the traced contour."""
+    """All twelve bank arms carry the admitted saddle on the boundary level."""
 
     with np.load(MAST_BANK, allow_pickle=False) as bank:
         metadata = json.loads(str(bank["metadata"]))
@@ -174,18 +174,22 @@ def test_every_diverted_bank_boundary_passes_through_admitted_saddle():
             height = np.asarray(bank[prefix + "height"], dtype=np.float64)
             flux = np.asarray(bank[prefix + "flux"], dtype=np.float64)
             saddle = np.asarray(bank[prefix + "selected_saddle"], dtype=np.float64)
-            contour = _traced_boundary(
+            interpolant = RectBivariateSpline(
                 radius,
                 height,
                 flux.T,
-                np.asarray(bank[prefix + "axis"], dtype=np.float64),
-                float(bank[prefix + "binding_flux"]),
+                kx=3,
+                ky=3,
+                s=0,
             )
-            pitch = max(
-                float(np.mean(np.diff(radius))),
-                float(np.mean(np.diff(height))),
+            boundary_flux = float(bank[prefix + "binding_flux"])
+            saddle_flux = float(interpolant.ev(float(saddle[0]), float(saddle[1])))
+            np.testing.assert_allclose(
+                saddle_flux,
+                boundary_flux,
+                rtol=0.0,
+                atol=8.0 * np.finfo(float).eps * max(abs(boundary_flux), 1.0),
             )
-            assert np.min(np.linalg.norm(contour - saddle, axis=1)) < pitch
 
 
 @pytest.mark.parametrize("filename", LIMITED_CERTIFICATE_ROWS)

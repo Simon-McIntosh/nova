@@ -365,10 +365,7 @@ def _traversed_read(topology, psi, polarity, inside_material):
     data_x = topology.x_point_data(vmap_x, polarity, data_o[2])
     data_w = topology.wall_anchor_data(psi_wall, polarity, surface=surface)
     data_b = topology.boundary(data_o, vmap_x, data_w, polarity)
-    comparison_flux = surface(
-        topology.connectivity_coordinate[:, 0],
-        topology.connectivity_coordinate[:, 1],
-    )
+    comparison_flux = psi_grid
     psi_norm = topology.normalize(data_o[2], data_b[2], comparison_flux)
     closed = topology.psi_mask(polarity, comparison_flux, data_b[2])
     connected = topology.axis_component(

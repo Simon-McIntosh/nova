@@ -489,18 +489,46 @@ class Topology(Pytree):
         """Return wall-point flux."""
         return self.wall(psi_wall, polarity)[2]
 
-    def _wall_anchor_selection(self, wall_flux, polarity):
-        """Return a unit-confined wall extremum, its unit and bracket nodes."""
+    def _wall_anchor_candidates(self, wall_flux):
+        """Return every fixed-shape wall bracket and its fitted extremum."""
+        nodes = jnp.arange(wall_flux.size, dtype=jnp.int32)
         if self.wall_unit_offsets is None or self.wall_unit_offsets.shape[0] == 2:
-            signed = jnp.asarray(polarity, dtype=wall_flux.dtype) * wall_flux
-            node = jnp.argmax(signed)
-            bracket = jnp.mod(node + jnp.asarray([-1, 0, 1]), wall_flux.size)
-            coordinate = self.wall.coordinate[bracket]
-            values = wall_flux[bracket]
-            length = select.length_2d(
-                coordinate[:, 0], coordinate[:, 1], array_namespace=jnp
+            brackets = jnp.mod(
+                nodes[:, jnp.newaxis] + jnp.asarray([-1, 0, 1]), wall_flux.size
             )
-            coefficients = select.traced_quadratic_wall(length, values)
+            units = jnp.zeros(wall_flux.size, dtype=jnp.int32)
+            fitted = jnp.ones(wall_flux.size, dtype=bool)
+        else:
+            offsets = self.wall_unit_offsets
+            units = jnp.searchsorted(offsets[1:], nodes, side="right")
+            starts = offsets[units]
+            ends = offsets[units + 1]
+            closed = self.wall_unit_closed[units]
+            previous = jnp.where(
+                nodes > starts,
+                nodes - 1,
+                jnp.where(closed, ends - 1, starts),
+            )
+            following = jnp.where(
+                nodes < ends - 1,
+                nodes + 1,
+                jnp.where(closed, starts, ends - 1),
+            )
+            open_starts = jnp.clip(nodes - 1, starts, jnp.maximum(starts, ends - 3))
+            open_brackets = jnp.minimum(
+                open_starts[:, jnp.newaxis] + jnp.arange(3),
+                ends[:, jnp.newaxis] - 1,
+            )
+            closed_brackets = jnp.stack((previous, nodes, following), axis=1)
+            brackets = jnp.where(closed[:, jnp.newaxis], closed_brackets, open_brackets)
+            fitted = (ends - starts) >= 3
+
+        coordinate = self.wall.coordinate[brackets]
+        values = wall_flux[brackets]
+
+        def fit_one(points, samples):
+            length = select.length_2d(points[:, 0], points[:, 1], array_namespace=jnp)
+            coefficients = select.traced_quadratic_wall(length, samples)
             position = select.wall_length(coefficients, array_namespace=jnp)
             interpolated_flux = (
                 coefficients[0] * position**2
@@ -509,8 +537,8 @@ class Topology(Pytree):
             )
             radius, height = select.wall_coordinate(
                 position,
-                coordinate[:, 0],
-                coordinate[:, 1],
+                points[:, 0],
+                points[:, 1],
                 length,
                 array_namespace=jnp,
             )
@@ -519,55 +547,83 @@ class Topology(Pytree):
                 -1.0,
                 jnp.where(coefficients[0] < 0, 1.0, jnp.nan),
             )
-            data = jnp.stack((radius, height, interpolated_flux, kind))
-            return data, jnp.asarray(0, dtype=jnp.int32), bracket
-        signed = jnp.asarray(polarity, dtype=wall_flux.dtype) * wall_flux
-        node = jnp.argmax(signed)
-        offsets = self.wall_unit_offsets
-        unit = jnp.searchsorted(offsets[1:], node, side="right")
-        start = offsets[unit]
-        end = offsets[unit + 1]
-        closed = self.wall_unit_closed[unit]
-        previous = jnp.where(node > start, node - 1, jnp.where(closed, end - 1, start))
-        following = jnp.where(
-            node < end - 1, node + 1, jnp.where(closed, start, end - 1)
-        )
-        open_start = jnp.clip(node - 1, start, jnp.maximum(start, end - 3))
-        open_bracket = jnp.minimum(open_start + jnp.arange(3), end - 1)
-        closed_bracket = jnp.stack((previous, node, following))
-        bracket = jnp.where(closed, closed_bracket, open_bracket)
-        coordinate = self.wall.coordinate[bracket]
-        values = wall_flux[bracket]
-        length = select.length_2d(
-            coordinate[:, 0], coordinate[:, 1], array_namespace=jnp
-        )
-        coefficients = select.traced_quadratic_wall(length, values)
-        position = select.wall_length(coefficients, array_namespace=jnp)
-        interpolated_flux = (
-            coefficients[0] * position**2 + coefficients[1] * position + coefficients[2]
-        )
-        radius, height = select.wall_coordinate(
-            position,
-            coordinate[:, 0],
-            coordinate[:, 1],
-            length,
-            array_namespace=jnp,
-        )
-        kind = jnp.where(
-            coefficients[0] > 0,
-            -1.0,
-            jnp.where(coefficients[0] < 0, 1.0, jnp.nan),
-        )
-        fitted = jnp.stack((radius, height, interpolated_flux, kind))
-        sampled = jnp.concatenate(
+            return jnp.stack((radius, height, interpolated_flux, kind))
+
+        candidates = jax.vmap(fit_one)(coordinate, values)
+        sampled = jnp.column_stack(
             (
-                self.wall.coordinate[node],
-                wall_flux[node][None],
-                jnp.asarray([jnp.nan]),
+                self.wall.coordinate,
+                wall_flux,
+                jnp.full(wall_flux.shape, jnp.nan, dtype=wall_flux.dtype),
             )
         )
-        data = jnp.where((end - start) >= 3, fitted, sampled)
-        return data, unit, bracket
+        return jnp.where(fitted[:, jnp.newaxis], candidates, sampled), units, brackets
+
+    def _wall_anchor_selection(self, wall_flux, polarity, eligible=None):
+        """Return the strongest eligible wall extremum and its bracket.
+
+        Structured reads supply a containment mask whose true rows are fitted
+        contacts reached by the axis-connected component at that candidate's
+        own spline level. Ranking only those rows prevents a detached private
+        lobe from publishing the limited plasma boundary.
+        """
+        candidates, units, brackets = self._wall_anchor_candidates(wall_flux)
+        if eligible is None:
+            eligible = jnp.isfinite(wall_flux)
+        eligible = jnp.asarray(eligible, dtype=bool) & jnp.isfinite(wall_flux)
+        signed = jnp.asarray(polarity, dtype=wall_flux.dtype) * wall_flux
+        node = jnp.argmax(jnp.where(eligible, signed, -jnp.inf))
+        data = jnp.where(
+            jnp.any(eligible),
+            candidates[node],
+            jnp.full_like(candidates[0], jnp.nan),
+        )
+        return data, units[node], brackets[node]
+
+    def _axis_connected_wall_candidates(
+        self,
+        candidates,
+        polarity,
+        comparison_flux,
+        axis_data,
+        inside_material,
+        surface,
+    ):
+        """Return contacts reached by their axis-enclosing component.
+
+        Each bracket supplies one fitted contact and the tensor spline supplies
+        that contact's boundary level. The existing component flood is applied
+        independently at every level, then the candidate is admitted only when
+        that component reaches the fitted contact within one lattice pitch.
+        Candidate count and raster shape determine every array, preserving the
+        fixed shape under ``jit`` and ``vmap``.
+        """
+        radial_pitch = jnp.max(jnp.diff(self.connectivity_radius))
+        vertical_pitch = jnp.max(jnp.diff(self.connectivity_height))
+        pitch = jnp.maximum(radial_pitch, vertical_pitch)
+        coordinate = self.connectivity_coordinate
+
+        def reaches_axis_component(candidate):
+            boundary_flux = candidate[2]
+            closed = self.psi_mask(polarity, comparison_flux, boundary_flux)
+            component = self.axis_component(
+                comparison_flux,
+                boundary_flux,
+                axis_data[2],
+                axis_data[:2],
+                closed,
+                inside_material,
+                surface=surface,
+                polarity=polarity,
+            )
+            distance = jnp.linalg.norm(coordinate - candidate[:2], axis=1)
+            return (
+                jnp.all(jnp.isfinite(candidate[:3]))
+                & jnp.all(jnp.isfinite(axis_data[:3]))
+                & jnp.any(component & (distance <= pitch))
+            )
+
+        return jax.vmap(reaches_axis_component)(candidates)
 
     def wall_anchor_bracket(self, psi_wall, polarity):
         """Return the three flat node indices supporting the selected unit."""
@@ -580,6 +636,10 @@ class Topology(Pytree):
         requested_class=None,
         private_wall_node_mask=None,
         surface: TensorBSpline | None = None,
+        comparison_flux=None,
+        axis_data=None,
+        inside_material=None,
+        containment_required=True,
     ):
         """Return the wall extremum on the surface that traces the boundary.
 
@@ -588,11 +648,12 @@ class Topology(Pytree):
         pinned diverted read selects its saddle and must not change when wall
         shadow evidence is supplied.
 
-        Structured reads select the contact from the tensor spline used for
-        contours and publish that spline's value at the fitted contact.  A
-        limited plasma therefore has one boundary authority: its last closed
-        contour passes through the wall contact.  Unstructured reads have no
-        tensor surface and retain their wall-zone samples.
+        Structured reads fit every wall bracket, evaluate every fitted contact
+        on the tensor spline used for contours, and admit only contacts reached
+        by the axis-connected component at their own level. A limited plasma
+        therefore has one boundary authority: its last closed contour passes
+        through the published wall contact. Unstructured reads have no tensor
+        surface and retain their wall-zone samples.
 
         Masked samples receive a finite losing score before the wall extremum
         is selected.  Keeping the operand finite preserves the fixed-shape
@@ -605,36 +666,60 @@ class Topology(Pytree):
                 self.wall.coordinate[:, 0],
                 self.wall.coordinate[:, 1],
             )
-        if private_wall_node_mask is None or requested_class is None:
-            selected = self._wall_anchor_selection(wall_flux, polarity)[0]
-            if surface is not None:
-                selected = selected.at[2].set(surface(selected[0], selected[1]))
-            return selected
-        private_wall = jnp.asarray(private_wall_node_mask, dtype=bool)
-        if private_wall.shape != wall_flux.shape:
-            raise ValueError("private wall mask must carry one flag per wall node")
-        apply_mask = jnp.asarray(requested_class) == int(TopologyClass.LIMITED)
-        private_wall = private_wall & apply_mask
-        signed_flux = jnp.asarray(polarity, dtype=wall_flux.dtype) * wall_flux
-        eligible = ~private_wall & jnp.isfinite(signed_flux)
-        lowest = jnp.min(jnp.where(eligible, signed_flux, jnp.inf))
-        highest = jnp.max(jnp.where(eligible, signed_flux, -jnp.inf))
-        span = highest - lowest
-        scale = jnp.maximum(jnp.maximum(jnp.abs(lowest), jnp.abs(highest)), 1.0)
-        losing_step = jnp.maximum(span, jnp.finfo(wall_flux.dtype).eps * scale)
-        losing_score = jnp.where(jnp.any(eligible), lowest - losing_step, jnp.nan)
-        masked_flux = jnp.where(
-            private_wall,
-            jnp.asarray(polarity, dtype=wall_flux.dtype) * losing_score,
-            wall_flux,
-        )
-        selected = self._wall_anchor_selection(masked_flux, polarity)[0]
-        selected_score = jnp.asarray(polarity, dtype=wall_flux.dtype) * selected[2]
-        bounded_flux = jnp.asarray(polarity, dtype=wall_flux.dtype) * jnp.minimum(
-            selected_score, highest
-        )
-        bounded = selected.at[2].set(bounded_flux)
-        selected = jnp.where(jnp.any(private_wall), bounded, selected)
+        masked_flux = wall_flux
+        private_wall = jnp.zeros(wall_flux.shape, dtype=bool)
+        highest = jnp.asarray(jnp.inf, dtype=wall_flux.dtype)
+        if private_wall_node_mask is not None and requested_class is not None:
+            private_wall = jnp.asarray(private_wall_node_mask, dtype=bool)
+            if private_wall.shape != wall_flux.shape:
+                raise ValueError("private wall mask must carry one flag per wall node")
+            apply_mask = jnp.asarray(requested_class) == int(TopologyClass.LIMITED)
+            private_wall = private_wall & apply_mask
+            signed_flux = jnp.asarray(polarity, dtype=wall_flux.dtype) * wall_flux
+            unmasked = ~private_wall & jnp.isfinite(signed_flux)
+            lowest = jnp.min(jnp.where(unmasked, signed_flux, jnp.inf))
+            highest = jnp.max(jnp.where(unmasked, signed_flux, -jnp.inf))
+            span = highest - lowest
+            scale = jnp.maximum(jnp.maximum(jnp.abs(lowest), jnp.abs(highest)), 1.0)
+            losing_step = jnp.maximum(span, jnp.finfo(wall_flux.dtype).eps * scale)
+            losing_score = jnp.where(jnp.any(unmasked), lowest - losing_step, jnp.nan)
+            masked_flux = jnp.where(
+                private_wall,
+                jnp.asarray(polarity, dtype=wall_flux.dtype) * losing_score,
+                wall_flux,
+            )
+
+        eligible = None
+        if (
+            surface is not None
+            and comparison_flux is not None
+            and axis_data is not None
+            and inside_material is not None
+        ):
+            candidates = self._wall_anchor_candidates(masked_flux)[0]
+            candidate_flux = surface(candidates[:, 0], candidates[:, 1])
+            candidates = candidates.at[:, 2].set(candidate_flux)
+            eligible = self._axis_connected_wall_candidates(
+                candidates,
+                polarity,
+                comparison_flux,
+                axis_data,
+                inside_material,
+                surface,
+            )
+            eligible = jnp.where(
+                jnp.asarray(containment_required),
+                eligible,
+                jnp.isfinite(masked_flux),
+            )
+        selected = self._wall_anchor_selection(masked_flux, polarity, eligible)[0]
+        if private_wall_node_mask is not None and requested_class is not None:
+            selected_score = jnp.asarray(polarity, dtype=wall_flux.dtype) * selected[2]
+            bounded_flux = jnp.asarray(polarity, dtype=wall_flux.dtype) * jnp.minimum(
+                selected_score, highest
+            )
+            bounded = selected.at[2].set(bounded_flux)
+            selected = jnp.where(jnp.any(private_wall), bounded, selected)
         if surface is not None:
             selected = selected.at[2].set(surface(selected[0], selected[1]))
         return selected
@@ -1017,9 +1102,14 @@ class Topology(Pytree):
                 self.connectivity_height,
                 flux,
             )
+            comparison_flux = surface(
+                self.connectivity_coordinate[:, 0],
+                self.connectivity_coordinate[:, 1],
+            )
         else:
             flux = psi_grid[self.polish_gather]
             surface = None
+            comparison_flux = psi_grid
         census_authored = structured and hasattr(self.grid, "read_census")
         if census_authored:
             (vmap_o, vmap_x), census = self.grid.read_census(psi_grid)
@@ -1033,12 +1123,6 @@ class Topology(Pytree):
             private_wall_node_mask,
             surface,
         )
-        wall_node = jnp.argmin(
-            jnp.sum((self.wall.coordinate - data_w[:2]) ** 2, axis=1)
-        )
-        wall_unit_index = jnp.searchsorted(
-            self.wall_unit_offsets[1:], wall_node, side="right"
-        )
         qualified_o = self.qualified_o_candidates(
             vmap_o,
             vmap_x,
@@ -1050,6 +1134,54 @@ class Topology(Pytree):
         )
         selection = self.o_point_qualification(vmap_o, polarity, qualified_o)
         data_o = selection.data
+        provisional_x = self.x_point_data(vmap_x, polarity, data_o[2])
+        provisional_boundary = self.boundary(data_o, vmap_x, data_w, polarity)
+        if requested_class is None:
+            containment_required = ~jnp.equal(provisional_boundary[2], provisional_x[2])
+        else:
+            containment_required = jnp.asarray(requested_class) == int(
+                TopologyClass.LIMITED
+            )
+        if structured:
+            data_w = self.wall_anchor_data(
+                psi_wall,
+                polarity,
+                requested_class,
+                private_wall_node_mask,
+                surface,
+                comparison_flux,
+                data_o,
+                inside_material,
+                containment_required,
+            )
+            qualified_o = self.qualified_o_candidates(
+                vmap_o,
+                vmap_x,
+                data_w,
+                polarity,
+                psi_grid,
+                inside_material,
+                surface,
+            )
+            selection = self.o_point_qualification(vmap_o, polarity, qualified_o)
+            data_o = selection.data
+            data_w = self.wall_anchor_data(
+                psi_wall,
+                polarity,
+                requested_class,
+                private_wall_node_mask,
+                surface,
+                comparison_flux,
+                data_o,
+                inside_material,
+                containment_required,
+            )
+        wall_node = jnp.argmin(
+            jnp.sum((self.wall.coordinate - data_w[:2]) ** 2, axis=1)
+        )
+        wall_unit_index = jnp.searchsorted(
+            self.wall_unit_offsets[1:], wall_node, side="right"
+        )
         data_x = self.x_point_data(vmap_x, polarity, data_o[2])
         emergent_boundary = self.boundary(data_o, vmap_x, data_w, polarity)
         if requested_class is None:
@@ -1112,13 +1244,6 @@ class Topology(Pytree):
         )
         data_o, data_x = published_stationary
         data_b = jnp.where(boundary_is_xpoint, data_x, data_w)
-        if structured:
-            comparison_flux = surface(
-                self.connectivity_coordinate[:, 0],
-                self.connectivity_coordinate[:, 1],
-            )
-        else:
-            comparison_flux = psi_grid
         boundary_uncertainty = self.boundary_interpolation_uncertainty(
             polish_receipt, boundary_is_xpoint
         )

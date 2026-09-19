@@ -12,11 +12,11 @@ import pytest
 from scipy.interpolate import RectBivariateSpline
 
 from nova.biot.null import Null1D, Null2D
+from nova.equilibrium.connectivity_boundary import _points_inside_polygon
 from nova.equilibrium.flux_surface_geometry import _trace_surfaces
 from nova.equilibrium.topology import Topology, TopologyClass
 from nova.geometry.hexstencil import hex_stencil
 from nova.jax.config import configure_dtypes
-from nova.linalg.tensor_spline import fit_tensor_spline
 
 
 ROOT = Path(__file__).parents[1]
@@ -55,12 +55,20 @@ def _topology(radius: np.ndarray, height: np.ndarray, wall: np.ndarray) -> Topol
 
 
 def _polyline_distance(points: np.ndarray, polyline: np.ndarray) -> float:
+    return _closest_polyline_pair(points, polyline)[0]
+
+
+def _closest_polyline_pair(
+    points: np.ndarray, polyline: np.ndarray
+) -> tuple[float, np.ndarray, np.ndarray]:
     start = polyline
     end = np.roll(polyline, -1, axis=0)
     segment = end - start
     length_squared = np.sum(segment**2, axis=1)
     length_squared = np.where(length_squared > 0.0, length_squared, 1.0)
     best = np.inf
+    best_point = np.full(2, np.nan)
+    best_polyline_point = np.full(2, np.nan)
     for point in points:
         offset = point[None, :] - start
         fraction = np.clip(
@@ -69,8 +77,42 @@ def _polyline_distance(points: np.ndarray, polyline: np.ndarray) -> float:
             1.0,
         )
         closest = start + fraction[:, None] * segment
-        best = min(best, float(np.min(np.linalg.norm(closest - point, axis=1))))
-    return float(best)
+        distance = np.linalg.norm(closest - point, axis=1)
+        index = int(np.argmin(distance))
+        if distance[index] < best:
+            best = float(distance[index])
+            best_point = point.copy()
+            best_polyline_point = closest[index].copy()
+    return float(best), best_point, best_polyline_point
+
+
+def _limited_read(
+    radius: np.ndarray,
+    height: np.ndarray,
+    flux: np.ndarray,
+    wall: np.ndarray,
+    wall_zone: np.ndarray,
+):
+    topology = _topology(radius, height, wall)
+    radial, vertical = np.meshgrid(radius, height, indexing="ij")
+    coordinate = np.column_stack((radial.ravel(), vertical.ravel()))
+    inside_material = np.asarray(
+        _points_inside_polygon(
+            coordinate[:, 0],
+            coordinate[:, 1],
+            wall[:, 0],
+            wall[:, 1],
+        ),
+        dtype=bool,
+    )
+    state = np.concatenate((flux.ravel(), np.asarray(wall_zone, dtype=np.float64)))
+    _masks, topology_state = topology.read(
+        jnp.asarray(state),
+        1.0,
+        jnp.asarray(inside_material),
+        requested_class=int(TopologyClass.LIMITED),
+    )
+    return topology, topology_state
 
 
 def _traced_boundary(
@@ -95,43 +137,54 @@ def _traced_boundary(
     return np.column_stack((traced.radius[:, 0], traced.height[:, 0]))
 
 
-def test_persisted_limited_terminal_boundary_uses_contact_flux():
-    """The converged MAST boundary touches its wall on its contour authority."""
+def test_persisted_limited_terminal_boundary_contact_is_axis_connected():
+    """The converged MAST contact belongs to the axis-enclosing contour."""
 
     with np.load(LIMITED_TOUCH / "row-16-terminal-state.npz") as state:
         radius = np.asarray(state["radius_axis"], dtype=np.float64)
         height = np.asarray(state["height_axis"], dtype=np.float64)
         flux = np.asarray(state["values"], dtype=np.float64)
         wall = np.asarray(state["wall"], dtype=np.float64)
-        wall_zone = jnp.asarray(state["wall_zone"], dtype=jnp.float64)
+        wall_zone = np.asarray(state["wall_zone"], dtype=np.float64)
     receipt = json.loads((LIMITED_TOUCH / "receipt.json").read_text())
+    detached_contact = np.asarray(
+        receipt["before"]["rows"][0]["contact_position_m"], dtype=np.float64
+    )
     measured = receipt["after"]["rows"][0]
 
-    surface = fit_tensor_spline(
-        jnp.asarray(radius),
-        jnp.asarray(height),
-        jnp.asarray(flux.T),
+    _topology_instance, topology_state = _limited_read(
+        radius, height, flux, wall, wall_zone
     )
-    topology = _topology(radius, height, wall)
-    contact = topology.wall_anchor_data(
-        jnp.asarray(wall_zone),
-        1.0,
-        int(TopologyClass.LIMITED),
-        surface=surface,
+    contact = np.r_[
+        np.asarray(topology_state.wall_point, dtype=np.float64),
+        float(topology_state.wall_point_flux),
+    ]
+    interpolant = RectBivariateSpline(radius, height, flux, kx=3, ky=3, s=0)
+    sampled_flux = float(interpolant.ev(float(contact[0]), float(contact[1])))
+    np.testing.assert_allclose(contact[2], sampled_flux, rtol=0.0, atol=2.0e-15)
+    np.testing.assert_allclose(
+        contact[:2],
+        np.asarray(measured["contact_position_m"], dtype=np.float64),
+        rtol=0.0,
+        atol=2.0e-12,
     )
-    contact = np.asarray(contact, dtype=np.float64)
-    sampled_flux = float(surface(contact[0], contact[1]))
-    np.testing.assert_allclose(contact[2], sampled_flux, rtol=1.0e-9, atol=0.0)
 
     contour = _traced_boundary(
         radius,
         height,
         flux,
-        np.asarray(measured["axis_position_m"], dtype=np.float64),
+        np.asarray(topology_state.axis, dtype=np.float64),
         float(contact[2]),
     )
     pitch = max(float(np.mean(np.diff(radius))), float(np.mean(np.diff(height))))
-    assert _polyline_distance(contour, wall) < pitch
+    contact_distance = _polyline_distance(contour, contact[None, :2])
+    wall_distance, _contour_point, closest_wall_point = _closest_polyline_pair(
+        contour, wall
+    )
+    assert contact_distance < pitch
+    assert np.linalg.norm(closest_wall_point - contact[:2]) < pitch
+    assert wall_distance <= contact_distance + np.finfo(float).eps * 32
+    assert np.linalg.norm(contact[:2] - detached_contact) > pitch
 
 
 def test_wall_zone_disagreement_cannot_move_structured_boundary_level():
@@ -142,23 +195,19 @@ def test_wall_zone_disagreement_cannot_move_structured_boundary_level():
         height = np.asarray(state["height_axis"], dtype=np.float64)
         flux = np.asarray(state["values"], dtype=np.float64)
         wall = np.asarray(state["wall"], dtype=np.float64)
-        wall_zone = jnp.asarray(state["wall_zone"], dtype=jnp.float64)
-    surface = fit_tensor_spline(radius, height, flux.T)
-    topology = _topology(radius, height, wall)
-    baseline = topology.wall_anchor_data(
-        wall_zone,
-        1.0,
-        int(TopologyClass.LIMITED),
-        surface=surface,
+        wall_zone = np.asarray(state["wall_zone"], dtype=np.float64)
+    _baseline_topology, baseline = _limited_read(radius, height, flux, wall, wall_zone)
+    contradictory = wall_zone.copy()
+    contradictory[0] = float(np.max(wall_zone) + 1.0)
+    _guarded_topology, guarded = _limited_read(
+        radius, height, flux, wall, contradictory
     )
-    contradictory = wall_zone.at[0].set(jnp.max(wall_zone) + 1.0)
-    guarded = topology.wall_anchor_data(
-        contradictory,
-        1.0,
-        int(TopologyClass.LIMITED),
-        surface=surface,
+    np.testing.assert_array_equal(
+        np.asarray(guarded.wall_point), np.asarray(baseline.wall_point)
     )
-    np.testing.assert_array_equal(np.asarray(guarded), np.asarray(baseline))
+    np.testing.assert_array_equal(
+        np.asarray(guarded.wall_point_flux), np.asarray(baseline.wall_point_flux)
+    )
 
 
 def test_every_diverted_bank_boundary_passes_through_admitted_saddle():

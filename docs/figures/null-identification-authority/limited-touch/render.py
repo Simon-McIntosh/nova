@@ -61,7 +61,7 @@ def main() -> int:
         dpi=DEFAULT_INK.figure_dpi,
         constrained_layout=True,
     )
-    titles = ("Before · wall-zone level", "After · contour-spline level")
+    titles = ("Before · detached-lobe contact", "After · axis-connected contact")
     for index, (axes, state, row, title) in enumerate(
         zip(axes_row, states, rows, titles, strict=True)
     ):
@@ -132,8 +132,8 @@ def main() -> int:
         axes.set_ylim(float(wall[:, 1].min()) - pad, float(wall[:, 1].max()) + pad)
     figure.suptitle(
         "MAST 27079 · 35 ms · converged limited read\n"
-        "shared contour levels; red triangle: this read's axis; "
-        "hollow blue: counterpart axis; circle: wall contact",
+        "shared contour levels; solid triangle: this read's axis; "
+        "hollow triangle: counterpart axis; circle: published wall contact",
         fontsize=9.0,
     )
     figure.savefig(ROOT / "row-16-before-after.png", dpi=180)

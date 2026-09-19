@@ -3,7 +3,8 @@
   "revision_before": "09f5cc5088e11d7f90837522ffef1f4067ed65b4",
   "route_definitions": {
     "wall_zone": "independently solved wall-zone samples followed by a quadratic in wall-polyline length",
-    "contour_surface": "tensor spline fitted to the solved rectangular flux lattice and used to trace the boundary"
+    "contour_surface": "tensor spline fitted to the solved rectangular flux lattice and used to trace the boundary",
+    "contour_min_wall_distance_m": "minimum distance from the traced axis-enclosing contour to the published wall contact"
   },
   "before": {
     "rows": [
@@ -46,13 +47,17 @@
         "time_s": 0.03500000014901161,
         "converged": true,
         "terminal_residual": 1.136941060407411e-09,
-        "axis_position_m": [0.6799217413516139, -0.0018526631348965567],
-        "boundary_flux_wb": 0.25850360061597305,
-        "contact_position_m": [0.599080815463746, 1.7280815839767456],
-        "contact_flux_wb": 0.25850360061597305,
-        "contour_surface_contact_flux_wb": 0.25850360061597266,
-        "relative_flux_error": 1.503183090240073e-15,
-        "contour_min_wall_distance_m": 0.012811640333972418,
+        "measurement_status": "persisted-fixture-regenerated",
+        "axis_position_m": [0.677755576177695, 0.001303700756285138],
+        "boundary_flux_wb": 0.25673503858584695,
+        "contact_position_m": [0.19524440169334412, -0.011792924701615214],
+        "contact_flux_wb": 0.25673503858584695,
+        "contour_surface_contact_flux_wb": 0.25673503858584656,
+        "relative_flux_error": 1.513537305851117e-15,
+        "contour_min_wall_distance_m": 0.0012517198875053154,
+        "global_contour_min_wall_distance_m": 3.062084605542914e-06,
+        "closest_contour_position_m": [0.19524746377794966, -0.010541208559507033],
+        "closest_wall_position_m": [0.19524440169334412, -0.010541208559507353],
         "radial_pitch_m": 0.060625000041909516,
         "vertical_pitch_m": 0.125
       },
@@ -61,15 +66,8 @@
         "time_s": 0.03999999910593033,
         "converged": true,
         "terminal_residual": 7.336651509264504e-11,
-        "axis_position_m": [0.7104105965906162, 0.0038515587536154566],
-        "boundary_flux_wb": 0.24432190485200148,
-        "contact_position_m": [0.5994198075576935, 1.7280815839767456],
-        "contact_flux_wb": 0.24432190485200148,
-        "contour_surface_contact_flux_wb": 0.24432190485200117,
-        "relative_flux_error": 1.249630835706985e-15,
-        "contour_min_wall_distance_m": 7.009371092281391e-05,
-        "radial_pitch_m": 0.060625000041909516,
-        "vertical_pitch_m": 0.125
+        "measurement_status": "not-regenerated",
+        "reason": "the retained evidence carries no persisted row-17 terminal raster; no containment-aware metric is claimed"
       }
     ]
   }

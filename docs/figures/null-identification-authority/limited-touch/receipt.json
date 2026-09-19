@@ -4,7 +4,8 @@
   "route_definitions": {
     "wall_zone": "independently solved wall-zone samples followed by a quadratic in wall-polyline length",
     "contour_surface": "tensor spline fitted to the solved rectangular flux lattice and used to trace the boundary",
-    "contour_min_wall_distance_m": "minimum distance from the traced axis-enclosing contour to the published wall contact"
+    "contour_min_wall_distance_m": "minimum distance from the terminal state's axis-enclosing boundary contour, traced at the containment-aware published boundary flux, to the row's published wall contact",
+    "global_contour_min_wall_distance_m": "minimum distance from the same axis-enclosing boundary contour to the wall polyline, wherever the contour approaches it"
   },
   "before": {
     "rows": [
@@ -13,30 +14,78 @@
         "time_s": 0.03500000014901161,
         "converged": true,
         "terminal_residual": 1.136941060407411e-09,
-        "axis_position_m": [0.6799217413516139, -0.0018526631348965567],
+        "axis_position_m": [
+          0.6799217413516139,
+          -0.0018526631348965567
+        ],
         "boundary_flux_wb": 0.28694575567005143,
-        "contact_position_m": [0.6050537429416492, 1.7280815839767456],
+        "contact_position_m": [
+          0.6050537429416492,
+          1.7280815839767456
+        ],
         "wall_zone_contact_flux_wb": 0.28694575567005143,
         "contour_surface_contact_flux_wb": 0.25453400486484157,
         "route_disagreement_wb": 0.03241175080520986,
-        "contour_min_wall_distance_m": 0.2720145779546779,
+        "contour_min_wall_distance_m": 0.8735099516233096,
         "radial_pitch_m": 0.060625000041909516,
-        "vertical_pitch_m": 0.125
+        "vertical_pitch_m": 0.125,
+        "contour_reference_flux_wb": 0.25673503858584695,
+        "closest_contour_position_m": [
+          0.5509363261794615,
+          0.8562496387098012
+        ],
+        "closest_contact_position_m": [
+          0.6050537429416492,
+          1.7280815839767456
+        ],
+        "global_contour_min_wall_distance_m": 3.062084605542914e-06,
+        "wall_approach_contour_position_m": [
+          0.19524746377794966,
+          -0.010541208559507033
+        ],
+        "closest_wall_position_m": [
+          0.19524440169334412,
+          -0.010541208559507353
+        ]
       },
       {
         "row": 17,
         "time_s": 0.03999999910593033,
         "converged": true,
         "terminal_residual": 7.336651509264504e-11,
-        "axis_position_m": [0.7104105965906162, 0.0038515587536154566],
+        "axis_position_m": [
+          0.7104105965906162,
+          0.0038515587536154566
+        ],
         "boundary_flux_wb": 0.2712440492948911,
-        "contact_position_m": [0.6053884305779619, 1.7280815839767456],
+        "contact_position_m": [
+          0.6053884305779619,
+          1.7280815839767456
+        ],
         "wall_zone_contact_flux_wb": 0.2712440492948911,
         "contour_surface_contact_flux_wb": 0.24062442198419914,
         "route_disagreement_wb": 0.030619627310691955,
-        "contour_min_wall_distance_m": 0.20974874944500732,
+        "contour_min_wall_distance_m": 0.8735307507245349,
         "radial_pitch_m": 0.060625000041909516,
-        "vertical_pitch_m": 0.125
+        "vertical_pitch_m": 0.125,
+        "contour_reference_flux_wb": 0.25673503858584695,
+        "closest_contour_position_m": [
+          0.5509363261794615,
+          0.8562496387098012
+        ],
+        "closest_contact_position_m": [
+          0.6053884305779619,
+          1.7280815839767456
+        ],
+        "global_contour_min_wall_distance_m": 3.062084605542914e-06,
+        "wall_approach_contour_position_m": [
+          0.19524746377794966,
+          -0.010541208559507033
+        ],
+        "closest_wall_position_m": [
+          0.19524440169334412,
+          -0.010541208559507353
+        ]
       }
     ]
   },
@@ -48,18 +97,39 @@
         "converged": true,
         "terminal_residual": 1.136941060407411e-09,
         "measurement_status": "persisted-fixture-regenerated",
-        "axis_position_m": [0.677755576177695, 0.001303700756285138],
+        "axis_position_m": [
+          0.677755576177695,
+          0.001303700756285138
+        ],
         "boundary_flux_wb": 0.25673503858584695,
-        "contact_position_m": [0.19524440169334412, -0.011792924701615214],
+        "contact_position_m": [
+          0.19524440169334412,
+          -0.011792924701615214
+        ],
         "contact_flux_wb": 0.25673503858584695,
         "contour_surface_contact_flux_wb": 0.25673503858584656,
         "relative_flux_error": 1.513537305851117e-15,
         "contour_min_wall_distance_m": 0.0012517198875053154,
         "global_contour_min_wall_distance_m": 3.062084605542914e-06,
-        "closest_contour_position_m": [0.19524746377794966, -0.010541208559507033],
-        "closest_wall_position_m": [0.19524440169334412, -0.010541208559507353],
+        "closest_contour_position_m": [
+          0.19524746377794966,
+          -0.010541208559507033
+        ],
+        "closest_wall_position_m": [
+          0.19524440169334412,
+          -0.010541208559507353
+        ],
         "radial_pitch_m": 0.060625000041909516,
-        "vertical_pitch_m": 0.125
+        "vertical_pitch_m": 0.125,
+        "contour_reference_flux_wb": 0.25673503858584695,
+        "closest_contact_position_m": [
+          0.19524440169334412,
+          -0.011792924701615214
+        ],
+        "wall_approach_contour_position_m": [
+          0.19524746377794966,
+          -0.010541208559507033
+        ]
       },
       {
         "row": 17,

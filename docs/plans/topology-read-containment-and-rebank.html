@@ -67,6 +67,19 @@
     <p><strong>Done when.</strong> The four topology test files are green with the new class-free assertion,
     the redrawn panel shows one boundary, and the receipt's before rows carry the same definition as its after
     rows.</p>
+    <p><strong>Landed 2026-09-19.</strong> Commits <code>822b0f9b</code>, <code>b55d94c5</code>,
+    <code>f4fe2b79</code>. Each structured pass evaluates containment from the state that pass holds, requiring
+    it only when the axis-reachable contact outranks that pass' X-point level and would therefore bind the
+    boundary; the raw wall extremum form (<code>jnp.any(eligible)</code>) failed two diverted contracts, moving
+    the diverted contact 0.159 m, and was rejected on that measurement. On the persisted row 16 fixture the
+    class-free read now publishes the centre-column contact <code>[0.195244, -0.011793]</code> at 0.256735 Wb
+    and reads limited, against the detached lobe <code>[0.605054, 1.728082]</code> at 0.286946 Wb it published
+    before. The panel draws only the axis-enclosing component in boundary style and the detached lobes faint and
+    labelled, and <code>contour_min_wall_distance_m</code> now measures the distance from the terminal state's
+    axis-enclosing contour to the row's published contact for both rows (0.873510 m before, 0.001252 m after),
+    with the wall-approach distance kept under its own key. Four-file gate: 34 passed in 317.56 s on
+    <code>all_debug</code>, exit 0. Full record:
+    <a href="/nova/evidence/archive/topology-read-containment-and-rebank-landed#class-free-containment">§1 landed</a>.</p>
 
     <h2 id="s2">§2 — Regenerate the twelve-row MAST bank and the certificate on main</h2>
     <p>Measured 2026-09-09: at main 4ab98002 the corroboration producer returns for 21978/35 a terminal residual

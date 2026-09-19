@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="topology-read-containment-and-rebank-landed">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="topology-read-containment-and-rebank">
+<title>topology-read-containment-and-rebank-landed</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Topology Read Containment and Re-bank — cumulative execution evidence">
+<meta name="plan-summary" content="Landing record of the topology-read-containment-and-rebank plan: containment evaluated inside each topology pass so a class-free read publishes the axis-enclosing contact, the one-meaning contact-gap metric, the corrected before/after figure, and the four-file gate">
+</head>
+<body>
+<main class="plan-doc">
+
+<h1>Topology Read Containment and Re-bank — cumulative execution evidence</h1>
+
+<section id="class-free-containment">
+  <h2 id="class-free-containment-h">Class-free read evaluates containment inside each pass</h2>
+
+  <p><strong>Defect.</strong> The containment screen in
+  <code>nova/equilibrium/topology.py</code> was computed once, from the provisional
+  pass, and reused by both structured containment passes. A read with no requested
+  class therefore screened against a state that had not yet re-qualified its axis
+  against its own wall anchor, kept the detached divertor lobe as the wall contact,
+  and still classified diverted.</p>
+
+  <p><strong>Reproduction on the persisted fixture</strong>
+  (<code>docs/figures/null-identification-authority/limited-touch/row-16-terminal-state.npz</code>,
+  MAST 27079 at 35 ms), measured at base <code>780b4f63</code> — the class-free read
+  and the class-pinned limited read disagree on the same raster:</p>
+
+  <pre><code>class-free  wall_point [0.59908082 1.72808158]  flux 0.25850360061597305  diverted 1
+limited     wall_point [0.1952444 -0.01179292]  flux 0.25673503858584695  diverted 0
+</code></pre>
+
+  <p>The provisional screen found 27 of 37 wall candidates eligible and selected the
+  centre-column contact <code>[0.1952444, -0.01179292]</code> at 0.3065 Wb, while the
+  published class-free read kept the raw wall extremum <code>[0.59908082, 1.72808158]</code>.
+  Containment was therefore decided against a state the read no longer held.</p>
+
+  <p><strong>Change.</strong> Each structured pass now evaluates containment from the
+  state that pass holds. The pass screens the strongest fitted contact reached by the
+  axis-enclosing component at that contact's own level against the pass' X-point level,
+  and requires containment only when that contact outranks the saddle and would
+  therefore bind the boundary — which is exactly what that pass' own boundary selection
+  publishes. The traced program stays fixed-shape: the screen enters as a
+  <code>jnp.where</code> operand and the X-point flux is an optional argument, so the
+  contact-only caller is unchanged.</p>
+
+  <p><strong>The negative control shows what the guard costs and why the rank
+  comparison is the criterion.</strong> Requiring containment whenever the reachable
+  set is non-empty (<code>jnp.any(eligible)</code>) engages the screen on diverted reads
+  too, because low-level contours of any plasma reach the wall; that form failed two
+  tests in the gate — <code>test_wall_refinement_preserves_spline_authored_contact[diverted-single-null]</code>
+  (contact moved 0.024815630484964643 m against a 0.02473095024234173 m median panel) and
+  the diverted position contract (0.1594393405540552 m). The rank comparison keeps a
+  diverted read on its raw wall extremum and is what the four-file gate passed with.</p>
+
+  <p><strong>Committed read after the change</strong> — class-free now equals the pinned
+  limited read on the same fixture:</p>
+
+  <pre><code>class-free  wall_point [ 0.1952444  -0.01179292]  flux 0.25673503858584695  diverted 0
+</code></pre>
+
+  <figure>
+    <img src="/nova/figures/null-identification-authority/limited-touch/row-16-before-after.png"
+         alt="Poloidal flux contours for row 16 before and after the containment change, with the detached divertor lobe and the axis-enclosing contact marked">
+    <figcaption>MAST 27079 &middot; 35 ms &middot; converged limited read, row 16, terminal
+    residual 1.14e-09, converged. Shared contour levels on both panels; boundary style
+    marks only the component enclosing the axis, the detached divertor lobe is drawn
+    faint and labelled; the circle is the read's published wall contact and the
+    triangle its magnetic axis. Before: detached-lobe contact
+    <code>[0.605054, 1.728082]</code> at 0.286946 Wb, 0.873510 m off the axis-enclosing
+    contour. After: axis-connected contact <code>[0.195244, -0.011793]</code> at
+    0.256735 Wb, 0.001252 m off it.</figcaption>
+  </figure>
+
+  <p><strong>One meaning for <code>contour_min_wall_distance_m</code>.</strong> The
+  receipt previously measured the before rows from their traced contour to the wall
+  (0.272 and 0.210) and the after row from its contour to its contact (0.001252), so a
+  settled contact could not be compared against a detached one. The key now measures the
+  distance from the terminal state's axis-enclosing boundary contour, traced at the
+  containment-aware published boundary flux, to the row's published wall contact;
+  the wall-approach distance keeps its own key (<code>global_contour_min_wall_distance_m</code>)
+  beside it, along with the closest contour and contact positions that realise each.</p>
+
+  <table>
+    <thead>
+      <tr><th>row</th><th>published contact (R, Z) / m</th><th>boundary / Wb</th><th>contour to contact / m</th><th>contour to wall / m</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>before 16</td><td>[0.605054, 1.728082]</td><td>0.286946</td><td>0.873510</td><td>3.062085e-06</td></tr>
+      <tr><td>before 17</td><td>[0.605388, 1.728082]</td><td>0.271244</td><td>0.873531</td><td>3.062085e-06</td></tr>
+      <tr><td>after 16</td><td>[0.195244, -0.011793]</td><td>0.256735</td><td>0.001252</td><td>3.062085e-06</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Gate.</strong> One <code>all_debug</code> job, four files, all green:
+  <code>tests/test_limited_boundary_touches_wall.py</code>,
+  <code>tests/test_jax_topology.py</code>, <code>tests/test_topology_limiter_contact.py</code>,
+  <code>tests/test_limiter_topology_receipts.py</code> — 34 passed in 317.56 s, exit 0. The
+  new contract is <code>test_persisted_class_free_read_publishes_the_axis_connected_contact</code>:
+  it reads the persisted fixture with no requested class, requires the published contact
+  to equal the centre-column contact within 2e-12 m and the boundary flux within 2e-15 Wb,
+  requires the read to classify limited, requires the traced axis-enclosing contour to
+  pass within one lattice pitch of that contact, and requires the contact to be more than
+  one pitch away from the detached lobe.</p>
+
+  <p><strong>Commits.</strong> <code>822b0f9b</code> moved containment into the passes and
+  added the persisted-fixture contract; <code>b55d94c5</code> refined the criterion to the
+  ranking comparison above; <code>f4fe2b79</code> gave the receipt metric one meaning and
+  redrew the figure. Changed paths: <code>nova/equilibrium/topology.py</code>,
+  <code>tests/test_limited_boundary_touches_wall.py</code>,
+  <code>tests/test_jax_topology.py</code>,
+  <code>docs/figures/null-identification-authority/limited-touch/{receipt.json,render.py,row-16-before-after.png,row-16-before-after.svg}</code>.</p>
+
+  <p><strong>Follow-ons.</strong> The after row 17 carries no persisted terminal raster in
+  the retained evidence, so no containment-aware metric is claimed for it and its
+  <code>contour_min_wall_distance_m</code> is measured against the same reference contour
+  as row 16 with that limitation recorded in the row's <code>measurement_status</code>.
+  The before rows' own published boundary level (0.286946 Wb, the wall-zone route) is not
+  the level of the reference contour (0.256735 Wb, the corrected route); the two routes'
+  disagreement is the recorded <code>route_disagreement_wb</code> of 0.032412 and is not
+  resolved by this change.</p>
+</section>
+
+</main>
+</body>
+</html>

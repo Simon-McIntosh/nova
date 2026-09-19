@@ -1017,6 +1017,66 @@ def _field_admitted_saddle(
     )
 
 
+def _persisted_positions(data: Any) -> list[int]:
+    """Return the state positions an archive carries a persisted field for."""
+    keys = getattr(data, "files", None)
+    if keys is None:
+        keys = list(data.keys())
+    return sorted(int(key.split("_")[1]) for key in keys if key.startswith("psi_"))
+
+
+def _persisted_saddle_residuals(data: Any) -> dict[int, float]:
+    """Read every persisted X-point pair back against its own stored field.
+
+    The archive is what a panel draws from, so the pair is measured where it
+    is stored: each stored field is refit independently and its value
+    evaluated at that state's own stored X-point coordinate, and the
+    difference against the stored flux is the disagreement the archive
+    actually carries. Nothing is assumed zero here -- this is the same
+    measurement the writer refuses an archive for, and against a field stored
+    beside a field it is the audit of whether the pair is one terminal state.
+
+    A stored index outside either stored array is a pair that cannot be read
+    back at all, and is refused rather than skipped.
+    """
+    radius = np.asarray(data["radius"], dtype=float)
+    height = np.asarray(data["height"], dtype=float)
+    residuals: dict[int, float] = {}
+    for position in _persisted_positions(data):
+        surface = fit_tensor_spline(
+            jnp.asarray(radius),
+            jnp.asarray(height),
+            jnp.asarray(np.asarray(data[f"psi_{position}"], dtype=float)),
+        )
+        x_points = np.asarray(data[f"xpoints_{position}"], dtype=float).reshape(-1, 2)
+        flux = np.asarray(data[f"xpoint_flux_{position}"], dtype=float).reshape(-1)
+        index = int(np.asarray(data[f"saddle_index_{position}"]))
+        if not (0 <= index < x_points.shape[0] and 0 <= index < flux.shape[0]):
+            raise ValueError(
+                "panel state %d persists a saddle index %d outside its stored "
+                "X-point pair" % (position, index)
+            )
+        coordinate = x_points[index]
+        residuals[position] = abs(
+            float(np.asarray(surface(coordinate[0], coordinate[1])))
+            - float(flux[index])
+        )
+    return residuals
+
+
+def _refuse_inconsistent_persisted_pairs(data: Any) -> dict[int, float]:
+    """Raise unless every persisted pair reads back as its own stored field."""
+    residuals = _persisted_saddle_residuals(data)
+    for position, residual in residuals.items():
+        if residual > SADDLE_FLUX_TOLERANCE:
+            raise ValueError(
+                "panel state %d persists an xpoint_flux that is not its own "
+                "field at its own X-point coordinate: residual %.3e Wb exceeds "
+                "%.1e" % (position, residual, SADDLE_FLUX_TOLERANCE)
+            )
+    return residuals
+
+
 def _write_panel_data(
     path: Path,
     *,
@@ -1097,21 +1157,28 @@ def _write_panel_data(
         coordinate, level, surface = _field_admitted_saddle(
             payload["radius"], payload["height"], field, axis, locator
         )
-        residual = abs(float(np.asarray(surface(coordinate[0], coordinate[1]))) - level)
-        if residual > SADDLE_FLUX_TOLERANCE:
-            raise ValueError(
-                "panel state %d persists an xpoint_flux that is not its own "
-                "field at its own X-point coordinate: residual %.3e Wb exceeds "
-                "%.1e" % (position, residual, SADDLE_FLUX_TOLERANCE)
-            )
-        payload[f"saddle_flux_residual_{position}"] = np.asarray(residual, dtype=float)
         flux = (
             np.asarray(state["nulls"]["x_point_flux"], dtype=float).reshape(-1).copy()
         )
         x_points = x_points.copy()
-        if 0 <= saddle_index < x_points.shape[0]:
+        # One range guard for the coordinate and the flux together: a state
+        # whose flux row is shorter than its coordinate row would otherwise
+        # take the raster coordinate beside an unoverwritten archived flux.
+        in_range = (
+            0 <= saddle_index < x_points.shape[0] and 0 <= saddle_index < flux.shape[0]
+        )
+        if in_range:
+            archived = x_points[saddle_index]
+            # The archived pair's own disagreement with the field persisted
+            # beside it. It is the same quantity the read-back guard refuses a
+            # stored pair for, recorded before the substitution so the audit
+            # trail carries what the raster pair replaced rather than a zero.
+            payload[f"saddle_flux_archived_delta_{position}"] = np.asarray(
+                float(flux[saddle_index])
+                - float(np.asarray(surface(archived[0], archived[1]))),
+                dtype=float,
+            )
             x_points[saddle_index] = coordinate
-        if 0 <= saddle_index < flux.shape[0]:
             flux[saddle_index] = level
         payload[f"xpoints_{position}"] = x_points
         payload[f"xpoint_flux_{position}"] = flux
@@ -1130,6 +1197,14 @@ def _write_panel_data(
             ),
         )
     path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(path, **payload)
+    # The guard measures the archive on disk rather than the arrays that were
+    # handed to it: the stored field is refit and read at the stored
+    # coordinate, so what passes is the pair a panel will actually draw.
+    with np.load(path, allow_pickle=False) as archive:
+        stored = {key: np.asarray(archive[key]) for key in archive.files}
+    for position, residual in _refuse_inconsistent_persisted_pairs(stored).items():
+        payload[f"saddle_flux_residual_{position}"] = np.asarray(residual, dtype=float)
     np.savez_compressed(path, **payload)
 
 
@@ -1326,6 +1401,7 @@ def _assemble_raster_branches(
             np.asarray(assembled["closed_segment_count"]).item()
         ),
         "open_branch_count": int(np.asarray(assembled["open_branch_count"]).item()),
+        "overflow": bool(np.asarray(assembled["overflow"])),
         "source": "raster-saddle",
     }
 

@@ -452,16 +452,30 @@
       </tbody>
       <caption>Weak-rotation-reactor-static at <code>-110</code> requested cells, displaced seed <code>062b465a7364914f&hellip;</code> 20 mm radially, exact clip. The level amplitude is the third column's own contribution in weber and is not comparable with the two field amplitudes, nor is it held to the field bound.</caption>
     </table>
-    <p><strong>One reported field is a mixed difference and must not be read as an
-    error.</strong> The receipt's <code>level_error_wb</code> is <code>-48.70235527547112</code>,
-    computed as the level column's amplitude (<code>1.2383665193033397 Wb</code>) against
-    the authored axis level (<code>49.94072179477446 Wb</code>). Those are not the same
-    kind of quantity: the first is the offset the column supplies in its own gauge, the
-    second an absolute level in the authored gauge, and the two gauges differ by exactly
-    such a constant. Subtracting one from the other is not a residual. The row's physical
-    error is its scaled residual on the <code>1.0 Wb</code> scale,
-    <code>2.3214644865632295e-03 Wb</code>, and that is the quantity the clause, the
-    re-read below and the verdict all use.</p>
+    <p><strong>The receipt no longer reports a mixed difference.</strong> The
+    <code>level_error_wb</code> key that this record first carried held
+    <code>-48.70235527547112</code>, computed as the level column's amplitude
+    (<code>1.2383665193033397 Wb</code>) against the authored axis level
+    (<code>49.94072179477446 Wb</code>). Those are not the same kind of quantity: the
+    first is the offset the column supplies in its own gauge, the second an absolute
+    level in the authored gauge, and the two gauges differ by exactly such a constant, so
+    subtracting one from the other is not a residual. The key has been removed from the
+    control receipt rather than left to be captioned around; the two readings stay on the
+    receipt unsubtracted, for a reader who wants the column's own contribution and the
+    authored level side by side. The row's physical error is its scaled residual on the
+    <code>1.0 Wb</code> scale, <code>2.3214644865632295e-03 Wb</code>, which needs no
+    gauge, and that is the quantity the clause, the re-read below and the verdict all
+    use.</p>
+    <p><strong>The pool-order guard now bounds the slice it checks.</strong> The guard
+    that accompanied the reader repair compared the carrier's cell count with the
+    operator's, two attributes that agree whichever prefix the read slices its pool by,
+    so it was silent under both indexings and the one-block shift rested on the stub test
+    alone. The sampled pool is now bounded and checked against the cell count the stencil
+    convention states, at the slice that is handed to the read: the fixed indexing reads
+    the owning cell's own mixture, and a pool declared from the flux vector's physical
+    prefix is refused with <code>ValueError: a point-sampled pool carries the operator's
+    cells first, so the slice handed to the read is the first 3 flux values; got a
+    declared pool of 4</code>.</p>
 
     <h3>Re-reading the level in one gauge, with the third column active</h3>
     <p>The gauge-free substitute is again the axis-to-boundary span, which no additive
@@ -576,6 +590,100 @@
     supplies <code>1.2383665193033397 Wb</code> of offset, it improves the
     positional clause by <code>1.69</code> times against the two-column control,
     and the state it reaches is still not the analytic equilibrium.</p>
+  </section>
+  <section id="review-repairs">
+    <h2>Review repairs: the pool bound and the level reading</h2>
+    <p>Two findings from the review of this record are repaired here, and the
+    repaired guard is shown refusing the indexing it exists to catch rather than
+    merely passing under the correct one.</p>
+    <h3 id="review-repairs-pool-bound">The sampled pool is bounded at the slice it hands over</h3>
+    <p>The mesh-carried point read assembles its sampling points against the
+    operator's cell block, so the flux values it passes must be the
+    carried-cell prefix of the state: the cells first, the wall nodes and the
+    direct sampling nodes after. The guard that stood here compared the
+    lattice's cell count against the operator's cell count, and those two agree
+    whichever prefix the reader takes, so both the correct and the incorrect
+    indexing passed it. The count that discriminates is the one the reader
+    <em>declares when it slices</em>, so the read now states that length and the
+    guard checks it against the cell count the stencil convention states, before
+    the slice is taken. The pre-fix index — the physical prefix, cells plus wall
+    nodes — is now refused:
+    <code>ValueError: a point-sampled pool carries the operator's cells first, so
+    the slice handed to the read is the first 3 flux values; got a declared pool
+    of 4</code>. On the committed three-cell stub the correct bound reads
+    <code>12.15</code> Wb for the nearest centroid's own mixture and the
+    physical-prefix bound raises; the regression test asserts both, the read and
+    the refusal.</p>
+    <h3 id="review-repairs-level-reading">The level column reports a residual, not a cross-gauge difference</h3>
+    <p>The control receipt carried <code>level_error_wb</code>, the difference
+    between the level column's amplitude and the authored level. The column is
+    anchored at the analytic magnetic axis while the authored level is an
+    absolute value, so that difference mixes two gauge conventions: on the
+    positive arm it read <code>-48.70235527547112</code>, four decades from any
+    error the solve carries. The key is removed. The two readings
+    (<code>level_amplitude_wb</code>, <code>level_target_wb</code>) stay in the
+    receipt unsubtracted for a reader who wants them, and the row's physical
+    error is its own scaled residual:
+    <code>level_row_scaled_residual</code> <code>2.3214644865632295e-03</code>,
+    the row residual divided by the declared level scale, in webers and needing
+    no gauge.</p>
+    <h3 id="review-repairs-gate">The gate at the repaired head</h3>
+    <p>One fresh <code>all_debug</code> CPU process per module at head
+    <code>10ff11fd</code>: <code>tests/test_centroid_constrained_fixture.py</code>
+    <strong>8 passed</strong> in <code>5.35 s</code>;
+    <code>tests/test_equilibrium_constraint_protocol.py</code> <strong>15
+    passed, 2 failed</strong> in <code>70.72 s</code>. Both failures are the
+    eliminated-constraint ids that fail at the base revision, raised as
+    <code>AttributeError: '_LinearOperator' object has no attribute
+    'program_identity'</code> by the test module's own stub, so the repaired head
+    adds no failure.</p>
+    <p><strong>The negative arm's terminal state is banked; the positive arm is
+    not.</strong> The save ordering this review asked for already holds:
+    <code>control_arm</code> writes <code>control-&lt;arm&gt;-state.npy</code> and
+    records <code>terminal_state_path</code> in the control JSON before the receipt
+    is composed, and <code>_draw_state</code> emits the SVG beside the PNG. What
+    was missing was the run. On an <code>all_debug</code> CPU pair at head
+    <code>10ff11fd</code>, the negative arm (<code>1273964</code>) completed in
+    <code>29:59</code> and now yields all four: the receipt, the state file it
+    names, and the panel as PNG and SVG. Its receipt carries
+    <code>terminal_state_path</code> — the key the earlier banked receipt lacked —
+    and the readings reproduce the earlier arm to the <code>1e-12</code> level, so
+    the repaired pool bound moves the negative control's answer by float ordering
+    only (<code>1.3138284465e-02</code> pitches against
+    <code>1.3138284664972332e-02</code>; terminal residual <code>4.170e-13</code>
+    against <code>1.590e-13</code>). The positive arm is not produced, and its
+    blocker is compilation rather than allocation. Two jobs were cancelled by the
+    <code>00:59:00</code> partition limit with no output at all
+    (<code>1273963</code> at <code>00:59:02</code>, <code>1273994</code> at
+    <code>00:59:22</code> with an unbuffered log, so the silence is its own), and
+    the two that followed aborted inside XLA on the same program: <code>1274003</code>
+    at <code>64 G</code> and <code>1274028</code> at <code>180 G</code> both died
+    with exit <code>134</code> (SIGABRT) at <code>38:47</code> and <code>38:28</code>
+    while <code>[Compiling module jit_scan for CPU]</code>, reporting
+    <code>LLVM compilation error: Cannot allocate memory</code> in 213 rows on the
+    first, <code>allocateMappedMemory failed with error: Cannot allocate memory</code>
+    for a <code>129</code>-byte then a <code>914</code>-byte suballocation, and
+    <code>LLVM ERROR: Unable to allocate section memory!</code>. Slurm records both
+    steps <code>COMPLETED 0:0</code> because the payload aborted inside the step,
+    so the log is the evidence and the exit status is not. <strong>Tripling the
+    request changed nothing</strong>: the abort moved by nineteen seconds
+    (<code>38:47</code> to <code>38:28</code>), and the step peaks slurm recorded
+    were <code>MaxRSS 28.7 GB</code> then <code>30.1 GB</code> with
+    <code>MaxVMSize 41.5 GB</code> — far below the <code>64 G</code> it first asked
+    and further below the <code>180 G</code> raise, so the allocation request was
+    never the constraint and the failed micro-allocations are the tell that a
+    section mapping failed rather than that memory ran out. The cache was a miss on
+    both runs and the last one banked what it could
+    (<code>MISS-COMPILED-AND-BANKED</code>, <code>338</code> to <code>340</code>
+    entries on the resolved per-host CPU subtree with one compile alarm) and still
+    died on <code>jit_scan</code>. No chunk row was ever printed, so the arm's trip
+    count stays unmeasured and the persisted-terminal-state finding is answered for
+    the negative arm only. The compile size of that program belongs to the
+    forward-solver route integrity plan's program-size section, not to this node;
+    the chunked continuation is the route to take on the day it compiles. The
+    <code>field-response</code> panel's vector companion needs an SVG emitter in
+    <code>benchmarks/centroid_field_response_probe.py</code>, which lies outside
+    this node's write scope and is reported rather than taken.</p>
   </section>
 </main>
 </html>

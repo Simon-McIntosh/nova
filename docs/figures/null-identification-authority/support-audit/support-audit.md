@@ -112,16 +112,43 @@ support content, rerouted into the traced partition.
 
 ### Corroboration that the builder did not change
 
-The bank builder writes those three rows, and between `fae50f15` and `299e4b64`
-it is byte-identical: the builder is the only consumer of the anchor names in
-`benchmarks/efit_forward_parity_slice.py`, and its occurrences of
-`declared_axis_flux` (18), `declared_boundary_flux` (15) and `declared_support`
-(27) are the same in both trees, as is every expression that derives them
-(`declared_support` remains the LCFS-and-material mask, the axis and boundary
-fluxes remain `TOTAL_FLUX_FACTOR`-scaled bank values). The only difference
-between the two trees in that file is the solve-seam conversion (`solve_portfolio`
-/ `solve_branch` giving way to `ForwardSolveRequest` plus `profile.solve`), and
-nothing in it touches the anchors.
+The bank builder writes those three rows, and what was compared between
+`fae50f15` and `299e4b64` is the **declared-anchor rows and the augmented row
+set** — not the builder file as a whole. The file is **not** byte-identical
+between the two trees: measured with `git diff --stat`, it differs by 98
+changed lines.
+
+```
+$ git diff --stat fae50f15 299e4b64 -- benchmarks/efit_forward_parity_slice.py
+ benchmarks/efit_forward_parity_slice.py | 98 +++++++++++++++++----------------
+ 1 file changed, 51 insertions(+), 47 deletions(-)
+```
+
+Every one of those changed lines is the solve-seam conversion — `solve_portfolio`
+and `solve_branch` giving way to `ForwardSolveRequest` plus `profile.solve`, and
+the receipt fields that rename with it (`branch.converged` becomes
+`receipt.qualified`, `branch.residual` becomes
+`equilibrium.fixed_point.residual`). Measured on that diff:
+
+* **zero** of the 98 changed lines mention `declared_axis_flux`,
+  `declared_boundary_flux`, `declared_support` or `TOTAL_FLUX_FACTOR`;
+* the per-occurrence counts of the anchor names are identical in both trees —
+  `declared_axis_flux` 18, `declared_boundary_flux` 15, `declared_support` 27
+  (`git show <tree>:benchmarks/efit_forward_parity_slice.py | grep -o <name> | wc -l`),
+  as is every expression that derives them
+  (`declared_support` remains the LCFS-and-material mask, the axis and boundary
+  fluxes remain `TOTAL_FLUX_FACTOR`-scaled bank values).
+
+The **augmented row set** was compared too, and on this solve neither tree
+carries one. `constraint_pairs` does not appear on the parity-slice path in
+either tree — at `299e4b64` the name occurs only in
+`nova/equilibrium/batched_labeller.py`, and `_parity_solve_request` passes none —
+so there is no `CircuitCurrentUnknown`, no `BoundedExteriorFieldUnknown` and no
+`ProfileAmplitudeUnknown` row present on one tree and absent on the other. The
+two trees differ in the solve seam and in nothing else; the declared-anchor
+content is unchanged, and the augmented row set is empty on both sides. A
+byte-identity claim over the builder file would be false and is not what this
+comparison rests on.
 
 ## The caveat: these are not augmented rows
 

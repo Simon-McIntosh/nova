@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T15:48:16",
+  "updated": "2026-09-19T15:48:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5508,6 +5508,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-review-fsapersist-c",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-19"
       },
       {
         "id": "s19c-review-fsarec-c",
@@ -205831,6 +205840,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2892
+    "_version": 2893
   }
 }

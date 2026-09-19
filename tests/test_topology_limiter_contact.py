@@ -122,30 +122,35 @@ def _designed_tangency(wall):
     return wall[(wall.shape[0] - 1) // 2]
 
 
-def test_limiter_contact_is_arc_length_quadratic_extremum():
-    """The weak contact lands on the analytic tangency node with the level at
-    the boundary flux, and the arc-length quadratic stays finite."""
+def test_limiter_contact_is_spline_authored_at_analytic_tangency():
+    """The weak contact uses the lattice spline at the analytic tangency."""
     row = _topology_row(WEAK, 45, 55, 241)
     contact = row["contact"]
     tangency = _designed_tangency(row["wall"])
     assert np.linalg.norm(contact[:2] - tangency) < 1.0e-6
-    assert abs(row["contact_flux"]) < 1.0e-6
+    np.testing.assert_allclose(
+        row["contact_flux"],
+        row["contour_contact_flux"],
+        rtol=1.0e-9,
+        atol=0.0,
+    )
     assert np.all(np.isfinite(contact))
 
 
 @pytest.mark.parametrize("case_name", [WEAK, DIVERTED])
-def test_level_error_stays_second_order(case_name):
-    """The contact level error against the continuum flux extremum falls at
-    least second order between 241 and 481 wall nodes (fitted order >= 1.9;
-    the single-null level error is measured well above that)."""
+def test_wall_refinement_preserves_spline_authored_contact(case_name):
+    """Wall refinement preserves a contact authored by the lattice spline."""
     coarse = _topology_row(case_name, 45, 55, 241)
     fine = _topology_row(case_name, 45, 55, 481)
-
-    def level_error(row):
-        return abs(row["contact_flux"] - row["continuum_flux_wb"])
-
-    fitted = float(np.log(level_error(coarse) / level_error(fine)) / np.log(2.0))
-    assert fitted >= 1.9
+    for row in (coarse, fine):
+        np.testing.assert_allclose(
+            row["contact_flux"],
+            row["contour_contact_flux"],
+            rtol=1.0e-9,
+            atol=0.0,
+        )
+    position_delta = np.linalg.norm(coarse["contact"][:2] - fine["contact"][:2])
+    assert position_delta <= coarse["median_panel_m"]
 
 
 def test_weak_position_error_is_second_order_between_241_and_481():

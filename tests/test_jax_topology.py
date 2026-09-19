@@ -18,7 +18,7 @@ with skip_import("jax"):
     from nova.biot.target import FluxTarget
     from nova.equilibrium import flux_surface_connectivity as fsc
     from nova.equilibrium.conservation import FluxLattice
-    from nova.equilibrium.domain import PlasmaDomain, classify_domains
+    from nova.equilibrium.domain import DomainMasks, classify_domains
     from nova.equilibrium.forward_operator import ForwardFluxOperator
     from nova.equilibrium.parallel_components import (
         label_parallel_connected_components,
@@ -360,38 +360,103 @@ def _traversed_read(topology, psi, polarity, inside_material):
         topology.connectivity_height,
         flux,
     )
+    comparison_flux = surface(
+        topology.connectivity_coordinate[:, 0],
+        topology.connectivity_coordinate[:, 1],
+    )
     vmap_o, vmap_x = _traversed_nulls(topology.grid, psi_grid)
-    data_o = topology.o_point_data(vmap_o, polarity)
-    data_x = topology.x_point_data(vmap_x, polarity, data_o[2])
     data_w = topology.wall_anchor_data(psi_wall, polarity, surface=surface)
+    qualified_o = topology.qualified_o_candidates(
+        vmap_o,
+        vmap_x,
+        data_w,
+        polarity,
+        psi_grid,
+        inside_material,
+        surface,
+    )
+    data_o = topology.o_point_qualification(vmap_o, polarity, qualified_o).data
+    provisional_x = topology.x_point_data(vmap_x, polarity, data_o[2])
+    provisional_boundary = topology.boundary(data_o, vmap_x, data_w, polarity)
+    containment_required = ~jnp.equal(provisional_boundary[2], provisional_x[2])
+    data_w = topology.wall_anchor_data(
+        psi_wall,
+        polarity,
+        surface=surface,
+        comparison_flux=comparison_flux,
+        axis_data=data_o,
+        inside_material=inside_material,
+        containment_required=containment_required,
+    )
+    qualified_o = topology.qualified_o_candidates(
+        vmap_o,
+        vmap_x,
+        data_w,
+        polarity,
+        psi_grid,
+        inside_material,
+        surface,
+    )
+    data_o = topology.o_point_qualification(vmap_o, polarity, qualified_o).data
+    data_w = topology.wall_anchor_data(
+        psi_wall,
+        polarity,
+        surface=surface,
+        comparison_flux=comparison_flux,
+        axis_data=data_o,
+        inside_material=inside_material,
+        containment_required=containment_required,
+    )
+    data_x = topology.x_point_data(vmap_x, polarity, data_o[2])
     data_b = topology.boundary(data_o, vmap_x, data_w, polarity)
-    comparison_flux = psi_grid
-    psi_norm = topology.normalize(data_o[2], data_b[2], comparison_flux)
-    closed = topology.psi_mask(polarity, comparison_flux, data_b[2])
-    connected = topology.axis_component(
+    boundary_is_xpoint = jnp.equal(data_b[2], data_x[2])
+    traversed_psi_norm = topology.normalize(data_o[2], data_b[2], comparison_flux)
+    traversed_closed = topology.psi_mask(polarity, comparison_flux, data_b[2])
+    traversed_connected = topology.axis_component(
         comparison_flux,
         data_b[2],
         data_o[2],
         data_o[:2],
-        closed,
+        traversed_closed,
         inside_material,
-        jnp.equal(data_b[2], data_x[2]),
+        boundary_is_xpoint,
         data_x[:2],
         surface,
         polarity=polarity,
     )
-    masks = classify_domains(
-        psi_norm,
-        closed,
-        connected,
+    traversed_masks = classify_domains(
+        traversed_psi_norm,
+        traversed_closed,
+        traversed_connected,
         inside_material,
     )
     half_plane_masks = classify_domains(
-        psi_norm,
-        closed,
+        traversed_psi_norm,
+        traversed_closed,
         _vertical_cut_connectivity(topology, data_o, vmap_x),
         inside_material,
     )
+    data_o, data_x, polish_receipt = fsc.polish_census_stationary_points(
+        flux,
+        topology.connectivity_radius,
+        topology.connectivity_height,
+        data_b[2],
+        polarity,
+        data_o,
+        data_x,
+        surface=surface,
+    )
+    published_stationary = jnp.stack((data_o, data_x))
+    published_stationary = published_stationary.at[:, :2].set(
+        polish_receipt["selected_position_rz"]
+    )
+    published_stationary = published_stationary.at[:, 2].set(
+        polish_receipt["selected_value"]
+    )
+    data_o, data_x = published_stationary
+    data_b = jnp.where(boundary_is_xpoint, data_x, data_w)
+    psi_norm = topology.normalize(data_o[2], data_b[2], comparison_flux)
+    masks = DomainMasks(traversed_masks.label, psi_norm)
     state = TopologyState(
         axis=data_o[:2],
         axis_flux=data_o[2],
@@ -401,7 +466,7 @@ def _traversed_read(topology, psi, polarity, inside_material):
         x_point_flux=data_x[2],
         wall_point=data_w[:2],
         wall_point_flux=data_w[2],
-        diverted=jnp.equal(data_b[2], data_x[2]),
+        diverted=boundary_is_xpoint,
     )
     return masks, state, half_plane_masks
 
@@ -513,8 +578,10 @@ def test_the_topology_read_matches_a_traversed_formulation(diverted):
     normalised flux and every published flux are therefore required to be
     bit-identical, with no tolerance anywhere.
 
-    The vertical half-plane contrast misclassifies 51 cells as private flux
-    that the saddle-aware hex connectivity identifies as part of the core.
+    The historical raster-knot contact produced 51 vertical-half-plane label
+    disagreements. That disagreement was the defect: once the contact is
+    authored by the contour spline, the traversed and production partitions
+    must agree in every cell.
 
     The fitted positions are the exception, and not because the claim is weaker
     there: a least-squares solve is the one step whose last bit the backend
@@ -540,11 +607,7 @@ def test_the_topology_read_matches_a_traversed_formulation(diverted):
     )
     changed = np.asarray(masks.label) != np.asarray(half_plane_masks.label)
     assert masks.label.size == 3195
-    assert int(np.sum(changed)) == 51
-    assert np.all(np.asarray(masks.label)[changed] == int(PlasmaDomain.CORE))
-    assert np.all(
-        np.asarray(half_plane_masks.label)[changed] == int(PlasmaDomain.PRIVATE_FLUX)
-    )
+    assert int(np.sum(changed)) == 0
     for field in DECIDING_STATE:
         np.testing.assert_array_equal(
             np.asarray(getattr(state, field)),

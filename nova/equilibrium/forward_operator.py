@@ -823,6 +823,23 @@ class _FrozenTopologyPartition(NamedTuple):
     residual_shadow: jax.Array
 
 
+def _frozen_partition_identity(partition: _FrozenTopologyPartition) -> jax.Array:
+    """Return residual-shadow and domain-label bits for active-set comparison.
+
+    The residual shadow remains the leading segment because topology reads feed
+    that segment back as wall-height hysteresis.  One-hot domain labels follow
+    it so every categorical change is visible to the active-set loop without
+    changing the shadow consumed by the frozen residual map.
+    """
+    label = jnp.ravel(jnp.asarray(partition.label))
+    label_identity = jnp.stack(
+        tuple(label == int(domain) for domain in PlasmaDomain), axis=1
+    ).ravel()
+    return jnp.concatenate(
+        (jnp.ravel(jnp.asarray(partition.residual_shadow, dtype=bool)), label_identity)
+    )
+
+
 class FluxReadRequest(IntEnum):
     """The read requests one machine invocation serves.
 
@@ -3868,8 +3885,6 @@ class ForwardFluxOperator:
 
             mapped._read_frozen_partition = read_partition
             mapped._map_frozen_partition = map_partition
-            mapped._frozen_partition_shadow = lambda partition: (
-                partition.residual_shadow
-            )
+            mapped._frozen_partition_shadow = _frozen_partition_identity
 
         return mapped

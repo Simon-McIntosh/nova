@@ -9,6 +9,7 @@ import numpy as np
 from nova.biot.null import Null1D, Null2D
 from nova.biot.target import FluxTarget
 from nova.equilibrium.conservation import FluxLattice
+from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium import fixed_point
 from nova.equilibrium.forward import _lattice_cells
 from nova.equilibrium.forward_operator import ForwardFluxOperator
@@ -127,10 +128,39 @@ def test_the_bound_frozen_partition_hooks_take_the_map_operand_order() -> None:
     shadowed = operator.traced_flux_map_with_shadow()
     assert shadowed._read_frozen_partition is not None
 
-    bound = fixed_point._bind_traced_map_arguments(
-        shadowed, (external, operator, None)
-    )
+    bound = fixed_point._bind_traced_map_arguments(shadowed, (external, operator, None))
     partition = bound._read_frozen_partition(initial, None)
     assert partition is not None
     mapped = bound._map_frozen_partition(initial, partition)
     assert mapped.shape == initial.shape
+
+
+def test_the_frozen_partition_identity_includes_domain_labels() -> None:
+    """A categorical domain change invalidates an otherwise equal partition."""
+    configure_dtypes()
+    operator = _operator()
+    external = operator.external()
+    initial = jnp.linspace(-1.0, 1.0, operator.node_number)
+    shadowed = operator.traced_flux_map_with_shadow()
+    partition = shadowed._read_frozen_partition(initial, None, external, operator)
+    identity = shadowed._frozen_partition_shadow(partition)
+
+    changed_label = partition.label.at[0].set(
+        (partition.label[0] + 1) % len(PlasmaDomain)
+    )
+    changed = partition._replace(label=changed_label)
+    changed_identity = shadowed._frozen_partition_shadow(changed)
+    residual_size = partition.residual_shadow.size
+
+    assert identity.shape == (residual_size + len(PlasmaDomain) * partition.label.size,)
+    np.testing.assert_array_equal(
+        np.asarray(identity[:residual_size]),
+        np.asarray(partition.residual_shadow),
+    )
+    assert np.count_nonzero(np.asarray(identity != changed_identity)) == 2
+    np.testing.assert_array_equal(
+        np.asarray(operator._previous_wall_shadow(changed_identity)),
+        np.asarray(partition.residual_shadow)[
+            operator.grid.node_number : operator.physical_node_number
+        ],
+    )

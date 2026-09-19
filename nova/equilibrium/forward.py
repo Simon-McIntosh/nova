@@ -202,6 +202,21 @@ _REDUCED: tuple[str, ...] = ("reduced_newton",)
 _CONSTRAINABLE: tuple[str, ...] = ("newton_krylov", *_REDUCED)
 
 
+def _shared_shadowed_map(shadowed_map: Callable) -> Callable:
+    """Keep topology and domain reads live while retaining residual shadows.
+
+    Newton freezes the supplied residual-shadow mask inside each local model.
+    The topology landmarks and profile-domain labels remain state-dependent
+    parts of the shared forward map, so this wrapper deliberately omits the
+    optional frozen-partition hooks carried by the underlying callable.
+    """
+
+    def mapped(*arguments):
+        return shadowed_map(*arguments)
+
+    return mapped
+
+
 def _lattice_cells(lattice: FluxLattice) -> tuple[np.ndarray, ...]:
     """Return rectangular control polygons centred on a structured lattice."""
     half_radial = 0.5 * lattice.radial_step
@@ -1952,6 +1967,7 @@ class ForwardProfile:
             )
 
         if route == "newton_krylov":
+            newton_shadowed_map = _shared_shadowed_map(shadowed_map)
 
             def solve(
                 initial_flux,
@@ -1964,7 +1980,7 @@ class ForwardProfile:
                     initial_flux,
                     shadow_mask_fn=shadow_mask,
                     promoted_shadow_mask_fn=promoted_shadow_mask,
-                    shadowed_map_fn=shadowed_map,
+                    shadowed_map_fn=newton_shadowed_map,
                     map_arguments=(external, operator, target_value),
                     callback_arguments=(operator,),
                     **{"newton_steps": self.newton_steps, **options},

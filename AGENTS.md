@@ -404,14 +404,31 @@ more often than `NOVA_CACHE_MISS_BUDGET` allows. Preserve
 GPU failures from CPU-specific identity assertions as device-qualified evidence;
 do not weaken those CPU contracts to make the H200 lane green.
 
-The H200 node is shared and its reservation is a **core** budget (30 cores, no
-cards): every submission states an explicit `--mem` (never `--mem=0`, which
-SLURM reads as the whole 1.5 TB and leaves the job pending on `Resources`
-while blocking the queue behind it) and sizes `--cpus-per-task` against the
-cores the serving jobs already hold (`squeue -w 98dci4-gpu-0003 -o '%C %b %m %j'`).
-A single-card measurement job is 8 cores, `--gres=gpu:1`, `--mem=128G`. The
-node's live budget and the serving footprint are kept in imas-ambix
-`imas_ambix/agent/AGENTS.md`.
+The H200 node is shared and two separate budgets govern it. The **reservation**
+is 30 cores and no cards, so every submission states an explicit `--mem` (never
+`--mem=0`, which SLURM reads as the whole 1.5 TB and leaves the job pending on
+`Resources` while blocking the queue behind it) and sizes `--cpus-per-task`
+against the cores the serving jobs already hold
+(`squeue -w 98dci4-gpu-0003 -o '%C %b %m %j'`). The **QoS** is what carries the
+cards and the memory, and it is the one that refuses:
+`sacctmgr show qos gpu_0003_grpa` reads `cpu=30,gres/gpu=4,mem=650G` with
+`DenyOnLimit`.
+
+**While the local model lane serves, that whole GPU allowance is spent and no
+other job of ours can schedule on the node.** Measured 2026-09-20: the serve
+holds `gres/gpu:4` and 600G with no time limit, so a correctly shaped
+`--gres=gpu:1 --mem=128G` job pends on `Resources` indefinitely; the node shows
+two free cards and they belong to a group this account is not in, so they are
+unreachable. Check `squeue -w 98dci4-gpu-0003 -o '%b %m'` against the cap before
+writing an H200 shape into a done-when. Where the serve is up, write the gate
+for `all_debug` with `JAX_PLATFORMS=cpu` and size the row count to the one-hour
+limit instead. The node's live budget and the serving footprint are kept in
+imas-ambix `imas_ambix/agent/AGENTS.md`.
+
+For CPU work the partition is `all_debug`. **`rigel_debug` is up, accepts jobs
+and has zero nodes**, so a job sent there pends forever with reason
+`PartitionConfig`; the login host being named rigel is what invites the
+mistake.
 
 ```bash
 # In a worktree, reuse the main checkout's environment (see One Environment

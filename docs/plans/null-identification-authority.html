@@ -22,15 +22,15 @@
 <title>Null identification authority | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-18">
+<meta name="plan-modified" content="2026-09-19">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html,docs/figures/null-identification-authority/bank-integrated/bank-integrated.json,docs/figures/null-identification-authority/bank-drift-probe/receipt.json,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json,docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087,7b0311d2,e76bc389">
-<meta name="plan-impl" content="0.97">
+<meta name="plan-impl" content="0.98">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="198">
+<meta name="plan-version" content="199">
 </head>
 <body>
 <main class="plan-doc">
@@ -211,6 +211,11 @@ for the lead before merge.</p>
     <h4 class="r-fu-title">Repair the anchor-bisect receipt on its three review findings</h4>
     <div class="r-fu-body"><p>From the 84/100 review of nia-anchor-trace-bisect. (1) <code>benchmarks/bank_drift_anchor_bisect.py</code> near line 727: the verdict keys on the hook-name list alone, so an absent arm (the exception stub from <code>_load_arm</code> near line 619 carries an empty list) is reported as "the override did not take effect"; report absent arms as absent. (2) The receipt's mixed-arm finding sentence (receipt JSON near line 426) is a template that calls a 2.2e-16 against 3.1e-16 gap "the anchor partition is the carrier"; the sentence must compare the gap to the round-off floor before naming a carrier. (3) <code>receipt.html</code> near line 142 states the slowest compile as 4m18s while the log's slowest alarm is 4m30.6s. Record repairs only, re-run the receipt subcommand against the existing arm JSONs, no allocation.</p></div>
     <pre class="r-fu-prompt">/reckon-ship null-identification-authority §1 — deliver f-nia-anchor-bisect-record-repairs: absent arms reported as absent, the mixed finding compared to the round-off floor, the compile cell corrected</pre>
+    </article>
+<article class="r-fu" data-id="f-nia-containment-aware-anchor" data-status="open" data-written-by="coordinator" data-written-at="2026-09-19T07:50:00Z" data-recommends-skill="/reckon-ship" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Containment-aware wall anchor: the limited boundary is the axis-enclosing contour that touches the wall</h4>
+    <div class="r-fu-body">Replace the argmax over wall flux in _wall_anchor_selection with a containment-aware selection: among wall nodes, take the one whose flux level's axis-enclosing component passes through that node (equivalently the extreme of polarity times flux over wall nodes that lie on an axis-enclosing contour), so the published contact is on the plasma boundary and not on a detached lobe near a divertor coil. Fix tests/test_limited_boundary_touches_wall.py so it asserts, for every limited state, that the published contact lies on the axis-enclosing component of the boundary level set within one pitch and that the component's closest approach to the wall is at the contact, replacing the tautological equality with an independent spline evaluation; fix the receipt so its wall gap is measured to the contact; retire the wall-zone semantics in tests/test_jax_topology.py (traversed reference psi_norm), tests/test_topology_limiter_contact.py (the 1e-6 contact flux assertion and the second-order refinement assertion) by rewriting them to the spline-authored contact. Gate on the persisted row 16 and 17 fixtures, the twelve-arm bank and the four Solovev limited rows in one all_debug job, and redraw the before/after panel with the contact on the plasma boundary.</div>
+    <pre class="r-fu-prompt">/reckon-ship null-identification-authority</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -774,6 +779,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-nia-limited-boundary-floats" data-who="" data-when="">
     <div class="r-comment-body">The lead reviewed docs/figures/null-identification-authority/contained-anchor/relabel-27079-flagged/row-16-35ms.png (MAST 27079, t 35 ms, converged, class limited) and ruled it fiction: a plasma is diverted with its boundary through the admitted X-point, or limited with its boundary touching the wall, and nothing else is a valid read. The receipt contained-route-replay.json shows why: boundary_route contained, boundary flux 0.28983 Wb (axis 0.29799 Wb) with its fitted anchor at R 0.19524 m, Z -0.0142 m on the centre column, while the closed contour traced at that level sits at R 0.30 to 0.55 m and encloses a quarter of EFIT's area (nearest_fully_contained_candidate_ratio 0.72). Either the wall-target flux used by _wall_anchor_selection and the interior field the contour is traced on disagree at the contact point, or the contained route moves the level inward until the contour is fully inside; both produce a floating surface reported as limited. Node nia-limited-boundary-touches-wall (r-20260918T161425539734) root-causes on this state, fixes the read so the limited boundary is the contour through the wall contact at the contact's own flux, and adds tests/test_limited_boundary_touches_wall.py asserting for every limited terminal state that the boundary's minimum wall distance is below one pitch and the boundary flux equals the field at the contact, and for every diverted state that the boundary passes through the admitted X-point.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-nia-limited-touch-reviewed" data-who="" data-when="">
+    <div class="r-comment-body">Run r-20260918T201949355073 (codex, commits 8fdc71ef and ffc979e5, merged at 9f0692fb) found the first defect: the wall-target route (independently solved wall-zone values through the wall-length quadratic) and the contour route (the tensor spline over the solved raster) disagreed by 0.0324 Wb at the row 16 contact and 0.0306 Wb at row 17, four times the axis-to-boundary span, and the published level is now the spline value at the contact (relative error 1.5e-15). The review r-20260919T071103282439 (59/100) reproduced every number from the two persisted fixtures without a solve and found the second defect, which the coordinator had also read off the before/after panel: at the published level 0.2585 Wb the level set has three components inside the vessel; the contact (R 0.599, Z 1.728, in the upper divertor) sits on a detached three-node lobe 0.893 m from the axis-enclosing contour, whose own closest approach to the wall is 0.0128 m at R 0.208, Z -0.048 on the centre column. So the plasma still floats, the receipt's wall-gap figure measures a different object from its contact, the test's contact assertion re-derives the production assignment and cannot fail, and its distance assertion never asks whether the contour reaches the contact. The class rule the lead stated is therefore unmet: the anchor selection must be containment-aware, choosing the wall node whose level set's axis-enclosing component passes through it, which on row 16 is the centre column, not the divertor. Three test files still carry the retired wall-zone semantics (named in the run's follow_ons with tracebacks).</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

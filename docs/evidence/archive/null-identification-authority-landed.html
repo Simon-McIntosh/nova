@@ -821,6 +821,23 @@
   <p><strong>Gate.</strong> One <code>all_debug</code> CPU allocation pinned <code>JAX_PLATFORMS=cpu</code> and ran the persisted before/after fixtures, twelve-arm bank, four limited Solovev rows, traversed topology reference, analytic limiter contacts and topology receipts through the project interpreter: <strong>33 passed in 314.72 seconds</strong>. The traversed reference now requires zero vertical-half-plane label disagreements under the spline-authored contact; the historical 51-cell disagreement was the retired contact defect, not a property to preserve. Log: <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/containment-anchor/coordinator-final-gate.log</code>.</p>
   <p><strong>Artifacts.</strong> The strict JSON receipt and the PNG/SVG panel are under <code>docs/figures/null-identification-authority/limited-touch/</code>. Row 17 retains no persisted terminal raster, so the repaired receipt explicitly makes no containment-aware row-17 claim rather than reusing the old wall-gap number.</p>
 </section>
+<section id="panel-test-strength">
+  <h2>The paired-probe panel test can now fail on both of its panel rules (2026-09-19)</h2>
+  <p><strong>Reproduction.</strong> The shared-level assertion in <code>test_panel_keeps_one_shared_level_array_across_both_panels</code> demanded, for each panel, the level array <code>contour_levels</code> returns for the producer archive's flux. Both fixture archives were written from the same default radius (9 points) and height (11 points), so the producer and current states carried the same flux array and a panel that computed its own levels from its own archive returned the array the assertion required. The line-contour check asserted that exactly one collection was attached to each panel and that its levels equalled the expected array; a filled contour set satisfies both, because it carries the same levels.</p>
+  <p><strong>Repair.</strong> Commit <code>7efd909c</code>, test-only. The current archive is written on its own 7x8 grid, so the panels' own level arrays are separated by <code>0.3131</code> at the widest sample and the sidecar's <code>grid_bit_identical</code> is <code>False</code>. The test asserts that the two archives' level arrays differ before asserting anything about the drawn panels, so a later edit that restores identical grids fails rather than silently restoring the reproduction. The contour check additionally requires the collection to be a <code>matplotlib.contour.ContourSet</code> with <code>filled</code> <code>False</code>.</p>
+  <table>
+    <caption>Three runs of the module, one fresh process each, all_debug CPU</caption>
+    <thead><tr><th>Tree state</th><th>exit</th><th>result</th><th>which assertion failed</th></tr></thead>
+    <tbody>
+      <tr><td>head, 7efd909c</td><td><code>0</code></td><td>11 passed</td><td>-</td></tr>
+      <tr><td>per-panel levels from own archive</td><td><code>1</code></td><td>1 failed, 10 passed</td><td>shared-level array: drawn <code>0.98033376</code> against expected <code>0.999375</code></td></tr>
+      <tr><td>filled contour in place of line contour</td><td><code>1</code></td><td>1 failed, 10 passed</td><td><code>assert contours[0].filled is False</code></td></tr>
+    </tbody>
+  </table>
+  <p><strong>Positive control on the second mutant.</strong> Under the filled-contour mutant the superseded assertion set was measured green: the collection count is one and its levels equal the shared array, so the count-and-levels check could not fail on a filled set. That is the finding this repair closes; the discriminating attribute is <code>filled</code>.</p>
+  <p><strong>Gate.</strong> One <code>all_debug</code> CPU allocation per run (<code>--cpus-per-task=4 --mem=32G</code>, <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code>), the shared root environment interpreter invoked directly with the worktree on <code>PYTHONPATH</code> and <code>uv</code> never invoked on the compute node, the module collected in one fresh process, whole run captured once to a log. Both mutants were applied by hand once and reverted; <code>benchmarks/bank_drift_paired_probe.py</code> ends byte-identical to its committed state.</p>
+  <p><strong>Artifacts.</strong> <code>green-head.log</code> (exit 0), <code>mutant-per-panel-levels.log</code> (exit 1), <code>mutant-filled-contour.log</code> (exit 1) under the reports fence <code>~/.config/reckon/crew/reports/nova/s19-local/nia-panel-test-strength/</code>. The change is confined to <code>tests/test_bank_drift_paired_probe.py</code>.</p>
+</section>
 </main>
 </body>
 </html>

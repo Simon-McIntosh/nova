@@ -370,9 +370,17 @@ def test_panel_keeps_one_shared_level_array_across_both_panels(tmp_path: Path) -
     """One physical level array reaches both contours and both null sets draw.
 
     Contours chosen per panel can make any two maps agree, so the shared array
-    is the quantity under test; both null sets are checked by their marker
-    vocabulary and by which of the two is hollowed."""
+    is the quantity under test.  The two archives are therefore written on
+    distinct grids: a panel that derives its own levels from its own archive
+    then draws a level array that differs from the shared one, and the check
+    says so instead of reproducing the expected levels by construction.  The
+    contour collection is also required to be an unfilled line set, which levels
+    alone do not establish -- a filled set carries the same levels.
 
+    Both null sets are checked by their marker vocabulary and by which of the
+    two is hollowed."""
+
+    import matplotlib
     import numpy as np
 
     from benchmarks.bank_drift_paired_probe import _panel_figure
@@ -381,17 +389,32 @@ def test_panel_keeps_one_shared_level_array_across_both_panels(tmp_path: Path) -
     old = tmp_path / "old.npz"
     new = tmp_path / "new.npz"
     _resolve_archive(old, residual=3.857344e-16, converged=True)
-    _resolve_archive(new, residual=2.451e-03, converged=False)
+    _resolve_archive(
+        new,
+        residual=2.451e-03,
+        converged=False,
+        radius=np.linspace(0.90, 2.05, 7),
+        height=np.linspace(-1.90, 1.90, 8),
+    )
 
     figure, evidence = _panel_figure(old, new, 8)
 
     with np.load(old, allow_pickle=False) as archive:
         expected = contour_levels(np.asarray(archive["flux"], dtype=float), count=8)
+    with np.load(new, allow_pickle=False) as archive:
+        own = contour_levels(np.asarray(archive["flux"], dtype=float), count=8)
+    assert not np.array_equal(own, expected), (
+        # guards the discrimination itself: identical grids make a per-panel
+        # level choice indistinguishable from the shared array
+        "fixture archives must carry different levels, or this check cannot fail"
+    )
     assert evidence["wall_bit_identical"] is True
-    assert evidence["grid_bit_identical"] is True
+    assert evidence["grid_bit_identical"] is False
     for axes in figure.axes:
         contours = axes.collections
         assert len(contours) == 1
+        assert isinstance(contours[0], matplotlib.contour.ContourSet)
+        assert contours[0].filled is False
         assert np.array_equal(np.asarray(contours[0].levels, dtype=float), expected)
         markers = _marker_lines(axes)
         assert {line.get_marker() for line in markers} == {"^", "x", "o", "s"}

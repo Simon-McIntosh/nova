@@ -1,17 +1,17 @@
 [
   {
     "edit_index": 0,
-    "level": -0.058072246912654946,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "level": -0.058072246912655,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 67,
     "component_count": 1,
     "components": [
       {
-        "node_count": 123,
+        "node_count": 127,
         "open": true,
         "ends": [
           [
@@ -25,21 +25,21 @@
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": []
   },
   {
     "edit_index": 1,
-    "level": -0.0606472093688034,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "level": -0.06064720936873112,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 67,
     "component_count": 1,
     "components": [
       {
-        "node_count": 124,
+        "node_count": 128,
         "open": true,
         "ends": [
           [
@@ -53,21 +53,21 @@
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": []
   },
   {
     "edit_index": 2,
-    "level": -0.06326687729171335,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "level": -0.06326687729206781,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 67,
     "component_count": 1,
     "components": [
       {
-        "node_count": 124,
+        "node_count": 128,
         "open": true,
         "ends": [
           [
@@ -81,77 +81,77 @@
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": []
   },
   {
     "edit_index": 3,
-    "level": -0.06588915397475928,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "level": -0.06588929219466962,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 67,
     "component_count": 1,
     "components": [
       {
-        "node_count": 124,
+        "node_count": 128,
         "open": true,
         "ends": [
           [
-            0.944330721,
+            0.944331331,
             -2.0
           ],
           [
-            0.745638357,
+            0.745638845,
             2.0
           ]
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": []
   },
   {
     "edit_index": 4,
-    "level": -0.06830395996635785,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "level": -0.06850869912583789,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 67,
     "component_count": 1,
     "components": [
       {
-        "node_count": 124,
+        "node_count": 128,
         "open": true,
         "ends": [
           [
-            0.942664001,
+            0.943548194,
             -2.0
           ],
           [
-            0.752989686,
+            0.753706859,
             2.0
           ]
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": []
   },
   {
     "edit_index": 5,
-    "level": -0.07105556381607717,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "level": -0.07105556381608484,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 67,
     "component_count": 1,
     "components": [
       {
-        "node_count": 124,
+        "node_count": 128,
         "open": true,
         "ends": [
           [
@@ -165,95 +165,95 @@
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": []
   },
   {
     "edit_index": 6,
-    "level": -0.07351280851074878,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "level": -0.0735659077902808,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 67,
     "component_count": 1,
     "components": [
       {
-        "node_count": 124,
+        "node_count": 128,
         "open": true,
         "ends": [
           [
-            0.940949502,
+            0.941169012,
             -2.0
           ],
           [
-            0.768299974,
+            0.768484037,
             2.0
           ]
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": []
   },
   {
     "edit_index": 7,
-    "level": -0.07584610509319564,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "level": -0.07618244635139551,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 67,
     "component_count": 1,
     "components": [
       {
-        "node_count": 126,
+        "node_count": 128,
         "open": true,
         "ends": [
           [
-            0.938614871,
+            0.939975492,
             -2.0
           ],
           [
-            0.774893837,
+            0.776056639,
             2.0
           ]
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": []
   },
   {
     "edit_index": 8,
-    "level": -0.0781442442837359,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "level": -0.07884559885981407,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 67,
     "component_count": 1,
     "components": [
       {
-        "node_count": 126,
+        "node_count": 128,
         "open": true,
         "ends": [
           [
-            0.936229136,
+            0.939007157,
             -2.0
           ],
           [
-            0.781400796,
+            0.7838236,
             2.0
           ]
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": []
   },
   {
     "edit_index": 9,
-    "level": -0.08055600062870044,
+    "level": -0.08161422495624172,
     "closed_candidate_count": 0,
     "well_formed": false,
     "cycle_component_count": 0,
@@ -267,21 +267,23 @@
         "open": true,
         "ends": [
           [
-            0.934215345,
+            0.938320313,
             -2.0
           ],
           [
-            0.788413023,
+            0.792073381,
             2.0
           ]
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": [
+      "closed_candidate_count!=1"
+    ]
   },
   {
     "edit_index": 10,
-    "level": -0.0831110648645641,
+    "level": -0.08443630770707718,
     "closed_candidate_count": 0,
     "well_formed": false,
     "cycle_component_count": 0,
@@ -295,21 +297,23 @@
         "open": true,
         "ends": [
           [
-            0.932607176,
+            0.937641797,
             -2.0
           ],
           [
-            0.79582865,
+            0.800415722,
             2.0
           ]
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": [
+      "closed_candidate_count!=1"
+    ]
   },
   {
     "edit_index": 11,
-    "level": -0.08617223003011634,
+    "level": -0.08768796008106637,
     "closed_candidate_count": 0,
     "well_formed": false,
     "cycle_component_count": 0,
@@ -323,21 +327,23 @@
         "open": true,
         "ends": [
           [
-            0.932249264,
+            0.937884624,
             -2.0
           ],
           [
-            0.80543686,
+            0.810687241,
             2.0
           ]
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": [
+      "closed_candidate_count!=1"
+    ]
   },
   {
     "edit_index": 12,
-    "level": -0.0892747882186555,
+    "level": -0.09087468274779147,
     "closed_candidate_count": 0,
     "well_formed": false,
     "cycle_component_count": 0,
@@ -351,21 +357,23 @@
         "open": true,
         "ends": [
           [
-            0.931867626,
+            0.937689083,
             -2.0
           ],
           [
-            0.814710944,
+            0.820240585,
             2.0
           ]
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": [
+      "closed_candidate_count!=1"
+    ]
   },
   {
     "edit_index": 13,
-    "level": -0.09197405506810297,
+    "level": -0.09197405506810301,
     "closed_candidate_count": 1,
     "well_formed": true,
     "cycle_component_count": 1,
@@ -394,11 +402,11 @@
         ]
       }
     ],
-    "term_that_fires": "none"
+    "terms_that_fire": []
   },
   {
     "edit_index": 14,
-    "level": -0.09710741425062577,
+    "level": -0.09710741425062587,
     "closed_candidate_count": 1,
     "well_formed": true,
     "cycle_component_count": 1,
@@ -427,21 +435,21 @@
         ]
       }
     ],
-    "term_that_fires": "none"
+    "terms_that_fire": []
   },
   {
     "edit_index": 15,
-    "level": -0.10557268077452606,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "level": -0.1055726807745262,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 71,
     "component_count": 1,
     "components": [
       {
-        "node_count": 130,
+        "node_count": 132,
         "open": true,
         "ends": [
           [
@@ -455,17 +463,17 @@
         ]
       }
     ],
-    "term_that_fires": "closed_candidate_count!=1"
+    "terms_that_fire": []
   },
   {
     "edit_index": 16,
-    "level": -0.11762932427993864,
+    "level": -0.11763029555185064,
     "closed_candidate_count": 1,
     "well_formed": true,
     "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 68,
+    "open_branch_count": 2,
+    "closed_segment_count": 69,
     "component_count": 2,
     "components": [
       {
@@ -474,31 +482,31 @@
         "ends": []
       },
       {
-        "node_count": 63,
+        "node_count": 65,
         "open": true,
         "ends": [
           [
-            0.964228614,
+            0.964231774,
             -2.0
           ],
           [
-            0.916347747,
+            0.916350971,
             2.0
           ]
         ]
       }
     ],
-    "term_that_fires": "none"
+    "terms_that_fire": []
   },
   {
     "edit_index": 17,
-    "level": -0.12036003089561323,
+    "level": -0.12035859745634776,
     "closed_candidate_count": 1,
     "well_formed": true,
     "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 68,
+    "open_branch_count": 2,
+    "closed_segment_count": 69,
     "component_count": 2,
     "components": [
       {
@@ -507,86 +515,76 @@
         "ends": []
       },
       {
-        "node_count": 63,
+        "node_count": 65,
         "open": true,
         "ends": [
           [
-            0.963003112,
+            0.962998528,
             -2.0
           ],
           [
-            0.924630784,
+            0.92462605,
             2.0
           ]
         ]
       }
     ],
-    "term_that_fires": "none"
+    "terms_that_fire": []
   },
   {
     "edit_index": 18,
-    "level": -0.11103454279865305,
+    "level": -0.11103528199087744,
     "closed_candidate_count": 1,
     "well_formed": true,
     "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 64,
-    "component_count": 2,
+    "open_branch_count": 2,
+    "closed_segment_count": 67,
+    "component_count": 1,
     "components": [
       {
-        "node_count": 64,
-        "open": false,
-        "ends": []
-      },
-      {
-        "node_count": 62,
+        "node_count": 128,
         "open": true,
         "ends": [
           [
-            0.936316483,
+            0.936318852,
             -2.0
           ],
           [
-            0.877249182,
+            0.877251615,
             2.0
           ]
         ]
       }
     ],
-    "term_that_fires": "none"
+    "terms_that_fire": []
   },
   {
     "edit_index": 19,
-    "level": -0.11421873338010269,
+    "level": -0.11422858261876627,
     "closed_candidate_count": 1,
     "well_formed": true,
     "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 66,
-    "component_count": 2,
+    "open_branch_count": 2,
+    "closed_segment_count": 69,
+    "component_count": 1,
     "components": [
       {
-        "node_count": 66,
-        "open": false,
-        "ends": []
-      },
-      {
-        "node_count": 62,
+        "node_count": 130,
         "open": true,
         "ends": [
           [
-            0.936406858,
+            0.936437857,
             -2.0
           ],
           [
-            0.887367817,
+            0.887400037,
             2.0
           ]
         ]
       }
     ],
-    "term_that_fires": "none"
+    "terms_that_fire": []
   }
 ]

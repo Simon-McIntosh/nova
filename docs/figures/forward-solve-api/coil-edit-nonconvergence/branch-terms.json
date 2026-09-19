@@ -254,16 +254,16 @@
   {
     "edit_index": 9,
     "level": -0.08161422495624172,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 67,
     "component_count": 1,
     "components": [
       {
-        "node_count": 125,
+        "node_count": 127,
         "open": true,
         "ends": [
           [
@@ -277,23 +277,21 @@
         ]
       }
     ],
-    "terms_that_fire": [
-      "closed_candidate_count!=1"
-    ]
+    "terms_that_fire": []
   },
   {
     "edit_index": 10,
     "level": -0.08443630770707718,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 67,
     "component_count": 1,
     "components": [
       {
-        "node_count": 125,
+        "node_count": 127,
         "open": true,
         "ends": [
           [
@@ -307,23 +305,21 @@
         ]
       }
     ],
-    "terms_that_fire": [
-      "closed_candidate_count!=1"
-    ]
+    "terms_that_fire": []
   },
   {
     "edit_index": 11,
     "level": -0.08768796008106637,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 69,
     "component_count": 1,
     "components": [
       {
-        "node_count": 127,
+        "node_count": 129,
         "open": true,
         "ends": [
           [
@@ -337,23 +333,21 @@
         ]
       }
     ],
-    "terms_that_fire": [
-      "closed_candidate_count!=1"
-    ]
+    "terms_that_fire": []
   },
   {
     "edit_index": 12,
     "level": -0.09087468274779147,
-    "closed_candidate_count": 0,
-    "well_formed": false,
-    "cycle_component_count": 0,
+    "closed_candidate_count": 1,
+    "well_formed": true,
+    "cycle_component_count": 1,
     "axis_enclosing_component_count": 1,
-    "open_branch_count": 0,
-    "closed_segment_count": 0,
+    "open_branch_count": 2,
+    "closed_segment_count": 69,
     "component_count": 1,
     "components": [
       {
-        "node_count": 127,
+        "node_count": 129,
         "open": true,
         "ends": [
           [
@@ -367,9 +361,7 @@
         ]
       }
     ],
-    "terms_that_fire": [
-      "closed_candidate_count!=1"
-    ]
+    "terms_that_fire": []
   },
   {
     "edit_index": 13,

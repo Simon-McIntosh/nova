@@ -1,0 +1,17 @@
+Correcting the account this commit's own message gives.
+
+The message ends with the fragment "Selected unverified. be careful", which
+is editor residue rather than part of the account, and it should be read as
+absent. Nothing in the change is unverified in the sense that phrase
+suggests, and nothing about it warrants special care beyond the record below.
+
+What the commit carries: the five read-request kinds declared as data, and a
+dispatcher whose loop body performs the request read once and selects the
+answer slots. What it does not carry, and what the message implies by
+omission: a call site. Nothing in the package, the tests or the benchmarks
+invokes the dispatcher, and the later program-shape census measured that it
+moved no program. It was added ahead of a seam that was never wired.
+
+That is why a subsequent change removes the dispatcher and the two request
+and answer types outright rather than extending them. The declaration was
+sound and the seam it anticipated did not arrive.

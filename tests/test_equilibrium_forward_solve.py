@@ -619,10 +619,16 @@ def test_the_accelerator_routes_agree_on_the_fixed_point(machine, converged):
     shadowed = operator.traced_flux_map_with_shadow()
     read_partition = shadowed._read_frozen_partition
     map_partition = shadowed._map_frozen_partition
+    seed_shadow = operator.residual_shadow_mask(seed, None)
+    seed_partition = read_partition(seed, seed_shadow, external, operator, None)
     for state_name, state in (
         ("seed", seed),
         ("picard_terminal", results["picard"].flux),
         ("newton_krylov_terminal", results["newton_krylov"].flux),
+        (
+            "newton_krylov_trajectory",
+            results["newton_krylov"].fixed_point.trajectory_state,
+        ),
     ):
         shadow = operator.residual_shadow_mask(state, None)
         explicit_live = mapped(state, external, operator, None)
@@ -645,6 +651,29 @@ def test_the_accelerator_routes_agree_on_the_fixed_point(machine, converged):
             f"{state_name}.live_vs_frozen_max_abs="
             f"{float(jnp.max(jnp.abs(explicit_live - explicit_frozen))):.17g}"
         )
+        seed_frozen = map_partition(state, seed_partition, external, operator, None)
+        print(
+            f"{state_name}.live_vs_seed_frozen_max_abs="
+            f"{float(jnp.max(jnp.abs(explicit_live - seed_frozen))):.17g}"
+        )
+        if state_name == "newton_krylov_trajectory":
+            for (leaf_path, seed_leaf), trajectory_leaf in zip(
+                jax.tree.leaves_with_path(seed_partition),
+                jax.tree.leaves(explicit_partition),
+                strict=True,
+            ):
+                seed_values = np.asarray(seed_leaf)
+                trajectory_values = np.asarray(trajectory_leaf)
+                difference = np.abs(trajectory_values - seed_values)
+                print(
+                    "newton_krylov_trajectory.partition_leaf="
+                    f"{jax.tree_util.keystr(leaf_path)} "
+                    f"seed_shape={seed_values.shape} "
+                    f"trajectory_shape={trajectory_values.shape} "
+                    f"difference_shape={difference.shape} "
+                    f"difference_count={np.count_nonzero(difference)} "
+                    f"max_abs={np.max(difference) if difference.size else 0}"
+                )
 
     for route, result in results.items():
         assert float(result.fixed_point.residual) < RESIDUAL_TOLERANCE, route

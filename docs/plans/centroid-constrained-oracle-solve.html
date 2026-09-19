@@ -23,8 +23,8 @@
   <title>Centroid-constrained oracle solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-18">
-<meta name="plan-version" content="19">
+<meta name="plan-modified" content="2026-09-19">
+<meta name="plan-version" content="20">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -91,6 +91,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260917T204844551541-cco-flux-level-compensating-term" data-who="reckon-ship" data-when="2026-09-17T21:40:29.304Z">
     <div class="r-comment-body"><p>Correct scope refusal by the worker: the flux-level term is a third compensating row, and the fixture's row, unknown and binding assembly with its direction map live in scripts/analytic_oracle_fixtures/centroid_row.py, which the brief did not fence. No code written. Redispatched as cco-flux-level-compensating-term-2 with that module in scope; the level-row functional goes in nova/equilibrium/constraint.py and the fixture builder stays in centroid_row.py</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260917T214414373906-cco-flux-level-compensating-term-2" data-who="reckon-ship" data-when="2026-09-18T20:36:23.855Z">
+    <div class="r-comment-body"><p>Flux-level compensating term landed with the adjudicated carrier reader and the pool-index repair; review 79/100 with four findings</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T053656352101-review-of-cco-bounded-row-step-control" data-who="s19c-review-cco-c" data-when="2026-09-17T06:45:40.145Z">
     <div class="r-comment-body"><p>Independent review of r-20260916T205409901465-cco-bounded-row-step-control stored at the fence path, total 84, findings recorded on the reviewed run's completion</p></div>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T09:11:00",
+  "updated": "2026-09-19T09:15:01",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -198304,6 +198304,256 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T214414373906-cco-flux-level-compensating-term-2",
+        "plan": "centroid-constrained-oracle-solve",
+        "section": "\u00a72",
+        "node": "cco-flux-level-compensating-term-2",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1563,
+                "cached_input_tokens": 877190,
+                "input_tokens": 878785,
+                "output_tokens": 103,
+                "reasoning_output_tokens": 57,
+                "total_tokens": 878888,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "scripts/analytic_oracle_fixtures/measure.py exposes the level column (a uniform flux offset that adds no field, stated in its docstring) beside the vertical and radial columns; scripts/analytic_oracle_fixtures/centroid_row.py assembles the third row, its unknown and its binding with the direction map extended; nova/equilibrium/constraint.py carries the level-row functional and the bounded unknown reports three amplitudes with the level term outside the field bound; tests in tests/test_centroid_constrained_fixture.py and tests/test_equilibrium_constraint_protocol.py cover the three-column family and pass in fresh all_debug processes with zero added failures against base (ids listed); ONE H200 job (gpu:1, 8 cores, 128G, root interpreter with PYTHONPATH, no uv on the node, persistent cache, receipts persisted as they land) re-runs the positive control on the 20 mm displaced weak-110 seed and reports the converged centroid against target, the three amplitudes, the gauge-free boundary-flux offset in the compensator column gauge and the row scaled residual against the 1e-12 clause, with the verdict stated as holds, fails, or fails at a measured floor; one poloidal contour panel per the plotting rules; plan and evidence record carry the landing; every uv command carries --no-sync and nothing runs uv sync; write files in short pieces and py_compile each with /home/ITER/mcintos/Code/nova/.venv/bin/python before committing; park with status waiting and all five wait fields when the job outlives the turn",
+          "estimated_hours": null,
+          "goal": "Implement the revised compensating-unknown decision as a uniform flux-level third compensating row beside the two solenoidal field columns, its functional in nova/equilibrium/constraint.py and its row, unknown and binding assembled in scripts/analytic_oracle_fixtures/centroid_row.py, measured by re-running the positive control",
+          "id": "cco-flux-level-compensating-term-2",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T21:44:15Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T214414373906-cco-flux-level-compensating-term-2/manifest.md",
+          "plan": "centroid-constrained-oracle-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/constraint.py",
+            "scripts/analytic_oracle_fixtures/measure.py",
+            "scripts/analytic_oracle_fixtures/centroid_row.py",
+            "benchmarks/centroid_constrained_fixture_receipt.py",
+            "benchmarks/oracle_start_newton_probe.py",
+            "tests/test_centroid_constrained_fixture.py",
+            "tests/test_equilibrium_constraint_protocol.py",
+            "docs/figures/centroid-constrained-oracle-solve",
+            "docs/evidence/archive/centroid-constrained-oracle-solve-landed.html",
+            "docs/plans/centroid-constrained-oracle-solve.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-flux-level"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s19c-cco-fluxlevel2-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T21:44:28Z",
+        "completed_at": "2026-09-18T20:36:23.855Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 82303,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 82315,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "1aa2597d359f9dec57a4fe6f99bfaa197534d125",
+        "commits": [
+          "67e0296c227b01cfb94f784cd725384cc5546ff4",
+          "42fab795a17b5e6174508f8e298327ff2f00faf4",
+          "6cccf91be89848e6a13abfdf74383f51c34cefe6",
+          "f39ae4a8f779a97044e4491a9e89a9b2b7c4fd51",
+          "a4c3c129daf0a1a0c89fc905b86a243908a45817",
+          "bdb3d49dc63f4d2f4c9c252b6d3874425cc48906",
+          "f5804eeb69f6e3b9a07899571d14d1f7e9b83c3e",
+          "e9363e8f36794d09ccc54cc6d799dddfaea816af",
+          "4bf4a59c76ff1f517a3cf9b009bb275c03882aea",
+          "67296f759d1cf3f35bea0932b7d37e0226075812",
+          "826a74346f8892bafefe7ddcfc53baf84677317b",
+          "9f08bd58fca584c4614abfa222554ab0bda9c729",
+          "ee6284466064193bba57bf9b56a482bfbf4b1974",
+          "d6043df9126993c2ddd073ff50a626e67969ed49",
+          "99f1345e6f9175507b9e7ffc7b324fb9f145df36",
+          "b66ab9cb3a0ba40b5d83d98120df3d10c6438b0f"
+        ],
+        "changed_lines": {
+          "added": 1289,
+          "removed": 105,
+          "files": 9
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "two-module all_debug gate: tests/test_centroid_constrained_fixture.py (8 passed) and tests/test_equilibrium_constraint_protocol.py (14 passed, 2 pre-existing failures at base 1aa2597d, zero added); H200 positive control job 1273572 both exits 0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-flux-level/lane-test_centroid_constrained_fixture-head.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T214414373906-cco-flux-level-compensating-term-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "3d586280-59bd-4439-91b5-76b1fa1f70c7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 5772127,
+            "input_tokens_cumulative": 5772127,
+            "output_tokens": 41881,
+            "output_tokens_cumulative": 41881,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T20:36:23.855Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 14,
+            "evidence": 14,
+            "fit": 17,
+            "goal_fidelity": 17,
+            "scope_discipline": 17
+          },
+          "absent": [],
+          "total": 79
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 5939682,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2925.198,
+          "generated_tokens": 52989,
+          "generation_seconds": 2893.878,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.6,
+          "machine_seconds": 31.32,
+          "peak_input_tokens": 166255,
+          "tokens_per_second": 18.31,
+          "wall_tokens_per_second": 18.11
+        },
+        "follow_on_paths": [
+          "control-positive.svg",
+          "docs/figures/centroid-constrained-oracle-solve/",
+          "2659.91",
+          "gauge-reread.json"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 10,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cco-flux-level-compensating-term-2",
+          "session_id": "3d586280-59bd-4439-91b5-76b1fa1f70c7",
+          "session_source": "stream",
+          "retained_at": "2026-09-18T20:36:23.855Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "centroid-constrained-oracle-solve",
+          "at_dispatch": null,
+          "at_complete": 0.5,
+          "verdict": "exempt",
+          "reason": "no-impl-recorded-at-dispatch"
+        },
+        "tool_steps": 57.0,
+        "orientation_input_tokens": 2876739.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -198672,6 +198922,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2844
+    "_version": 2845
   }
 }

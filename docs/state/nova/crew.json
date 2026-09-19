@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T17:06:41",
+  "updated": "2026-09-19T17:11:05",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5160,6 +5160,15 @@
       },
       {
         "id": "s19c-msc-shim-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-19"
+      },
+      {
+        "id": "s19c-msc-stalefig-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -211158,6 +211167,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2924
+    "_version": 2925
   }
 }

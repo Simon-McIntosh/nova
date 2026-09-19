@@ -591,5 +591,66 @@
     positional clause by <code>1.69</code> times against the two-column control,
     and the state it reaches is still not the analytic equilibrium.</p>
   </section>
+  <section id="review-repairs">
+    <h2>Review repairs: the pool bound and the level reading</h2>
+    <p>Two findings from the review of this record are repaired here, and the
+    repaired guard is shown refusing the indexing it exists to catch rather than
+    merely passing under the correct one.</p>
+    <h3 id="review-repairs-pool-bound">The sampled pool is bounded at the slice it hands over</h3>
+    <p>The mesh-carried point read assembles its sampling points against the
+    operator's cell block, so the flux values it passes must be the
+    carried-cell prefix of the state: the cells first, the wall nodes and the
+    direct sampling nodes after. The guard that stood here compared the
+    lattice's cell count against the operator's cell count, and those two agree
+    whichever prefix the reader takes, so both the correct and the incorrect
+    indexing passed it. The count that discriminates is the one the reader
+    <em>declares when it slices</em>, so the read now states that length and the
+    guard checks it against the cell count the stencil convention states, before
+    the slice is taken. The pre-fix index — the physical prefix, cells plus wall
+    nodes — is now refused:
+    <code>ValueError: a point-sampled pool carries the operator's cells first, so
+    the slice handed to the read is the first 3 flux values; got a declared pool
+    of 4</code>. On the committed three-cell stub the correct bound reads
+    <code>12.15</code> Wb for the nearest centroid's own mixture and the
+    physical-prefix bound raises; the regression test asserts both, the read and
+    the refusal.</p>
+    <h3 id="review-repairs-level-reading">The level column reports a residual, not a cross-gauge difference</h3>
+    <p>The control receipt carried <code>level_error_wb</code>, the difference
+    between the level column's amplitude and the authored level. The column is
+    anchored at the analytic magnetic axis while the authored level is an
+    absolute value, so that difference mixes two gauge conventions: on the
+    positive arm it read <code>-48.70235527547112</code>, four decades from any
+    error the solve carries. The key is removed. The two readings
+    (<code>level_amplitude_wb</code>, <code>level_target_wb</code>) stay in the
+    receipt unsubtracted for a reader who wants them, and the row's physical
+    error is its own scaled residual:
+    <code>level_row_scaled_residual</code> <code>2.3214644865632295e-03</code>,
+    the row residual divided by the declared level scale, in webers and needing
+    no gauge.</p>
+    <h3 id="review-repairs-gate">The gate at the repaired head</h3>
+    <p>One fresh <code>all_debug</code> CPU process per module at head
+    <code>10ff11fd</code>: <code>tests/test_centroid_constrained_fixture.py</code>
+    <strong>8 passed</strong> in <code>5.35 s</code>;
+    <code>tests/test_equilibrium_constraint_protocol.py</code> <strong>15
+    passed, 2 failed</strong> in <code>70.72 s</code>. Both failures are the
+    eliminated-constraint ids that fail at the base revision, raised as
+    <code>AttributeError: '_LinearOperator' object has no attribute
+    'program_identity'</code> by the test module's own stub, so the repaired head
+    adds no failure.</p>
+    <p><strong>The terminal state is not yet banked.</strong> The save ordering
+    this review asked for already holds: <code>control_arm</code> writes
+    <code>control-&lt;arm&gt;-state.npy</code> and records
+    <code>terminal_state_path</code> in the control JSON before the receipt is
+    composed, and <code>_draw_state</code> emits the SVG beside the PNG. What was
+    missing is the run, and the two CPU control arms submitted for it at
+    <code>10ff11fd</code> were still solving when this node's fence closed, with
+    no receipt, state file or panel written. If an arm is cancelled on the
+    partition's <code>00:59:00</code> limit, the CPU route to the persisted state
+    does not fit one allocation and belongs to the coordinator as a decision
+    rather than to a blind retry. The <code>field-response</code> panel's vector
+    companion needs an SVG emitter in
+    <code>benchmarks/centroid_field_response_probe.py</code>, which lies outside
+    this node's write scope and is reported rather than taken.</p>
+  </section>
 </main>
 </html>

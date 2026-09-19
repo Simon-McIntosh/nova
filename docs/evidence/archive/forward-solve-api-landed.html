@@ -567,6 +567,52 @@ the panel and the persisted-state expectations are refreshed together.</p>
 draws its boundary from the EFIT LCFS columns, so it does not inherit the tracer defect the followup
 assumed.</p>
 </section>
+<section id="coil-edit-persistence-guard">
+<h2>The persistence guard reads the persisted pair back, and the census headline restated (2026-09-19)</h2>
+<p><strong>The guard measured a fit against itself.</strong> The persistence-time assertion added with the
+sweep-persistence repair compared one tensor-spline fit's level with that same fit evaluated at that same
+coordinate, so the residual was zero by construction: measured against the twenty retained pre-repair state
+pairs, which disagree with their own stored field by up to 2.249e-2 Wb at state 0, it fired <strong>0 of 20
+times</strong> with 14 of the 20 residuals exactly zero and a maximum of 1.388e-17 against a 1.0e-9
+tolerance. The stored flux never reached the expression either: the flux row was overwritten with the level
+three lines after the residual was computed, so no path existed by which the archived pair could be the
+thing asserted on.</p>
+<p><strong>The repair.</strong> <code>_write_panel_data</code> now reloads the archive it has just written
+and reads every persisted state back through <code>_persisted_saddle_residuals</code>, which refits the
+stored psi independently and evaluates it at that state's own stored X-point coordinate against the stored
+<code>xpoint_flux</code>; a residual above <code>SADDLE_FLUX_TOLERANCE</code> is refused by
+<code>_refuse_inconsistent_persisted_pairs</code>. The read-back residual is persisted per state as
+<code>saddle_flux_residual_{position}</code>, and the archived lattice pair's own disagreement with the
+field persisted beside it — the 2.249e-2 Wb the raster substitution removed at state 0, the same quantity
+the read-back refuses a stored pair for — is recorded as
+<code>saddle_flux_archived_delta_{position}</code>, so the audit trail carries what the repair removed
+rather than a zero. The two independent range conditions on the coordinate and flux row counts collapse to
+one guard, so a state whose flux row is shorter than its coordinate row cannot take the raster coordinate
+beside an unoverwritten archived flux.</p>
+<p><strong>A live blocker found on the way.</strong> <code>_assemble_raster_branches</code> omitted the
+<code>overflow</code> flag that <code>_persist_branches</code> requires unconditionally, so the sweep's
+per-edit persistence raised <code>KeyError: 'overflow'</code> before writing any archive at all on the
+raster-assembly path the sweep and the regeneration job both take. The flag the assembler already computes
+is now passed through. This is why the regeneration job could not have produced a fixture without it.</p>
+<p><strong>Positive control.</strong> <code>tests/test_coil_edit_persistence_guard.py</code> runs the
+read-back check on the retained pre-repair fixture and asserts it fires on all twenty states, with state 0
+reading 2.249e-2 Wb; on a synthetic archive the writer itself produces it asserts the read-back passes with
+the stored coordinate replaced by the field's own stationary pair, and that the archived disagreement
+survives as its own persisted field; and it asserts the writer refuses a state whose flux row is shorter
+than its coordinate row. Gate on the login node: <code>JAX_PLATFORMS=cpu
+/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q
+tests/test_coil_edit_persistence_guard.py</code>, 3 passed, exit 0. Commit <code>8bfcff1d</code>.</p>
+<p><strong>The census headline restated.</strong> The sweep-persistence record reported "14 of 20 closed"
+beside "six open in two mechanisms", which cannot both hold: its own two mechanisms cover eight states.
+On the retained fixture the count under the gate the panel draws with (<code>closed_candidate_count</code>
+1 and <code>well_formed</code>) is <strong>12 of 20 drawn closed</strong> — states 7 to 12 and 14 to 19 —
+with <strong>eight open</strong>: states 0, 1, 2, 3, 5 and 6 lose the cycle, and states 4 and 13 carry a
+cycle with an axis-enclosing component but admit nothing (<code>closed_candidate_count</code> 0, drawn with
+the unconnected-mark fallback). Fourteen of twenty carry a cycle, which is not the drawn-closed count. The
+plan's followup article and the sweep-persistence outcome are restated in place to match. No figure
+accompanies this section: the evidence is a per-state table of residuals and counts, and this node's write
+scope carries no figures path.</p>
+</section>
 </main>
 </body>
 </html>

@@ -1,0 +1,76 @@
+{
+  "artifact": "MAST 27079 limited-boundary wall-contact repair",
+  "revision_before": "09f5cc5088e11d7f90837522ffef1f4067ed65b4",
+  "route_definitions": {
+    "wall_zone": "independently solved wall-zone samples followed by a quadratic in wall-polyline length",
+    "contour_surface": "tensor spline fitted to the solved rectangular flux lattice and used to trace the boundary"
+  },
+  "before": {
+    "rows": [
+      {
+        "row": 16,
+        "time_s": 0.03500000014901161,
+        "converged": true,
+        "terminal_residual": 1.136941060407411e-09,
+        "axis_position_m": [0.6799217413516139, -0.0018526631348965567],
+        "boundary_flux_wb": 0.28694575567005143,
+        "contact_position_m": [0.6050537429416492, 1.7280815839767456],
+        "wall_zone_contact_flux_wb": 0.28694575567005143,
+        "contour_surface_contact_flux_wb": 0.25453400486484157,
+        "route_disagreement_wb": 0.03241175080520986,
+        "contour_min_wall_distance_m": 0.2720145779546779,
+        "radial_pitch_m": 0.060625000041909516,
+        "vertical_pitch_m": 0.125
+      },
+      {
+        "row": 17,
+        "time_s": 0.03999999910593033,
+        "converged": true,
+        "terminal_residual": 7.336651509264504e-11,
+        "axis_position_m": [0.7104105965906162, 0.0038515587536154566],
+        "boundary_flux_wb": 0.2712440492948911,
+        "contact_position_m": [0.6053884305779619, 1.7280815839767456],
+        "wall_zone_contact_flux_wb": 0.2712440492948911,
+        "contour_surface_contact_flux_wb": 0.24062442198419914,
+        "route_disagreement_wb": 0.030619627310691955,
+        "contour_min_wall_distance_m": 0.20974874944500732,
+        "radial_pitch_m": 0.060625000041909516,
+        "vertical_pitch_m": 0.125
+      }
+    ]
+  },
+  "after": {
+    "rows": [
+      {
+        "row": 16,
+        "time_s": 0.03500000014901161,
+        "converged": true,
+        "terminal_residual": 1.136941060407411e-09,
+        "axis_position_m": [0.6799217413516139, -0.0018526631348965567],
+        "boundary_flux_wb": 0.25850360061597305,
+        "contact_position_m": [0.599080815463746, 1.7280815839767456],
+        "contact_flux_wb": 0.25850360061597305,
+        "contour_surface_contact_flux_wb": 0.25850360061597266,
+        "relative_flux_error": 1.503183090240073e-15,
+        "contour_min_wall_distance_m": 0.012811640333972418,
+        "radial_pitch_m": 0.060625000041909516,
+        "vertical_pitch_m": 0.125
+      },
+      {
+        "row": 17,
+        "time_s": 0.03999999910593033,
+        "converged": true,
+        "terminal_residual": 7.336651509264504e-11,
+        "axis_position_m": [0.7104105965906162, 0.0038515587536154566],
+        "boundary_flux_wb": 0.24432190485200148,
+        "contact_position_m": [0.5994198075576935, 1.7280815839767456],
+        "contact_flux_wb": 0.24432190485200148,
+        "contour_surface_contact_flux_wb": 0.24432190485200117,
+        "relative_flux_error": 1.249630835706985e-15,
+        "contour_min_wall_distance_m": 7.009371092281391e-05,
+        "radial_pitch_m": 0.060625000041909516,
+        "vertical_pitch_m": 0.125
+      }
+    ]
+  }
+}

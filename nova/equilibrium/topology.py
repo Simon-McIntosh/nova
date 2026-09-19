@@ -579,13 +579,20 @@ class Topology(Pytree):
         polarity,
         requested_class=None,
         private_wall_node_mask=None,
+        surface: TensorBSpline | None = None,
     ):
-        """Return the wall extremum after excluding known private-wall nodes.
+        """Return the wall extremum on the surface that traces the boundary.
 
         A private-wall mask is meaningful only for a pinned limited read.  An
         emergent read retains its own saddle-height reachability rule, while a
         pinned diverted read selects its saddle and must not change when wall
         shadow evidence is supplied.
+
+        Structured reads select the contact from the tensor spline used for
+        contours and publish that spline's value at the fitted contact.  A
+        limited plasma therefore has one boundary authority: its last closed
+        contour passes through the wall contact.  Unstructured reads have no
+        tensor surface and retain their wall-zone samples.
 
         Masked samples receive a finite losing score before the wall extremum
         is selected.  Keeping the operand finite preserves the fixed-shape
@@ -593,8 +600,16 @@ class Topology(Pytree):
         preventing a masked node from winning the discrete wall bracket.
         """
         wall_flux = jnp.asarray(psi_wall)
+        if surface is not None:
+            wall_flux = surface(
+                self.wall.coordinate[:, 0],
+                self.wall.coordinate[:, 1],
+            )
         if private_wall_node_mask is None or requested_class is None:
-            return self._wall_anchor_selection(wall_flux, polarity)[0]
+            selected = self._wall_anchor_selection(wall_flux, polarity)[0]
+            if surface is not None:
+                selected = selected.at[2].set(surface(selected[0], selected[1]))
+            return selected
         private_wall = jnp.asarray(private_wall_node_mask, dtype=bool)
         if private_wall.shape != wall_flux.shape:
             raise ValueError("private wall mask must carry one flag per wall node")
@@ -619,7 +634,10 @@ class Topology(Pytree):
             selected_score, highest
         )
         bounded = selected.at[2].set(bounded_flux)
-        return jnp.where(jnp.any(private_wall), bounded, selected)
+        selected = jnp.where(jnp.any(private_wall), bounded, selected)
+        if surface is not None:
+            selected = selected.at[2].set(surface(selected[0], selected[1]))
+        return selected
 
     @jax.jit
     def boundary(self, data_o, vmap_x, data_w, polarity):
@@ -1013,6 +1031,7 @@ class Topology(Pytree):
             polarity,
             requested_class,
             private_wall_node_mask,
+            surface,
         )
         wall_node = jnp.argmin(
             jnp.sum((self.wall.coordinate - data_w[:2]) ** 2, axis=1)

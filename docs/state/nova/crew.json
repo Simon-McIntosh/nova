@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T21:44:41",
+  "updated": "2026-09-19T22:02:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -212245,6 +212245,225 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T090428129698-msc-newton-krylov-route-regression",
+        "plan": "millisecond-converged-solve",
+        "section": "",
+        "node": "msc-newton-krylov-route-regression",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5443,
+                "cached_input_tokens": 561222,
+                "input_tokens": 566667,
+                "output_tokens": 4079,
+                "reasoning_output_tokens": 323,
+                "total_tokens": 570746,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "followup f-msc-newton-krylov-route-regression on the plan: two forward-solve regressions reproduce on CPU at the current head and are dated to the mesh-array tracing commit dd7d8286 (2026-09-16); the predecessor node on the local lane (run r-20260918T165636099922, its logs under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/lane-regressions, read gate-a-targets-2ff0e733.log and the crashed diagnose-routes-2ff0e733.log first) repaired the frozen-partition hook arity and a traced-program cache leak, both merged, and left these two: test_the_accelerator_routes_agree_on_the_fixed_point fails because profile.solve(seed, route=newton_krylov, newton_steps=8, warmup=40) terminates at fixed-point residual 1.2947 against 1e-6 while the picard route converges, so the accelerated route lost the equilibrium the shared map holds; and test_the_moment_map_is_differentiable_against_finite_differences fails because the coarsest finite-difference step's relative error is 4.46e-4 where the ladder expects it above 1e-2, so either the step scale no longer follows the traced mesh or the analytic Jacobian changed; for the first, instrument the newton_krylov route's telemetry per step on the test machine (the predecessor's diagnostic crashed converting shadow_mask_changes, an array, to a scalar, so print full shapes), compare its map arguments against the picard route's at the same state, and find which traced argument or frozen-partition read the Newton-Krylov path consumes differently since the mesh arrays became traced (the mesh-array commit touched fixed_point.py, forward.py, forward_operator.py and reduced_newton.py); for the second, measure the ladder at the three steps against the analytic Jacobian and decide from the measurement whether the step scale or the Jacobian moved, never by widening the tolerance; the gate is tests/test_equilibrium_forward_solve.py in split all_debug jobs (the whole file exceeds the 59-minute limit: the first thirteen tests took about 30 minutes, so roughly eleven tests per job), JAX_PLATFORMS=cpu, the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python directly (never uv on a compute node), TMPDIR=/tmp in the submit environment and the payload, scripts inside the worktree, all green, with the H200 lane recorded as a follow-on because the reservation is held; a figure under docs/figures/millisecond-converged-solve/newton-krylov-route showing residual against step for both routes before and after, PNG and SVG; the plan landing comment and the evidence anchor in docs/evidence/archive/millisecond-converged-solve-landed.html; commit at the first passing target before any long wait; call configure_dtypes before any array; every uv command carries --no-sync and nothing runs uv sync; py_compile with the project interpreter before each commit; if the fence ends first, commit what holds and name the rest under follow_ons; a wait carries wait_condition, wait_probe as a JSON list, wait_terminal and resume_brief; status words complete, waiting or blocked only",
+          "estimated_hours": null,
+          "goal": "restore convergence of the Newton-Krylov accelerator route on the shared forward map so every accelerated route reaches the same fixed point",
+          "id": "msc-newton-krylov-route-regression",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-19T09:04:28Z",
+            "read_at": "2026-09-19T09:04:30Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 96.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T090428129698-msc-newton-krylov-route-regression/manifest.md",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/fixed_point.py",
+            "nova/equilibrium/reduced_newton.py",
+            "nova/equilibrium/forward_operator.py",
+            "nova/equilibrium/forward.py",
+            "tests/test_equilibrium_forward_solve.py",
+            "tests/test_forward_operator_arguments.py",
+            "docs/figures/millisecond-converged-solve/newton-krylov-route",
+            "docs/plans/millisecond-converged-solve.html",
+            "docs/evidence/archive/millisecond-converged-solve-landed.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/newton-krylov-route"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19x-msc-nk-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-19T09:04:41Z",
+        "completed_at": "2026-09-19T13:50:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 17143,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "17d8b0c4280b34409ef651e44913b04eb28fb545",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T090428129698-msc-newton-krylov-route-regression/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0b8e9-250a-7b11-9eaf-3e11f0912bc7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 40465408,
+            "cached_input_tokens_cumulative": 40465408,
+            "input_tokens": 40574474,
+            "input_tokens_cumulative": 40574474,
+            "output_tokens": 37222,
+            "output_tokens_cumulative": 37222,
+            "reasoning_output_tokens": 9106,
+            "reasoning_output_tokens_cumulative": 9106
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-19T13:50:24Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 98.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-19T13:50:24Z"
+            }
+          ],
+          "notional_cost_usd": 625.2222,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 40465408,
+          "cumulative_input_tokens": 81039882,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 46328
+        },
+        "follow_on_paths": [
+          "PNG/SVG;",
+          "tests/test_equilibrium_forward_solve.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-newton-krylov-route-regression",
+          "session_id": "01a0b8e9-250a-7b11-9eaf-3e11f0912bc7",
+          "session_source": "stream",
+          "retained_at": "2026-09-19T13:50:24Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "01a0b8e9-250a-7b11-9eaf-3e11f0912bc7",
+          "source": "stream",
+          "reason": "lead directive, option F: the third attempt is a different design chosen by the decision newton-krylov-third-repair, so the sessions turns carry context for two approaches that both failed and cannot inform the one that replaces them; the six commits are preserved in the worktree and named in the outcome, and releasing forward_operator.py lets three queued items that edit the same module land in sequence tonight"
+        },
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.88,
+        "impl_move": {
+          "plan": "millisecond-converged-solve",
+          "at_dispatch": 0.88,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "gate-not-passing"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "no-negative-control-declared",
+          "test_paths": [
+            "tests/test_equilibrium_forward_solve.py",
+            "tests/test_forward_operator_arguments.py"
+          ]
+        },
+        "tool_steps": 100.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -212683,6 +212902,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2931
+    "_version": 2932
   }
 }

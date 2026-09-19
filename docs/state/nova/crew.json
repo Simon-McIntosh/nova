@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T16:21:13",
+  "updated": "2026-09-19T16:22:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -206800,6 +206800,323 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T135724363069-nia-anchor-bisect-record-repairs",
+        "plan": "null-identification-authority",
+        "section": "",
+        "node": "nia-anchor-bisect-record-repairs",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2354,
+                "cached_input_tokens": 253944,
+                "input_tokens": 256330,
+                "output_tokens": 4065,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 260395,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "In benchmarks/bank_drift_anchor_bisect.py the verdict near line 727 reports an arm whose _load_arm stub carries an empty hook list as absent rather than as the override not taking effect, the mixed-arm finding sentence compares the two gaps to the round-off floor (2.2e-16 against 3.1e-16 is below it) before naming any carrier, and the receipt's slowest-compile figure is taken from the log's alarm lines (4m30.6s where the receipt said 4m18s). A test module tests/test_bank_drift_anchor_bisect.py pins the absent-arm verdict and the floor comparison on synthetic arm JSONs. The receipt subcommand is re-run against the existing arm JSONs under docs/figures/null-identification-authority/anchor-bisect/arms with the login-node interpreter, no allocation, so receipt-21978-35-anchor-bisect.json and receipt.html are regenerated rather than hand-edited, and the diff of the regenerated receipt is quoted in the plan comment. Gate: the new test module plus tests/test_bank_drift_paired_probe.py on the login node, captured once to a log in the reports directory with the exit status. Every uv command carries --no-sync and nothing runs uv sync; on a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with TMPDIR=/tmp and JAX_PLATFORMS=cpu, one job, never an array. Commits carry a body. The plan comment and the landed-record anchor state only what was measured.",
+          "estimated_hours": 0.75,
+          "goal": "Repair the anchor-bisect receipt on the three review findings: absent arms reported as absent, the mixed-arm sentence compared to the round-off floor before naming a carrier, and the slowest-compile figure read from the log.",
+          "id": "nia-anchor-bisect-record-repairs",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-19T13:57:26Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T135724363069-nia-anchor-bisect-record-repairs/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/bank_drift_anchor_bisect.py",
+            "tests/test_bank_drift_anchor_bisect.py",
+            "docs/figures/null-identification-authority/anchor-bisect",
+            "docs/plans/null-identification-authority.html",
+            "docs/evidence/archive/null-identification-authority-landed.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/nia-anchor-bisect-record-repairs"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-nia-bisectrec-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-19T13:57:38Z",
+        "completed_at": "2026-09-19T14:16:17.379Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1111,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1119,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3d679461916cd5cf9fbbc6d984e66d7e7995e938",
+        "commits": [
+          "68bdf8fa27de11056282b6080f965afaf57a1571"
+        ],
+        "changed_lines": {
+          "added": 321,
+          "removed": 7,
+          "files": 6
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "gate_check": {
+          "command": "TMPDIR=/tmp JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_bank_drift_anchor_bisect.py tests/test_bank_drift_paired_probe.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/nia-anchor-bisect-record-repairs/pytest-anchor-bisect-record-repairs.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T135724363069-nia-anchor-bisect-record-repairs/manifest.md",
+        "scope_changed": false,
+        "session_id": "8c185dcc-9582-467a-a28a-07b08a7979a0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 8959030,
+            "input_tokens_cumulative": 8959030,
+            "output_tokens": 43213,
+            "output_tokens_cumulative": 43213,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-19T14:16:17.379Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 33,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1952,
+              "log_fresh": false,
+              "manifest_commits": [
+                "16a4dfe5 fix(coil-edit): persist one terminal state per sweep edit"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "5ada93bb45cd0b9f2e9d8d925b5877b245e6b17370bfbefd9669472e0a5a9fb0",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T125427607332-fsa-sweep-persistence/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan forward-solve-api --section '\u00a75' --role review --spec-level exact --node review-of-fsa-sweep-persistence --goal 'attach an independent review to run r-20260919T125427607332-fsa-sweep-persistence' --done-when 'the review for r-20260919T125427607332-fsa-sweep-persistence stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260919T125427607332-fsa-sweep-persistence.json --time-budget 55m --session s19-codex-20260916 --local",
+              "node": "fsa-sweep-persistence",
+              "phase": "working",
+              "plan": "forward-solve-api",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260919T125427607332-fsa-sweep-persistence",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 1957,
+              "terminal_at": "2026-09-19T13:24:50Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-sweep-persistence"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3000,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1320,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 2288,
+              "log_fresh": false,
+              "manifest_commits": [
+                "3587b939",
+                "a6e51877",
+                "f14605be"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "d3567cfb500679f75abca560b7370154cf3b4b4b29ebd17c6e52b33b0494db40",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T125709902038-msc-census-gate-and-unit-node/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project nova --plan millisecond-converged-solve --section '' --role review --spec-level exact --node review-of-msc-census-gate-and-unit-node --goal 'attach an independent review to run r-20260919T125709902038-msc-census-gate-and-unit-node' --done-when 'the review for r-20260919T125709902038-msc-census-gate-and-unit-node stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260919T125709902038-msc-census-gate-and-unit-node.json --time-budget 50m --session s19-codex-20260916 --local",
+              "node": "msc-census-gate-and-unit-node",
+              "phase": "starting",
+              "plan": "millisecond-converged-solve",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260919T125709902038-msc-census-gate-and-unit-node",
+              "session": "s19-codex-20260916",
+              "terminal_age_seconds": 2296,
+              "terminal_at": "2026-09-19T13:19:11Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-census-gate-and-unit-node"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 9124255,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1116.047,
+          "generated_tokens": 52027,
+          "generation_seconds": 1054.239,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.2,
+          "machine_seconds": 61.808,
+          "peak_input_tokens": 163925,
+          "tokens_per_second": 49.35,
+          "wall_tokens_per_second": 46.62
+        },
+        "follow_on_paths": [
+          "docs/figures/null-identification-authority/anchor-bisect/receipt-21978-35-anchor-bisect.json"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-anchor-bisect-record-repairs",
+          "session_id": "8c185dcc-9582-467a-a28a-07b08a7979a0",
+          "session_source": "stream",
+          "retained_at": "2026-09-19T14:16:17.379Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.99,
+        "impl_move": {
+          "plan": "null-identification-authority",
+          "at_dispatch": 0.99,
+          "at_complete": 0.994,
+          "verdict": "moved"
+        },
+        "tool_steps": 82.0,
+        "orientation_input_tokens": 1825254.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -207238,6 +207555,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2907
+    "_version": 2908
   }
 }

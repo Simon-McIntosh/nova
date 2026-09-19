@@ -30,7 +30,7 @@
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="208">
+<meta name="plan-version" content="209">
 </head>
 <body>
 <main class="plan-doc">
@@ -841,6 +841,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260919T140106096257-nia-panel-test-strength" data-who="nia-panel-test-strength" data-when="2026-09-19T14:20:00Z">
     <div class="r-comment-body">Panel test strength, both findings delivered as test-only edits in <code>tests/test_bank_drift_paired_probe.py</code> (commit 7efd909c, no other path touched). (1) The current archive in <code>test_panel_keeps_one_shared_level_array_across_both_panels</code> is now written on a 7x8 grid (radius 0.90-2.05, height -1.90-1.90) where the producer keeps the 9x11 default, and the test asserts the two archives carry different level arrays so the discrimination cannot be edited away silently. Measured: the per-panel level arrays differ by 0.3131 at the widest, and the sidecar now reports <code>grid_bit_identical</code> False (was pinned True). (2) The contour check now requires the collection to be a <code>matplotlib.contour.ContourSet</code> with <code>filled</code> False, because levels alone do not separate an unfilled line set from a filled one carrying the same levels. Both mutants applied by hand once and reverted, three logs under the reports fence: at head 11 passed exit 0; per-panel-levels mutant 1 failed 10 passed exit 1, red on exactly the shared-level assertion (0.98033376 against the expected 0.999375); filled-contour mutant 1 failed 10 passed exit 1, red at <code>assert contours[0].filled is False</code>. The old assertion set was measured green on the filled mutant (<code>len(contours)==1</code> and levels equal both hold), which is the finding it could not see. One fresh process per run on <code>all_debug</code>, module-wide, shared root environment interpreter, JAX_PLATFORMS=cpu, TMPDIR=/tmp.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260919T135724363069-nia-anchor-bisect-record-repairs" data-who="reckon-ship" data-when="2026-09-19T14:16:17.379Z">
+    <div class="r-comment-body"><p>Absent arms reported as absent, carrier finding floored at float64 eps, slowest compile read from the log, receipt regenerated from the arm JSONs; verdict paths pinned. Coordinator read the diff; record repair with tests, no separate review.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

@@ -465,8 +465,9 @@ hide a crossing because splitting a monotone interval anywhere keeps every piece
 <code>panel-states.npz</code>, cell (5,&nbsp;9), edge&nbsp;3 (the left edge, radius
 0.605625&nbsp;m, height &minus;1.375000 to &minus;1.250000&nbsp;m): a dense scan reports
 <strong>two</strong> level crossings, the fixed five-sample subdivision reports <strong>zero</strong>
-straddles, and the tracer's own per-edge crossing tally reads <code>[1, 1, 0, 2]</code> against the
-detector's <code>cell_crossing_count</code> of 2. The edge restriction measures as a cubic to within
+straddles, and the dense scan's true per-edge count is <code>[1, 1, 0, 2]</code> where the pre-fix tracer
+reads <code>[1, 1, 0, 0]</code> with a <code>cell_crossing_count</code> of 2 (the review swapped the parent
+tracer in to measure this; the fixed tracer reproduces the dense scan). The edge restriction measures as a cubic to within
 2.8e-17 on every probed edge, which is what makes the extrema the right instrument. States 10, 11 and
 12 show the same signature.</p>
 <p><strong>Measured effect.</strong> The twenty-state census now reports <strong>0 of 20</strong>

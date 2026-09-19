@@ -11,14 +11,19 @@ dictionary.
 
 from __future__ import annotations
 
+from dataclasses import replace
 import os
 from pathlib import Path
 import subprocess
 import sys
 import types
 
+import jax
+import jax.numpy as jnp
 import numpy as np
 
+from nova.equilibrium.forward_operator import ForwardFluxOperator, PrescribedCurrentField
+from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.jax.config import configure_dtypes
 
 WORKTREE = Path(__file__).resolve().parents[1]
@@ -196,3 +201,131 @@ def test_exact_clip_moments_are_finite_on_a_clipped_state(tmp_path):
     assert np.all(np.isfinite(current))
     assert np.count_nonzero(current) > 1
     assert float(np.ptp(current)) > 0.0
+
+
+def _field_response(
+    *, rows: int, circuits: int, cells: int, spy, flux_rows: int | None = None
+):
+    """Build distinguishable field blocks while counting kernel evaluations."""
+
+    def interaction(shape, offset):
+        spy.append((shape, offset))
+        return jnp.arange(np.prod(shape), dtype=jnp.float64).reshape(shape) + offset
+
+    return PrescribedCurrentField(
+        response=interaction(
+            (rows + 2 if flux_rows is None else flux_rows, circuits), 1.0
+        ),
+        current=jnp.arange(1.0, circuits + 1.0),
+        radial_response=interaction((rows, circuits), 10.0),
+        vertical_response=interaction((rows, circuits), 20.0),
+        plasma_radial_response=tuple(
+            interaction((rows, cells), offset) for offset in (30.0, 40.0, 50.0)
+        ),
+        plasma_vertical_response=tuple(
+            interaction((rows, cells), offset) for offset in (60.0, 70.0, 80.0)
+        ),
+    )
+
+
+def test_grid_field_response_builds_once_and_reuses_exact_interactions():
+    """A second field evaluation changes currents without rebuilding kernels."""
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    kernel_evaluations = []
+    field = _field_response(rows=4, circuits=2, cells=3, spy=kernel_evaluations)
+    built_count = len(kernel_evaluations)
+    assert built_count == 9, "the positive control did not build every interaction"
+    moments = CellCurrentMoments(
+        jnp.asarray((1.0, 2.0, 3.0)),
+        jnp.asarray((4.0, 5.0, 6.0)),
+        jnp.asarray((7.0, 8.0, 9.0)),
+    )
+
+    first = field.poloidal_field(moments)
+    edited = jnp.asarray((-3.0, 5.0))
+    second = field.poloidal_field(moments, edited)
+
+    assert len(kernel_evaluations) == built_count
+    expected_first_radial = field.radial_response @ field.current + sum(
+        response @ moment
+        for response, moment in zip(field.plasma_radial_response, moments, strict=True)
+    )
+    expected_second_vertical = field.vertical_response @ edited + sum(
+        response @ moment
+        for response, moment in zip(
+            field.plasma_vertical_response, moments, strict=True
+        )
+    )
+    np.testing.assert_array_equal(first.radial, expected_first_radial)
+    np.testing.assert_array_equal(second.vertical, expected_second_vertical)
+
+
+def test_field_responses_are_pytree_children_and_share_one_identity():
+    """Flux and field blocks survive a pytree round trip under one digest."""
+    configure_dtypes()
+    field = _field_response(rows=4, circuits=2, cells=3, spy=[])
+    leaves, auxiliary = field.tree_flatten()
+    assert len(leaves) == 10
+    restored = PrescribedCurrentField.tree_unflatten(auxiliary, leaves)
+
+    assert restored.response_identity == field.response_identity
+    np.testing.assert_array_equal(restored.radial_response, field.radial_response)
+    np.testing.assert_array_equal(restored.vertical_response, field.vertical_response)
+    for rebuilt, original in zip(
+        restored.plasma_radial_response, field.plasma_radial_response, strict=True
+    ):
+        np.testing.assert_array_equal(rebuilt, original)
+
+
+def test_operator_pytree_threads_every_field_response_and_identity():
+    """The operator digest and pytree cover the exact field matrices."""
+    from tests.test_forward_operator_arguments import _operator
+
+    configure_dtypes()
+    template = _operator()
+    field = _field_response(
+        rows=template.grid.node_number,
+        circuits=2,
+        cells=template.grid.node_number,
+        flux_rows=template.node_number,
+        spy=[],
+    )
+    operator = replace(template, prescribed_current_field=field)
+    children, auxiliary = operator.tree_flatten()
+    restored = ForwardFluxOperator.tree_unflatten(auxiliary, children)
+
+    assert operator.geometry_identity != template.geometry_identity
+    np.testing.assert_array_equal(
+        restored.prescribed_field.radial_response, field.radial_response
+    )
+    for rebuilt, original in zip(
+        restored.prescribed_field.plasma_vertical_response,
+        field.plasma_vertical_response,
+        strict=True,
+    ):
+        np.testing.assert_array_equal(rebuilt, original)
+
+
+def test_field_response_refuses_partial_or_mis_shaped_blocks():
+    """A field carrier cannot silently omit one exact interaction family."""
+    configure_dtypes()
+    with np.testing.assert_raises_regex(ValueError, "supplied together"):
+        PrescribedCurrentField(
+            response=jnp.ones((5, 2)),
+            current=jnp.ones(2),
+            radial_response=jnp.ones((3, 2)),
+        )
+    with np.testing.assert_raises_regex(ValueError, "plasma field response"):
+        PrescribedCurrentField(
+            response=jnp.ones((5, 2)),
+            current=jnp.ones(2),
+            radial_response=jnp.ones((3, 2)),
+            vertical_response=jnp.ones((3, 2)),
+            plasma_radial_response=(
+                jnp.ones((3, 4)),
+                jnp.ones((3, 4)),
+                jnp.ones((2, 4)),
+            ),
+            plasma_vertical_response=(jnp.ones((3, 4)),) * 3,
+        )

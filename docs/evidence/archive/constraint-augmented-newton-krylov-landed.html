@@ -801,6 +801,51 @@
     touching <code>constraint.py</code>; one coefficient at a time is identifiable against this single row, while a set of them needs a second
     row or a regularised update. The remaining five rows wait on a lane that does not pay four compilations per row.</p>
   </section>
+
+  <section id="shafranov-grid-field-responses">
+    <h2>Shafranov grid field responses: exact interactions built once, currents imaged thereafter</h2>
+    <p><strong>Implementation.</strong> Commit <code>796df350</code> extends
+    <code>PrescribedCurrentField</code> with radial and vertical conductor-response matrices and the matching three plasma blocks for cell
+    current, radial first moment and vertical first moment. All nine matrices are validated as one fixed-shape response family, flattened as
+    operator pytree children and covered by the same response identity that feeds <code>ForwardFluxOperator.geometry_identity</code>. A field
+    evaluation contracts only the current vector and <code>CellCurrentMoments</code>; no Biot kernel and no gradient of the flux map appears on
+    that route. <code>ForwardFluxOperator.interpolate_grid_poloidal_field</code> evaluates the operator mesh's own
+    <code>StencilMesh.shared_node_flux_stencil</code> on the requested contour, so a moved boundary reads the field already imaged on the fixed
+    grid.</p>
+    <p><strong>The refusal reproduced before the repair.</strong> The three new carrier contracts each failed with
+    <code>TypeError: PrescribedCurrentField.__init__() got an unexpected keyword argument 'radial_response'</code>. The repaired tests make the
+    guarded event observable: a counted builder sees <strong>nine response interactions</strong> while constructing the synthetic carrier and
+    the first and second current/moment evaluations leave the count at nine. Partial component families and one mis-shaped plasma block are
+    refused rather than silently replaced by zeros.</p>
+    <p><strong>Analytic grid route.</strong> The Solov'ev certificate now has a positive-control route that samples the analytic Biot field on
+    operator grids of <strong>21, 31 and 41 nodes per axis</strong>, images it through a fixed response column, interpolates it to contours of
+    <strong>501, 1001 and 2001 points</strong> with the shared-node stencil, and feeds that field to
+    <code>shafranov_contour_integrals</code> and <code>beta_p_plus_half_internal_inductance</code>. The relative error against the volume
+    definition falls from the first to the third resolution and its fitted order clears the declared <strong>0.5</strong> floor. The direct
+    analytic contour field is never handed to this test, so a pass exercises the grid-imaged route rather than repeating the earlier analytic
+    row.</p>
+    <p><strong>CPU certificate.</strong> One <code>all_debug</code> allocation, job <code>1273847</code>, ran both assigned modules with
+    <code>JAX_PLATFORMS=cpu</code> through the shared root interpreter: <strong>70 passed in 156.24 s</strong>. A second step inside that same
+    allocation built a 64-node, 12-circuit, 64-plasma-cell response using the exact conductor and polygon-moment Biot kernels. It recorded
+    <strong>76 kernel evaluations at build and zero per field evaluation</strong>; construction took <strong>7.1573 s</strong>, while 31
+    changed-current images had a median wall time of <strong>62.67 &micro;s</strong>, a build-to-evaluation ratio of
+    <strong>114,199&times;</strong>. The committed <code>receipt.json</code> says
+    <code>grid_imaged_route_exercised: true</code> and records the toroidal volume term as the solved state's own integral.</p>
+    <figure>
+      <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-integral/field-response-timing.png"
+           alt="Logarithmic bar chart comparing a seven-second exact Biot response build with a sixty-three-microsecond current-only field image; annotation states 76 kernel calls at build and zero per evaluation.">
+      <figcaption>The exact interactions are paid once. A current edit or changed plasma moment thereafter is a matrix image, over one hundred
+      thousand times cheaper on this 64-node CPU certificate. The vector companion is
+      <a href="/nova/figures/constraint-augmented-newton-krylov/shafranov-integral/field-response-timing.svg">published beside the PNG</a>.
+      The plotted relationship is timing evidence; the exact values and route flags remain machine-readable in
+      <code>/nova/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json</code>.</figcaption>
+    </figure>
+    <p><strong>Wiring boundary.</strong> <code>ExternalShafranovConstraint.observed</code> and
+    <code>benchmarks/shafranov_pair_receipt.py</code> are held by other live nodes and were outside this worker's write fence. Their follow-on
+    is now narrow: take <code>ForwardFluxOperator.boundary_poloidal_field</code>, pass its radial and vertical components with the solved
+    state's pressure and toroidal-field volume integrals to the landed diagnostic, and state the same toroidal-term provenance in the bank
+    receipt. This worker does not resolve the driving followup or claim section closure.</p>
+  </section>
 </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T15:23:03",
+  "updated": "2026-09-19T15:48:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -205190,6 +205190,209 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T132251462287-review-of-dvfb-separatrix-import",
+        "plan": "diiid-vertical-force-balance",
+        "section": "",
+        "node": "review-of-dvfb-separatrix-import",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 418,
+                "cached_input_tokens": 129073,
+                "input_tokens": 129523,
+                "output_tokens": 1771,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 131294,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "The stored review record judges four things with file and line for every finding. One: whether _grid_axis_rz in benchmarks/diiid_forward_gs_match.py selects the correct grid extremum for both flux polarities; the comparison boundary > axis picks nanargmin of the normalised field, and the review reasons through both signs on a concrete example rather than restating the docstring. Two: whether _separatrix returns what the callers benchmarks/diiid_circuit_driven_forward_validation.py and benchmarks/diiid_diverted_solve_overlay.py expect, ordered R,Z vertices of the axis-enclosing closed branch, an empty (0,2) array when none is assembled, and whether the callers vertex-count check treats (0,2) as undrawable. Three: whether contour_separation is symmetric and its units are millimetres as the callers assume. Four: whether the appended comment on docs/plans/diiid-vertical-force-balance.html and the new section of docs/evidence/archive/diiid-vertical-force-balance-landed.html state only what the node measured (10 passed, 6983 collected, positive control at radius 1.000000 m, removal commit 130d84e3) without claiming a physics result it did not check. The restored functions are exercised first-hand on a small synthetic field of both polarities with /home/ITER/mcintos/Code/nova/.venv/bin/python on the login node, which is light work. The record closes with a verdict of pass or fail and the reason. The review record is the only deliverable; every uv command carries --no-sync and nothing runs uv sync.",
+          "estimated_hours": 0.6,
+          "goal": "Review the merged DIII-D separatrix-import restoration (commits 20f4520f and 0978249f, merged at 424a2893 on main) for correctness of the restored helpers against the assembled-branch API and for the honesty of the plan and evidence record it appended.",
+          "id": "review-of-dvfb-separatrix-import",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-19T13:22:52Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T132251462287-review-of-dvfb-separatrix-import/manifest.md",
+          "plan": "diiid-vertical-force-balance",
+          "requested_backend": null,
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/review-of-dvfb-separatrix-import"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "session-337d1d569f61f639eedc",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-19T13:23:02Z",
+        "completed_at": "2026-09-19T13:45:02.929Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1311,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1320,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "079def015e8bb102c2696a281c64bdfe53bd2bb9",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T132251462287-review-of-dvfb-separatrix-import/manifest.md",
+        "scope_changed": false,
+        "session_id": "eb72f639-de6e-4f07-84c5-3793d9f60981",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3878980,
+            "input_tokens_cumulative": 3878980,
+            "output_tokens": 48689,
+            "output_tokens_cumulative": 48689,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-19T13:45:02.929Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 3878980,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1317.099,
+          "generated_tokens": 48689,
+          "generation_seconds": 489.047,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 33.7,
+          "machine_seconds": 828.052,
+          "peak_input_tokens": 161756,
+          "tokens_per_second": 99.56,
+          "wall_tokens_per_second": 36.97
+        },
+        "follow_on_paths": [
+          "benchmarks/diiid_forward_gs_match.py:1406",
+          "tests/imas/test_diiid_forward_gs_match.py",
+          "nova/equilibrium/separatrix_branches.py",
+          "benchmarks/diiid_forward_gs_match.py:1357",
+          "0.0316",
+          "benchmarks/diiid_circuit_driven_forward_validation.py:335",
+          "docs/evidence/archive/diiid-vertical-force-balance-landed.html:275"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "review role: the sole deliverable is the stored review record",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-dvfb-separatrix-import",
+          "session_id": "eb72f639-de6e-4f07-84c5-3793d9f60981",
+          "session_source": "stream",
+          "retained_at": "2026-09-19T13:45:02.929Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.96,
+        "impl_move": {
+          "plan": "diiid-vertical-force-balance",
+          "at_dispatch": 0.96,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "tool_steps": 49.0,
+        "orientation_input_tokens": 1374024.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -205628,6 +205831,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2891
+    "_version": 2892
   }
 }

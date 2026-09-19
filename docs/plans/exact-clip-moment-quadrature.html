@@ -27,8 +27,8 @@
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
-<meta name="plan-impl" content="0.9">
-<meta name="plan-version" content="35">
+<meta name="plan-impl" content="0.95">
+<meta name="plan-version" content="36">
 </head>
 <body>
   <main class="plan-doc">
@@ -153,6 +153,16 @@
       </p>
     <p class="r-dec-rat"></p>
     </div>
+<div class="r-dec" data-key="traced-vertex-capacity-for-multi-run-cells" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How is the traced polygon vertex capacity set for a cell whose level set enters twice?</p>
+    <p class="r-dec-ctx">Measured by the capacity record-repair node 2026-09-19 on the diverted single-null row at 110 cells. The derived bound is a one-arc bound, 128 arc samples plus the straight chain, giving 162 for that row. Cell 9 realises two traced level runs and needs 260, decomposing as 256 interior level-arc samples plus 4 on the cell boundary, so the bound refuses it and the row reports one refused cell with vertex count 0 and area 0.0. Raising the capacity to 4096 for a diagnostic run admits the cell at area 0.00708. A multi-run cell is a real geometric case on a diverted layout, not a pathology, so the bound has to account for it one way or another.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="per-layout-derivation">derive the capacity per layout from the number of level runs the layout can present, so a diverted row carries its own bound</button>
+      <button class="r-opt" data-value="widen-to-two-runs">widen traced_polygon_vertex_capacity globally to admit two runs plus the straight chain</button>
+      <button class="r-opt" data-value="keep-and-report">keep the one-arc bound and let a multi-run cell be refused and reported</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -173,16 +183,22 @@
     <div class="r-fu-body">From the 93/100 review of ecq-capacity-sizing. (1) nova/equilibrium/separatrix_clip.py near line 1185 refuses any layout above 128 plus the straight chain by returning included 0 with no error, where the superseded 3840 product admitted it; a production cell realising a second traced arc would now be silently dropped from the support. Make the refusal observable: a count of refused cells on the clip receipt and a fail-closed assertion path the solve can surface, with a test presenting a two-arc layout. The one-arc premise is measured only on the three weak-rotation rows; measure the moderate, strong and single-null rows at 110 cells for the maximal live vertex count. (2) benchmarks/solovev_certificate.py:3654 still computes exact_support_capacity as chord_capacity times chain_samples (3840) for the memory receipts' dimensions block; derive it from the compiled bound so the receipts show 158. (3) The largest-allocation half of the memory measure was skipped by --skip-hlo on both sides; run the largest-intermediate census once per tree. (4) The named warm-cost driver benchmarks/exact_clip_warm_cost.py has never produced a receipt (its production worker requires --cells, --output, --cache-root, --dump-root and refuses the CPU lane); either give it a CPU-lane path or restate the section's compile-wall instrument as the memory-scaling per-rung wall, which is what the landing used. (5) The per-row identity allocations ended in a TypeError and the identity receipts came from unnamed compare-only reruns; name them in the record.</div>
     <pre class="r-fu-prompt">/reckon-ship exact-clip-moment-quadrature §4</pre>
     </article>
-<article class="r-fu" data-id="f-ecq-capacity-record-repairs" data-status="open" data-written-by="nova S19 coordinator" data-written-at="2026-09-18T12:50:00Z" data-recommends-skill="/reckon-ship" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ecq-capacity-record-repairs" data-status="resolved" data-written-by="nova S19 coordinator" data-written-at="2026-09-18T12:50:00Z" data-recommends-skill="/reckon-ship" data-resolved-at="2026-09-19T15:04:55+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Capacity follow-ons: the 260-vertex count, the swept product still in committed cost receipts, and the single-null refused cell</h4>
     <div class="r-fu-body"><p>From the 91/100 review of ecq-capacity-refusal-must-report and the worker's own follow-ons. (1) <code>docs/figures/exact-clip-moment-quadrature/capacity/receipts.md</code> near line 23 states the two-arc fixture realises 258 live vertices while the head fixture presents 260 to <code>_pack_traced_vertices</code> and the raised-capacity control admits 260; re-read and correct the count. (2) The retirement of the swept 3840 product is code-only: the committed exact-clip cost receipts under <code>docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/</code> still declare 3840 at 110, 3072 at 300 and 2816 at 1000 cells; regenerate those receipts' dimensions block from the compiled bound without a new solve, or state in each that the field is historical. (3) The diverted single-null row at 110 cells refuses one cell under the derived bound; measure that cell's live vertex count with the capacity raised for one diagnostic run and decide whether the bound is too tight or the layout is not the one it was derived for.</p></div>
     <pre class="r-fu-prompt">/reckon-ship exact-clip-moment-quadrature §4 — deliver f-ecq-capacity-record-repairs: correct the vertex count, retire 3840 from the committed cost receipts, and measure the single-null refused cell</pre>
+    <p class="r-fu-outcome">Landed at c8122e03 (merged a9ae4aab). All three corrected against measurement. The realised count is 260, not 258: the earlier figure was read off the refused cell's zeroed vertex_count, which cannot exceed the bound it failed to meet, and the packer array is measured at full shape (1, 1024, 2) carrying 260 live entries, with the capacity-raised control admitting the same cell at 260. The retired swept product is marked historical in the committed cost receipts with its provenance recorded rather than silently regenerated. The refused cell is identified as cell 9 and measured: 260 decomposes as 256 interior level-arc samples plus 4 on the cell boundary, so the cell realises two traced level runs against a bound derived for one arc (162 = 128 + 34). The bound is too tight for this layout rather than the layout being the wrong one, which is now the decision below.</p>
     </article>
 <article class="r-fu" data-id="f-ecq-fallback-floor" data-status="resolved" data-written-by="nova S19 coordinator" data-written-at="2026-09-18T14:15:00Z" data-recommends-skill="/reckon-ship" data-resolved-at="2026-09-19T14:53:08+00:00" data-resolved-by="">
     <h4 class="r-fu-title">An independent floor for the five rows whose budget is a tenth of round-off</h4>
     <div class="r-fu-body"><p>Five rows (weak 1000, moderate 1000, strong 110, strong 300, strong 1000) have their other error term at the fan's refinement floor, so one tenth of it (2.9e-17 to 5.1e-16) sits below any polyline's own round-off floor (1.5e-15 to 2.5e-15 at 128 vertices) and no arc vertex count can meet it. Replace that budget with an independent floor for those rows: the round-off floor of the closed-form evaluation itself measured on the analytic row (the smallest relative difference two independent arc parametrisations of the same level set produce), and re-read the smallest-met count against it; add the five rows to the convergence figure once a finite floor exists.</p></div>
     <pre class="r-fu-prompt">/reckon-ship exact-clip-moment-quadrature §2 — deliver f-ecq-fallback-floor: a measured round-off floor for the five fallback rows and their smallest-met counts</pre>
     <p class="r-fu-outcome">Landed at dd37e421 (merged f957541e): the five rows are fenced on a floor measured from the closed-form evaluation itself, as the re-parametrisation envelope over two independent traversals of one analytic level set (current 2.038e-16, radial 2.060e-15, vertical 4.789e-16 over counts 8 to 128 on a circle and an eccentric ellipse). The recipe as written degenerates because the moment reduction is exactly re-parametrisation invariant at several counts, giving a difference of exactly 0.0, so the envelope over counts is used and that is stated. The five rows remain unmet under both readings, which is the honest negative, and the figure now carries all nine rows. A lead decision on re-expressing the fence in the moment relative L2 norm is opened below.</p>
+    </article>
+<article class="r-fu" data-id="f-ecq-memory-identification-swept-product" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship exact-clip-moment-quadrature" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">One more committed receipt still declares the retired swept product</h4>
+    <div class="r-fu-body">Reported by the capacity node from outside its write paths: docs/figures/cut-cell-current-attribution/reposed-fixture/certificate/solve-memory-identification.json declares exact_support_capacity 3072 in two places, the retired swept product. Mark it historical with its provenance the same way the exact-clip cost receipts now are, or regenerate its dimensions block from the compiled bound without a new solve. Check for any other committed receipt carrying 3072, 3840 or 2816 as a capacity while making the change.</div>
+    <pre class="r-fu-prompt">/reckon-ship exact-clip-moment-quadrature</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

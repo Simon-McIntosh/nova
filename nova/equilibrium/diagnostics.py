@@ -146,7 +146,7 @@ class ShafranovContourIntegrals:
 def _contour_metric(
     contour: jax.Array, count: int
 ) -> tuple[jax.Array, jax.Array, jax.Array, jax.Array]:
-    r"""Return boundary points, segment lengths, outward normals and area.
+    r"""Return boundary segment midpoints, lengths, outward normals and area.
 
     ``contour`` carries ``(N, 2)`` rows of :math:`(R, Z)` in metres, with rows
     at index ``count`` and beyond required to be exact zeros.  Segments close
@@ -154,6 +154,15 @@ def _contour_metric(
     closed polyline.  The normal is the tangent rotated a quarter turn, then
     oriented outward by the sign of the shoelace area, which makes the
     result independent of the direction the caller sampled the contour in.
+
+    The point returned per segment is its MIDPOINT, and it is the point the
+    integrand is evaluated at.  A chord's direction and length are those of
+    the boundary at its own midpoint to second order, so weighting a midpoint
+    sample by the chord length is a second-order rule on a closed curve.  The
+    leading vertex of the same chord is displaced from that midpoint by half a
+    chord, which makes the rule first order however fine the sampling is; the
+    caller therefore averages the vertex fields to the midpoint rather than
+    selecting one of them.
     """
     import jax.numpy as jnp
 
@@ -167,7 +176,21 @@ def _contour_metric(
         points[:, 0] * following[:, 1] - following[:, 0] * points[:, 1]
     )
     normal = jnp.where(signed_area >= 0.0, normal, -normal)
-    return points, length, normal, signed_area
+    midpoint = 0.5 * (points + following)
+    return midpoint, length, normal, signed_area
+
+
+def _segment_mean(field: jax.Array, count: int) -> jax.Array:
+    """Return the two-vertex mean of a contour field on every segment.
+
+    This is the field value at each segment midpoint, which is where
+    :func:`_contour_metric` places the sample; it is the trapezoidal average
+    of the two endpoints and stays traceable and differentiable in ``field``.
+    """
+    import jax.numpy as jnp
+
+    vertex = field[:count]
+    return 0.5 * (vertex + jnp.concatenate((vertex[1:], vertex[:1]), axis=0))
 
 
 def shafranov_contour_integrals(
@@ -237,6 +260,17 @@ def shafranov_contour_integrals(
     field arguments.  ``MU0`` is the explicit permeability of free space and
     every symbol above is in raw SI.
 
+    The discrete rule is the midpoint rule on the closed polyline: the
+    integrand is evaluated at each chord's midpoint and weighted by the chord
+    length, so it is second order in the contour sampling.  Evaluating the same
+    integrand at the chord's leading vertex is first order instead, because
+    that vertex sits half a chord away from the midpoint to which the chord's
+    length and direction belong, and the resulting error decays only as the
+    contour is refined.  The midpoint rule reaches its limit by 501 contour
+    points on the Solovev single-null reference, where the vertex rule would
+    still be decaying with order 1.0, so the difference is not one a caller can
+    spend contour points to remove.
+
     The combination :math:`\beta_p + l_i/2` is NOT a functional of these
     contour integrals alone.  Eliminating the toroidal term from
     ``vertical_moment`` needs the volume integral
@@ -248,9 +282,9 @@ def shafranov_contour_integrals(
     import jax.numpy as jnp
 
     points, length, normal, area = _contour_metric(contour, count)
-    radial = radial_field[:count]
-    vertical = vertical_field[:count]
-    toroidal = toroidal_field[:count]
+    radial = _segment_mean(radial_field, count)
+    vertical = _segment_mean(vertical_field, count)
+    toroidal = _segment_mean(toroidal_field, count)
     poloidal_squared = radial**2 + vertical**2
     total_squared = poloidal_squared + toroidal**2
     inverse = 1.0 / MU0

@@ -328,7 +328,7 @@
   <tr><td>partial walk</td><td>16, 18</td><td>2, 3</td><td>7/1, 0/7/1</td><td>32/0, 26/22/0</td><td>8.365e-04, 1.849e-03</td><td>1.740e-03, 4.870e-03</td></tr>
   </tbody>
   </table>
-  <figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the wall and both null sets"><figcaption>Edit 7 (&minus;4&#37;, converged, residual 5.0e-09, left) beside edit 6 (&minus;6&#37;, non-converged, residual 4.4e-03, right): reference contours grey, solved contours orange on shared levels, reference nulls blue and solved nulls orange, over the MAST first wall.</figcaption></figure>
+  <figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the wall and both null sets"><figcaption>Edit 7 (&minus;4&#37;, converged, residual 5.0e-09, left) beside edit 6 (&minus;6&#37;, non-converged, residual 4.4e-03, right): reference contours blue, solved contours orange on shared levels, reference nulls blue and solved nulls orange, over the MAST first wall. The boundary branch is drawn from the assembled set in both cases &mdash; lobe solid, saddle legs dashed, and a caption naming which of the two drawings each panel carries.</figcaption></figure>
   <p>Receipt: <code>docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.json</code>
   (per-edit traces) and <code>coil-edit-nonconvergence.html</code> (the twenty edits tabled beside each
   other, with the panel states in <code>panel-states.npz</code>).</p>
@@ -386,6 +386,75 @@ restored latency receipt, 303 insertions / 285 deletions across <code>coil-edit-
 <p><strong>Followup:</strong> <code>benchmarks/diiid_poloidal_figures.py</code> owes the same closed-branch
 fix — it draws a boundary level set from the same tracer and inherits the same merge-at-the-saddle
 failure.</p>
+</section>
+
+<section id="coil-edit-branch-closure">
+<h2>The closed boundary branch at the trace: the repair landed (2026-09-19)</h2>
+<p><strong>Status: repair landed, residual mechanism measured.</strong> Three commits close the
+open-arc defect the section above localized. The trace now subdivides each cell edge rather than
+classifying it by corner sign, so an even number of crossings on one edge is detectable; a node id
+names a crossing <em>on</em> an edge rather than the edge itself, so two crossings on one edge no
+longer collide into a spurious junction; the node capacity is derived from that scaled id space
+because JAX clamps out-of-bounds scatters silently; and the saddle tie pairing reads the
+<em>sign</em> of the quadratic form rather than comparing two of its values for exact equality. The
+boundary level is now read at the traced field's own polished admitted saddle
+(<code>boundary_flux_at_admitted_saddle</code>) instead of being reconstructed by refitting the same
+field at the X-point coordinate, a difference of about 3.4e-4 that was enough to send the
+four-crossing saddle cell back onto corner-sign pairing and run the lobe out along a leg.</p>
+<p><strong>Measured effect.</strong> The twenty-state census of
+<code>assemble_separatrix_branches</code>, re-run at each state's own saddle level, now fails
+<strong>4 of 20</strong> states, down from the 16 of 21 reported before the repair. States 0&ndash;8
+and 13&ndash;19 assemble well formed: <code>closed_candidate_count</code> 1,
+<code>cycle_component_count</code> 1, <code>axis_enclosing_component_count</code> 1, with the lobe
+beside two saddle-ended legs on the states that hold a saddle cell and as the whole closed boundary
+on those that do not. State 0 goes from one open arc to
+<code>closed_segment_count</code> 67 with <code>open_branch_count</code> 2; state 13 reads 66 with no
+open branch.</p>
+<p><strong>The residual four.</strong> States 9, 10, 11 and 12 still fail, all with
+<code>closed_candidate_count</code> 0 and the same signature as before. The mechanism is different
+from the one repaired here and is measured, not inferred. In these states the level set through the
+admitted saddle crosses only <em>two</em> of that saddle's cell's four edges, so the trace never
+counts the cell ambiguous and the sector tie cannot fire: at state 9 the trace reports crossing count
+2 at cell (5,&nbsp;9) and an empty four-crossing set, and the degree histogram is
+<code>[0, 2, 123]</code> with one component of 124 valid segments that encloses the axis without being
+a cycle. The polished stationary point is (0.614825&nbsp;m,&nbsp;&minus;1.305531&nbsp;m) with flux
+&minus;0.081614225, a gradient of 0.0, a Hessian determinant of &minus;2.754064 and eigenvalues
++1.703308 and &minus;1.616891 &mdash; a genuine saddle, displaced about 0.035&nbsp;m in z from the
+solve's own X-point at (0.617219&nbsp;m,&nbsp;&minus;1.270493&nbsp;m). No level closes the lobe: the
+exact stationary value and &plusmn;1e-3, &plusmn;1e-4, &plusmn;1e-5 and &plusmn;1e-6 around either
+candidate all leave <code>closed_candidate_count</code> 0. The gate
+<code>ambiguous&nbsp;=&nbsp;crossing_count&nbsp;==&nbsp;4</code> is therefore what withholds the tie
+from a saddle whose own cell the level set crosses twice, and closing it is the next lever here.</p>
+<p><strong>Test.</strong> <code>test_persisted_state_closes_the_axis_enclosing_lobe</code> asserts the
+closure on two persisted failing states rather than on a synthetic fixture, and carries its own
+negative control: at the saddle level each state assembles exactly one axis-enclosing cycle, and at
+that level displaced by 1e-3 the same call assembles no cycle and is not well formed. The control is
+what makes the assertion a measurement of the level rule rather than of the assembler's tolerance.</p>
+<figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the closed lobe solid, the saddle legs dashed, both null sets and the unstructured first wall"><figcaption>Edit 7 (&minus;4&nbsp;&#37;, converged, residual 5.0e-09, left) beside edit 6
+(&minus;6&nbsp;&#37;, non-converged, residual 4.4e-03, right). The solved boundary branch is drawn with its
+axis-enclosing lobe solid and its two saddle-ended divertor legs dashed, in orange; the reference set
+is drawn dashed in blue from its raw separatrix, because its own assembly is not well formed and the
+caption says so rather than leaving the panel empty. Levels run between the axis flux 0.341217&nbsp;Wb
+and the boundary flux &minus;0.122930&nbsp;Wb, and the shared level array is the same on both panels.
+Both null sets are drawn: solid triangles for each axis and filled crosses for each admitted saddle,
+hollow markers for other qualified nulls. The wall is drawn from the unit collection. Both files are
+committed: <code>converged-vs-nonconverged.png</code> and
+<code>converged-vs-nonconverged.svg</code>.</figcaption></figure>
+<p><strong>Provenance departure.</strong> The panel is rendered from the persisted
+<code>panel-states.npz</code> rather than from a fresh sweep. Re-running the twenty-state sweep needs
+the canonical measurement host, and both routes are closed: <code>_require_measurement_host()</code>
+refuses any host that is not the declared betelgeuse <code>gpu_0003_grpA</code> 8-CPU 128-GiB
+allocation, and that node has been serving long jobs throughout. The raster therefore carries its
+original provenance and the census reads it; the alternative is to re-run the sweep on
+<code>all_debug</code> when the lane serves, which is the only way to refresh the raster. The sweep
+driver already persists <code>xpoint_flux_{position}</code> and <code>saddle_index_{position}</code>
+per edit, so the persisted file is stale against the driver rather than the driver being incomplete.</p>
+<p>Driver and per-state table:
+<code>docs/figures/forward-solve-api/coil-edit-nonconvergence/diagnose_branch_terms.py</code> and
+<code>branch-terms.json</code>.</p>
+<p><strong>Followup:</strong> <code>benchmarks/diiid_poloidal_figures.py</code> owes the same
+closed-branch fix — it draws a boundary level set from the same tracer and inherits the same
+merge-at-the-saddle failure.</p>
 </section>
 </main>
 </body>

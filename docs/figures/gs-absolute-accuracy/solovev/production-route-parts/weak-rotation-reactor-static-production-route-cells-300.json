@@ -72,7 +72,10 @@
     "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-300.png",
     "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-300.png",
     "render_source": "persisted_part_receipt",
-    "sha256": "89fc10af919811f0ec06aedad069c31beff5399d465cca73e64c5f04f771ee5f"
+    "sha256": "61e31a2baf4cb87bdaddcaf0f1ba9fd8df174f2cfbbcbd64679c6b810a479a36",
+    "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-300.svg",
+    "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-cells-300.svg",
+    "vector_sha256": "a19e8034498ad9e167a2dd30edcff40b094b2501968ceccbdfb8ca996adb4bcb"
   },
   "geometry": {
     "boundary_flux_error_wb": 7.5705133066844486,
@@ -21311,7 +21314,7 @@
   "stage_wall_seconds": {
     "accuracy_scoring": 0.7689140569418669,
     "case_and_machine": 0.18413529638200998,
-    "figure_render": 0.6648602411150932,
+    "figure_render": 0.5593711026012897,
     "operator_and_seed": 21.845613386482,
     "production_solve": 114.32706860173494
   }

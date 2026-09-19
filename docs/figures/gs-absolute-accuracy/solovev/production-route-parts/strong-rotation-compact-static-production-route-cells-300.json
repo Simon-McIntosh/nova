@@ -72,7 +72,10 @@
     "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.png",
     "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.png",
     "render_source": "persisted_part_receipt",
-    "sha256": "e0c30d970be5a09aa72f8a81b9a59df98d62e83485bc860a644acda828f63b6f"
+    "sha256": "816f712329ced0bd4cfd1f63c02211785229246a3797638833b13a92c85173ad",
+    "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.svg",
+    "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/strong-rotation-compact-static-production-route-cells-300.svg",
+    "vector_sha256": "ef4e41c319e7f98ccc920c3848804c9e25a53a852798ca4701f16b456332959d"
   },
   "geometry": {
     "boundary_flux_error_wb": 0.022291083444660645,
@@ -21274,7 +21277,7 @@
   "stage_wall_seconds": {
     "accuracy_scoring": 0.7303165048360825,
     "case_and_machine": 0.17999512422829866,
-    "figure_render": 0.4706684239208698,
+    "figure_render": 0.5932525396347046,
     "operator_and_seed": 21.75265246629715,
     "production_solve": 121.72067821305245
   }

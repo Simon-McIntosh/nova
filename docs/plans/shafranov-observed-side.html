@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-blocks" content="constraint-augmented-newton-krylov">
 </head>
 <body>
@@ -74,6 +74,22 @@
     <p><strong>Done when.</strong> The fitted order on the analytic route is stated in the receipt with its
     mechanism, the test asserts the order the discretisation predicts, and the certificate figure shows the
     ladder.</p>
+    <p><strong>Landed 2026-09-19 (partial).</strong> The first-order stage is the contour quadrature in
+    <code>shafranov_contour_integrals</code>, which sampled the integrand at each chord's leading vertex while
+    weighting it by that chord's length and outward normal; it now samples the segment midpoint through
+    <code>_segment_mean</code>, the trapezoidal rule on a closed polyline. Held-analytic measurements: the
+    quadrature fitted order 0.985 before and 2.151 after, the shared-node stencil fitted third order, and the
+    field imaging was exact on this control. The reported order 1.10 was the quadrature's order measured against
+    a ladder that advanced the grid and the contour sampling together. The test now holds the grid and refines
+    the sampling, fits 2.064, prints and persists it to the receipt, and asserts above 1.8. Open: the fix moved
+    the contour side to its converged value and exposed a pre-existing marginal identity bound &mdash;
+    fractionated per virial term, the <code>radial_moment</code> residual is flat in volume resolution and falls
+    only in the contour sampling, localising a surviving first-order term to the contour side of the radial
+    surface integral. Three rungs of <code>test_shafranov_contour_integrals_equal_their_volume_side</code> stand
+    red at resolutions 321/641/1281 and the bound is left untouched. Commits <code>3818bd05</code>,
+    <code>f633a00a</code>, <code>c6dae3cb</code>; record
+    <a href="/nova/evidence/archive/shafranov-observed-side-landed.html">shafranov-observed-side-landed</a>. The
+    certificate figure is not yet redrawn.</p>
 
     <h2 id="s3">§3 — The constraint's observed side is the contour integral and the six-row receipt is regenerated</h2>
     <p>ExternalShafranovConstraint.observed still embeds the large-aspect-ratio identity. Wire it to

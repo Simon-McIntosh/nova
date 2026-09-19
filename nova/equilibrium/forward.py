@@ -1552,6 +1552,7 @@ class ForwardProfile:
             radius,
             height,
             topology.boundary_flux,
+            axis_rz=topology.axis,
         )
         segment = contour["segment_endpoints_rz"].reshape((-1, 2, 2))
         segment_valid = contour["segment_valid"].reshape((-1,))

@@ -15,7 +15,10 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 
-from nova.equilibrium.flux_surface_connectivity import traced_spline_contour
+from nova.equilibrium.flux_surface_connectivity import (
+    EDGE_CROSSING_CAPACITY,
+    traced_spline_contour,
+)
 
 
 __all__ = ["assemble_separatrix_branches"]
@@ -229,7 +232,13 @@ def assemble_separatrix_branches(
     slot overflow invalidates the whole result and returns only zero geometry.
     """
     contour = traced_spline_contour(
-        values, radial, vertical, level, bisection_steps, saddle_steps
+        values,
+        radial,
+        vertical,
+        level,
+        bisection_steps,
+        saddle_steps,
+        axis_rz=axis_rz,
     )
     (
         controls,
@@ -240,12 +249,15 @@ def assemble_separatrix_branches(
         unique_floor,
     ) = _expanded_graph(contour)
     edge_count = controls.shape[0]
-    saddle_node_floor = (
+    saddle_node_floor = EDGE_CROSSING_CAPACITY * (
         vertical.shape[0] * (radial.shape[0] - 1)
         + (vertical.shape[0] - 1) * radial.shape[0]
     )
-    cell_count = edge_count // 4
-    node_capacity = saddle_node_floor + cell_count + edge_count
+    # The synthetic saddle nodes are numbered from the first id past the real
+    # crossings and grouped nodes, two per unsplit segment, so the node arrays
+    # must reach that far.  A capacity below it clamps every scatter past its
+    # end, and the degrees read back are then not the graph's degrees.
+    node_capacity = saddle_node_floor + edge_count // 4 + edge_count
     labels = _component_labels(nodes, valid, node_capacity)
     degree, _component_valid, _cycle, _encloses_axis = _component_properties(
         controls, nodes, valid, labels, axis_rz, node_capacity

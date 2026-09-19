@@ -10,7 +10,11 @@ import numpy as np
 import pytest
 
 from nova.equilibrium.clip_quadrature import saddle_wedge_current_moments
-from nova.equilibrium.separatrix_clip import AtomicCellMesh, _traced_level_arc
+from nova.equilibrium.separatrix_clip import (
+    AtomicCellMesh,
+    _sampled_spline_edge_roots,
+    _traced_level_arc,
+)
 from nova.jax.config import configure_dtypes
 
 configure_dtypes()
@@ -91,6 +95,38 @@ def test_spline_chain_emits_four_profile_owned_wedges():
     ):
         np.testing.assert_array_equal(vertices[0], np.zeros(2))
         np.testing.assert_array_equal(vertices[count:], 0.0)
+
+
+def test_spline_chain_retains_two_roots_on_one_edge():
+    mesh, _signed_flux = _saddle_cell()
+    saddle = jnp.asarray([0.0, 0.8])
+
+    def displaced_saddle_level(points):
+        return (points[..., 1] - saddle[1]) ** 2 - points[..., 0] ** 2
+
+    signed_flux = displaced_saddle_level(jnp.asarray(mesh.node_coordinates))
+    fractions, counts, _positive_after = _sampled_spline_edge_roots(
+        mesh.node_coordinates,
+        mesh.cell_nodes,
+        mesh.cell_vertex_count,
+        displaced_saddle_level,
+        None,
+    )
+    wedges = mesh.traced_saddle_wedges(
+        signed_flux,
+        saddle_vertex=saddle,
+        core_reference=jnp.asarray([0.0, -1.0]),
+        curve_evaluator=displaced_saddle_level,
+        arc_tracer=_traced_level_arc,
+    )
+
+    np.testing.assert_array_equal(counts[0], [0, 1, 2, 1])
+    np.testing.assert_allclose(fractions[0, 2], [0.4, 0.6], atol=2.0e-14)
+    assert bool(wedges.saddle[0])
+    assert np.all(np.asarray(wedges.vertex_count[0]) > mesh.support_capacity)
+    assert float(jnp.sum(wedges.area[0])) == pytest.approx(
+        float(wedges.full_area[0]), rel=0.0, abs=2.0e-13
+    )
 
 
 class _FlatField:

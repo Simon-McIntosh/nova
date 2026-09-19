@@ -288,6 +288,17 @@ def _augmented_system(
 def _solve(
     context: dict[str, Any], seed: np.ndarray, *, constrained: bool
 ) -> tuple[dict[str, Any], np.ndarray]:
+    """Solve one control arm and report its readings.
+
+    The level column's physical error is ``level_row_scaled_residual``: the row
+    residual divided by the declared level scale, which is in webers and needs
+    no gauge.  The column is anchored at the analytic magnetic axis while the
+    authored level is an absolute value, so the difference between
+    ``level_amplitude_wb`` and ``level_target_wb`` carries the compensator's own
+    axis-anchored offset and is a mixed-gauge number, not an error; the receipt
+    reports the two readings unsubtracted for the reader who wants them and
+    makes no error claim from them.
+    """
     pairs = _certificate_pairs(context, level=True)
     request = certificate._certificate_solve_request(
         context["profile"],
@@ -378,7 +389,6 @@ def _solve(
             "compensating_amplitudes": amplitudes,
             "level_amplitude_wb": level_amplitude,
             "level_target_wb": context["level_target_wb"],
-            "level_error_wb": level_amplitude - context["level_target_wb"],
             "field_bound_t": DEFAULT_FIELD_BOUND_T,
             "field_scale_t": DEFAULT_FIELD_SCALE_T,
             "level_scale_wb": DEFAULT_LEVEL_SCALE_WB,

@@ -651,13 +651,36 @@
     the repaired pool bound moves the negative control's answer by float ordering
     only (<code>1.3138284465e-02</code> pitches against
     <code>1.3138284664972332e-02</code>; terminal residual <code>4.170e-13</code>
-    against <code>1.590e-13</code>). The positive arm (<code>1273963</code>)
-    <code>TIMEOUT</code>ed at <code>00:59:02</code> after about fifteen minutes of
-    first compile and forty-four of solve, and lost its stdio to buffering; it
-    awaits the retry <code>1273994</code>, which runs the same lane unbuffered with
-    a warm compile cache. Should that retry also expire, the constrained arm's
-    solve does not fit one <code>00:59:00</code> allocation and the lane is the
-    coordinator's decision rather than a blind repetition. The
+    against <code>1.590e-13</code>). The positive arm is not produced, and its
+    blocker is compilation rather than allocation. Two jobs were cancelled by the
+    <code>00:59:00</code> partition limit with no output at all
+    (<code>1273963</code> at <code>00:59:02</code>, <code>1273994</code> at
+    <code>00:59:22</code> with an unbuffered log, so the silence is its own), and
+    the two that followed aborted inside XLA on the same program: <code>1274003</code>
+    at <code>64 G</code> and <code>1274028</code> at <code>180 G</code> both died
+    with exit <code>134</code> (SIGABRT) at <code>38:47</code> and <code>38:28</code>
+    while <code>[Compiling module jit_scan for CPU]</code>, reporting
+    <code>LLVM compilation error: Cannot allocate memory</code> in 213 rows on the
+    first, <code>allocateMappedMemory failed with error: Cannot allocate memory</code>
+    for a <code>129</code>-byte then a <code>914</code>-byte suballocation, and
+    <code>LLVM ERROR: Unable to allocate section memory!</code>. Slurm records both
+    steps <code>COMPLETED 0:0</code> because the payload aborted inside the step,
+    so the log is the evidence and the exit status is not. <strong>Tripling the
+    request changed nothing</strong>: the abort moved by nineteen seconds
+    (<code>38:47</code> to <code>38:28</code>), and the step peaks slurm recorded
+    were <code>MaxRSS 28.7 GB</code> then <code>30.1 GB</code> with
+    <code>MaxVMSize 41.5 GB</code> — far below the <code>64 G</code> it first asked
+    and further below the <code>180 G</code> raise, so the allocation request was
+    never the constraint and the failed micro-allocations are the tell that a
+    section mapping failed rather than that memory ran out. The cache was a miss on
+    both runs and the last one banked what it could
+    (<code>MISS-COMPILED-AND-BANKED</code>, <code>338</code> to <code>340</code>
+    entries on the resolved per-host CPU subtree with one compile alarm) and still
+    died on <code>jit_scan</code>. No chunk row was ever printed, so the arm's trip
+    count stays unmeasured and the persisted-terminal-state finding is answered for
+    the negative arm only. The compile size of that program belongs to the
+    forward-solver route integrity plan's program-size section, not to this node;
+    the chunked continuation is the route to take on the day it compiles. The
     <code>field-response</code> panel's vector companion needs an SVG emitter in
     <code>benchmarks/centroid_field_response_probe.py</code>, which lies outside
     this node's write scope and is reported rather than taken.</p>

@@ -841,8 +841,20 @@ PANEL_STATES = (
 # that field's admitted saddle.  State 0 holds a saddle cell, so its lobe meets
 # two divertor legs; state 13 carries no saddle cell at all and its lobe is the
 # whole closed boundary.
+#
+# States 9 to 12 are the ones whose saddle cell holds a pair of level crossings
+# inside one sub-interval of a fixed five-sample edge subdivision.  Both
+# endpoints of that sub-interval sit on the same side of the boundary level, so
+# the subdivision reports no crossing there, the cell's crossing count reads 2
+# instead of 4, the tie between its two sectors never fires, and the lobe the
+# saddle pinches is left open.  They are pinned here at the terms the
+# stationary-point bracket produces, which is the state that closes them.
 PERSISTED_STATE_TERMS = {
     0: {"closed_segment_count": 67, "open_branch_count": 2},
+    9: {"closed_segment_count": 67, "open_branch_count": 2},
+    10: {"closed_segment_count": 67, "open_branch_count": 2},
+    11: {"closed_segment_count": 69, "open_branch_count": 2},
+    12: {"closed_segment_count": 69, "open_branch_count": 2},
     13: {"closed_segment_count": 66, "open_branch_count": 0},
 }
 

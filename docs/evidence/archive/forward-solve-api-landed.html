@@ -431,13 +431,74 @@ what makes the assertion a measurement of the level rule rather than of the asse
 <figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the closed lobe solid, the saddle legs dashed, both null sets and the unstructured first wall"><figcaption>Edit 7 (&minus;4&nbsp;&#37;, converged, residual 5.0e-09, left) beside edit 6
 (&minus;6&nbsp;&#37;, non-converged, residual 4.4e-03, right). The solved boundary branch is drawn with its
 axis-enclosing lobe solid and its two saddle-ended divertor legs dashed, in orange; the reference set
-is drawn dashed in blue from its raw separatrix, because its own assembly is not well formed and the
-caption says so rather than leaving the panel empty. Levels run between the axis flux 0.341217&nbsp;Wb
+is drawn in blue as unconnected crossings, because its own assembly is not well formed and its raw
+separatrix is a scan-order crossing list whose consecutive entries are neighbours in the raster walk
+rather than endpoints of one segment, so joining them drew a fan of chords across the vessel. The
+caption says so, and names the reference as the unedited equilibrium whose admitted saddle sits above
+its axis, against the solved states whose saddle sits below. Levels run between the axis flux 0.341217&nbsp;Wb
 and the boundary flux &minus;0.122930&nbsp;Wb, and the shared level array is the same on both panels.
 Both null sets are drawn: solid triangles for each axis and filled crosses for each admitted saddle,
 hollow markers for other qualified nulls. The wall is drawn from the unit collection. Both files are
 committed: <code>converged-vs-nonconverged.png</code> and
 <code>converged-vs-nonconverged.svg</code>.</figcaption></figure>
+</section>
+
+<section id="edge-root-bracket">
+<h2>Every root on a cell edge is bracketed from the edge cubic's own extrema (2026-09-19)</h2>
+<p><strong>Status: landed; the residual four close.</strong> The section above left the four states
+sitting on a detector, not a geometry: the level set crosses the saddle cell's left edge twice inside
+one five-sample sub-interval, both endpoints of that sub-interval read the same side of the level, the
+cell's crossing count reads 2, and the four-crossing gate never admits the sector tie. The repair
+replaces the fixed subdivision with root counting from the cubic the spline restricts to an edge,
+which has at most two stationary points in the edge parameter and therefore at most three monotone
+pieces.</p>
+<p><strong>Whose cubic it is.</strong> Every cell edge of the structured lattice is axis-aligned, so
+the restriction of the global tensor spline to an edge is exactly a cubic in the edge parameter. The
+edge derivative is the chain rule of the spline's own partials,
+<code>delta&#39;(t) = dr/dt &middot; dp/dr + dz/dt &middot; dp/dz</code>, quadratic in <code>t</code>;
+three derivative evaluations fix its coefficients, its roots are the interior split points, and one
+root is bracketed on each monotone piece whose ends straddle the level. Three pieces per edge is the
+fixed shape the traced program keeps: a negative discriminant is clamped rather than masked, which
+leaves a spurious split point on a monotone edge, and spurious splits cost one evaluation and cannot
+hide a crossing because splitting a monotone interval anywhere keeps every piece monotone.</p>
+<p><strong>Reproduction of the recorded defect, first-hand and before the change.</strong> On
+<code>panel-states.npz</code>, cell (5,&nbsp;9), edge&nbsp;3 (the left edge, radius
+0.605625&nbsp;m, height &minus;1.375000 to &minus;1.250000&nbsp;m): a dense scan reports
+<strong>two</strong> level crossings, the fixed five-sample subdivision reports <strong>zero</strong>
+straddles, and the tracer's own per-edge crossing tally reads <code>[1, 1, 0, 2]</code> against the
+detector's <code>cell_crossing_count</code> of 2. The edge restriction measures as a cubic to within
+2.8e-17 on every probed edge, which is what makes the extrema the right instrument. States 10, 11 and
+12 show the same signature.</p>
+<p><strong>Measured effect.</strong> The twenty-state census now reports <strong>0 of 20</strong>
+failing, down from 4 of 20. States 9 and 10 read <code>closed_segment_count</code> 67 with
+<code>open_branch_count</code> 2; states 11 and 12 read 69 and 2; the previously failing saddle cell
+now reads <code>cell_crossing_count</code> 4 with the sector tie admitted.</p>
+<p><strong>Gate.</strong> One <code>all_debug</code> job, CPU platforms, the shared environment's
+interpreter invoked directly, ran
+<code>tests/test_flux_surface_connectivity.py</code> and
+<code>tests/test_separatrix_branches.py</code> with the persisted-state test extended from states 0
+and 13 to 0, 9, 10, 11, 12 and 13, then the census on the same fixture: <strong>34 passed</strong>
+in 104.85&nbsp;s and <strong>0 of 20</strong> failing, both exit 0. The gate measures this node's own
+change; the merged result belongs to a separately dispatched test node.</p>
+<p><strong>The reference drawing.</strong> <code>benchmarks/coil_edit_latency.py</code> no longer
+joins the reference's scan-order crossing list into one polyline. Consecutive entries of that list are
+neighbours in the raster walk, not endpoints of one segment, so the join drew a fan of chords; the
+crossings are now drawn as unconnected marks and the caption states that the boundary is not
+assembled there. The caption also names which equilibrium the reference is, from a computed
+comparison rather than an assertion: the reference's admitted saddle sits <em>above</em> its axis
+(0.585&nbsp;m,&nbsp;+1.231&nbsp;m) while the solved states carry theirs below
+(0.621&nbsp;m,&nbsp;&minus;1.303&nbsp;m). The panel was redrawn on a compute partition and both files
+verify through the SVG.</p>
+<figure><img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, all four edges of the saddle cell bracketed, both null sets and the first wall"><figcaption>The same panel after the edge-root repair. The solved branch is drawn with its
+axis-enclosing lobe solid and its saddle legs dashed in orange; the reference is drawn in blue as
+unconnected crossings, with the caption naming it as the unedited equilibrium whose admitted saddle
+sits above its axis. Both null sets are drawn, the wall is drawn from the unit collection, and the
+files verify through <code>converged-vs-nonconverged.svg</code>.</figcaption></figure>
+<p><strong>Followup.</strong> The edge-root probe written for this node reads one stationary root
+outside the crossing pair on states 10&ndash;12 where the dense scan and the analytic root both place
+the extremum inside it, so the probe's root-acceptance algebra needs a look before the probe is
+reused; its dense-scan and cubic-residual columns are the ones the reproduction above rests on and
+they agree with the tracer's own per-edge tally, so the repair itself is not in question.</p>
 <p><strong>Provenance departure.</strong> The panel is rendered from the persisted
 <code>panel-states.npz</code> rather than from a fresh sweep. Re-running the twenty-state sweep needs
 the canonical measurement host, and both routes are closed: <code>_require_measurement_host()</code>

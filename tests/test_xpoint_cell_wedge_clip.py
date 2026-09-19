@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import ast
 from dataclasses import dataclass
+import inspect
+import textwrap
 
 import jax
 import jax.numpy as jnp
@@ -53,6 +56,47 @@ def test_spline_chain_admits_the_supplied_saddle_vertex():
     ):
         np.testing.assert_array_equal(vertices[0], np.zeros(2))
         np.testing.assert_array_equal(vertices[count:], 0.0)
+
+
+def test_spline_chain_refuses_a_non_finite_supplied_saddle():
+    mesh, signed_flux = _saddle_cell()
+
+    support = mesh.traced_clip(
+        signed_flux,
+        saddle_vertex=jnp.asarray([jnp.nan, 0.0]),
+        curve_evaluator=_saddle_level,
+        arc_tracer=_traced_level_arc,
+    )
+
+    assert not bool(support.saddle[0])
+    assert support.refused_cells() == 1
+    np.testing.assert_array_equal(support.saddle_vertex, 0.0)
+    assert not bool(support.included[0])
+    np.testing.assert_array_equal(support.area, 0.0)
+    np.testing.assert_array_equal(support.vertex_count, 0)
+    for branch in (support.branch_support_vertices, support.branch_area):
+        assert np.all(np.isfinite(np.asarray(branch)))
+
+
+def test_forward_operator_supplies_the_typed_census_saddle_to_the_clip():
+    from nova.equilibrium import forward_operator
+
+    source = inspect.getsource(forward_operator.ForwardFluxOperator._profile_support)
+    calls = [
+        node
+        for node in ast.walk(ast.parse(textwrap.dedent(source)))
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "_traced_clip"
+    ]
+
+    assert len(calls) == 1
+    supplied = {keyword.arg: keyword.value for keyword in calls[0].keywords}
+    assert "saddle_vertex" in supplied, "the clip is called with no saddle vertex"
+    attribute = supplied["saddle_vertex"]
+    assert isinstance(attribute, ast.Attribute)
+    assert isinstance(attribute.value, ast.Name)
+    assert (attribute.value.id, attribute.attr) == ("topology", "x_point")
 
 
 def test_spline_chain_does_not_infer_a_saddle_from_crossing_chords():

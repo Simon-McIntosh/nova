@@ -1067,6 +1067,10 @@ def _traced_clip(
             supplied = jnp.broadcast_to(supplied, (cell_count, 2))
         if supplied.shape != (cell_count, 2):
             raise ValueError("saddle_vertex must have shape (2,) or (cells, 2)")
+        admitted = jnp.all(jnp.isfinite(supplied), axis=-1)
+        if admitted.ndim == 0:
+            admitted = jnp.broadcast_to(admitted, (cell_count,))
+        saddle = saddle & admitted
         saddle_point = supplied
     saddle_point = jnp.where(saddle[:, None], saddle_point, 0.0)
 

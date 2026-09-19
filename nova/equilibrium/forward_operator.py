@@ -3088,6 +3088,7 @@ class ForwardFluxOperator:
             atomic_mesh.centroids,
             atomic_mesh.support_capacity,
             inside_boundary,
+            saddle_vertex=topology.x_point,
             curve_evaluator=curved_level,
             participating_cell=participation,
             arc_tracer=_implicit_traced_level_arc,

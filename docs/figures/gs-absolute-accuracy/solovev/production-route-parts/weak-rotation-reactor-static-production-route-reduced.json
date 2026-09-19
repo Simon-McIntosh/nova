@@ -71,8 +71,11 @@
   "figure": {
     "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-reduced.png",
     "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-reduced.png",
-    "render_source": "fresh_production_solve",
-    "sha256": "1624f12aa9fee4ade39a5d0dc0f2aeff34af676a69eb2014ee2f8e920b5fd3f1"
+    "render_source": "persisted_part_receipt",
+    "sha256": "6653eede1db0bbb38c9f8b282f2c363526dd661b51a4a62cb8150253a554534b",
+    "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-reduced.svg",
+    "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/weak-rotation-reactor-static-production-route-reduced.svg",
+    "vector_sha256": "272de1da640891589e2c9767509b8ea2f34fead902e6e961fbbacac758f09c01"
   },
   "geometry": {
     "boundary_flux_error_wb": 10.39513184789983,
@@ -12821,6 +12824,7 @@
   "solver": {
     "call": "profile.solve(ForwardSolveRequest)",
     "carrier_identity": "solovev:weak-rotation-reactor-static:-110",
+    "converged": false,
     "gmres_iterations": 30,
     "lambda_amplitude_history": {
       "samples": [
@@ -13212,12 +13216,37 @@
     },
     "qualification": "unqualified",
     "qualification_bound": 1e-12,
-    "qualification_reason": "fixed_point_residual_above_qualification_bound_after_iteration_budget",
+    "qualification_components": {
+      "joint": "unqualified",
+      "position_error": {
+        "axis_error_m": 0.0018460312639213298,
+        "axis_within_bound": true,
+        "bound_m": 0.46606341035820315,
+        "bound_pitch_multiple": 1.0,
+        "qualified": true,
+        "x_point_error_m": null,
+        "x_point_within_bound": true
+      },
+      "terminal_residual": {
+        "bound": 1e-12,
+        "qualified": false,
+        "value": 0.007447526861632619
+      },
+      "topology_read": {
+        "axis_admitted": true,
+        "qualified": true,
+        "read_status": "qualified_axis",
+        "x_point_admitted": true,
+        "x_point_required": false
+      }
+    },
+    "qualification_reason": "fixed_point_residual_outside_qualification_bound",
     "raster_flux_receipt": {
       "available": false,
       "status": "unavailable_non_tensor_product_grid"
     },
     "requested_seed_class": "limited",
+    "residual_only_qualification": "unqualified",
     "resolved_defaults": {
       "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
       "deviations": {
@@ -13296,7 +13325,7 @@
   "stage_wall_seconds": {
     "accuracy_scoring": 0.6080394852906466,
     "case_and_machine": 0.17405063193291426,
-    "figure_render": 0.2346762828528881,
+    "figure_render": 0.5439850967377424,
     "operator_and_seed": 22.026600944809616,
     "production_solve": 115.22047305293381
   }

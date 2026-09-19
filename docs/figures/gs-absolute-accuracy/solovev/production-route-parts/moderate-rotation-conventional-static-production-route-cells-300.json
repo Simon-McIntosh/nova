@@ -72,7 +72,10 @@
     "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.png",
     "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.png",
     "render_source": "persisted_part_receipt",
-    "sha256": "aee39e616e0b65c9687422ea2b5474813825056b4045d6991f480a54e0d0356c"
+    "sha256": "5912f3828cca242d76c1788803232b00d5f41673fff9e316b53d15fa3e981368",
+    "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.svg",
+    "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/moderate-rotation-conventional-static-production-route-cells-300.svg",
+    "vector_sha256": "58ab16fd674f007f9e6fb1a5b4957efdaf4e4e184fbe5971ce881ea751963dfc"
   },
   "geometry": {
     "boundary_flux_error_wb": 0.21957371415736196,
@@ -21340,7 +21343,7 @@
   "stage_wall_seconds": {
     "accuracy_scoring": 0.7917921040207148,
     "case_and_machine": 0.19006321672350168,
-    "figure_render": 0.46788148768246174,
+    "figure_render": 0.5848080944269896,
     "operator_and_seed": 22.09374748170376,
     "production_solve": 116.92100436706096
   }

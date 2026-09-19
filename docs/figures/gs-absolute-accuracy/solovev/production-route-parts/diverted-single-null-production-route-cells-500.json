@@ -79,8 +79,11 @@
   "figure": {
     "filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-500.png",
     "project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-500.png",
-    "render_source": "fresh_production_solve",
-    "sha256": "ab6ac9f8dd4f73f2d85a912b67586ec3d16449ff3844f1c55364c77bb3887075"
+    "render_source": "persisted_part_receipt",
+    "sha256": "897e56ecb1f82b0823d42ced9dda7bfa12699458476dd94dd926938b3235e8a9",
+    "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-500.svg",
+    "vector_project_absolute_src": "/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-500.svg",
+    "vector_sha256": "e87f6ae1e41636210647ecfd4d5efdbcf16667f763847876b7a2526276bdefce"
   },
   "geometry": {
     "boundary_flux_error_wb": 2.490276864927643e-19,
@@ -25828,6 +25831,7 @@
   "solver": {
     "call": "profile.solve(ForwardSolveRequest)",
     "carrier_identity": "solovev:diverted-single-null:-500",
+    "converged": true,
     "gmres_iterations": 30,
     "lambda_amplitude_history": {
       "samples": [
@@ -25913,12 +25917,37 @@
     },
     "qualification": "qualified",
     "qualification_bound": 1e-12,
-    "qualification_reason": "fixed_point_residual_within_qualification_bound",
+    "qualification_components": {
+      "joint": "qualified",
+      "position_error": {
+        "axis_error_m": 0.0014329635061000813,
+        "axis_within_bound": true,
+        "bound_m": 0.07103816322006563,
+        "bound_pitch_multiple": 1.0,
+        "qualified": true,
+        "x_point_error_m": 0.0011992892842295785,
+        "x_point_within_bound": true
+      },
+      "terminal_residual": {
+        "bound": 1e-12,
+        "qualified": true,
+        "value": 2.4230081673565618e-17
+      },
+      "topology_read": {
+        "axis_admitted": true,
+        "qualified": true,
+        "read_status": "qualified_axis",
+        "x_point_admitted": true,
+        "x_point_required": true
+      }
+    },
+    "qualification_reason": "residual_topology_and_position_within_qualification_bounds",
     "raster_flux_receipt": {
       "available": false,
       "status": "unavailable_non_tensor_product_grid"
     },
     "requested_seed_class": "diverted",
+    "residual_only_qualification": "qualified",
     "resolved_defaults": {
       "compilation_cache_directory": "/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-0745ecebea4cb264e054",
       "deviations": {
@@ -25995,7 +26024,7 @@
   "stage_wall_seconds": {
     "accuracy_scoring": 1.001639312133193,
     "case_and_machine": 0.7084136549383402,
-    "figure_render": 0.3388707898557186,
+    "figure_render": 0.6050319410860538,
     "operator_and_seed": 23.14641678519547,
     "production_solve": 119.68642721138895
   }

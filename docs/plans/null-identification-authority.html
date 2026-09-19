@@ -25,12 +25,12 @@
 <meta name="plan-modified" content="2026-09-19">
 <meta name="plan-artifacts" content="docs/evidence/archive/null-identification-authority-landed.html,docs/figures/null-identification-authority/bank-integrated/bank-integrated.json,docs/figures/null-identification-authority/bank-drift-probe/receipt.json,docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json,docs/figures/topology-visual-corroboration/mast-bank-solve-operands.npz">
 <meta name="plan-commits" content="72ed7f60,ebc4371d,f4a1b9b5,b2a7a046,63b50480,f07ee0c5,23a86b25,82949087,7b0311d2,e76bc389">
-<meta name="plan-impl" content="0.992">
+<meta name="plan-impl" content="0.994">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="207">
+<meta name="plan-version" content="208">
 </head>
 <body>
 <main class="plan-doc">
@@ -236,10 +236,11 @@ for the lead before merge.</p>
     <pre class="r-fu-prompt">/reckon-ship null-identification-authority — deliver f-nia-panel-test-strength: two fixture archives on distinct grids and a contour-kind assertion in the paired-probe panel test</pre>
     <p class="r-fu-outcome">Landed at 7efd909c and 4d91bd2e (merged 778fbbb3): the two fixture archives are written on distinct grids and the contour collection is asserted to be an unfilled ContourSet; both mutants fail the module (1 failed, 10 passed each) and the head passes (11 passed) in fresh all_debug processes.</p>
     </article>
-<article class="r-fu" data-id="f-nia-anchor-bisect-record-repairs" data-status="open" data-written-by="nova S19 coordinator" data-written-at="2026-09-18T12:35:00Z" data-recommends-skill="/reckon-ship" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-nia-anchor-bisect-record-repairs" data-status="resolved" data-written-by="nova S19 coordinator" data-written-at="2026-09-18T12:35:00Z" data-recommends-skill="/reckon-ship" data-resolved-at="2026-09-19T14:18:10+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Repair the anchor-bisect receipt on its three review findings</h4>
     <div class="r-fu-body"><p>From the 84/100 review of nia-anchor-trace-bisect. (1) <code>benchmarks/bank_drift_anchor_bisect.py</code> near line 727: the verdict keys on the hook-name list alone, so an absent arm (the exception stub from <code>_load_arm</code> near line 619 carries an empty list) is reported as "the override did not take effect"; report absent arms as absent. (2) The receipt's mixed-arm finding sentence (receipt JSON near line 426) is a template that calls a 2.2e-16 against 3.1e-16 gap "the anchor partition is the carrier"; the sentence must compare the gap to the round-off floor before naming a carrier. (3) <code>receipt.html</code> near line 142 states the slowest compile as 4m18s while the log's slowest alarm is 4m30.6s. Record repairs only, re-run the receipt subcommand against the existing arm JSONs, no allocation.</p></div>
     <pre class="r-fu-prompt">/reckon-ship null-identification-authority §1 — deliver f-nia-anchor-bisect-record-repairs: absent arms reported as absent, the mixed finding compared to the round-off floor, the compile cell corrected</pre>
+    <p class="r-fu-outcome">Landed at 68bdf8fa: absent arms are reported as absent, the carrier finding compares the residual gap to the float64 round-off floor before naming a carrier, the slowest compile is read from the log, the receipt is regenerated from the existing arm JSONs, and tests/test_bank_drift_anchor_bisect.py pins the verdict paths (18 passed with the paired-probe module).</p>
     </article>
 <article class="r-fu" data-id="f-nia-containment-aware-anchor" data-status="resolved" data-written-by="coordinator" data-written-at="2026-09-19T07:50:00Z" data-recommends-skill="/reckon-ship" data-resolved-at="2026-09-19T09:16:30+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Containment-aware wall anchor: the limited boundary is the axis-enclosing contour that touches the wall</h4>

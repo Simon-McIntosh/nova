@@ -23,13 +23,13 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-impl" content="0.94">
+<meta name="plan-impl" content="0.96">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd,273ff747,7aef0963">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="112">
+<meta name="plan-version" content="113">
 </head>
 <body>
 <main class="plan-doc">
@@ -184,10 +184,11 @@
     <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve</pre>
     <p class="r-fu-outcome">Repaired at b85d1d70 (merged a5b8ba1d): the crash came from the census test omitting the analytic reference the production route already passes, so the sampler's surface-node fallback collapsed to a single vertex on a diverted source that declares no closed zero-flux surface of its own. Base arm 1 failed 9 passed, head 10 passed 2 skipped in one all_debug job. The assertions below the crash had never executed and are re-baselined on measurement, which turns up a negative worth carrying: at both rungs no stencil ring contains the divertor saddle (54 of 55 rings straddle the separatrix, one lies wholly inside at the axis), so the census resolves the axis alone and the read stays limited with a non-finite X-point. The followup below carries that to the saddle-detector section of the topology plan. Two brief defects are recorded: my brief named the wrong raising site and asserted the target passed at head, which it did not.</p>
     </article>
-<article class="r-fu" data-id="f-msc-delete-observation-unit-node-shim" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship millisecond-converged-solve" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-msc-delete-observation-unit-node-shim" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship millisecond-converged-solve" data-resolved-at="2026-09-19T16:54:35+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Delete the census shim that publishes _UNIT_NODE onto the observation module</h4>
     <div class="r-fu-body">The program-shape census proceeded past the certificate builder defect by publishing clip_quadrature._UNIT_NODE onto nova.equilibrium.observation for the duration of the call, recorded under framework_compat_shims in its receipt. The builder now imports from the owning module, so the shim is dead: remove it from the census driver, drop the framework_compat_shims entry from the receipt it writes, and confirm with tests/test_census_record_receipts.py and tests/test_solovev_certificate_builder.py on the login node that nothing else reaches for the name.</div>
     <pre class="r-fu-prompt">/reckon-ship millisecond-converged-solve</pre>
+    <p class="r-fu-outcome">Closed in two nodes. The census driver's own shim went at 18287b1b (merged c16dd729) with the receipt regenerated and the guard flipped to refuse a disclosure. The remaining readers went at bf437826, 8227675d and e2ab1e56 (merged 935efd4c): the memory-scaling and warm-cost benchmarks and the memory test reach the constant through nova.equilibrium.clip_quadrature, with six failures at base over the two files and none at head on the surface changed. The fourth module needed no change and the record says why, since it binds a different constant, _DENSITY_UNIT_NODE from nova.equilibrium.stencil_mesh. The whole-file arm including the two slow terminal-driver tests is withdrawn rather than owed: one of its solves exceeded 25 minutes of CPU at 24.6 GB, so that measurement belongs with the compile-cost work.</p>
     </article>
 <article class="r-fu" data-id="f-msc-diverted-census-has-no-saddle-rung" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship topology-read-containment-and-rebank §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">The diverted oracle census has no rung whose mesh contains the saddle, so its containment rule has no positive control</h4>

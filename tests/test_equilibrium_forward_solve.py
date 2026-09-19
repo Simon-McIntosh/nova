@@ -592,90 +592,11 @@ def test_the_accelerator_routes_agree_on_the_fixed_point(machine, converged):
     """Every accelerated route drives the shared map to one equilibrium."""
     profile, seed, _vacuum = machine
     scale = jnp.max(jnp.abs(converged.flux))
-    results = {}
     for route, options in (
         ("picard", {"evaluations": 2 * EVALUATIONS}),
         ("newton_krylov", {"newton_steps": 8, "warmup": 40}),
     ):
         result = profile.solve(seed, route=route, **options)
-        results[route] = result
-        point = result.fixed_point
-        for name in (
-            "trace",
-            "shadow_mask_changes",
-            "active_set_residuals",
-            "active_set_mask_differences",
-            "inner_iteration_residuals_before",
-            "inner_iteration_residuals_after",
-            "inner_iteration_accepted",
-        ):
-            values = np.asarray(getattr(point, name))
-            print(f"{route}.{name}.shape={values.shape}")
-            print(f"{route}.{name}.values={values.tolist()}")
-
-    operator = profile.operator
-    external = operator.external()
-    mapped = operator.traced_flux_map()
-    shadowed = operator.traced_flux_map_with_shadow()
-    read_partition = shadowed._read_frozen_partition
-    map_partition = shadowed._map_frozen_partition
-    seed_shadow = operator.residual_shadow_mask(seed, None)
-    seed_partition = read_partition(seed, seed_shadow, external, operator, None)
-    for state_name, state in (
-        ("seed", seed),
-        ("picard_terminal", results["picard"].flux),
-        ("newton_krylov_terminal", results["newton_krylov"].flux),
-        (
-            "newton_krylov_trajectory",
-            results["newton_krylov"].fixed_point.trajectory_state,
-        ),
-    ):
-        shadow = operator.residual_shadow_mask(state, None)
-        explicit_live = mapped(state, external, operator, None)
-        captured_live = mapped(state, external)
-        explicit_partition = read_partition(state, shadow, external, operator, None)
-        captured_partition = read_partition(state, shadow, external)
-        explicit_frozen = map_partition(
-            state, explicit_partition, external, operator, None
-        )
-        captured_frozen = map_partition(state, captured_partition, external)
-        print(
-            f"{state_name}.live_argument_max_abs="
-            f"{float(jnp.max(jnp.abs(explicit_live - captured_live))):.17g}"
-        )
-        print(
-            f"{state_name}.frozen_argument_max_abs="
-            f"{float(jnp.max(jnp.abs(explicit_frozen - captured_frozen))):.17g}"
-        )
-        print(
-            f"{state_name}.live_vs_frozen_max_abs="
-            f"{float(jnp.max(jnp.abs(explicit_live - explicit_frozen))):.17g}"
-        )
-        seed_frozen = map_partition(state, seed_partition, external, operator, None)
-        print(
-            f"{state_name}.live_vs_seed_frozen_max_abs="
-            f"{float(jnp.max(jnp.abs(explicit_live - seed_frozen))):.17g}"
-        )
-        if state_name == "newton_krylov_trajectory":
-            for (leaf_path, seed_leaf), trajectory_leaf in zip(
-                jax.tree.leaves_with_path(seed_partition),
-                jax.tree.leaves(explicit_partition),
-                strict=True,
-            ):
-                seed_values = np.asarray(seed_leaf)
-                trajectory_values = np.asarray(trajectory_leaf)
-                difference = np.abs(trajectory_values - seed_values)
-                print(
-                    "newton_krylov_trajectory.partition_leaf="
-                    f"{jax.tree_util.keystr(leaf_path)} "
-                    f"seed_shape={seed_values.shape} "
-                    f"trajectory_shape={trajectory_values.shape} "
-                    f"difference_shape={difference.shape} "
-                    f"difference_count={np.count_nonzero(difference)} "
-                    f"max_abs={np.max(difference) if difference.size else 0}"
-                )
-
-    for route, result in results.items():
         assert float(result.fixed_point.residual) < RESIDUAL_TOLERANCE, route
         assert _relative(result.flux, converged.flux, scale) < PARITY_TOLERANCE, route
 
@@ -981,34 +902,18 @@ def test_the_moment_map_is_differentiable_against_finite_differences(
     direction = jnp.asarray(rng.standard_normal(converged.flux.shape))
     direction = direction / jnp.max(jnp.abs(direction))
     analytic = jacobian @ direction
-    analytic_scale = float(jnp.max(jnp.abs(analytic)))
-    print(f"moment_jacobian.analytic.shape={np.asarray(analytic).shape}")
-    print(f"moment_jacobian.analytic.values={np.asarray(analytic).tolist()}")
-    print(f"moment_jacobian.analytic_scale={analytic_scale:.17g}")
-    assert np.isfinite(analytic_scale) and analytic_scale > 0.0
+    assert float(jnp.max(jnp.abs(analytic))) > 1.0
     errors = []
-    diagnostic_steps = (1.0e-2, 3.0e-3, *MOMENT_JACOBIAN_STEPS)
-    for step in diagnostic_steps:
+    for step in MOMENT_JACOBIAN_STEPS:
         numeric = (
             profile.moment_residual(converged.flux + step * direction, targets)
             - profile.moment_residual(converged.flux - step * direction, targets)
         ) / (2.0 * step)
-        error = float(jnp.max(jnp.abs(numeric - analytic))) / analytic_scale
-        errors.append(error)
-        plus_labels = profile.operator.read(converged.flux + step * direction)[0].label
-        minus_labels = profile.operator.read(converged.flux - step * direction)[0].label
-        label_changes = int(jnp.sum(plus_labels != minus_labels))
-        print(f"moment_jacobian.step={step:.17g}")
-        print(f"moment_jacobian.numeric.values={np.asarray(numeric).tolist()}")
-        print(f"moment_jacobian.relative_error={error:.17g}")
-        print(f"moment_jacobian.cross_interval_label_changes={label_changes}")
-    registered_errors = errors[-len(MOMENT_JACOBIAN_STEPS) :]
-    assert (
-        registered_errors[0]
-        > MOMENT_JACOBIAN_TOLERANCE
-        > registered_errors[1]
-        > registered_errors[2]
-    )
+        errors.append(
+            float(jnp.max(jnp.abs(numeric - analytic)))
+            / float(jnp.max(jnp.abs(analytic)))
+        )
+    assert errors[0] > MOMENT_JACOBIAN_TOLERANCE > errors[1] > errors[2]
 
 
 def test_the_solve_is_differentiable_in_the_conductor_current(machine):

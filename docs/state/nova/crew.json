@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T15:51:41",
+  "updated": "2026-09-19T15:51:43",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5018,6 +5018,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-18"
+      },
+      {
+        "id": "s19c-msc-linearring-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-19"
       },
       {
         "id": "s19c-msc-meshargs-s",
@@ -205903,6 +205912,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2900
+    "_version": 2901
   }
 }

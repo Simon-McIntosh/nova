@@ -68,6 +68,15 @@ LEVEL_TOLERANCE_OF_SPAN = 1.0e-3
 ROWS = (("weak-rotation-reactor-static", -110),)
 DISPLACEMENT_M = np.asarray((0.020, 0.0), dtype=np.float64)
 
+# A constrained solve of this fixture outruns one debug allocation, so the
+# control arm is advanced in chunks: each chunk runs this many Newton trips
+# from the state the previous chunk persisted, and a run stops at convergence
+# or at this wall fence, whichever comes first. The trip ceiling bounds a
+# continuation that stops making progress.
+CHUNK_TRIPS = 2
+CHUNK_WALL_FENCE_S = 50.0 * 60.0
+CHUNK_TRIP_CEILING = 48
+
 # One-map response of the fixture centroid to a uniform exterior field,
 # measured with both signs at 1 mT and 10 mT with the exterior held fixed.
 PROBE_RADIAL_M_PER_T = 1.627789
@@ -237,18 +246,27 @@ def _certificate_request(context: dict[str, Any]) -> Any:
 
 
 def _certificate_pairs(
-    context: dict[str, Any], *, level: bool
+    context: dict[str, Any],
+    *,
+    level: bool,
+    initial_field_t: Any = None,
+    initial_level_wb: Any = None,
 ) -> tuple[ConstraintPair, ...]:
     """Return this fixture's pairs, with or without the flux-level row.
 
     Dropping the level pair leaves the centroid pair exactly as declared, so
-    two programs built from these lists differ by the level row alone.
+    two programs built from these lists differ by the level row alone.  The
+    initial amplitudes are inputs because a continuation restarts the
+    compensators where the previous trip left them; left unset they take the
+    builder's own declared start.
     """
     pairs = fixture_constraint_pairs(
         jnp.asarray(context["centroid"]),
         level_point=context["axis_point"],
         level_target=jnp.asarray((context["level_target_wb"],)),
         pitch=context["pitch"],
+        initial_field_t=initial_field_t,
+        initial_level_wb=initial_level_wb,
     )
     return pairs if level else (pairs[0],)
 
@@ -286,7 +304,13 @@ def _augmented_system(
 
 
 def _solve(
-    context: dict[str, Any], seed: np.ndarray, *, constrained: bool
+    context: dict[str, Any],
+    seed: np.ndarray,
+    *,
+    constrained: bool,
+    trips: int | None = None,
+    initial_field_t: Any = None,
+    initial_level_wb: Any = None,
 ) -> tuple[dict[str, Any], np.ndarray]:
     """Solve one control arm and report its readings.
 
@@ -298,8 +322,18 @@ def _solve(
     axis-anchored offset and is a mixed-gauge number, not an error; the receipt
     reports the two readings unsubtracted for the reader who wants them and
     makes no error claim from them.
+
+    ``trips`` bounds the Newton steps this call runs.  Left unset the call runs
+    the certificate's declared step count, which is a whole solve; a bounded
+    call is one chunk of a continuation whose caller persists the returned
+    state and the returned amplitudes and hands them back as the next seed.
     """
-    pairs = _certificate_pairs(context, level=True)
+    pairs = _certificate_pairs(
+        context,
+        level=True,
+        initial_field_t=initial_field_t,
+        initial_level_wb=initial_level_wb,
+    )
     request = certificate._certificate_solve_request(
         context["profile"],
         seed,
@@ -315,6 +349,10 @@ def _solve(
     )
     if constrained:
         request = replace(request, constraint_pairs=pairs)
+    if trips is not None:
+        request = replace(
+            request, policy=replace(request.policy, newton_steps=int(trips))
+        )
     started = perf_counter()
     receipt = context["profile"].solve(request)
     equilibrium = receipt.equilibrium
@@ -1012,8 +1050,35 @@ def control_arm(
         set_support_clip_mode(previous_mode)
     state_path = output_root / f"control-{arm}-state.npy"
     np.save(state_path, np.asarray(state, dtype=np.float64))
-    control = {
-        "terminal_state_path": str(state_path),
+    control = control_receipt(
+        context,
+        arm=arm,
+        constrained=constrained,
+        lane=lane,
+        displaced=displaced,
+        result=result,
+        state=state,
+        figure=figure,
+    )
+    control["terminal_state_path"] = str(state_path)
+    _write_json(output_root / f"control-{arm}.json", control)
+    return control
+
+
+def control_receipt(
+    context: dict[str, Any],
+    *,
+    arm: str,
+    constrained: bool,
+    lane: dict[str, Any],
+    displaced: np.ndarray,
+    result: dict[str, Any],
+    state: np.ndarray,
+    figure: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Shape one control arm's receipt around its reading and its state."""
+    return {
+        "terminal_state_path": None,
         "schema": "nova.centroid-displaced-control",
         "arm": arm,
         "constrained": constrained,
@@ -1032,7 +1097,189 @@ def control_arm(
         "solve": result,
         "figure": figure,
     }
+
+
+def control_arm_chunked(
+    output_root: Path,
+    arm: str,
+    *,
+    trips: int = CHUNK_TRIPS,
+    wall_fence_seconds: float = CHUNK_WALL_FENCE_S,
+    lane_requirement: str = "cpu",
+) -> dict[str, Any]:
+    """Advance one control arm in persisted chunks, continuing from the state.
+
+    A constrained solve of this fixture outruns a single debug allocation, and
+    the solve is one opaque call, so the continuation is taken outside it: each
+    chunk runs a bounded number of Newton trips from the state the previous
+    chunk persisted, the compensator amplitudes are handed back as the next
+    chunk's declared start, and the checkpoint is rewritten after every chunk.
+    The run stops at convergence or at the wall fence, whichever comes first,
+    and a run that stops at the fence leaves the checkpoint for the next
+    submission to resume from.  No panel is drawn here: the terminal state is
+    rendered by a separate short call so the solve's own budget is the only one
+    the solve spends.
+    """
+    if arm not in ("positive", "negative"):
+        raise ValueError(f"unknown control arm {arm!r}")
+    configure_dtypes()
+    configure_persistent_compilation_cache(default_forward_compilation_cache_root())
+    lane = _lane(lane_requirement)
+    checkpoint_path = output_root / f"control-{arm}-checkpoint.json"
+    checkpoint_state = output_root / f"control-{arm}-checkpoint-state.npy"
+    resumed = None
+    if checkpoint_path.exists() and checkpoint_state.exists():
+        resumed = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+        state = np.load(checkpoint_state)
+        trips_done = int(resumed["trips_completed"])
+        chunks_done = int(resumed["chunks_completed"])
+        field_t = resumed["last_field_t"]
+        level_wb = resumed["last_level_wb"]
+    else:
+        state = None
+        trips_done = 0
+        chunks_done = 0
+        field_t = None
+        level_wb = None
+    started = perf_counter()
+    previous_mode = support_clip_mode()
+    set_support_clip_mode("exact")
+    try:
+        context = _context("weak-rotation-reactor-static", -110)
+        displaced = (
+            np.asarray(state, dtype=np.float64)
+            if state is not None
+            else _translated_state(context)
+        )
+        state = displaced
+        converged = False
+        result: dict[str, Any] = {}
+        while True:
+            result, state = _solve(
+                context,
+                state,
+                constrained=arm == "positive",
+                trips=trips,
+                initial_field_t=field_t,
+                initial_level_wb=level_wb,
+            )
+            trips_done += trips
+            chunks_done += 1
+            amplitudes = np.asarray(result["compensating_amplitudes"], dtype=np.float64)
+            field_t = [float(value) for value in amplitudes[:2]]
+            level_wb = float(amplitudes[2])
+            residual = float(result["terminal_residual"])
+            converged = residual <= certificate.TERMINAL_RESIDUAL_BOUND
+            np.save(checkpoint_state, np.asarray(state, dtype=np.float64))
+            _write_json(
+                checkpoint_path,
+                {
+                    "schema": "nova.centroid-control-continuation",
+                    "arm": arm,
+                    "resumed_from": None if resumed is None else resumed.get("arm"),
+                    "chunks_completed": chunks_done,
+                    "trips_completed": trips_done,
+                    "trips_per_chunk": trips,
+                    "terminal_residual": residual,
+                    "converged": converged,
+                    "last_field_t": field_t,
+                    "last_level_wb": level_wb,
+                    "wall_seconds": perf_counter() - started,
+                    "source_revision": _revision(),
+                    "lane": lane,
+                },
+            )
+            print(
+                "CENTROID_CONTROL_CHUNK "
+                f"arm={arm} chunks={chunks_done} trips={trips_done} "
+                f"terminal_residual={residual:+.6e} converged={converged} "
+                f"wall_seconds={perf_counter() - started:.3f}",
+                flush=True,
+            )
+            if converged:
+                break
+            if perf_counter() - started >= wall_fence_seconds:
+                break
+            if trips_done >= CHUNK_TRIP_CEILING:
+                break
+    finally:
+        set_support_clip_mode(previous_mode)
+    if not converged:
+        return {
+            "arm": arm,
+            "status": "checkpointed",
+            "checkpoint_path": str(checkpoint_path),
+            "trips_completed": trips_done,
+            "chunks_completed": chunks_done,
+            "terminal_residual": float(result["terminal_residual"]),
+            "wall_seconds": perf_counter() - started,
+        }
+    state_path = output_root / f"control-{arm}-state.npy"
+    np.save(state_path, np.asarray(state, dtype=np.float64))
+    control = control_receipt(
+        context,
+        arm=arm,
+        constrained=arm == "positive",
+        lane=lane,
+        displaced=displaced,
+        result=result,
+        state=state,
+        figure=None,
+    )
+    control["terminal_state_path"] = str(state_path)
+    control["continuation"] = {
+        "chunks_completed": chunks_done,
+        "trips_completed": trips_done,
+        "trips_per_chunk": trips,
+        "checkpoint_path": str(checkpoint_path),
+    }
     _write_json(output_root / f"control-{arm}.json", control)
+    return control
+
+
+def render_control_state(
+    output_root: Path, figure_path: Path, arm: str
+) -> dict[str, Any]:
+    """Draw a banked terminal state and record the panel in that arm's receipt.
+
+    The panel is a pure function of the fixture context and the persisted
+    state, so it is drawn by its own short call rather than inside the solve
+    that produced the state.  The state is checked against the digest its
+    receipt records before anything is drawn.
+    """
+    receipt_path = output_root / f"control-{arm}.json"
+    control = json.loads(receipt_path.read_text(encoding="utf-8"))
+    state_path = Path(control["terminal_state_path"])
+    state = np.load(state_path)
+    digest = _digest(np.asarray(state, dtype=np.float64))
+    if digest != control["terminal_state_sha256_binary64"]:
+        raise ValueError(
+            "the banked state does not hash to the digest its receipt records: "
+            f"{digest} against {control['terminal_state_sha256_binary64']}"
+        )
+    configure_dtypes()
+    previous_mode = support_clip_mode()
+    set_support_clip_mode("exact")
+    try:
+        context = _context("weak-rotation-reactor-static", -110)
+        figure = _draw_state(
+            context,
+            state,
+            figure_path,
+            title=(
+                "bounded centroid row on a displaced seed"
+                if arm == "positive"
+                else "same displaced seed, no row"
+            ),
+            color="#cc7722" if arm == "positive" else "#a23b72",
+            project_src=(
+                f"/nova/figures/centroid-constrained-oracle-solve/control-{arm}.png"
+            ),
+        )
+    finally:
+        set_support_clip_mode(previous_mode)
+    control["figure"] = figure
+    _write_json(receipt_path, control)
     return control
 
 
@@ -1271,6 +1518,31 @@ def parse_args() -> argparse.Namespace:
         default="h200",
         help="lane the control arm must run on; cpu means one all_debug allocation",
     )
+    parser.add_argument(
+        "--chunked",
+        action="store_true",
+        help=(
+            "advance the control arm in persisted chunks, resuming from its "
+            "checkpoint and stopping at convergence or the wall fence"
+        ),
+    )
+    parser.add_argument(
+        "--chunk-trips",
+        type=int,
+        default=CHUNK_TRIPS,
+        help="Newton trips per continuation chunk",
+    )
+    parser.add_argument(
+        "--chunk-wall-fence",
+        type=float,
+        default=CHUNK_WALL_FENCE_S,
+        help="seconds a continuation run may spend before it checkpoints and exits",
+    )
+    parser.add_argument(
+        "--render-control",
+        choices=("positive", "negative"),
+        help="draw a banked terminal state and record its panel in the receipt",
+    )
     parser.add_argument("--merge-controls", action="store_true")
     parser.add_argument("--reread-gauge", action="store_true")
     parser.add_argument(
@@ -1356,6 +1628,53 @@ def main() -> None:
         report = merge_controls(arguments.output_root)
         print(
             f"CENTROID_MERGED_CONTROLS passed={report['verdict']['passed']}",
+            flush=True,
+        )
+        return
+    if arguments.render_control is not None:
+        arm_figure = arguments.figure.with_name(
+            f"control-{arguments.render_control}.png"
+        )
+        control = render_control_state(
+            arguments.output_root, arm_figure, arguments.render_control
+        )
+        print(
+            f"CENTROID_CONTROL_RENDERED arm={control['arm']} "
+            f"png={control['figure']['sha256'][:16]} "
+            f"svg={control['figure']['vector_sha256'][:16]}",
+            flush=True,
+        )
+        return
+    if arguments.chunked and arguments.control_arm is not None:
+        control = control_arm_chunked(
+            arguments.output_root,
+            arguments.control_arm,
+            trips=arguments.chunk_trips,
+            wall_fence_seconds=arguments.chunk_wall_fence,
+            lane_requirement=arguments.control_lane,
+        )
+        if control.get("status") == "checkpointed":
+            print(
+                "CENTROID_CONTROL_CHECKPOINTED "
+                f"arm={control['arm']} trips={control['trips_completed']} "
+                f"chunks={control['chunks_completed']} "
+                f"terminal_residual={control['terminal_residual']:+.6e} "
+                f"wall_seconds={control['wall_seconds']:.3f}",
+                flush=True,
+            )
+            return
+        solve = control["solve"]
+        print(
+            "CENTROID_CONTROL_CHUNKED_TERMINAL "
+            f"arm={control['arm']} "
+            f"trips={control['continuation']['trips_completed']} "
+            f"chunks={control['continuation']['chunks_completed']} "
+            f"centroid_error_pitches={solve['centroid_error_pitches']:+.9e} "
+            f"row_scaled_residual_sup={solve['row_scaled_residual_sup']:+.9e} "
+            f"terminal_residual={solve['terminal_residual']:+.9e} "
+            f"field_t_abs_sup={solve['compensating_field_t_abs_sup']:+.9e} "
+            f"qualified={solve['qualified']} "
+            f"wall_seconds={solve['wall_seconds']:.3f}",
             flush=True,
         )
         return

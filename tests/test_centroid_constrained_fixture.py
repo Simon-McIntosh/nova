@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import jax.numpy as jnp
 import numpy as np
 
+from benchmarks import centroid_constrained_fixture_receipt as control_receipt_module
 from scripts.analytic_oracle_fixtures.centroid_row import (
     DEFAULT_FIELD_BOUND_T,
     DEFAULT_FIELD_SCALE_T,
@@ -240,3 +243,29 @@ def test_level_pair_rejects_a_non_level_centroid_component() -> None:
         )
     with np.testing.assert_raises_regex(ValueError, "one target value"):
         level_constraint_pair(np.asarray((1.7, 0.0)), jnp.asarray([1.38, 0.0, 0.0]))
+
+
+def test_control_render_refuses_a_state_that_misses_its_receipt_digest(
+    tmp_path: Path,
+) -> None:
+    """A panel is drawn only from the state its receipt names and digests.
+
+    The digest is checked before the fixture context is built, so a receipt
+    naming a state it did not hash is refused rather than drawn into a figure
+    that would then be cited as that arm's terminal panel.
+    """
+    state_path = tmp_path / "control-positive-state.npy"
+    np.save(state_path, np.asarray([1.0, 2.0, 3.0], dtype=np.float64))
+    (tmp_path / "control-positive.json").write_text(
+        json.dumps(
+            {
+                "terminal_state_path": str(state_path),
+                "terminal_state_sha256_binary64": "0" * 64,
+            }
+        ),
+        encoding="utf-8",
+    )
+    with np.testing.assert_raises_regex(ValueError, "does not hash to the digest"):
+        control_receipt_module.render_control_state(
+            tmp_path, tmp_path / "control-positive.png", "positive"
+        )

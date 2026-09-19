@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T14:28:08",
+  "updated": "2026-09-19T14:32:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -204218,6 +204218,234 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T112327157134-trcr-class-free-containment",
+        "plan": "topology-read-containment-and-rebank",
+        "section": "\u00a71",
+        "node": "trcr-class-free-containment",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 11132,
+                "cached_input_tokens": 808302,
+                "input_tokens": 819436,
+                "output_tokens": 4557,
+                "reasoning_output_tokens": 171,
+                "total_tokens": 823993,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "section 1 of the plan: containment_required in nova/equilibrium/topology.py (near line 1140) is computed once from the provisional pass and reused by both containment passes, so a class-free read (requested_class None) on the persisted fixture docs/figures/null-identification-authority/limited-touch/row-16-terminal-state.npz keeps the detached divertor contact (R 0.599, Z 1.728) and classifies diverted, where the class-pinned limited read publishes the centre-column contact R 0.19524 m Z -0.01179 m at 0.256735 Wb (the review r-20260919T090130854993 measured this; read it first); compute containment inside each pass, keep the traced program fixed-shape, and add a test in tests/test_limited_boundary_touches_wall.py that the class-free read on the persisted fixture publishes the centre-column contact within one pitch and classifies limited; redraw docs/figures/null-identification-authority/limited-touch/row-16-before-after.png and .svg so only the axis-enclosing component is drawn in boundary style and the detached divertor lobes are drawn faint with a caption word; give contour_min_wall_distance_m one meaning across the before and after rows of receipt.json (the before rows read 0.272 and 0.210 under an earlier definition where the new one gives 0.874 for the before contact) and name the gate as four files; the gate is the four topology test files (tests/test_limited_boundary_touches_wall.py, tests/test_jax_topology.py, tests/test_topology_limiter_contact.py, tests/test_limiter_topology_receipts.py) in one all_debug job, all green; the evidence record docs/evidence/archive/topology-read-containment-and-rebank-landed.html does not exist yet, create it with reckon-type evidence and plan-evidence-for topology-read-containment-and-rebank and one anchor for this section; a text-only lane, never Read a PNG, verify figures through their SVG; call configure_dtypes before building any array; every uv command carries --no-sync and nothing runs uv sync; heavy work runs in one all_debug job with JAX_PLATFORMS=cpu through the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python directly (never uv on a compute node), TMPDIR=/tmp in the submit environment and the payload, scripts inside the worktree; nothing goes to betelgeuse; py_compile with the project interpreter before each commit; manifest at the first commit; a wait, if declared, carries wait_condition, wait_probe as a JSON list command, wait_terminal and a filled resume_brief; status words complete, waiting or blocked only; figures follow the plotting rules (line contours on shared levels, both null sets, the wall, no axes) as PNG and SVG; the plan landing comment and the evidence anchor are yours to write",
+          "estimated_hours": null,
+          "goal": "evaluate containment inside each topology pass so the class-free read publishes the axis-enclosing contact",
+          "id": "trcr-class-free-containment",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-19T11:23:27Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T112327157134-trcr-class-free-containment/manifest.md",
+          "plan": "topology-read-containment-and-rebank",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "tests/test_limited_boundary_touches_wall.py",
+            "tests/test_jax_topology.py",
+            "tests/test_topology_limiter_contact.py",
+            "tests/test_limiter_topology_receipts.py",
+            "docs/figures/null-identification-authority/limited-touch",
+            "docs/plans/topology-read-containment-and-rebank.html",
+            "docs/evidence/archive/topology-read-containment-and-rebank-landed.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/trcr-class-free"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-trcr-classfree-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-19T11:23:36Z",
+        "completed_at": "2026-09-19T11:59:51.128Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2167,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2175,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "780b4f63110b3dd196a8d8538b9111308350edbf",
+        "commits": [
+          "822b0f9b32fe9346b106725f3597c857fe482490",
+          "b55d94c5f63108daafe8457e0ba805435f48a585",
+          "f4fe2b796e3cabeb573620bec5501dc3b3689c6b",
+          "6a31b665b2afa97edbabf1437ae06175d478be91"
+        ],
+        "changed_lines": {
+          "added": 3906,
+          "removed": 3215,
+          "files": 9
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "four topology test files in one all_debug job (34 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/trcr-class-free/gate2.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T112327157134-trcr-class-free-containment/manifest.md",
+        "scope_changed": false,
+        "session_id": "ad0a23a8-237e-44f6-a1a5-98800e0307b7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 12158654,
+            "input_tokens_cumulative": 12158654,
+            "output_tokens": 77784,
+            "output_tokens_cumulative": 77784,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-19T11:59:51.128Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "unparsed",
+          "scores": {},
+          "absent": [],
+          "total": null
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 12325423,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2171.832,
+          "generated_tokens": 86725,
+          "generation_seconds": 1260.329,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.5,
+          "machine_seconds": 911.503,
+          "peak_input_tokens": 165469,
+          "tokens_per_second": 68.81,
+          "wall_tokens_per_second": 39.93
+        },
+        "follow_on_paths": [
+          "0.286946",
+          "0.032412"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/trcr-class-free-containment",
+          "session_id": "ad0a23a8-237e-44f6-a1a5-98800e0307b7",
+          "session_source": "stream",
+          "retained_at": "2026-09-19T11:59:51.128Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "topology-read-containment-and-rebank",
+          "at_dispatch": null,
+          "at_complete": 0.14,
+          "verdict": "exempt",
+          "reason": "no-impl-recorded-at-dispatch"
+        },
+        "tool_steps": 114.0,
+        "orientation_input_tokens": 1596016.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -204600,6 +204828,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2882
+    "_version": 2883
   }
 }

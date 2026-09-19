@@ -209,6 +209,7 @@ class _NodeFluxFunctional:
         return jnp.zeros_like(jnp.asarray(context.flux))
 
 
+@pytest.mark.slow
 def test_profile_amplitude_compensator_reaches_its_row() -> None:
     """A profile amplitude imposed through a constraint row moves the solve.
 

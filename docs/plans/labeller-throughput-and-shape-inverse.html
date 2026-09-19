@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="labeller-throughput-and-shape-inverse">
+  <meta name="plan-title" content="Labeller throughput and shape inverse — one program per slice, a batched read, and a shape step that achieves what it commands">
+  <meta name="plan-summary" content="The labeller at 300 slices a second on device, the elongation overshoot repaired, the multi-trip constraint proven, the cold iterate shadowed, corpus written.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="40.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S19">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="h200,throughput,jax,equilibrium,mast">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+  <title>Labeller throughput and shape inverse | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-19">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s0">Why this plan exists</h2>
+    <p>Playable-forward-solve reached 0.995 and is a record: the turning-point and position controls, the
+    warm-started reduced Newton and the H200 lane all landed. What remained on it as followups is the hard
+    tail the lead asked for on 2026-09-06 and since: a labeller at about 300 slices a second against 12 to 14
+    today, a shape inverse whose admitted half step achieves twice the commanded motion, a constrained
+    iteration proven only within one trip cap, a cold first iterate with no shadow, and the decoder corpus the
+    imas-ambix video decoder needs. Each is a section here with effort, depth, risk and attempts. The parent's
+    evidence record is the input; this plan's record is
+    <code>docs/evidence/archive/labeller-throughput-and-shape-inverse-landed.html</code>.</p>
+
+    <h2 id="s-contract">Section contract</h2>
+    <table>
+      <thead><tr><th>Section</th><th>Effort (worker-hours)</th><th>Reasoning</th><th>Risk</th><th>Attempts so far</th></tr></thead>
+      <tbody>
+        <tr><td>§1 One program per slice</td><td>10</td><td>deep</td><td>elevated</td><td>1 (vmap probe, slower per element)</td></tr>
+        <tr><td>§2 Batched topology read</td><td>8</td><td>deep</td><td>critical</td><td>0</td></tr>
+        <tr><td>§3 Elongation overshoot</td><td>6</td><td>deep</td><td>elevated</td><td>0</td></tr>
+        <tr><td>§4 Multi-trip constraint</td><td>4</td><td>deep</td><td>moderate</td><td>0</td></tr>
+        <tr><td>§5 Cold iterate shadow</td><td>4</td><td>deep</td><td>moderate</td><td>0</td></tr>
+        <tr><td>§6 Decoder corpus</td><td>8</td><td>standard</td><td>elevated</td><td>0</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s1">§1 — The whole slice solve inside one compiled program</h2>
+    <p>Lead target: about 300 slices a second, against 12 to 14 warm on one H200 today (48 to 50 ms a trip,
+    one to two trips a slice). A dense solve on about 1,100 plasma-cell amplitudes is well under a millisecond
+    on the device, so the trip is latency-bound: the Newton ladder as a host loop with data-dependent
+    backtracking and the trips of the topology read each pay about 7.6 microseconds of launch latency per step
+    plus the host round trips between them. Put the whole slice solve inside one compiled program with a fixed
+    trip budget and masked convergence instead of the host ladder, so one call is one slice and the launch count
+    per slice drops to a handful.</p>
+    <p><strong>Done when.</strong> One MAST shot (22086) is labelled through the single program with terminal
+    states bit-identical to the host-ladder route on the converged rows and the per-slice wall recorded on the
+    H200; the receipt tables launches per slice before and after.</p>
+
+    <h2 id="s2">§2 — The topology read of a batch of slices on device</h2>
+    <p>The vmap probe over the fused trip ran slower per element because the fused close is a write-then-read
+    topology pass whose per-element memory dominates. Re-cast the pass so a batch of slices reads in one
+    fixed-shape program (the saddle-aware flood is already fixed-shape per slice) and measure the slices per
+    second against batch size on one card.</p>
+    <p><strong>Done when.</strong> A batch of 32 slices reads in one program with labels identical to the
+    per-slice read, and the throughput curve against batch size is banked; this is the critical-risk section
+    because it changes the read every consumer depends on.</p>
+
+    <h2 id="s3">§3 — The admitted half step on the elongation command achieves twice the commanded motion</h2>
+    <p>From the bounded-step receipts: the elongation plus 5 percent command asks 54.95 mm at the upper and
+    lower extrema; the full inverse step is refused by the axis referee and the half step is admitted, yet the
+    half step achieves 112.4 mm upper and 119.0 mm lower with 30.0 mm uncommanded drift, so the linearised
+    turning-point response under-states the true response by about four on this command while the upper-point
+    command over-achieves by 1.6. Add a Newton outer loop on the achieved shape: re-linearise at the admitted
+    state and iterate until commanded and achieved motions agree to a stated tolerance, still under the
+    admission line search and the 20 kA ceiling.</p>
+    <p><strong>Done when.</strong> The elongation and upper-point commands achieve their motion within 5 percent
+    with the iteration count and uncommanded drift banked, and the figure shows commanded against achieved
+    per iteration.</p>
+
+    <h2 id="s4">§4 — The constrained iteration converges over several capped trips</h2>
+    <p>The globalisation acceptance on 27079 row 96 landed inside a single 1000 A trip cap, so the multi-trip
+    path the cap exists for is only weakly exercised. Command the same row to a displacement needing three to
+    four caps and require convergence within 1 mm, a monotone decrease of the augmented constraint merit across
+    trips, no trip above the cap, no overshoot past the target at any accepted step, and the total
+    compensating current within 10 percent of the free-solve value; record the trip count.</p>
+    <p><strong>Done when.</strong> The receipt tables the trips with merit, step and current per trip, or the
+    refusal names which requirement failed and at which trip.</p>
+
+    <h2 id="s5">§5 — Give the cold first iterate a shadow by reading twice</h2>
+    <p>The wall-anchor repair excludes the first iterate of a run because it has no previous shadow. On the
+    corpus census limited cold-start frames sit at a 0.066 median span ratio against 0.285 for warm ones over
+    1,228 frames, and the consumer's decoder is seeded at the starts of sequences, so the frames this leaves
+    worst are the ones its short-horizon case depends on most. Read the first iterate twice, the second read
+    shadowed by the first, and measure the cold-start span ratio against the warm one.</p>
+    <p><strong>Done when.</strong> The cold-start median span ratio on the census moves toward the warm value
+    with the delta banked, and the containment rule of the topology plan holds on the shadowed first read.</p>
+
+    <h2 id="s6">§6 — The decoder corpus</h2>
+    <p>Conditional on §1 and §2 landing: the labeller over the decoder's shot list as one sharded job writing
+    every shot's session as it lands with the per-slice conditioning flag and target source and a digest
+    manifest, resumable by shot, with a completion receipt counting shots, slices, converged and qualified
+    fractions and GPU-hours. Whether the conditioned slices may train is the imas-ambix lead's decision, which
+    the flag makes enforceable on data.</p>
+    <p><strong>Done when.</strong> The corpus is written and its completion receipt is banked; the job shape is
+    one job sharded inside its allocation, never one job per shot.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="job-shape" data-choice="one-job-sharded" data-by="lead" data-when="2026-09-09">
+    <p class="r-dec-q">How does a many-slice measurement run on the scheduler?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="one-job-sharded">one job that shards the rows inside its allocation</button>
+      <button class="r-opt" data-value="array">a job array with one row per task</button>
+      </p>
+    <p class="r-dec-rat">Lead 2026-09-06 and 2026-09-09: batch across shots on device and shard the batch across the job&#x27;s cards; a sixteen-task array on the shared reservation was ruled a scope defect.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ltsi-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship labeller-throughput-and-shape-inverse §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land §3, §4 and §5 on CPU first; §1, §2 and §6 need the H200 reservation</h4>
+    <div class="r-fu-body"><p>The reservation is fully held today, so the three CPU-measurable sections go first; §1 and §2 are the throughput core and take the strongest capability class when the H200 is available.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship labeller-throughput-and-shape-inverse §3</pre>
+    </article>
+</section>
+  <section data-reckon="gates" id="gates" class="r-gates">
+<h2><span class="sec">§</span> Evidence gates</h2>
+<div class="r-gate" data-id="g-ltsi-corpus-after-throughput" data-section="s6" data-gated-sections="s6" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">The decoder corpus is written only once sections 1 and 2 have landed with labels bit-identical to the per-slice read and the per-slice wall banked, so the corpus is produced by the program that will be maintained rather than by the host ladder it replaces; the H200 reservation must admit the sharded job.</h4>
+    <p class="r-gate-required-evidence">This plan's landed record anchors for sections 1 and 2 with the bit-identity receipt on shot 22086 and the throughput curve against batch size.</p>
+    </div>
+</section>
+</main>
+</body>
+</html>

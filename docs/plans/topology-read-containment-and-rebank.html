@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="topology-read-containment-and-rebank">
+  <meta name="plan-title" content="Topology read containment and rebank — every read publishes the axis-enclosing boundary, and the bank describes main">
+  <meta name="plan-summary" content="Containment on the class-free read, the MAST bank regenerated on main, a centroid-free saddle detector, certificate drift attributed, joint qualification.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="29.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S19">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="topology,equilibrium,mast,solovev,h200">
+  <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <title>Topology read containment and rebank | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-19">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s0">Why this plan exists</h2>
+    <p>Null-identification-authority reached 0.99 and became a record, but its tail held the work that decides
+    whether a nova topology read can be trusted: the lead's rule that a plasma is diverted with its boundary
+    through the admitted X-point or limited with its boundary touching the wall, and nothing else, is now met
+    on the class-pinned limited read (MAST 27079 row 16 leans on the centre column at R 0.195 m after the
+    containment-aware anchor of 2026-09-19) but not on the class-free read; the twelve-row MAST bank the
+    sprint's gates compare against does not describe main; the production saddle census loses the single-null
+    X-point at 110 and 300 cells; and the sixteen-row certificate drifted from its committed pin with one row
+    producing a non-finite amplitude. Each is a section here with effort, depth, risk and attempts. The parent
+    plan's evidence record is the input; this plan's record is
+    <code>docs/evidence/archive/topology-read-containment-and-rebank-landed.html</code>. This plan blocks
+    gs-absolute-accuracy-gates, which the parent blocked.</p>
+
+    <h2 id="s-contract">Section contract</h2>
+    <table>
+      <thead><tr><th>Section</th><th>Effort (worker-hours)</th><th>Reasoning</th><th>Risk</th><th>Attempts so far</th></tr></thead>
+      <tbody>
+        <tr><td>§1 Class-free containment</td><td>4</td><td>deep</td><td>moderate</td><td>0</td></tr>
+        <tr><td>§2 Rebank on main</td><td>6</td><td>deep</td><td>elevated</td><td>2 (stalled on H200 headroom and a stale census)</td></tr>
+        <tr><td>§3 Saddle detector</td><td>8</td><td>deep</td><td>elevated</td><td>1 (design candidates recorded)</td></tr>
+        <tr><td>§4 Certificate drift and NaN</td><td>6</td><td>deep</td><td>elevated</td><td>1 (attribution started)</td></tr>
+        <tr><td>§5 Joint qualification</td><td>5</td><td>deep</td><td>elevated</td><td>0</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s1">§1 — Containment on the class-free read, the boundary drawn as its axis-enclosing component, one meaning per receipt key</h2>
+    <p><code>containment_required</code> in nova/equilibrium/topology.py is decided once from the provisional
+    pass and reused by both containment passes, so a class-free read (requested class None) on the persisted
+    row 16 fixture keeps the detached divertor contact and classifies diverted, self-consistent but untested.
+    Decide containment inside each pass and add a test that the class-free read on the persisted fixture
+    publishes the centre-column contact and classifies limited. The limited-touch panel draws the whole boundary
+    level set in boundary style; draw only the axis-enclosing component as the boundary and the detached
+    divertor lobes faint with a caption word. Give contour_min_wall_distance_m one meaning across the before and
+    after rows of the receipt.</p>
+    <p><strong>Done when.</strong> The four topology test files are green with the new class-free assertion,
+    the redrawn panel shows one boundary, and the receipt's before rows carry the same definition as its after
+    rows.</p>
+
+    <h2 id="s2">§2 — Regenerate the twelve-row MAST bank and the certificate on main</h2>
+    <p>Measured 2026-09-09: at main 4ab98002 the corroboration producer returns for 21978/35 a terminal residual
+    of 2.4506e-3 where the bank says 3.857e-16, and the pure and mixed rows appear crossed, so the banked
+    receipt does not describe main. That bank is the reference the banking, the corrected-read re-solve and the
+    bit-identity gate compare against. Regenerate the twelve rows and the sixteen-row Solovev certificate in one
+    H200 job at a named main revision under a declared configuration with the pre-settlement acceptance default
+    and the persistent compilation cache on; expected 21985/51 axes at R about 0.90 m and no unqualified-axis
+    row; bank per row the candidate table status, the attempted terminal flux on failure, and the O and X
+    candidate counts and margins.</p>
+    <p><strong>Done when.</strong> The regenerated bank names its revision and configuration, every row's
+    contour panel is drawn beside its predecessor, the deltas are recorded rather than asserted identical, and
+    the cut-cell rung A evidence (which changes the physics of every solve) is either landed before the bank or
+    the bank is marked pre-rung. The H200 reservation must have headroom; this section is gated on both.</p>
+
+    <h2 id="s3">§3 — A saddle detector that does not need a centroid within a quarter pitch of the saddle</h2>
+    <p>The production census in the forward operator's compatibility census loses the single-null X-point at
+    110 and 300 cells while the solved flux matches the analytic field to 1e-17, and finds it at 500 cells only
+    because one centroid happens to sit 0.23 pitch from the saddle: a six-neighbour ring centred more than about
+    a quarter pitch from a saddle sees two sign changes, so the detector's resolution is a fraction of the cell
+    pitch. Candidates to discriminate on the three persisted rows with the 500-cell admission as the control:
+    test every ring's local quadratic for a saddle-type Hessian with its stationary point inside the ring, not
+    only rings with four sign changes; or a vertex-centred census on the cells meeting at each vertex.</p>
+    <p><strong>Done when.</strong> The single-null X-point is admitted at 110, 300 and 500 cells within one
+    pitch of the analytic saddle with no tuning per resolution, the traced program stays fixed-shape, and the
+    limited rows admit no saddle.</p>
+
+    <h2 id="s4">§4 — Attribute the exact-oracle certificate drift and repair the diverted 300-cell NaN</h2>
+    <p>The sixteen-row Solovev certificate is the sprint's exact-solution pin, and its regeneration at head
+    shows every residual block differing from the last committed certificate 8fb5a767, with the diverted 300
+    row raising a NaN source amplitude so the finer rows never ran. Attribute first, on CPU where the reduced
+    rows run in minutes: solve the diverted 110 and 300 rows through the certificate driver at four revisions
+    in fresh-process lanes and tabulate per revision the terminal residual, step count and whether the NaN
+    appears; name the commit that moved each row. A drift that is only the adaptive refresh reaching the same
+    fixed point within tolerance re-bases the bit-identity expectation with the new floor stated; a NaN is a
+    defect and is repaired.</p>
+    <p><strong>Done when.</strong> Each row's drift has a named commit, the NaN's source is fixed with a test
+    on the 300-cell diverted row, and the certificate at head is re-committed with the new floor stated.</p>
+
+    <h2 id="s5">§5 — The joint qualification rule</h2>
+    <p>A row is qualified when the residual, the admitted read and a resolution-scaled position bound all
+    hold; today they are judged separately and a converged residual with an unadmitted read still reads as
+    success in some receipts. Implement the joint rule, rank or widen the saddle table on the seven bank rows
+    whose X candidates exceed 30, and apply it to the regenerated bank of §2 and to the certificate.</p>
+    <p><strong>Done when.</strong> Every bank and certificate receipt carries the joint verdict per row, the
+    two pre-existing tests/test_forward_operator_axes.py failures are resolved or named as device-qualified, and
+    the 0.13025 mm X-coordinate identity in the slow sweep is explained.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="class-rule" data-choice="binary" data-by="lead" data-when="2026-09-18">
+    <p class="r-dec-q">What is a valid topology read?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="binary">diverted with the boundary through the admitted X-point, or limited with the boundary touching the wall; nothing else</button>
+      <button class="r-opt" data-value="contained">a closed contour enclosing the axis inside the vessel</button>
+      </p>
+    <p class="r-dec-rat">Lead 2026-09-18 on the MAST 27079 row 16 panel: a floating closed surface is fiction. Every read, receipt and panel is held to the binary rule.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-trcr-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship topology-read-containment-and-rebank §1" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land §1 on the persisted row 16 fixture, then §3 and §4 on CPU while the H200 reservation is held</h4>
+    <div class="r-fu-body"><p>§1 needs no solve. §3 and §4 run on all_debug. §2 and §5 wait for H200 headroom and, for §2, the cut-cell rung A evidence.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship topology-read-containment-and-rebank §1</pre>
+    </article>
+</section>
+  <section data-reckon="gates" id="gates" class="r-gates">
+<h2><span class="sec">§</span> Evidence gates</h2>
+<div class="r-gate" data-id="g-trcr-rebank-after-rung-a" data-section="s2" data-gated-sections="s2,s5" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">The twelve-row MAST bank and the sixteen-row certificate are regenerated only after cut-cell-current-attribution section 6 (rung A, the signed-flux clip of the profile support) has landed, because that rung changes the physics of every forward solve and a bank regenerated before it would be stale on landing; the H200 reservation must also admit a nova job (a two-core probe with srun --test-only must not answer configuration not available).</h4>
+    <p class="r-gate-required-evidence">The cut-cell-current-attribution landed record anchor for section 6 with the amplitude-within-one-percent gate on the 110-cell rows, and a scheduler probe showing a nova job can start on gpu_0003_grpA.</p>
+    </div>
+</section>
+</main>
+</body>
+</html>

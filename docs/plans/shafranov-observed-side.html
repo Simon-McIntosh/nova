@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="shafranov-observed-side">
+  <meta name="plan-title"     content="Shafranov observed side — the exact contour functional on the exact Biot field, in production">
+  <meta name="plan-summary"   content="Field responses built at operator build, the grid route at the right order, the constraint observed side on the contour integral, the toroidal term ruled.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="17.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint"    content="S19">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="equilibrium,mast,active-set,grad-shafranov,efit">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <title>Shafranov observed side | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s0">Why this plan exists</h2>
+    <p>The lead ruled on 2026-09-18 that the magnetics-implied β<sub>p</sub> + l<sub>i</sub>/2 is an exact
+    Shafranov contour integral, never the ln(8R/a) formula, that the poloidal field on the contour is the exact
+    Biot field imaged on the grid and never a flux gradient, and that no interaction is recalculated per
+    evaluation. The constraint-augmented-newton-krylov plan landed the integrals (82/100), the field response
+    machinery (83/100), the discriminator and the flux-function fit, and reached 0.92 with the production half
+    still open: nothing in the tree constructs the field blocks at operator build, the analytic grid route
+    converges at first order, the constraint's observed side still calls the formula, and the toroidal-field
+    volume term needs a ruling. This plan carries those as sections. Its record is
+    <code>docs/evidence/archive/shafranov-observed-side-landed.html</code>.</p>
+
+    <h2 id="s-contract">Section contract</h2>
+    <table>
+      <thead><tr><th>Section</th><th>Effort (worker-hours)</th><th>Reasoning</th><th>Risk</th><th>Attempts so far</th></tr></thead>
+      <tbody>
+        <tr><td>§1 Field responses in production</td><td>5</td><td>deep</td><td>moderate</td><td>1 (machinery landed, builder missing)</td></tr>
+        <tr><td>§2 Grid route order</td><td>4</td><td>deep</td><td>moderate</td><td>0</td></tr>
+        <tr><td>§3 Constraint observed side</td><td>6</td><td>deep</td><td>elevated</td><td>0</td></tr>
+        <tr><td>§4 The toroidal term</td><td>2</td><td>standard</td><td>moderate</td><td>0 (awaits the lead)</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s1">§1 — Build the field responses at operator build and measure the reuse across two solves</h2>
+    <p>The radial and vertical field blocks are fixed-shape pytree leaves of PrescribedCurrentField whose digest
+    folds into the geometry identity, and poloidal_field images the current vector and interpolates to the
+    contour through the shared-node stencil with no kernel call per evaluation; the review of 2026-09-19
+    verified that by reading the code path. But no production code constructs a PrescribedCurrentField carrying
+    them (every construction is a test or an uncommitted timing driver), the reuse test counts the fixture's own
+    nine constructions rather than two solves, and the receipt's 0 kernel calls per evaluation is a literal in
+    the driver. Construct the blocks inside the operator build from the machine's cached radial and vertical
+    field tuples, replace the reuse test with one counting kernel evaluations across two solves on one operator,
+    and commit the kernel counter so 76 at build and 0 per evaluation are measured in the tree.</p>
+    <p><strong>Done when.</strong> A production solve on a MAST bank row carries the field blocks under the
+    same cache path as the flux response, the two-solve test asserts zero kernel evaluations on the second, and
+    the receipt numbers come from the committed counter.</p>
+
+    <h2 id="s2">§2 — The grid route converges at order 1.1 where a fixed-weight cubic stencil should give two</h2>
+    <p>Measured by the review at 21, 31 and 41 nodes per axis with 501, 1001 and 2001 contour points: relative
+    errors 0.747, 0.490 and 0.358, fitted order 1.10, and the test asserts order above 0.5 without printing the
+    order. Find whether the contour interpolation, the field imaging or the contour quadrature is first order,
+    fix it or state why the discretisation predicts one, and make the test print and persist the fitted order.</p>
+    <p><strong>Done when.</strong> The fitted order on the analytic route is stated in the receipt with its
+    mechanism, the test asserts the order the discretisation predicts, and the certificate figure shows the
+    ladder.</p>
+
+    <h2 id="s3">§3 — The constraint's observed side is the contour integral and the six-row receipt is regenerated</h2>
+    <p>ExternalShafranovConstraint.observed still embeds the large-aspect-ratio identity. Wire it to
+    beta_p_plus_half_internal_inductance on the solved state's boundary with the grid-imaged field from §1, move
+    the formula helpers out of the constraint module to diagnostics, make the receipt driver's observed column the
+    integral, and regenerate the six-row MAST receipt and its panels. The commensurability finding stands as the
+    reference for the panel: EFIT's stored scalars are reproduced by a denominator radius near the boundary
+    minor radius, so the panel compares on nova's convention and says so.</p>
+    <p><strong>Done when.</strong> The constraint row carries no formula, the six-row receipt states the
+    observed column as the contour integral with the toroidal term's provenance per §4, and the discriminator
+    strip is regenerated on it with both null sets, wall and shared levels.</p>
+
+    <h2 id="s4">§4 — Where the toroidal-field volume term comes from</h2>
+    <p>The assembled functional W = -2 μ<sub>0</sub> S<sub>v</sub> - 6 μ<sub>0</sub> P - Z carries the volume
+    integrals P = ∫ p dV and Z = ∫ B<sub>φ</sub><sup>2</sup> dV, so β<sub>p</sub> + l<sub>i</sub>/2 is not a
+    functional of the boundary field alone; the integral node's derivation shows a single virial field cannot
+    remove both. Until the lead rules, Z is the solved state's own integral and every receipt says so. The
+    alternative is a diamagnetic-loop measurement where the machine carries one, which makes the observed side
+    fully external at the cost of a new input.</p>
+    <p><strong>Done when.</strong> The decision below is locked, the receipt provenance field names the source
+    of Z, and, if the diamagnetic route is chosen, the MAST diamagnetic signal is read through the store with its
+    calibration stated.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="toroidal-volume-term" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Where does the toroidal-field volume term Z of the Shafranov functional come from?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="solved-state">the solved state's own integral of B_phi squared</button>
+          <button class="r-opt" data-value="diamagnetic-loop">a diamagnetic-loop measurement where the machine carries one, the solved state elsewhere</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-sos-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship shafranov-observed-side §1">
+        <h4 class="r-fu-title">Land §1 and §2 together on CPU, then §3 once §4 is locked</h4>
+        <div class="r-fu-body"><p>§1 and §2 share the analytic route and its gate. §3 waits on the decision in §4 so the receipt is regenerated once.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship shafranov-observed-side §1</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="forward-solver-route-integrity">
+  <meta name="plan-title"     content="Forward solver route integrity — every accelerated route reaches the shared fixed point, in a program that fits">
+  <meta name="plan-summary"   content="Restore the Newton-Krylov route, bound the solve executable, carry every evaluation through one traced state machine, and make the pre-warm cover the lane.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="29.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint"    content="S19">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="equilibrium,fixed-point,jax,convergence,h200">
+  <meta name="plan-informs"   content="">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <title>Forward solver route integrity | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s0">Why this plan exists</h2>
+    <p>The millisecond-converged-solve plan reached 0.88 with its accounting levers landed, and what remains
+    on it is not accounting: the forward solver itself regressed when the mesh arrays became traced
+    (dd7d8286, 2026-09-16), the compiled solve program is two orders of magnitude larger than a converged
+    forward solve should be, and the one change that would shrink it, a single traced evaluator, moved
+    certificate terminal states when it was tried as a frozen-topology interim. These are the difficult
+    remainder of the millisecond target and they were sitting as followups on a plan that reads as nearly
+    done. This plan carries them as sections with their own effort, depth, risk and attempt count so the
+    sprint graph can see them. Evidence records of the parent plan are the inputs; the record of this plan
+    is <code>docs/evidence/archive/forward-solver-route-integrity-landed.html</code>.</p>
+
+    <h2 id="s-contract">Section contract</h2>
+    <p>Every section below carries the four fields the lead asked every unit of difficult work to state.
+    Attempts counts every dispatched node that has taken the section, whether it landed or not; a third
+    attempt is the signal to route the node to a stronger capability class.</p>
+    <table>
+      <thead><tr><th>Section</th><th>Effort (worker-hours)</th><th>Reasoning</th><th>Risk</th><th>Attempts so far</th></tr></thead>
+      <tbody>
+        <tr><td>§1 Newton-Krylov route</td><td>6</td><td>deep</td><td>elevated</td><td>2 (local lane partial, codex live)</td></tr>
+        <tr><td>§2 Program size budget</td><td>8</td><td>deep</td><td>elevated</td><td>0</td></tr>
+        <tr><td>§3 Single traced evaluator</td><td>12</td><td>deep</td><td>critical</td><td>1 (frozen-topology interim, withdrawn)</td></tr>
+        <tr><td>§4 Lane cache coverage</td><td>3</td><td>standard</td><td>moderate</td><td>0</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s1">§1 — The Newton-Krylov accelerator route terminates at residual 1.29 and the moment-map ladder no longer orders</h2>
+    <p>Two forward-solve regressions dated to the mesh-array tracing commit dd7d8286, both reproducing on CPU.
+    First, <code>profile.solve(seed, route=newton_krylov, newton_steps=8, warmup=40)</code> terminates at a
+    fixed-point residual of 1.2947 on the test machine while the picard route converges below 1e-6, so the
+    accelerated route lost the equilibrium the shared map holds. Second, the finite-difference ladder in
+    <code>test_the_moment_map_is_differentiable_against_finite_differences</code> expects the coarsest step's
+    relative error above 1e-2 and measures 4.46e-4, so either the step scale no longer follows the traced mesh
+    or the analytic Jacobian changed. A local-lane node repaired the two failures that surrounded these (the
+    frozen-partition hook arity and a traced-program cache leak, merged at c0c28f30) and reproduced these two;
+    a codex node is on them now.</p>
+    <p><strong>Method.</strong> Instrument the newton_krylov route's telemetry per step on the test machine
+    (full shapes, never an array converted to a scalar), compare its map arguments against the picard route's
+    at the same state, and find which traced argument or frozen-partition read the Newton-Krylov path consumes
+    differently since the mesh arrays became traced; the commit touched fixed_point.py, forward.py,
+    forward_operator.py and reduced_newton.py. For the ladder, measure the three steps against the analytic
+    Jacobian and decide from the measurement whether the step scale or the Jacobian moved. Never widen a
+    tolerance.</p>
+    <p><strong>Done when.</strong> tests/test_equilibrium_forward_solve.py is green in split all_debug jobs on
+    CPU (the whole file exceeds the 59-minute limit), the H200 lane result is recorded when the reservation has
+    headroom, and the evidence record carries a residual-against-step figure for both routes before and after.</p>
+
+    <h2 id="s2">§2 — The solve executable is 900 MB: unroll depth budget and scan the trips</h2>
+    <p>Measured 2026-09-14: the persistent compilation cache holds 1907 entries totalling 7.6 GB, the largest
+    solve executable is 903 MB on disk and two certificate solve programs are 419 and 392 MB; retrieving three
+    entries took 84.5 s; the 1000-cell exact-clip program's HLO exceeds the 2 GiB protobuf limit and cannot be
+    serialised. A converged forward solve should compile to megabytes. The program is unrolled where it should
+    loop: Newton steps and trips as Python loops rather than scans, fixed-capacity candidate tables evaluated in
+    full at every stage, the read inlined per trip, the polygon fan on every cell. This bounds the 1 ms target
+    directly because launch latency scales with kernel count.</p>
+    <p><strong>Done when.</strong> An executable-size gate sits beside the memory gate (solve executable under
+    50 MB at 1000 cells, HLO op count reported); trips and Newton steps run as lax.scan or while_loop with fixed
+    telemetry slots; the read is evaluated once per trip; a JAX profiler trace of one 1000-cell whole-cell solve
+    on the H200 tables kernel count, launch latency share and compute share; terminal states on the committed
+    300-cell rows are bit-identical.</p>
+
+    <h2 id="s3">§3 — Carry every solve evaluation through one traced operator state machine</h2>
+    <p>The frozen-topology interim reduced the 300- and 1000-cell optimised solves from 654,832 and 662,331
+    instructions to 203,078 and 204,531 and cut the cold 300-cell compile from 370 s to 60 s, but it could not
+    land: matched outer-jitted H200 comparisons changed all four required certificate terminal states, the
+    single-null 500 row moving by 2.2e-3 with a non-finite terminal residual. Freezing the topology is not a
+    semantics-preserving substitute for reusing the evaluator. The section implements one lax state machine
+    whose sole operator body serves residual, merit, acceptance, recovery, reconciliation and Jacobian-vector
+    requests while each request retains the exact live read semantics; the boundary proof is that three
+    nested-JIT calls optimise to three inlined bodies.</p>
+    <p><strong>Done when.</strong> The four certificate terminal states are bit-identical to the committed rows
+    under the state machine, the instruction count is at or below the interim's, and the compile time is
+    banked beside the census. This is the plan's critical-risk section: it changes the semantics surface of
+    every solve, and its gate is the exact certificate, never a tolerance.</p>
+
+    <h2 id="s4">§4 — The pre-warm pin covers none of the lane's programs</h2>
+    <p>Measured 2026-09-18: the pre-warm covers 3292 keys the lane never requests and none of the 1285 keys it
+    does, so the lane's 1341 hits all came from that target's own earlier run on the same directory; a lane
+    that has never run there compiles everything it needs. Add the lane target's program set as pre-warm rows,
+    make the guard's served_entries count program-key cache entries rather than a recursive file count that
+    includes the XLA autotune subtree, and make the guard marker line-anchored.</p>
+    <p><strong>Done when.</strong> A lane run against a directory holding only the pin's keys reports hits for
+    the lane's own programs with zero compile seconds, served_entries equals the count of program-key entries
+    on disk, and an anchored grep finds the marker on a passing run.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="state-machine-acceptance" data-choice="bit-identical-certificate" data-by="lead" data-when="2026-09-19">
+        <p class="r-dec-q">What accepts the single traced evaluator?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="bit-identical-certificate">bit-identical certificate terminal states on the four required rows</button>
+          <button class="r-opt" data-value="tolerance">terminal states within a stated tolerance</button>
+        </p>
+        <p class="r-dec-rat">The interim that moved the single-null 500 row by 2.2e-3 and produced a non-finite residual is the measured cost of a tolerance; the certificate is the exact pin and stays the gate.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-fsri-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship forward-solver-route-integrity §1">
+        <h4 class="r-fu-title">Land §1 through the live codex node, then §4, §2 and §3 in that order</h4>
+        <div class="r-fu-body"><p>§1 is in flight on the codex lane (run r-20260919T090428129698, dispatched from the parent plan; its landing is recorded here). §4 is small and unblocks honest lane timing for §2 and §3. §3 is the critical-risk section and takes the strongest capability class available.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §1</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

@@ -22,7 +22,7 @@ EVIDENCE = ROOT / "docs/evidence/archive/millisecond-converged-solve-landed.html
 OPERAND_CACHE = ROOT / "logs/exact-operand-cache.npz"
 
 BANK_CACHE_BYTES = 20_044_389_103
-CENSUS_CACHE_BYTES = 20_038_219_057
+CENSUS_CACHE_BYTES = 20_093_357_205
 WORD = {1: "one", 2: "two", 5: "five", 12: "twelve", 16: "sixteen"}
 
 
@@ -48,9 +48,9 @@ def test_the_two_captures_are_distinct_and_the_anchor_states_each():
     assert int(census["total_bytes"]) == CENSUS_CACHE_BYTES
     assert bank["gib"] != census["total_gib"]
     evidence = EVIDENCE.read_text(encoding="utf-8")
-    assert "3,958 entries at 18.662 GiB" in evidence
+    assert "3,989 entries at 18.713 GiB" in evidence
     assert "reads 18.668 GiB for its byte count" in evidence
-    assert census["total_entries"] == 3_958
+    assert census["total_entries"] == 3_989
     assert census["runtime_keys"] == 12
 
 
@@ -121,15 +121,14 @@ def test_the_bucket_bar_values_match_the_census_receipt_and_the_anchor():
     assert census["combined"]["identities"] == 16
 
 
-def test_the_anchor_carries_the_census_section_figure_and_shim_disclosure():
+def test_the_anchor_carries_the_census_section_figure_and_no_shim_entry():
     census = _load(CENSUS)
     evidence = EVIDENCE.read_text(encoding="utf-8")
     assert 'id="program-shape-census"' in evidence
     assert "program-shape-buckets.png" in evidence
     assert "SVG twin" in evidence
     assert "program-shape-census.json" in evidence
-    assert census["framework_compat_shims"], (
-        "the census must disclose its compatibility shim"
+    assert "framework_compat_shims" not in census, (
+        "the census must carry no compatibility shim"
     )
-    assert "clip_quadrature._UNIT_NODE" in census["framework_compat_shims"][0]
     assert census["certificate_source"].startswith("benchmarks/solovev_certificate")

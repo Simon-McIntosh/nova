@@ -1044,7 +1044,10 @@ def _traced_clip(
     packed_leaving = _pack_traced_values(
         crossing_edge & start_inside, unique_crossing, width
     )
-    saddle = (crossing_count == 4) & jnp.asarray(curve_evaluator is None)
+    supplied_saddle = saddle_vertex is not None
+    saddle = (crossing_count == 4) & jnp.asarray(
+        curve_evaluator is None or supplied_saddle
+    )
     first_line = crossing[:, 2] - crossing[:, 0]
     second_line = crossing[:, 3] - crossing[:, 1]
     denominator = _cross_2d(first_line, second_line)
@@ -1270,6 +1273,71 @@ def _traced_clip(
         branch_counts.append(counts)
     branch_support = jnp.stack(branch_vertices, axis=1)
     branch_vertex_count = jnp.stack(branch_counts, axis=1)
+
+    if curve_evaluator is not None:
+        expanded_branches = []
+        expanded_branch_counts = []
+        branch_overflow = jnp.zeros(cell_count, dtype=bool)
+        half_arc_slot = jnp.arange(0, _SPLINE_BOUNDARY_SEGMENTS + 1, 2)
+        second_half_slot = half_arc_slot[1:-1]
+        middle_slot = jnp.arange(2, chord_capacity)
+
+        for branch in range(2):
+            branch_polygon = branch_support[:, branch]
+            branch_count = branch_vertex_count[:, branch]
+            last_slot = jnp.maximum(branch_count - 1, 0)
+            previous_slot = jnp.maximum(branch_count - 2, 0)
+            first_root = branch_polygon[:, 1]
+            last_root = jnp.take_along_axis(
+                branch_polygon, last_slot[:, None, None], axis=1
+            )[:, 0]
+            first_inside = branch_polygon[:, 2]
+            last_inside = jnp.take_along_axis(
+                branch_polygon, previous_slot[:, None, None], axis=1
+            )[:, 0]
+            first_half = tracer(
+                saddle_point,
+                first_root,
+                curve_evaluator,
+                first_inside,
+            )[:, half_arc_slot]
+            second_half = tracer(
+                last_root,
+                saddle_point,
+                curve_evaluator,
+                last_inside,
+            )[:, second_half_slot]
+            middle = branch_polygon[:, middle_slot]
+            expanded_candidate = jnp.concatenate(
+                (first_half, middle, second_half), axis=1
+            )
+            expanded_valid = jnp.concatenate(
+                (
+                    jnp.broadcast_to(
+                        saddle[:, None], (cell_count, first_half.shape[1])
+                    ),
+                    saddle[:, None] & (middle_slot[None, :] < branch_count[:, None]),
+                    jnp.broadcast_to(
+                        saddle[:, None], (cell_count, second_half.shape[1])
+                    ),
+                ),
+                axis=1,
+            )
+            expanded_count = jnp.sum(expanded_valid, axis=1)
+            branch_overflow = branch_overflow | (expanded_count > support_capacity)
+            expanded_support, expanded_count = _pack_traced_vertices(
+                expanded_candidate, expanded_valid, support_capacity
+            )
+            expanded_branches.append(
+                jnp.where(saddle[:, None, None], expanded_support, branch_polygon)
+            )
+            expanded_branch_counts.append(
+                jnp.where(saddle, expanded_count, branch_count)
+            )
+
+        branch_support = jnp.stack(expanded_branches, axis=1)
+        branch_vertex_count = jnp.stack(expanded_branch_counts, axis=1)
+        overflow = overflow | branch_overflow
 
     full_area, _full_first, _full_second = _traced_polygon_moments(
         cell_start_point, count, centre
@@ -1666,6 +1734,169 @@ def _traced_saddle_wedges_from_edge_roots(
     )
 
 
+def _sampled_spline_edge_roots(
+    node_coordinates,
+    cell_nodes,
+    cell_vertex_count,
+    curve_evaluator,
+    participating_cell,
+):
+    """Locate at most two ordered spline roots on every atomic-cell edge."""
+    coordinates = jnp.asarray(node_coordinates)
+    nodes = jnp.asarray(cell_nodes)
+    count = jnp.asarray(cell_vertex_count)
+    cell_count, width = nodes.shape
+    edge_slot = jnp.arange(width)
+    valid_edge = edge_slot[None, :] < count[:, None]
+    following_slot = jnp.where(
+        edge_slot[None, :] + 1 < count[:, None], edge_slot[None, :] + 1, 0
+    )
+    following_nodes = jnp.take_along_axis(nodes, following_slot, axis=1)
+    start = coordinates[nodes]
+    end = coordinates[following_nodes]
+    parameter = jnp.linspace(0.0, 1.0, 257, dtype=coordinates.dtype)
+    sampled_point = (
+        start[:, :, None, :]
+        + parameter[None, None, :, None] * (end - start)[:, :, None, :]
+    )
+    sampled_value = curve_evaluator(
+        sampled_point.reshape(cell_count, width * parameter.size, 2)
+    ).reshape(cell_count, width, parameter.size)
+    sign_change = (sampled_value[..., :-1] > 0.0) != (sampled_value[..., 1:] > 0.0)
+    sign_change = sign_change & valid_edge[..., None]
+    root_count = jnp.sum(sign_change, axis=2)
+    supported = jnp.all(root_count <= 2, axis=1)
+    if participating_cell is not None:
+        participation = jnp.asarray(participating_cell, dtype=bool)
+        if participation.shape != (cell_count,):
+            raise ValueError("participating_cell must carry one flag per cell")
+        supported = supported & participation
+
+    rank = jnp.cumsum(sign_change, axis=2) - 1
+    bracket_index = []
+    bracket_valid = []
+    for root_slot in range(2):
+        selected = sign_change & (rank == root_slot)
+        bracket_index.append(jnp.argmax(selected, axis=2))
+        bracket_valid.append(jnp.any(selected, axis=2))
+    bracket_index = jnp.stack(bracket_index, axis=2)
+    bracket_valid = jnp.stack(bracket_valid, axis=2) & supported[:, None, None]
+    lower_parameter = parameter[bracket_index]
+    upper_parameter = parameter[bracket_index + 1]
+    lower_point = (
+        start[..., None, :] + lower_parameter[..., None] * (end - start)[..., None, :]
+    )
+    upper_point = (
+        start[..., None, :] + upper_parameter[..., None] * (end - start)[..., None, :]
+    )
+    lower_value = jnp.take_along_axis(sampled_value, bracket_index, axis=2)
+    upper_value = jnp.take_along_axis(sampled_value, bracket_index + 1, axis=2)
+    flat_shape = (cell_count, 2 * width)
+    local_fraction = _traced_level_segment_root(
+        lower_point.reshape(*flat_shape, 2),
+        upper_point.reshape(*flat_shape, 2),
+        lower_value.reshape(flat_shape),
+        upper_value.reshape(flat_shape),
+        curve_evaluator,
+    ).reshape(cell_count, width, 2)
+    fraction = lower_parameter + local_fraction * (upper_parameter - lower_parameter)
+    fraction = jnp.where(bracket_valid, fraction, 0.0)
+    packed_count = jnp.where(supported[:, None], jnp.minimum(root_count, 2), 0).astype(
+        jnp.int32
+    )
+    return fraction, packed_count, bracket_valid & (upper_value > 0.0)
+
+
+def _expand_spline_saddle_wedges(
+    wedges,
+    curve_evaluator,
+    arc_tracer,
+    straight_capacity,
+):
+    """Replace both saddle-to-root chords by one fixed sampled chain per wedge."""
+    vertices = jnp.asarray(wedges.support_vertices)
+    count = jnp.asarray(wedges.vertex_count)
+    cell_count = vertices.shape[0]
+    capacity = traced_polygon_vertex_capacity(straight_capacity)
+    half_arc_slot = jnp.arange(0, _SPLINE_BOUNDARY_SEGMENTS + 1, 2)
+    second_half_slot = half_arc_slot[1:-1]
+    middle_slot = jnp.arange(2, straight_capacity)
+    expanded_vertices = []
+    expanded_counts = []
+    tracer = _traced_level_arc if arc_tracer is None else arc_tracer
+
+    for wedge in range(4):
+        polygon = vertices[:, wedge]
+        polygon_count = count[:, wedge]
+        last_slot = jnp.maximum(polygon_count - 1, 0)
+        previous_slot = jnp.maximum(polygon_count - 2, 0)
+        first_root = polygon[:, 1]
+        last_root = jnp.take_along_axis(polygon, last_slot[:, None, None], axis=1)[:, 0]
+        first_inside = polygon[:, 2]
+        last_inside = jnp.take_along_axis(
+            polygon, previous_slot[:, None, None], axis=1
+        )[:, 0]
+        first_half = tracer(
+            wedges.saddle_vertex,
+            first_root,
+            curve_evaluator,
+            first_inside,
+        )[:, half_arc_slot]
+        second_half = tracer(
+            last_root,
+            wedges.saddle_vertex,
+            curve_evaluator,
+            last_inside,
+        )[:, second_half_slot]
+        middle = polygon[:, middle_slot]
+        candidate = jnp.concatenate((first_half, middle, second_half), axis=1)
+        valid = jnp.concatenate(
+            (
+                jnp.broadcast_to(
+                    wedges.saddle[:, None], (cell_count, first_half.shape[1])
+                ),
+                wedges.saddle[:, None]
+                & (middle_slot[None, :] < polygon_count[:, None]),
+                jnp.broadcast_to(
+                    wedges.saddle[:, None], (cell_count, second_half.shape[1])
+                ),
+            ),
+            axis=1,
+        )
+        expanded, expanded_count = _pack_traced_vertices(candidate, valid, capacity)
+        expanded_vertices.append(expanded)
+        expanded_counts.append(expanded_count)
+
+    vertices = jnp.stack(expanded_vertices, axis=1)
+    count = jnp.stack(expanded_counts, axis=1)
+    flat_vertices = vertices.reshape(4 * cell_count, capacity, 2)
+    flat_count = count.reshape(4 * cell_count)
+    flat_centre = jnp.broadcast_to(
+        wedges.centroids[:, None, :], (cell_count, 4, 2)
+    ).reshape(4 * cell_count, 2)
+    area, first, second = _traced_polygon_moments(
+        flat_vertices, flat_count, flat_centre
+    )
+    area = area.reshape(cell_count, 4)
+    first = first.reshape(cell_count, 4, 2)
+    second = second.reshape(cell_count, 4, 2, 2)
+    selected = wedges.saddle[:, None]
+    live = jnp.arange(capacity)[None, None, :] < count[..., None]
+    return SaddleCellWedges(
+        support_vertices=jnp.where(
+            (selected[..., None] & live)[..., None], vertices, 0.0
+        ),
+        vertex_count=jnp.where(selected, count, 0),
+        centroids=wedges.centroids,
+        area=jnp.where(selected, area, 0.0),
+        full_area=wedges.full_area,
+        first_area_moment=jnp.where(selected[..., None], first, 0.0),
+        second_area_moment=jnp.where(selected[..., None, None], second, 0.0),
+        saddle=wedges.saddle,
+        saddle_vertex=wedges.saddle_vertex,
+    )
+
+
 @dataclass(frozen=True)
 class ClippedSupports:
     """Fixed-shape supports and exact polygon moments for one flux map."""
@@ -1855,6 +2086,8 @@ class AtomicCellMesh:
         saddle_vertex,
         core_reference,
         participating_cell=None,
+        curve_evaluator=None,
+        arc_tracer: Callable | None = None,
         edge_root_fraction=None,
         edge_root_count=None,
         edge_root_positive_after=None,
@@ -1878,6 +2111,10 @@ class AtomicCellMesh:
                 raise ValueError(
                     "explicit saddle roots do not accept a separate participation mask"
                 )
+            if curve_evaluator is not None or arc_tracer is not None:
+                raise ValueError(
+                    "explicit saddle roots do not accept a separate spline tracer"
+                )
             return _traced_saddle_wedges_from_edge_roots(
                 self.node_coordinates,
                 self.cell_nodes,
@@ -1890,6 +2127,33 @@ class AtomicCellMesh:
                 edge_root_fraction,
                 edge_root_count,
                 edge_root_positive_after,
+            )
+        if curve_evaluator is not None:
+            root_fraction, root_count, positive_after = _sampled_spline_edge_roots(
+                self.node_coordinates,
+                self.cell_nodes,
+                self.cell_vertex_count,
+                curve_evaluator,
+                participating_cell,
+            )
+            straight = _traced_saddle_wedges_from_edge_roots(
+                self.node_coordinates,
+                self.cell_nodes,
+                self.cell_vertex_count,
+                self.centroids,
+                self.support_capacity,
+                signed_flux,
+                saddle_vertex,
+                core_reference,
+                root_fraction,
+                root_count,
+                positive_after,
+            )
+            return _expand_spline_saddle_wedges(
+                straight,
+                curve_evaluator,
+                arc_tracer,
+                self.support_capacity,
             )
         positive = self.traced_clip(
             signed_flux,

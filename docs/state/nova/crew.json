@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T11:04:25",
+  "updated": "2026-09-19T11:18:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -202381,6 +202381,236 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T075817963210-nia-containment-aware-anchor",
+        "plan": "null-identification-authority",
+        "section": "\u00a74",
+        "node": "nia-containment-aware-anchor",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1608,
+                "cached_input_tokens": 504551,
+                "input_tokens": 506161,
+                "output_tokens": 2478,
+                "reasoning_output_tokens": 139,
+                "total_tokens": 508639,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "followup f-nia-containment-aware-anchor on the plan: your predecessor node nia-limited-boundary-touches-wall-2 (your own session) unified the two flux routes, and its review (stored at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260918T201949355073-nia-limited-boundary-touches-wall-2.json, read it first) showed from the persisted fixtures docs/figures/null-identification-authority/limited-touch/row-16-terminal-state.npz and row-16-before.npz that at the published level 0.2585036 Wb the level set has three components inside the vessel, the contact (R 0.599, Z 1.728) sits on a detached three-node lobe in the upper divertor 0.893 m from the axis-enclosing contour, and that contour's own closest approach to the wall is 0.0128 m at R 0.208, Z -0.048 on the centre column, so the plasma still floats and the true limiter contact is inboard; replace the argmax over polarity times wall flux in _wall_anchor_selection (nova/equilibrium/topology.py) with a containment-aware selection that takes, among wall nodes, the extreme of polarity times flux over those whose level's axis-enclosing component passes through the node (the same saddle-aware flood or connected-component labelling the read already uses for the X-point, applied at each candidate wall level, or a cheaper monotone equivalent you justify in the docstring), so the published contact is on the plasma boundary; keep the traced program fixed-shape; fix tests/test_limited_boundary_touches_wall.py so for every limited state it asserts with an independent spline evaluation that the published contact lies on the axis-enclosing component of the boundary level set within one pitch and that this component's closest approach to the wall is at the contact (drop the tautological equality the review named at line 124 and the distance assertion at 134 that measures a different object), fix the receipt so contour_min_wall_distance_m is measured to the contact, and rewrite the three tests still carrying the wall-zone semantics (tests/test_jax_topology.py traversed-reference psi_norm, tests/test_topology_limiter_contact.py 1e-6 contact flux and second-order refinement) to the spline-authored contact rather than deleting them; gate on the two persisted fixtures, the twelve-arm bank and the four Solovev limited rows in one all_debug job with JAX_PLATFORMS=cpu through /home/ITER/mcintos/Code/nova/.venv/bin/python directly (never uv on a compute node), TMPDIR=/tmp in the submit environment and the payload, scripts inside the worktree, expected all green in the three topology test files; redraw docs/figures/null-identification-authority/limited-touch/row-16-before-after.png and .svg with the contact on the plasma boundary and both null sets, the wall and shared levels; the plan landing comment and the evidence anchor; commit at the first passing test and before any long wait; nothing to betelgeuse; call configure_dtypes before any array; every uv command carries --no-sync and nothing runs uv sync; py_compile with the project interpreter before each commit; if the fence ends first, commit what holds and name the rest under follow_ons; a wait carries wait_condition, wait_probe as a JSON list, wait_terminal and resume_brief; status words complete, waiting or blocked only",
+          "estimated_hours": null,
+          "goal": "select the limited wall anchor by containment so the published contact lies on the axis-enclosing boundary contour",
+          "id": "nia-containment-aware-anchor",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-19T07:58:18Z",
+            "read_at": "2026-09-19T07:58:20Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 95.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T075817963210-nia-containment-aware-anchor/manifest.md",
+          "plan": "null-identification-authority",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/topology.py",
+            "nova/equilibrium/stencil_nulls.py",
+            "tests/test_limited_boundary_touches_wall.py",
+            "tests/test_jax_topology.py",
+            "tests/test_topology_limiter_contact.py",
+            "tests/test_limiter_topology_receipts.py",
+            "docs/figures/null-identification-authority/limited-touch",
+            "docs/plans/null-identification-authority.html",
+            "docs/evidence/archive/null-identification-authority-landed.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/containment-anchor"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19x-nia-touch-x",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-19T07:58:33Z",
+        "completed_at": "2026-09-19T08:52:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3256,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3256,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "32c81a5b18fccafa93113627b68418539c42cfd3",
+        "commits": [
+          "a491e6de65e2c97919aaadc61d6fedbc45e74347",
+          "e7cd121da8d9d109b9c715db8289db9b37beca29"
+        ],
+        "changed_lines": {
+          "added": 1100,
+          "removed": 825,
+          "files": 10
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "one all_debug CPU job over the four topology test files (33 passed)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/containment-anchor/coordinator-final-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T075817963210-nia-containment-aware-anchor/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0b8ac-99a5-7d33-9cb5-86055a0a69ce",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12221056,
+            "cached_input_tokens_cumulative": 12221056,
+            "input_tokens": 12326695,
+            "input_tokens_cumulative": 12326695,
+            "output_tokens": 15917,
+            "output_tokens_cumulative": 15917,
+            "reasoning_output_tokens": 4071,
+            "reasoning_output_tokens_cumulative": 4071
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-19T08:52:49Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 96.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-19T08:52:49Z"
+            }
+          ],
+          "notional_cost_usd": 172.2794,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 15,
+            "evidence": 17,
+            "fit": 16,
+            "goal_fidelity": 17,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 84
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 12221056,
+          "cumulative_input_tokens": 24547751,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 19988
+        },
+        "follow_on_paths": [
+          "docs/plans/null-identification-authority.html",
+          "/section",
+          "product/test"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-containment-aware-anchor",
+          "session_id": "01a0b8ac-99a5-7d33-9cb5-86055a0a69ce",
+          "session_source": "stream",
+          "retained_at": "2026-09-19T08:52:49Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.98,
+        "impl_move": {
+          "plan": "null-identification-authority",
+          "at_dispatch": 0.98,
+          "at_complete": 0.99,
+          "verdict": "moved"
+        },
+        "tool_steps": 127.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -202763,6 +202993,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2863
+    "_version": 2864
   }
 }

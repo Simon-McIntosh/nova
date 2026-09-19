@@ -30,7 +30,7 @@
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="200">
+<meta name="plan-version" content="201">
 </head>
 <body>
 <main class="plan-doc">
@@ -785,6 +785,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-nia-limited-touch-reviewed" data-who="" data-when="">
     <div class="r-comment-body">Run r-20260918T201949355073 (codex, commits 8fdc71ef and ffc979e5, merged at 9f0692fb) found the first defect: the wall-target route (independently solved wall-zone values through the wall-length quadratic) and the contour route (the tensor spline over the solved raster) disagreed by 0.0324 Wb at the row 16 contact and 0.0306 Wb at row 17, four times the axis-to-boundary span, and the published level is now the spline value at the contact (relative error 1.5e-15). The review r-20260919T071103282439 (59/100) reproduced every number from the two persisted fixtures without a solve and found the second defect, which the coordinator had also read off the before/after panel: at the published level 0.2585 Wb the level set has three components inside the vessel; the contact (R 0.599, Z 1.728, in the upper divertor) sits on a detached three-node lobe 0.893 m from the axis-enclosing contour, whose own closest approach to the wall is 0.0128 m at R 0.208, Z -0.048 on the centre column. So the plasma still floats, the receipt's wall-gap figure measures a different object from its contact, the test's contact assertion re-derives the production assignment and cannot fail, and its distance assertion never asks whether the contour reaches the contact. The class rule the lead stated is therefore unmet: the anchor selection must be containment-aware, choosing the wall node whose level set's axis-enclosing component passes through it, which on row 16 is the centre column, not the divertor. Three test files still carry the retired wall-zone semantics (named in the run's follow_ons with tracebacks).</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260919T071103282439-review-of-nia-limited-boundary-touches-wall-2" data-who="reckon-ship" data-when="2026-09-19T07:38:22.229Z">
+    <div class="r-comment-body"><p>Review stored: 59/100; the contact sits on a detached lobe 0.89 m from the axis-enclosing contour, so the plasma still floats</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

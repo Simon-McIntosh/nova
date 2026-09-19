@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T15:51:37",
+  "updated": "2026-09-19T15:51:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5164,6 +5164,15 @@
       },
       {
         "id": "s19c-nia-bisectrec-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-19"
+      },
+      {
+        "id": "s19c-nia-certnulls-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -205885,6 +205894,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2898
+    "_version": 2899
   }
 }

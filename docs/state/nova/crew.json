@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T00:30:51",
+  "updated": "2026-09-20T00:32:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5003,6 +5003,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-18"
+      },
+      {
+        "id": "s19c-msc-certbase-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-19"
       },
       {
         "id": "s19c-msc-evaldesign-c",
@@ -213150,6 +213159,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2934
+    "_version": 2935
   }
 }

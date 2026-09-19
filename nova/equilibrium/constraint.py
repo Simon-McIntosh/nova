@@ -447,6 +447,16 @@ def _require_within_bound_if_concrete(value: object, bound: object, name: str) -
         raise ValueError(f"{name} exceeds its declared finite bound")
 
 
+def _require_positive_or_unbounded_if_concrete(value: object, name: str) -> None:
+    """Require positive finite limits, or an unbounded one, without forcing a trace."""
+    try:
+        concrete = np.asarray(value)
+    except TypeError, jax.errors.TracerArrayConversionError:
+        return
+    if np.any(concrete <= 0.0) or np.any(np.isnan(concrete)):
+        raise ValueError(f"{name} must be positive and not NaN")
+
+
 def compensator_step(
     unknown: CompensatingUnknown, normalized: jax.Array, row_residual: jax.Array
 ) -> tuple[jax.Array, jax.Array]:
@@ -481,8 +491,15 @@ class BoundedExteriorFieldUnknown:
 
     ``direction`` selects one column-vector direction per constraint row from
     the operator's prescribed exterior-field response.  ``field_scale`` maps
-    the dimensionless Newton unknown to tesla and ``field_bound`` gives the
-    largest admitted magnitude in tesla.
+    the dimensionless Newton unknown to the physical unit of that response
+    column and ``field_bound`` gives the largest admitted magnitude there.
+
+    A component declared with an unbounded limit carries a unit the field bound
+    has nothing to say about.  The level column of a coil-less fixture is that
+    case: its amplitude is a uniform flux offset in weber, added identically
+    everywhere, so it carries no poloidal field and cannot move the plasma.  It
+    is reported beside the field amplitudes and never refused by the field
+    bound, which :meth:`field_bound_applies` states per component.
 
     The bound is imposed by damped step control, never by saturating
     :meth:`physical_value`: a value clipped at its bound reaches zero tangent
@@ -525,8 +542,18 @@ class BoundedExteriorFieldUnknown:
         object.__setattr__(self, "field_scale", scale)
         object.__setattr__(self, "field_bound", bound)
         _require_positive_if_concrete(scale, "exterior-field scale")
-        _require_positive_if_concrete(bound, "exterior-field bound")
+        _require_positive_or_unbounded_if_concrete(bound, "exterior-field bound")
         _require_positive_if_concrete(limit, "exterior-field step limit")
+
+    @property
+    def field_bound_applies(self) -> jax.Array:
+        """Return whether each amplitude is subject to the declared field bound.
+
+        An amplitude whose limit is unbounded is reported beside the field
+        amplitudes and never refused: a uniform flux offset in weber adds no
+        poloidal field, so the tesla bound says nothing about it.
+        """
+        return jnp.isfinite(jnp.asarray(self.field_bound))
 
     @property
     def row_count(self) -> int:
@@ -964,6 +991,84 @@ class CurrentCentroidConstraint:
         return jnp.moveaxis(jacobian, 0, -1)
 
 
+@dataclass(frozen=True)
+class FluxLevelConstraint:
+    """One absolute flux-level row at each declared point.
+
+    The row reads the total flux the map interpolates at a fixed ``(R, Z)``
+    point, so it vanishes exactly where the map carries the commanded level
+    there.  A uniform flux offset -- a constant added identically everywhere,
+    which carries no poloidal field and therefore no force -- has unit
+    leverage on this row.  On a coil-less fixture whose exterior carries no
+    source, that offset is the only term that can move the level with the
+    position pinned, while the solenoidal field columns contribute nothing at
+    a point on their own anchor; together they are what makes the authored
+    fixed point reachable.
+
+    The points arrive as the binding payload with shape ``(point_count, 2)``
+    in ``(R, Z)``, so moving a point is a new payload rather than a new
+    compiled program.
+
+    Two carriers state a flux the row can read.  A structured
+    :class:`~nova.equilibrium.conservation.FluxLattice` is read by the cubic
+    lattice interpolation every shape row shares.  A cell-carried mesh states
+    its per-cell centroids instead and is read through the owning cell's
+    own-node quadratic, which the operator evaluates with weights it fit on
+    the host when the mesh was built; both reads return the point's flux in
+    the state's own unit and neither adds a host callback to the traced read.
+    """
+
+    point_count: int
+
+    def __post_init__(self) -> None:
+        if int(self.point_count) < 1:
+            raise ValueError("a flux-level row set needs at least one point")
+        object.__setattr__(self, "point_count", int(self.point_count))
+
+    @property
+    def row_count(self) -> int:
+        return self.point_count
+
+    def observed(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        supplied = jnp.reshape(jnp.asarray(payload, dtype=jnp.float64), (-1, 2))
+        if supplied.shape[0] < self.point_count:
+            raise ValueError("a flux-level row needs one (R, Z) point per row")
+        points = supplied[: self.point_count]
+        if _carries_cell_flux_mesh(profile.lattice):
+            return jax.vmap(
+                lambda point: _mesh_carried_point_flux(profile, context.flux, point)
+            )(points)
+        grid = _lattice_grid(profile, context.flux)
+        return jax.vmap(
+            lambda point: sample_lattice_flux(profile.lattice, grid, point)
+        )(points)
+
+    def residual(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        unknown: jax.Array,
+        payload: object,
+        target: jax.Array,
+        scale: jax.Array,
+    ) -> jax.Array:
+        del unknown
+        return (self.observed(profile, context, payload) - target) / scale
+
+    def dual_flux_image(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext,
+        payload: object,
+    ) -> jax.Array:
+        return _flux_jacobian_image(self, profile, context, payload)
+
+
 class WallGapTarget(NamedTuple):
     """Wall point, inward direction, the gap to close, and the flux reference."""
 
@@ -1036,10 +1141,76 @@ def sample_lattice_flux(lattice, grid: jax.Array, point: jax.Array) -> jax.Array
     return radial_weight @ block @ vertical_weight
 
 
+_LATTICE_CARRIER_ATTRIBUTES = (
+    "shape",
+    "radius",
+    "radial_step",
+    "height",
+    "vertical_step",
+)
+
+
 def _lattice_grid(profile: ForwardProfile, flux: jax.Array) -> jax.Array:
     """Return the plasma-grid block of one flux state in lattice shape."""
     lattice = profile.lattice
+    if not all(hasattr(lattice, name) for name in _LATTICE_CARRIER_ATTRIBUTES):
+        raise TypeError(
+            "a point-sampling row needs a structured FluxLattice carrier -- a "
+            "shape, an origin and a step per axis -- or a cell-carried mesh "
+            "whose per-cell flux the operator reads through sample_flux_field"
+        )
     return jnp.reshape(jnp.asarray(flux)[: lattice.node_count], lattice.shape)
+
+
+def _carries_cell_flux_mesh(lattice: object) -> bool:
+    """Return whether a carrier states a per-cell centroid coordinate."""
+    return hasattr(lattice, "coordinate")
+
+
+def _mesh_carried_point_flux(
+    profile: ForwardProfile, flux: jax.Array, point: jax.Array
+) -> jax.Array:
+    """Read the cell-carried flux at one point through the cell that owns it.
+
+    The operator's point read evaluates each carried cell's own-node quadratic
+    at the query the caller supplies *for that cell* and scatters the result
+    back to that cell, so one point is placed in the slot of the cell whose
+    centroid lies nearest and read from that same slot.  Nearest centroid is
+    the mesh's own ownership rule, and a point on a shared edge is read by one
+    of the two cells whose polynomials agree there to the fit's accuracy.
+
+    The operator's point read gathers from a pool it builds as the carried
+    cells first and the direct sampling nodes after them, indexing the second
+    block from the cell count.  The state carries more than its cells -- extra
+    physical nodes sit between the cells and the sampling nodes -- so the
+    carried block is the state's first ``node_count`` values, not its first
+    ``physical_node_number``; handing it the longer block shifts every sampled
+    value by the difference and answers with a neighbouring cell's polynomial,
+    which a uniform offset still passes through unchanged.
+
+    The flux values enter the read linearly, so the read returns the point's
+    flux in the state's own unit, and an offset carried identically by every
+    cell moves it by exactly that offset.
+    """
+    operator = profile.operator
+    lattice = profile.lattice
+    state = jnp.asarray(flux, dtype=jnp.float64)
+    centres = jnp.asarray(lattice.coordinate, dtype=state.dtype)
+    node_count = int(lattice.node_count)
+    if node_count != int(operator.grid.node_number):
+        raise ValueError(
+            "a cell-carried read needs the lattice and the operator's flux mesh "
+            "to carry the same cells in the same order"
+        )
+    owner = jnp.argmin(jnp.sum((centres - point[None, :]) ** 2, axis=-1))
+    points = jnp.zeros((node_count, 1, 2), dtype=state.dtype)
+    points = points.at[owner, 0].set(jnp.asarray(point, dtype=state.dtype))
+    values, _radial, _vertical = operator.sample_flux_field(
+        state[:node_count],
+        operator.sample_node_flux(state),
+        points,
+    )
+    return values[owner, 0]
 
 
 IsofluxReference = Literal["boundary", "reference_point"]
@@ -1394,9 +1565,7 @@ class ExternalShafranovConstraint:
     def _payload(self, payload: object) -> tuple[jax.Array, jax.Array]:
         """Return the external flux image and the reference minor radius."""
         if not isinstance(payload, Sequence) or len(payload) != 2:
-            raise ValueError(
-                "a shafranov row payload is (external_flux, minor_radius)"
-            )
+            raise ValueError("a shafranov row payload is (external_flux, minor_radius)")
         external_flux, minor_radius = payload
         return jnp.asarray(external_flux), jnp.asarray(minor_radius)
 
@@ -1423,9 +1592,7 @@ class ExternalShafranovConstraint:
         radius = observation.centroid_r
         height = observation.centroid_z
         lattice = profile.lattice
-        grid = jnp.reshape(
-            external_flux[: lattice.node_count], lattice.shape
-        )
+        grid = jnp.reshape(external_flux[: lattice.node_count], lattice.shape)
         step = lattice.radial_step
         point = jnp.stack((radius, height))
         upper = sample_lattice_flux(lattice, grid, point + jnp.stack((step, 0.0)))

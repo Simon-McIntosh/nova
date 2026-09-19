@@ -65,6 +65,10 @@ FORBIDDEN_IMPORT_PREFIXES = ("h5py", "imas")
 FORBIDDEN_PATH_FRAGMENTS = (".geqdsk", ".npz", "/archive/", "stored_reference")
 EXTERIOR_CURRENT_PERTURBATION = 1.0e-4
 EXTERIOR_FIELD_COMPONENTS = ("vertical", "radial")
+# The compensating family of a coil-less fixture: the two solenoidal field
+# columns and the level column beside them, which carries no field at all.
+EXTERIOR_LEVEL_COMPONENT = "level"
+EXTERIOR_COMPENSATION_COLUMNS = (*EXTERIOR_FIELD_COMPONENTS, EXTERIOR_LEVEL_COMPONENT)
 ROUNDTRIP_COMPOSITION_FRACTIONS = {
     "23x35": 1.320394289e-2,
     "37x57": 3.819717157e-3,
@@ -715,6 +719,30 @@ def uniform_exterior_field_response(
     return np.column_stack((vertical, radial))
 
 
+def uniform_exterior_compensation_response(
+    case: RotatingEquilibrium, machine: OracleMachine
+) -> np.ndarray:
+    """Return the compensating family: the two field columns and the level column.
+
+    The level column is a uniform flux offset -- a constant added identically at
+    every target -- beside the vertical and radial columns of
+    :func:`uniform_exterior_field_response`.  A constant added to the poloidal
+    flux carries no field, so the level column moves the flux level and nothing
+    else; it is the gauge freedom of a fixture whose exterior is posed from the
+    authored total field.
+    """
+    return np.column_stack(
+        (
+            uniform_exterior_field_response(case, machine),
+            np.ones(
+                len(machine.node)
+                + len(machine.wall_node)
+                + len(machine.sample_coordinates)
+            ),
+        )
+    )
+
+
 def uniform_exterior_field_flux(
     case: RotatingEquilibrium,
     coordinates: np.ndarray,
@@ -723,20 +751,26 @@ def uniform_exterior_field_flux(
     """Return the total-flux a uniform exterior field contributes, weber.
 
     ``field_t`` is the ``(vertical, radial)`` amplitude pair in tesla, ordered
-    as the columns of :func:`uniform_exterior_field_response`.  The vertical
-    column carries an additive constant chosen at the magnetic axis, so the
-    field's own contribution to the axis level is zero there; the reference
-    radius is read back from the case rather than assumed, so a fixture change
-    cannot silently move the anchor.
+    as the columns of :func:`uniform_exterior_field_response`, optionally
+    followed by a third entry: the level amplitude in weber, ordered as the
+    level column of :func:`uniform_exterior_compensation_response`.  The level
+    term is a constant added identically at every point, which is why it moves
+    the flux level and nothing else.  The vertical column carries an additive
+    constant chosen at the magnetic axis, so the field's own contribution to the
+    axis level is zero there; the reference radius is read back from the case
+    rather than assumed, so a fixture change cannot silently move the anchor.
     """
     points = np.atleast_2d(np.asarray(coordinates, dtype=np.float64))
     field = np.asarray(field_t, dtype=np.float64)
     reference_radius = float(np.asarray(case.magnetic_axis, dtype=np.float64)[0])
     radius = points[:, 0]
     height = points[:, 1]
-    return field[0] * np.pi * (radius**2 - reference_radius**2) - (
+    field_contribution = field[0] * np.pi * (radius**2 - reference_radius**2) - (
         2.0 * np.pi * field[1] * radius * height
     )
+    if field.size < 3:
+        return field_contribution
+    return field_contribution + field[2]
 
 
 def gauge_free_flux_read(
@@ -798,8 +832,23 @@ def forward_operator(
     case: RotatingEquilibrium,
     machine: OracleMachine,
     exterior: np.ndarray | None = None,
+    *,
+    compensation: bool = False,
 ) -> ForwardFluxOperator:
-    """Return the same production map class used by the recovery chain."""
+    """Return the same production map class used by the recovery chain.
+
+    ``compensation`` grows the operator's prescribed slot from the two
+    solenoidal field columns to the compensating family, whose third column is
+    the uniform flux offset.  A constraint unknown addresses that slot through
+    its ``flux_delta``, so the operator and the unknown must agree on the column
+    count: a level-bearing row needs ``compensation=True``, and the default
+    keeps the two-column response that field-only consumers pose against.
+    """
+    response = (
+        uniform_exterior_compensation_response(case, machine)
+        if compensation
+        else uniform_exterior_field_response(case, machine)
+    )
     grid_count = len(machine.node)
     wall_count = len(machine.wall_node)
     if exterior is not None:
@@ -853,8 +902,8 @@ def forward_operator(
         polarity=1,
         moment_geometry=machine.moment_geometry,
         prescribed_current_field=PrescribedCurrentField(
-            response=jnp.asarray(uniform_exterior_field_response(case, machine)),
-            current=jnp.zeros(len(EXTERIOR_FIELD_COMPONENTS)),
+            response=jnp.asarray(response),
+            current=jnp.zeros(response.shape[1]),
         ),
     )
 

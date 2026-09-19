@@ -24,7 +24,11 @@ import numpy as np
 from benchmarks import oracle_start_newton_probe as oracle_probe
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import ForwardProfile, fixed_point
-from nova.equilibrium.constraint import assemble_augmented_system
+from nova.equilibrium.constraint import (
+    ConstraintContext,
+    ConstraintPair,
+    assemble_augmented_system,
+)
 from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.solve_request import default_forward_compilation_cache_root
@@ -39,9 +43,12 @@ from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 from scripts.analytic_oracle_fixtures.centroid_row import (
     DEFAULT_FIELD_BOUND_T,
     DEFAULT_FIELD_SCALE_T,
+    DEFAULT_LEVEL_SCALE_WB,
     DEFAULT_STEP_LIMIT,
     centroid_constraint_pair,
     exterior_field_identity,
+    fixture_constraint_pairs,
+    reader_identity,
 )
 
 
@@ -125,6 +132,8 @@ def _lane(required: str) -> dict[str, Any]:
         raise RuntimeError("TMPDIR must be /tmp inside the allocation")
     return {
         "job_id": int(job_id),
+        "lane_requirement": required,
+        "scientific_receipt": required == "h200",
         "partition": os.environ["SLURM_JOB_PARTITION"],
         "node": os.environ.get("SLURMD_NODENAME", socket.gethostname()),
         "allocated_cpus": int(os.environ.get("SLURM_CPUS_PER_TASK", "1")),
@@ -167,7 +176,9 @@ def _context(case_name: str, requested_cells: int) -> dict[str, Any]:
     exact_moments, baseline, cache = oracle_fixture.cached_fixture_exterior(
         source_case, exact, machine, empty, analytic
     )
-    operator = oracle_fixture.forward_operator(source_case, machine, baseline)
+    operator = oracle_fixture.forward_operator(
+        source_case, machine, baseline, compensation=True
+    )
     profile = ForwardProfile(
         operator,
         StencilMesh(machine.node, machine.stencil, machine.area),
@@ -180,9 +191,19 @@ def _context(case_name: str, requested_cells: int) -> dict[str, Any]:
         profile, case_name, target_current, centroid, current_receipt
     )
     pitch = float(np.sqrt(np.median(np.asarray(machine.area))))
-    response = np.asarray(operator.prescribed_current_field.response)
-    if response.shape[1] != 2 or not np.all(np.max(np.abs(response), axis=0) > 0.0):
+    response = np.asarray(operator.prescribed_current_field.response, dtype=np.float64)
+    if response.shape[1] != len(oracle_fixture.EXTERIOR_COMPENSATION_COLUMNS):
+        raise RuntimeError("the compensation response lost a declared column")
+    if not np.all(np.max(np.abs(response), axis=0) > 0.0):
         raise RuntimeError("the uniform exterior response failed its positive control")
+    if not np.all(response[:, 2] == response[0, 2]):
+        raise RuntimeError("the level column is not a uniform flux offset")
+    # the level row is declared at the analytic magnetic axis, where both
+    # solenoidal field columns read exactly zero, so the row reads the level
+    axis_point = np.asarray(exact.magnetic_axis, dtype=np.float64).reshape(1, 2)
+    level_target = float(
+        np.asarray(certificate._exact_state(case_name, exact, axis_point))[0]
+    )
     return {
         "case_name": case_name,
         "requested_cells": requested_cells,
@@ -201,16 +222,73 @@ def _context(case_name: str, requested_cells: int) -> dict[str, Any]:
         "cache": cache,
         "baseline": np.asarray(baseline, dtype=np.float64),
         "response": response,
+        "axis_point": axis_point,
+        "level_target_wb": level_target,
     }
+
+
+def _certificate_request(context: dict[str, Any]) -> Any:
+    return certificate._certificate_solve_request(
+        context["profile"],
+        context["seed"],
+        context["target_current"],
+        carrier_identity="centroid-fixture-certificate",
+    )
+
+
+def _certificate_pairs(
+    context: dict[str, Any], *, level: bool
+) -> tuple[ConstraintPair, ...]:
+    """Return this fixture's pairs, with or without the flux-level row.
+
+    Dropping the level pair leaves the centroid pair exactly as declared, so
+    two programs built from these lists differ by the level row alone.
+    """
+    pairs = fixture_constraint_pairs(
+        jnp.asarray(context["centroid"]),
+        level_point=context["axis_point"],
+        level_target=jnp.asarray((context["level_target_wb"],)),
+        pitch=context["pitch"],
+    )
+    return pairs if level else (pairs[0],)
+
+
+def _augmented_system(
+    context: dict[str, Any], request: Any, pairs: tuple[ConstraintPair, ...]
+):
+    """Assemble the fixture's augmented system for one pair list."""
+    profile = context["profile"]
+    return assemble_augmented_system(
+        profile,
+        jnp.asarray(context["seed"]),
+        pairs,
+        base_map=profile.flux_map(
+            request.current,
+            None,
+            request.target_current,
+            request.prescribed_current,
+        ),
+        base_shadow_mask=lambda state: profile.operator.residual_shadow_mask(
+            state, None
+        ),
+        base_promoted_shadow_mask=lambda state, previous: (
+            profile.operator.residual_shadow_mask(state, None, previous_shadow=previous)
+        ),
+        base_shadowed_map=profile.operator.flux_map_with_shadow(
+            request.current,
+            None,
+            request.target_current,
+            request.prescribed_current,
+        ),
+        requested_class=None,
+        target_current=jnp.asarray(context["target_current"]),
+    )
 
 
 def _solve(
     context: dict[str, Any], seed: np.ndarray, *, constrained: bool
 ) -> tuple[dict[str, Any], np.ndarray]:
-    pair = centroid_constraint_pair(
-        context["centroid"],
-        pitch=context["pitch"],
-    )
+    pairs = _certificate_pairs(context, level=True)
     request = certificate._certificate_solve_request(
         context["profile"],
         seed,
@@ -225,23 +303,45 @@ def _solve(
         ),
     )
     if constrained:
-        request = replace(request, constraint_pairs=(pair,))
+        request = replace(request, constraint_pairs=pairs)
     started = perf_counter()
     receipt = context["profile"].solve(request)
     equilibrium = receipt.equilibrium
     state = np.asarray(jax.block_until_ready(equilibrium.flux), dtype=np.float64)
     topology = oracle_probe._topology(context["profile"].operator, state)
     if constrained:
-        record = equilibrium.constraints[0]
-        observed = np.asarray(record.observed, dtype=np.float64)
-        physical = np.asarray(record.physical_unknown, dtype=np.float64)
-        scaled_residual = np.asarray(record.scaled_residual, dtype=np.float64)
-        qualified = bool(np.asarray(record.qualified).all())
-        bound_refusal = (
-            None
-            if record.bound_refusal is None
-            else [bool(value) for value in np.asarray(record.bound_refusal).reshape(-1)]
+        centroid_record, level_record = equilibrium.constraints
+        observed = np.asarray(centroid_record.observed, dtype=np.float64)
+        amplitudes = np.concatenate(
+            (
+                np.asarray(centroid_record.physical_unknown, dtype=np.float64),
+                np.asarray(level_record.physical_unknown, dtype=np.float64),
+            )
         )
+        field = amplitudes[:2]
+        level_amplitude = float(amplitudes[2])
+        centroid_residual = np.asarray(
+            centroid_record.scaled_residual, dtype=np.float64
+        )
+        level_residual = float(
+            np.max(np.abs(np.asarray(level_record.scaled_residual, dtype=np.float64)))
+        )
+        scaled_residual = np.concatenate(
+            (
+                centroid_residual,
+                np.asarray(level_record.scaled_residual, dtype=np.float64),
+            )
+        )
+        qualified = bool(
+            np.asarray(centroid_record.qualified).all()
+            and np.asarray(level_record.qualified).all()
+        )
+        bound_refusal = [
+            bool(value)
+            for record in (centroid_record, level_record)
+            if record.bound_refusal is not None
+            for value in np.asarray(record.bound_refusal).reshape(-1)
+        ] or None
     else:
         observation = context["profile"].current_moment_observation(
             jnp.asarray(state),
@@ -251,7 +351,10 @@ def _solve(
         observed = np.asarray(
             (observation.centroid_r, observation.centroid_z), dtype=np.float64
         )
-        physical = np.full(2, np.nan)
+        field = np.full(2, np.nan)
+        amplitudes = np.full(3, np.nan)
+        level_amplitude = float("nan")
+        level_residual = float("nan")
         scaled_residual = (observed - context["centroid"]) / context["pitch"]
         qualified = False
         bound_refusal = None
@@ -268,11 +371,17 @@ def _solve(
                 np.linalg.norm(observed - context["centroid"]) / context["pitch"]
             ),
             "row_scaled_residual_sup": float(np.max(np.abs(scaled_residual))),
+            "level_row_scaled_residual": level_residual,
             "bound_refusal": bound_refusal,
-            "compensating_field_t": physical,
-            "compensating_field_t_abs_sup": float(np.max(np.abs(physical))),
+            "compensating_field_t": field,
+            "compensating_field_t_abs_sup": float(np.max(np.abs(field))),
+            "compensating_amplitudes": amplitudes,
+            "level_amplitude_wb": level_amplitude,
+            "level_target_wb": context["level_target_wb"],
+            "level_error_wb": level_amplitude - context["level_target_wb"],
             "field_bound_t": DEFAULT_FIELD_BOUND_T,
             "field_scale_t": DEFAULT_FIELD_SCALE_T,
+            "level_scale_wb": DEFAULT_LEVEL_SCALE_WB,
             "wall_seconds": perf_counter() - started,
             "topology": topology,
             "state_sha256_binary64": _digest(state),
@@ -282,16 +391,16 @@ def _solve(
 
 
 def _compile_probe_program(
-    context: dict[str, Any], *, constrained: bool
+    context: dict[str, Any], *, constrained: bool, level: bool = True
 ) -> tuple[Any, tuple[jax.Array, ...]]:
-    """Return the production solve program and explicit array arguments."""
+    """Return the production solve program and explicit array arguments.
+
+    ``level=False`` assembles the same bounded solve with the flux-level pair
+    dropped, so the two programs differ by the level row alone and their build
+    walls are a paired measurement of what the row adds to the compiled program.
+    """
     profile = context["profile"]
-    request = certificate._certificate_solve_request(
-        profile,
-        context["seed"],
-        context["target_current"],
-        carrier_identity=f"centroid-compile:{'bounded' if constrained else 'control'}",
-    )
+    request = _certificate_request(context)
     options = request.policy.kernel_options()
     if not constrained:
         program = profile._accelerated_history_program(
@@ -305,42 +414,8 @@ def _compile_probe_program(
         )
         return program, (jnp.asarray(context["seed"]), external)
 
-    pair = centroid_constraint_pair(
-        context["centroid"],
-        pitch=context["pitch"],
-    )
-    mapped = profile.flux_map(
-        request.current,
-        None,
-        request.target_current,
-        request.prescribed_current,
-    )
-    shadowed = profile.operator.flux_map_with_shadow(
-        request.current,
-        None,
-        request.target_current,
-        request.prescribed_current,
-    )
-
-    def shadow_mask(state):
-        return profile.operator.residual_shadow_mask(state, None)
-
-    def promoted_shadow_mask(state, previous):
-        return profile.operator.residual_shadow_mask(
-            state, None, previous_shadow=previous
-        )
-
-    system = assemble_augmented_system(
-        profile,
-        jnp.asarray(context["seed"]),
-        (pair,),
-        base_map=mapped,
-        base_shadow_mask=shadow_mask,
-        base_promoted_shadow_mask=promoted_shadow_mask,
-        base_shadowed_map=shadowed,
-        requested_class=None,
-        target_current=jnp.asarray(context["target_current"]),
-    )
+    pairs = _certificate_pairs(context, level=level)
+    system = _augmented_system(context, request, pairs)
 
     def solve(initial):
         return fixed_point.newton_krylov(
@@ -401,6 +476,166 @@ def compile_probe_arm(output_root: Path, arm: str) -> dict[str, Any]:
         partial["completed"] = True
         _write_json(state_path, partial)
         return partial
+    finally:
+        set_support_clip_mode(previous_mode)
+
+
+def _callback_counts(text: str) -> dict[str, int]:
+    """Count the host-callback tokens a traced or compiled program carries."""
+    return {
+        "pure_callback": text.count("pure_callback"),
+        "callback": text.count("callback"),
+    }
+
+
+def _wall_per_evaluation(function, argument, *, repeats: int = 50) -> dict[str, float]:
+    """Return the blocked wall per evaluation of one callable.
+
+    The call is blocked on every repeat, so the figure is the dispatch-plus-
+    compute wall of one evaluation rather than the time to queue it.
+    """
+    jax.block_until_ready(function(argument))
+    started = perf_counter()
+    for _ in range(repeats):
+        jax.block_until_ready(function(argument))
+    total = perf_counter() - started
+    return {
+        "repeats": repeats,
+        "total_seconds": total,
+        "seconds_per_evaluation": total / repeats,
+    }
+
+
+def reader_facts(output_root: Path) -> dict[str, Any]:
+    """Record what the level row's point read is built from and what it costs.
+
+    Three facts, each measured rather than asserted: the reader's static
+    construction (host-solved per-node weights over the owning cell's own
+    polygon, with source lines); the absence of a host callback in the traced
+    row and in the compiled program; and the row's own cost -- the observed()
+    wall per evaluation beside one augmented map evaluation, and the build wall
+    of the program with the level row against the same program without it.
+    """
+    configure_dtypes()
+    configure_persistent_compilation_cache(default_forward_compilation_cache_root())
+    lane = _lane("h200")
+    previous_mode = support_clip_mode()
+    set_support_clip_mode("exact")
+    try:
+        context = _context("weak-rotation-reactor-static", -110)
+        profile = context["profile"]
+        pairs = _certificate_pairs(context, level=True)
+        centroid_pair, level_pair = pairs
+        binding = level_pair.binding
+        flux = jnp.asarray(context["seed"], dtype=jnp.float64)
+
+        def read(flux_state, pair):
+            ctx = ConstraintContext(
+                flux=flux_state,
+                requested_class=None,
+                target_current=jnp.asarray(context["target_current"]),
+                shadow=None,
+            )
+            return pair.functional.residual(
+                profile,
+                ctx,
+                jnp.zeros(1, dtype=jnp.float64),
+                binding.payload,
+                binding.target,
+                binding.scale,
+            )
+
+        row_jaxpr = jax.make_jaxpr(lambda state: read(state, level_pair))(flux)
+        centroid_jaxpr = jax.make_jaxpr(lambda state: read(state, centroid_pair))(flux)
+        row_text = str(row_jaxpr)
+        centroid_text = str(centroid_jaxpr)
+        row_callbacks = _callback_counts(row_text)
+
+        row_observed = jax.jit(lambda state: read(state, level_pair))
+        observed_wall = _wall_per_evaluation(row_observed, flux)
+
+        request = _certificate_request(context)
+        systems = {
+            level: _augmented_system(
+                context, request, _certificate_pairs(context, level=level)
+            )
+            for level in (True, False)
+        }
+        steps = {level: jax.jit(system.map_fn) for level, system in systems.items()}
+        # each map is evaluated at its own initial state: the two systems carry
+        # one unknown per row, so the level row's system holds one more
+        newton_step_wall = _wall_per_evaluation(
+            steps[True], jnp.asarray(systems[True].initial, dtype=jnp.float64)
+        )
+        newton_step_wall_without = _wall_per_evaluation(
+            steps[False], jnp.asarray(systems[False].initial, dtype=jnp.float64)
+        )
+
+        builds = {}
+        for level in (True, False):
+            program, arguments = _compile_probe_program(
+                context, constrained=True, level=level
+            )
+            lowered = program.lower(*arguments)
+            text = lowered.as_text(dialect="stablehlo")
+            started = perf_counter()
+            lowered.compile()
+            builds["with_level_row" if level else "without_level_row"] = {
+                "compile_seconds": perf_counter() - started,
+                "stablehlo_instruction_count": _stablehlo_instruction_count(text),
+                "stablehlo_callback_counts": _callback_counts(text),
+                "stablehlo_sha256": hashlib.sha256(text.encode()).hexdigest(),
+            }
+
+        observed_seconds = observed_wall["seconds_per_evaluation"]
+        step_seconds = newton_step_wall["seconds_per_evaluation"]
+        level_cost = {
+            "unknowns_with_level_row": int(systems[True].initial.shape[0]),
+            "unknowns_without_level_row": int(systems[False].initial.shape[0]),
+            "observed_seconds_per_evaluation": observed_seconds,
+            "observed_repeats": observed_wall["repeats"],
+            "one_newton_step_seconds": step_seconds,
+            "one_newton_step_repeats": newton_step_wall["repeats"],
+            "observed_to_step_ratio": observed_seconds / step_seconds,
+            "one_newton_step_seconds_without_level_row": newton_step_wall_without[
+                "seconds_per_evaluation"
+            ],
+            "one_newton_step_repeats_without_level_row": newton_step_wall_without[
+                "repeats"
+            ],
+            "compile_seconds_with_level_row": builds["with_level_row"][
+                "compile_seconds"
+            ],
+            "compile_seconds_without_level_row": builds["without_level_row"][
+                "compile_seconds"
+            ],
+            "compile_seconds_delta": builds["with_level_row"]["compile_seconds"]
+            - builds["without_level_row"]["compile_seconds"],
+            "stablehlo_instruction_delta": builds["with_level_row"][
+                "stablehlo_instruction_count"
+            ]
+            - builds["without_level_row"]["stablehlo_instruction_count"],
+        }
+        receipt = {
+            "schema": "nova.centroid-flux-level-reader-facts",
+            "source_revision": _revision(),
+            "lane": lane,
+            "support_clip_mode": "exact",
+            "case": "weak-rotation-reactor-static",
+            "requested_cells": -110,
+            "carrier": type(profile.lattice).__name__,
+            "reader_identity": reader_identity(),
+            "row_jaxpr_callback_counts": row_callbacks,
+            "row_jaxpr_has_host_callback": bool(
+                row_callbacks["pure_callback"] or row_callbacks["callback"]
+            ),
+            "centroid_row_jaxpr_callback_counts": _callback_counts(centroid_text),
+            "compiled_program": builds,
+            "level_cost": level_cost,
+            "level_amplitude_slot_wb": float(DEFAULT_LEVEL_SCALE_WB),
+        }
+        _write_json(output_root / "reader-facts.json", receipt)
+        return receipt
     finally:
         set_support_clip_mode(previous_mode)
 
@@ -485,7 +720,10 @@ def _row(case_name: str, requested_cells: int) -> tuple[dict[str, Any], dict[str
         "characteristic_pitch_m": context["pitch"],
         "baseline_sha256_binary64": _digest(context["baseline"]),
         "fixture_exterior_cache": context["cache"],
-        "response_column_sup_wb_per_t": np.max(np.abs(context["response"]), axis=0),
+        "response_column_sup_wb_per_t": np.max(
+            np.abs(context["response"][:, :2]), axis=0
+        ),
+        "level_column_flux_per_wb": context["response"][0, 2],
         "field_identity": exterior_field_identity(),
         "seed": context["seed_receipt"],
         "solve": result,
@@ -659,12 +897,17 @@ def _draw_state(
     poloidal_axes(axis)
     axis.set_title(f"{title}\nanalytic blue / terminal coloured", fontsize=8)
     path.parent.mkdir(parents=True, exist_ok=True)
+    vector_path = path.with_suffix(".svg")
+    figure.savefig(vector_path)
     figure.savefig(path, dpi=180)
     plt.close(figure)
     return {
         "filesystem_path": str(path),
         "project_absolute_src": project_src,
         "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "vector_filesystem_path": str(vector_path),
+        "vector_project_absolute_src": str(Path(project_src).with_suffix(".svg")),
+        "vector_sha256": hashlib.sha256(vector_path.read_bytes()).hexdigest(),
     }
 
 
@@ -696,6 +939,12 @@ def _control_verdict(
         "positive_centroid_within_tenth_pitch": (
             positive["centroid_error_pitches"] <= 0.1
         ),
+        "positive_level_row_at_or_below_1e_12": (
+            positive["level_row_scaled_residual"] <= 1.0e-12
+        ),
+        "positive_level_amplitude_is_finite": bool(
+            np.isfinite(positive["level_amplitude_wb"])
+        ),
         "negative_remains_outside_tenth_pitch": (
             negative["centroid_error_pitches"] > 0.1
         ),
@@ -704,19 +953,30 @@ def _control_verdict(
     return verdict
 
 
-def control_arm(output_root: Path, figure_path: Path, arm: str) -> dict[str, Any]:
+def control_arm(
+    output_root: Path,
+    figure_path: Path,
+    arm: str,
+    lane_requirement: str = "h200",
+) -> dict[str, Any]:
     """Solve one displaced-seed control and draw its own panel.
 
     The positive arm imposes the centroid row on a seed displaced from the
     analytic centroid; the negative arm runs the same displaced seed with no
     row. Each arm is its own job because one H200 job does not hold the four
     programs of a full receipt inside an hour.
+
+    The lane requirement is a parameter rather than a constant because a
+    displaced-seed solve is also the only route back to a terminal state the
+    record never persisted, and that route has to be reachable from a CPU debug
+    partition when the H200 reservation is held. The receipt records which lane
+    it ran on and whether it is the scientific one.
     """
     if arm not in ("positive", "negative"):
         raise ValueError(f"unknown control arm {arm!r}")
     configure_dtypes()
     configure_persistent_compilation_cache(default_forward_compilation_cache_root())
-    lane = _lane("h200")
+    lane = _lane(lane_requirement)
     constrained = arm == "positive"
     previous_mode = support_clip_mode()
     set_support_clip_mode("exact")
@@ -740,7 +1000,10 @@ def control_arm(output_root: Path, figure_path: Path, arm: str) -> dict[str, Any
         )
     finally:
         set_support_clip_mode(previous_mode)
+    state_path = output_root / f"control-{arm}-state.npy"
+    np.save(state_path, np.asarray(state, dtype=np.float64))
     control = {
+        "terminal_state_path": str(state_path),
         "schema": "nova.centroid-displaced-control",
         "arm": arm,
         "constrained": constrained,
@@ -894,10 +1157,17 @@ def reread_gauge_readings(
     """
     output_root.mkdir(parents=True, exist_ok=True)
     arms: list[dict[str, Any]] = []
+    skipped: list[dict[str, str]] = []
     for arm in ("positive", "negative"):
         path = source_root / f"control-{arm}.json"
         if not path.exists():
-            raise FileNotFoundError(f"banked control receipt absent: {path}")
+            # A bank holding one arm is still readable: the absent arm is
+            # recorded rather than raised, so a single-arm read cannot be
+            # mistaken for a two-arm one.
+            skipped.append(
+                {"arm": arm, "reason": f"banked control receipt absent: {path}"}
+            )
+            continue
         stored = json.loads(path.read_text())
         case_name = str(stored["case"])
         topology = stored["solve"]["topology"]
@@ -945,6 +1215,7 @@ def reread_gauge_readings(
         "source_root": str(source_root),
         "level_tolerance_of_span": LEVEL_TOLERANCE_OF_SPAN,
         "row_tolerance": oracle_probe.FIXED_POINT_TOLERANCE,
+        "skipped_arms": skipped,
         "gauge": (
             "solved and analytic flux levels are compared only as the span "
             "between the magnetic axis and the boundary; the compensator "
@@ -984,8 +1255,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compile-probe-arm", choices=("unconstrained", "constrained"))
     parser.add_argument("--first-step", action="store_true")
     parser.add_argument("--control-arm", choices=("positive", "negative"))
+    parser.add_argument(
+        "--control-lane",
+        choices=("h200", "cpu"),
+        default="h200",
+        help="lane the control arm must run on; cpu means one all_debug allocation",
+    )
     parser.add_argument("--merge-controls", action="store_true")
     parser.add_argument("--reread-gauge", action="store_true")
+    parser.add_argument(
+        "--reader-facts",
+        action="store_true",
+        help="record the level row's reader construction, purity and cost",
+    )
     parser.add_argument(
         "--source-root",
         type=Path,
@@ -1022,11 +1304,26 @@ def main() -> None:
             flush=True,
         )
         return
-    if arguments.reread_gauge:
-        report = reread_gauge_readings(
-            arguments.source_root,
-            arguments.output_root,
+    if arguments.reader_facts:
+        receipt = reader_facts(arguments.output_root)
+        cost = receipt["level_cost"]
+        print(
+            "CENTROID_READER_FACTS "
+            f"carrier={receipt['carrier']} "
+            f"host_callback_in_row={receipt['row_jaxpr_has_host_callback']} "
+            f"observed_us={cost['observed_seconds_per_evaluation'] * 1.0e6:.3f} "
+            f"newton_step_us={cost['one_newton_step_seconds'] * 1.0e6:.3f} "
+            f"newton_step_us_without_level_row="
+            f"{cost['one_newton_step_seconds_without_level_row'] * 1.0e6:.3f} "
+            f"compile_s_with_level_row={cost['compile_seconds_with_level_row']:.3f} "
+            f"compile_s_without_level_row="
+            f"{cost['compile_seconds_without_level_row']:.3f} "
+            f"stablehlo_instruction_delta={cost['stablehlo_instruction_delta']}",
+            flush=True,
         )
+        return
+    if arguments.reread_gauge:
+        report = reread_gauge_readings(arguments.source_root, arguments.output_root)
         for arm in report["arms"]:
             print(
                 "CENTROID_GAUGE_REREAD "
@@ -1036,6 +1333,12 @@ def main() -> None:
                 f"compensator_span_wb={arm['compensator_span_contribution_wb']:+.9e} "
                 f"row_scaled_residual_sup={arm['row_scaled_residual_sup']:+.9e} "
                 f"verdict={arm['fixed_point_verdict']}",
+                flush=True,
+            )
+        for skipped in report["skipped_arms"]:
+            print(
+                f"CENTROID_GAUGE_REREAD_SKIPPED arm={skipped['arm']} "
+                f"reason={skipped['reason']}",
                 flush=True,
             )
         return
@@ -1048,11 +1351,17 @@ def main() -> None:
         return
     if arguments.control_arm is not None:
         arm_figure = arguments.figure.with_name(f"control-{arguments.control_arm}.png")
-        control = control_arm(arguments.output_root, arm_figure, arguments.control_arm)
+        control = control_arm(
+            arguments.output_root,
+            arm_figure,
+            arguments.control_arm,
+            arguments.control_lane,
+        )
         solve = control["solve"]
         print(
             "CENTROID_CONTROL "
             f"arm={control['arm']} constrained={solve['constrained']} "
+            f"lane={control['lane']['partition']} "
             f"centroid_error_pitches={solve['centroid_error_pitches']:+.9e} "
             f"row_scaled_residual_sup={solve['row_scaled_residual_sup']:+.9e} "
             f"terminal_residual={solve['terminal_residual']:+.9e} "

@@ -23,6 +23,7 @@ from nova.equilibrium.constraint import (
     ConstraintPair,
     ConstraintRecord,
     ExternalShafranovConstraint,
+    FluxLevelConstraint,
     ProfileAmplitudeUnknown,
     assemble_augmented_system,
     constraint_residual_jvp,
@@ -864,3 +865,246 @@ def test_shafranov_row_refuses_a_target_its_compensator_cannot_reach() -> None:
     np.testing.assert_allclose(
         np.asarray(drivable_record.observed), [target], rtol=0.0, atol=1.0e-12
     )
+
+
+def _level_row_state(profile) -> tuple[jax.Array, ConstraintContext]:
+    """Return a linear radial flux map and the context the level row reads."""
+    lattice = profile.lattice
+    radius = jnp.asarray(lattice.radius)[:, None]
+    grid = jnp.broadcast_to(radius, lattice.shape)
+    flux = grid.reshape(-1)
+    return flux, ConstraintContext(
+        flux=flux,
+        requested_class=None,
+        target_current=None,
+        shadow=None,
+    )
+
+
+def test_flux_level_row_reads_the_level_and_scales_its_residual() -> None:
+    configure_dtypes()
+    profile = _shafranov_profile()
+    row = FluxLevelConstraint(point_count=1)
+    _flux, context = _level_row_state(profile)
+    payload = jnp.asarray([[2.0, 0.0]])
+
+    assert row.row_count == 1
+    np.testing.assert_allclose(
+        np.asarray(row.observed(profile, context, payload)),
+        [2.0],
+        rtol=0.0,
+        atol=1.0e-12,
+        err_msg="the row reads the map's own level at the declared point",
+    )
+
+    # the residual is signed against the commanded level and scaled by the
+    # binding, so a level above and below the target report opposite signs
+    np.testing.assert_allclose(
+        np.asarray(
+            row.residual(
+                profile, context, None, payload, jnp.asarray([1.0]), jnp.asarray([0.5])
+            )
+        ),
+        [2.0],
+        rtol=0.0,
+        atol=1.0e-12,
+    )
+    np.testing.assert_allclose(
+        np.asarray(
+            row.residual(
+                profile, context, None, payload, jnp.asarray([3.0]), jnp.asarray([0.5])
+            )
+        ),
+        [-2.0],
+        rtol=0.0,
+        atol=1.0e-12,
+    )
+
+
+def test_flux_level_row_dual_image_sums_to_one() -> None:
+    configure_dtypes()
+    profile = _shafranov_profile()
+    row = FluxLevelConstraint(point_count=1)
+    flux, context = _level_row_state(profile)
+
+    image = row.dual_flux_image(profile, context, jnp.asarray([[2.0, 0.0]]))
+    assert image.shape == (flux.size, 1)
+    # an interpolated read of the level has unit total leverage on the map:
+    # the reported level enters through one partition of interpolation weights
+    np.testing.assert_allclose(
+        float(np.sum(np.asarray(image))),
+        1.0,
+        rtol=0.0,
+        atol=1.0e-12,
+        err_msg="the level row's flux image is a partition of unity",
+    )
+
+
+def test_flux_level_row_states_its_carrier_requirement() -> None:
+    configure_dtypes()
+    profile = SimpleNamespace(lattice=SimpleNamespace(node_count=4))
+    context = ConstraintContext(
+        flux=jnp.arange(4.0),
+        requested_class=None,
+        target_current=None,
+        shadow=None,
+    )
+    with np.testing.assert_raises_regex(TypeError, "structured FluxLattice"):
+        FluxLevelConstraint(point_count=1).observed(
+            profile, context, jnp.asarray([[2.0, 0.0]])
+        )
+
+
+class _CellMeshOperator:
+    """Operator stub whose point read mixes the cell and its sampling nodes.
+
+    The read is a weighted combination -- one weight on the owning cell's own
+    value, the rest on its direct sampling nodes -- so the weights sum to one
+    and a constant added to every flux value moves the read by exactly that
+    constant.  The pool is assembled the way the mesh assembles it, carried
+    cells first and sampling nodes after them indexed from the cell count, so
+    a caller that hands the read a longer carried block than the cells shifts
+    every sampled value and reads a neighbouring cell's neighbourhood.
+    """
+
+    physical_node_number = 4
+
+    def __init__(self, node_number: int) -> None:
+        self.grid = SimpleNamespace(node_number=node_number)
+
+    def sample_node_flux(self, state):
+        return jnp.asarray(state)[self.physical_node_number :]
+
+    def sample_flux_field(self, centroid_flux, sample_flux, points):
+        pool = jnp.concatenate([jnp.asarray(centroid_flux), jnp.asarray(sample_flux)])
+        count = self.grid.node_number
+        query = jnp.asarray(points)[:, :, 0]
+        carried = pool[:count]
+        sampled = pool[count + jnp.arange(count)]
+        mixed = 0.5 * carried + 0.5 * sampled
+        values = jnp.broadcast_to(mixed[:, None], query.shape) + query
+        zeros = jnp.zeros_like(values)
+        return values, zeros, zeros
+
+
+def _cell_mesh_profile() -> SimpleNamespace:
+    """Return a three-cell carrier whose centroids sit on the inboard axis."""
+    mesh = SimpleNamespace(
+        coordinate=np.asarray([[1.0, 0.0], [2.0, 0.0], [3.0, 0.0]]), node_count=3
+    )
+    return SimpleNamespace(lattice=mesh, operator=_CellMeshOperator(node_number=3))
+
+
+_CELL_MESH_VALUES = (0.1, 0.2, 0.3, 0.9, 10.0, 20.0, 30.0)
+_CELL_MESH_MIX = (
+    0.5 * (0.1 + 10.0),
+    0.5 * (0.2 + 20.0),
+    0.5 * (0.3 + 30.0),
+)
+
+
+def _cell_mesh_state():
+    """Return the test state, built only after extended precision is enabled.
+
+    One carried value per cell, one extra physical node between the cells and
+    the sampling nodes, then one sampling node per cell.  Building the array at
+    import time would capture it in single precision and leave a float32
+    residue on the compared values.
+    """
+    return jnp.asarray(_CELL_MESH_VALUES)
+
+
+def test_flux_level_row_reads_a_cell_carried_mesh_through_its_owner() -> None:
+    """A cell-carried carrier is read, and an offset moves the row by itself."""
+    configure_dtypes()
+    profile = _cell_mesh_profile()
+    row = FluxLevelConstraint(point_count=1)
+    state = _cell_mesh_state()
+    context = ConstraintContext(
+        flux=state,
+        requested_class=None,
+        target_current=None,
+        shadow=None,
+    )
+
+    # the query is nearest the second cell's centroid, so the row reads that
+    # cell: the ownership follows the point rather than a fixed slot, and the
+    # value is that cell's own mixture of its carried value and its sampling
+    # nodes rather than the mixture of the cell one slot along
+    point = jnp.asarray([[2.05, 0.05]])
+    centre = float(np.asarray(row.observed(profile, context, point))[0])
+    np.testing.assert_allclose(profile.lattice.coordinate[1, 0], 2.0, rtol=0.0)
+    np.testing.assert_allclose(centre, _CELL_MESH_MIX[1] + 2.05, rtol=0.0, atol=1.0e-12)
+
+    outboard = float(
+        np.asarray(row.observed(profile, context, jnp.asarray([[3.05, 0.0]])))[0]
+    )
+    np.testing.assert_allclose(
+        outboard, _CELL_MESH_MIX[2] + 3.05, rtol=0.0, atol=1.0e-12
+    )
+
+    # the sampling nodes are reached through the pool's second block, indexed
+    # from the cell count: moving one cell's sampling node moves that cell's
+    # read by half the shift and leaves the cell whose carried value is the
+    # extra physical node's alone.  A read that takes the state's first
+    # physical-node-number values as the carried block answers here with the
+    # shift of the slot below, so this assertion is what separates the two.
+    shifted_state = state.at[5].add(4.0)
+    shifted = context._replace(flux=shifted_state)
+    sampled = float(np.asarray(row.observed(profile, shifted, point))[0])
+    np.testing.assert_allclose(sampled, centre + 2.0, rtol=0.0, atol=1.0e-12)
+    np.testing.assert_allclose(
+        float(
+            np.asarray(row.observed(profile, shifted, jnp.asarray([[3.05, 0.0]])))[0]
+        ),
+        outboard,
+        rtol=0.0,
+        atol=1.0e-12,
+    )
+
+    # the level column's whole property: an offset carried identically by every
+    # cell moves the row by exactly that offset, so its leverage is unit and a
+    # target at the declared point is reachable by the level term alone
+    offset = 5.0
+    shifted = context._replace(flux=state + offset)
+    np.testing.assert_allclose(
+        np.asarray(row.observed(profile, shifted, jnp.asarray([[2.05, 0.05]]))),
+        centre + offset,
+        rtol=0.0,
+        atol=1.0e-12,
+    )
+
+
+def test_unbounded_exterior_amplitude_is_reported_outside_the_field_bound() -> None:
+    configure_dtypes()
+    field = BoundedExteriorFieldUnknown(
+        direction=jnp.eye(3),
+        field_scale=jnp.asarray((1.0e-3, 1.0e-3, 1.0)),
+        field_bound=jnp.asarray((2.5e-1, 2.5e-1, jnp.inf)),
+        step_limit=jnp.asarray((1.0, 1.0, 1.0)),
+    )
+
+    np.testing.assert_array_equal(
+        np.asarray(field.field_bound_applies), np.asarray([True, True, False])
+    )
+    np.testing.assert_allclose(
+        np.asarray(field.physical_value(jnp.asarray((0.0, 0.0, 1.0e4)))),
+        [0.0, 0.0, 1.0e4],
+        rtol=0.0,
+    )
+    # a level past the tesla bound is never refused by the field bound
+    step, refused = field.damped_step(jnp.zeros(3), jnp.asarray((0.0, 0.0, 1.0e6)))
+    assert not bool(np.asarray(refused).any())
+    assert float(np.asarray(step)[0]) == 0.0
+    assert float(np.asarray(step)[2]) < 0.0
+
+    # only the component whose physical value is past the bound refuses, and the
+    # level component never does: a level amplitude is a flux offset, not a
+    # field, so the tesla bound is not the control that holds it. A refusal
+    # check that drives every component past its bound cannot tell a
+    # per-component rule from an all-or-nothing one, so the middle component
+    # here sits inside the bound on purpose.
+    over_bound = jnp.asarray((2.0 * 2.5e-1 / 1.0e-3, 0.0, 1.0e6))
+    step, refused = field.damped_step(over_bound, jnp.zeros(3))
+    np.testing.assert_array_equal(np.asarray(step), np.zeros(3))
+    np.testing.assert_array_equal(np.asarray(refused), np.asarray([True, False, False]))

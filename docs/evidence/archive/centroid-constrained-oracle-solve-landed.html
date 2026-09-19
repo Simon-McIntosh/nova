@@ -405,5 +405,177 @@
     them. Source receipts unchanged at revision
     <code>442820bf0f0220c9b0ab1cf84295d4b0832a2d8a</code>.</p>
   </section>
+
+  <section id="flux-level-third-column">
+    <h2>The flux-level third column beside the two solenoidal fields</h2>
+    <p><strong>Functional <code>67e0296c</code>; fixture row, unknown and binding
+    <code>42fab795</code>; three-column tests <code>6cccf91b</code>; receipt pose
+    <code>f39ae4a8</code>; carrier requirement <code>a4c3c129</code>,
+    <code>bdb3d49d</code> and <code>f5804eeb</code>; adjudicated reader
+    <code>e9363e8f</code>; per-program initial state <code>4bf4a59c</code>; the
+    reader index defect and its fix <code>67296f75</code>; stub precision
+    <code>826a7434</code>; re-read dispatch <code>9f08bd58</code>. H200 job
+    <code>1273572</code> took the positive control at head <code>826a7434</code>,
+    twenty-one minutes past the reader fix, on base <code>1aa2597d</code>; the
+    worktree head is now <code>ee628446</code>.</strong></p>
+
+    <p>The lead's revision of 2026-09-17 (<code>uniform-field-increment-plus-flux-level</code>)
+    keeps the two solenoidal uniform-field columns and adds a third column carrying a
+    uniform flux offset in weber. The offset adds no field, so it moves the flux level
+    without moving the centroid, and it moves the axis and the boundary by the same
+    amount. The level row reads the flux at the analytic magnetic axis through the
+    operator's own point sample and binds to that point's authored level. The third
+    column is held to its own <code>1e-12</code> row clause on its own <code>1.0 Wb</code>
+    scale and is deliberately outside the <code>0.25 T</code> field bound the two
+    solenoidal amplitudes obey: <code>level_bound_wb</code> is <code>null</code> and
+    <code>level_bound_is_field_bound</code> is <code>false</code>.</p>
+    <table>
+      <thead><tr><th>Quantity</th><th>Positive arm, three columns</th></tr></thead>
+      <tbody>
+        <tr><td>Response columns / unknowns</td><td><code>[vertical, radial, level]</code> / <code>775</code> with the level row, <code>774</code> without</td></tr>
+        <tr><td>Compensating amplitudes</td><td><code>[2.388599064870474e-03 T, -1.1059397227966279e-13 T, 1.2383665193033397 Wb]</code></td></tr>
+        <tr><td>Abs sup of the two field amplitudes</td><td><code>2.388599064870474e-03 T</code>, <code>0.955%</code> of the declared <code>0.25 T</code> bound</td></tr>
+        <tr><td>Bound refusal</td><td><code>[false, false, false]</code></td></tr>
+        <tr><td>Centroid observed / target [m]</td><td><code>(6.063900238029877, -2.3154947488882247e-13)</code> / <code>(6.063530173332898, 0.0)</code></td></tr>
+        <tr><td>Centroid error</td><td><code>+3.70064697864475e-04 m</code> radial = <code>7.9402220554638949e-04</code> pitches, inside the asked tenth by <code>126</code> times</td></tr>
+        <tr><td>Terminal residual</td><td><code>1.110210658104954e-03</code></td></tr>
+        <tr><td>Row scaled residual sup</td><td><code>2.3214644865632295e-03</code>, carried by the level row on its <code>1.0 Wb</code> scale, against the <code>1e-12</code> clause</td></tr>
+        <tr><td>Level row's own point target</td><td>met to <code>2.3215e-03 Wb</code> = <code>4.708e-05</code> of the <code>49.2965 Wb</code> span</td></tr>
+        <tr><td>Converged / qualified</td><td><code>false</code> / <code>false</code>, with <code>row_qualified false</code>: no converged flag is set and none could be, the terminal residual sitting five decades above the <code>1e-8</code> fixed-point tolerance and seven above the <code>1e-10</code> qualification tolerance</td></tr>
+        <tr><td>Topology class / axis read</td><td><code>limited</code> / <code>qualified_axis</code>, <code>0</code> X-candidates, <code>1</code> O-candidate</td></tr>
+        <tr><td>Axis flux solved / analytic [Wb]</td><td><code>49.94691860858882</code> / <code>49.937923831556624</code>, a difference of <code>+8.994777e-03</code></td></tr>
+        <tr><td>Boundary flux solved / analytic [Wb]</td><td><code>0.6503959477662681</code> / <code>-0.3114495546343796</code>, a difference of <code>+0.9618455</code></td></tr>
+        <tr><td>Wall contact [m]</td><td><code>(7.711243498509007, -1.2833930119030192)</code></td></tr>
+        <tr><td>Realised / requested cells</td><td><code>135</code> / <code>-110</code></td></tr>
+        <tr><td>Wall [s] / lane</td><td><code>2659.909718300216</code> / one H200 NVL card, 8 CPUs, 128 G, <code>TMPDIR=/tmp</code>, <code>cuda,cpu</code>, x64, shared interpreter run directly, persistent compile cache</td></tr>
+        <tr><td>State digest</td><td><code>e4c08e55dd54b73b14b034c8d0acef985dbe92a2b1828b394b1&hellip;</code></td></tr>
+      </tbody>
+      <caption>Weak-rotation-reactor-static at <code>-110</code> requested cells, displaced seed <code>062b465a7364914f&hellip;</code> 20 mm radially, exact clip. The level amplitude is the third column's own contribution in weber and is not comparable with the two field amplitudes, nor is it held to the field bound.</caption>
+    </table>
+    <p><strong>One reported field is a mixed difference and must not be read as an
+    error.</strong> The receipt's <code>level_error_wb</code> is <code>-48.70235527547112</code>,
+    computed as the level column's amplitude (<code>1.2383665193033397 Wb</code>) against
+    the authored axis level (<code>49.94072179477446 Wb</code>). Those are not the same
+    kind of quantity: the first is the offset the column supplies in its own gauge, the
+    second an absolute level in the authored gauge, and the two gauges differ by exactly
+    such a constant. Subtracting one from the other is not a residual. The row's physical
+    error is its scaled residual on the <code>1.0 Wb</code> scale,
+    <code>2.3214644865632295e-03 Wb</code>, and that is the quantity the clause, the
+    re-read below and the verdict all use.</p>
+
+    <h3>Re-reading the level in one gauge, with the third column active</h3>
+    <p>The gauge-free substitute is again the axis-to-boundary span, which no additive
+    constant can move, read on both sides at the same two points. This is a re-read of the
+    banked receipt: no solve ran, no field was recomputed, and no GPU was spent. The banked
+    directory holds only the positive arm, so the negative arm is reported as skipped rather
+    than raised, and no instrument control is claimed from it here.</p>
+    <table>
+      <thead><tr><th>quantity</th><th>positive arm, three columns</th></tr></thead>
+      <tbody>
+        <tr><td>solved span, axis minus boundary (Wb)</td><td><code>49.296522660822546</code></td></tr>
+        <tr><td>analytic span at the same two points (Wb)</td><td><code>50.249373386191</code></td></tr>
+        <tr><td>gauge-free flux offset (Wb)</td><td><code>-0.9528507253684566</code></td></tr>
+        <tr><td>gauge-free flux offset of span</td><td><code>-1.8962439950152867e-02</code></td></tr>
+        <tr><td>compensator contribution at the contact radius, <code>pi B (R squared - R0 squared)</code> with <code>R0 = 6.2 m</code> and <code>R = 7.711243498509007 m</code> (Wb)</td><td><code>+0.15775877619361545</code></td></tr>
+        <tr><td>compensator contribution to the span (Wb)</td><td><code>-0.15901815448496354</code></td></tr>
+        <tr><td>offset less the compensator's own span contribution (Wb)</td><td><code>-0.793832570883493</code></td></tr>
+        <tr><td>row scaled residual sup</td><td><code>2.3214644865632295e-03</code></td></tr>
+        <tr><td>level clause at or within <code>1e-3</code> of span</td><td><strong>fails</strong>, <code>1.896e-02</code>, nineteen times the clause</td></tr>
+        <tr><td>fixed-point clause at or below <code>1e-12</code></td><td><strong>fails</strong>, <code>2.321e-03</code>, nine decades above it</td></tr>
+      </tbody>
+      <caption>Read from <code>gauge-reread.json</code> under
+      <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-flux-level/</code>
+      on an <code>all_debug</code> allocation at the same head as the receipt, with
+      <code>JAX_PLATFORMS=cpu</code> and the shared interpreter run directly.</caption>
+    </table>
+    <h3>The three-column family against the two-column control</h3>
+    <p>The two-column numbers are the displaced-seed control of the previous section,
+    taken at <code>442820bf</code> on the same displaced seed. That arm carries no level
+    row, so the reader index defect <code>67296f75</code> fixes is inert for it. The
+    comparison is nevertheless not a single-head one, and it is stated as a pair.</p>
+    <table>
+      <thead><tr><th>quantity</th><th>two columns at 442820bf</th><th>three columns at 826a7434</th></tr></thead>
+      <tbody>
+        <tr><td>centroid error (pitches)</td><td><code>1.3398458394898267e-03</code></td><td><code>7.9402220554638949e-04</code></td></tr>
+        <tr><td>terminal residual</td><td><code>6.731388e-04</code></td><td><code>1.110210658104954e-03</code></td></tr>
+        <tr><td>row scaled residual sup</td><td><code>1.3398458394898267e-03</code></td><td><code>2.3214644865632295e-03</code></td></tr>
+        <tr><td>gauge-free flux offset (Wb)</td><td><code>-0.8267158876132186</code></td><td><code>-0.9528507253684566</code></td></tr>
+        <tr><td>gauge-free flux offset of span</td><td><code>-1.6463130685184867e-02</code></td><td><code>-1.8962439950152867e-02</code></td></tr>
+        <tr><td>level column amplitude (Wb)</td><td>absent, no level row</td><td><code>1.2383665193033397</code></td></tr>
+        <tr><td>qualified</td><td><code>false</code></td><td><code>false</code></td></tr>
+      </tbody>
+      <caption>The third column improves the positional clause and moves every other
+      figure the wrong way. It is the only column that can move the level, it supplies
+      <code>1.238 Wb</code> and meets its own point target locally, and the state is
+      still not the analytic equilibrium.</caption>
+    </table>
+    <h3>The row's reader and what it costs</h3>
+    <p>The adjudicated route has the row dispatch on its carrier: a lattice stating a
+    per-cell centroid coordinate is read through the operator's own point sample over
+    the mesh node stencil, and a structured <code>FluxLattice</code> still reads through
+    the cubic lattice interpolation the shape rows share. The point read is a per-node
+    local fit with host-solved weights, and it carries no device callback.</p>
+    <table>
+      <thead><tr><th>reader fact</th><th>value</th></tr></thead>
+      <tbody>
+        <tr><td>carrier</td><td><code>StencilMesh</code>, a cell-carried mesh with a per-cell centroid coordinate</td></tr>
+        <tr><td>fit</td><td>one local six-coefficient quadratic per node ring, host-solved at build</td></tr>
+        <tr><td>weights</td><td><code>np.linalg.pinv-style pinv(_quadratic_design(ring_local))</code>, <code>nova/equilibrium/stencil_mesh.py:817</code></td></tr>
+        <tr><td>design / device read</td><td><code>stencil_mesh.py:433</code> / <code>stencil_mesh.py:245</code></td></tr>
+        <tr><td>operator point sample</td><td><code>nova/equilibrium/forward_operator.py:2682</code></td></tr>
+        <tr><td>row read</td><td><code>nova/equilibrium/constraint.py</code>, the mesh-carried point flux</td></tr>
+        <tr><td>normalisation</td><td>ring centred on its own node and scaled to unit width; ownership is the cell whose centroid is nearest the point</td></tr>
+        <tr><td>callbacks in the row's jaxpr</td><td><code>callback 0</code>, <code>pure_callback 0</code>; <code>row_jaxpr_has_host_callback false</code></td></tr>
+        <tr><td>callbacks in both compiled programs</td><td><code>0</code> in each of the with-row and without-row StableHLO</td></tr>
+        <tr><td>one Newton step</td><td><code>0.17210294572636486 s</code> with the level row, <code>0.17278442915529013 s</code> without, 50 repeats each</td></tr>
+        <tr><td>the row's own read, <code>observed()</code> per evaluation</td><td><code>0.00010019337758421899 s</code> over 50 repeats, <code>5.821711950446303e-04</code> of one Newton step: the read costs a thousandth of the step it constrains</td></tr>
+        <tr><td>compile wall with / without the level row</td><td><code>2134.0117226084694 s</code> / <code>2255.552346904762 s</code>, a difference of <code>-121.54062429629266 s</code></td></tr>
+        <tr><td>StableHLO instructions with / without</td><td><code>1073026</code> / <code>1043422</code>, a difference of <code>+29604</code></td></tr>
+        <tr><td>unknowns with / without</td><td><code>775</code> / <code>774</code></td></tr>
+        <tr><td>reader-facts identity</td><td>schema <code>nova.centroid-flux-level-reader-facts</code>, source revision <code>826a7434</code>, support clip <code>exact</code>, level slot <code>1.0 Wb</code>, requested cells <code>-110</code></td></tr>
+      </tbody>
+    </table>
+    <h3>The terminal state's poloidal panel</h3>
+    <p>The panel draws the banked positive arm's terminal state beside the analytic
+    field on one shared level set, with both null sets in their own styles and the
+    first wall on unit-faithful closure, so the reader can see where the solved axis
+    and boundary sit against the analytic ones. It is the raster the receipt at head
+    <code>826a7434</code> names, and its digest is the one the receipt carries.</p>
+    <figure>
+      <img src="/nova/figures/centroid-constrained-oracle-solve/control-positive.png"
+           alt="Poloidal flux contours of the displaced-seed positive control's terminal state drawn over the analytic field on a shared level set, with both null sets and the first wall" />
+      <figcaption>Line contours only, no axes and no gridlines, on twelve levels taken
+      from the analytic field so the two cannot hide behind independent scales. Blue is
+      the analytic field, orange the terminal state of the three-column positive arm at
+      head <code>826a7434</code>; the wall is drawn on unit-faithful closure. The
+      analytic null set sits at the triangle, and no admitted saddle exists on either
+      field (<code>0</code> X-candidates, <code>1</code> O-candidate: the state is
+      <code>limited</code>, its boundary touching the wall at
+      <code>(7.711243498509007, -1.2833930119030192) m</code>). Terminal residual
+      <code>1.110210658104954e-03</code>, converged <code>false</code>: the solved
+      contours lie close to the analytic ones and are not the analytic equilibrium.</figcaption>
+    </figure>
+
+    <h3>Verdict</h3>
+    <p>Against the clauses the node was fenced to rule on, the positive control
+    <strong>fails, and fails at a measured floor rather than by an unbounded
+    margin</strong>. The positional clause <strong>holds</strong> and holds
+    decisively: <code>7.9402220554638949e-04</code> pitches, one hundred and
+    twenty-six times inside the asked tenth of a pitch. The field bound
+    <strong>holds</strong> on all three columns: the largest field amplitude is
+    <code>2.388599064870474e-03 T</code>, <code>0.955%</code> of the declared
+    <code>0.25 T</code>, with <code>bound_refusal [false, false, false]</code>. The
+    level column's own point target is met locally to
+    <code>2.3214644865632295e-03 Wb</code>, <code>4.708e-05</code> of the
+    <code>49.2965 Wb</code> span. The fixed-point clause <strong>fails</strong> at
+    <code>2.3214644865632295e-03</code> against its <code>1e-12</code> threshold,
+    nine decades above it, and the gauge-free level clause <strong>fails</strong> at
+    <code>1.8962439950152867e-02</code> of span against its <code>1e-3</code>-of-span
+    threshold, nineteen times it. The third column is therefore a real but
+    insufficient term: it moves the level that no solenoidal field can move, it
+    supplies <code>1.2383665193033397 Wb</code> of offset, it improves the
+    positional clause by <code>1.69</code> times against the two-column control,
+    and the state it reaches is still not the analytic equilibrium.</p>
+  </section>
 </main>
 </html>

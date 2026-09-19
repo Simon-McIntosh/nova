@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="82">
+<meta name="plan-version" content="83">
 <meta name="plan-impl" content="0.94">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
@@ -257,6 +257,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260919T141620037986-fsa-persistence-guard-positive-control" data-who="reckon-ship" data-when="2026-09-19T14:32:31.902Z">
     <div class="r-comment-body"><p>The guard measures the archived pair and fires on all twenty states (state 0 at 2.249e-2 Wb) where the previous assertion fired on none; range guards unified; headline restated to 12 of 20.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260919T125427607332-fsa-sweep-persistence" data-who="reckon-ship" data-when="2026-09-19T13:24:56.207Z">
+    <div class="r-comment-body"><p>Gate not run by this node: the declared fixture-regeneration gate needs an all_debug job the 55-minute fence could not reach, and it moved to the regeneration followup. The repair itself is merged at a8234e24 and was exercised by the corrective node fsa-persistence-guard-positive-control, whose read-back guard fires on all twenty archived states (3 passed, exit 0).</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260904T123306247283-fsa-solve-budget-drift-inventory" data-who="fsa-budget-audit" data-when="2026-09-04T12:50:46Z">
     <div class="r-comment-body"><p>737 pinned solver-control sites (4 in nova/, 300 in benchmarks/, 14 in docs/figures producers, 419 in tests): 12 distinct Newton budgets and 14 distinct GMRES budgets in active paths, three conflicting would-be authorities (ForwardProfile newton_steps 4, the kernel's GMRES 8 with warmup 8, PerturbedSeedPolicy 10 and 30), the MAST bank produced at Newton 12, GMRES 12, warmup 0; single-source recommendation for a ForwardSolveRequest/Policy and a fail-closed default-wiring test</p></div>

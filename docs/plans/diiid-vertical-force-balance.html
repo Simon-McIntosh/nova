@@ -23,10 +23,10 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
-<meta name="plan-impl" content="0.93">
+<meta name="plan-impl" content="0.96">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,diiid-forward-onboarding,constraint-augmented-newton-krylov">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
@@ -108,9 +108,15 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
     <pre class="r-fu-prompt">/reckon-ship diiid-vertical-force-balance §5</pre>
     <p class="r-fu-outcome">Landed (dvf-prescribed-profile-prototype, commits 78a2f700, 12840a9c, 974e9afe, 30b5e6f6, merged): the five gate frames were solved forward on the H200 with 19 reliable p-prime and ff-prime surfaces each and the currents prescribed from the label in COCOS 17 (map factor -2 pi, current factor +1, one convention crossing, per-row sign tuple recorded, no single source COCOS index claimed). Result: 0 of 5 converged at 1e-6, terminal residuals 0.415 (frame 179), 0.400 (44), 5.93 (144), 2.37 (146), 2.41 (137), 26 to 29 minutes wall per frame; axis and X-point present per row. Every source Parquet lacks stored EFIT p-prime and ff-prime, so the extracted-versus-stored profile comparison is recorded unavailable rather than inferred. Receipt docs/figures/diiid-vertical-force-balance/prescribed-profile-prototype/receipt.json with the bounded per-frame H200 launcher run-frame.sh.</p>
     </article>
-<article class="r-fu" data-id="f-dvfb-separatrix-import-break" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-19T12:00:00Z" data-recommends-skill="/reckon-ship diiid-vertical-force-balance" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dvfb-separatrix-import-break" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-19T12:00:00Z" data-recommends-skill="/reckon-ship diiid-vertical-force-balance" data-resolved-at="2026-09-19T13:20:37+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Two DIII-D test modules fail to import _separatrix from the forward GS match benchmark</h4>
     <div class="r-fu-body">Measured 2026-09-19 by the receipt-repairs node: tests/imas/test_diiid_circuit_driven_forward_validation.py and tests/imas/test_diiid_diverted_solve_overlay.py both fail at collection because benchmarks.diiid_forward_gs_match no longer exports _separatrix, so the path-free default lane's collection exits nonzero before any test runs and the two modules have been silent since the export moved. Restore the import through the module's current public name (or the separatrix branches API the tracer repair landed), confirm both modules collect and run on all_debug CPU, and record which commit removed the export.</div>
+    <pre class="r-fu-prompt">/reckon-ship diiid-vertical-force-balance</pre>
+    <p class="r-fu-outcome">Restored at 20f4520f (merged 424a2893): _separatrix and contour_separation return to benchmarks/diiid_forward_gs_match.py as thin wrappers over the assembled-branch API; both modules collect and pass (10 passed) and the path-free default lane collects with exit 0. The export was removed by 130d84e3 (2026-08-26). Two follow-ons remain open below.</p>
+    </article>
+<article class="r-fu" data-id="f-dvfb-drivers-import-private-names" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship diiid-vertical-force-balance" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Three DIII-D drivers import module-private names instead of the comparators</h4>
+    <div class="r-fu-body">Recorded by the separatrix-import node: benchmarks/diiid_circuit_driven_forward_validation.py, benchmarks/diiid_diverted_solve_overlay.py and a third driver import _separatrix and contour_separation from the forward-match module rather than calling assemble_separatrix_branches and compare_closed_boundaries directly, and no unit test in tests/imas/test_diiid_forward_gs_match.py pins the two restored names. Re-point the drivers at the public comparators, pin the two names with a unit test until the last private import is gone, and confirm both test modules still collect and pass on all_debug CPU.</div>
     <pre class="r-fu-prompt">/reckon-ship diiid-vertical-force-balance</pre>
     </article>
 </section>

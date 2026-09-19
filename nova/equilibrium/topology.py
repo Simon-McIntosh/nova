@@ -655,6 +655,11 @@ class Topology(Pytree):
         through the published wall contact. Unstructured reads have no tensor
         surface and retain their wall-zone samples.
 
+        ``containment_required`` of ``None`` evaluates containment inside this
+        pass rather than receiving it: the screen is applied when any fitted
+        contact is reached by the axis-enclosing component at that contact's
+        own level, and the raw wall extremum is retained when none is.
+
         Masked samples receive a finite losing score before the wall extremum
         is selected.  Keeping the operand finite preserves the fixed-shape
         quadratic interpolation used by :class:`~nova.biot.null.Null1D` while
@@ -707,6 +712,8 @@ class Topology(Pytree):
                 inside_material,
                 surface,
             )
+            if containment_required is None:
+                containment_required = jnp.any(eligible)
             eligible = jnp.where(
                 jnp.asarray(containment_required),
                 eligible,
@@ -1134,10 +1141,10 @@ class Topology(Pytree):
         )
         selection = self.o_point_qualification(vmap_o, polarity, qualified_o)
         data_o = selection.data
-        provisional_x = self.x_point_data(vmap_x, polarity, data_o[2])
-        provisional_boundary = self.boundary(data_o, vmap_x, data_w, polarity)
         if requested_class is None:
-            containment_required = ~jnp.equal(provisional_boundary[2], provisional_x[2])
+            # A class-free read has no branch to pin containment to, so each
+            # containment pass evaluates it from the state that pass holds.
+            containment_required = None
         else:
             containment_required = jnp.asarray(requested_class) == int(
                 TopologyClass.LIMITED

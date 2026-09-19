@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T13:49:23",
+  "updated": "2026-09-19T13:52:45",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5317,6 +5317,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-review-cankrec-c",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-19"
       },
       {
         "id": "s19c-review-cankrow-c",
@@ -203697,6 +203706,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2875
+    "_version": 2876
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T15:48:51",
+  "updated": "2026-09-19T15:48:53",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4779,6 +4779,15 @@
       },
       {
         "id": "s19c-dvfb-import-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-19"
+      },
+      {
+        "id": "s19c-dvfb-polarity-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -205849,6 +205858,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2894
+    "_version": 2895
   }
 }

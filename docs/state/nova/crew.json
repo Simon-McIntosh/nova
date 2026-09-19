@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T16:16:03",
+  "updated": "2026-09-19T16:16:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4898,6 +4898,15 @@
       },
       {
         "id": "s19c-fsa-edge-root-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-19"
+      },
+      {
+        "id": "s19c-fsa-guard-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -206876,6 +206885,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2905
+    "_version": 2906
   }
 }

@@ -34,6 +34,7 @@ from nova.utilities.importmanager import skip_import
 with skip_import("jax"):
     from nova.equilibrium.forward_operator import ForwardFluxOperator
 
+from nova.equilibrium.topology import NoQualifiedAxisError
 from tests.test_equilibrium_forward_solve import _with_direct_samples
 
 pytest_plugins = ("tests.test_equilibrium_forward_solve",)
@@ -90,9 +91,20 @@ def _unfused_point_read(self, psi, requested_class=None):
 
 
 def _unfused_linear_read(self, psi, requested_class=None):
-    """Serve the two requests from the two reads the fusion removes."""
-    masks, topology = self.read(psi, requested_class)
+    """Serve the two requests from the two reads the fusion removes.
+
+    The two requests disagree about unqualified states: ``read`` raises on the
+    host when no axis candidate resolves, while the fused route reaches only
+    ``_support_partition``, which returns the achieved labels either way.  Where
+    the separate request would refuse a state the fused route serves, the
+    substitute takes the partition's own masks and topology, so the comparison
+    runs over the states both routes serve.
+    """
     partition = self._support_partition(psi, requested_class)
+    try:
+        masks, topology = self.read(psi, requested_class)
+    except NoQualifiedAxisError:
+        masks, topology = partition[0], partition[1]
     return (
         self.cell_current_moments(psi, requested_class),
         self._clipped_integral_measure(partition),

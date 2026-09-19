@@ -1327,10 +1327,11 @@ def _draw_branch_set(
 
     The assembler returns zero geometry for any violation of its terms, so a
     present set is not the same as a drawn boundary: a rejected set falls back
-    to the raw level set, dashed, and reports the fallback beside its zero
-    counts rather than leaving the panel without the boundary the reader is
-    looking for.  A set whose terms did not travel with it -- an archive written
-    before the terms accompanied the geometry -- is drawn as stored.
+    to its crossings drawn as unconnected marks, and reports the fallback
+    beside its zero counts rather than leaving the panel without the boundary
+    the reader is looking for.  A set whose terms did not travel with it -- an
+    archive written before the terms accompanied the geometry -- is drawn as
+    stored.
     """
     tally = {"closed_drawn": 0, "open_drawn": 0, "unassembled": 0}
     verdict = None if branches is None else branches.get("well_formed")
@@ -1349,7 +1350,20 @@ def _draw_branch_set(
         np.asarray(fallback, dtype=float) if fallback is not None else np.empty((0, 2))
     )
     if array.size:
-        axis.plot(array[:, 0], array[:, 1], color=color, linewidth=0.7, linestyle="--")
+        # The fallback is a scan-order crossing list, not an ordered path: two
+        # consecutive entries are neighbours in the raster walk, not endpoints
+        # of one segment.  Joining them draws a fan of chords across the vessel,
+        # so the crossings are drawn as separate unconnected marks and the
+        # caption says the boundary is not assembled here.
+        axis.plot(
+            array[:, 0],
+            array[:, 1],
+            color=color,
+            linestyle="none",
+            marker="+",
+            markersize=3.0,
+            markeredgewidth=0.7,
+        )
         tally["unassembled"] = 1
     return tally
 
@@ -1499,13 +1513,29 @@ def _branch_style_note(drawn: dict[str, int]) -> str:
     """Return the caption fragment describing how one set was drawn.
 
     A set the assembler rejected carries zero geometry, so it is drawn as its
-    own solved separatrix, dashed; the caption has to say which of the two
-    drawings the reader is looking at, because the two are indistinguishable on
-    the panel and one of them is not an assembled boundary.
+    own scan-order crossings, unconnected; the caption has to say which of the
+    two drawings the reader is looking at, because the two are indistinguishable
+    on the panel and one of them is not an assembled boundary.
     """
     if drawn.get("unassembled"):
-        return "unassembled at its own saddle level, drawn dashed from its separatrix"
+        return "unassembled, crossings drawn unconnected"
     return "lobe solid, legs dashed"
+
+
+def _null_ordering(x_points: Any, saddle_index: int, axis: Any) -> str:
+    """Compare the admitted saddle's height with the magnetic axis's.
+
+    Both the reference and every solved state carry a qualified null set, and
+    which one is admitted as the boundary saddle differs between them: the
+    reference's sits above its axis, the solved states' below.  The caption
+    states the comparison rather than assuming it, so a regenerated reference
+    whose ordering changed does not silently contradict its own caption.
+    """
+    array = np.atleast_2d(np.asarray(x_points, dtype=float))
+    if not 0 <= saddle_index < array.shape[0]:
+        return "saddle absent"
+    point = np.asarray(axis, dtype=float).reshape(2)
+    return "above its axis" if array[saddle_index][1] > point[1] else "below its axis"
 
 
 def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
@@ -1535,12 +1565,18 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
     )
     figure.suptitle(
         "terminal poloidal flux on shared levels between the axis and boundary "
-        "flux (%.4f to %.4f Wb)  |  reference set blue: %s, admitted %s, other "
-        "qualified nulls hollow  |  solved set orange: %s, admitted %s, other "
-        "hollow  |  wall drawn"
+        "flux (%.4f to %.4f Wb)  |  reference is the unedited equilibrium "
+        "(blue, admitted saddle %s)  |  reference set blue: %s, admitted %s, "
+        "other qualified nulls hollow  |  solved set orange: %s, admitted %s, "
+        "other hollow  |  wall drawn"
         % (
             loaded["reference_axis_flux"],
             loaded["reference_boundary_flux"],
+            _null_ordering(
+                loaded["reference_xpoints"],
+                loaded["reference_saddle_index"],
+                loaded["reference_axis"],
+            ),
             _branch_style_note(loaded.get("reference_branches_drawn", {})),
             reference_note,
             _branch_style_note(loaded["failed"].get("branches_drawn", {})),

@@ -765,7 +765,32 @@
 
 <p><strong>What remains.</strong> The producer revision does not contain the hook's name at all — its <code>nova/equilibrium/forward_operator.py</code> is 1805 lines with zero occurrences of <code>dynamic_extra</code>, and the arrangement arrives later at <code>879a33ee</code> (<em>feat(equilibrium): separate operator geometry from member data</em>). Between <code>fae50f15</code> and this tree, 175 commits touch <code>nova/equilibrium/</code>. The anchor names being exonerated, the standing candidate is what the operand partition <em>contains</em>: the producer's partition carries no values at all against 76 leaves now, and the families that add leaves to it are the traced profile-coefficient work and the traced-polygon-capacity refactor. This record localises the drift downstream of the anchor store; it does not name the commit.</p>
 
-<p><strong>Instrument and one recorded defect.</strong> Job <code>1273425</code> on <code>98dci4-gpu-0003</code> (reservation <code>gpu_0003_grpA</code>, one card, eight cores, 128G, wall 52m51s) ran four <code>jit(solve)</code> compilations, the slowest 4m18s, with <code>jax_enable_x64 true</code> asserted before any array. A pre-flight control on the login node showed the two treatments separating on four instruments before any allocation was spent, and the traced arm reproduced the committed bank reference's operand digests both there and on device. The first submission (<code>1273419</code>) died in operand construction because the payload's working directory was the report directory and the producer's response-carrier check resolves its receipt path relative to the repository root; the defect is recorded, reproduced by hand and repaired in the launcher, and the driver's receipt path still owes a repair for reporting <em>"the override did not take effect"</em> when its arms are merely absent.</p>
+<p><strong>Instrument and one recorded defect.</strong> Job <code>1273425</code> on <code>98dci4-gpu-0003</code> (reservation <code>gpu_0003_grpA</code>, one card, eight cores, 128G, wall 52m51s) ran four <code>jit(solve)</code> compilations, the slowest 4m30.6s, with <code>jax_enable_x64 true</code> asserted before any array. A pre-flight control on the login node showed the two treatments separating on four instruments before any allocation was spent, and the traced arm reproduced the committed bank reference's operand digests both there and on device. The first submission (<code>1273419</code>) died in operand construction because the payload's working directory was the report directory and the producer's response-carrier check resolves its receipt path relative to the repository root; the defect is recorded, reproduced by hand and repaired in the launcher. The driver's receipt path reported <em>"the override
+did not take effect"</em> when its arms were merely absent; that reading is repaired, together with
+the compile figure in the receipt below.</p>
+
+<p><strong>Receipt repairs (2026-09-19).</strong> Three review findings on the record above are
+repaired in the driver and pinned in <code>tests/test_bank_drift_anchor_bisect.py</code>. (1) An arm
+that never landed or whose solve raised carries no terminal state, and the verdict reported its
+empty hook-name list as a treatment that failed to take effect; the verdict now keys on the arm's
+absence first, publishing <code>arms_absent</code> with each treatment's reason and a finding that
+says the record compares nothing about the hook. Reproduced on the committed driver with an empty
+arm directory, which answered <em>"the override did not take effect"</em> for both classes. (2) The
+mixed class's two residual values, <code>2.2041968427410595e-16</code> and
+<code>3.0996518101046146e-16</code>, differ bitwise, so the verdict named the anchor partition the
+carrier of their <code>8.95e-17</code> gap; that gap is below the round-off floor
+(<code>2.220446049250313e-16</code>, one machine epsilon, the floor a normalised residual can
+reach), so the finding now compares the gap to the floor and reports the two arms as having
+reached the same state by a different arithmetic order. The regenerated receipt carries
+<code>terminal_residual_gap</code>, <code>round_off_floor</code> as data beside the sentence. On
+the pure class, whose arms agree exactly, the finding is unchanged. (3) The receipt's instrument
+table stated the allocation's slowest compile as 4m18s, the first of the log's two slow-operation
+alarms; the log's alarms read <code>4m18.232613536s</code> and <code>4m30.589312894s</code>, so
+the receipt and this record now state 4m30.6s. The receipt subcommand was re-run against the
+committed arm records with no allocation, so the machine-readable receipt is regenerated rather
+than edited; a positive control (a separation far above the floor) still names the carrier.
+Gate on the login node: the new test module plus <code>tests/test_bank_drift_paired_probe.py</code>,
+18 passed, exit 0.</p>
 
 <p><strong>Evidence.</strong> Receipt <code>docs/figures/null-identification-authority/anchor-bisect/receipt.html</code> with the machine-readable <code>receipt-21978-35-anchor-bisect.json</code> and the four committed arm records and terminal-array archives under <code>arms/</code>; driver <code>benchmarks/bank_drift_anchor_bisect.py</code>; run log <code>~/.config/reckon/crew/reports/nova/s19-local/anchor-bisect/bisect.log</code> with the control at <code>control.log</code> and the failed first submission at <code>bisect-run1-chdir-defect.log</code>.</p>
 </section>

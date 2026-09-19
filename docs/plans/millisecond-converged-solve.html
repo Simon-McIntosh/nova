@@ -22,14 +22,14 @@
 <title>Millisecond converged solve | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-19">
+<meta name="plan-modified" content="2026-09-20">
 <meta name="plan-impl" content="0.96">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd,273ff747,7aef0963">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="116">
+<meta name="plan-version" content="117">
 </head>
 <body>
 <main class="plan-doc">
@@ -544,6 +544,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260919T090428129698-msc-newton-krylov-route-regression" data-who="reckon-ship" data-when="2026-09-19T13:50:24Z">
     <div class="r-comment-body"><p>Stopped at the two-attempt fence to release nova/equilibrium/forward_operator.py, which three other queued items also edit and which nothing could reach while this run held it. Attempt one, label-aware partition promotion, reached NoQualifiedAxisError in job 1273977; attempt two, every topology read kept live at bed0155b, passed its focused refusal test and timed out at 59:25 in job 1273996. Six commits stay in the worktree unmerged and recoverable by merge: 1b54057a route telemetry, 4992bcc3 frozen trajectory operands, bff52fa8 frozen domain labels, bebd067e retire route diagnostics, bed0155b the live-map Newton repair, 8e0f3bbc the staged residual renderer. The third attempt waits on the lead decision.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-msc-stray-note-corrected-by-a-pushed-note" data-who="coordinator" data-when="2026-09-20T00:40:00Z">
+    <div class="r-comment-body"><p>The last of the five review repairs is done and it is the one a worker could not do, because it is a push. Commit 1f141e67's body ended with the fragment <code>Selected unverified. be careful</code>, editor residue that reads as a caveat on the change. A note now sits on that commit at <code>refs/notes/commits</code> saying the fragment is not part of the account, restating what the commit carried, and naming the thing its message implied by omission: it added the request-kind declaration and the dispatcher without any call site, and the later program-shape census measured that the dispatcher moved no program. The note also records why a subsequent change deletes the dispatcher and the two request and answer types rather than extending them, so a reader arriving at the deletion does not have to reconstruct the reason.</p><p>The note was pushed explicitly and the remote ref was confirmed to have moved, because neither <code>git push</code> nor <code>git fetch</code> carries notes by default and this checkout did not hold the refspecs. The remaining four repairs are in flight as two nodes, split because the certificate baseline is a benchmark change needing its own allocation while the dispatcher deletion, the fused-branch test and the receipt cell are ordinary edits.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s19h-s3-certificate-prerequisite" data-who="reckon-ship s19-handoff" data-when="2026-09-15T10:15:00Z">
     <div class="r-comment-body">Section 3 prerequisite, held by the coordinator rather than by a plan-level wire: the certified millisecond measurement runs only once gs-absolute-accuracy-gates section 3 (the certificate artifact and its pin) is current on the exact cut-cell participation and the joint qualification, because it reports cost for certificate-passing solves. The stage-scoped dependency gs-absolute-accuracy-gates#s3 was authored and withdrawn the same hour: the roadmap's anchor resolver did not recognise that section (reported to reckon), and a plan-level dependency on the whole certificate plan would hold section 2, which never needed it. gs-absolute-accuracy-gates now informs this plan; no section 3 node is dispatched before the certificate lands.</div>

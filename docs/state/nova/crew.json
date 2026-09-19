@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T16:36:53",
+  "updated": "2026-09-19T16:36:55",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5769,6 +5769,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-18"
+      },
+      {
+        "id": "s19c-review-shim-c",
+        "harness": "clive",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-19"
       },
       {
         "id": "s19c-review-sos-order-c",
@@ -208915,6 +208924,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2915
+    "_version": 2916
   }
 }

@@ -29,7 +29,6 @@ direct pre-clip sample nodes.
 from __future__ import annotations
 
 from collections.abc import Callable
-from enum import IntEnum
 from dataclasses import InitVar, dataclass, field, fields, is_dataclass
 from functools import cached_property
 import hashlib
@@ -821,102 +820,6 @@ class _FrozenTopologyPartition(NamedTuple):
     topology: TopologyState
     profile_support: object
     residual_shadow: jax.Array
-
-
-class FluxReadRequest(IntEnum):
-    """The read requests one machine invocation serves.
-
-    Every kind below is a post-processing of the *same* read: a residual, a
-    merit scalar, an acceptance decision, a recovery start and a
-    reconciliation reading all consume the discrete topology state and the
-    current moments that one qualification pass produces.  Carrying them as
-    elements of a request list rather than as one call site each is what keeps
-    the read body to a single traced instance; the Jacobian-vector request is
-    not such a post-processing, so it is deliberately absent and rides the
-    machine at the transform level instead.
-    """
-
-    RESIDUAL = 0
-    MERIT = 1
-    ACCEPTANCE = 2
-    RECOVERY = 3
-    RECONCILIATION = 4
-
-
-class FluxReadAnswer(NamedTuple):
-    """One read's outputs, every one of them already computed.
-
-    The request tag chooses which combination of these forms the value a
-    caller receives; it never chooses the arithmetic, because the arithmetic
-    is shared.
-    """
-
-    residual: jax.Array
-    merit: jax.Array
-    acceptance: jax.Array
-    recovery: jax.Array
-    reconciliation: jax.Array
-    mask: jax.Array
-
-
-def dispatch_read_requests(read, states, tags, node_number: int):
-    """Serve one read request per row in a single traced loop body.
-
-    ``states`` carries one trial flux map per request and ``tags`` is a traced
-    integer vector naming the request kind each row is served with.  The tag
-    travels as loop state and selects its value inside the body, so ``read`` is
-    reached from exactly one call site however many request kinds a caller
-    holds.
-
-    The selection is a dynamic gather over the reading's pooled outputs rather
-    than a ``lax.switch``: a control-flow switch whose branches select a field
-    of a value computed in the same loop body gives the optimiser a reason to
-    clone the whole body once per trip, which multiplies the read in the
-    compiled program by the request count.  A gather has no branch to clone,
-    so the body stays one instance.  Measured on a three-trip loop: three
-    branches and five branches both leave three bodies behind a switch, and
-    one body behind the gather.
-
-    ``read`` takes one state and returns a :class:`FluxReadAnswer`.  The
-    returned pair is the selected scalar per row and the read mask per row;
-    rows whose kind selects a scalar carry the mask they were read from, so a
-    caller that needs the discrete partition reads it beside its answer
-    instead of qualifying the state a second time.
-    """
-    count = tags.shape[0]
-    answers = jnp.zeros(count, dtype=jnp.float64)
-    masks = jnp.zeros((count, node_number), dtype=bool)
-
-    def condition(carry):
-        index, _answers, _masks = carry
-
-        return index < count
-
-    def body(carry):
-        index, selected_answers, selected_masks = carry
-        reading = read(states[index])
-        pooled = jnp.stack(
-            (
-                reading.residual,
-                reading.merit,
-                reading.acceptance,
-                reading.recovery,
-                reading.reconciliation,
-            )
-        )
-        selected = pooled[tags[index]]
-        return (
-            index + 1,
-            selected_answers.at[index].set(selected),
-            selected_masks.at[index].set(reading.mask),
-        )
-
-    if count == 0:
-        return answers, masks
-    _index, answers, masks = jax.lax.while_loop(
-        condition, body, (jnp.asarray(0, dtype=jnp.int32), answers, masks)
-    )
-    return answers, masks
 
 
 def _structured_grid_axes(coordinate) -> tuple[np.ndarray, np.ndarray]:

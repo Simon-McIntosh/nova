@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="73">
 <meta name="plan-impl" content="0.87">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
@@ -259,6 +259,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-fsa-lcfs-trace-reviewed" data-who="" data-when="">
     <div class="r-comment-body">Review r-20260919T082842765337 reproduced the census first-hand (4 of 20 fail, states 9 to 12, levels identical to nine digits, no state regressed) and the gate (30 passed), and corrected three things the record got wrong. First, the four residual states are not a two-crossing saddle cell: on state 9 the fitted spline crosses all four edges of cell (5,9), twice on the left edge 19.4 mm apart, and the five-sample subdivision brackets a root only where a sub-interval's ends straddle the level, so two roots inside one 25 mm sub-interval are still lost; the count of 2 belongs to the detector, not the geometry, and the queued fix of forcing the ambiguity gate would not close the lobe because the two left-edge crossings are absent from the ring. The repair belongs in the bracket: count roots on each edge from the cubic's own extrema along the edge, not from fixed samples. Second, the blue reference spray is the fixture's stored reference_separatrix, a crossing list in scan order, drawn verbatim as one dashed polyline in benchmarks/coil_edit_latency.py near line 1425; the reference raster is correctly oriented and reproduces its own stored axis and saddle, so this is a rendering defect, not data orientation. Third, the reference is a different configuration from the solves: its admitted saddle sits above its axis (z +1.23) while every solved state carries a lower X-point (saddle z -1.33 to -1.24), so the panel compares an upper-null reference against lower-null solves without saying so. The coordinator corrected the mechanism sentence in the evidence record; the followup below is rewritten to the review's findings.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260919T082842765337-review-of-fsa-coil-edit-panel-lcfs-2" data-who="reckon-ship" data-when="2026-09-19T08:52:32.962Z">
+    <div class="r-comment-body"><p>Review stored: 75/100, five findings</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260915T082752949902-fsa-transport-shim-delta-gate" data-who="fsa-transport-shim-delta-gate" data-when="2026-09-15T11:35:00+02:00">
     <div class="r-comment-body"><p>Transport test delta gate did not complete in its single exact scheduler allocation. Job <code>1271211</code> on <code>all_debug</code> ran the base archive <code>0f872fd6</code> through seven modules: 35 passed, 0 failed and 1 xfailed; it reached <code>tests/test_transport_geometry_reference.py</code> at the 59-minute wall and exited <code>143</code> before a terminal receipt. The shim-removal revision <code>fb402f8f</code> was not run, so the added-failure set is <strong>NOT MEASURABLE</strong>, not assumed empty. Full per-module logs and JUnit receipts are under <code>~/.config/reckon/crew/reports/nova/s19-handoff/transport-shim-gate/</code>; the next action is a fresh allocation with sufficient time or an exact plan-approved test selection.</p></div>

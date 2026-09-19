@@ -22,6 +22,7 @@ import time
 from typing import Any
 
 
+ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_CELLS = (300, 1000)
 BASELINE_300_EXECUTABLE_BYTES = 461_724_765
 MAX_300_EXECUTABLE_BYTES = 50_000_000
@@ -1214,8 +1215,14 @@ def measure_300_marker_census(
     return receipt
 
 
-def _certificate_operands(case_name: str, requested_cells: int):
-    """Build the exact production certificate operands for one committed row."""
+def _certificate_render_context(case_name: str, requested_cells: int) -> dict[str, Any]:
+    """Build the certificate operands together with what a flux panel needs.
+
+    The solve operands come from one shared body so a caller that also draws the
+    terminal state pays for the fixture exterior once rather than twice: the
+    coordinates, the analytic reference state and the operator that reads a
+    state's stationary points are the same objects the solve already built.
+    """
     import numpy as np
 
     from benchmarks import solovev_certificate as certificate
@@ -1254,7 +1261,156 @@ def _certificate_operands(case_name: str, requested_cells: int):
         target_current,
         carrier_identity=f"solovev:{case_name}:{requested_cells}",
     )
-    return profile, seed, requested_class, target_current, request
+    return {
+        "profile": profile,
+        "seed": seed,
+        "requested_class": requested_class,
+        "target_current": target_current,
+        "request": request,
+        "exact": exact,
+        "machine": machine,
+        "coordinates": coordinates,
+        "oracle_state": oracle_state,
+        "operator": operator,
+    }
+
+
+def _certificate_operands(case_name: str, requested_cells: int):
+    """Build the exact production certificate operands for one committed row."""
+    context = _certificate_render_context(case_name, requested_cells)
+    return (
+        context["profile"],
+        context["seed"],
+        context["requested_class"],
+        context["target_current"],
+        context["request"],
+    )
+
+
+def _panel_slug(case_name: str, requested_cells: int) -> str:
+    """Name one row's panel by its case and realised cell count."""
+    return f"{case_name}-cells-{abs(int(requested_cells))}-across-revisions"
+
+
+def _panel_receipt(path: Path) -> dict[str, Any]:
+    """Receipt one rendered panel from the files on disk.
+
+    The digests are read back rather than carried in memory, so a panel that
+    failed to write is refused here instead of being receipted as present.
+    """
+    vector = path.with_suffix(".svg")
+    for candidate in (path, vector):
+        if not candidate.resolve().is_file():
+            raise RuntimeError(f"rendered certificate panel is missing: {candidate}")
+    source = f"/nova/{path.relative_to(ROOT / 'docs')}"
+    return {
+        "filesystem_path": str(path.relative_to(ROOT)),
+        "project_absolute_src": source,
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "vector_filesystem_path": str(vector.relative_to(ROOT)),
+        "vector_project_absolute_src": source.removesuffix(".png") + ".svg",
+        "vector_sha256": hashlib.sha256(vector.read_bytes()).hexdigest(),
+    }
+
+
+def _certificate_flux_panel(
+    case_name: str,
+    requested_cells: int,
+    context: dict[str, Any],
+    terminal_state: Any,
+    *,
+    terminal_residual: float,
+    bit_identical: bool,
+    revision_note: str,
+    path: Path,
+) -> dict[str, Any]:
+    """Draw one terminal state as unfilled poloidal flux contours beside its reference.
+
+    The solved state and the analytic reference share one level array so a
+    mismatch cannot hide behind independent colour scales, both null sets are
+    drawn in their own style, and the first-wall units close the panel. The
+    caption carries the terminal residual and the cross-revision verdict, which
+    is what makes the panel a record of the state rather than an illustration.
+    """
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    from benchmarks import solovev_certificate as certificate
+    from nova.media import poloidal
+    from nova.media.ink import DEFAULT_INK, poloidal_axes
+
+    coordinates = np.asarray(context["coordinates"], dtype=np.float64)
+    wall = np.asarray(context["machine"].wall_node, dtype=np.float64)
+    boundary = np.asarray(certificate._boundary(case_name, context["exact"]))
+    operator = context["operator"]
+    solved_values = np.asarray(terminal_state, dtype=np.float64).reshape(-1)
+    analytic_values = np.asarray(context["oracle_state"], dtype=np.float64).reshape(-1)
+    solved_topology = certificate._topology(operator, solved_values)
+    analytic_topology = certificate._topology(operator, analytic_values)
+    if (
+        certificate._is_diverted_case(case_name)
+        and analytic_topology["read_status"] == "no_qualified_axis"
+    ):
+        analytic_topology = certificate._analytic_diverted_topology(context["exact"])
+    radial, height, solved = certificate._raster_field(coordinates, solved_values, wall)
+    _, _, analytic = certificate._raster_field(coordinates, analytic_values, wall)
+    levels = poloidal.contour_levels(
+        np.concatenate((solved.ravel(), analytic.ravel())), count=12
+    )
+    figure, axis = plt.subplots(figsize=(6.4, 6.0), constrained_layout=True)
+    poloidal.draw_flux_contours(
+        axis, radial, height, analytic, levels, color=certificate.ANALYTIC_INK_COLOR
+    )
+    poloidal.draw_flux_contours(
+        axis, radial, height, solved, levels, color=certificate.SOLVED_INK_COLOR
+    )
+    poloidal.draw_boundary(
+        axis, boundary[:, 0], boundary[:, 1], color=certificate.ANALYTIC_INK_COLOR
+    )
+    wall_units = (wall,)
+    poloidal.draw_wall(axis, units=wall_units)
+    for topology, color in (
+        (analytic_topology, certificate.ANALYTIC_INK_COLOR),
+        (solved_topology, certificate.SOLVED_INK_COLOR),
+    ):
+        if topology.get("axis_rz_m") is None and topology.get("x_point_rz_m") is None:
+            continue
+        poloidal.draw_nulls(
+            axis,
+            magnetic_axis=topology.get("axis_rz_m"),
+            x_points=topology.get("x_point_rz_m"),
+            style=DEFAULT_INK.variant(
+                axis_marker="^", axis_color=color, xpoint_color=color
+            ),
+            contain=wall_units,
+        )
+    poloidal_axes(axis)
+    axis.set_title(
+        f"{case_name} · {abs(int(requested_cells))} cells\n"
+        f"blue reference contours and nulls / ochre solved contours and nulls; "
+        f"shared Wb levels",
+        fontsize=9,
+    )
+    axis.text(
+        0.02,
+        0.02,
+        f"terminal residual {terminal_residual:.3e}\n{revision_note}",
+        transform=axis.transAxes,
+        fontsize=7,
+        va="bottom",
+        bbox=DEFAULT_INK.label_bbox,
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=170)
+    figure.savefig(path.with_suffix(".svg"))
+    plt.close(figure)
+    receipt = _panel_receipt(path)
+    receipt["bit_identical"] = bool(bit_identical)
+    receipt["terminal_residual"] = terminal_residual
+    return receipt
 
 
 class EmptyIdentitySetError(ValueError):
@@ -1290,6 +1446,7 @@ def _certificate_identity_row(
     *,
     baseline: dict[str, Any],
     candidate_revision: str,
+    panel_path: Path | None = None,
 ) -> dict[str, Any]:
     """Compare the head terminal state with the state recorded at the base revision.
 
@@ -1300,6 +1457,10 @@ def _certificate_identity_row(
     established on the digest and the realised width; a maximum element
     difference is unavailable from a digest and is reported as unmeasured rather
     than as zero.
+
+    When ``panel_path`` is given, the state this row solved is drawn as a
+    poloidal flux contour panel beside its analytic reference, so the terminal
+    state is recorded as a figure and not only as a digest.
     """
     import jax
     import jax.numpy as jnp
@@ -1309,9 +1470,12 @@ def _certificate_identity_row(
         candidate_revision, baseline, case_name, requested_cells
     )
     baseline_row = baseline["rows"][(str(case_name), int(requested_cells))]
-    profile, seed, requested_class, target_current, request = _certificate_operands(
-        case_name, requested_cells
-    )
+    context = _certificate_render_context(case_name, requested_cells)
+    profile = context["profile"]
+    seed = context["seed"]
+    requested_class = context["requested_class"]
+    target_current = context["target_current"]
+    request = context["request"]
     state = jnp.asarray(seed)
     external = profile.operator.external()
     options = request.policy.kernel_options()
@@ -1333,6 +1497,23 @@ def _certificate_identity_row(
     candidate_state_finite = bool(np.all(np.isfinite(candidate_state)))
     candidate_residual = float(candidate.residual)
     baseline_hash = baseline_row["state_sha256_binary64"]
+    bit_identical = candidate_hash == baseline_hash
+    panel = None
+    if panel_path is not None:
+        panel = _certificate_flux_panel(
+            case_name,
+            requested_cells,
+            context,
+            candidate_state,
+            terminal_residual=candidate_residual,
+            bit_identical=bit_identical,
+            revision_note=(
+                f"baseline {'bit-identical' if bit_identical else 'DIFFERS'} "
+                f"across {arms['baseline']['revision'][:8]} → "
+                f"{arms['candidate']['revision'][:8]}"
+            ),
+            path=panel_path,
+        )
     return {
         "case": case_name,
         "requested_cells": requested_cells,
@@ -1349,7 +1530,7 @@ def _certificate_identity_row(
         "candidate_state_sha256_binary64": candidate_hash,
         "baseline_state_finite": baseline_row["state_finite"],
         "candidate_state_finite": candidate_state_finite,
-        "terminal_state_bit_identical": candidate_hash == baseline_hash,
+        "terminal_state_bit_identical": bit_identical,
         "maximum_absolute_state_difference": None,
         "maximum_absolute_state_difference_measure": (
             "unavailable from a recorded digest; the baseline arm is a binary64 "
@@ -1362,6 +1543,7 @@ def _certificate_identity_row(
         "baseline_terminal_residual_finite": baseline_row["terminal_residual_finite"],
         "candidate_terminal_residual_finite": math.isfinite(candidate_residual),
         "converged_equal": None,
+        "panel": panel,
     }
 
 
@@ -1369,6 +1551,7 @@ def run_certificate_identity(
     output: Path,
     cache_root: Path | None,
     baseline_receipt: Path | None = None,
+    panel_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Persist the four certificate identity rows as each comparison lands."""
     identity_row_count = _require_identity_rows(
@@ -1413,7 +1596,9 @@ def run_certificate_identity(
             "terminal state recorded at the base revision against the head "
             "accelerated program"
         ),
+        "panel_directory": str(panel_dir) if panel_dir is not None else None,
         "rows": [],
+        "pending_rows": [list(row) for row in CERTIFICATE_ROWS],
         "passed": None,
     }
     _write_json(output, receipt)
@@ -1424,8 +1609,22 @@ def run_certificate_identity(
             requested_cells,
             baseline=baseline,
             candidate_revision=candidate_revision,
+            panel_path=(
+                None
+                if panel_dir is None
+                else Path(panel_dir) / f"{_panel_slug(case_name, requested_cells)}.png"
+            ),
         )
         receipt["rows"].append(row)
+        receipt["pending_rows"] = [
+            list(pending)
+            for pending in CERTIFICATE_ROWS
+            if (pending[0], pending[1]) != (case_name, requested_cells)
+            and not any(
+                landed["case"] == pending[0] and landed["requested_cells"] == pending[1]
+                for landed in receipt["rows"]
+            )
+        ]
         _write_json(output, receipt)
         print(
             f"CERTIFICATE_DONE case={case_name} cells={requested_cells} "
@@ -1786,6 +1985,14 @@ def main() -> int:
     parser.add_argument("--candidate-dir", type=Path)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--certificate-output", type=Path)
+    parser.add_argument(
+        "--certificate-panel-dir",
+        type=Path,
+        help=(
+            "directory that receives one poloidal flux panel per certificate "
+            "row, drawn from the state that row solved"
+        ),
+    )
     parser.add_argument("--measure-300-output", type=Path)
     parser.add_argument("--marker-census-output", type=Path)
     parser.add_argument(
@@ -1878,6 +2085,7 @@ def main() -> int:
             args.certificate_output,
             args.cache_root,
             args.certificate_baseline_receipt,
+            args.certificate_panel_dir,
         )
         print(
             f"CERTIFICATE_IDENTITY_GATE={'PASS' if result['passed'] else 'FAIL'}",

@@ -384,6 +384,7 @@ def _traversed_read(topology, psi, polarity, inside_material):
         axis_data=data_o,
         inside_material=inside_material,
         containment_required=None,
+        x_point_flux=topology.x_point_data(vmap_x, polarity, data_o[2])[2],
     )
     qualified_o = topology.qualified_o_candidates(
         vmap_o,
@@ -403,6 +404,7 @@ def _traversed_read(topology, psi, polarity, inside_material):
         axis_data=data_o,
         inside_material=inside_material,
         containment_required=None,
+        x_point_flux=topology.x_point_data(vmap_x, polarity, data_o[2])[2],
     )
     data_x = topology.x_point_data(vmap_x, polarity, data_o[2])
     data_b = topology.boundary(data_o, vmap_x, data_w, polarity)

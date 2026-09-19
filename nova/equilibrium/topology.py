@@ -640,6 +640,7 @@ class Topology(Pytree):
         axis_data=None,
         inside_material=None,
         containment_required=True,
+        x_point_flux=None,
     ):
         """Return the wall extremum on the surface that traces the boundary.
 
@@ -656,9 +657,11 @@ class Topology(Pytree):
         surface and retain their wall-zone samples.
 
         ``containment_required`` of ``None`` evaluates containment inside this
-        pass rather than receiving it: the screen is applied when any fitted
-        contact is reached by the axis-enclosing component at that contact's
-        own level, and the raw wall extremum is retained when none is.
+        pass rather than receiving it: the strongest fitted contact reached by
+        the axis-enclosing component at its own level is screened against the
+        pass' X-point level, and containment is required only when that
+        contact outranks the saddle and would therefore bind the boundary. A
+        diverted plasma keeps the raw wall extremum as its wall diagnostic.
 
         Masked samples receive a finite losing score before the wall extremum
         is selected.  Keeping the operand finite preserves the fixed-shape
@@ -713,7 +716,20 @@ class Topology(Pytree):
                 surface,
             )
             if containment_required is None:
-                containment_required = jnp.any(eligible)
+                screened = self._wall_anchor_selection(
+                    masked_flux, polarity, eligible
+                )[0]
+                if x_point_flux is None:
+                    containment_required = jnp.asarray(False)
+                else:
+                    ranked = jnp.asarray(polarity) * (
+                        screened[2] - jnp.asarray(x_point_flux)
+                    )
+                    containment_required = (
+                        jnp.isfinite(screened[2])
+                        & jnp.isfinite(jnp.asarray(x_point_flux))
+                        & (ranked > 0)
+                    )
             eligible = jnp.where(
                 jnp.asarray(containment_required),
                 eligible,
@@ -1160,6 +1176,7 @@ class Topology(Pytree):
                 data_o,
                 inside_material,
                 containment_required,
+                self.x_point_data(vmap_x, polarity, data_o[2])[2],
             )
             qualified_o = self.qualified_o_candidates(
                 vmap_o,
@@ -1182,6 +1199,7 @@ class Topology(Pytree):
                 data_o,
                 inside_material,
                 containment_required,
+                self.x_point_data(vmap_x, polarity, data_o[2])[2],
             )
         wall_node = jnp.argmin(
             jnp.sum((self.wall.coordinate - data_w[:2]) ** 2, axis=1)

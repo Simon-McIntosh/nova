@@ -3418,15 +3418,33 @@ def _active_set_newton_krylov(
     partition_read = getattr(shadowed_map_fn, "_read_frozen_partition", None)
     partitioned_map = getattr(shadowed_map_fn, "_map_frozen_partition", None)
     partition_shadow = getattr(shadowed_map_fn, "_frozen_partition_shadow", None)
+    partition_usable = getattr(shadowed_map_fn, "_frozen_partition_usable", None)
     freeze_topology = (
         partition_read is not None
         and partitioned_map is not None
         and partition_shadow is not None
     )
+
+    def usable_partition(partition):
+        """Whether a frozen read may be carried onto this trip's iterations.
+
+        A read whose normalising scalars are not finite cannot revalue any
+        state, so carrying it would put a ``nan`` scale under every cell
+        current and, worse, record the mask it produced as the trip's own.
+        Refusing it here sends the trip back to a fresh read of its state,
+        which is what an unfrozen solve does.
+        """
+        if partition_usable is None:
+            return jnp.asarray(True)
+        return jnp.asarray(partition_usable(partition))
+
     if freeze_topology:
         initial_partition = partition_read(initial, None)
-        initial_mask = jnp.ravel(
-            jnp.asarray(partition_shadow(initial_partition), dtype=bool)
+        initial_carried = usable_partition(initial_partition)
+        initial_mask = jnp.where(
+            initial_carried,
+            jnp.ravel(jnp.asarray(partition_shadow(initial_partition), dtype=bool)),
+            jnp.ravel(jnp.asarray(shadow_mask_fn(initial), dtype=bool)),
         )
     else:
         initial_mask = jnp.ravel(jnp.asarray(shadow_mask_fn(initial), dtype=bool))
@@ -3445,7 +3463,11 @@ def _active_set_newton_krylov(
     ):
         def frozen_map(candidate):
             if freeze_topology:
-                return partitioned_map(candidate, partition)
+                return jax.lax.cond(
+                    usable_partition(partition),
+                    lambda: partitioned_map(candidate, partition),
+                    lambda: shadowed_map_fn(candidate, mask),
+                )
             return shadowed_map_fn(candidate, mask)
 
         def frozen_mask(_candidate):
@@ -3506,18 +3528,26 @@ def _active_set_newton_krylov(
         solved_state = inner_result.state
         if freeze_topology:
             observed_partition = partition_read(solved_state, mask)
-            observed_mask = jnp.ravel(
-                jnp.asarray(partition_shadow(observed_partition), dtype=bool)
+            observed_carried = usable_partition(observed_partition)
+            observed_mask = jnp.where(
+                observed_carried,
+                jnp.ravel(
+                    jnp.asarray(partition_shadow(observed_partition), dtype=bool)
+                ),
+                jnp.ravel(
+                    jnp.asarray(promoted_shadow_mask_fn(solved_state, mask), dtype=bool)
+                ),
+            )
+            observed_mapped = jax.lax.cond(
+                observed_carried,
+                lambda: partitioned_map(solved_state, observed_partition),
+                lambda: shadowed_map_fn(solved_state, observed_mask),
             )
         else:
             observed_mask = jnp.ravel(promoted_shadow_mask_fn(solved_state, mask))
             observed_partition = observed_mask
+            observed_mapped = shadowed_map_fn(solved_state, observed_mask)
         observed_difference = jnp.sum(observed_mask != mask, dtype=jnp.int32)
-        observed_mapped = (
-            partitioned_map(solved_state, observed_partition)
-            if freeze_topology
-            else shadowed_map_fn(solved_state, observed_mask)
-        )
         observed_residual = _relative_residual(observed_mapped, solved_state)
         observed_finite = jnp.isfinite(observed_residual)
         converged = (
@@ -3534,7 +3564,11 @@ def _active_set_newton_krylov(
         damped_state = state + _ACTIVE_SET_CYCLE_DAMPING * (solved_state - state)
         if freeze_topology:
             damped_mask = observed_mask
-            damped_mapped = partitioned_map(damped_state, observed_partition)
+            damped_mapped = jax.lax.cond(
+                observed_carried,
+                lambda: partitioned_map(damped_state, observed_partition),
+                lambda: shadowed_map_fn(damped_state, damped_mask),
+            )
         else:
             damped_mask = jnp.ravel(promoted_shadow_mask_fn(damped_state, mask))
             damped_mapped = shadowed_map_fn(damped_state, damped_mask)
@@ -3550,14 +3584,22 @@ def _active_set_newton_krylov(
         selected_finite = jnp.where(repeated, damped_finite, observed_finite)
         selected_difference = jnp.sum(selected_mask != mask, dtype=jnp.int32)
         incoming_mapped = (
-            partitioned_map(state, partition)
+            jax.lax.cond(
+                usable_partition(partition),
+                lambda: partitioned_map(state, partition),
+                lambda: shadowed_map_fn(state, mask),
+            )
             if freeze_topology
             else shadowed_map_fn(state, mask)
         )
         incoming_residual = _relative_residual(incoming_mapped, state)
         incoming_merit = _smooth_relative_sup_merit(incoming_mapped, state)
         selected_mapped = (
-            partitioned_map(selected_state, selected_partition)
+            jax.lax.cond(
+                observed_carried,
+                lambda: partitioned_map(selected_state, selected_partition),
+                lambda: shadowed_map_fn(selected_state, selected_mask),
+            )
             if freeze_topology
             else shadowed_map_fn(selected_state, selected_mask)
         )

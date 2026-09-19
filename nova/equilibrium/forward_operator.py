@@ -3199,6 +3199,26 @@ class ForwardFluxOperator:
             )
         return exact_support
 
+    @staticmethod
+    def frozen_partition_usable(partition) -> jax.Array:
+        """Return whether a frozen read can normalise a state at all.
+
+        A read that admitted no finite axis leaves every normalising scalar
+        undefined, so the partition it produced has no scale to revalue a
+        state with: revaluing against it turns the whole current support into
+        ``nan``, and that reaches both the source-normalisation divisor and
+        the mask the active set records.  Refusing such a partition makes the
+        reconcile re-read the trip, so the carry is taken only where it can
+        reproduce what a fresh read returns.
+        """
+        topology = partition.topology
+        return (
+            jnp.isfinite(topology.axis_flux)
+            & jnp.isfinite(topology.boundary_flux)
+            & jnp.isfinite(topology.flux_span)
+            & (jnp.abs(topology.flux_span) > 0.0)
+        )
+
     def _partition_for_state(self, psi, frozen):
         """Revalue one state on an already-decided discrete partition."""
         topology = frozen.topology
@@ -3871,5 +3891,6 @@ class ForwardFluxOperator:
             mapped._frozen_partition_shadow = lambda partition: (
                 partition.residual_shadow
             )
+            mapped._frozen_partition_usable = self.frozen_partition_usable
 
         return mapped

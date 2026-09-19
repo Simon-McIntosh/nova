@@ -23,14 +23,14 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-impl" content="0.88">
 <meta name="plan-impl" content="0.88">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd,273ff747,7aef0963">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="102">
+<meta name="plan-version" content="103">
 </head>
 <body>
 <main class="plan-doc">
@@ -493,6 +493,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-msc-census-gate-and-unit-node" data-who="msc-census-gate-and-unit-node" data-when="2026-09-19T15:18:12+02:00">
     <div class="r-comment-body">Landed the two record repairs named as remaining above at base 1bbde0d2, commits 3587b939 and a6e51877. The census record gate is committed as tests/test_census_record_receipts.py: it reads bank-shape-identity.json, program-shape-census.json and the landed archive's anchor and holds the byte/GiB pairs, the two distinct captures (20,044,389,103 against 20,038,219,057 bytes), the cited paths, the bank receipt's 0.482 flux reading and the bucket bar values (5 today, 2 bucketed) to each other. It also corrects bank-shape-identity.json line 7: the operand cache citation read 89486 bytes, the group-id column of an ls listing, and the tracked file logs/exact-operand-cache.npz is 180876 bytes. The certificate builder's read of observation._UNIT_NODE was an AttributeError at benchmarks/solovev_certificate.py — observation exports no such attribute, the constant is defined in nova/equilibrium/clip_quadrature.py (0.5 * (_GAUSS_NODE + 1.0), eight Gauss-Legendre nodes), and the read now imports it from that defining module; tests/test_solovev_certificate_builder.py pins the 110-cell analytic row building on CPU without compiling. Gate: one all_debug job over the two new files plus tests/test_forward_census.py, 1 failed / 20 passed / 2 skipped, exit 1; the base arm over the same targets, 3 failed / 9 passed / 2 skipped / 2 errors, exit 1, the shared failure being the pre-existing test_forward_census_exact_diverted_oracle, so zero added failures. The base arm is also the positive control: both builder tests fail there and the analytic-row fixture errors. No H200 job. Evidence anchor at docs/evidence/archive/millisecond-converged-solve-landed.html#program-shape-records-gate. The two driving followups are the coordinator's to close.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-msc-census-gate-review-fail" data-who="coordinator" data-when="2026-09-19T14:15:00Z">
+    <div class="r-comment-body"><p>The independent review of the census-gate landing (8004814f) returned FAIL on one blocking finding: 3587b939 removed the observation binding from benchmarks/solovev_certificate.py while tests/test_exact_clip_memory.py (six failures, four in the default lane), benchmarks/exact_clip_memory_scaling.py, benchmarks/exact_clip_warm_cost.py and benchmarks/nan_tangent_localisation.py still read <code>certificate.observation._UNIT_NODE</code> and now raise AttributeError. The record-gate half holds: two mutations break the receipt test. Corrective node msc-unit-node-readers-repair points every reader at nova.equilibrium.clip_quadrature directly and removes the dead compatibility shims; the census driver shim is the live shim node's scope.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s19h-s3-certificate-prerequisite" data-who="reckon-ship s19-handoff" data-when="2026-09-15T10:15:00Z">
     <div class="r-comment-body">Section 3 prerequisite, held by the coordinator rather than by a plan-level wire: the certified millisecond measurement runs only once gs-absolute-accuracy-gates section 3 (the certificate artifact and its pin) is current on the exact cut-cell participation and the joint qualification, because it reports cost for certificate-passing solves. The stage-scoped dependency gs-absolute-accuracy-gates#s3 was authored and withdrawn the same hour: the roadmap's anchor resolver did not recognise that section (reported to reckon), and a plan-level dependency on the whole certificate plan would hold section 2, which never needed it. gs-absolute-accuracy-gates now informs this plan; no section 3 node is dispatched before the certificate lands.</div>

@@ -250,6 +250,25 @@
         "wall_nodes": 121,
         "whole_cell_quadrature_points_per_cell": 1792
       },
+      "dimensions_provenance": {
+        "chain_samples_reserved_for_every_slot": 128,
+        "exact_quadrature_points_per_cell": {
+          "current_expression": "the exact route's closed-form polygon moments evaluate no per-cell quadrature points",
+          "recorded_value": 245632,
+          "retired_by_revision": "f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+          "status": "historical",
+          "superseded_expression": "(exact_support_capacity - 2) * quadrature_nodes_per_triangle at the swept capacity 3840"
+        },
+        "exact_support_capacity": {
+          "current_derived_value_for_this_layout": 158,
+          "current_expression": "spline_chain_samples_per_chord + atomic_support_capacity, one traced arc plus the straight edge chain",
+          "recorded_value": 3840,
+          "retired_by_revision": "f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+          "status": "historical",
+          "superseded_expression": "atomic_support_capacity * spline_chain_samples_per_chord, 128 times every straight slot"
+        },
+        "measurements": "compile wall, solve, stages and allocator fields record this run as measured and are unchanged by the capacity retirement"
+      },
       "lane": {
         "allocated_cpus": 8,
         "device": "NVIDIA H200 NVL",
@@ -1326,6 +1345,25 @@
         "spline_chain_samples_per_chord": 128,
         "wall_nodes": 121,
         "whole_cell_quadrature_points_per_cell": 1408
+      },
+      "dimensions_provenance": {
+        "chain_samples_reserved_for_every_slot": 128,
+        "exact_quadrature_points_per_cell": {
+          "current_expression": "the exact route's closed-form polygon moments evaluate no per-cell quadrature points",
+          "recorded_value": 196480,
+          "retired_by_revision": "f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+          "status": "historical",
+          "superseded_expression": "(exact_support_capacity - 2) * quadrature_nodes_per_triangle at the swept capacity 3072"
+        },
+        "exact_support_capacity": {
+          "current_derived_value_for_this_layout": 152,
+          "current_expression": "spline_chain_samples_per_chord + atomic_support_capacity, one traced arc plus the straight edge chain",
+          "recorded_value": 3072,
+          "retired_by_revision": "f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+          "status": "historical",
+          "superseded_expression": "atomic_support_capacity * spline_chain_samples_per_chord, 128 times every straight slot"
+        },
+        "measurements": "compile wall, solve, stages and allocator fields record this run as measured and are unchanged by the capacity retirement"
       },
       "lane": {
         "allocated_cpus": 8,
@@ -3148,6 +3186,25 @@
         "spline_chain_samples_per_chord": 128,
         "wall_nodes": 121,
         "whole_cell_quadrature_points_per_cell": 1280
+      },
+      "dimensions_provenance": {
+        "chain_samples_reserved_for_every_slot": 128,
+        "exact_quadrature_points_per_cell": {
+          "current_expression": "the exact route's closed-form polygon moments evaluate no per-cell quadrature points",
+          "recorded_value": 180096,
+          "retired_by_revision": "f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+          "status": "historical",
+          "superseded_expression": "(exact_support_capacity - 2) * quadrature_nodes_per_triangle at the swept capacity 2816"
+        },
+        "exact_support_capacity": {
+          "current_derived_value_for_this_layout": 150,
+          "current_expression": "spline_chain_samples_per_chord + atomic_support_capacity, one traced arc plus the straight edge chain",
+          "recorded_value": 2816,
+          "retired_by_revision": "f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+          "status": "historical",
+          "superseded_expression": "atomic_support_capacity * spline_chain_samples_per_chord, 128 times every straight slot"
+        },
+        "measurements": "compile wall, solve, stages and allocator fields record this run as measured and are unchanged by the capacity retirement"
       },
       "lane": {
         "allocated_cpus": 8,

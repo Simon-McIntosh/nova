@@ -267,12 +267,15 @@ assertion in either file tests the artifact for absence.</p>
     the magnetic axis located on the grid as the flux extremum the boundary-minus-axis span selects. No private copy of
     the deleted contour extraction is reintroduced: the geometry comes from the same assembler the forward-match scorer
     uses, so a solved field and a traced one share one boundary construction. An assembly that yields no closed branch
-    returns an empty array, which the drivers' <code>len(boundary) &gt;= 4</code> check already reads as undrawable.</p>
+    returns an empty array. The overlay driver's <code>len(boundary) &gt;= 4</code> check reads that as
+    undrawable; the circuit-validation driver has no vertex-count check and passes the empty array to
+    <code>contour_separation</code>, whose guard returns <code>(nan, nan)</code> below two vertices, which
+    <code>_strict_float</code> then turns into a <code>None</code> metric rather than a refusal.</p>
     <table>
       <caption>Gate on all_debug CPU, one job, shared interpreter, JAX_PLATFORMS=cpu</caption>
       <thead><tr><th scope="col">Gate</th><th scope="col">Result</th></tr></thead>
       <tbody>
-        <tr><th scope="row">Control on the restored extractor</th><td>analytic circular field <code>psi=(R-5)^2+Z^2</code> on a 129 by 129 grid: axis located at exactly (5.0, 0.0); closed boundary 801 vertices, all finite, radius 0.999997 to 1.000000 m; symmetric self-separation 0.0 mm. A level with no contour returns shape (0, 2) — the guard fires and the negative is refused</td></tr>
+        <tr><th scope="row">Control on the restored extractor</th><td>analytic circular field <code>psi=(R-5)^2+Z^2</code> on a 129 by 129 grid: axis located at exactly (5.0, 0.0); closed boundary 801 vertices, all finite, radius 0.999997 to 1.000000 m; the sampled loop closes with a 0.0316 m gap on the rising polarity (one solve cell, 0.5 percent of the 5.96 m perimeter), 0.000000 m for the falling polarity; symmetric self-separation 0.0 mm. A level with no contour returns shape (0, 2) — the guard fires and the negative is refused</td></tr>
         <tr><th scope="row">The two modules</th><td>10 passed in 7.71 s, exit 0 — <code>tests/imas/test_diiid_circuit_driven_forward_validation.py</code> 4, <code>tests/imas/test_diiid_diverted_solve_overlay.py</code> 6, no pre-existing failures</td></tr>
         <tr><th scope="row">Path-free default lane</th><td><code>pytest --collect-only -q</code> with the repository's own addopts (<code>-rfEs --doctest-modules -m 'not slow'</code>): exit 0, <code>6983/7837 tests collected (854 deselected) in 36.63 s</code>, no ERROR and no ImportError line, and all ten restored tests present in the collected set</td></tr>
       </tbody>
@@ -288,5 +291,49 @@ assertion in either file tests the artifact for absence.</p>
     <p><strong>Logs and receipts:</strong>
     <code>~/.config/reckon/crew/reports/nova/s19-local/dvfb-separatrix-import/</code>
     (<code>modules.log</code>, <code>default-lane-collect.log</code>, <code>lane.sh</code>).</p>
+  </section>
+
+  <section id="axis-located-for-both-flux-polarities">
+    <h2>The grid axis under both flux polarities</h2>
+    <p><strong>The defect, reproduced before the repair.</strong> The restored helper normalised the flux by the
+    boundary-minus-axis span and then took <code>nanargmin</code> or <code>nanargmax</code> of the <em>normalised</em>
+    array according to the sign of that span. The map <code>psi -&gt; (psi - axis)/(boundary - axis)</code> is affine with
+    slope <code>1/(boundary - axis)</code>, so it preserves the ordering of <code>psi</code> when the span is positive and
+    reverses it when the span is negative. Under the falling span <code>nanargmax</code> of the normalised array is
+    therefore <code>argmin</code> of the flux — the outermost grid corner — while the axis under that sign is the flux
+    maximum.</p>
+    <table>
+      <caption>Analytic field <code>psi = +-((R-5)^2+Z^2)</code> on R in [3,7], Z in [-2,2], 129 by 129, true axis (5.0, 0.0); measured with the review node's own polarity probe run from this node's worktree</caption>
+      <thead><tr><th scope="col">Polarity</th><th scope="col">Located axis</th><th scope="col">Distance from the true axis</th><th scope="col">Assembled boundary</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">rising, level 0.9</th><td>[5.0, 0.0]</td><td>0.0000 m</td><td>1953 vertices, radius 0.9486828 to 0.9486839 m</td></tr>
+        <tr><th scope="row">falling, level -0.9</th><td>[3.0, -2.0]</td><td>2.8284 m — a grid corner</td><td>EMPTY (0, 2), where an explicit axis (5, 0) assembles the same 1953-vertex boundary</td></tr>
+      </tbody>
+    </table>
+    <p>The empty return is silent: the overlay driver raises
+    <code>RuntimeError("the converged solve did not yield a drawable boundary")</code> on fewer than four vertices, so a
+    field of the opposite sign reads as an explicit refusal there, while the circuit-validation driver reports no
+    boundary at all.</p>
+    <p><strong>The repair.</strong> The helper now takes the extremum of the <em>raw</em> flux, the sign of the span
+    choosing which extremum is the axis, and its docstring states that mechanism.
+    <code>tests/imas/test_diiid_forward_gs_match_helpers.py</code> pins both polarities on the analytic field:
+    <code>_grid_axis_rz</code> returns (5.0, 0.0) for both, <code>_separatrix</code> returns a finite (N, 2) loop with
+    N &gt; 4 at levels 0.9 and -0.9 for both, and a level the field never reaches still returns shape (0, 2).</p>
+    <p><strong>Gate.</strong> The new module plus the two driver test modules, <code>JAX_PLATFORMS=cpu</code> on the
+    login node under the shared interpreter with <code>-p no:cacheprovider</code>, captured once:
+    <code>13 passed in 192.09 s</code>, exit 0 (new module 3, circuit-validation 4, overlay 6). The same three checks
+    applied to the base revision's module source fail exactly on the falling polarity — <code>[axis] sign -1 located
+    [3.0, -2.0]</code>, <code>[boundary] sign -1 shape (0, 2)</code>, two failures, exit 1.</p>
+    <p><strong>Two corrections to the section above.</strong> First, the <code>len(boundary) &gt;= 4</code> check belongs
+    to the overlay driver only: the circuit-validation driver has no vertex-count check and passes an empty boundary to
+    <code>contour_separation</code>, whose guard returns <code>(nan, nan)</code> below two vertices, which
+    <code>_strict_float</code> then turns into a <code>None</code> metric rather than a refusal. Second, the sampled loop
+    is not exactly closed: its closure gap is 0.0316 m on the rising polarity — one solve cell, 0.5 percent of the 5.96 m
+    perimeter — and 0.000000 m for the falling polarity. No other claim in that section is changed; in particular the
+    control row's 801-vertex count is left as written, because it is not reproducible from its stated inputs (level 1.0
+    is node-aligned on this lattice) and deciding otherwise is outside this node's scope.</p>
+    <p><strong>Logs:</strong> <code>~/.config/reckon/crew/reports/nova/s19-local/dvfb-axis-polarity-repair/</code>
+    (<code>polarity-probe-base.log</code>, <code>gate-head.log</code>, <code>gate-base-falling-case.log</code>,
+    <code>guard-probe.log</code>).</p>
   </section>
 </main>

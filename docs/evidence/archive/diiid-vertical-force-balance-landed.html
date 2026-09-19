@@ -243,4 +243,50 @@ from the passive description. Both statements are correct about their own subjec
 same shape as a stored verdict carrying no observation time. The wording is a followup, not a behaviour defect: no
 assertion in either file tests the artifact for absence.</p>
 </section>
+
+  <section id="separatrix-import-restored">
+    <h2>The DIII-D gates collect again</h2>
+    <p><strong>Commit that removed the export: <code>130d84e3</code></strong> (<em>feat(equilibrium): compare assembled
+    DIII-D boundaries</em>, 2026-08-26). It deleted <code>def _separatrix(...)</code> and
+    <code>def contour_separation(...)</code> from <code>benchmarks/diiid_forward_gs_match.py</code> and replaced the
+    caller inside the module with <code>assemble_separatrix_branches</code> and
+    <code>compare_closed_boundaries</code>. The module's own call sites moved; the three outside drivers that import the
+    two names did not, and nothing in the default lane collected them.</p>
+    <p><strong>Reproduced at base <code>1bbde0d2</code> before the repair.</strong> Collecting the two test modules
+    aborted with <code>ImportError: cannot import name '_separatrix' from 'benchmarks.diiid_forward_gs_match'</code> at
+    <code>benchmarks/diiid_diverted_solve_overlay.py:45</code> and
+    <code>benchmarks/diiid_circuit_driven_forward_validation.py</code> (its
+    <code>from benchmarks.diiid_forward_gs_match import (&hellip;)</code> block): <code>4 errors during collection, no tests
+    collected, 4 errors in 12.29s</code>, exit 2. Both modules load their driver by
+    <code>importlib.util.spec_from_file_location</code> at module import, so the driver's <code>ImportError</code> is the
+    test module's collection error.</p>
+    <p><strong>What was restored, and on which machinery.</strong> Two names, not one:
+    <code>contour_separation</code> is imported by the circuit-validation driver and comes back quoting the module's own
+    driver list. <code>_separatrix</code> returns the closed boundary from the assembled branch API the tracer repair
+    landed — the axis-enclosing branch of <code>assemble_separatrix_branches</code> sampled to ordered R,Z vertices — with
+    the magnetic axis located on the grid as the flux extremum the boundary-minus-axis span selects. No private copy of
+    the deleted contour extraction is reintroduced: the geometry comes from the same assembler the forward-match scorer
+    uses, so a solved field and a traced one share one boundary construction. An assembly that yields no closed branch
+    returns an empty array, which the drivers' <code>len(boundary) &gt;= 4</code> check already reads as undrawable.</p>
+    <table>
+      <caption>Gate on all_debug CPU, one job, shared interpreter, JAX_PLATFORMS=cpu</caption>
+      <thead><tr><th scope="col">Gate</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Control on the restored extractor</th><td>analytic circular field <code>psi=(R-5)^2+Z^2</code> on a 129 by 129 grid: axis located at exactly (5.0, 0.0); closed boundary 801 vertices, all finite, radius 0.999997 to 1.000000 m; symmetric self-separation 0.0 mm. A level with no contour returns shape (0, 2) — the guard fires and the negative is refused</td></tr>
+        <tr><th scope="row">The two modules</th><td>10 passed in 7.71 s, exit 0 — <code>tests/imas/test_diiid_circuit_driven_forward_validation.py</code> 4, <code>tests/imas/test_diiid_diverted_solve_overlay.py</code> 6, no pre-existing failures</td></tr>
+        <tr><th scope="row">Path-free default lane</th><td><code>pytest --collect-only -q</code> with the repository's own addopts (<code>-rfEs --doctest-modules -m 'not slow'</code>): exit 0, <code>6983/7837 tests collected (854 deselected) in 36.63 s</code>, no ERROR and no ImportError line, and all ten restored tests present in the collected set</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Side effect, not this node's measure.</strong>
+    <code>benchmarks/diiid_solenoid_inclusion_ladder.py</code> — whose broken
+    <code>_separatrix</code> import §4 recorded as pre-existing breakage — imports cleanly again, as does
+    <code>benchmarks/diiid_vacuum_from_description.py</code>; both are out of this node's write scope and were not run.</p>
+    <p><strong>Owed elsewhere.</strong> The drivers that import the two names are outside this node's write scope, so the
+    long-term shape — whether they should read the assembled branch API directly rather than through a restored module
+    name — is a followup. So is a pinning unit test in the forward-match module's own test file, which is also outside
+    scope; the collection failure itself is the regression guard, and it fires.</p>
+    <p><strong>Logs and receipts:</strong>
+    <code>~/.config/reckon/crew/reports/nova/s19-local/dvfb-separatrix-import/</code>
+    (<code>modules.log</code>, <code>default-lane-collect.log</code>, <code>lane.sh</code>).</p>
+  </section>
 </main>

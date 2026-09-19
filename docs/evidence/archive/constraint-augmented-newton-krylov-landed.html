@@ -753,7 +753,7 @@
     and it does not converge. The pressure-gradient arm terminates <code>active_set_cycle_detected</code> with a terminal residual of 0.0507
     after 8 outer steps, reaching an amplitude fraction of &minus;3.67; the <code>FF&#8242;</code> arm terminates the same way with a fraction
     of +0.308. Both land the combination near 0.657 against a target of 0.4614 — a gap of about <strong>0.196</strong>, some four thousand
-    times the 5.2e-05 the row was asked to close (<code>scale_alone_closes_the_gap: false</code>). A single scale on either component is not
+    times the 5.2e-05 the projection itself moved the target by; the gap the row was asked to close on 21978/35 is 0.1487, observed 0.31259 against target 0.46136 (<code>scale_alone_closes_the_gap: false</code>). A single scale on either component is not
     the degree of freedom this row needs: <strong>the shape carries the gap</strong>, which is the design answer the measurement was run to
     obtain. The receipt records it per row as <code>scale_alone_closes_the_gap</code>.</p>
     <figure>
@@ -773,7 +773,7 @@
       the lane that produced the raster: no solve runs for the component panels, only the row's profiles re-extracted and re-projected, and
       each freed-scale curve drawn at the amplitude the banked solve reported. Before anything is written the redraw re-derives the fit and
       refuses the row unless the order, the basis, the SI scale, the condition number and the relative residual all reproduce the receipt to
-      <code>rtol=1e-9</code>; this row reproduced all six, which is why the companion is evidence about the same projection, but the identity
+      <code>rtol=1e-9</code>; this row reproduced all five compared quantities per component (order and basis, then si_scale, condition number and relative residual), which is why the companion is evidence about the same projection, but the identity
       is a comparison against the record — not a byte identity with the raster. Only the raster's third panel carries the terminal state:
       the receipt persists the terminal residual and the converged flag but <em>not</em> the terminal flux field, so the redraw has nothing
       to redraw there and its third panel carries the reference state alone, saying so in its own title. The two figures must therefore be

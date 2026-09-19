@@ -26,7 +26,7 @@
 <meta name="plan-informs" content="uniform-cell-clip-and-coupling,null-identification-authority,gs-absolute-accuracy-gates,exact-clip-moment-quadrature,centroid-constrained-oracle-solve">
 <meta name="plan-blocks" content="uniform-cell-clip-and-coupling">
 <meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="123">
+<meta name="plan-version" content="124">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="797ab089,f8404c66,945f1ae2,770f3cf6,f57409c8,8e8d8e97,49a32f22,d03c171d,b6820524,02ba41e9,df288d3b,413393e5">
 <meta name="plan-impl" content="0.6">
@@ -652,6 +652,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-cca-xpoint-cell-reviewed" data-who="" data-when="">
     <div class="r-comment-body">Run r-20260918T202207266011 (codex, five commits merged at 81d4b425; review r-20260919T070254133252) made the spline-chain clip admit the supplied saddle vertex, retain every spline root per edge and split the traced saddle support into four fixed-capacity wedges; the all_debug oracle reproduces first-hand at 110, 300 and 500 cells with core-side current within 1e-13 relative of the analytic wedge integral and exactly zero private-flux and common-SOL current. Two findings that shape the next node: the oracle's expected value is computed from the carrier's own emitted wedge polygons, so it cannot fail on a mislabelled or mis-paired wedge, and an independent region measure (the analytic wedge integral over the region bounded by the separatrix branches and the cell edges) is what the production case needs; and the branch expansion is computed then discarded by the jnp.where(saddle, ...) at separatrix_clip.py lines 1332 and 1335 on the production spline route, because forward_operator.py near line 2956 passes curve_evaluator without saddle_vertex, so no production solve splits the X-point cell yet. The H200 certificate rows could not run: the reservation is fully held.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260919T070254133252-review-of-cca-xpoint-cell-treatment" data-who="reckon-ship" data-when="2026-09-19T07:25:16.763Z">
+    <div class="r-comment-body"><p>Review stored: 87/100, two findings</p></div>
 </div>
 </section>
 

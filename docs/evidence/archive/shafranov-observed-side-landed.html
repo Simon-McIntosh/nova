@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="shafranov-observed-side-landed">
+  <meta name="plan-title" content="Shafranov observed side — cumulative execution evidence">
+  <meta name="plan-summary" content="The first-order stage in the grid-imaged Shafranov route was the contour quadrature, sampling the metric at segment endpoints; moved to midpoints the route fits order 2.06. The fix exposes a flat radial-moment residual localised to the contour side of the identity.">
+  <meta name="plan-evidence-for" content="shafranov-observed-side">
+  <meta name="plan-informs" content="constraint-augmented-newton-krylov,millisecond-converged-solve">
+  <title>Shafranov observed side — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <h1>Shafranov observed side — cumulative execution evidence</h1>
+    <p class="lede">One anchor per material result. Each names the node, the commit, the gate that measured it and what the measurement means.</p>
+  </header>
+
+<section id="the-contour-quadrature-was-the-first-order-stage"><h2>The contour quadrature was the first-order stage, and the radial moment is still flat (2026-09-19)</h2>
+<p>Node <code>sos-grid-imaged-biot-field-converges-to-the-volume-definition</code>; the grid-route order question of
+<a href="/nova/plans/shafranov-observed-side.html#s2">shafranov-observed-side §2</a>. Commits <code>3818bd05</code>
+(the quadrature) and <code>f633a00a</code> (the test and the receipt).</p>
+
+<p><strong>Result — the first-order stage.</strong> Of the three candidate stages, the contour quadrature in
+<code>nova/equilibrium/diagnostics.py</code> <code>shafranov_contour_integrals</code> was first order. It evaluated
+the integrand at each chord's leading vertex while weighting it by that chord's length and outward normal. The
+length and direction belong to the segment; the leading vertex sits half a chord from the midpoint they describe,
+so the rule was first order in the contour sampling however fine the contour became. <code>_contour_metric</code>
+now returns the segment midpoint and the integrals average each field to it through the new
+<code>_segment_mean</code>, which is the trapezoidal rule on a closed polyline and second order. The mechanism is
+stated in both docstrings.</p>
+
+<p><strong>Measure — each stage held at the analytic value in turn.</strong> On the Solovev single-null reference,
+four <code>all_debug</code> jobs, <code>JAX_PLATFORMS=cpu</code>, project interpreter, exit 0:</p>
+<table>
+  <thead><tr><th>Stage</th><th>Instrument</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td>Contour quadrature</td><td>exact analytic contour field; departure from the converged limit at
+    501/1001/2001/4001/8001 points</td><td>0.52436, 0.26735, 0.13494, 0.06779, 0.03397 &mdash; halving per
+    doubling, <strong>fitted order 0.985</strong>. The midpoint rule on the same polyline fits
+    <strong>2.151</strong>.</td></td></tr>
+    <tr><td>Shared-node stencil interpolation</td><td>analytic contour field substituted for the interpolated one;
+    scaled departure over grids 21/41/81/161</td><td>errors moved by ~2&times;10<sup>-6</sup>;
+    1.714&times;10<sup>-3</sup>, 2.367&times;10<sup>-4</sup>, 2.800&times;10<sup>-5</sup>,
+    3.532&times;10<sup>-6</sup> &mdash; <strong>third order, not a defect</strong></td></tr>
+    <tr><td>Field imaging through the response blocks</td><td><code>PrescribedCurrentField</code> filled with
+    analytic node values, <code>poloidal_field()</code> read back</td><td>exact on this positive control;
+    contributes nothing</td></tr>
+  </tbody>
+</table>
+
+<p><strong>The reported order 1.10 was an instrument artifact.</strong> The test's ladder advanced the grid and the
+contour sampling in lockstep (21/501, 31/1001, 41/2001), so the order fitted against "grid resolution" was the
+contour quadrature's order wearing the grid's name, and the 0.5 floor could not separate a first-order route from
+a second-order one.</p>
+
+<p><strong>Measure — after the fix.</strong> The test now holds the grid at 161 and refines only the contour
+sampling against the 8001 rung: <strong>fitted order 2.064</strong>, departures
+9.4388&times;10<sup>-4</sup>, 2.2850&times;10<sup>-4</sup>, 5.4124&times;10<sup>-5</sup>. A second loop holds
+the sampling at 2001 and refines the grid 21/41/81 against the analytic-field route at the same sampling, so the
+grid's own contribution is isolated from the volume reference: 2.870&times;10<sup>-6</sup>,
+2.015&times;10<sup>-6</sup>, 6.890&times;10<sup>-7</sup>. The assertion moved from 0.5 to 1.8, which a
+first-order rule cannot reach. The order, its ladder and its mechanism are printed and persisted to
+<code>docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json</code>.</p>
+
+<p><strong>Exposure — the radial moment is flat in resolution.</strong> The midpoint fix moves the contour side to
+its converged value, and a pre-existing marginal identity bound no longer has a cancellation to hide behind. The
+virial identity holds term by term, so the residual was taken per term on both ladders. The volume resolution
+ladder, sampling held at 2001:</p>
+<table>
+  <thead><tr><th>Term</th><th>321</th><th>641</th><th>1281</th><th>Order</th></tr></thead>
+  <tbody>
+    <tr><td><code>vertical_moment</code></td><td>1.3776&times;10<sup>-4</sup></td><td>8.4618&times;10<sup>-5</sup></td><td>4.4028&times;10<sup>-5</sup></td><td>0.824</td></tr>
+    <tr><td><strong><code>radial_moment</code></strong></td><td><strong>7.1732&times;10<sup>-4</sup></strong></td><td><strong>6.4156&times;10<sup>-4</sup></strong></td><td><strong>6.2718&times;10<sup>-4</sup></strong></td><td><strong>0.097 &mdash; flat</strong></td></tr>
+    <tr><td><code>toroidal_stress</code></td><td>1.7830&times;10<sup>-4</sup></td><td>1.0303&times;10<sup>-4</sup></td><td>4.9540&times;10<sup>-5</sup></td><td>0.925</td></tr>
+  </tbody>
+</table>
+<p>And the contour sampling ladder, volume resolution held at 1281:</p>
+<table>
+  <thead><tr><th>Term</th><th>2001</th><th>4001</th><th>8001</th><th>Order</th></tr></thead>
+  <tbody>
+    <tr><td><code>vertical_moment</code></td><td>4.4028&times;10<sup>-5</sup></td><td>4.8158&times;10<sup>-5</sup></td><td>4.7882&times;10<sup>-5</sup></td><td>flat</td></tr>
+    <tr><td><strong><code>radial_moment</code></strong></td><td><strong>6.2718&times;10<sup>-4</sup></strong></td><td><strong>1.7487&times;10<sup>-4</sup></strong></td><td><strong>6.1378&times;10<sup>-5</sup></strong></td><td><strong>1.677 &mdash; converging</strong></td></tr>
+    <tr><td><code>toroidal_stress</code></td><td>4.9540&times;10<sup>-5</sup></td><td>5.6132&times;10<sup>-5</sup></td><td>5.6208&times;10<sup>-5</sup></td><td>flat</td></tr>
+  </tbody>
+</table>
+
+<p><strong>The named defect is <code>radial_moment</code>, and the two ladders localise it to the contour side.</strong>
+Each term's residual is flat in exactly one ladder and responds to the other, which is what names the side without
+assuming it. The radial residual is flat in volume resolution and falls only when the contour sampling is refined &mdash;
+so the error is on the contour side of the radial identity, and moving the sample to the segment midpoint did not
+remove it; a first-order term survives in that surface integral. The vertical and toroidal residuals behave
+oppositely: flat in sampling, first order in resolution (0.824 and 0.925), the signature of the volume side's
+cell-centre plasma mask, which carries no boundary correction.</p>
+
+<p><strong>Lesson.</strong> The three-term residual vector was being read as one number. Fractionated per term and
+per ladder, the flat coordinate stops being a mystery and becomes a location: a residual that does not move with
+the refinement you applied is on the other side. The failing bound was hiding a real defect, not a tolerance to
+relax &mdash; the bound is left untouched and the three rungs of
+<code>test_shafranov_contour_integrals_equal_their_volume_side</code> stand red until the radial surface term is
+repaired. Probe scripts and logs:
+<code>~/.config/reckon/crew/reports/nova/s19-local/sos-grid-route-order/</code>
+(<code>volume_side_term_probe.{py,log}</code>, <code>floor_and_order_probe.{py,log}</code>,
+<code>contour_quadrature_probe.{py,log}</code>, <code>term_decomposition_probe.{py,log}</code>).</p>
+</section>
+</main>
+</body>
+</html>

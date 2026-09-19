@@ -4,25 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="shafranov-observed-side">
-  <meta name="plan-title"     content="Shafranov observed side — the exact contour functional on the exact Biot field, in production">
-  <meta name="plan-summary"   content="Field responses built at operator build, the grid route at the right order, the constraint observed side on the contour integral, the toroidal term ruled.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="shafranov-observed-side">
+  <meta name="plan-title" content="Shafranov observed side — the exact contour functional on the exact Biot field, in production">
+  <meta name="plan-summary" content="Field responses built at operator build, the grid route at the right order, the constraint observed side on the contour integral, the toroidal term ruled.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="17.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S19">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="equilibrium,mast,active-set,grad-shafranov,efit">
+  <meta name="plan-sprint" content="S19">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="equilibrium,mast,active-set,grad-shafranov,efit">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
   <title>Shafranov observed side | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-north-star" content="ns-accurate-millisecond-gs">
+<meta name="plan-modified" content="2026-09-19">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -94,25 +97,25 @@
     calibration stated.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="toroidal-volume-term" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Where does the toroidal-field volume term Z of the Shafranov functional come from?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="solved-state">the solved state's own integral of B_phi squared</button>
-          <button class="r-opt" data-value="diamagnetic-loop">a diamagnetic-loop measurement where the machine carries one, the solved state elsewhere</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="toroidal-volume-term" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Where does the toroidal-field volume term Z of the Shafranov functional come from?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="solved-state">the solved state&#x27;s own integral of B_phi squared</button>
+      <button class="r-opt" data-value="diamagnetic-loop">a diamagnetic-loop measurement where the machine carries one, the solved state elsewhere</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-sos-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship shafranov-observed-side §1">
-        <h4 class="r-fu-title">Land §1 and §2 together on CPU, then §3 once §4 is locked</h4>
-        <div class="r-fu-body"><p>§1 and §2 share the analytic route and its gate. §3 waits on the decision in §4 so the receipt is regenerated once.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship shafranov-observed-side §1</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sos-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship shafranov-observed-side §1" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land §1 and §2 together on CPU, then §3 once §4 is locked</h4>
+    <div class="r-fu-body"><p>§1 and §2 share the analytic route and its gate. §3 waits on the decision in §4 so the receipt is regenerated once.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship shafranov-observed-side §1</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

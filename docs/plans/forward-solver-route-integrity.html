@@ -4,26 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="forward-solver-route-integrity">
-  <meta name="plan-title"     content="Forward solver route integrity — every accelerated route reaches the shared fixed point, in a program that fits">
-  <meta name="plan-summary"   content="Restore the Newton-Krylov route, bound the solve executable, carry every evaluation through one traced state machine, and make the pre-warm cover the lane.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="forward-solver-route-integrity">
+  <meta name="plan-title" content="Forward solver route integrity — every accelerated route reaches the shared fixed point, in a program that fits">
+  <meta name="plan-summary" content="Restore the Newton-Krylov route, bound the solve executable, carry every evaluation through one traced state machine, and make the pre-warm cover the lane.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="29.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S19">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="equilibrium,fixed-point,jax,convergence,h200">
-  <meta name="plan-informs"   content="">
+  <meta name="plan-sprint" content="S19">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="equilibrium,fixed-point,jax,convergence,h200">
+  <meta name="plan-informs" content="">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
   <title>Forward solver route integrity | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-north-star" content="ns-accurate-millisecond-gs">
+<meta name="plan-modified" content="2026-09-19">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -112,25 +115,25 @@
     on disk, and an anchored grep finds the marker on a passing run.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="state-machine-acceptance" data-choice="bit-identical-certificate" data-by="lead" data-when="2026-09-19">
-        <p class="r-dec-q">What accepts the single traced evaluator?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="bit-identical-certificate">bit-identical certificate terminal states on the four required rows</button>
-          <button class="r-opt" data-value="tolerance">terminal states within a stated tolerance</button>
-        </p>
-        <p class="r-dec-rat">The interim that moved the single-null 500 row by 2.2e-3 and produced a non-finite residual is the measured cost of a tolerance; the certificate is the exact pin and stays the gate.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="state-machine-acceptance" data-choice="bit-identical-certificate" data-by="lead" data-when="2026-09-19">
+    <p class="r-dec-q">What accepts the single traced evaluator?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="bit-identical-certificate">bit-identical certificate terminal states on the four required rows</button>
+      <button class="r-opt" data-value="tolerance">terminal states within a stated tolerance</button>
+      </p>
+    <p class="r-dec-rat">The interim that moved the single-null 500 row by 2.2e-3 and produced a non-finite residual is the measured cost of a tolerance; the certificate is the exact pin and stays the gate.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-fsri-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship forward-solver-route-integrity §1">
-        <h4 class="r-fu-title">Land §1 through the live codex node, then §4, §2 and §3 in that order</h4>
-        <div class="r-fu-body"><p>§1 is in flight on the codex lane (run r-20260919T090428129698, dispatched from the parent plan; its landing is recorded here). §4 is small and unblocks honest lane timing for §2 and §3. §3 is the critical-risk section and takes the strongest capability class available.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §1</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-fsri-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="coordinator" data-written-at="2026-09-19" data-recommends-skill="/reckon-ship forward-solver-route-integrity §1" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land §1 through the live codex node, then §4, §2 and §3 in that order</h4>
+    <div class="r-fu-body"><p>§1 is in flight on the codex lane (run r-20260919T090428129698, dispatched from the parent plan; its landing is recorded here). §4 is small and unblocks honest lane timing for §2 and §3. §3 is the critical-risk section and takes the strongest capability class available.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity §1</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

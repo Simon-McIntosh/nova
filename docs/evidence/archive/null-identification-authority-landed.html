@@ -783,6 +783,25 @@
     <figcaption>row-17-40ms. Recovered from worktree <code>nia-contained-anchor-corpus-route</code> at <code>f074cd5e</code>.</figcaption>
   </figure>
 </section>
+<section id="limited-boundary-wall-contact">
+  <h2>Limited boundaries use the contour surface at their wall contact (2026-09-19)</h2>
+  <p><strong>Finding.</strong> The converged MAST 27079 limited reads had two boundary authorities. Route W used independently solved wall-zone values and a quadratic in wall-polyline length; route S used the tensor spline over the solved rectangular raster, which is the field the boundary contour follows. At the fitted contacts the routes disagreed by <code>0.03241175080520986 Wb</code> on row 16 and <code>0.030619627310691955 Wb</code> on row 17. The proposed clamp of a quadratic overshoot could not explain differences of this size. The full labeller replay that preceded this measurement was rejected as evidence because its rows were nonconverged; the accepted reproduction calls the bounded reduced-Newton slice solve directly and requires convergence before analysing the terminal state.</p>
+  <p><strong>Repair.</strong> A structured topology read now selects the wall contact from the tensor spline used for contours and publishes that spline's value at the fitted contact. An unstructured carrier, which has no tensor surface, retains its wall-zone route. A deliberately contradictory structured wall-zone vector is ignored by the regression test, while private-wall masking remains part of contact selection. The implementation, quantitative receipt and before/after terminal rasters are durable at commit <code>8fdc71ef</code>.</p>
+  <table>
+    <caption>Converged limited reads before and after one contour authority</caption>
+    <thead><tr><th>MAST 27079 row</th><th>terminal residual</th><th>before W minus S</th><th>before wall gap</th><th>after relative contact-flux error</th><th>after wall gap</th></tr></thead>
+    <tbody>
+      <tr><td>16, 35 ms</td><td><code>1.136941060407411e-09</code></td><td><code>0.03241175080520986 Wb</code></td><td><code>0.2720145779546779 m</code></td><td><code>1.50e-15</code></td><td><code>0.012811640333972418 m</code></td></tr>
+      <tr><td>17, 40 ms</td><td><code>7.336651509264504e-11</code></td><td><code>0.030619627310691955 Wb</code></td><td><code>0.20974874944500732 m</code></td><td><code>1.25e-15</code></td><td><code>0.00007009371092281391 m</code></td></tr>
+    </tbody>
+  </table>
+  <figure>
+    <img src="/nova/figures/null-identification-authority/limited-touch/row-16-before-after.png" alt="MAST 27079 row 16 before and after limited-boundary reads, drawn as unfilled poloidal flux contours on one shared level array with the wall, both read axes and the fitted wall contact">
+    <figcaption>MAST 27079 at 35 ms. Both panels use one shared absolute contour-level array. The red contour is the published limited-boundary level, the black outline is the wall, the red triangle is the panel's axis, the hollow blue triangle is the counterpart axis, and the circle marks the fitted wall contact. Before, the wall-zone level closes 0.272 m inside the wall; after, the contour-spline level approaches within 0.0128 m, below the 0.125 m cell-pitch bound.</figcaption>
+  </figure>
+  <p><strong>Gate.</strong> One <code>all_debug</code> CPU job pinned <code>JAX_PLATFORMS=cpu</code> and ran the new persisted-row, twelve-arm diverted, four-row limited-certificate and companion contact checks together with the existing JAX topology and limiter-receipt files: 30 passed and 3 failed in 223.55 seconds. The new boundary tests all pass. The residual failures are retained visibly for coordinator dispatch: <code>test_the_topology_read_matches_a_traversed_formulation</code> differs in all 3,195 normalised-flux values by at most <code>5.1738e-4</code>; <code>test_limiter_contact_is_arc_length_quadratic_extremum</code> still expects a sub-<code>1e-6 Wb</code> analytic level while the spline-authored value is <code>1.6933522867362064e-6 Wb</code>; and the diverted arm of <code>test_level_error_stays_second_order</code> measures order <code>-0.9511591416258307</code> after retiring the independent wall-zone level. The gate log is <code>~/.config/reckon/crew/reports/nova/s19-codex/limited-touch/pytest-final.slurm.log</code>.</p>
+  <p><strong>Artifacts.</strong> Machine-readable receipt and both terminal rasters are under <code>docs/figures/null-identification-authority/limited-touch/</code>, beside the PNG and SVG comparison. Baseline and repaired solve logs are under <code>~/.config/reckon/crew/reports/nova/s19-codex/limited-touch/</code>.</p>
+</section>
 </main>
 </body>
 </html>

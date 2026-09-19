@@ -26,6 +26,7 @@ with skip_import("jax"):
     from nova.equilibrium.topology import Topology, TopologyState
     from nova.geometry import select
     from nova.jax.config import Precision, configure_dtypes
+    from nova.linalg.tensor_spline import fit_tensor_spline
 
 
 def _structured_grid(nx, nz, xlim=(0.5, 1.5), zlim=(-0.6, 0.6)):
@@ -128,11 +129,12 @@ def test_batched_update_matches_per_slice(topology):
 
 
 def test_batched_primary_points_match_per_slice(diverted):
-    """Batched primary X coordinates and flux equal per-slice reads.
+    """Batched spline-authored reads ignore contradictory wall-zone values.
 
     The shared grid carries two physical saddles.  Two additional slices move
-    only the wall operand to either side of an almost-tangent wall/X flux tie,
-    so the parity assertion covers both a double-null and the class hand-off.
+    only the independent wall operand by a material fraction of the grid flux
+    span.  The structured boundary reads from the grid spline, so these
+    contradictory wall-zone values cannot move its contact, flux or class.
     """
     topo, psi, inside = diverted
     polarity = 1
@@ -140,16 +142,11 @@ def test_batched_primary_points_match_per_slice(diverted):
     vmap_o, vmap_x = topo.grid(psi_grid)
     data_o = topo.o_point_data(vmap_o, polarity)
     data_x = topo.x_point_data(vmap_x, polarity, data_o[2])
-    data_w = topo.wall(psi_wall, polarity)
     finite_x_count = int(np.sum(np.isfinite(np.asarray(vmap_x)[:, 0])))
     assert finite_x_count == 2
 
     flux_span = abs(float(data_x[2] - data_o[2]))
-    tie_offset = float(data_x[2] - data_w[2])
-    tie_epsilon = 1.0e-10 * flux_span
-    wall_offsets = jnp.asarray(
-        [0.0, tie_offset - tie_epsilon, tie_offset + tie_epsilon]
-    )
+    wall_offsets = jnp.asarray([0.0, -0.25 * flux_span, 0.25 * flux_span])
     psi_batch = jnp.concatenate(
         (
             jnp.broadcast_to(psi_grid, (wall_offsets.size, psi_grid.size)),
@@ -159,13 +156,26 @@ def test_batched_primary_points_match_per_slice(diverted):
     )
 
     _batch_masks, batch_state = topo.read_batch(psi_batch, polarity, inside)
-    np.testing.assert_allclose(
-        np.abs(
-            np.asarray(batch_state.wall_point_flux[1:] - batch_state.x_point_flux[1:])
+    np.testing.assert_array_equal(
+        np.asarray(batch_state.wall_point),
+        np.broadcast_to(
+            np.asarray(batch_state.wall_point[0]),
+            np.asarray(batch_state.wall_point).shape,
         ),
-        tie_epsilon,
-        rtol=1.0e-6,
-        atol=8.0 * np.finfo(float).eps * max(flux_span, 1.0),
+    )
+    np.testing.assert_array_equal(
+        np.asarray(batch_state.wall_point_flux),
+        np.broadcast_to(
+            np.asarray(batch_state.wall_point_flux[0]),
+            np.asarray(batch_state.wall_point_flux).shape,
+        ),
+    )
+    np.testing.assert_array_equal(
+        np.asarray(batch_state.diverted),
+        np.broadcast_to(
+            np.asarray(batch_state.diverted[0]),
+            np.asarray(batch_state.diverted).shape,
+        ),
     )
     for index in range(psi_batch.shape[0]):
         _slice_masks, slice_state = topo.read(psi_batch[index], polarity, inside)
@@ -342,20 +352,33 @@ def _vertical_cut_connectivity(topology, data_o, vmap_x):
 def _traversed_read(topology, psi, polarity, inside_material):
     """Return the saddle-aware partition and state with traversed null fits."""
     psi_grid, psi_wall = topology.split_flux_map(psi)
+    radial_count = topology.connectivity_radius.shape[0]
+    vertical_count = topology.connectivity_height.shape[0]
+    flux = psi_grid.reshape((radial_count, vertical_count)).T
+    surface = fit_tensor_spline(
+        topology.connectivity_radius,
+        topology.connectivity_height,
+        flux,
+    )
     vmap_o, vmap_x = _traversed_nulls(topology.grid, psi_grid)
     data_o = topology.o_point_data(vmap_o, polarity)
     data_x = topology.x_point_data(vmap_x, polarity, data_o[2])
-    data_w = topology.wall(psi_wall, polarity)
+    data_w = topology.wall_anchor_data(psi_wall, polarity, surface=surface)
     data_b = topology.boundary(data_o, vmap_x, data_w, polarity)
-    psi_norm = topology.normalize(data_o[2], data_b[2], psi_grid)
-    closed = topology.psi_mask(polarity, psi_grid, data_b[2])
+    comparison_flux = psi_grid
+    psi_norm = topology.normalize(data_o[2], data_b[2], comparison_flux)
+    closed = topology.psi_mask(polarity, comparison_flux, data_b[2])
     connected = topology.axis_component(
-        psi_grid,
+        comparison_flux,
         data_b[2],
         data_o[2],
         data_o[:2],
         closed,
         inside_material,
+        jnp.equal(data_b[2], data_x[2]),
+        data_x[:2],
+        surface,
+        polarity=polarity,
     )
     masks = classify_domains(
         psi_norm,
@@ -593,7 +616,7 @@ def test_mast_bank_slices_classification_is_batch_invariant():
     connectivity kernel runs the same fixed iteration schedule whether one
     slice or sixty-four are batched, so the vmapped classification must equal
     the per-slice classification exactly.  The twelve rows cover the limited
-    and diverted phases of one MAST shot on the shared laboratory lattice.
+    and diverted regimes of one MAST shot on the shared laboratory lattice.
     """
     from nova.equilibrium.connectivity_boundary import (
         _raster_hex_partition_geometry,
@@ -723,7 +746,7 @@ def test_mast_bank_slices_classification_is_batch_invariant():
         links,
     )
     # the classification is not trivial: the bank spans limited and diverted
-    # phases, so component counts vary across the dozen
+    # regimes, so component counts vary across the dozen
     component_counts = {
         int(row): int(
             np.count_nonzero(

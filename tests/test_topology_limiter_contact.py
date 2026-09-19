@@ -1,19 +1,10 @@
-"""Limiter wall-contact read on the analytic oracle fixtures.
+"""Limiter wall contacts share the contour surface of analytic fixtures.
 
-The wall contact is the extremum of the quadratic fitted through the extremal
-wall node and its two neighbours in cumulative arc length along the wall
-polyline, with the level the quadratic's extremum value.  On the
-designed-tangent limiter fixtures a wall node sits exactly at the analytic
-tangency (the outboard boundary-flux point), so the contact lands on that node
-and the position error against the analytic tangency is already at the machine
-floor at the coarsest node count; the level error against the continuum flux
-extremum falls at least second order between 241 and 481 wall nodes.  The
-offset diverted wall is resampled by arc length at each node count, so its
-position contract is a panel bound while the level stays second order.  The
-private-wall shadow mask is applied unchanged before selection, and the
-contact read depends only on the wall polyline and its nodal flux, so whole
-121-node rows are bit-identical across lattice sizes exactly as they are
-across cell counts.
+The wall-length quadratic still refines a contact position from the extremal
+wall node and its neighbours.  On a structured carrier the contact level is
+then sampled from the same tensor spline used for the plasma contour.  The
+private-wall shadow remains a selection mask, but an independently supplied
+wall-zone vector cannot become a second boundary authority.
 """
 
 from __future__ import annotations
@@ -33,6 +24,7 @@ with skip_import("jax"):
     from nova.equilibrium import TopologyClass
     from nova.equilibrium.topology import Topology
     from nova.jax.config import configure_dtypes
+    from nova.linalg.tensor_spline import fit_tensor_spline
     from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 
 
@@ -73,8 +65,8 @@ def _topology_row(case_name, radial, vertical, wall_nodes):
     The grid box follows the fixture's own recipe (boundary midplane radii
     widened by a margin for limiter cases, the wall-derived envelope for the
     diverted case) so the box contains the qualified magnetic axis.  The
-    contact read itself uses only the wall polyline and its nodal flux, so
-    grid size is inert.
+    contact position is refined along the wall and its flux is sampled from
+    the tensor spline over this lattice.
     """
     carrier, source_case, exact = certificate._case(case_name)
     wall = (
@@ -104,6 +96,11 @@ def _topology_row(case_name, radial, vertical, wall_nodes):
     ]
     state = np.asarray(state, dtype=np.float64)
     _masks, read = topology.read(state, 1.0, np.ones(len(coordinate), dtype=bool))
+    surface = fit_tensor_spline(
+        radii,
+        heights,
+        state[: len(coordinate)].reshape(radial, vertical).T,
+    )
     continuum = _analytic_wall_extremum(case_name, exact, wall, 1.0)
     panels = np.linalg.norm(np.roll(wall, -1, axis=0) - wall, axis=1)
     return {
@@ -112,6 +109,7 @@ def _topology_row(case_name, radial, vertical, wall_nodes):
         "grid_node_count": len(coordinate),
         "contact": np.asarray(read.wall_point, dtype=np.float64),
         "contact_flux": float(read.wall_point_flux),
+        "contour_contact_flux": float(surface(read.wall_point[0], read.wall_point[1])),
         "continuum_r_z": np.asarray(continuum["coordinate_rz_m"]),
         "continuum_flux_wb": float(continuum["flux_wb"]),
         "median_panel_m": float(np.median(panels)),
@@ -174,13 +172,17 @@ def test_diverted_position_stays_within_one_wall_panel():
 
 
 @pytest.mark.parametrize("case_name", [WEAK, DIVERTED])
-def test_wall_contact_bit_identical_across_lattice_sizes(case_name):
-    """121-node rows read bit-identical contact positions on two lattice
-    sizes, because the contact read depends only on the wall polyline and its
-    nodal flux."""
+def test_wall_contact_uses_each_lattice_contour_surface(case_name):
+    """Each lattice publishes its contour spline's value at the contact."""
     small = _topology_row(case_name, 45, 55, 121)
     large = _topology_row(case_name, 65, 75, 121)
-    assert np.array_equal(small["contact"][:2], large["contact"][:2])
+    for row in (small, large):
+        np.testing.assert_allclose(
+            row["contact_flux"],
+            row["contour_contact_flux"],
+            rtol=1.0e-9,
+            atol=0.0,
+        )
 
 
 @pytest.mark.parametrize("case_name", [WEAK, DIVERTED])

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-19T11:28:58",
+  "updated": "2026-09-19T11:48:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -202824,6 +202824,234 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T090619820972-fsa-edge-root-bracket",
+        "plan": "forward-solve-api",
+        "section": "\u00a75",
+        "node": "fsa-edge-root-bracket",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5443,
+                "cached_input_tokens": 561222,
+                "input_tokens": 566667,
+                "output_tokens": 4079,
+                "reasoning_output_tokens": 323,
+                "total_tokens": 570746,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "followup f-fsa-edge-root-bracket-and-reference-render items (1) and (2) on the plan: the review of the predecessor (stored at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20260918T154507107752-fsa-coil-edit-panel-lcfs-2.json, read it first, and its logs under /home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T082842765337-review-of-fsa-coil-edit-panel-lcfs-2/logs including edge-probe.log) measured on the persisted fixture docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz state 9 at level -0.081614263 that the fitted spline crosses all four edges of saddle cell (5,9), twice on the left edge 19.36 mm apart, while the five-sample subdivision in nova/equilibrium/flux_surface_connectivity.py near line 1480 sees positive deltas on every left-edge sub-interval, so cell_crossing_count reads 2 and the closing tie at line 1666 never fires; states 10, 11 and 12 fail the same way; replace the fixed subdivision with root counting from the edge cubic's own stationary points (the spline restricted to an edge is a cubic in the edge parameter; solve its derivative's quadratic, split the edge at the real stationary points inside it, and bracket one root per monotone piece whose ends straddle the level), keeping the traced program fixed-shape with at most three roots per edge padded exact-zero and EDGE_CROSSING_CAPACITY honoured; the gate is one all_debug job (JAX_PLATFORMS=cpu, the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python directly, never uv on a compute node, TMPDIR=/tmp in the submit environment and the payload, scripts inside the worktree) running tests/test_flux_surface_connectivity.py and tests/test_separatrix_branches.py with the persisted-state test extended to states 9 to 12, and the twenty-state census on panel-states.npz reporting 0 of 20 failing (it was 4 of 20); then in benchmarks/coil_edit_latency.py near line 1425 stop drawing reference_separatrix, a scan-order crossing list, as one polyline: assemble it through assemble_separatrix_branches or draw its crossings as unconnected segments, and caption which equilibrium the reference is (its admitted saddle sits above its axis while every solved state has a lower X-point); redraw docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png and .svg per the plotting rules; the plan landing comment and the evidence anchor in docs/evidence/archive/forward-solve-api-landed.html; a text-only lane, never Read a PNG, verify through the SVG; commit at the first passing state; call configure_dtypes before any array; every uv command carries --no-sync and nothing runs uv sync; py_compile with the project interpreter before each commit; manifest at the first commit with status words complete, waiting or blocked only and, if a wait is declared, wait_condition, wait_probe as a JSON list, wait_terminal and a filled resume_brief",
+          "estimated_hours": null,
+          "goal": "bracket every level-set root on a cell edge from the edge cubic own stationary points so two roots inside one sub-interval are both found",
+          "id": "fsa-edge-root-bracket",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-19T09:06:20Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T090619820972-fsa-edge-root-bracket/manifest.md",
+          "plan": "forward-solve-api",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/flux_surface_connectivity.py",
+            "nova/equilibrium/separatrix_branches.py",
+            "benchmarks/coil_edit_latency.py",
+            "tests/test_flux_surface_connectivity.py",
+            "tests/test_separatrix_branches.py",
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence",
+            "docs/plans/forward-solve-api.html",
+            "docs/evidence/archive/forward-solve-api-landed.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/edge-root-bracket"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-fsa-edge-root-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-19T09:06:31Z",
+        "completed_at": "2026-09-19T09:27:30.542Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1249,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1259,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "17d8b0c4280b34409ef651e44913b04eb28fb545",
+        "commits": [
+          "1037c68a85026a93714c3bddf91ea1aabf8989a8"
+        ],
+        "changed_lines": {
+          "added": 934,
+          "removed": 700,
+          "files": 7
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/test_flux_surface_connectivity.py tests/test_separatrix_branches.py on all_debug CPU (34 passed) and the twenty-state census (0 of 20 failing)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/edge-root-bracket/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "Edge roots bracketed from the cubic own extrema; the coil-edit census is 0 of 20 failing; review 92/100",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T090619820972-fsa-edge-root-bracket/manifest.md",
+        "scope_changed": false,
+        "session_id": "42cc0915-50a2-4d6d-a99d-0120c96ed453",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 9110894,
+            "input_tokens_cumulative": 9110894,
+            "output_tokens": 69725,
+            "output_tokens_cumulative": 69725,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-19T09:27:30.542Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 18,
+            "evidence": 17,
+            "fit": 19,
+            "goal_fidelity": 19,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 92
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 9278799,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1256.536,
+          "generated_tokens": 79556,
+          "generation_seconds": 746.99,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.7,
+          "machine_seconds": 509.546,
+          "peak_input_tokens": 166605,
+          "tokens_per_second": 106.5,
+          "wall_tokens_per_second": 63.31
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "running tests",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-edge-root-bracket",
+          "session_id": "42cc0915-50a2-4d6d-a99d-0120c96ed453",
+          "session_source": "stream",
+          "retained_at": "2026-09-19T09:27:30.542Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.87,
+        "impl_move": {
+          "plan": "forward-solve-api",
+          "at_dispatch": 0.87,
+          "at_complete": 0.88,
+          "verdict": "moved"
+        },
+        "tool_steps": 84.0,
+        "orientation_input_tokens": 1725526.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -203206,6 +203434,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2866
+    "_version": 2867
   }
 }

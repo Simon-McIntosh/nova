@@ -637,18 +637,28 @@
     <code>AttributeError: '_LinearOperator' object has no attribute
     'program_identity'</code> by the test module's own stub, so the repaired head
     adds no failure.</p>
-    <p><strong>The terminal state is not yet banked.</strong> The save ordering
-    this review asked for already holds: <code>control_arm</code> writes
-    <code>control-&lt;arm&gt;-state.npy</code> and records
-    <code>terminal_state_path</code> in the control JSON before the receipt is
-    composed, and <code>_draw_state</code> emits the SVG beside the PNG. What was
-    missing is the run, and the two CPU control arms submitted for it at
-    <code>10ff11fd</code> were still solving when this node's fence closed, with
-    no receipt, state file or panel written. If an arm is cancelled on the
-    partition's <code>00:59:00</code> limit, the CPU route to the persisted state
-    does not fit one allocation and belongs to the coordinator as a decision
-    rather than to a blind retry. The <code>field-response</code> panel's vector
-    companion needs an SVG emitter in
+    <p><strong>The negative arm's terminal state is banked; the positive arm is
+    not.</strong> The save ordering this review asked for already holds:
+    <code>control_arm</code> writes <code>control-&lt;arm&gt;-state.npy</code> and
+    records <code>terminal_state_path</code> in the control JSON before the receipt
+    is composed, and <code>_draw_state</code> emits the SVG beside the PNG. What
+    was missing was the run. On an <code>all_debug</code> CPU pair at head
+    <code>10ff11fd</code>, the negative arm (<code>1273964</code>) completed in
+    <code>29:59</code> and now yields all four: the receipt, the state file it
+    names, and the panel as PNG and SVG. Its receipt carries
+    <code>terminal_state_path</code> — the key the earlier banked receipt lacked —
+    and the readings reproduce the earlier arm to the <code>1e-12</code> level, so
+    the repaired pool bound moves the negative control's answer by float ordering
+    only (<code>1.3138284465e-02</code> pitches against
+    <code>1.3138284664972332e-02</code>; terminal residual <code>4.170e-13</code>
+    against <code>1.590e-13</code>). The positive arm (<code>1273963</code>)
+    <code>TIMEOUT</code>ed at <code>00:59:02</code> after about fifteen minutes of
+    first compile and forty-four of solve, and lost its stdio to buffering; it
+    awaits the retry <code>1273994</code>, which runs the same lane unbuffered with
+    a warm compile cache. Should that retry also expire, the constrained arm's
+    solve does not fit one <code>00:59:00</code> allocation and the lane is the
+    coordinator's decision rather than a blind repetition. The
+    <code>field-response</code> panel's vector companion needs an SVG emitter in
     <code>benchmarks/centroid_field_response_probe.py</code>, which lies outside
     this node's write scope and is reported rather than taken.</p>
   </section>

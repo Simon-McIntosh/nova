@@ -46,7 +46,6 @@ import jax
 import numpy as np
 
 from benchmarks import solovev_certificate as certificate
-from nova.equilibrium import clip_quadrature
 from nova.equilibrium.forward_operator import set_support_clip_mode
 from nova.jax.config import configure_dtypes
 
@@ -64,8 +63,6 @@ def main() -> int:
 
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
-    if not hasattr(certificate.observation, "_UNIT_NODE"):
-        certificate.observation._UNIT_NODE = clip_quadrature._UNIT_NODE
     if arguments.mode in ("whole_cell", "whole_cell_guard"):
         from benchmarks import limited_row_shadow_census
 
@@ -161,7 +158,6 @@ def test_scaling_exponent_refuses_nonpositive_measurements(value):
 
 def test_measure_uses_the_current_quadrature_node_owner(monkeypatch, tmp_path):
     """The memory probe reaches compilation after the quadrature module split."""
-    monkeypatch.delattr(memory_scaling.certificate.observation, "_UNIT_NODE", False)
     monkeypatch.setattr(memory_scaling, "configure_dtypes", lambda: None)
     monkeypatch.setattr(memory_scaling, "support_clip_mode", lambda: "chord")
     monkeypatch.setattr(memory_scaling, "set_support_clip_mode", lambda _mode: None)
@@ -171,10 +167,6 @@ def test_measure_uses_the_current_quadrature_node_owner(monkeypatch, tmp_path):
     )
 
     def compiled(*_args, **_kwargs):
-        assert (
-            memory_scaling.certificate.observation._UNIT_NODE
-            is memory_scaling.clip_quadrature._UNIT_NODE
-        )
         return {
             "requested_cells": -110,
             "realised_cells": 132,
@@ -192,6 +184,17 @@ def test_measure_uses_the_current_quadrature_node_owner(monkeypatch, tmp_path):
         (part_root / "requested-110.json").read_text(encoding="utf-8")
     )
     assert part["row"] == receipt["rows"][0]
+
+
+def test_the_memory_probe_reads_the_node_constant_from_its_owning_module():
+    """The probe must not publish the constant onto the observation module.
+
+    The certificate builder imports the constant from
+    ``nova.equilibrium.clip_quadrature``, so a compatibility shim that
+    republishes it as ``observation._UNIT_NODE`` has nothing left to serve.
+    """
+    source = Path(memory_scaling.__file__).read_text(encoding="utf-8")
+    assert "observation._UNIT_NODE" not in source
 
 
 def test_measure_can_bank_memory_without_serializing_hlo(monkeypatch, tmp_path):

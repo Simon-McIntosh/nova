@@ -90,9 +90,13 @@ that is still descending fast is reported as settled. The residuals of the group
 residual is below its seed's, so none is a failure to descend; all are a stop while descending.</p>
 <p>The mask-stable seed is a consequence of the warm start: from edit 1 onward the seed is the previous
 edit's terminal state, whose active set is already stationary on the new operator. The one edit that is
-not warm-started from a predecessor (edit 0, seeded from the base frame at the shot current) shows mask
-motion in every trip
-(<code>18, 34, 6, 0</code>) and converges, which is the contrast that makes the group coherent.</p>
+not warm-started from a predecessor (edit 0, seeded from the base frame at the shot current) is the
+contrast that makes the group coherent, and its trace is not a mask that moves on every trip: it takes
+four trips with twelve, ten, zero and zero accepted steps, on a mask difference of
+<code>18, 34, 6, 0</code> and a residual trace of
+<code>5.007e-02, 4.141e-02, 5.028e-10, 2.729e-09</code>. It converges &mdash; the last two entries sit
+below the 1e-8 tolerance &mdash; but the mask moves on its first three trips only, and its fourth
+closing read promotes nothing, which is the same read that stops the six stalled edits.</p>
 
 <h3>Refused first step &mdash; no Newton step accepted &mdash; edits 17, 19</h3>
 <p>These two take one trip, accept zero Newton steps, reject one, see a mask difference of 0, and return
@@ -151,9 +155,13 @@ reference), so a mismatch under about 1/14 of the range is inside the gap betwee
 reference is the <strong>upper-null</strong> equilibrium: its admitted saddle sits at +1.231 m against an
 axis at +0.022 m, 1.208 m above the axis, while every one of the twenty solved states admits a
 <strong>lower</strong> null below its own axis. Both panels
-draw the reference nulls in blue (dashed separatrix, hollow markers) and the solved nulls in orange (solid
-separatrix, filled axis triangle, filled X) over the MAST first wall. The pair is the two largest-residual
-points of their respective sets, chosen by the driver's panel selector.</figcaption>
+draw the reference nulls in blue and the solved nulls in orange, each set as a filled axis triangle plus a
+filled X at its admitted saddle, over the MAST first wall; neither set carries a second qualified null, so
+no hollow marker is drawn on either panel (the painter returns
+<code>other_x_points_drawn: 0</code> for both sets in the receipt below). The reference set's boundary
+arrives unassembled, so its crossings are drawn as separate unconnected marks rather than as a closed
+contour, while the solved set is drawn as a solid lobe with dashed legs. The pair is the two
+largest-residual points of their respective sets, chosen by the driver's panel selector.</figcaption>
 </figure>
 <h2 id="artifacts">Where this rides</h2>
 <ul>
@@ -163,12 +171,23 @@ points of their respective sets, chosen by the driver's panel selector.</figcapt
   <li><code>panel-states.npz</code> &mdash; the per-edit poloidal flux states, the reference state, the
   shared contour levels, the nulls and the wall units the panel is drawn from.</li>
   <li><code>converged-vs-nonconverged.png</code> &mdash; the panel above.</li>
+  <li><code>converged-vs-nonconverged.json</code> &mdash; the panel's own receipt: the shared contour
+  levels, the branch terms and drawing style of each set, the caption text, and the drawn and dropped
+  null tally <code>poloidal.draw_nulls</code> returns for each set (one admitted saddle drawn, none
+  dropped outside the wall, no other qualified nulls).</li>
   <li><code>coil-edit-latency.json</code> &mdash; the sweep receipt in the sibling
-  <code>coil-edit-latency</code> directory, this record's forensic companion, with the latency
-  statement and the two gates that failed.</li>
+  <code>coil-edit-latency</code> directory, this record's forensic companion: the same run
+  (<code>source_revision d38491924</code>, H200 job 1273580), with the latency statement and the two
+  gates that failed.</li>
+  <li><code>coil-edit-latency-2026-09-17.json</code> &mdash; the earlier receipt of this same
+  twenty-edit sweep (H200 job 1273204, median <strong>353.0 ms</strong> warm), preserved under a dated
+  name beside the current one because an earlier version of the plan text quoted its median.</li>
 </ul>
-<p class="lede">Rendered from a single H200 job on the frozen MAST 22086 slice-43 arm. The sweep receipt
-reports 10 of 20 converged at a 353 ms median warm wall; this record explains the ten.</p>
+<p class="lede">Rendered from a single H200 job on the frozen MAST 22086 slice-43 arm. This record's own
+sweep receipt reports 10 of 20 converged at a <strong>370.4 ms</strong> median warm wall
+(<code>coil-edit-latency/coil-edit-latency.json</code>, job 1273580); the earlier receipt of the same
+sweep reports 353.0 ms (<code>coil-edit-latency/coil-edit-latency-2026-09-17.json</code>, job 1273204).
+This record explains the ten.</p>
 </main>
 </body>
 </html>

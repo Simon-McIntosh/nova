@@ -983,6 +983,67 @@ Gate on the login node: the new test module plus <code>tests/test_bank_drift_pai
   under <code>docs</code> and removes it afterwards, because the driver receipts a panel against the
   served docs mount and refuses a figure outside it.</p>
 </section>
+<section id="the-grid-class-margin-infinity-is-the-wall-operand">
+  <h2>The grid class margin's infinity is the wall operand, not an absent-xpoint sentinel (2026-09-20)</h2>
+  <p>Node <code>nia-the-grid-class-margin-reads-infinite</code> (s19-codex, implement spec exact).
+  Source <code>nova/equilibrium/forward_operator.py</code>. The failing case is
+  <code>tests/test_forward_operator_axes.py::test_tensor_product_grid_class_margin_is_read_on_the_spline</code>,
+  which pins the structured-grid read at <code>-0.31887492472951007</code> and obtains <code>inf</code>.
+  The margin is the subtraction at <code>nova/equilibrium/connectivity_boundary.py</code>
+  <code>class_margin = class_u_wall - class_u_x</code>, so the question is which operand is not finite.
+  Both are printed below with their values, and every fixture array with its shape and finite count.</p>
+  <p><strong>The operands, printed rather than reasoned about.</strong> The read is instrumented at the
+  <code>_connectivity_read</code> seam on the exact fixture the case builds. <code>class_u_x</code> is
+  <strong>finite</strong> at <code>0.051708397272780315</code>: an X-point IS admitted on this fixture,
+  at <code>(0.78, 0)</code>, so no absent-saddle sentinel is involved. <code>class_u_wall</code> is
+  <code>inf</code>. The margin is therefore <code>inf - 0.051708397272780315</code>. Every fixture input
+  is finite: <code>grid_flux</code> <code>(81,)</code> finite 81, <code>wall_flux</code>
+  <code>(64,)</code> finite 64, <code>state</code> <code>(145,)</code> finite 145;
+  <code>moment_geometry</code> is <code>None</code>, so the degenerate short-circuit at
+  <code>forward_operator.py</code> <code>_connectivity_class_margin</code> is not the branch taken;
+  <code>_fixed_design_topology.connectivity_radius.size</code> is 9, so the read does reach the
+  traced boundary seam. <code>jax_enable_x64</code> is asserted, not trusted, and the fixture arrays are
+  built after <code>configure_dtypes()</code>.</p>
+  <table>
+    <caption>The two operands and the shadow that sets the wall value, same fixture, same process.</caption>
+    <thead><tr><th>quantity</th><th>value</th><th>finite</th></tr></thead>
+    <tbody>
+      <tr><td><code>class_u_x</code> (read <code>u_xpoint</code>)</td><td><code>0.051708397272780315</code></td><td>yes</td></tr>
+      <tr><td><code>class_u_wall</code> (read <code>u_wall</code>)</td><td><code>inf</code></td><td><strong>no</strong></td></tr>
+      <tr><td>read <code>wall_shadowed</code></td><td><code>True</code></td><td>&mdash;</td></tr>
+      <tr><td><code>reachable_wall_node_mask</code>, classification supplied</td><td>0 of 64</td><td>&mdash;</td></tr>
+      <tr><td><code>reachable_wall_node_mask</code>, classification withheld</td><td>5 of 64</td><td>&mdash;</td></tr>
+      <tr><td><code>topology.wall_point</code></td><td><code>(1.58202873, 0.38889916)</code>, wall vertex 6</td><td>yes</td></tr>
+      <tr><td><code>topology.wall_point_flux</code></td><td><code>-0.18879455615639096</code></td><td>yes</td></tr>
+    </tbody>
+  </table>
+  <p><strong>What sets the infinity.</strong> Not the saddle. The supplied wall operand is shadowed:
+  <code>class_wall_shadowed = supplied_wall_valid &amp; ~class_wall["reachable"][supplied_wall_index]</code>
+  evaluates <code>True</code> because <em>no</em> wall node is reachable when the classification
+  operands are supplied, and the wall level is then replaced outright by
+  <code>u_wall_c = jnp.where(class_wall_shadowed, jnp.inf, u_wall_c)</code> in
+  <code>nova/equilibrium/connectivity_boundary.py</code>. Withholding the classification operands on the
+  identical state leaves 5 of 64 wall nodes reachable and the margin finite, which is the same state
+  reading differently only because the reachable-wall search runs from a different region
+  (<code>wall_region</code> is <code>pre_saddle_region</code> with a classification and <code>reach</code>
+  without it). So the infinity enters as a shadowing verdict on the wall operand, and the subtraction
+  merely propagates it.</p>
+  <p><strong>The saddle operand did not move; the wall operand did.</strong> The same probe at the revision
+  that set the pin (<code>268e6928d</code>) reads <code>class_u_x</code>
+  <code>0.051708397272780315</code> &mdash; bit-identical to the current tree, so the xpoint candidate is
+  unchanged &mdash; with <code>class_u_wall</code> <code>-0.26716652745672975</code>, wall point
+  <code>(0.3, 0)</code>, <code>wall_point_flux</code> <code>-0.11954666666666702</code>, 2 of 64 wall nodes
+  reachable, <code>wall_shadowed</code> <code>False</code>, and the margin at its pinned
+  <code>-0.31887492472951007</code>. The pinned margin is therefore a true read of its revision, not a
+  stale pin; what changed is which wall anchor the read selects and whether that anchor is reachable from
+  the region the classification read searches.</p>
+  <p><strong>Status.</strong> Diagnosis only, committed before any repair. The shadow rule that writes the
+  infinity lives in <code>nova/equilibrium/connectivity_boundary.py</code>, which is outside this node's
+  write scope, so the repair has to be expressed at the <code>forward_operator.py</code> call site &mdash;
+  either the <code>classification_wall</code> operand the call supplies or the topology object whose region
+  the reachable-wall search runs from. The attribution of the moving read to a specific commit, and the
+  repair itself, are not yet landed.</p>
+</section>
 </main>
 </body>
 </html>

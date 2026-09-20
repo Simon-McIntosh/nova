@@ -44,7 +44,14 @@ from benchmarks import efit_forward_parity_slice as parity
 from benchmarks import mast_response_carrier_warm as response_carrier
 from benchmarks.diiid_forward_gs_match import _margin_graded_newton_krylov
 from nova.equilibrium import reduced_newton
+from nova.equilibrium.constraint import (
+    CircuitCurrentUnknown,
+    ConstraintBinding,
+    ConstraintPair,
+    CurrentCentroidConstraint,
+)
 from nova.equilibrium.fixed_point import FixedPointResult, FixedPointTerminationReason
+from nova.equilibrium.observation import MomentIntegralSupport
 from nova.equilibrium.flux_surface_connectivity import (
     fit_tensor_spline,
     traced_spline_contour,
@@ -97,6 +104,11 @@ INTERACTIVE_LATENCY_TARGET_MILLISECONDS = 100.0
 COMPILED_SLICE_TOLERANCE = reduced_newton.FIXED_POINT_RESIDUAL_TOLERANCE
 COMPILED_SLICE_NEWTON_STEPS = reduced_newton.NEWTON_STEPS
 COMPILED_SLICE_ACTIVE_SET_STEPS = reduced_newton.ACTIVE_SET_STEPS
+# The vertical-current-centre row's declared tolerance and its declared scale,
+# both in metres: the tolerance is the physical residual the augmented solve
+# must reach on the centroid, and the scale is the length the row is normalised
+# by, so a scaled residual of one means a whole panel height of displacement.
+VERTICAL_CENTROID_TOLERANCE = 1.0e-6
 
 
 def _sha256_bytes(payload: bytes) -> str:
@@ -411,6 +423,108 @@ def _calibrate_cache() -> tuple[dict[str, float | int], Any]:
     return cache_events, cache
 
 
+def _circuit_families(policy: dict[str, Any]) -> dict[int, str]:
+    """Return the zero-based circuit index of every named active family."""
+    return {
+        int(row["stored_circuit"]) - 1: str(row["family"])
+        for row in policy["active_mapping"]
+    }
+
+
+def _vertical_centroid_pair(
+    profile: Any,
+    policy: dict[str, Any],
+    flux: jax.Array,
+    *,
+    requested_class: jax.Array,
+    target_current: float,
+    target: float,
+) -> tuple[ConstraintPair, dict[str, Any]]:
+    """Return the vertical current-centre row and the actuator that drives it.
+
+    The row reads the plasma's own current centroid on the whole authored
+    domain and is eliminated by a circuit-current direction the machine's own
+    response matrix picks out over its active mapping: no direction is written
+    here, the matrix supplies it, and the ampere scale is the current that
+    moves the row by one declared scale.  Pinning this row is what holds a
+    solved state on the vertical position its reference belongs to while a
+    boundary coil is edited, since an unconstrained slice leaves the vertical
+    current centre free and converges on a different equilibrium instead.
+    """
+    prescribed = profile.operator.prescribed_current_field
+    if prescribed is None:
+        raise RuntimeError("the vertical-centroid row needs the prescribed field")
+    circuit_count = int(prescribed.circuit_count)
+    families = _circuit_families(policy)
+    if not families:
+        raise RuntimeError("the vertical-centroid row needs a drivable circuit set")
+    position_scale = float(np.ptp(np.asarray(profile.lattice.height)))
+    seed = ConstraintPair(
+        functional=CurrentCentroidConstraint(
+            components=("centroid_z",),
+            support=MomentIntegralSupport.ALL_DOMAIN,
+        ),
+        unknown=CircuitCurrentUnknown(
+            direction=jnp.zeros(circuit_count, dtype=jnp.float64),
+            ampere_scale=jnp.asarray([1.0], dtype=jnp.float64),
+        ),
+        binding=ConstraintBinding(
+            target=jnp.atleast_1d(jnp.asarray(target, dtype=jnp.float64)),
+            tolerance=jnp.asarray([VERTICAL_CENTROID_TOLERANCE], dtype=jnp.float64),
+            scale=jnp.asarray([position_scale], dtype=jnp.float64),
+            initial_unknown=jnp.asarray([0.0], dtype=jnp.float64),
+            payload=None,
+            policy="imposed",
+        ),
+    )
+    derived, selection = profile.derived_constraint_pairs(
+        (seed,),
+        flux,
+        requested_class=requested_class,
+        target_current=target_current,
+        circuits=sorted(families),
+    )
+    (pair,) = derived
+    authority = float(
+        np.asarray(selection.direction_authority, dtype=float).reshape(-1)[0]
+    )
+    if not np.isfinite(authority) or authority <= 0.0:
+        raise RuntimeError("the vertical-centroid row has no circuit authority")
+    direction = np.asarray(pair.unknown.direction, dtype=float).reshape(-1)
+    pair = ConstraintPair(
+        functional=pair.functional,
+        unknown=CircuitCurrentUnknown(
+            direction=pair.unknown.direction,
+            ampere_scale=jnp.asarray([1.0 / authority], dtype=jnp.float64),
+            singular_values=pair.unknown.singular_values,
+            authority=pair.unknown.authority,
+            rule=pair.unknown.rule,
+        ),
+        binding=pair.binding,
+    )
+    actuator = {
+        "definition": "vertical current-centre row, matrix-led over the active mapping",
+        "components": ["centroid_z"],
+        "support": MomentIntegralSupport.ALL_DOMAIN.value,
+        "target_m": float(target),
+        "tolerance_m": VERTICAL_CENTROID_TOLERANCE,
+        "position_scale_m": position_scale,
+        "selection_rule": selection.rule.name.lower(),
+        "ampere_scale_a": float(1.0 / authority),
+        "direction_authority_m_per_a": authority,
+        "drivable_circuits": [
+            {
+                "circuit": index,
+                "family": families[index],
+                "direction_weight": float(direction[index]),
+            }
+            for index in sorted(families)
+            if abs(direction[index]) > 0.0
+        ],
+    }
+    return pair, actuator
+
+
 def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, Any]]:
     response_cache, carrier = _response_cache(carrier_path)
     selected = {"shot": SHOT, "slice_index": SLICE_INDEX}
@@ -519,8 +633,38 @@ def _prepare_case(carrier_path: Path) -> tuple[Any, dict[str, Any], dict[str, An
         "nulls": _null_points(profile, mixed_seed.state),
         "branches": _branches_of(profile, mixed_seed.state, reference_raster),
     }
+    # The vertical current centre the reference frame already carries is the
+    # target every edit is held to: the row is measured on the base frame's own
+    # terminal state, through the same observation the constraint reads, and
+    # the compensating direction is derived there once so it is a constant of
+    # the compiled slice rather than a per-edit re-derivation.
+    reference_centroid = profile.current_moment_observation(
+        mixed_seed.state,
+        support=MomentIntegralSupport.ALL_DOMAIN,
+        requested_class=TopologyClass.DIVERTED,
+        target_current=target_current,
+    )
+    reference_centroid_z = float(np.asarray(reference_centroid.centroid_z))
+    if not np.isfinite(reference_centroid_z):
+        raise RuntimeError("the reference frame carries no vertical current centre")
+    vertical_pair, vertical_actuator = _vertical_centroid_pair(
+        profile,
+        policy,
+        mixed_seed.state,
+        requested_class=jnp.asarray(int(TopologyClass.DIVERTED), dtype=jnp.int8),
+        target_current=target_current,
+        target=reference_centroid_z,
+    )
+    reference_panel["vertical_centroid"] = {
+        "reference_m": reference_centroid_z,
+        "target_m": reference_centroid_z,
+        "tolerance_m": VERTICAL_CENTROID_TOLERANCE,
+    }
     prepared = {
         "initial": mixed_seed.state,
+        "vertical_centroid_pair": vertical_pair,
+        "vertical_centroid_actuator": vertical_actuator,
+        "reference_centroid_z": reference_centroid_z,
         "reference_lcfs": np.asarray(reference_labelled.lcfs)[:reference_lcfs_count],
         "reference_raster_separatrix": reference_raster_separatrix,
         "reference_panel": reference_panel,
@@ -562,11 +706,18 @@ def _compiled_edit(
     *,
     newton_steps: int = COMPILED_SLICE_NEWTON_STEPS,
     active_set_steps: int = COMPILED_SLICE_ACTIVE_SET_STEPS,
+    constraint_pairs: tuple[ConstraintPair, ...] = (),
 ) -> Any:
-    """Re-enter the compiled slice program with one edited current vector."""
-    return reduced_newton.solve_reduced_newton_compiled(
-        profile.operator,
+    """Re-enter the compiled slice program with one edited current vector.
+
+    With rows registered the slice solves the augmented fixed point, folding
+    each row's compensating circuit current into the prescribed vector it is
+    handed; with none it is the same unconstrained entry the sweep always took.
+    """
+    return reduced_newton.solve_constrained_reduced_newton_compiled(
+        profile,
         state,
+        constraint_pairs=constraint_pairs,
         requested_class=requested_class,
         target_current=target_current,
         prescribed_current=current,
@@ -576,6 +727,37 @@ def _compiled_edit(
         program=program,
         stream=False,
     )
+
+
+def _vertical_centroid_row(result: Any) -> dict[str, Any] | None:
+    """Return the terminal state of the vertical current-centre row, or nothing.
+
+    The row is the difference between the solved state's own current centroid
+    and the vertical position its reference carries, together with the circuit
+    current the augmented solve spent to hold it, so every sweep point states
+    both the constraint it was solved under and what that constraint cost.
+    """
+    records = tuple(getattr(result, "constraints", ()) or ())
+    if not records:
+        return None
+    record = records[0]
+    compensating = getattr(result, "compensating_current", None)
+    return {
+        "observed_m": float(np.asarray(record.observed).reshape(-1)[0]),
+        "target_m": float(np.asarray(record.target).reshape(-1)[0]),
+        "residual_m": float(np.asarray(record.physical_residual).reshape(-1)[0]),
+        "scaled_residual": float(np.asarray(record.scaled_residual).reshape(-1)[0]),
+        "tolerance_m": float(np.asarray(record.tolerance).reshape(-1)[0]),
+        "qualified": bool(np.asarray(record.qualified)),
+        "compensating_current_a": float(
+            np.asarray(record.physical_unknown).reshape(-1)[0]
+        ),
+        "compensating_current_norm_a": (
+            None
+            if compensating is None
+            else float(np.linalg.norm(np.asarray(compensating, dtype=float)))
+        ),
+    }
 
 
 def _achieved_class(profile: Any, state: Any) -> dict[str, Any]:
@@ -765,6 +947,29 @@ def _wall_units(operator: Any) -> tuple[Any, ...]:
     )
 
 
+def _preflight_panel_wall(profile: Any) -> None:
+    """Resolve the vessel units and one interior mask before the sweep runs.
+
+    The panel writer builds its interior mask from the operator's wall units,
+    so an operator whose wall is not a unit collection fails the write only
+    after every edit has been solved.  Making the same call first turns that
+    into a failure of seconds rather than of the whole allocation.
+    """
+    units = _wall_units(profile.operator)
+    if not units:
+        raise RuntimeError("the operator carries no wall units to draw")
+    mask = _wall_interior(
+        np.asarray(profile.lattice.radius, dtype=float),
+        np.asarray(profile.lattice.height, dtype=float),
+        units,
+    )
+    print(
+        "PREFLIGHT_WALL_OK units=%d interior_samples=%d"
+        % (len(units), int(np.count_nonzero(mask))),
+        flush=True,
+    )
+
+
 def _grid_field(psi: Any, shape: Any) -> np.ndarray:
     """Return one raster psi as the (height, radius) contour array."""
     return (
@@ -911,11 +1116,14 @@ def _write_diagnostics(
                 "trip_boundary": reduced_newton.TRIP_BOUNDARY,
                 "ladder_scoring": reduced_newton.LADDER_SCORING,
             },
+            "constraint": prepared["vertical_centroid_actuator"],
         },
         "seed_probe_definition": (
             "one trip closed with zero Newton steps on this edit's current "
             "vector, seeded from the state the edit starts from; the reported "
-            "residual is the seed's own residual on the edited operator"
+            "residual is the seed's own residual on the edited operator, "
+            "measured without the vertical current-centre row so it stays the "
+            "same quantity every earlier sweep recorded"
         ),
         "summary": _group_nonconverged(rows),
         "edits": rows,
@@ -1118,6 +1326,15 @@ def _write_panel_data(
     payload["edit_index"] = np.asarray(
         [state["edit_index"] for state in panel_states], dtype=int
     )
+    centroid = reference_panel.get("vertical_centroid")
+    if centroid is not None:
+        payload["vertical_centroid_target_m"] = np.asarray(float(centroid["target_m"]))
+        payload["vertical_centroid_reference_m"] = np.asarray(
+            float(centroid["reference_m"])
+        )
+        payload["vertical_centroid_tolerance_m"] = np.asarray(
+            float(centroid["tolerance_m"])
+        )
     payload["edit_fraction"] = np.asarray(
         [state["edit_fraction"] for state in panel_states], dtype=float
     )
@@ -1136,7 +1353,7 @@ def _write_panel_data(
     payload["achieved_class"] = np.asarray(
         [state["class"] for state in panel_states], dtype=str
     )
-    wall = profile.operator.wall
+    wall = _wall_units(profile.operator)
     inside = _wall_interior(payload["radius"], payload["height"], wall)
     for position, state in enumerate(panel_states):
         if state["psi"] is None:
@@ -1467,6 +1684,19 @@ def _panel_load(data_path: Path) -> dict[str, Any]:
             "reference_saddle_index": reference_saddle_index,
             "wall": wall,
             "inside": inside,
+            "vertical_centroid": (
+                {
+                    "reference_m": float(
+                        np.asarray(data["vertical_centroid_reference_m"])
+                    ),
+                    "target_m": float(np.asarray(data["vertical_centroid_target_m"])),
+                    "tolerance_m": float(
+                        np.asarray(data["vertical_centroid_tolerance_m"])
+                    ),
+                }
+                if "vertical_centroid_target_m" in data.files
+                else None
+            ),
         }
         passed, failed = _panel_edits(data)
         selected = (("converged", passed), ("failed", failed))
@@ -1732,6 +1962,16 @@ def _null_ordering(x_points: Any, saddle_index: int, axis: Any) -> str:
     return "above its axis" if array[saddle_index][1] > point[1] else "below its axis"
 
 
+def _constraint_note(centroid: dict[str, Any] | None) -> str:
+    """Name the vertical current-centre row the solved states were held to."""
+    if centroid is None:
+        return "(none recorded in this archive)"
+    return "at %.6f m (the reference's own centre, tolerance %.0e m)" % (
+        centroid["target_m"],
+        centroid["tolerance_m"],
+    )
+
+
 def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
     """Write the converged-versus-non-converged poloidal panel."""
     loaded = _panel_load(data_path)
@@ -1757,9 +1997,12 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
     solved_note = _saddle_note(
         loaded["failed"]["xpoints"], loaded["failed"]["saddle_index"]
     )
+    constraint_note = _constraint_note(loaded.get("vertical_centroid"))
     figure.suptitle(
         "terminal poloidal flux on shared levels between the axis and boundary "
-        "flux (%.4f to %.4f Wb)  |  reference is the unedited equilibrium, an "
+        "flux (%.4f to %.4f Wb)  |  every solved state imposes the "
+        "vertical current-centre row %s  |  reference is the unedited "
+        "equilibrium, an "
         "upper-null state whose admitted saddle sits above its axis, while every "
         "solved state admits a lower null (blue, admitted saddle %s)  |  "
         "reference set blue: %s, admitted %s, "
@@ -1768,6 +2011,7 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
         % (
             loaded["reference_axis_flux"],
             loaded["reference_boundary_flux"],
+            constraint_note,
             _null_ordering(
                 loaded["reference_xpoints"],
                 loaded["reference_saddle_index"],
@@ -1796,9 +2040,24 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
         },
         "reference_branches": _branch_terms(loaded["reference_branches"]),
         "reference_branches_drawn": dict(loaded.get("reference_branches_drawn", {})),
+        "vertical_centroid": loaded.get("vertical_centroid"),
         "converged": _panel_summary(loaded["converged"]),
         "non_converged": _panel_summary(loaded["failed"]),
     }
+
+
+def _declared_path(path: Path) -> str:
+    """Return a repository-relative path, or the absolute one outside the root.
+
+    A run that keeps its figures in a scratch directory writes outside the
+    repository, and a receipt field must name where the file actually is rather
+    than fail to describe it.
+    """
+    resolved = Path(path)
+    try:
+        return str(resolved.relative_to(ROOT))
+    except ValueError:
+        return str(resolved)
 
 
 def _receipt_document(
@@ -1817,6 +2076,7 @@ def _receipt_document(
     elapsed_seconds: float,
     exit_marker: int | None,
     figure: Path,
+    raster_figure: Path | None = None,
 ) -> dict[str, Any]:
     """Assemble the wire receipt over the edits recorded so far.
 
@@ -1906,9 +2166,10 @@ def _receipt_document(
         "interactive_path": {
             "route": "compiled slice (reduced fixed point, one fixed-shape "
             "program re-entered per edit)",
-            "solve_entry": "reduced_newton.solve_reduced_newton_compiled",
+            "solve_entry": ("reduced_newton.solve_constrained_reduced_newton_compiled"),
             "prescribed_current": "traced 101-circuit vector, replacement semantics",
             "raster_target": "operator-held receiver grid built once at construction",
+            "constraint": prepared["vertical_centroid_actuator"],
         },
         "source_revision": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
@@ -1922,7 +2183,7 @@ def _receipt_document(
             "sha256": _sha256(ROOT / "nova/equilibrium/reduced_newton.py"),
         },
         "driver": {
-            "path": str(Path(__file__).relative_to(ROOT)),
+            "path": _declared_path(Path(__file__)),
             "sha256": _sha256(Path(__file__)),
         },
         "scheduler": _scheduler(),
@@ -2044,8 +2305,10 @@ def _receipt_document(
             ),
         },
         "edits": rows,
-        "figure": str(figure.relative_to(ROOT)),
-        "raster_figure": str(DEFAULT_RASTER_FIGURE.relative_to(ROOT)),
+        "figure": _declared_path(figure),
+        "raster_figure": _declared_path(
+            DEFAULT_RASTER_FIGURE if raster_figure is None else raster_figure
+        ),
     }
 
 
@@ -2056,6 +2319,7 @@ def run(
     diagnostics: Path,
     panel_data: Path,
     panel_figure: Path,
+    raster_figure: Path = DEFAULT_RASTER_FIGURE,
 ) -> dict[str, Any]:
     """Compile once and measure successive warm prescribed-current edits."""
     total_started = time.perf_counter()
@@ -2071,6 +2335,7 @@ def run(
     reporter.start()
     try:
         profile, prepared, carrier = _prepare_case(carrier_path)
+        _preflight_panel_wall(profile)
         solve_persistent_hits_start = int(cache_events["hits"])
         solve_persistent_misses_start = int(cache_events["misses"])
         solve_persistent_saved_start = float(cache_events["saved_seconds"])
@@ -2087,6 +2352,7 @@ def run(
 
         rows: list[dict[str, Any]] = []
         panel_states: list[dict[str, Any]] = []
+        constraint_pairs = (prepared["vertical_centroid_pair"],)
         state = initial
         program = None
         program_reused_from_edit: int | None = None
@@ -2115,6 +2381,7 @@ def run(
                 requested_class,
                 target_current,
                 program,
+                constraint_pairs=constraint_pairs,
             )
             if program is None:
                 # The first edit builds the fixed-shape program; every later
@@ -2226,6 +2493,7 @@ def run(
                 ],
                 "achieved_class": _achieved_class(profile, result.state),
                 "seed_probe": seed_probe,
+                "vertical_centroid": _vertical_centroid_row(result),
                 "reduced_dimension": int(result.reduced_dimension),
                 "off_support_leakage_wb": float(result.off_support_leakage),
                 "program_reused": program_reused_this_edit,
@@ -2323,6 +2591,7 @@ def run(
                 elapsed_seconds=time.perf_counter() - total_started,
                 exit_marker=None,
                 figure=figure,
+                raster_figure=raster_figure,
             )
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text(
@@ -2351,7 +2620,7 @@ def run(
             persistent_cache_misses=persistent_misses,
         )
         if equilibrium is not None and equilibrium.raster_flux is not None:
-            _render_raster(equilibrium.raster_flux, DEFAULT_RASTER_FIGURE)
+            _render_raster(equilibrium.raster_flux, raster_figure)
         try:
             panel = _render_panel(panel_data, panel_figure)
             print("PANEL=" + json.dumps(panel, sort_keys=True), flush=True)
@@ -2372,6 +2641,7 @@ def run(
             elapsed_seconds=time.perf_counter() - total_started,
             exit_marker=None,
             figure=figure,
+            raster_figure=raster_figure,
         )
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(
@@ -2447,7 +2717,9 @@ def _check_case(carrier_path: Path) -> dict[str, Any]:
     return message
 
 
-def _probe(carrier_path: Path) -> dict[str, Any]:
+def _probe(
+    carrier_path: Path, *, impose_vertical_centroid: bool = False
+) -> dict[str, Any]:
     """Run one compiled-slice edit end to end on any host (CPU smoke).
 
     Exercises the exact per-edit path the H200 job measures — the compiled
@@ -2501,6 +2773,27 @@ def _probe(carrier_path: Path) -> dict[str, Any]:
         .multiply(1.0 + EDIT_FRACTIONS[0])
     )
     seed = np.asarray(_passive["state"], dtype=np.float64)
+    constraint_pairs: tuple[ConstraintPair, ...] = ()
+    if impose_vertical_centroid:
+        reference_centroid_z = float(
+            np.asarray(
+                profile.current_moment_observation(
+                    jnp.asarray(seed),
+                    support=MomentIntegralSupport.ALL_DOMAIN,
+                    requested_class=requested_class,
+                    target_current=target_current,
+                ).centroid_z
+            )
+        )
+        pair, actuator = _vertical_centroid_pair(
+            profile,
+            policy,
+            jnp.asarray(seed),
+            requested_class=requested_class,
+            target_current=target_current,
+            target=reference_centroid_z,
+        )
+        constraint_pairs = (pair,)
     result = _compiled_edit(
         profile,
         jnp.asarray(seed),
@@ -2508,6 +2801,7 @@ def _probe(carrier_path: Path) -> dict[str, Any]:
         requested_class,
         target_current,
         None,
+        constraint_pairs=constraint_pairs,
     )
     equilibrium = _equilibrium_receipt(
         profile,
@@ -2541,6 +2835,8 @@ def _probe(carrier_path: Path) -> dict[str, Any]:
         "coil_family": selected_coil["family"],
         "coil_circuit_index": circuit_index,
         "target_current_a": target_current,
+        "vertical_centroid": _vertical_centroid_row(result),
+        "vertical_centroid_actuator": (actuator if impose_vertical_centroid else None),
     }
 
 
@@ -2556,7 +2852,8 @@ def _sbatch_script(arguments: argparse.Namespace) -> str:
         f"--figure {arguments.figure.resolve()} "
         f"--diagnostics {arguments.diagnostics.resolve()} "
         f"--panel-data {arguments.panel_data.resolve()} "
-        f"--panel-figure {arguments.panel_figure.resolve()}"
+        f"--panel-figure {arguments.panel_figure.resolve()} "
+        f"--raster-figure {arguments.raster_figure.resolve()}"
     )
     return f"""#!/usr/bin/env bash
 #SBATCH --job-name=coil-edit-latency
@@ -2638,6 +2935,7 @@ def main() -> None:
     run_parser.add_argument("--diagnostics", type=Path, default=DEFAULT_DIAGNOSTICS)
     run_parser.add_argument("--panel-data", type=Path, default=DEFAULT_PANEL_DATA)
     run_parser.add_argument("--panel-figure", type=Path, default=DEFAULT_PANEL_FIGURE)
+    run_parser.add_argument("--raster-figure", type=Path, default=DEFAULT_RASTER_FIGURE)
     run_parser.add_argument(
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
     )
@@ -2649,6 +2947,9 @@ def main() -> None:
         job_parser.add_argument("--panel-data", type=Path, default=DEFAULT_PANEL_DATA)
         job_parser.add_argument(
             "--panel-figure", type=Path, default=DEFAULT_PANEL_FIGURE
+        )
+        job_parser.add_argument(
+            "--raster-figure", type=Path, default=DEFAULT_RASTER_FIGURE
         )
         job_parser.add_argument(
             "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
@@ -2675,6 +2976,11 @@ def main() -> None:
     probe_parser.add_argument(
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
     )
+    probe_parser.add_argument(
+        "--impose-vertical-centroid",
+        action="store_true",
+        help="carry the vertical current-centre row on the probed edit",
+    )
     arguments = parser.parse_args()
     if arguments.command == "run":
         run(
@@ -2684,6 +2990,7 @@ def main() -> None:
             arguments.diagnostics,
             arguments.panel_data,
             arguments.panel_figure,
+            arguments.raster_figure,
         )
     elif arguments.command == "panel":
         print(
@@ -2696,7 +3003,16 @@ def main() -> None:
     elif arguments.command == "checkcase":
         print(json.dumps(_check_case(arguments.carrier), indent=2, sort_keys=True))
     elif arguments.command == "probe":
-        print(json.dumps(_probe(arguments.carrier), indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                _probe(
+                    arguments.carrier,
+                    impose_vertical_centroid=arguments.impose_vertical_centroid,
+                ),
+                indent=2,
+                sort_keys=True,
+            )
+        )
     elif arguments.command == "sbatch":
         print(_sbatch_script(arguments), end="")
     elif arguments.command == "submit":

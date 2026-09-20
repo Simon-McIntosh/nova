@@ -613,6 +613,59 @@ plan's followup article and the sweep-persistence outcome are restated in place 
 accompanies this section: the evidence is a per-state table of residuals and counts, and this node's write
 scope carries no figures path.</p>
 </section>
+<section id="coil-edit-vertical-centroid-row">
+<h2>The vertical current-centre row on the coil-edit sweep: the row lands, the regeneration does not (2026-09-20)</h2>
+<p><strong>The row is imposed through the machine interface, not as an array.</strong>
+<code>benchmarks/coil_edit_latency.py</code> now carries
+<code>CurrentCentroidConstraint(components=("centroid_z",), support=MomentIntegralSupport.ALL_DOMAIN)</code>
+on both the sweep and the probe, passed as a <code>ConstraintPair</code> with an imposed
+<code>ConstraintBinding</code>. The actuator circuit is not chosen by hand: the pair is built by
+<code>ForwardProfile.derived_constraint_pairs</code>, which resolves the circuit on the mapping's own
+direction authority and takes the ampere scale from the authority the mapping carries, so the row is a
+consequence of the machine description rather than a coefficient list written beside it. The
+constrained route is <code>solve_constrained_reduced_newton_compiled</code>, which falls back to the
+unconstrained entry only when no pair is supplied. Each row and each persisted record carries the
+vertical centroid target, its reference and the tolerance, and <code>_vertical_centroid_row</code>
+reports them.</p>
+<p><strong>Two driver defects stood between the row and any panel, and both were found by a negative
+control rather than by reading.</strong> The per-edit receipt resolved every declared output path against
+the repository root and required it to be inside it, so a scratch figure path killed the sweep
+immediately after edit 1 (<code>c920e30d</code>). The panel-data writer then passed
+<code>profile.operator.wall</code> — the operator's flux target — where
+<code>inside_wall_units</code> wants the vessel unit collection, so the first edit's panel write raised
+<code>TypeError: 'FluxTarget' object is not iterable</code> after its solve had already been paid for
+(<code>5a1bac81</code>, <code>eb9d7285</code>). The wall now resolves through the driver's own adapter,
+and <code>_preflight_panel_wall</code> exercises the same call before any solve, so an operator whose
+wall is not a unit collection fails the allocation in seconds instead of at its end.</p>
+<p><strong>What was measured.</strong> The constrained probe passes in every allocation
+(<code>REGEN_PROBE_EXIT=0</code>) and the wall preflight reports
+<code>PREFLIGHT_WALL_OK units=1 interior_samples=684</code>, which is the positive marker that the
+second repair is load-bearing. Nine of the twenty edits then solved with the row imposed before the
+abort: edits 1 and 3 reached <code>converged=True</code> with 4 and 16 trips and a boundary at 102.6 mm,
+the rest stopped unrepaired at <code>converged=False</code>, and the warm per-edit wall spread from
+62.0 s to 728.9 s.</p>
+<p><strong>What was not measured, and why the node closes here.</strong> The driver aborts inside LLVM
+section allocation after the ninth edit — <code>LLVM compilation error: Cannot allocate memory</code>
+repeated, <code>allocateMappedMemory failed with error: Cannot allocate memory</code>,
+<code>Failed to satisfy suballocation request for 352</code>, <code>LLVM ERROR: Unable to allocate
+section memory!</code> — leaving <code>REGEN_DRIVER_EXIT=134</code>,
+<code>REGEN_ABORTED=the driver did not complete; nothing copied into the fixture</code> and
+<code>EXIT_MARKER=134</code> in
+<code>~/.config/reckon/crew/runs/r-20260919T231747888058-fsa-coil-edit-under-the-vertical-constraint/logs/regen-1274099.log</code>.
+A 352-byte suballocation failing is not a memory-size limit, and the same abort has been read on other
+nodes at allocations raised well past this one, so the failure is not answered by a larger request and
+the job was not resubmitted. The regeneration and the redrawn panel are therefore <strong>not
+done</strong>: nothing was copied into the fixture, and the partial scratch archive holding 9 of the 20
+states was deliberately not promoted, because a fixture of nine states is not the fixture the census
+and the persisted-state test are stated against.</p>
+<p><strong>The figure's standing is unchanged and is stated rather than left implicit.</strong>
+<code>docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged</code> is
+untouched and was not re-rendered, so it still shows a solved plasma closing through a different null
+from the null its reference closes through. It remains <strong>known-wrong</strong> rather than
+silently stale: it is not captioned as regenerated under the constraint, and the followup
+<code>f-fsa-regenerate-coil-edit-fixture</code> stays open carrying the regeneration, the census
+agreement and the redraw. The row that this node committed is what that regeneration will run.</p>
+</section>
 </main>
 </body>
 </html>

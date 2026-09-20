@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T02:10:07",
+  "updated": "2026-09-20T02:14:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -213424,6 +213424,231 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle",
+        "plan": "cut-cell-current-attribution",
+        "section": "\u00a77",
+        "node": "cca-production-clip-takes-the-typed-saddle",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1178,
+                "cached_input_tokens": 478026,
+                "input_tokens": 479206,
+                "output_tokens": 2834,
+                "reasoning_output_tokens": 1487,
+                "total_tokens": 482040,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the forward operator passes the typed census saddle to the clip as its saddle vertex, the four region-owned moment profiles are consumed by the plasma-cell partition and by the null read, and the oracle is made independent of the carrier by integrating the analytic current over the region bounded by the separatrix branches and the cell edges rather than over the carrier own emitted polygons; one all_debug CPU allocation, --cpus-per-task=8 --mem=64G --time=00:59:00, TMPDIR=/tmp in the submit environment and in the payload, JAX_PLATFORMS=cpu, the shared root interpreter run directly and uv never invoked on the compute node, runs that independent oracle at 110, 300 and 500 cells in one job and never as an array, and the core-side current agrees with the analytic wedge integral to within 1e-13 relative at each resolution; the certificate re-solve half of this section gate is NOT attempted and is reported as deferred, because the quality-of-service caps this account at four cards and the model serve holds all four, so a GPU job cannot schedule; committed cases pin the saddle vertex reaching the clip and the four profiles reaching both consumers, the gate reports added failures against the base revision, and the declared negative control reddens",
+          "estimated_hours": null,
+          "goal": "pass the typed census saddle into the production spline-chain clip so the wedge split the oracle already proves is what the production route computes",
+          "id": "cca-production-clip-takes-the-typed-saddle",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-19T23:47:31Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle/manifest.md",
+          "negative_control": "NEGATIVE CONTROL: forward_operator._profile_support mutated by deleting the single line 'saddle_vertex=topology.x_point,' so the production spline-chain clip receives no typed census saddle; the pinning test must redden.",
+          "plan": "cut-cell-current-attribution",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a77",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "nova/equilibrium/separatrix_clip.py",
+            "nova/equilibrium/forward_operator.py",
+            "benchmarks/xpoint_cell_wedge_oracle.py",
+            "tests/test_xpoint_cell_wedge_clip.py",
+            "docs/figures/cut-cell-current-attribution",
+            "docs/plans/cut-cell-current-attribution.html",
+            "docs/evidence/archive/cut-cell-current-attribution-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-cca-saddle-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-19T23:47:41Z",
+        "completed_at": "2026-09-20T00:10:01.715Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1330,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1340,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "05aafeae51f508ad7ab1fb38410d6b72b3e4c506",
+        "commits": [
+          "d90a522fe8ac53d4a26477bf920aeb8ac367be47",
+          "3d0b2f494bd5da2dcb5115e4803cf346cc68a5ed",
+          "156bff654384b72925d23fbfdf9a010a4840f37b",
+          "fa7db0d675a0bceb8b8edf85a13df4832da7b59c"
+        ],
+        "changed_lines": {
+          "added": 2308,
+          "removed": 11,
+          "files": 15
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "PYTHONPATH=<worktree> JAX_PLATFORMS=cpu .venv/bin/python -m pytest -p no:cacheprovider -q tests/test_xpoint_cell_wedge_clip.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle/negative-control.red.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "the operator passes the typed census saddle to the production spline-chain clip, pinned by twelve focused tests with two added and none failing; the independent oracle written alongside fails its own gate at 110 cells and the node localised that to the oracle reconstruction rather than the route, giving four specific defects that are now the repair list on their own followup",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle/manifest.md",
+        "scope_changed": false,
+        "session_id": "b946818c-4e0d-4fb3-b3e8-3da9ddc505eb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2102173,
+            "input_tokens_cumulative": 2102173,
+            "output_tokens": 6986,
+            "output_tokens_cumulative": 6986,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-20T00:10:01.715Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 16330082,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 115.324,
+          "generated_tokens": 89760,
+          "generation_seconds": 100.378,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.7,
+          "machine_seconds": 14.946,
+          "peak_input_tokens": 166643,
+          "tokens_per_second": 894.22,
+          "wall_tokens_per_second": 778.33
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-production-clip-takes-the-typed-saddle",
+          "session_id": "b946818c-4e0d-4fb3-b3e8-3da9ddc505eb",
+          "session_source": "stream",
+          "retained_at": "2026-09-20T00:10:01.715Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.6,
+        "impl_move": {
+          "plan": "cut-cell-current-attribution",
+          "at_dispatch": 0.6,
+          "at_complete": 0.65,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/test_xpoint_cell_wedge_clip.py"
+          ],
+          "declaration": "NEGATIVE CONTROL: forward_operator._profile_support mutated by deleting the single line 'saddle_vertex=topology.x_point,' so the production spline-chain clip receives no typed census saddle; the pinning test must redden.",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle/negative-control.red.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T234730758244-cca-production-clip-takes-the-typed-saddle/negative-control.red.log"
+        },
+        "tool_steps": 121.0,
+        "orientation_input_tokens": 3482806.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -213862,6 +214087,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2943
+    "_version": 2944
   }
 }

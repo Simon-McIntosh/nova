@@ -353,44 +353,52 @@ def test_forward_census_bank_rows_do_not_overflow():
     assert len(receipt["rows"]) == 12
 
 
-def test_forward_census_exact_diverted_oracle():
-    """The certificate ladder resolves only nulls contained by its nodal rings."""
-    from benchmarks.solovev_certificate import AXIS_M, X_POINT_M, _case, _exact_state
+def _diverted_oracle_read(requested_cells: int):
+    """Return the diverted-oracle carrier mesh, its read, and its census.
+
+    ``requested_cells`` is the carrier resolution argument: a negative value
+    refines the hex carrier, so the realised node count grows with its
+    magnitude. The diverted source declares no closed zero-flux surface of its
+    own -- its field coefficient is negative, so the surface-node fallback of
+    the separatrix sampler is non-finite and collapses to a single vertex --
+    and the analytic reference is the object carrying the core boundary, which
+    the production route passes.
+    """
+    from benchmarks.solovev_certificate import _case, _exact_state
     from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 
     carrier_case, source_case, exact = _case("diverted-jump-bearing")
+    machine = oracle_fixture.cached_machine(
+        carrier_case,
+        requested_cells,
+        wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+    )
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    oracle_state = _exact_state("diverted-jump-bearing", exact, coordinates)
+    empty_operator = oracle_fixture.forward_operator(source_case, machine)
+    exact_physical = oracle_fixture.exact_current_moments(
+        source_case, empty_operator, oracle_state, analytic=exact
+    )
+    coefficients = empty_operator.coupling_current_moments(exact_physical)
+    exact_internal = oracle_fixture._internal_flux_image(empty_operator, coefficients)
+    operator = oracle_fixture.forward_operator(
+        source_case, machine, oracle_state - exact_internal
+    )
+    _masks, state = operator.read(jnp.asarray(oracle_state))
+    grid_flux = jnp.asarray(oracle_state[: len(machine.node)])
+    census = operator._fixed_design_topology.grid.candidate_table_status(grid_flux)
+    return carrier_case, machine, operator, state, census
 
-    def read_exact(requested_cells):
-        machine = oracle_fixture.cached_machine(
-            carrier_case,
-            requested_cells,
-            wall_nodes=oracle_fixture.WALL_POINT_COUNT,
-        )
-        coordinates = np.vstack(
-            (machine.node, machine.wall_node, machine.sample_coordinates)
-        )
-        oracle_state = _exact_state("diverted-jump-bearing", exact, coordinates)
-        empty_operator = oracle_fixture.forward_operator(source_case, machine)
-        # The diverted source declares no closed zero-flux surface of its own:
-        # its field coefficient is negative, so the surface-node fallback of
-        # the separatrix sampler is non-finite and collapses to a single
-        # vertex. The exact reference is the object carrying the core boundary.
-        exact_physical = oracle_fixture.exact_current_moments(
-            source_case, empty_operator, oracle_state, analytic=exact
-        )
-        coefficients = empty_operator.coupling_current_moments(exact_physical)
-        exact_internal = oracle_fixture._internal_flux_image(
-            empty_operator, coefficients
-        )
-        operator = oracle_fixture.forward_operator(
-            source_case, machine, oracle_state - exact_internal
-        )
-        _masks, state = operator.read(jnp.asarray(oracle_state))
-        grid_flux = jnp.asarray(oracle_state[: len(machine.node)])
-        census = operator._fixed_design_topology.grid.candidate_table_status(grid_flux)
-        return machine, operator, state, census
 
-    coarse_machine, coarse_operator, coarse_state, coarse_census = read_exact(-110)
+def test_forward_census_exact_diverted_oracle():
+    """The certificate ladder resolves only nulls contained by its nodal rings."""
+    from benchmarks.solovev_certificate import AXIS_M, X_POINT_M
+
+    _carrier, coarse_machine, coarse_operator, coarse_state, coarse_census = (
+        _diverted_oracle_read(-110)
+    )
     coarse_pitch = float(np.sqrt(np.median(np.asarray(coarse_machine.area))))
     coarse_grid = coarse_operator._fixed_design_topology.grid
     nearest_saddle_cell = int(
@@ -422,7 +430,9 @@ def test_forward_census_exact_diverted_oracle():
     assert bool(coarse_census["ring_resolution_limited"][nearest_saddle_cell])
     assert not np.any(np.asarray(coarse_census["overflow"]))
 
-    fine_machine, fine_operator, fine_state, fine_census = read_exact(-300)
+    _carrier, fine_machine, fine_operator, fine_state, fine_census = (
+        _diverted_oracle_read(-300)
+    )
     fine_pitch = float(np.sqrt(np.median(np.asarray(fine_machine.area))))
 
     assert len(fine_machine.node) == 342
@@ -440,6 +450,105 @@ def test_forward_census_exact_diverted_oracle():
     np.testing.assert_array_equal(fine_census["raw_ring_count"], [1, 0])
     np.testing.assert_array_equal(fine_census["candidate_count"], [1, 0])
     assert not np.any(np.asarray(fine_census["overflow"]))
+
+
+# The containment rule admits a saddle only where a nodal ring *contains* it,
+# which for a six-neighbour ring on a hex carrier needs a ring centre within
+# about a quarter of a cell pitch of the saddle -- further out the ring sees two
+# sign changes rather than four, and the read stays limited.
+ADMISSION_CENTRE_DISTANCE_IN_PITCH = 0.25
+DIVERTED_ORACLE_RUNG_CELLS = (110, 200, 300, 500)
+
+
+def test_forward_census_diverted_oracle_pitch_ladder_admits_no_saddle():
+    """No carrier rung places a ring centre near the diverted saddle.
+
+    The diverted oracle fixture censuses the analytic diverted flux on the
+    *carrier's* hex mesh.  The next rung of the carrier ladder refines that mesh
+    but does not move the carrier wall, and the carrier's wall is not the
+    diverted separatrix: the analytic X-point lies outside it, so it lies
+    outside the meshed domain, and a ring can only be centred on a mesh cell.
+    Refining therefore cannot walk a ring centre up to the saddle -- the
+    distance in cells pitches grows as the pitch shrinks -- and the fixture
+    cannot give the containment rule a positive control that is a saddle.  The
+    ladder's positive control stays the axis pair, which is admitted at every
+    rung.  The control for the saddle belongs on the single-null fixture whose
+    mesh is built from the diverted separatrix.
+    """
+    from benchmarks.solovev_certificate import X_POINT_M
+    from shapely.geometry import Point, Polygon
+
+    saddle = np.asarray(X_POINT_M, dtype=np.float64)
+    rows = []
+    for requested_cells in DIVERTED_ORACLE_RUNG_CELLS:
+        _carrier, machine, operator, _state, census = _diverted_oracle_read(
+            -requested_cells
+        )
+        pitch = float(np.sqrt(np.median(np.asarray(machine.area))))
+        centres = np.asarray(
+            operator._fixed_design_topology.grid.locator.physical_origin,
+            dtype=np.float64,
+        )
+        # The ring set is the census row order, so this distance is measured on
+        # exactly the ring centres the containment rule can admit.
+        distance = np.linalg.norm(centres - saddle, axis=1)
+        nearest = int(np.argmin(distance))
+        ring_count = np.asarray(census["raw_ring_count"])
+        candidate_count = np.asarray(census["candidate_count"])
+        wall = np.asarray(machine.wall_node, dtype=np.float64)
+        rows.append(
+            {
+                "requested_cells": requested_cells,
+                "realised_cells": len(machine.node),
+                "wall_nodes": len(wall),
+                "pitch_m": pitch,
+                "nearest_ring_centre_to_saddle_m": float(distance[nearest]),
+                "nearest_ring_centre_to_saddle_pitch": float(distance[nearest] / pitch),
+                "nearest_ring_crossing_count": int(
+                    np.asarray(census["ring_crossing_count"])[nearest]
+                ),
+                "saddle_ring_count": int(ring_count[1]),
+                "saddle_candidate_count": int(candidate_count[1]),
+                "axis_ring_count": int(ring_count[0]),
+                "axis_candidate_count": int(candidate_count[0]),
+                "saddle_inside_carrier_wall": bool(
+                    Polygon(wall).contains(Point(float(saddle[0]), float(saddle[1])))
+                ),
+            }
+        )
+    print(
+        "DIVERTED_ORACLE_PITCH_LADDER "
+        + json.dumps(
+            {
+                "saddle_rz_m": saddle.tolist(),
+                "admission_centre_distance_in_pitch": (
+                    ADMISSION_CENTRE_DISTANCE_IN_PITCH
+                ),
+                "rungs": rows,
+            },
+            sort_keys=True,
+        )
+    )
+
+    assert len(rows) == len(DIVERTED_ORACLE_RUNG_CELLS)
+    # The carrier wall does not move with the rung: only the mesh refines.
+    assert len({row["wall_nodes"] for row in rows}) == 1
+    realised = [row["realised_cells"] for row in rows]
+    assert realised == sorted(realised)
+    assert realised[-1] > realised[0]
+    for row in rows:
+        assert not row["saddle_inside_carrier_wall"], row
+        assert row["saddle_ring_count"] == 0, row
+        assert row["saddle_candidate_count"] == 0, row
+        assert row["nearest_ring_crossing_count"] == 2, row
+        assert (
+            row["nearest_ring_centre_to_saddle_pitch"]
+            > ADMISSION_CENTRE_DISTANCE_IN_PITCH
+        ), row
+        # The ladder is not trivially barren: the axis pair is admitted at
+        # every rung, which is this fixture's only positive control.
+        assert row["axis_ring_count"] >= 1, row
+        assert row["axis_candidate_count"] >= 1, row
 
 
 @pytest.mark.parametrize("requested_cells", (110, 300, 500))

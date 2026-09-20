@@ -29,7 +29,7 @@
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="124">
+<meta name="plan-version" content="125">
 </head>
 <body>
 <main class="plan-doc">
@@ -580,6 +580,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-msc-a-target-arrived-dressed-as-a-budget" data-who="coordinator" data-when="2026-09-20T02:28:00Z">
     <div class="r-comment-body"><p>The shape of this one is worth keeping past the repair. A ceiling and a target are different statements: a ceiling says what must not get worse and is set from what was measured, a target says where the work is going and is set from what is wanted. Writing the target into the ceiling's constant makes the gate refuse every state that exists, including the one the same commit landed at, and the two archived receipts that encode measured history become failures. Nothing announced it, because the constant moved inside a nine-module feature whose subject was tracing mesh arrays through solve programs, and the two cases it broke are in a module that feature did not touch.</p><p>Two readings follow. A gate constant carried inside an unrelated commit is worth a rule of its own, because the reviewer of a tracing feature is not reading for budget changes. And the split now in place is the durable fix rather than the number: with the ceiling and the target as separate named quantities, moving the target can never again refuse a measurement, and the distance between them is the thing the plan is actually trying to close.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260920T001009714081-msc-name-what-turned-the-gate-receipts-red" data-who="reckon-ship" data-when="2026-09-20T00:23:59.304Z">
+    <div class="r-comment-body"><p>the gate reddening is attributed to dd7d82867, a mesh-array tracing feature across nine modules that also moved the solve-size constant from 450 MB to 50 MB; the ceiling is measured history and the target is where the work is going, and writing the target into the ceiling refused every state that exists including the one that commit landed at, so the repair separates them and both case assertions pass unmodified with the test file untouched</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s19h-s3-certificate-prerequisite" data-who="reckon-ship s19-handoff" data-when="2026-09-15T10:15:00Z">
     <div class="r-comment-body">Section 3 prerequisite, held by the coordinator rather than by a plan-level wire: the certified millisecond measurement runs only once gs-absolute-accuracy-gates section 3 (the certificate artifact and its pin) is current on the exact cut-cell participation and the joint qualification, because it reports cost for certificate-passing solves. The stage-scoped dependency gs-absolute-accuracy-gates#s3 was authored and withdrawn the same hour: the roadmap's anchor resolver did not recognise that section (reported to reckon), and a plan-level dependency on the whole certificate plan would hold section 2, which never needed it. gs-absolute-accuracy-gates now informs this plan; no section 3 node is dispatched before the certificate lands.</div>

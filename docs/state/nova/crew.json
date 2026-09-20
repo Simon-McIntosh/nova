@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T02:16:55",
+  "updated": "2026-09-20T02:29:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -213658,6 +213658,220 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260920T001009714081-msc-name-what-turned-the-gate-receipts-red",
+        "plan": "millisecond-converged-solve",
+        "section": "",
+        "node": "msc-name-what-turned-the-gate-receipts-red",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1448,
+                "cached_input_tokens": 571333,
+                "input_tokens": 572783,
+                "output_tokens": 1176,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 573959,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the manifest names the commit between the certificate base revision 4e82bafb3 and head that changed what evaluate_gate accepts, found by running the two cases against the sources at revisions between those two rather than by reading the diff alone; the two cases tests/test_solve_program_size.py::test_gate_accepts_the_measured_interim_reduction and ::test_gate_records_the_1000_cell_serialisation_refusal_as_a_finding pass with their assertions UNMODIFIED, because either the gate grew a clause the two archived receipts genuinely do not satisfy, in which case the receipts are re-measured and the manifest says which figures moved and why, or the clause is wrong and the gate is repaired; tests/test_solve_program_size.py is deliberately outside the write scope, so a conclusion that the cases themselves are wrong is reported with its reasoning rather than acted on; one all_debug CPU allocation with JAX_PLATFORMS=cpu, TMPDIR=/tmp in the submit environment and in the payload, the shared root interpreter run directly and uv never invoked on the compute node, and the gate reports added failures against the base revision",
+          "estimated_hours": null,
+          "goal": "name the change that made the program-size gate reject two of its own archived receipts, and correct whichever side is wrong",
+          "id": "msc-name-what-turned-the-gate-receipts-red",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-20T00:10:10Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T001009714081-msc-name-what-turned-the-gate-receipts-red/manifest.md",
+          "negative_control": "none: this node changes a gate clause or the receipts it reads, adds no test, and its acceptance is the two existing cases passing with their assertions unmodified",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/solve_program_size_gate.py",
+            "docs/figures/millisecond-converged-solve/program-size",
+            "docs/evidence/archive/millisecond-converged-solve-landed.html",
+            "docs/plans/millisecond-converged-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-msc-gatered-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-20T00:10:20Z",
+        "completed_at": "2026-09-20T00:23:59.304Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 812,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 819,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "462423303c24bd7a53dcf92d57dfd17ef66bc285",
+        "commits": [
+          "3785788f71ad41ddb8dd0721f14cd9e907ad663b",
+          "e7a6a80770629c6b15ff351f25923f3076dd2c75"
+        ],
+        "changed_lines": {
+          "added": 2403,
+          "removed": 1,
+          "files": 7
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "PYTHONPATH=$PWD JAX_PLATFORMS=cpu .venv/bin/python -m pytest -p no:cacheprovider -q -m \"not slow\" tests/test_solve_program_size.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/msc-gatered/after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T001009714081-msc-name-what-turned-the-gate-receipts-red/manifest.md",
+        "scope_changed": false,
+        "session_id": "a8a5758f-da88-4b90-a78b-23878cd3c9a4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 8311772,
+            "input_tokens_cumulative": 8311772,
+            "output_tokens": 48882,
+            "output_tokens_cumulative": 48882,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-20T00:23:59.304Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 8477490,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 816.056,
+          "generated_tokens": 57405,
+          "generation_seconds": 713.95,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.3,
+          "machine_seconds": 102.106,
+          "peak_input_tokens": 164418,
+          "tokens_per_second": 80.4,
+          "wall_tokens_per_second": 70.34
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-name-what-turned-the-gate-receipts-red",
+          "session_id": "a8a5758f-da88-4b90-a78b-23878cd3c9a4",
+          "session_source": "stream",
+          "retained_at": "2026-09-20T00:23:59.304Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.99,
+        "impl_move": {
+          "plan": "millisecond-converged-solve",
+          "at_dispatch": 0.99,
+          "at_complete": 1.0,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 70.0,
+        "orientation_input_tokens": 2416625.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -214096,6 +214310,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2945
+    "_version": 2946
   }
 }

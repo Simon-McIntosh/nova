@@ -58,8 +58,41 @@ class CertificateBaselineRefusal(RuntimeError):
     recorded base revision, or a record that omits the baseline digest for a
     row, cannot serve as that baseline: reading it would report a bit-identity
     between two states that were never two revisions, which is the comparison
-    this gate exists to make.
+    this gate exists to make.  A record that carries the state array beside the
+    digest is refused when the two disagree, because then the array is not the
+    state the digest describes.
     """
+
+
+def _recorded_state_array(
+    row: dict[str, Any], receipt: Path
+) -> tuple[Any, str] | tuple[None, None]:
+    """Read the terminal state array a recorded row carries, if it carries one.
+
+    A row records its terminal state as a binary64 digest, and may record the
+    array beside it: either as a ``.npy`` path (absolute, or relative to the
+    receipt that names it) or inline as a sequence of binary64 values.  The
+    returned source names which of the two forms was read, so the emitted row
+    can state where its baseline arm came from.
+    """
+    import numpy as np
+
+    inline = row.get("baseline_state_array")
+    if inline is not None:
+        return np.asarray(inline, dtype=np.float64), "inline values"
+    recorded_path = row.get("baseline_state_array_path")
+    if not recorded_path:
+        return None, None
+    path = Path(recorded_path)
+    if not path.is_absolute():
+        path = Path(receipt).resolve().parent / path
+    if not path.is_file():
+        raise CertificateBaselineRefusal(
+            f"baseline receipt {receipt} names a terminal state array at {path}, "
+            "which does not exist, so the baseline arm it claims to carry cannot "
+            "be read"
+        )
+    return np.asarray(np.load(path), dtype=np.float64), f"{recorded_path}"
 
 
 def load_certificate_baseline(
@@ -72,7 +105,11 @@ def load_certificate_baseline(
     ``certificate`` object of a semantic gate receipt.  Each arm is keyed by the
     revision that produced it: the baseline states carry the revision recorded
     beside them and the caller's expected base revision must match it, so a
-    record made at another revision is refused rather than compared.
+    record made at another revision is refused rather than compared.  A receipt
+    written by a run at the base revision from a base checkout therefore serves
+    as the baseline arm directly, and a row of it that also records the terminal
+    state array lets the difference between the two revisions be measured
+    instead of only its existence established.
     """
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     certificate = payload.get("certificate", payload)
@@ -98,9 +135,22 @@ def load_certificate_baseline(
                 f"baseline receipt {path} records no baseline state digest for "
                 f"{key[0]} at {key[1]} cells"
             )
+        state_array, array_source = _recorded_state_array(row, path)
+        if state_array is not None:
+            measured_digest = hashlib.sha256(state_array.tobytes()).hexdigest()
+            if measured_digest != str(digest):
+                raise CertificateBaselineRefusal(
+                    f"baseline receipt {path} carries a state array for {key[0]} at "
+                    f"{key[1]} cells whose binary64 digest is {measured_digest}, "
+                    f"which does not match the digest {digest} the same row "
+                    "records; the array is not the state the digest describes"
+                )
         rows[key] = {
             "revision": revision,
             "state_sha256_binary64": str(digest),
+            "state_array": state_array,
+            "state_array_source": array_source,
+            "arm_kind": "state array" if state_array is not None else "digest",
             "realised_state_values": row.get("realised_state_values"),
             "terminal_residual": row.get("baseline_terminal_residual"),
             "terminal_residual_finite": row.get("baseline_terminal_residual_finite"),
@@ -125,7 +175,9 @@ def certificate_identity_arms(
     The baseline arm is the terminal state recorded at the base revision and the
     candidate arm is the state solved at head.  Both keys are carried out of
     here onto the emitted row, so a reader can see that the two arms belong to
-    two revisions rather than to one.
+    two revisions rather than to one, and the baseline source names whether that
+    record carries the state array or only its digest: the array measures the
+    size of a difference and the digest can only establish one.
     """
     key = (str(case_name), int(requested_cells))
     recorded = baseline["rows"].get(key)
@@ -134,15 +186,81 @@ def certificate_identity_arms(
             f"baseline receipt {baseline['receipt']} carries no row for "
             f"{case_name} at {requested_cells} cells"
         )
+    carries_array = recorded.get("state_array") is not None
     return {
         "baseline": {
-            "source": "recorded base-revision terminal state",
+            "source": (
+                "recorded base-revision terminal state array"
+                if carries_array
+                else "recorded base-revision terminal state digest"
+            ),
+            "arm_kind": "state array" if carries_array else "digest",
+            "state_array_source": recorded.get("state_array_source"),
             "revision": baseline["revision"],
         },
         "candidate": {
             "source": "head-revision solve",
             "revision": candidate_revision,
         },
+    }
+
+
+def certificate_state_difference(
+    candidate_state: Any,
+    baseline_row: dict[str, Any],
+    label: str = "certificate row",
+) -> dict[str, Any]:
+    """Measure the element-wise maximum difference between the two terminal arms.
+
+    A baseline row that carries its recorded state array gives a measured
+    difference, and that number is what separates a last-bit reordering from a
+    changed solution: the first lands near the machine epsilon of the state and
+    the second does not.  A row that carries only a binary64 digest cannot give
+    one, and the absence is reported as unmeasured with its reason rather than
+    as zero, because zero is the reading a bit-identical pair produces and would
+    be read as a match.
+
+    The arm's shapes must agree: an element-wise difference over two different
+    shapes is not a difference, so a mismatch is refused rather than broadcast.
+    """
+    import numpy as np
+
+    state_array = baseline_row.get("state_array")
+    if state_array is None:
+        return {
+            "maximum_absolute_state_difference": None,
+            "maximum_absolute_state_difference_measure": (
+                "unmeasured: the baseline arm carries a binary64 digest rather "
+                "than the state array, so the two arms cannot be differenced "
+                "element-wise"
+            ),
+            "difference_values": None,
+        }
+    candidate = np.asarray(candidate_state, dtype=np.float64)
+    baseline = np.asarray(state_array, dtype=np.float64)
+    if candidate.shape != baseline.shape:
+        raise CertificateBaselineRefusal(
+            f"{label}: the arrays cannot be differenced element-wise; the "
+            f"candidate arm has shape {candidate.shape} and the recorded "
+            f"baseline arm has shape {baseline.shape}"
+        )
+    counted = _require_identity_rows(candidate.size, label)
+    difference = np.abs(candidate - baseline)
+    if not bool(np.all(np.isfinite(difference))):
+        return {
+            "maximum_absolute_state_difference": None,
+            "maximum_absolute_state_difference_measure": (
+                f"unmeasured: the element-wise difference over {counted} values "
+                "carries non-finite entries"
+            ),
+            "difference_values": counted,
+        }
+    return {
+        "maximum_absolute_state_difference": float(np.max(difference)),
+        "maximum_absolute_state_difference_measure": (
+            f"maximum of |candidate - baseline| over {counted} binary64 values"
+        ),
+        "difference_values": counted,
     }
 
 
@@ -1460,6 +1578,31 @@ def _require_identity_rows(identity_row_count: int, label: str) -> int:
     return count
 
 
+def _persist_state_array(
+    directory: Path | None, case_name: str, requested_cells: int, state: Any
+) -> dict[str, Any] | None:
+    """Write a terminal state array beside the receipt that describes it.
+
+    A terminal state persisted as an array is what lets a later comparison
+    measure the size of a difference rather than only establish that one exists,
+    so each row writes its own array by default: the digest it also records is
+    what checks that the array read back is the state it describes.
+    """
+    if directory is None:
+        return None
+    import numpy as np
+
+    values = np.asarray(state, dtype=np.float64)
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / f"{case_name}_{abs(int(requested_cells))}.npy"
+    np.save(path, values)
+    return {
+        "path": str(path),
+        "values": int(values.size),
+        "sha256_binary64": hashlib.sha256(values.tobytes()).hexdigest(),
+    }
+
+
 def _certificate_identity_row(
     case_name: str,
     requested_cells: int,
@@ -1467,16 +1610,19 @@ def _certificate_identity_row(
     baseline: dict[str, Any],
     candidate_revision: str,
     panel_path: Path | None = None,
+    state_directory: Path | None = None,
 ) -> dict[str, Any]:
     """Compare the head terminal state with the state recorded at the base revision.
 
     The baseline arm is read from the terminal state recorded at the base
     revision and the candidate arm is solved here at head, so the comparison is
-    base against head rather than one revision against itself.  A recorded state
-    carries a binary64 digest rather than the array, so the identity is
-    established on the digest and the realised width; a maximum element
-    difference is unavailable from a digest and is reported as unmeasured rather
-    than as zero.
+    base against head rather than one revision against itself.  The baseline
+    record carries a binary64 digest, and carries the state array beside it when
+    the base-revision run persisted one, so the size of the difference between
+    the two revisions is reported whenever the array is available and reported
+    as unmeasured with its reason when only the digest is.  This row's own
+    terminal state is persisted as an array beside its digest so the next
+    comparison against it can measure rather than merely establish.
 
     When ``panel_path`` is given, the state this row solved is drawn as a
     poloidal flux contour panel beside its analytic reference, so the terminal
@@ -1518,6 +1664,14 @@ def _certificate_identity_row(
     candidate_residual = float(candidate.residual)
     baseline_hash = baseline_row["state_sha256_binary64"]
     bit_identical = candidate_hash == baseline_hash
+    difference = certificate_state_difference(
+        candidate_state,
+        baseline_row,
+        f"solovev:{case_name}:{requested_cells}",
+    )
+    persisted = _persist_state_array(
+        state_directory, str(case_name), requested_cells, candidate_state
+    )
     panel = None
     if panel_path is not None:
         panel = _certificate_flux_panel(
@@ -1542,6 +1696,8 @@ def _certificate_identity_row(
         "baseline_revision": arms["baseline"]["revision"],
         "candidate_revision": arms["candidate"]["revision"],
         "baseline_arm_source": arms["baseline"]["source"],
+        "baseline_arm_kind": arms["baseline"]["arm_kind"],
+        "baseline_state_array_source": arms["baseline"]["state_array_source"],
         "candidate_arm_source": arms["candidate"]["source"],
         "baseline_seconds": None,
         "baseline_recorded_seconds": baseline_row["seconds"],
@@ -1551,10 +1707,18 @@ def _certificate_identity_row(
         "baseline_state_finite": baseline_row["state_finite"],
         "candidate_state_finite": candidate_state_finite,
         "terminal_state_bit_identical": bit_identical,
-        "maximum_absolute_state_difference": None,
-        "maximum_absolute_state_difference_measure": (
-            "unavailable from a recorded digest; the baseline arm is a binary64 "
-            "sha256 rather than the state array"
+        "maximum_absolute_state_difference": difference[
+            "maximum_absolute_state_difference"
+        ],
+        "maximum_absolute_state_difference_measure": difference[
+            "maximum_absolute_state_difference_measure"
+        ],
+        "difference_values": difference["difference_values"],
+        "candidate_state_array_path": (
+            None if persisted is None else persisted["path"]
+        ),
+        "candidate_state_array_values": (
+            None if persisted is None else persisted["values"]
         ),
         "baseline_terminal_residual": baseline_row["terminal_residual"],
         "candidate_terminal_residual": (
@@ -1572,8 +1736,15 @@ def run_certificate_identity(
     cache_root: Path | None,
     baseline_receipt: Path | None = None,
     panel_dir: Path | None = None,
+    state_dir: Path | None = None,
 ) -> dict[str, Any]:
-    """Persist the four certificate identity rows as each comparison lands."""
+    """Persist the four certificate identity rows as each comparison lands.
+
+    Each row writes its terminal state array beside its digest, into
+    ``state_dir`` (the receipt's own ``-states`` directory by default), so a
+    later run at another revision reads the array rather than a digest and
+    reports the size of the difference between the two revisions.
+    """
     identity_row_count = _require_identity_rows(
         len(CERTIFICATE_ROWS), "certificate identity rows"
     )
@@ -1593,6 +1764,11 @@ def run_certificate_identity(
         baseline_receipt or CERTIFICATE_BASELINE_RECEIPT
     )
     candidate_revision = _require_revision()
+    state_directory = (
+        state_dir
+        if state_dir is not None
+        else Path(output).resolve().parent / f"{Path(output).stem}-states"
+    )
     receipt: dict[str, Any] = {
         "schema": "nova.solve-program-certificate-identity",
         "identity_row_count": identity_row_count,
@@ -1617,6 +1793,8 @@ def run_certificate_identity(
             "accelerated program"
         ),
         "panel_directory": str(panel_dir) if panel_dir is not None else None,
+        "state_directory": str(state_directory),
+        "baseline_arm_kinds": {},
         "rows": [],
         "pending_rows": [list(row) for row in CERTIFICATE_ROWS],
         "passed": None,
@@ -1634,6 +1812,7 @@ def run_certificate_identity(
                 if panel_dir is None
                 else Path(panel_dir) / f"{_panel_slug(case_name, requested_cells)}.png"
             ),
+            state_directory=state_directory,
         )
         receipt["rows"].append(row)
         receipt["pending_rows"] = [
@@ -1646,9 +1825,14 @@ def run_certificate_identity(
             )
         ]
         _write_json(output, receipt)
+        kinds = receipt["baseline_arm_kinds"]
+        land = row["baseline_arm_kind"]
+        kinds[land] = int(kinds.get(land, 0)) + 1
         print(
             f"CERTIFICATE_DONE case={case_name} cells={requested_cells} "
             f"bit_identical={int(row['terminal_state_bit_identical'])} "
+            f"baseline_arm={row['baseline_arm_kind']} "
+            f"max_abs_state_difference={row['maximum_absolute_state_difference']} "
             f"baseline_revision={row['baseline_revision']} "
             f"candidate_revision={row['candidate_revision']}",
             flush=True,
@@ -1691,6 +1875,9 @@ def certificate_baseline_source(
         "baseline_revision": arms["baseline"]["revision"],
         "candidate_revision": arms["candidate"]["revision"],
         "baseline_arm_source": arms["baseline"]["source"],
+        "baseline_arm_kind": arms["baseline"]["arm_kind"],
+        "baseline_state_array_source": arms["baseline"]["state_array_source"],
+        "baseline_arm_measures_difference": baseline_row.get("state_array") is not None,
         "candidate_arm_source": arms["candidate"]["source"],
         "arms_differ": arms["baseline"]["revision"] != arms["candidate"]["revision"],
         "baseline_state_sha256_binary64": baseline_row["state_sha256_binary64"],
@@ -2013,6 +2200,16 @@ def main() -> int:
             "row, drawn from the state that row solved"
         ),
     )
+    parser.add_argument(
+        "--certificate-state-dir",
+        type=Path,
+        help=(
+            "directory that receives one terminal state array per certificate "
+            "row, so a later comparison at another revision measures the size "
+            "of a difference rather than only establishing one; defaults to a "
+            "-states directory beside the receipt"
+        ),
+    )
     parser.add_argument("--measure-300-output", type=Path)
     parser.add_argument("--marker-census-output", type=Path)
     parser.add_argument(
@@ -2090,6 +2287,8 @@ def main() -> int:
             "baseline_revision",
             "candidate_revision",
             "baseline_arm_source",
+            "baseline_arm_kind",
+            "baseline_arm_measures_difference",
             "candidate_arm_source",
             "baseline_state_sha256_binary64",
         ):
@@ -2106,6 +2305,7 @@ def main() -> int:
             args.cache_root,
             args.certificate_baseline_receipt,
             args.certificate_panel_dir,
+            args.certificate_state_dir,
         )
         print(
             f"CERTIFICATE_IDENTITY_GATE={'PASS' if result['passed'] else 'FAIL'}",

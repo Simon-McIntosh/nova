@@ -1972,13 +1972,16 @@ def _null_style_note(tally: dict[str, int]) -> str:
     dropped = int(tally.get("x_points_dropped_outside_wall", 0))
     other = int(tally.get("other_x_points_drawn", 0))
     phrase = "as drawn %d admitted filled"
+    arguments = [drawn]
     if dropped:
         phrase += ", %d admitted dropped outside the wall"
+        arguments.append(dropped)
     if other:
         phrase += ", %d other qualified hollow"
+        arguments.append(other)
     else:
         phrase += ", no other qualified nulls"
-    return phrase % ((drawn, dropped) if dropped else (drawn,))
+    return phrase % tuple(arguments)
 
 
 def _null_ordering(x_points: Any, saddle_index: int, axis: Any) -> str:

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T20:27:14",
+  "updated": "2026-09-20T20:30:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -216428,6 +216428,241 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260920T161342331604-nia-make-the-drift-probe-record-match-its-receipts",
+        "plan": "null-identification-authority",
+        "section": "",
+        "node": "nia-make-the-drift-probe-record-match-its-receipts",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 585,
+                "cached_input_tokens": 855446,
+                "input_tokens": 856033,
+                "output_tokens": 1108,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 857141,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the coverage paragraph restates the 22086/43 pure remainder arm from its own emission, which records active_set_settled, rather than calling it non-converged on the active-set cycle; benchmarks/bank_drift_paired_probe.py either draws each panel wall from its own resolved archive or states that the two archives geometry is bit-identical so one polygon is drawn, with the record sentence matching whichever the code does; the compile-line count of 462 lines and 2 Compiling is cited to the job log rather than to a receipt field, because no receipt carries one; the receipt records repository-relative roots that resolve from the checkout root rather than a five-deep path calibrated to the producing worktree depth; tests/test_bank_drift_paired_probe.py pins the panel composition the plotting rules require, line contours on the shared level array, both null sets in their own styles and the wall drawn, by inspecting the figure artists rather than the rendered image; every corrected statement re-derives from committed receipts or logs with no new measurement, and the manifest shows the source for each; the gate reports added failures against the base revision and the declared negative control reddens",
+          "estimated_hours": null,
+          "goal": "make every statement in the twelve-arm drift probe record agree with the receipt or log that carries it",
+          "id": "nia-make-the-drift-probe-record-match-its-receipts",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-20T16:13:43Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T161342331604-nia-make-the-drift-probe-record-match-its-receipts/manifest.md",
+          "negative_control": "benchmarks/bank_drift_paired_probe.py:913, wall = panel[\"wall\"]  ->  wall = panels[0][\"wall\"]  (every panel draws the producer archive's wall instead of its own resolved wall)",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/bank_drift_paired_probe.py",
+            "tests/test_bank_drift_paired_probe.py",
+            "docs/evidence/archive/null-identification-authority-landed.html",
+            "docs/plans/null-identification-authority.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-nia-drift-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-20T16:13:52Z",
+        "completed_at": "2026-09-20T16:40:28.547Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1586,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1596,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "83f585a1126688ef30494793f52e7db042179dbe",
+        "commits": [
+          "34bf882da753f8a91708386ff556ddc795d48024",
+          "f73fce6973f1728855a4cdb902a5c54a4fff3c6f"
+        ],
+        "changed_lines": {
+          "added": 2408,
+          "removed": 2,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G bash /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/drift-probe-record-repairs/gate_driver.sh",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/drift-probe-record-repairs/gate-after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T161342331604-nia-make-the-drift-probe-record-match-its-receipts/manifest.md",
+        "scope_changed": false,
+        "session_id": "e89d5342-c5bb-467f-a59b-cddbb1f0636e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 14720079,
+            "input_tokens_cumulative": 14720079,
+            "output_tokens": 76841,
+            "output_tokens_cumulative": 76841,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-20T16:40:28.547Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 15048933,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1592.727,
+          "generated_tokens": 94245,
+          "generation_seconds": 1507.405,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.6,
+          "machine_seconds": 85.322,
+          "peak_input_tokens": 165959,
+          "tokens_per_second": 62.52,
+          "wall_tokens_per_second": 59.17
+        },
+        "follow_on_paths": [
+          "bank-drift/sweep-old.log",
+          "bank-drift/sweep-new.log",
+          "record/plan",
+          "/"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": [
+          {
+            "path": "docs/figures/null-identification-authority/bank-drift-probe/compile-line-count-against-log-position.png",
+            "reason": "the figure the record cites for the compile-count claim; the bank-drift-probe topic directory is this record repair companion"
+          },
+          {
+            "path": "docs/figures/null-identification-authority/bank-drift-probe/compile-line-count-against-log-position.svg",
+            "reason": "the vector companion of the same figure, kept beside the PNG for text-lane review"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-make-the-drift-probe-record-match-its-receipts",
+          "session_id": "e89d5342-c5bb-467f-a59b-cddbb1f0636e",
+          "session_source": "stream",
+          "retained_at": "2026-09-20T16:40:28.547Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.9995,
+        "impl_move": {
+          "plan": "null-identification-authority",
+          "at_dispatch": 0.9995,
+          "at_complete": 0.9995,
+          "verdict": "waived",
+          "reason": "this node repairs the statements of an already-landed probe record so each claim names its capture; the null-identification plan remainder is the shadowed-contact decision, which this repair does not move"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/test_bank_drift_paired_probe.py"
+          ],
+          "declaration": "benchmarks/bank_drift_paired_probe.py:913, wall = panel[\"wall\"]  ->  wall = panels[0][\"wall\"]  (every panel draws the producer archive's wall instead of its own resolved wall)",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/drift-probe-record-repairs/gate-negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/drift-probe-record-repairs/gate-negative-control.log"
+        },
+        "tool_steps": 114.0,
+        "orientation_input_tokens": 7020436.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -216880,6 +217115,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2979
+    "_version": 2980
   }
 }

@@ -1,0 +1,28 @@
+{
+  "panels": [
+    {
+      "bitmap_content_sha256": "375613cfb2406c7eac0dc6327ebec7a24e32e1a1b26cf909ba1be476e313a63a",
+      "bitmap_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png",
+      "bitmap_shape": [
+        1620,
+        1890,
+        4
+      ],
+      "case": "diverted-single-null",
+      "file_sha256": "48093d505dd61c490446f1d5f27c37507413e82884667b5cbc8512011491172e",
+      "normalised_vector_fields": [
+        "<dc:date> element value",
+        "Matplotlib vX.Y.Z version token",
+        "generated element ids, renumbered in first-appearance order"
+      ],
+      "part": "docs/figures/gs-absolute-accuracy/solovev/production-route-parts/diverted-single-null-production-route-cells-300.json",
+      "requested_cells": 300,
+      "vector_content_sha256": "cc7f1f370f4fce4673ac164c3635e30bdc9b3e1c4d64fa106670851516ccc608",
+      "vector_file_sha256": "a0f5c9dee6e1512884791ea99817bbe5fa78fe45914f00adacc8ecae502db2e4",
+      "vector_filesystem_path": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.svg"
+    }
+  ],
+  "rationale": "A file digest on a rendered panel cannot separate a moved panel from a container that moved with it. The PNG bytes are reproducible here, but the SVG container is not: every render advances the <dc:date> element, rewrites the Matplotlib version token, and renames the generated clip-path ids. A content digest normalises exactly those three fields, so it fires when the drawn panels move and stays quiet when only the container is rewritten.",
+  "schema": "nova.figure-panel-content-pin",
+  "version": 1
+}

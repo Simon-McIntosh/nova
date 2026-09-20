@@ -30,7 +30,7 @@
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="221">
+<meta name="plan-version" content="222">
 </head>
 <body>
 <main class="plan-doc">
@@ -887,6 +887,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260920T154340359275-nia-pin-the-panel-rather-than-its-container" data-who="reckon-ship" data-when="2026-09-20T15:54:47.996Z">
     <div class="r-comment-body"><p>two renders from one revision differ only in the vector container, so the drawn panels are stable and what had been moving was never the figure; the bitmap is pinned as bytes and the vector by normalised content, with the guard controlled both ways, which separates a regression in a drawn panel from a renderer or library upgrade</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260920T001657589423-nia-the-grid-class-margin-reads-infinite" data-who="reckon-ship" data-when="2026-09-20T16:20:51.103Z">
+    <div class="r-comment-body"><p>the infinity is on the wall side, not the saddle: an X-point is admitted at 0.051708397272780315 and the wall level is infinite because commit 8fdc71ef5 made the wall anchor publish the flux evaluated on the tensor spline at the fitted contact rather than the wall nodes own flux from the state, so the fixture offset is discarded, the anchor moves vertex, the reachable-wall set falls from 5 of 64 to 0 of 64 with the classification operands supplied, and the shadow turns a defined level into infinity; the parent commit still reads the pinned value, so the pin is not stale. The node refused to repair because the two files are outside its fence, which was a coordinator scoping error.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

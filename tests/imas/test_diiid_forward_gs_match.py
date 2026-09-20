@@ -1,3 +1,4 @@
+import ast
 import importlib.util
 import inspect
 import json
@@ -14,6 +15,127 @@ gate = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 sys.modules[SPEC.name] = gate
 SPEC.loader.exec_module(gate)
+
+
+BENCHMARKS_ROOT = MODULE_PATH.parent
+MATCH_MODULE = "benchmarks.diiid_forward_gs_match"
+
+# The comparators a driver must reach through the public equilibrium surface
+# rather than import from the forward-match module: the match module's own
+# boundary builder and its nearest-vertex separation statistic.
+MATCH_COMPARATOR_IMPORTS = ("_separatrix", "contour_separation")
+
+# Drivers that still import a match-module comparator, with the names each
+# takes.  The map is declared so a re-introduced import reddens this case
+# instead of reappearing unnoticed, and so moving a driver onto the public
+# comparators narrows it deliberately.
+MATCH_COMPARATOR_IMPORTERS = {"diiid_solenoid_inclusion_ladder.py": ("_separatrix",)}
+
+# The drivers re-pointed onto the public comparators, with the public names
+# each now must import.
+PUBLIC_COMPARATOR_DRIVERS = {
+    "diiid_diverted_solve_overlay.py": ("assemble_separatrix_branches",),
+    "diiid_circuit_driven_forward_validation.py": (
+        "assemble_separatrix_branches",
+        "compare_closed_boundaries",
+    ),
+}
+
+
+def _imported_names(path: Path) -> dict[str, set[str]]:
+    """Return {module: names} for every absolute import in one source file."""
+
+    tree = ast.parse(path.read_text())
+    imported: dict[str, set[str]] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module:
+            imported.setdefault(node.module, set()).update(
+                alias.name for alias in node.names
+            )
+    return imported
+
+
+def _match_comparator_importers(root: Path) -> dict[str, tuple[str, ...]]:
+    """Return {driver: imported comparators} for the match module's comparators."""
+
+    offenders = {}
+    for path in sorted(root.glob("*.py")):
+        if path.name == MODULE_PATH.name:
+            continue
+        imported = _imported_names(path).get(MATCH_MODULE, set())
+        matched = tuple(sorted(imported.intersection(MATCH_COMPARATOR_IMPORTS)))
+        if matched:
+            offenders[path.name] = matched
+    return offenders
+
+
+def test_no_driver_imports_the_match_separatrix_comparators():
+    offenders = _match_comparator_importers(BENCHMARKS_ROOT)
+    assert offenders == MATCH_COMPARATOR_IMPORTERS, (
+        "the drivers importing the forward-match module's comparators changed: "
+        f"{offenders} against the declared {MATCH_COMPARATOR_IMPORTERS}"
+    )
+
+
+def test_the_repointed_drivers_import_the_public_comparators():
+    for name, required in PUBLIC_COMPARATOR_DRIVERS.items():
+        imported = _imported_names(BENCHMARKS_ROOT / name)
+        public = imported.get("nova.equilibrium.separatrix_branches", set()) | (
+            imported.get("nova.equilibrium.boundary_comparison", set())
+        )
+        missing = set(required) - public
+        assert not missing, f"{name} does not import {sorted(missing)} from nova"
+
+
+def _load_driver(name: str):
+    """Import one benchmark driver by file path, as the driver tests do."""
+
+    path = BENCHMARKS_ROOT / name
+    spec = importlib.util.spec_from_file_location(path.stem, path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _ring_field(polarity: float):
+    """Return one axis-enclosing flux map and the levels that band it."""
+
+    radius = np.linspace(0.8, 2.4, 65)
+    height = np.linspace(-0.8, 0.8, 65)
+    radial, vertical = np.meshgrid(radius, height, indexing="ij")
+    flux = polarity * ((radial - 1.6) ** 2 + vertical**2)
+    return radius, height, flux, 0.0, polarity * 0.09
+
+
+def test_driver_boundary_readings_reproduce_the_match_module_on_a_synthetic_field():
+    """Pin the readings the re-pointed drivers produce to the replaced calls.
+
+    The drivers build their closed boundary and their vertex separation
+    locally now, so this compares each local construction against the
+    forward-match names the drivers used to reach for, on flux bands of both
+    polarities.  Equality is exact: a re-pointed driver that shifts a reading
+    by one ulp is a changed terminal reading, not a refactor.
+    """
+
+    overlay = _load_driver("diiid_diverted_solve_overlay.py")
+    circuit = _load_driver("diiid_circuit_driven_forward_validation.py")
+
+    for polarity in (1.0, -1.0):
+        radius, height, flux, axis_flux, boundary_flux = _ring_field(polarity)
+        expected = gate._separatrix(radius, height, flux, axis_flux, boundary_flux)
+        produced = overlay.assembled_closed_boundary(
+            radius, height, flux, axis_flux, boundary_flux
+        )
+        assert expected.shape == produced.shape
+        assert len(produced) >= 3
+        np.testing.assert_array_equal(produced, expected)
+
+        reference = expected + np.array([0.002, 0.0])
+        assert circuit.symmetric_vertex_separation(
+            expected, reference
+        ) == gate.contour_separation(expected, reference)
 
 
 def test_registered_bar_is_tied_to_the_measured_label_ceiling(tmp_path):

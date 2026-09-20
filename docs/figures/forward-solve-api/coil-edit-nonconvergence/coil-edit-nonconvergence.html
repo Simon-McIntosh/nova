@@ -116,6 +116,11 @@ differences <code>32</code> then <code>0</code>, one rejection per trip, and des
 one rejection per trip, and descends 4.870e-03 &rarr; 2.311e-03 &rarr; 1.849e-03. Both end on a trip whose
 mask difference is 0 while the residual is still above tolerance: a genuine active-set iteration that
 was working and was cut short, not a stalled or refused one.</p>
+<p>The three groups are persisted in <code>coil-edit-nonconvergence.json</code> as
+<code>summary.groups</code> with their member edit ids (<code>stall</code> 1, 2, 4, 6, 8, 10,
+<code>refused_first_step</code> 17, 19, <code>partial_walk</code> 16, 18), beside
+<code>summary.termination_groups.active_set_settled</code> holding all ten, so this table can be
+checked against the record it was read from rather than against the termination word alone.</p>
 <table>
 <thead>
 <tr><th>group</th><th>edits</th><th>trips</th><th>steps / trip</th><th>rejected / trip</th><th>mask &Delta;</th><th>terminal residual</th><th>seed residual</th></tr>

@@ -4,25 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="cpu-compile-abort">
-  <meta name="plan-title"     content="The CPU Lane Aborts In Compilation">
-  <meta name="plan-summary"   content="Four drivers abort in LLVM section memory while compiling on CPU, with resident memory far inside the request and no GPU lane to escape to.">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="cpu-compile-abort">
+  <meta name="plan-title" content="The CPU Lane Aborts In Compilation">
+  <meta name="plan-summary" content="Four drivers abort in LLVM section memory while compiling on CPU, with resident memory far inside the request and no GPU lane to escape to.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="moderate">
-  <meta name="plan-sprint"    content="S19">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="jax,throughput">
-  <meta name="plan-blocks"    content="millisecond-converged-solve,forward-solve-api,centroid-constrained-oracle-solve">
+  <meta name="plan-sprint" content="S19">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="jax,throughput">
+  <meta name="plan-blocks" content="millisecond-converged-solve,forward-solve-api,centroid-constrained-oracle-solve">
   <title>The CPU Lane Aborts In Compilation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-20">
+<meta name="plan-impl" content="0.3">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -103,26 +106,33 @@
     the two are not conflated.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="compile-abort-remedy" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which remedy does the fleet take for a driver that aborts in compilation on CPU?</p>
-        <p class="r-dec-ctx">Deliberately left open until §1 reports, because the remedies are not equally cheap and the measurement chooses between them. A cache warm is hours and changes no code; reducing the emitted program is the bucket-floor work on the millisecond plan and is measured in days; waiting for the GPU lane means stopping the local serve, which is the engine the whole fleet runs on. If §1 finds the mapping limit is not reached, none of these is the answer and the section is re-opened rather than a remedy being chosen anyway.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="warm-the-cache-for-the-lane">warm the persistent compilation cache for the programs the CPU lane actually requests, so the compile does not happen</button>
-          <button class="r-opt" data-value="reduce-the-emitted-program">reduce the emitted program through the bucket floor, so the compile that does happen places fewer sections</button>
-          <button class="r-opt" data-value="reclaim-a-card-from-the-serve">reclaim one card from the model serve so heavy measurements have a GPU lane again</button></p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="compile-abort-remedy" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which remedy does the fleet take for a driver that aborts in compilation on CPU?</p>
+    <p class="r-dec-ctx">Deliberately left open until §1 reports, because the remedies are not equally cheap and the measurement chooses between them. A cache warm is hours and changes no code; reducing the emitted program is the bucket-floor work on the millisecond plan and is measured in days; waiting for the GPU lane means stopping the local serve, which is the engine the whole fleet runs on. If §1 finds the mapping limit is not reached, none of these is the answer and the section is re-opened rather than a remedy being chosen anyway.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="warm-the-cache-for-the-lane">warm the persistent compilation cache for the programs the CPU lane actually requests, so the compile does not happen</button>
+      <button class="r-opt" data-value="reduce-the-emitted-program">reduce the emitted program through the bucket floor, so the compile that does happen places fewer sections</button>
+      <button class="r-opt" data-value="reclaim-a-card-from-the-serve">reclaim one card from the model serve so heavy measurements have a GPU lane again</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-cca-measure-the-mapping-count" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-20" data-recommends-skill="/reckon-ship cpu-compile-abort §1" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Sample the mapping count through a failing compile and settle the hypothesis either way</h4>
-        <div class="r-fu-body"><p>Take the smallest of the four drivers that reproduces the abort and run it in one debug allocation with a sampler recording the process mapping count from its own <code>/proc</code> entry alongside resident memory, at a fixed interval, until the process dies. Report the peak count against the 65,530 limit, the last sample before the abort, and the resident memory at those instants. One sentence of verdict: reached or did not reach. A negative is as valuable as a positive here and must be written down as plainly, because the hypothesis has already been repeated once as though it were established.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort §1</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-cca-measure-the-mapping-count" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-20" data-recommends-skill="/reckon-ship cpu-compile-abort §1" data-resolved-at="2026-09-20T16:05:20+00:00" data-resolved-by="">
+    <h4 class="r-fu-title">Sample the mapping count through a failing compile and settle the hypothesis either way</h4>
+    <div class="r-fu-body"><p>Take the smallest of the four drivers that reproduces the abort and run it in one debug allocation with a sampler recording the process mapping count from its own <code>/proc</code> entry alongside resident memory, at a fixed interval, until the process dies. Report the peak count against the 65,530 limit, the last sample before the abort, and the resident memory at those instants. One sentence of verdict: reached or did not reach. A negative is as valuable as a positive here and must be written down as plainly, because the hypothesis has already been repeated once as though it were established.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort §1</pre>
+    <p class="r-fu-outcome">Measured, and the number is the one the hypothesis predicted without quite closing it. Landed at 17bd21d5 and 018879d7, merged at f5ea2034. A sampler records the process mapping count beside its resident memory once a second for the life of a driver, 1,036 samples over 1,044 seconds on the certificate driver. The count peaked at 65,271 against the kernel limit of 65,530, four tenths of one percent short, while resident memory stayed at 17.4 GB and virtual size at 25.7 GB. A process at 65,271 mappings and 17 GB resident that cannot place a few hundred bytes is out of mappings, not out of memory, which is what the section-memory refusals were saying. The worker was right to stop short of calling it settled: this configuration exited 1 rather than aborting, because the aborting one needs a panel directory its write fence did not include, and 65,271 is not 65,530. That fence was my scoping error and the confirmation is its own node.</p>
+    </article>
+<article class="r-fu" data-id="f-cca-reproduce-the-abort-under-the-sampler" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-20" data-recommends-skill="/reckon-ship cpu-compile-abort §1" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run the configuration that actually aborts under the sampler, which needs the figure directory the first fence left out</h4>
+    <div class="r-fu-body"><p>The sampler works and the number it returned on a run that did not abort is 65,271 mappings against a limit of 65,530. What remains is one sentence of confirmation: the configuration that does abort needs the certificate panel directory under the served figure tree, and the node measuring it was not granted that path, which is a scoping error of mine rather than anything the worker did. Grant <code>docs/figures/millisecond-converged-solve</code> and run the same driver with the panel directory it needs, under the same sampler, in one debug allocation.</p><p>Report the peak count, the last sample before the abort, and the resident memory at both instants, and say in one sentence whether the limit was reached. If it was, the cause is named and the remedy decision above becomes answerable. If the count stalls short of the limit again while the process still aborts, then mappings are not the whole story and the record says what else the sampler saw move, which is the more interesting outcome and must not be quietly dropped in favour of the tidy one.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort §1</pre>
+    </article>
+</section>
 
     <section id="mapping-count">
       <h2><span class="sec">§</span> What the sampler saw (job 1274144)</h2>

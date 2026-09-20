@@ -996,6 +996,76 @@ scripts/analytic_oracle_fixtures/measure.py:984: in _analytic_profile_support
   <p><strong>Scope.</strong> <code>tests/test_solve_program_size.py</code> sits outside this node's write scope by design, and it was not edited: the file is byte-identical to head at <code>e4805f18e28c42af5090f7e179d2750c</code>, and the case bodies were executed as committed. Verifying the merged result belongs to a separately dispatched test node.</p>
   <p><strong>Artifacts.</strong> Lane log <code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/msc-gatered/srun.log</code> (host <code>98dci4-clu-3141</code>, python <code>3.14.2</code>, one <code>srun</code> on <code>all_debug</code>), with the per-arm logs <code>after.log</code>, <code>before.log</code>, <code>guard.log</code> and <code>gate.log</code> beside it; the before-arm gate source and the case-build step are in the same directory under <code>before-tree/</code>; the figure renderer is <code>make_figure.py</code>. Commits: <code>3785788f7</code>.</p>
 </section>
+
+  <section id="certificate-baseline-state-array">
+  <h2>The certificate baseline carries the state array, so a difference has a size</h2>
+  <p><strong>What changed.</strong> A recorded baseline row may now carry its terminal state array
+  beside its binary64 digest — as a <code>.npy</code> path (absolute, or relative to the receipt
+  that names it) or inline as a sequence of binary64 values. The loader validates the array
+  against the digest the same row records and refuses the pair when they disagree, so the array
+  can never stand in for a state it does not describe. <code>CertificateBaselineRefusal</code>
+  also fires on an array path that does not exist.</p>
+  <p><strong>What the comparison reports.</strong> <code>certificate_state_difference</code>
+  returns the element-wise maximum of <code>|candidate - baseline|</code> over the recorded array,
+  which is the number that separates a last-bit reordering (near the machine epsilon of the
+  state) from a changed solution. Where the baseline arm carries only a digest it returns
+  <code>None</code> with the reason recorded, never <code>0.0</code>: zero is the reading a
+  bit-identical pair produces, so reporting it for an arm that was never differenced would read
+  as a match. A shape mismatch is refused rather than broadcast, and an empty difference is
+  refused by the same guard that refuses an empty identity set.</p>
+  <p><strong>Per-row arm naming.</strong> The emitted row and the arm-selection probe name, per
+  row, which of the two sources the baseline arm used — <code>recorded base-revision terminal
+  state array</code> or <code>recorded base-revision terminal state digest</code> — and the
+  receipt counts the kinds. Each row also persists its own terminal state array beside its
+  digest, into a <code>-states</code> directory beside the receipt by default, so every future
+  row carries the array as a matter of course. Every uv command in the lane carried
+  <code>--no-sync</code> and the compute node ran the shared root interpreter directly, uv never
+  invoked there.</p>
+  <p><strong>The committed rows remain unmeasured, and their recorded difference is not
+  adopted.</strong> No certificate row was re-solved in this node: the driver aborts in the third
+  compile, and that measurement is owned elsewhere. All four committed rows therefore carry the
+  digest-only baseline and report the difference as unmeasured with its reason. The committed
+  receipt does carry a <code>maximum_absolute_state_difference</code> of
+  <code>5.684341886080802e-14</code>, <code>1.7763568394002505e-15</code>,
+  <code>1.249000902703301e-16</code> and <code>0.0022199809164994903</code> from the superseded
+  in-process comparison, which built both arms at one revision; a committed case asserts the
+  loader does not surface those numbers as cross-revision measurements against an array the row
+  does not carry.</p>
+  <table>
+    <tr><th>Baseline arm</th><th>Difference reported</th><th>Refused when</th></tr>
+    <tr><td>state array (path or inline)</td><td>finite maximum of <code>|candidate -
+    baseline|</code> with its element count</td><td>array digest disagrees with the row's digest;
+    array path absent; shapes differ; difference carries non-finite entries</td></tr>
+    <tr><td>binary64 digest only</td><td><code>null</code>, with
+    <code>maximum_absolute_state_difference_measure</code> reading
+    <code>unmeasured: …</code></td><td>the digest itself absent; the receipt's revision is not the
+    recorded base revision</td></tr>
+  </table>
+  <p><strong>The rule that was measured.</strong> The gate rests on two runs of one focused suite
+  on one <code>all_debug</code> CPU allocation each, <code>JAX_PLATFORMS=cpu</code> and
+  <code>TMPDIR=/tmp</code> in the submit environment and in the payload, the shared root
+  interpreter run directly: <code>tests/test_certificate_baseline_revision.py
+  tests/test_solve_program_size.py tests/test_solve_program_size_gate.py</code> is 36 passed at the
+  base revision and 43 passed at the change, both exit 0, both with an empty failure list — zero
+  added failures over seven new cases.</p>
+  <p><strong>Negative control.</strong> Making the digest-only branch return <code>0.0</code>
+  reddens exactly the two cases that assert unmeasured-not-zero, so the guard fires on the
+  mutation rather than passing by never being exercised:</p>
+  <pre>DECLARED NEGATIVE CONTROL: benchmarks/solve_program_size_gate.py certificate_state_difference
+returns 0.0 as maximum_absolute_state_difference where the baseline arm carries only a digest
+
+FAILED tests/test_certificate_baseline_revision.py::test_row_compared_against_a_digest_reports_the_difference_as_unmeasured
+FAILED tests/test_certificate_baseline_revision.py::test_committed_row_carries_no_state_array_so_its_recorded_difference_is_not_adopted
+========================= 2 failed, 12 passed in 8.50s =========================</pre>
+  <p><strong>Representation.</strong> No figure: the content is a branch table over the arm kind,
+  and the plan's representation test excludes an image of what is naturally a table. A flux panel
+  is owed only by a node that solves a certificate row, and this one solved none.</p>
+  <p><strong>Scope and artifacts.</strong> Changed paths: <code>benchmarks/solve_program_size_gate.py</code>
+  and <code>tests/test_certificate_baseline_revision.py</code> (commit <code>87b3c929e</code>).
+  Logs: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T153922912568-msc-persist-the-baseline-state-array/logs/baseline_suite.log</code>,
+  <code>…/after_suite.log</code> and <code>…/negative_control.log</code>. Verifying the merged
+  result belongs to a separately dispatched test node.</p>
+</section>
 </main>
 </body>
 </html>

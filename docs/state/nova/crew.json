@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T20:35:32",
+  "updated": "2026-09-20T20:44:11",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -216708,6 +216708,232 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260920T154610428813-msc-give-the-containment-rule-a-positive-control",
+        "plan": "millisecond-converged-solve",
+        "section": "",
+        "node": "msc-give-the-containment-rule-a-positive-control",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1412,
+                "cached_input_tokens": 789941,
+                "input_tokens": 791355,
+                "output_tokens": 1080,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 792435,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "the census gains a rung whose pitch brings the divertor X-point inside a stencil ring on the diverted oracle fixture, so the containment rule has a positive control that is a saddle rather than only the axis pair, and a committed case asserts a saddle is admitted at that rung; or, if no pitch reachable within one all_debug allocation brings the saddle inside a ring, the record states the pitches tried with the ring-centre distance to the saddle at each, expressed in cell pitches, and says plainly that the diverted oracle cannot exercise the containment rule so the control moves to a fixture that can, naming it; either way the answer is written on this plan and referenced from the topology plan saddle-detector section rather than left in one of them; one all_debug CPU allocation with JAX_PLATFORMS=cpu, TMPDIR=/tmp in the submit environment and in the payload, the shared root interpreter run directly and uv never invoked on the compute node; the gate reports added failures against the base revision and the declared negative control reddens",
+          "estimated_hours": null,
+          "goal": "give the containment rule a rung on which a saddle is actually admitted, or state on both plans that this fixture cannot provide one",
+          "id": "msc-give-the-containment-rule-a-positive-control",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-20T15:46:11Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T154610428813-msc-give-the-containment-rule-a-positive-control/manifest.md",
+          "negative_control": "replace  saddle = np.asarray(X_POINT_M, dtype=np.float64)  with  _msc_base = np.asarray(X_POINT_M, dtype=np.float64); _msc_shift = float(__import__(\"os\").environ.get(\"MSC_SADDLE_PITCH_SHIFT\") or \"0\"); saddle = _msc_base  and  distance = np.linalg.norm(centres - saddle, axis=1)  with  _msc_dir = centres[np.argmin(np.linalg.norm(centres - _msc_base, axis=1))] - _msc_base; saddle = _msc_base + _msc_shift * pitch * _msc_dir / np.linalg.norm(_msc_dir); distance = np.linalg.norm(centres - saddle, axis=1)   -- i.e. displace the diverted fixture's saddle by a signed number of carrier pitches along the direction of its nearest ring centre; never invert an assertion",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "tests/test_forward_census.py",
+            "docs/evidence/archive/millisecond-converged-solve-landed.html",
+            "docs/plans/millisecond-converged-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-msc-saddlerung-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-20T15:46:23Z",
+        "completed_at": "2026-09-20T18:35:28.764Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 10137,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 10145,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "531cba3c1e72dfb63f53c3819b4a5f1a6545e955",
+        "commits": [
+          "39fc89aea65561ef9912e44c89aca917f6b675ab",
+          "c464e90b6fccf9200060a8c74663c99370485d0d",
+          "f4ed7fb14c962be69d122161870b12e634ed2ba3"
+        ],
+        "changed_lines": {
+          "added": 181,
+          "removed": 34,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G bash -lc \"export TMPDIR=/tmp JAX_PLATFORMS=cpu; /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_forward_census.py::test_forward_census_diverted_oracle_pitch_ladder_admits_no_saddle\"",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.cache/msc-containment-gate/head-ladder.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T154610428813-msc-give-the-containment-rule-a-positive-control/manifest.md",
+        "scope_changed": false,
+        "session_id": "f87092f2-e029-4408-99e1-eddde2dff7a0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3979542,
+            "input_tokens_cumulative": 3979542,
+            "output_tokens": 24977,
+            "output_tokens_cumulative": 24977,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-20T18:35:28.764Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 18649306,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 587.401,
+          "generated_tokens": 146273,
+          "generation_seconds": 349.424,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.1,
+          "machine_seconds": 237.977,
+          "peak_input_tokens": 163475,
+          "tokens_per_second": 418.61,
+          "wall_tokens_per_second": 249.02
+        },
+        "follow_on_paths": [
+          "docs/plans/topology-read-containment-and-rebank.html",
+          "nova/equilibrium/forward_operator.py:3091",
+          "tests/test_forward_census.py::test_forward_census_exact_diverted_oracle",
+          "benchmarks/topology_read_resolution_ladder.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-give-the-containment-rule-a-positive-control",
+          "session_id": "f87092f2-e029-4408-99e1-eddde2dff7a0",
+          "session_source": "stream",
+          "retained_at": "2026-09-20T18:35:28.764Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 1.0,
+        "impl_move": {
+          "plan": "millisecond-converged-solve",
+          "at_dispatch": 1.0,
+          "at_complete": 1.0,
+          "verdict": "waived",
+          "reason": "millisecond-converged-solve is at impl 1.0; this node adds the positive control its review asked for and moves no section"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/test_forward_census.py"
+          ],
+          "declaration": "replace  saddle = np.asarray(X_POINT_M, dtype=np.float64)  with  _msc_base = np.asarray(X_POINT_M, dtype=np.float64); _msc_shift = float(__import__(\"os\").environ.get(\"MSC_SADDLE_PITCH_SHIFT\") or \"0\"); saddle = _msc_base  and  distance = np.linalg.norm(centres - saddle, axis=1)  with  _msc_dir = centres[np.argmin(np.linalg.norm(centres - _msc_base, axis=1))] - _msc_base; saddle = _msc_base + _msc_shift * pitch * _msc_dir / np.linalg.norm(_msc_dir); distance = np.linalg.norm(centres - saddle, axis=1)   -- i.e. displace the diverted fixture's saddle by a signed number of carrier pitches along the direction of its nearest ring centre; never invert an assertion",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T154610428813-msc-give-the-containment-rule-a-positive-control/negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T154610428813-msc-give-the-containment-rule-a-positive-control/negative-control.log"
+        },
+        "tool_steps": 123.0,
+        "orientation_input_tokens": 3265719.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -217160,6 +217386,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2985
+    "_version": 2986
   }
 }

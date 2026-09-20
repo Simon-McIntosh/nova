@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T17:33:22",
+  "updated": "2026-09-20T17:33:27",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7721,15 +7721,6 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-25"
-      },
-      {
-        "id": "session-337d1d569f61f639eedc",
-        "harness": "clive",
-        "role": "review",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-19"
       },
       {
         "id": "shadow-haiku-1",
@@ -214544,6 +214535,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2948
+    "_version": 2949
   }
 }

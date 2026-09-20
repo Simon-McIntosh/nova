@@ -141,9 +141,12 @@ def test_diverted_normalised_certificate_rung_retains_finite_fallback(
     from benchmarks import solovev_certificate
 
     monkeypatch.setattr(solovev_certificate, "PART_ROOT", tmp_path)
-    row = solovev_certificate._measure("diverted-jump-bearing", -300)
+    row = solovev_certificate._measure("diverted-single-null", -300)
 
-    assert row["solver"]["terminal_fixed_point_residual"] == 0.025515711279493654
+    # The rung now terminates at the un-carried fixed point: the frozen
+    # topology partition whose target-current suppression produced the retired
+    # 0.025515711279493654 is not in effect for this row at this revision.
+    assert row["solver"]["terminal_fixed_point_residual"] == 2.248351582217136
 
 
 @pytest.fixture(scope="module")

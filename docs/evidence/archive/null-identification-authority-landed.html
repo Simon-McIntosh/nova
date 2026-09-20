@@ -1151,6 +1151,42 @@ declared mutation) under the reports fence
   </ol>
   <p>The pinned value is therefore <strong>not stale</strong>, because the parent commit produces it.</p>
 </section>
+<section>
+  <h2>The diverted certificate pin rested on an unreachable rung</h2>
+  <p>The pin asserted <code>0.025515711279493654</code> for
+  <code>tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback</code>.
+  At base <code>9c5e64da8</code> the recorded defect does not reproduce as recorded. The test calls
+  <code>solovev_certificate._measure("diverted-jump-bearing", -300)</code>, which labels the returned row
+  with the alias, and <code>_validate_row</code> then tests <code>row["case"] in CASE_NAMES</code>. The
+  alias is not in <code>CASE_NAMES</code>; it lives in <code>DIVERTED_CASE_ALIASES</code>. The rung
+  therefore raises <code>RuntimeError: unknown certificate case</code> before the assertion, so the
+  stale pin was never the failing line.</p>
+  <pre>E           RuntimeError: unknown certificate case
+benchmarks/solovev_certificate.py:2514: RuntimeError
+1 failed in 189.33s</pre>
+  <p>History places the mask: <code>8c2c4b278</code> introduced the pin when
+  <code>"diverted-jump-bearing"</code> was a member of <code>CASE_NAMES</code>, so the pin was reachable
+  then; <code>81b6cc235</code> renamed the case to <code>diverted-single-null</code> and moved the old
+  spelling into <code>DIVERTED_CASE_ALIASES</code> without widening the membership test.
+  <code>_case</code>, <code>_case_machine</code> and <code>_exact_state</code> route both spellings
+  identically, so the rung computed is the same one.</p>
+  <p>With the rung reachable by its canonical name, the terminal residual is exactly
+  <code>2.248351582217136</code> — the un-carried baseline, and the value the plan attributed to the
+  carry-off arm. The pin now records it with the mechanism stated in-line. The alias rejection in the
+  benchmark is left for a follow-on, since repairing it is outside this node's write scope.</p>
+  <p><strong>Gate.</strong> One <code>all_debug</code> CPU allocation per run, <code>TMPDIR=/tmp</code>
+  in the submit environment and in the payload, <code>JAX_PLATFORMS=cpu</code>, the shared root
+  environment interpreter run directly with the worktree on <code>PYTHONPATH</code> and
+  <code>uv</code> never invoked on the compute node, the case selected explicitly by path so the slow
+  marker does not exclude it. Baseline: <strong>1 failed in 189.33s</strong> (alias rejection).
+  After: <strong>1 passed in 185.99s, EXIT=0, 1 collected</strong>. Negative control — the retired
+  value restored on the corrected tree: <strong>1 failed in 188.41s</strong> at
+  <code>assert 2.248351582217136 == 0.025515711279493654</code>. Added failures against the base
+  revision: none. Logs <code>baseline-stale-pin.log</code>, <code>after-pin.log</code> and
+  <code>negative-control.log</code> (first line names the declared mutation) under
+  <code>~/.config/reckon/crew/runs/r-20260920T160154139156-nia-retire-the-stale-certificate-pin/logs/</code>.
+  Implementation at commit <code>f205bff1f</code>.</p>
+</section>
 </main>
 </body>
 </html>

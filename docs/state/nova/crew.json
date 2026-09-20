@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T18:29:40",
+  "updated": "2026-09-20T19:19:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -215720,6 +215720,213 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260920T160614302471-cca-reproduce-the-abort-under-the-sampler",
+        "plan": "cpu-compile-abort",
+        "section": "\u00a71",
+        "node": "cca-reproduce-the-abort-under-the-sampler",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 959,
+                "cached_input_tokens": 841740,
+                "input_tokens": 842701,
+                "output_tokens": 1137,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 843838,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "one all_debug CPU allocation with --cpus-per-task=8 --mem=64G --time=00:59:00, TMPDIR=/tmp exported in the submit environment and in the payload, JAX_PLATFORMS=cpu, the shared root interpreter run directly and uv never invoked on the compute node, runs benchmarks.compile_abort_probe over the certificate driver in the configuration that aborts, which needs --certificate-panel-dir pointing under docs/figures/millisecond-converged-solve, and the run reaches the abort rather than exiting cleanly; the record states the peak mapping count against the 65530 limit, the count in the last sample before the abort, and the resident memory at both instants, and gives one sentence of verdict that the limit was or was not reached; if the count stalls short of the limit while the process still aborts, the record says what else the sampler saw move and that mappings are not the whole story, which is the more interesting outcome and is not to be dropped in favour of the tidy one; the earlier run peaked at 65271 with 17.4 GB resident, so state this run peak beside that number rather than in isolation",
+          "estimated_hours": null,
+          "goal": "run the configuration that actually aborts under the mapping sampler, and say whether the limit is reached",
+          "id": "cca-reproduce-the-abort-under-the-sampler",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-20T16:06:16Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T160614302471-cca-reproduce-the-abort-under-the-sampler/manifest.md",
+          "negative_control": "none: this node reproduces a failing run under an existing sampler and adds no test; its own correctness is that the abort reproduces, which the log shows or does not",
+          "plan": "cpu-compile-abort",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/compile_abort_probe.py",
+            "docs/figures/millisecond-converged-solve",
+            "docs/evidence/archive/cpu-compile-abort-landed.html",
+            "docs/plans/cpu-compile-abort.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-cca-confirm-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-20T16:06:30Z",
+        "completed_at": "2026-09-20T16:35:37.023Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1740,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1747,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "b5f02aca383b6a48f1ce2b6c14d9c39c3fc74d75",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T160614302471-cca-reproduce-the-abort-under-the-sampler/manifest.md",
+        "scope_changed": false,
+        "session_id": "5f62822a-974e-484f-8920-666a34988746",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 8111004,
+            "input_tokens_cumulative": 8111004,
+            "output_tokens": 54281,
+            "output_tokens_cumulative": 54281,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-20T16:35:37.023Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 8278696,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1744.04,
+          "generated_tokens": 63462,
+          "generation_seconds": 1029.717,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.7,
+          "machine_seconds": 714.323,
+          "peak_input_tokens": 166392,
+          "tokens_per_second": 61.63,
+          "wall_tokens_per_second": 36.39
+        },
+        "follow_on_paths": [
+          "/proc/meminfo",
+          "MemFree/MemAvailable/CommitLimit/Committed_AS",
+          "benchmarks/compile_abort_probe.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "no test file is in scope; the node measure is a measurement and its evidence is two allocations with their sampler series",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-reproduce-the-abort-under-the-sampler",
+          "session_id": "5f62822a-974e-484f-8920-666a34988746",
+          "session_source": "stream",
+          "retained_at": "2026-09-20T16:35:37.023Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.3,
+        "impl_move": {
+          "plan": "cpu-compile-abort",
+          "at_dispatch": 0.3,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "gate-not-passing"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 76.0,
+        "orientation_input_tokens": 6032105.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -216158,6 +216365,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2966
+    "_version": 2967
   }
 }

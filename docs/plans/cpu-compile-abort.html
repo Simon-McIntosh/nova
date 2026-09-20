@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-20">
 <meta name="plan-impl" content="0.55">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 </head>
 <body>
   <main class="plan-doc">
@@ -180,6 +180,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260920T153324775149-cca-sample-the-mapping-count-through-the-abort" data-who="reckon-ship" data-when="2026-09-20T16:03:16.814Z">
     <div class="r-comment-body"><p>the mapping count peaked at 65,271 against the kernel limit of 65,530 over 1,036 samples, while resident memory stayed at 17.4 GB and virtual size at 25.7 GB, so a process that cannot place a few hundred bytes at that point is out of mappings rather than out of memory; the worker stopped short of calling it settled because this configuration exited rather than aborting, needing a panel directory its write fence did not include, which was a coordinator scoping error and is now its own node</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260920T160614302471-cca-reproduce-the-abort-under-the-sampler" data-who="reckon-ship" data-when="2026-09-20T16:35:37.023Z">
+    <div class="r-comment-body"><p>the abort reproduces at 54,147 mappings against the 65,530 cap with resident memory at 12.25 GB of 64 GB, and the shortfall is not the finding: one certificate program load adds 16,789 to 17,620 mappings measured five times, so a fourth load from that point cannot complete without crossing the cap by about five thousand, while a second run at a finer tick finished all four rows only by returning 16,178 mappings first. Nothing else approached a bound. The crossing is inferred rather than observed and the record says so with the arithmetic that justifies it.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-cca-the-step-is-the-lever-not-the-total" data-who="coordinator" data-when="2026-09-20T19:20:00Z">
     <div class="r-comment-body"><p>The measurement changes what the remedy choice is about, so the options above should be read against it. The binding quantity is not the total mapping count but the size of one program load, between 16,789 and 17,620 mappings. Against a cap of 65,530 that is room for three loads and no more, whatever else the process does. The certificate asks for four.</p><p>Two consequences for the options. Warming the cache is only a remedy if a cache hit loads a program with materially fewer mappings than a compile does, and nobody has measured that; the mappings come from the section allocator, so a hit may well cost nearly the same and the option would then be no remedy at all. Reducing the emitted program acts directly on the step and is the bucket-floor work already on the millisecond plan. There is also a third shape the original options missed, and it is the cheapest thing to try: the second run completed four loads because it returned sixteen thousand mappings before its fourth, so releasing a program between rows, or running each row in its own process, stays under the cap without changing the program at all. That is worth measuring before choosing, because it needs no new machinery.</p></div>

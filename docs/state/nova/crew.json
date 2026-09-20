@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T18:01:51",
+  "updated": "2026-09-20T18:02:47",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -214593,6 +214593,228 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260920T154144249870-dvfb-retire-the-last-private-importer",
+        "plan": "diiid-vertical-force-balance",
+        "section": "",
+        "node": "dvfb-retire-the-last-private-importer",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1232,
+                "cached_input_tokens": 784404,
+                "input_tokens": 785638,
+                "output_tokens": 1038,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 786676,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "benchmarks/diiid_solenoid_inclusion_ladder.py calls the public comparator instead of importing the private separatrix name at line 36 and using it at line 258, with its terminal readings unchanged and shown to be unchanged; the committed case in tests/imas/test_diiid_forward_gs_match.py that declares the remaining importers now declares none, so a re-introduction reddens rather than reappearing unnoticed; the comment at benchmarks/diiid_vacuum_from_description.py line 56 saying the match module no longer exports that name is deleted rather than updated, because the import it justified is already gone and a comment asserting a fact about another module is a fact that rots; both test modules collect and pass in one all_debug CPU allocation with JAX_PLATFORMS=cpu, TMPDIR=/tmp in the submit environment and in the payload, the shared root interpreter run directly and uv never invoked on the compute node; the gate reports added failures against the base revision and the declared negative control reddens",
+          "estimated_hours": null,
+          "goal": "retire the last private import of the match module separatrix comparator",
+          "id": "dvfb-retire-the-last-private-importer",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-20T15:41:47Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T154144249870-dvfb-retire-the-last-private-importer/manifest.md",
+          "negative_control": "negative_control: a driver module in benchmarks/ re-imports the private comparator: from benchmarks.diiid_forward_gs_match import _separatrix",
+          "plan": "diiid-vertical-force-balance",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/diiid_solenoid_inclusion_ladder.py",
+            "benchmarks/diiid_vacuum_from_description.py",
+            "tests/imas/test_diiid_forward_gs_match.py",
+            "docs/evidence/archive/diiid-vertical-force-balance-landed.html",
+            "docs/plans/diiid-vertical-force-balance.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-dvfb-last-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-20T15:41:58Z",
+        "completed_at": "2026-09-20T15:55:39.583Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 812,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 821,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "7a869bc1ace7ffb616beada805a8dd8eeb59731f",
+        "commits": [
+          "b5c7249320c415e3ed65a910c0abceab1c45366a",
+          "a90e70e99418cd51ed3d3b9617b6deca601139fb"
+        ],
+        "changed_lines": {
+          "added": 129,
+          "removed": 21,
+          "files": 5
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G bash -lc \"export TMPDIR=/tmp JAX_PLATFORMS=cpu; /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/imas/test_diiid_forward_gs_match.py tests/imas/test_diiid_forward_gs_match_helpers.py\"",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/dvfb-retire-the-last-private-importer/negative-control-red.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T154144249870-dvfb-retire-the-last-private-importer/manifest.md",
+        "scope_changed": false,
+        "session_id": "bf6d99cc-5ed1-4de1-b05a-ac62f97a053e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6609021,
+            "input_tokens_cumulative": 6609021,
+            "output_tokens": 34771,
+            "output_tokens_cumulative": 34771,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-20T15:55:39.583Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 6609021,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 818.02,
+          "generated_tokens": 34771,
+          "generation_seconds": 501.861,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.1,
+          "machine_seconds": 316.159,
+          "peak_input_tokens": 149137,
+          "tokens_per_second": 69.28,
+          "wall_tokens_per_second": 42.51
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/dvfb-retire-the-last-private-importer",
+          "session_id": "bf6d99cc-5ed1-4de1-b05a-ac62f97a053e",
+          "session_source": "stream",
+          "retained_at": "2026-09-20T15:55:39.583Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 1.0,
+        "impl_move": {
+          "plan": "diiid-vertical-force-balance",
+          "at_dispatch": 1.0,
+          "at_complete": 1.0,
+          "verdict": "waived",
+          "reason": "the node closes an open followup on a plan already at its landed fraction rather than advancing a section"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/imas/test_diiid_forward_gs_match.py"
+          ],
+          "declaration": "negative_control: a driver module in benchmarks/ re-imports the private comparator: from benchmarks.diiid_forward_gs_match import _separatrix",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/dvfb-retire-the-last-private-importer/negative-control-red.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/dvfb-retire-the-last-private-importer/negative-control-red.log"
+        },
+        "tool_steps": 64.0,
+        "orientation_input_tokens": 1740451.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -215031,6 +215253,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2958
+    "_version": 2959
   }
 }

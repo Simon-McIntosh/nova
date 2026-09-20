@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T17:56:08",
+  "updated": "2026-09-20T17:57:02",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -214361,6 +214361,229 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260920T153922912568-msc-persist-the-baseline-state-array",
+        "plan": "millisecond-converged-solve",
+        "section": "",
+        "node": "msc-persist-the-baseline-state-array",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1583,
+                "cached_input_tokens": 781372,
+                "input_tokens": 782957,
+                "output_tokens": 998,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 783955,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "benchmarks/solve_program_size_gate.py persists each row terminal state array beside its digest and reports maximum_absolute_state_difference for every row it compares, so a last-bit reordering and a change in the solution are distinguishable; the baseline arm can be taken from a base checkout rather than a recorded digest and the receipt names which of the two it used per row; a committed case asserts that a row compared against an array reports a finite maximum difference and that a row compared against a digest reports the difference as unmeasured with its reason rather than as zero; the focused suite reports zero added failures against the base revision on one all_debug CPU allocation with JAX_PLATFORMS=cpu, TMPDIR=/tmp in the submit environment and in the payload, the shared root interpreter run directly and uv never invoked on the compute node; no certificate rows are re-solved in this node, because the driver aborts in compilation and that is measured elsewhere; the declared negative control reddens",
+          "estimated_hours": null,
+          "goal": "make the certificate carry the baseline state array so the size of a cross-revision difference can be read, not only its existence",
+          "id": "msc-persist-the-baseline-state-array",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-20T15:39:23Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T153922912568-msc-persist-the-baseline-state-array/manifest.md",
+          "negative_control": "DECLARED NEGATIVE CONTROL: benchmarks/solve_program_size_gate.py certificate_state_difference returns 0.0 as maximum_absolute_state_difference where the baseline arm carries only a digest, so a digest-only comparison reads as a bit-identical pair",
+          "plan": "millisecond-converged-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/solve_program_size_gate.py",
+            "tests/test_certificate_baseline_revision.py",
+            "docs/evidence/archive/millisecond-converged-solve-landed.html",
+            "docs/plans/millisecond-converged-solve.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-msc-persist-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-20T15:39:37Z",
+        "completed_at": "2026-09-20T15:50:23.778Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 639,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 646,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "7a869bc1ace7ffb616beada805a8dd8eeb59731f",
+        "commits": [
+          "87b3c929e87d4e46478e8a394140f1307224f937",
+          "33c0e4d3db46287c7712a3debf8224f53ef584d0"
+        ],
+        "changed_lines": {
+          "added": 472,
+          "removed": 15,
+          "files": 4
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "gate_check": {
+          "command": "JAX_PLATFORMS=cpu PYTHONPATH=$PWD /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_certificate_baseline_revision.py tests/test_solve_program_size.py tests/test_solve_program_size_gate.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T153922912568-msc-persist-the-baseline-state-array/logs/negative_control.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "the certificate persists each row terminal state array beside its digest and reports the maximum absolute difference per row, naming which arm it read; a digest-only baseline reports the difference as unmeasured with its reason rather than as zero, which is what made a last-bit reordering and a change in the solution indistinguishable. Forty-three passed at head against thirty-six at base, seven added, none failing.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T153922912568-msc-persist-the-baseline-state-array/manifest.md",
+        "scope_changed": false,
+        "session_id": "9800a894-a93f-4d40-8977-acdc19111bea",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 10124038,
+            "input_tokens_cumulative": 10124038,
+            "output_tokens": 41127,
+            "output_tokens_cumulative": 41127,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-20T15:50:23.778Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 10124038,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 643.552,
+          "generated_tokens": 41127,
+          "generation_seconds": 578.559,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 32.9,
+          "machine_seconds": 64.993,
+          "peak_input_tokens": 158053,
+          "tokens_per_second": 71.09,
+          "wall_tokens_per_second": 63.91
+        },
+        "follow_on_paths": [
+          "program-size/compile"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-persist-the-baseline-state-array",
+          "session_id": "9800a894-a93f-4d40-8977-acdc19111bea",
+          "session_source": "stream",
+          "retained_at": "2026-09-20T15:50:23.778Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 1.0,
+        "impl_move": {
+          "plan": "millisecond-converged-solve",
+          "at_dispatch": 1.0,
+          "at_complete": 1.0,
+          "verdict": "waived",
+          "reason": "this plan reached full implementation earlier today; the node closes an open followup rather than advancing a section, and the two certificate rows it cannot reach belong to the compile-abort plan"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/test_certificate_baseline_revision.py"
+          ],
+          "declaration": "DECLARED NEGATIVE CONTROL: benchmarks/solve_program_size_gate.py certificate_state_difference returns 0.0 as maximum_absolute_state_difference where the baseline arm carries only a digest, so a digest-only comparison reads as a bit-identical pair",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T153922912568-msc-persist-the-baseline-state-array/logs/negative_control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T153922912568-msc-persist-the-baseline-state-array/logs/negative_control.log"
+        },
+        "tool_steps": 82.0,
+        "orientation_input_tokens": 2501228.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -214799,6 +215022,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2955
+    "_version": 2956
   }
 }

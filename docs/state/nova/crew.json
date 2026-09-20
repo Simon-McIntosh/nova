@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T17:57:02",
+  "updated": "2026-09-20T18:01:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5433,6 +5433,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-17"
+      },
+      {
+        "id": "s19c-nia-stalepin-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-20"
       },
       {
         "id": "s19c-nia-support-c",
@@ -215022,6 +215031,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2956
+    "_version": 2957
   }
 }

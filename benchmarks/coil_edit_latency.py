@@ -2023,6 +2023,20 @@ def _render_panel(data_path: Path, figure_path: Path) -> dict[str, Any]:
     }
 
 
+def _declared_path(path: Path) -> str:
+    """Return a repository-relative path, or the absolute one outside the root.
+
+    A run that keeps its figures in a scratch directory writes outside the
+    repository, and a receipt field must name where the file actually is rather
+    than fail to describe it.
+    """
+    resolved = Path(path)
+    try:
+        return str(resolved.relative_to(ROOT))
+    except ValueError:
+        return str(resolved)
+
+
 def _receipt_document(
     *,
     prepared: dict[str, Any],
@@ -2039,6 +2053,7 @@ def _receipt_document(
     elapsed_seconds: float,
     exit_marker: int | None,
     figure: Path,
+    raster_figure: Path | None = None,
 ) -> dict[str, Any]:
     """Assemble the wire receipt over the edits recorded so far.
 
@@ -2145,7 +2160,7 @@ def _receipt_document(
             "sha256": _sha256(ROOT / "nova/equilibrium/reduced_newton.py"),
         },
         "driver": {
-            "path": str(Path(__file__).relative_to(ROOT)),
+            "path": _declared_path(Path(__file__)),
             "sha256": _sha256(Path(__file__)),
         },
         "scheduler": _scheduler(),
@@ -2267,8 +2282,10 @@ def _receipt_document(
             ),
         },
         "edits": rows,
-        "figure": str(figure.relative_to(ROOT)),
-        "raster_figure": str(DEFAULT_RASTER_FIGURE.relative_to(ROOT)),
+        "figure": _declared_path(figure),
+        "raster_figure": _declared_path(
+            DEFAULT_RASTER_FIGURE if raster_figure is None else raster_figure
+        ),
     }
 
 
@@ -2550,6 +2567,7 @@ def run(
                 elapsed_seconds=time.perf_counter() - total_started,
                 exit_marker=None,
                 figure=figure,
+                raster_figure=raster_figure,
             )
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text(
@@ -2599,6 +2617,7 @@ def run(
             elapsed_seconds=time.perf_counter() - total_started,
             exit_marker=None,
             figure=figure,
+            raster_figure=raster_figure,
         )
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(

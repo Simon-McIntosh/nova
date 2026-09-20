@@ -983,6 +983,72 @@ Gate on the login node: the new test module plus <code>tests/test_bank_drift_pai
   under <code>docs</code> and removes it afterwards, because the driver receipts a panel against the
   served docs mount and refuses a figure outside it.</p>
 </section>
+<section id="the-panel-pin-separates-a-moved-panel-from-a-moved-container">
+  <h2>The panel pin now separates a moved panel from a moved container (2026-09-20)</h2>
+  <p>Node <code>nia-pin-the-panel-rather-than-its-container</code>, answering the third observation
+  above. Renderer <code>benchmarks/solovev_certificate.py</code> stage <code>_render_persisted_row</code>;
+  pin <code>docs/figures/gs-absolute-accuracy/figure-panel-pin.json</code>; guard
+  <code>tests/test_figure_panel_pin.py</code>.</p>
+  <figure><img src="/nova/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png" alt="The diverted single-null production-route 300-cell certificate panel: analytic and solved poloidal flux as unfilled line contours on one shared level array, both null sets drawn in their own styles, the vessel drawn"><figcaption>The pinned panel. A re-render at this revision reproduces it byte-for-byte, so on the bitmap the file digest already isolates a real move; the vector file is the one whose container moves.</figcaption></figure>
+  <p><strong>Render twice from one revision.</strong> The persisted part
+  <code>production-route-parts/diverted-single-null-production-route-cells-300.json</code> was rendered
+  twice through the driver's own render stage with the root redirected to a scratch tree. The bitmap is
+  byte-reproducible: <code>48093d505dd61c490446f1d5f27c37507413e82884667b5cbc8512011491172e</code>
+  both times, and the committed file carries that digest. The vector file is not: the two renders wrote
+  <code>5b3a57d94566ab50…</code> and <code>50a9d6a6c7152f54…</code>. Decoded, the two renders are
+  identical — the PNG pixel buffers are equal with maximum difference 0.</p>
+  <table>
+    <caption>One revision, three vectors: the committed artifact and two fresh renders</caption>
+    <thead><tr><th>source</th><th>bitmap file sha256</th><th>bitmap content sha256</th><th>vector file sha256</th><th>vector content sha256</th></tr></thead>
+    <tbody>
+      <tr><td>committed (pin taken at <code>edb02142f</code>)</td><td><code>48093d505dd61c49…</code></td><td><code>375613cfb2406c7e…</code></td><td><code>a0f5c9dee6e15128…</code></td><td><code>cc7f1f370f4fce46…</code></td></tr>
+      <tr><td>render 1</td><td><code>48093d505dd61c49…</code></td><td><code>375613cfb2406c7e…</code></td><td><code>5b3a57d94566ab50…</code></td><td><code>cc7f1f370f4fce46…</code></td></tr>
+      <tr><td>render 2</td><td><code>48093d505dd61c49…</code></td><td><code>375613cfb2406c7e…</code></td><td><code>50a9d6a6c7152f54…</code></td><td><code>cc7f1f370f4fce46…</code></td></tr>
+    </tbody>
+  </table>
+  <p><strong>Which fields move.</strong> Three, all container-only. The <code>&lt;dc:date&gt;</code>
+  element reads <code>2026-09-19T16:20:34.378676</code> in the committed file and
+  <code>2026-09-20T17:46:58.557177</code> then <code>2026-09-20T17:46:58.888561</code> in the two
+  renders, so it advances on every write. The <code>Matplotlib v…</code> token is a library version,
+  the shipped panel naming <code>v3.11.1</code>. And every <code>clip-path</code> reference is a
+  generated element id — <code>p8c9390ab6e</code> committed, <code>pa7365b360d</code> and
+  <code>peeefd185d8</code> in the renders — so 175 of the file's lines differ between two renders of
+  identical pixels. Those are the three fields a content digest normalises: date, version token, and
+  generated ids renumbered in first-appearance order.</p>
+  <p><strong>Render at the revision the pin was taken at.</strong> The last commit to touch the pinned
+  files is <code>edb02142f</code>, and the renderer has not changed since — <code>git log
+  edb02142f..HEAD -- benchmarks/solovev_certificate.py</code> is empty — so rendering at HEAD is
+  rendering at the pin's revision. It reproduces the committed bitmap exactly, <strong>both files
+  byte-identical on the bitmap and both content digests equal on the vector</strong>. The pin was
+  therefore never stale; it was unsatisfiable for the wrong reason, and only on the vector file.</p>
+  <p><strong>What the pin becomes.</strong> The panels are stable and only the container moves, so the
+  bitmaps are pinned as bytes and content alike, and the vector is pinned by content. The guard is
+  controlled both ways: an unchanged re-render keeps the pin, and a five-percent rescale of the solved
+  flux breaks it on both files. The negative control is the declared mutation of the guard's own
+  normalisation — replacing the content digest with the raw file digest — which reddens three tests,
+  including the committed-artifact case, exactly as it should: it is the failure the old pin would
+  have produced on a faithful re-render.</p>
+  <p><strong>Should a measurement driver write into the served figure tree? No.</strong> This is the
+  mechanism the followup names: <code>_render_persisted_row</code> resolves its output under
+  <code>ROOT/docs</code>, so the render stage that produces a row's receipt writes the published
+  artifact, and the receipt it then computes describes the file it just overwrote. A measurement run
+  therefore mutates the thing it measures, and a node that then "restores the committed bytes so the
+  pin stays green" cannot be distinguished from one hiding a real move. The render stage should write
+  to a scratch root and publish in an explicit separate step; until the driver changes, a measuring
+  caller must redirect <code>ROOT</code>, as the guard here and the frozen-partition node's guard
+  module both do.</p>
+  <p><strong>Gate.</strong> One <code>all_debug</code> CPU allocation, <code>TMPDIR=/tmp</code> in the
+  submit environment and in the payload, <code>JAX_PLATFORMS=cpu</code>, the shared root environment
+  interpreter run directly with the worktree on <code>PYTHONPATH</code> and <code>uv</code> never
+  invoked on the compute node: the new guard plus the existing certificate render guards,
+  <strong>9 passed in 10.52 s, EXIT=0</strong>. Added failures against the base revision: none — the
+  existing render module is unmodified from base and passes unchanged. Logs:
+  <code>gate_all_debug.log</code> and <code>negative_control.log</code> (first line names the
+declared mutation) under the reports fence
+  <code>~/.config/reckon/crew/reports/nova/s19-local/nia-pin-the-panel-rather-than-its-container/</code>,
+  with the probe driver <code>figure_panel_pin_probe.py</code> beside them.
+  Implementation at commit <code>436b814b9</code>.</p>
+</section>
 </main>
 </body>
 </html>

@@ -336,4 +336,65 @@ assertion in either file tests the artifact for absence.</p>
     (<code>polarity-probe-base.log</code>, <code>gate-head.log</code>, <code>gate-base-falling-case.log</code>,
     <code>guard-probe.log</code>).</p>
   </section>
+
+  <section id="drivers-call-the-public-comparators">
+    <h2>The two DIII-D drivers call the public comparators, and the readings do not move</h2>
+    <p><strong>Base: <code>6c122a0a</code></strong>, this node's own worktree. The
+    <code>separatrix-import-restored</code> section above restored <code>_separatrix</code> and
+    <code>contour_separation</code> to <code>benchmarks/diiid_forward_gs_match.py</code> so the drivers could keep
+    importing them; this node removes the imports and calls the public surface instead. The two drivers named by the
+    followup, <code>benchmarks/diiid_diverted_solve_overlay.py</code> and
+    <code>benchmarks/diiid_circuit_driven_forward_validation.py</code>, now build their closed boundary from
+    <code>nova.equilibrium.separatrix_branches.assemble_separatrix_branches</code>, and the circuit driver also calls
+    <code>nova.equilibrium.boundary_comparison.compare_closed_boundaries</code>.</p>
+    <p><strong>How many drivers, named.</strong> The followup counts three and names two. Measured by parsing every
+    <code>benchmarks/*.py</code> with <code>ast</code> and intersecting its imports of
+    <code>benchmarks.diiid_forward_gs_match</code> with the comparator names, three files import a comparator at base,
+    and the unnamed third is <code>benchmarks/diiid_solenoid_inclusion_ladder.py</code>:</p>
+    <table>
+      <caption>Drivers importing a match-module comparator (<code>_separatrix</code>, <code>contour_separation</code>)</caption>
+      <thead><tr><th scope="col">Driver</th><th scope="col">At base <code>6c122a0a</code></th><th scope="col">At this head</th></tr></thead>
+      <tbody>
+        <tr><th scope="row"><code>diiid_circuit_driven_forward_validation.py</code></th><td><code>_separatrix</code>, <code>contour_separation</code></td><td>none</td></tr>
+        <tr><th scope="row"><code>diiid_diverted_solve_overlay.py</code></th><td><code>_separatrix</code></td><td>none</td></tr>
+        <tr><th scope="row"><code>diiid_solenoid_inclusion_ladder.py</code></th><td><code>_separatrix</code></td><td><code>_separatrix</code> — outside this node's write scope</td></tr>
+      </tbody>
+    </table>
+    <p><code>contour_separation</code> has no importer left. The ladder keeps its import and is the only remaining
+    comparator importer, so the count is stated rather than rounded: three at base, one at this head, and the one is
+    owed to a node with that path in its fence.</p>
+    <p><strong>The readings do not move, and that is measured, not asserted.</strong> A solved flux field is extremal at
+    its magnetic axis, so the axis-enclosing branch is fixed by the sign of the boundary-minus-axis span, and the two
+    local constructions reproduce the replaced calls step for step; the committed case
+    <code>test_driver_boundary_readings_reproduce_the_match_module_on_a_synthetic_field</code> compares them on
+    <code>psi = &plusmn;((R-1.6)&sup2;+Z&sup2;)</code> over R in [0.8, 2.4], Z in [-0.8, 0.8], 65 by 65, at both
+    polarities: <code>np.testing.assert_array_equal</code> on the boundary vertices, and exact equality on the
+    separation pair. Equality is exact because one ulp of movement is a changed terminal reading. The circuit driver's
+    banked millimetre series is kept, and it is kept by arithmetic as well — its
+    <code>symmetric_vertex_separation</code> is the removed <code>contour_separation</code> body — while the comparator's
+    arc-length resampled metre distances are recorded beside it under a new <code>boundary_comparison</code> row rather
+    than replacing it, so the series stays comparable across the cohort. The comparator fails closed, so a
+    non-converged frame stores a <code>failures</code> tuple instead of a distance.</p>
+    <table>
+      <caption>Gate on all_debug CPU, one job, shared root interpreter run directly, <code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code> in the submit environment and in the payload, <code>uv</code> never invoked on the compute node (host <code>98dci4-clu-3141</code>, python 3.14.2, jax 0.11.0 backend cpu)</caption>
+      <thead><tr><th scope="col">Measurement</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Base revision, same three modules</th><td>19 passed, 0 failed, exit 0 — the three files at <code>6c122a0a</code> copied into a scratch tree with the repository's data tree linked, config and conftest taken from the worktree</td></tr>
+        <tr><th scope="row">This head, same three modules</th><td>22 passed, 0 failed, exit 0 (19 + the 3 cases this node adds)</td></tr>
+        <tr><th scope="row">Added failures against base</th><td>0</td></tr>
+        <tr><th scope="row">Negative control</th><td><code>_separatrix</code> re-added to the overlay driver's import block in a scratch copy: <code>1 failed, 11 deselected</code>, exit 1, <code>AssertionError</code> naming the re-introduced import</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The first baseline was an instrument fault, and it looked like a regression.</strong> The base revision's
+    first run reported <code>4 failed, 15 passed</code>, all four <code>FileNotFoundError</code> for
+    <code>&lt;scratch&gt;/docs/figures/coil-circuit-discovery/circuit-driven-forward-validation/&hellip;.json</code>:
+    those cases read banked receipts through a path relative to the module root, so running them from a scratch tree
+    without a reachable data tree fails them for the harness's reason, not the base revision's. Linking the worktree's
+    <code>docs</code> into the scratch tree moved them to passed. The four ids are recorded here because a
+    <code>4 failed</code> baseline is exactly the reading that would hide a real added failure.</p>
+    <p><strong>Logs:</strong> <code>~/.config/reckon/crew/runs/r-20260920T000512017766-dvfb-drivers-call-the-public-comparators/logs/</code>
+    (<code>header.log</code>, <code>baseline.log</code>, <code>after.log</code>, <code>negative_control.log</code>,
+    <code>gate_status.log</code>, <code>gate.sh</code>, <code>baseline2.sh</code>). Commit
+    <code>0705871ee</code>.</p>
+  </section>
 </main>

@@ -5,6 +5,7 @@
   ],
   "limits": {
     "300_cell_executable_bytes": 450000000,
+    "300_cell_executable_target_bytes": 50000000,
     "300_cell_solve_instructions": 210000
   },
   "passed": true,

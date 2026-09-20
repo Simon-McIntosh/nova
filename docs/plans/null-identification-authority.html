@@ -30,7 +30,7 @@
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="226">
+<meta name="plan-version" content="227">
 </head>
 <body>
 <main class="plan-doc">
@@ -906,6 +906,9 @@ for the lead before merge.</p>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260920T161342331604-nia-make-the-drift-probe-record-match-its-receipts" data-who="reckon-ship" data-when="2026-09-20T16:40:28.547Z">
     <div class="r-comment-body"><p>the drift-probe record now grounds each claim in the capture that carries it: per-archive panel wall with the bit-identity sidecar, repository-relative receipt roots, and a compile-count-against-log-position figure; the probe test file is unchanged and green at base and head</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260920T181242228308-nia-can-the-level-be-valued-without-the-candidate" data-who="reckon-ship" data-when="2026-09-20T18:44:23.872Z">
+    <div class="r-comment-body"><p>the level and the candidate come from one selection record and the published level is gated on the same bit the candidate reports; separating them is one where on the published record and makes the grid case pass, but the MAST pin asserts the level is absent (test_limiter_spline_minimum.py:416 isposinf), not merely unselected, so the choice reduces to recover-the-level-from-the-reachable-wall versus withdraw-the-wall-operand; four poloidal panels drawn</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

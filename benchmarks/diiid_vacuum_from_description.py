@@ -51,11 +51,6 @@ PERSISTED_ENTRY = Path(
 PERSISTED_DD_VERSION = "4.1.1"
 ROUNDOFF_RELATIVE_BOUND = 1e-12
 
-# Reproduced from benchmarks.diiid_solenoid_inclusion_ladder rather than
-# imported: that module's own import chain currently raises ImportError
-# (diiid_forward_gs_match no longer exports ``_separatrix``), a pre-existing
-# defect outside this driver's write scope.  These values are copied
-# unchanged from the ladder's all-conductors rung.
 ECOILA_INDEX = POLOIDAL_CONDUCTORS.index("ECOILA")
 MISSING_CONDUCTOR_ORDER = ("ECOILB", "E567UP", "E567DN", "E89UP", "E89DN")
 CURRENT_SCALE = {

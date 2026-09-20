@@ -1,0 +1,24 @@
+submit_env TMPDIR=/tmp JAX_PLATFORMS=cpu cells=110,300,500 revision=d90a522fe8ac53d4a26477bf920aeb8ac367be47
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-production-clip-takes-the-typed-saddle/benchmarks/xpoint_cell_wedge_oracle.py", line 1020, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-production-clip-takes-the-typed-saddle/benchmarks/xpoint_cell_wedge_oracle.py", line 1015, in main
+    run(args.output, tuple(args.cells), diagnose_only=args.diagnose_only)
+    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-production-clip-takes-the-typed-saddle/benchmarks/xpoint_cell_wedge_oracle.py", line 910, in run
+    row = _measure_row(
+        cells,
+    ...<2 lines>...
+        diagnose_only=diagnose_only,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-production-clip-takes-the-typed-saddle/benchmarks/xpoint_cell_wedge_oracle.py", line 803, in _measure_row
+    raise AssertionError(
+    ...<2 lines>...
+    )
+AssertionError: core current relative error 1.388e-01 exceeds 1.0e-13
+ORACLE_EXIT=1
+ORACLE-GATE=FAIL tested=None max_core_rel=None limit=1e-13 private_zero=None sol_zero=None
+VERDICT_EXIT=0

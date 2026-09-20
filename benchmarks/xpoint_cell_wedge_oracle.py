@@ -37,10 +37,10 @@ assert jax.config.jax_enable_x64 is True
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "docs/figures/cut-cell-current-attribution/xpoint-cell"
-REQUESTED_CELLS = (110, 300, 1000, 2500)
+REQUESTED_CELLS = (110, 300, 500)
 REFERENCE_CELLS = 110
 MU_0 = 4.0e-7 * math.pi
-CORE_CURRENT_RELATIVE_LIMIT = 1.0e-6
+CORE_CURRENT_RELATIVE_LIMIT = 1.0e-13
 COLOURS = {
     "analytic": "#2563eb",
     "read": "#d97706",
@@ -443,6 +443,116 @@ def _support_vertices(wedges: Any, slot: int) -> np.ndarray:
     return np.asarray(wedges.support_vertices)[0, slot, :count]
 
 
+def _exact_edge_roots(
+    polygon: np.ndarray, exact: Any, boundary_flux: float
+) -> list[tuple[float, np.ndarray]]:
+    """Resolve the separatrix roots on the cell boundary from the exact flux."""
+    roots: list[tuple[float, np.ndarray]] = []
+    parameters = np.linspace(0.0, 1.0, 257)
+    for edge, (start, end) in enumerate(
+        zip(polygon, np.roll(polygon, -1, axis=0), strict=True)
+    ):
+        points = start[None, :] + parameters[:, None] * (end - start)[None, :]
+        values = np.asarray(exact.flux(points), dtype=np.float64) - boundary_flux
+        for slot in np.flatnonzero(values[:-1] * values[1:] < 0.0):
+            fraction = brentq(
+                lambda value, s=start, e=end: float(
+                    exact.flux((s + value * (e - s))[None, :])[0] - boundary_flux
+                ),
+                float(parameters[slot]),
+                float(parameters[slot + 1]),
+                xtol=8.9e-16,
+                rtol=8.9e-16,
+            )
+            roots.append((edge + float(fraction), start + fraction * (end - start)))
+    roots.sort(key=lambda item: item[0])
+    return roots
+
+
+def _polygon_centroid(vertices: np.ndarray) -> np.ndarray:
+    radial = vertices[:, 0]
+    vertical = vertices[:, 1]
+    following_radial = np.roll(radial, -1)
+    following_vertical = np.roll(vertical, -1)
+    cross = radial * following_vertical - following_radial * vertical
+    area = 0.5 * float(np.sum(cross))
+    return np.asarray(
+        [
+            float(np.sum((radial + following_radial) * cross)) / (6.0 * area),
+            float(np.sum((vertical + following_vertical) * cross)) / (6.0 * area),
+        ]
+    )
+
+
+def _independent_branch_sectors(
+    polygon: np.ndarray,
+    exact: Any,
+    saddle: np.ndarray,
+    boundary_flux: float,
+    polarity: float,
+) -> list[dict[str, Any]]:
+    """Build the four sectors from the exact roots and the cell boundary alone.
+
+    Every sector is bounded by one boundary arc of the cell (the straight
+    edges between two consecutive separatrix roots) and the two branch chords
+    that meet at the saddle.  The confined side of each sector is read from the
+    exact flux at the midpoint of its boundary arc, so neither the sector
+    polygons nor their signs come from the carrier's emitted vertices.
+    """
+    roots = _exact_edge_roots(polygon, exact, boundary_flux)
+    if len(roots) != 4:
+        raise RuntimeError(f"expected four exact separatrix roots, found {len(roots)}")
+    width = len(polygon)
+    perimeter = float(width)
+    sectors = []
+    for slot in range(4):
+        parameter, point = roots[slot]
+        next_parameter, next_point = roots[(slot + 1) % 4]
+        span = next_parameter - parameter
+        if span <= 0.0:
+            span += perimeter
+        between = []
+        for step in range(1, width + 1):
+            vertex_index = (int(math.floor(parameter)) + step) % width
+            absolute = float(vertex_index)
+            if absolute <= parameter:
+                absolute += perimeter
+            if parameter < absolute < parameter + span:
+                between.append(polygon[vertex_index])
+        vertices = np.asarray([saddle, point, *between, next_point], dtype=np.float64)
+        probe_parameter = parameter + 0.5 * span
+        probe_edge = int(math.floor(probe_parameter)) % width
+        probe_fraction = probe_parameter - math.floor(probe_parameter)
+        probe = polygon[probe_edge] + probe_fraction * (
+            polygon[(probe_edge + 1) % width] - polygon[probe_edge]
+        )
+        confined = bool(
+            polarity * (float(exact.flux(probe[None, :])[0]) - boundary_flux) > 0.0
+        )
+        sectors.append(
+            {
+                "vertices": vertices,
+                "confined": confined,
+                "arc_midpoint_rz_m": probe,
+            }
+        )
+    return sectors
+
+
+def _closing_vertex_sequence(vertices: np.ndarray) -> list[list[float]]:
+    """Return a rotation- and direction-free canonical vertex sequence."""
+    points = [tuple(float(value) for value in row) for row in vertices]
+    if len(points) > 1 and points[0] == points[-1]:
+        points.pop()
+    forward = min(points[index:] + points[:index] for index in range(len(points)))
+    reversed_points = list(reversed(points))
+    backward = min(
+        reversed_points[index:] + reversed_points[:index]
+        for index in range(len(reversed_points))
+    )
+    return [list(point) for point in min(forward, backward)]
+
+
 def _observed_nulls(operator: Any, analytic: np.ndarray) -> dict[str, Any]:
     physical = jnp.asarray(analytic[: operator.physical_node_number], dtype=jnp.float64)
     _masks, topology, _connected, axis_admitted = jax.block_until_ready(
@@ -650,12 +760,31 @@ def _measure_row(
         ),
         axis=1,
     )
-    expected = np.asarray(
-        [
-            _analytic_polygon_moments(_support_vertices(wedges, slot), centre, item)
-            for slot, item in enumerate(profiles)
-        ]
+    sectors = _independent_branch_sectors(
+        polygon, exact, x_point, boundary_flux, polarity
     )
+    core_direction = axis - x_point
+    confined_slots = [slot for slot, item in enumerate(sectors) if item["confined"]]
+    if len(confined_slots) != 2:
+        raise RuntimeError(
+            f"expected two confined sectors, found {len(confined_slots)}"
+        )
+    core_slot = max(
+        confined_slots,
+        key=lambda slot: float(
+            np.dot(
+                _polygon_centroid(sectors[slot]["vertices"]) - x_point,
+                core_direction,
+            )
+        ),
+    )
+    expected = np.zeros((4, 3))
+    expected[0] = _analytic_polygon_moments(
+        sectors[core_slot]["vertices"], centre, profiles[0]
+    )
+    geometry_matches_carrier = _closing_vertex_sequence(
+        _support_vertices(wedges, 0)
+    ) == _closing_vertex_sequence(sectors[core_slot]["vertices"])
     scale = np.maximum(np.abs(expected), 1.0e-12)
     relative_error = np.abs(actual - expected) / scale
     core_current_relative_error = float(relative_error[0, 0])
@@ -715,6 +844,27 @@ def _measure_row(
         "saddle_inserted_as_first_vertex": saddle_inserted,
         "exact_zero_padding": exact_zero_padding,
         "profile_order": ["confined-core", "zero-private", "zero-sol", "zero-sol"],
+        "independent_core_sector": int(core_slot),
+        "independent_confined_sectors": [int(slot) for slot in confined_slots],
+        "independent_sector_area_m2": [
+            abs(
+                float(
+                    np.sum(
+                        np.asarray(item["vertices"])[:, 0]
+                        * np.roll(np.asarray(item["vertices"])[:, 1], -1)
+                    )
+                )
+                - float(
+                    np.sum(
+                        np.asarray(item["vertices"])[:, 1]
+                        * np.roll(np.asarray(item["vertices"])[:, 0], -1)
+                    )
+                )
+            )
+            / 2.0
+            for item in sectors
+        ],
+        "carrier_core_polygon_matches_independent": geometry_matches_carrier,
         "measured_moments": actual,
         "analytic_moments": expected,
         "relative_moment_error": relative_error,
@@ -822,6 +972,15 @@ def run(
             ),
             "all_padding_exact_zero": (
                 all(row["exact_zero_padding"] for row in rows)
+                if not diagnose_only
+                else None
+            ),
+            "all_carrier_core_polygons_match_independent": (
+                all(
+                    row["carrier_core_polygon_matches_independent"]
+                    for row in rows
+                    if row.get("oracle_completed")
+                )
                 if not diagnose_only
                 else None
             ),

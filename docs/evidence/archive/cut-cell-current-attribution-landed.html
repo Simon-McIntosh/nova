@@ -12,8 +12,8 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Cut-cell current attribution — cumulative execution evidence">
 <meta name="plan-summary" content="Landing record of the cut-cell-current-attribution plan: the §1 root cause (whole-cell booking since 2026-08-27), the Gate A/B/C oracle gates, the reposed fixture exterior, the exact-clip quadrature memory findings, and the clipped-support quadrature per-module test-delta gate that closes §2 re-verification">
-<meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-09-20">
+<meta name="plan-version" content="3">
 </head>
 <body>
 <main class="plan-doc">
@@ -1503,6 +1503,90 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
     <img src="/nova/figures/cut-cell-current-attribution/rung-a/weak-booked-minus-analytic.png" alt="weak-booked-minus-analytic.png">
     <figcaption>weak-booked-minus-analytic. Recovered from worktree <code>cca-rung-a2-frozen-support</code> at <code>1046dc4f</code>.</figcaption>
   </figure>
+</section>
+
+<section id="xpoint-saddle-wired-into-the-production-clip">
+  <h2 id="xpoint-saddle-wired-into-the-production-clip-h">The typed census saddle reaches the production spline-chain clip, and the independent measure that was to confirm it is wrong</h2>
+
+  <p><strong>Landed 2026-09-20 in commit <code>d90a522fe</code> on base
+  <code>05aafeae5</code>.</strong> The production forward operator passed no saddle vertex
+  to the spline-chain clip, so the operator's own branch expansion was discarded and no
+  production solve split the X-point cell. The profile support now supplies the typed census
+  saddle as the clip's saddle vertex — <code>topology.x_point</code> — and a supplied saddle
+  that is not finite admits no expansion, so an absent census saddle refuses the cell and
+  packs an empty inclusion rather than NaN geometry. The refusal is what the second committed
+  case pins: with a non-finite supplied saddle the cell is refused, its inclusion empty and
+  its area and vertex count zero, while the branch arrays stay finite.</p>
+
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/xpoint-cell/carrier-vs-independent-cells-110.png" alt="carrier-vs-independent-cells-110.png">
+    <figcaption>The X-point cell at 110 requested cells. Left: the four regions the
+    production spline chain emits, the core wedge in red, the private-flux wedge in purple
+    and the two common scrape-off-layer wedges in green. Right: the four sectors the
+    rewritten oracle reconstructs from the exact separatrix edge roots and the cell boundary.
+    The reconstruction does not reproduce the carrier: its sectors wind clockwise, one of
+    them covers nearly the whole cell, and the sector it selects as core sits above the
+    saddle where the carrier's core sits beside it. Saddle and axis are drawn in the ink
+    default; the same record is committed as
+    <code>carrier-vs-independent-cells-110.json</code>.</figcaption>
+  </figure>
+
+  <p><strong>The gate is red, and it reddens on the instrument.</strong> One
+  <code>all_debug</code> allocation (8 cpus, 64G, <code>TMPDIR=/tmp</code> in the submit
+  environment and in the payload, <code>uv</code> never invoked on the compute node) ran 110,
+  300 and 500 cells in one job and stopped at the first row: core-side current relative error
+  <strong>1.388e-01</strong> against the 1e-13 limit, receipt at
+  <code>docs/figures/cut-cell-current-attribution/oracle/receipt.json</code>. The
+  comparison above shows why that is not evidence about the clip. The carrier's four wedge
+  areas are 5.72e-04, 4.19e-03, 1.76e-02 and 5.36e-04 m2; the reconstruction's four sectors
+  are 2.05e-02, 5.09e-04, 6.38e-05 and 1.91e-03 m2, all clockwise, one of them spanning more
+  than the cell interior admits. The two sectors it labels confined are not the carrier's
+  core and private-flux wedges, and its core selection by centroid projection along the axis
+  direction picks the quad above the saddle while the carrier's core is the quad beside it.
+  The pairing of exact edge roots into regions is therefore wrong in the reconstruction, and
+  the next node owns that pairing.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Measure</th>
+        <th>Value</th>
+        <th>Source</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Focused gate, <code>tests/test_xpoint_cell_wedge_clip.py</code></td>
+        <td>12 passed, 0 failed, 0 added failures against 10 pre-existing tests</td>
+        <td>root interpreter, <code>JAX_PLATFORMS=cpu</code></td>
+      </tr>
+      <tr>
+        <td>Declared negative control (delete the saddle-vertex keyword)</td>
+        <td>pinning test reddens: "the clip is called with no saddle vertex"</td>
+        <td>reverted immediately; the committed state carries the keyword</td>
+      </tr>
+      <tr>
+        <td>Independent oracle, 110 cells</td>
+        <td>core-side current relative error 1.388e-01 (limit 1e-13)</td>
+        <td>one all_debug job, three resolutions in one allocation</td>
+      </tr>
+      <tr>
+        <td>Carrier core wedge against the reconstruction's selected core</td>
+        <td>polygon sets differ; areas 5.72e-04 against 5.09e-04 m2</td>
+        <td><code>carrier-vs-independent-cells-110.json</code></td>
+      </tr>
+      <tr>
+        <td>Region-owned moments consumed by the partition and the null read</td>
+        <td>not done: the moment support masks still promote every cut cell to the plasma domain</td>
+        <td>deferred to the next node</td>
+      </tr>
+      <tr>
+        <td>Certificate re-solve over the diverted rows</td>
+        <td>deferred: the GPU quality of service caps this account at four cards and the model serve holds all four</td>
+        <td>no H200 job can schedule</td>
+      </tr>
+    </tbody>
+  </table>
 </section>
 </main>
 </body>

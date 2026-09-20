@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T18:06:11",
+  "updated": "2026-09-20T18:07:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -214824,6 +214824,226 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260920T153324775149-cca-sample-the-mapping-count-through-the-abort",
+        "plan": "cpu-compile-abort",
+        "section": "\u00a71",
+        "node": "cca-sample-the-mapping-count-through-the-abort",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 542,
+                "cached_input_tokens": 769324,
+                "input_tokens": 769868,
+                "output_tokens": 1531,
+                "reasoning_output_tokens": 402,
+                "total_tokens": 771399,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "one all_debug CPU allocation, --cpus-per-task=8 --mem=64G --time=00:59:00, TMPDIR=/tmp exported in the submit environment and in the payload, JAX_PLATFORMS=cpu, the shared root interpreter run directly and uv never invoked on the compute node, runs one driver that reproduces the abort under a sampler that records the process mapping count from its own /proc entry beside its resident memory at a fixed interval until the process dies; the manifest names which driver was chosen from the four that abort and why it is the smallest, quoting its job id from the earlier log; the record states the peak mapping count against the 65530 limit, the count in the last sample before the abort, and the resident memory at those same instants, and gives a one-sentence verdict that the limit was or was not reached; if it was not reached the record names what else the sampler saw move and retires the mapping hypothesis in writing rather than leaving it open; the sampler writes its samples as they are taken so an abort loses the last sample rather than the series",
+          "estimated_hours": null,
+          "goal": "measure what is exhausted when a CPU compile aborts in section memory, and settle the mapping-limit hypothesis either way",
+          "id": "cca-sample-the-mapping-count-through-the-abort",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-20T15:33:25Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T153324775149-cca-sample-the-mapping-count-through-the-abort/manifest.md",
+          "negative_control": "none: this node measures a failing run and adds no test; its own correctness is that the abort reproduces under the sampler, which the log shows or does not",
+          "plan": "cpu-compile-abort",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/compile_abort_probe.py",
+            "docs/evidence/archive/cpu-compile-abort-landed.html",
+            "docs/plans/cpu-compile-abort.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-cca-maps-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-20T15:33:39Z",
+        "completed_at": "2026-09-20T16:03:16.814Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1768,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1777,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "b031249b5cc50da279de87acbd6ba9a2de9082c3",
+        "commits": [
+          "17bd21d586c806dcfbe662768325d4d771c2f07a",
+          "018879d78f785c8fee422befdc15972a91c81098"
+        ],
+        "changed_lines": {
+          "added": 346,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m benchmarks.compile_abort_probe -- /bin/bash -c \"for i in 1 2 3 4 5 6; do sleep 0.4; done\"",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T153324775149-cca-sample-the-mapping-count-through-the-abort/smoke-maps.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T153324775149-cca-sample-the-mapping-count-through-the-abort/manifest.md",
+        "scope_changed": false,
+        "session_id": "66f2e46e-b50e-48fd-b486-0d9e9f406979",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6755037,
+            "input_tokens_cumulative": 6755037,
+            "output_tokens": 41149,
+            "output_tokens_cumulative": 41149,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-20T16:03:16.814Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 6755037,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1774.375,
+          "generated_tokens": 41149,
+          "generation_seconds": 506.605,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 33.9,
+          "machine_seconds": 1267.77,
+          "peak_input_tokens": 162698,
+          "tokens_per_second": 81.23,
+          "wall_tokens_per_second": 23.19
+        },
+        "follow_on_paths": [
+          "docs/",
+          "docs/figures",
+          "benchmarks/solovev_certificate.py:4379",
+          "/proc/<pid>/maps",
+          "/proc/<pid>/status",
+          "/proc/<pid>/smaps_rollup"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-sample-the-mapping-count-through-the-abort",
+          "session_id": "66f2e46e-b50e-48fd-b486-0d9e9f406979",
+          "session_source": "stream",
+          "retained_at": "2026-09-20T16:03:16.814Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "cpu-compile-abort",
+          "at_dispatch": null,
+          "at_complete": 0.3,
+          "verdict": "exempt",
+          "reason": "no-impl-recorded-at-dispatch"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 60.0,
+        "orientation_input_tokens": 1989746.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -215262,6 +215482,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2960
+    "_version": 2961
   }
 }

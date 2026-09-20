@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-20">
 <meta name="plan-impl" content="0.3">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -176,6 +176,11 @@
       warm and a smaller emitted program, but it does make both remedies plausible and it rules
       out the allocation request as the lever.</p>
     </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260920T153324775149-cca-sample-the-mapping-count-through-the-abort" data-who="reckon-ship" data-when="2026-09-20T16:03:16.814Z">
+    <div class="r-comment-body"><p>the mapping count peaked at 65,271 against the kernel limit of 65,530 over 1,036 samples, while resident memory stayed at 17.4 GB and virtual size at 25.7 GB, so a process that cannot place a few hundred bytes at that point is out of mappings rather than out of memory; the worker stopped short of calling it settled because this configuration exited rather than aborting, needing a panel directory its write fence did not include, which was a coordinator scoping error and is now its own node</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

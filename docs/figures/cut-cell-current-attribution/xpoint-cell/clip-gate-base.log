@@ -1,0 +1,176 @@
+..................sF...s                                                 [100%]
+=================================== FAILURES ===================================
+__________________ test_forward_census_exact_diverted_oracle ___________________
+
+    def test_forward_census_exact_diverted_oracle():
+        """The certificate ladder resolves only nulls contained by its nodal rings."""
+        from benchmarks.solovev_certificate import AXIS_M, X_POINT_M, _case, _exact_state
+        from scripts.analytic_oracle_fixtures import measure as oracle_fixture
+    
+        carrier_case, source_case, exact = _case("diverted-jump-bearing")
+    
+        def read_exact(requested_cells):
+            machine = oracle_fixture.cached_machine(
+                carrier_case,
+                requested_cells,
+                wall_nodes=oracle_fixture.WALL_POINT_COUNT,
+            )
+            coordinates = np.vstack(
+                (machine.node, machine.wall_node, machine.sample_coordinates)
+            )
+            oracle_state = _exact_state("diverted-jump-bearing", exact, coordinates)
+            empty_operator = oracle_fixture.forward_operator(source_case, machine)
+            # The diverted source declares no closed zero-flux surface of its own:
+            # its field coefficient is negative, so the surface-node fallback of
+            # the separatrix sampler is non-finite and collapses to a single
+            # vertex. The exact reference is the object carrying the core boundary.
+            exact_physical = oracle_fixture.exact_current_moments(
+                source_case, empty_operator, oracle_state, analytic=exact
+            )
+            coefficients = empty_operator.coupling_current_moments(exact_physical)
+            exact_internal = oracle_fixture._internal_flux_image(
+                empty_operator, coefficients
+            )
+            operator = oracle_fixture.forward_operator(
+                source_case, machine, oracle_state - exact_internal
+            )
+            _masks, state = operator.read(jnp.asarray(oracle_state))
+            grid_flux = jnp.asarray(oracle_state[: len(machine.node)])
+            census = operator._fixed_design_topology.grid.candidate_table_status(grid_flux)
+            return machine, operator, state, census
+    
+>       coarse_machine, coarse_operator, coarse_state, coarse_census = read_exact(-110)
+                                                                       ^^^^^^^^^^^^^^^^
+
+/tmp/cca-clip-gate/test_forward_census.py:393: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/tmp/cca-clip-gate/test_forward_census.py:378: in read_exact
+    exact_physical = oracle_fixture.exact_current_moments(
+scripts/analytic_oracle_fixtures/measure.py:1029: in exact_current_moments
+    support = _analytic_profile_support(
+scripts/analytic_oracle_fixtures/measure.py:1014: in _analytic_profile_support
+    return operator._profile_support(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ForwardFluxOperator(grid=FluxTarget(null=Null2D(maxsize=5, precision=<Precision.DOUBLE: 'float64'>)), wall=FluxTarget(...t64, weak_type=True), common_sol=None, private_flux=None, normalisation=<NormalisationPolicy.ABSOLUTE: 0>), polarity=1)
+masks = DomainMasks(label=Array([1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1,
+       1, 1, 1, 0, 0, 0, 0,...012, 0.93189008,
+       1.16505981, 1.15208848, 1.36625908, 1.02551842, 1.51306226,
+       1.45905415], dtype=float64))
+topology = namespace(axis_flux=Array(0.00570958, dtype=float64), boundary_flux=Array(0., dtype=float64), flux_span=Array(-0.00570958, dtype=float64))
+physical = Array([-1.36721755e-05, -5.24522788e-04,  1.08892670e-04, -4.16925820e-04,
+       -1.34639214e-03, -3.36317367e-04, -1...-03,
+       -2.19740664e-03, -2.29587624e-03, -2.38561962e-03, -2.46097285e-03,
+       -2.51663040e-03], dtype=float64)
+sample_psi_norm = Array([1.00790773, 0.9589586 , 1.0038012 , 1.08027868, 1.03075932,
+       0.99817834, 0.99048278, 0.98511891, 1.109730... 1.18254426, 1.40010895, 1.69119291, 1.80590981, 1.57103795,
+       1.29101112, 1.17474054, 1.34296065], dtype=float64)
+fixed_participation = None
+
+    def _profile_support(
+        self,
+        masks,
+        topology,
+        physical,
+        sample_psi_norm,
+        *,
+        fixed_participation=None,
+    ):
+        """Return the plasma-side support for the active clip mode.
+    
+        The committed chord clip reproduces the prior committed clip:
+        full atomic cells selected by the profile partition label alone.
+        The opt-in exact mode traces the curved boundary with every cut
+        cell participating, and its chord-cells variant replaces only the
+        two named cells' geometry with that chord result. A derivative check
+        may hold the discrete participation set fixed while revaluing every
+        continuous spline root on that branch.
+        """
+        if self.moment_geometry is None:
+            raise ValueError("moment geometry is required for current moments")
+        atomic_mesh = self.moment_geometry.atomic_mesh
+        chord_support = None
+        if _SUPPORT_CLIP_MODE in ("chord", "chord_cells"):
+            chord_support = atomic_mesh.traced_clip(
+                jnp.ones(len(atomic_mesh.node_coordinates), dtype=physical.dtype)
+            ).qualify(masks.profile_participation)
+            if _SUPPORT_CLIP_MODE == "chord":
+                return chord_support
+        shared_flux = self.shared_node_flux(physical)
+        inside_boundary = self.polarity * (shared_flux - topology.boundary_flux)
+        flux_coefficient = self.support_flux_coefficients(
+            masks.psi_norm, sample_psi_norm
+        )
+        inside_coefficient = -flux_coefficient
+        inside_coefficient = inside_coefficient.at[:, 0].add(1.0)
+        coordinate = jnp.asarray(self.grid.coordinate, dtype=masks.psi_norm.dtype)
+        surface_value = masks.psi_norm[None, :]
+        surface = fit_split_spline(
+            coordinate[None, :, 0],
+            coordinate[None, :, 1],
+            surface_value,
+            surface_value - 1.0,
+            order=6,
+            regularization=1.0e-14,
+        )
+    
+        curved_level = _ExactClipLevel(
+            surface,
+            inside_coefficient,
+            self._support_curve_centre,
+            self._support_curve_scale,
+        )
+    
+        cell_vertices = jnp.asarray(atomic_mesh.node_coordinates)[
+            jnp.asarray(atomic_mesh.cell_nodes)
+        ]
+        vertex_participation = self._vertex_level_participation(
+            atomic_mesh.cell_vertex_count,
+            curved_level(cell_vertices),
+        )
+        participation = (
+            masks.profile_participation | vertex_participation
+            if fixed_participation is None
+            else jnp.asarray(fixed_participation, dtype=bool)
+        )
+        traced_support = _traced_clip(
+            atomic_mesh.node_coordinates,
+            atomic_mesh.cell_nodes,
+            atomic_mesh.cell_vertex_count,
+            atomic_mesh.centroids,
+            atomic_mesh.support_capacity,
+            inside_boundary,
+>           saddle_vertex=topology.x_point,
+                          ^^^^^^^^^^^^^^^^
+            curve_evaluator=curved_level,
+            participating_cell=participation,
+            arc_tracer=_implicit_traced_level_arc,
+        )
+E       AttributeError: 'types.SimpleNamespace' object has no attribute 'x_point'
+
+nova/equilibrium/forward_operator.py:3091: AttributeError
+=============================== warnings summary ===============================
+test_forward_census.py::test_forward_census_exact_diverted_oracle
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-repair-the-independent-oracle-reconstruction/tests/test_solovev_recovery_gates.py:76: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.slow
+
+test_forward_census.py::test_forward_census_exact_diverted_oracle
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-repair-the-independent-oracle-reconstruction/tests/test_solovev_recovery_gates.py:93: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.slow
+
+test_forward_census.py::test_forward_census_exact_diverted_oracle
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-repair-the-independent-oracle-reconstruction/tests/test_solovev_recovery_gates.py:110: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.slow
+
+test_forward_census.py::test_forward_census_exact_diverted_oracle
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-repair-the-independent-oracle-reconstruction/tests/test_solovev_recovery_gates.py:138: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.slow
+
+test_forward_census.py::test_forward_census_exact_diverted_oracle
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-repair-the-independent-oracle-reconstruction/tests/test_solovev_recovery_gates.py:149: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.slow
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../../../../../../../../tmp/cca-clip-gate/test_forward_census.py::test_forward_census_exact_diverted_oracle
+1 failed, 21 passed, 2 skipped, 5 warnings in 84.34s (0:01:24)

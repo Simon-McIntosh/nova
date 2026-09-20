@@ -811,7 +811,8 @@ def _measure_row(
         np.all(sector_area > 0.0) or np.all(sector_area < 0.0)
     )
     sector_largest_area = float(np.max(np.abs(sector_area)))
-    sector_area_closure = float(np.sum(sector_area)) + cell_interior_area
+    sector_area_total = float(np.sum(sector_area))
+    sector_area_closure = sector_area_total - cell_interior_area
     if not sector_winding_consistent:
         raise AssertionError(
             f"reconstructed sectors do not wind consistently: {sector_area}"
@@ -863,6 +864,7 @@ def _measure_row(
         "independent_sector_signed_area_m2": sector_area,
         "independent_sector_largest_area_m2": sector_largest_area,
         "independent_sector_winding_consistent": sector_winding_consistent,
+        "independent_sector_area_total_m2": sector_area_total,
         "independent_sector_area_closure_m2": sector_area_closure,
         "independent_core_sector": int(core_slot),
         "independent_private_sector": int(private_slot),
@@ -926,6 +928,7 @@ def _measure_row(
         "cell_interior_area_m2": cell_interior_area,
         "independent_sector_largest_area_m2": sector_largest_area,
         "independent_sector_winding_consistent": sector_winding_consistent,
+        "independent_sector_area_total_m2": sector_area_total,
         "independent_sector_area_closure_m2": sector_area_closure,
         "carrier_core_polygon_matches_independent": geometry_matches_carrier,
         "carrier_private_polygon_matches_independent": private_matches_carrier,

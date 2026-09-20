@@ -1607,6 +1607,95 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
     </tbody>
   </table>
 </section>
+
+<section id="independent-oracle-cell-frame-repair">
+  <h2>Independent oracle: the cell frame repair</h2>
+  <p>The independent wedge oracle reconstructed sectors against the cell polygon as
+  the machine exposes it, while the atomic mesh stores every cell in the
+  counter-clockwise traversal <code>_normalise_cells</code> produces. A separatrix
+  root is encoded as an edge index plus a fraction along that edge, so the two
+  frames name different boundary segments: each solved root was consumed on the
+  wrong edge and the sectors joined roots across the wrong branch. The recorded
+  X-point cell at 110 requested cells has signed area
+  <code>-2.293827560763972e-02</code> m2, so it is one of the reversed cells.
+  Indexing the supplied fractions against the normalised polygon reproduces the
+  exact roots, so the root-finding pair is not at fault and the pairing rule
+  itself is correct.</p>
+  <table>
+    <thead>
+      <tr><th>Measurement</th><th>Result</th><th>Source</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Root displacement, un-normalised against normalised polygon</td>
+        <td>2.1163e-02 / 6.5408e-02 / 2.1163e-02 / 3.6082e-02 m against a 9.4e-02 m cell pitch; 1.5543e-15 m when normalised</td>
+        <td>reproduction before the repair, quoted in the run manifest</td>
+      </tr>
+      <tr>
+        <td>Sector winding, area bound and closure, 110 / 300 / 500 cells</td>
+        <td>winding consistent at all three; largest sector 2.0456e-02 / 4.4855e-03 / 1.9138e-03 m2 against interiors 2.2938e-02 / 8.4107e-03 / 5.0464e-03 m2; closure 4.4409e-16 / 0.0 / 0.0 m2</td>
+        <td><code>receipt.json</code>, one <code>all_debug</code> job 1274156</td>
+      </tr>
+      <tr>
+        <td>Core current against the analytic wedge integral</td>
+        <td>4.0804e-15 / 2.5650e-14 / 6.8009e-16 relative, limit 1e-13</td>
+        <td><code>oracle-gate.log</code>, <code>receipt.json</code></td>
+      </tr>
+      <tr>
+        <td>Reconstructed confined sectors against the carrier's own core and private wedges</td>
+        <td>both polygon-agreement flags True at all three resolutions</td>
+        <td><code>carrier_core_polygon_matches_independent</code>, <code>carrier_private_polygon_matches_independent</code></td>
+      </tr>
+      <tr>
+        <td>Committed cases pinning the frame contract, the winding and the area bound</td>
+        <td>14 passed, 0 failed</td>
+        <td><code>tests/test_xpoint_cell_wedge_clip.py</code></td>
+      </tr>
+      <tr>
+        <td>Declared negative control (reindex the fractions against the un-normalised polygon)</td>
+        <td>reddens: <code>AssertionError: reconstructed sectors close to -4.588e-02 m2 against the cell interior, so they are not a partition</code></td>
+        <td><code>negative-control.log</code>, exit 1</td>
+      </tr>
+      <tr>
+        <td>Base against working head over the two modules reaching the oracle</td>
+        <td>1 failed / 21 passed / 2 skipped against 1 failed / 23 passed / 2 skipped; zero added failures</td>
+        <td><code>clip-gate-base.log</code>, <code>clip-gate-after.log</code></td>
+      </tr>
+      <tr>
+        <td>Region-owned moments consumed by the partition and the null read</td>
+        <td>still not done: the moment support masks promote every cut cell to the plasma domain</td>
+        <td>deferred to the next node</td>
+      </tr>
+      <tr>
+        <td>Certificate re-solve over the diverted rows</td>
+        <td>deferred: the local model serve holds all four cards on the shared reservation</td>
+        <td>no H200 job can schedule</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>The oracle emits its own per-resolution panels with the wall, both null sets and
+  the four wedges drawn on line contours, so the reconstructed regions are visible
+  rather than only tabulated.</p>
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-110.svg"
+         alt="Independent wedge reconstruction in the X-point cell at 110 requested cells">
+    <figcaption>Independent wedge reconstruction in the X-point cell at 110 requested
+    cells. The four sectors wind consistently, fill the cell interior, and the
+    confined pair is the carrier's own core and private-flux wedge. Wall, analytic
+    nulls and observed nulls are drawn.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/cut-cell-current-attribution/xpoint-cell/single-null-wedges-cells-500.svg"
+         alt="Independent wedge reconstruction in the X-point cell at 500 requested cells">
+    <figcaption>The same reconstruction at 500 requested cells. The sector areas
+    shrink with the cell interior and the closure is exact to the last bit, so the
+    partition is a property of the frame rather than of the resolution.</figcaption>
+  </figure>
+  <p>The comparison figure <code>carrier-vs-independent-cells-110.png</code> in the
+  same directory was rendered before this repair and therefore records the
+  pre-repair disagreement between the two reconstructions; whoever closes the
+  remaining clause should regenerate it against the repaired oracle.</p>
+</section>
 </main>
 </body>
 </html>

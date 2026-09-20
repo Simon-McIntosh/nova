@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="forward-solver-route-integrity-landed">
+  <meta name="plan-title" content="Forward solver route integrity execution record">
+  <meta name="plan-summary" content="Shared trip body, executable measurements, and retained certificate limitations">
+  <meta name="plan-evidence-for" content="forward-solver-route-integrity">
+  <meta name="plan-verifies" content="forward-solver-route-integrity#s2">
+  <meta name="plan-commits" content="d8bbc0491e72df29ddaabc1e6d76f704c4c8dc2d">
+  <meta name="plan-recorded-at" content="2026-09-20">
+  <title>Forward solver route integrity execution record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Forward solver route integrity execution record</h1>
+  <section id="shared-trip-body">
+    <h2>All active-set trips share one lowered body</h2>
+    <p>Local implementation commit <code>d8bbc0491e72df29ddaabc1e6d76f704c4c8dc2d</code>
+    replaces the separately executed first trip with slot zero of the same
+    <code>lax.scan</code> that carries subsequent trips. Abstract evaluation determines
+    the fixed result and globalization layouts; the first active slot overwrites their
+    placeholders before they can be observed. Live masks, reconciliation, warmup policy,
+    continuation and the inner Newton expressions retain their existing semantics.
+    The source change is confined to <code>nova/equilibrium/fixed_point.py</code>.</p>
+    <p>The defect reproduced against <code>9e8f94f26de1c7d32acd17a0cd34196131dad823</code>:
+    <q>the lowered solve contains 2 copies of its trip body</q>, for trip budgets two and five.
+    A known-present optimization barrier marks the actual inner solve result in the lowered
+    StableHLO; a one-barrier control is checked before counting the solve. The committed
+    cases in <code>tests/test_solve_trips_are_a_scan.py</code> now see one copy.</p>
+    <p>The Newton step loop already used <code>lax.while_loop</code>, and the reduced solver's
+    two <code>fori_loop</code> budgets already lower as scans with unroll one. Those working
+    implementations were retained and tested rather than rewritten. The reduced host driver
+    does not enter the certificate's compiled program.</p>
+    <table>
+      <thead><tr><th>Check</th><th>Base</th><th>Candidate</th></tr></thead>
+      <tbody>
+        <tr><td>Lowered active-trip body copies, budgets 2 and 5</td><td>2</td><td>1</td></tr>
+        <tr><td>Lowered Newton step body, budgets 2 and 5</td><td>Existing while body</td><td>1</td></tr>
+        <tr><td>Reduced trip/Newton budgets</td><td>Existing scans</td><td>3/5 and 6/9; unroll 1</td></tr>
+        <tr><td>Telemetry after early convergence</td><td>Fixed slots</td><td>Trip capacities 4 and 7; Newton capacities 2 and 5; unused slots retain NaN or -1</td></tr>
+        <tr><td>Focused suite</td><td>138 passed in 143.81 s</td><td>146 passed in 130.55 s; zero added failures</td></tr>
+      </tbody>
+    </table>
+    <p>The focused command names <code>tests/test_fixed_point.py</code>,
+    <code>tests/test_route_default_wiring.py</code> and <code>tests/test_default_wiring.py</code>;
+    the candidate additionally names <code>tests/test_solve_trips_are_a_scan.py</code>.
+    All run with <code>-p no:cacheprovider</code>. The first reproduction also exposed a
+    recursion error in the added JAXPR inspection helper; that helper was corrected before
+    the passing candidate run. The two trip-copy failures above are independent of it.</p>
+
+    <h3>Executable and mapping measurements</h3>
+    <p id="measurement-status">The measurement is in progress. No executable-size or
+    certificate identity acceptance is claimed by the structural test result.</p>
+    <p>Every measurement is a separate process in allocation <code>1274198</code> on
+    <code>all_debug</code>, with <code>--cpus-per-task=8 --mem=64G --time=00:59:00</code>.
+    <code>TMPDIR=/tmp</code> is set at submission and inside the payload;
+    <code>JAX_PLATFORMS=cpu</code> is explicit. The payload uses
+    <code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code> directly, without uv.
+    The serialized byte count is the existing
+    <code>benchmarks.program_scope_census._executable_size</code> measure, and
+    <code>benchmarks.compile_abort_probe</code> samples each child's mappings every 0.5 s.
+    Payload exit codes, rather than the probe wrapper's exit, determine completion.</p>
+    <p>The older census binds operator arrays into the program, while production passes
+    the arrays and target current as explicit operands. Both signatures are measured as
+    matched base/candidate pairs. The explicit base process loads the exact base
+    <code>fixed_point.py</code> from git into memory; all other production source files
+    are unchanged by this commit. A short diagnostic step inherited four tasks and
+    overlapped the captured baseline compile; each passed eight cases. Its timings are
+    unused, and the captured baseline compile wall includes that contention.</p>
+
+    <h3>Scope and remaining acceptance</h3>
+    <p>The <code>100,000,000</code>-byte target, the historical state-digest comparison,
+    and the negative control remain separately recorded gates. This record does not
+    resolve the driving followup or close the plan section.</p>
+    <p><code>benchmarks/program_scope_census.py:_loop_inventory</code> searches for the
+    literal former <code>fori_loop(1, active_set_steps</code> spelling. Updating that
+    source marker requires its own owner because the file is outside this worker's
+    fence. The executable-size gate in <code>benchmarks/solve_program_size_gate.py</code>
+    also belongs to the assigned follow-on.</p>
+    <p>The historical receipt has digest
+    <code>f9598a166437ef23dc46e6d9f5d6cbade584fe299b5ee0771f071332eaf914ed</code>
+    but no terminal array. The current base already produces
+    <code>08fa9fe0b218a2b7f2da77b1652643cb634824868af0afd53a515fe864607bb6</code>,
+    also reported in the earlier committed cross-revision receipt. A maximum absolute
+    difference from a digest cannot be reconstructed. This pre-existing mismatch cannot
+    be attributed to the scan change; a validated historical array is required to measure it.</p>
+    <p>Raw logs, scripts, arrays and receipts are under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T181701895943-fsri-the-trips-are-a-scan-not-a-loop/</code>.
+    The manifest names every artifact. The local implementation is unpromoted.</p>
+  </section>
+</main>
+</body>
+</html>

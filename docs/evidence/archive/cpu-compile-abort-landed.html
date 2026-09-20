@@ -227,6 +227,105 @@ run exists because of that, and its role is to supply the step size and its dura
   each as PNG beside SVG).</li>
 </ul>
 
+
+<h2 id="one-row-per-process">One certificate row per child process</h2>
+
+<p><strong>What ran.</strong> One <code>all_debug</code> allocation, job <code>1274197</code>, node
+<code>98dci4-clu-3141</code>, <code>--cpus-per-task=8 --mem=64G --time=00:59:00</code>, with
+<code>TMPDIR=/tmp</code> exported in the submit environment and again inside the payload,
+<code>JAX_PLATFORMS=cpu</code>, and the shared root interpreter
+(<code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code>) invoked directly — <code>uv</code> was
+never called on the compute node. The four certificate rows ran as four sequential children of that
+one job, never as a job array, and each child was wrapped in
+<code>benchmarks/compile_abort_probe.py</code> at a 0.2 s tick, so every count below is sampled from
+the child's own <code>/proc/&lt;pid&gt;/maps</code> rather than inferred.</p>
+
+<p><strong>Why the shape is the remedy.</strong> One certificate program load adds
+<strong>16789-17620</strong> mappings measured five times across two earlier runs, against a kernel
+limit of <strong>65530</strong>. That is room for three loads and no more, and the certificate asks
+for four; the run that completed did so only because it happened to return sixteen thousand mappings
+to the kernel before its fourth load. One process per row makes that release unconditional.</p>
+
+<table>
+  <tr><th>row</th><th>cells</th><th>child pid</th><th>child exit</th><th>peak mappings</th><th>of 65530</th><th>one load (16789-17620)</th><th>wall (s)</th></tr>
+        <tr><td><code>weak-rotation-reactor-static</code></td><td>-300</td><td>766515</td><td>1</td><td><strong>24,750</strong></td><td>yes</td><td>False</td><td>2.430e-15</td></tr>
+        <tr><td><code>moderate-rotation-conventional-static</code></td><td>-300</td><td>767153</td><td>1</td><td><strong>40,756</strong></td><td>NO</td><td>False</td><td>1.175e-15</td></tr>
+        <tr><td><code>strong-rotation-compact-static</code></td><td>-300</td><td>768530</td><td>1</td><td><strong>40,752</strong></td><td>NO</td><td>False</td><td>1.457e-15</td></tr>
+        <tr><td><code>diverted-single-null</code></td><td>-500</td><td>769870</td><td>1</td><td><strong>39,095</strong></td><td>NO</td><td>False</td><td>2.092e-01</td></tr>
+</table>
+
+<p><strong>What the four children show, and what they do not.</strong> The largest sampled peak is
+<strong>40,756</strong> of the kernel's <strong>65,530</strong> — <strong>62% of the cap</strong> — and the
+smallest is 24,750; the mean is 36,338. Every child finished with tens of thousands of mappings of
+room left, and the aborting job's failure mode is unavailable to them by construction: it died inside
+a fourth load from 54147 mappings because one process had already loaded three rows' programs, and a
+child here starts from an empty address space rather than inheriting its predecessors' load.</p>
+
+<p><strong>The evidence does not say each child loads one program, and the receipt records that
+plainly.</strong> A row's own solve, state write and panel render loads more than one program for the
+larger rows: the peak of a child minus its own starting count is roughly one load for the smallest row
+and roughly two for the largest. The receipt's <code>within_one_program_load</code> flag tests a peak
+against <strong>2 × 16789 = 33578</strong> — twice the cost of one load — and reads
+<strong>false</strong> for <code>moderate-rotation-conventional-static</code>, <code>strong-rotation-compact-static</code>, <code>diverted-single-null</code> and true for the rest, so the per-child series are reported
+against the one-load figure honestly rather than as a claim that no child crossed it. "Run each row in
+its own process" is a bound on what a process accumulates, not on what a row costs; a reader who takes
+the flag as the remedy's claim will read it wrong, which is why the flag and the caveat travel
+together.</p>
+
+<p>The two rows the aborting job never reached — <code>strong-rotation-compact-static</code> and <code>diverted-single-null</code> — completed here, each in its own
+process, each writing its own terminal state.</p>
+
+<figure>
+  <img src="/nova/figures/millisecond-converged-solve/program-size/process-per-row/one-load-per-row.png"
+       alt="Per-child mapping count for the four certificate rows against the kernel cap and the two-load ceiling">
+  <figcaption>The four children of job <code>1274197</code> sampled at a 0.2 s tick. Upper panel: each
+  child's mapping count for the life of its load, with <code>vm.max_map_count</code> = 65530 in red,
+  the two-load line at 33578 dotted, and each peak circled. Lower panel: the four peaks as bars
+  against the one-load band measured previously (16789-17620, shaded) and the same two lines. The
+  point of the figure is vertical distance: every child ends far below the cap, because no child ever
+  loaded a second row's program.</figcaption>
+</figure>
+
+<p><strong>The receipt the gate reads.</strong> Each child wrote its own row receipt as it landed,
+and the parent merged the four into the single receipt at
+<code>docs/figures/millisecond-converged-solve/program-size/process-per-row/certificate.json</code>,
+carrying <code>execution_mode = one-process-per-row</code>, the parent's process id, and one entry per
+row naming the child's process id, exit code and sampled peak. Every row carries both revision keys
+(<code>baseline_revision = 4e82bafb3</code>, <code>candidate_revision = 2710b2ea1</code>), the
+baseline state digest, the bit-identity verdict and its terminal residual, which is the same receipt
+shape the single-process path mints. The merge refuses a receipt whose rows were solved by the
+receipt's own process, by fewer distinct processes than there are rows, or by a row that wrote no
+receipt, so a single-process run cannot present itself as four.</p>
+
+<table>
+  <tr><th>row</th><th>bit-identical</th><th>baseline arm</th><th>terminal residual</th></tr>
+        <tr><td><code>weak-rotation-reactor-static</code></td><td>False</td><td>digest</td><td>2.430e-15</td></tr>
+        <tr><td><code>moderate-rotation-conventional-static</code></td><td>False</td><td>digest</td><td>1.175e-15</td></tr>
+        <tr><td><code>strong-rotation-compact-static</code></td><td>False</td><td>digest</td><td>1.457e-15</td></tr>
+        <tr><td><code>diverted-single-null</code></td><td>False</td><td>digest</td><td>2.092e-01</td></tr>
+</table>
+
+<p><strong>The identity verdict is FAIL on all four rows and that is not this node's finding.</strong>
+The committed baseline arm for every row is a <em>digest</em>, not a terminal state array, so the
+cross-revision difference is reported as unmeasured rather than as zero — the same verdict the
+in-process run returned at job <code>1274144</code>, and the reason that run exited 1 as well. The
+rows themselves complete, which is what this node set out to establish; measuring the difference
+belongs to a comparison at a revision that records its array, and the failing identity gate is
+reported here rather than triaged, because it lies outside this node's declared scope.</p>
+
+<h3>Artifacts</h3>
+<ul>
+  <li>Launcher: <code>.../r-20260920T180231259880-cca-one-certificate-row-per-process/lane.sh</code>,
+  driving one <code>srun</code> into <code>all_debug</code>; log <code>lane.log</code> beside it,
+  carrying <code>LANE_REVISION</code>, the node, one <code>CERTIFICATE_START</code> /
+  <code>CERTIFICATE_DONE</code> pair per row, a <code>PROBE_SUMMARY</code> line per child and one
+  <code>CERTIFICATE_ROW_PROCESS</code> line per row.</li>
+  <li>Merged receipt: <code>docs/figures/millisecond-converged-solve/program-size/process-per-row/certificate.json</code>;
+  per-row receipts, sampled series and probe summaries in the <code>rows/</code> directory beside it.</li>
+  <li>Certificate panels, one per row, in <code>.../process-per-row/panels/</code> as PNG beside SVG.</li>
+  <li>Figure: <code>/nova/figures/millisecond-converged-solve/program-size/process-per-row/one-load-per-row.png</code>
+  (<code>.svg</code> beside it), rendered from the four probe series.</li>
+</ul>
 </main>
 </body>
 </html>

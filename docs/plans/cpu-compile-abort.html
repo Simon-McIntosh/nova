@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-20">
 <meta name="plan-impl" content="0.55">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 </head>
 <body>
   <main class="plan-doc">
@@ -107,15 +107,15 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="compile-abort-remedy" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="compile-abort-remedy" data-choice="reduce-the-emitted-program" data-by="lead" data-when="2026-09-20T17:57:51+00:00">
     <p class="r-dec-q">Which remedy does the fleet take for a driver that aborts in compilation on CPU?</p>
     <p class="r-dec-ctx">Deliberately left open until §1 reports, because the remedies are not equally cheap and the measurement chooses between them. A cache warm is hours and changes no code; reducing the emitted program is the bucket-floor work on the millisecond plan and is measured in days; waiting for the GPU lane means stopping the local serve, which is the engine the whole fleet runs on. If §1 finds the mapping limit is not reached, none of these is the answer and the section is re-opened rather than a remedy being chosen anyway.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="warm-the-cache-for-the-lane">warm the persistent compilation cache for the programs the CPU lane actually requests, so the compile does not happen</button>
-      <button class="r-opt" data-value="reduce-the-emitted-program">reduce the emitted program through the bucket floor, so the compile that does happen places fewer sections</button>
+      <button class="r-opt chosen" data-value="reduce-the-emitted-program">reduce the emitted program through the bucket floor, so the compile that does happen places fewer sections</button>
       <button class="r-opt" data-value="reclaim-a-card-from-the-serve">reclaim one card from the model serve so heavy measurements have a GPU lane again</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead ruling 2026-09-20, in two steps that are both taken. The root remedy is to reduce the emitted program: the solve compiles to 400 to 900 MB because it is unrolled where it should loop, and the lead&#x27;s design ruling is stronger than a scan, that these processes are never to loop at all and are to be designed as efficient maps. That is forward-solver-route-integrity section 2, moved to the front of its plan and put on the strongest lane. Until it lands, the interim step is the one the abort node found: run each certificate row in its own process so no process loads more than it can map, which stays under the cap without touching the solver. Warming the cache is not a remedy, because a hit loads the same oversized program; reclaiming a card sidesteps the mapping cap without touching the size.</p>
     </div>
 </section>
 
@@ -132,6 +132,11 @@
     <div class="r-fu-body"><p>The sampler works and the number it returned on a run that did not abort is 65,271 mappings against a limit of 65,530. What remains is one sentence of confirmation: the configuration that does abort needs the certificate panel directory under the served figure tree, and the node measuring it was not granted that path, which is a scoping error of mine rather than anything the worker did. Grant <code>docs/figures/millisecond-converged-solve</code> and run the same driver with the panel directory it needs, under the same sampler, in one debug allocation.</p><p>Report the peak count, the last sample before the abort, and the resident memory at both instants, and say in one sentence whether the limit was reached. If it was, the cause is named and the remedy decision above becomes answerable. If the count stalls short of the limit again while the process still aborts, then mappings are not the whole story and the record says what else the sampler saw move, which is the more interesting outcome and must not be quietly dropped in favour of the tidy one.</p></div>
     <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort §1</pre>
     <p class="r-fu-outcome">Reproduced and explained, landed at 812f6906, merged at 12c83165. The abort came back: the driver died inside the fourth certificate row after 192 section-memory refusals in nine milliseconds, with the mapping count last read at 54,147 against the 65,530 cap and resident memory at 12.25 GB of a 64 GB request. The shortfall of 11,383 is not the finding and the node said so. The finding is the step size: one certificate program load adds between 16,789 and 17,620 mappings, measured five times across two runs, so a fourth load from 54,147 cannot complete without crossing the cap by about five thousand. A second run at a fifth-second tick completed all four rows only because it returned 16,178 mappings to the kernel before its fourth load, which the first did not. Nothing else the sampler watched came near a bound. The crossing itself is inferred rather than observed and the record is explicit about that: the last sample fell 0.78 seconds before the refusal, and a rise of that size was measured inside one fifth-second interval, so the gap is traversable in about a tenth of a second and a one-second series cannot settle it in either direction. That is the right way to report it.</p>
+    </article>
+<article class="r-fu" data-id="f-cca-one-row-per-process-until-the-program-shrinks" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-20" data-recommends-skill="/reckon-ship cpu-compile-abort §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run each certificate row in its own process, so no process loads more programs than it can map</h4>
+    <div class="r-fu-body"><p>The interim half of the lead's ruling. One program load costs about seventeen thousand mappings against a cap of 65,530, so three loads fit and the certificate asks for four; the run that completed did so only because it released a program before its fourth load. Giving each row its own process makes that release unconditional. It changes no solver code and it unblocks the two unmeasured certificate rows, the coil-edit regeneration and the centroid positive arm while the program-size work on the route-integrity plan does the real repair.</p><p>The certificate driver already persists each row's receipt as it lands, so the per-process shape costs nothing in recoverability. The regeneration sweep and the centroid arm need the same treatment and are named here so they are not forgotten when the certificate is done.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort §2</pre>
     </article>
 </section>
 

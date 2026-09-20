@@ -30,7 +30,7 @@
 <meta name="plan-informs" content="gs-absolute-accuracy-gates,multi-unit-limiter-wall,uniform-cell-clip-and-coupling,playable-forward-solve">
 <meta name="plan-depends-on" content="cut-cell-current-attribution">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="224">
+<meta name="plan-version" content="225">
 </head>
 <body>
 <main class="plan-doc">
@@ -901,6 +901,9 @@ for the lead before merge.</p>
 <div class="r-comment" data-section="_top" data-id="c-nia-the-wall-repair-stopped-on-a-real-contradiction" data-who="coordinator" data-when="2026-09-20T19:22:00Z">
     <div class="r-comment-body"><p>The wall-operand repair stopped one step from landing and was right to. Its candidate makes the grid case pass, reproducing the pinned margin to the last digit, and its declared control reddens at the base revision as it should. It also reddens a diverted MAST contract that the parent commit's family pins, and the worker measured both arms on identical operands rather than arguing from the code: two failed and nine passed under the repair against one failed and ten passed at base, with the single shared failure being a tracing defect present at both revisions. So the trade is real and it is not a regression the worker introduced.</p><p>Two details from that run worth keeping beyond this decision. Its base arm needed a package copy imported before pytest starts, because a plain path ordering loses to the rootdir pytest prepends, which is a trap any base-versus-head measurement in this repository will meet. And it discarded its own first six-file baseline log as evidence, because two concurrent jobs had interleaved into it, and said so rather than reading per-file attribution out of a log with two writers. That is the discipline that makes the rest of its numbers usable.</p></div>
 </div>
+<div class="r-comment" data-section="_top" data-id="c-nia-measure-the-separation-with-panels" data-who="lead" data-when="2026-09-20T19:55:00Z">
+    <div class="r-comment-body"><p>Lead ruling 2026-09-20 on the shadowed-contact decision: measure the separation first, and draw both cases. The probe applies an experimental separation of the wall level from the wall candidate on a scratch tree and runs the grid case and the diverted MAST case against it. It also renders a poloidal panel per case under the plotting rules: line contours on shared levels, the axis and every admitted X-point in the null vocabulary, the wall drawn unit-faithfully, with the supplied census contact and the reachable-wall set marked. The lead's reason is that seeing the flux map, the stationary points and the wall contours together will show where the real issue lies, which two rows of pass and fail cannot. The decision stays open until the probe and its panels are read.</p></div>
+</div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
 <h2><span class="sec">§</span> Open questions</h2>
@@ -964,11 +967,12 @@ for the lead before merge.</p>
 <div class="r-dec" data-key="shadowed-contact-withdraws-the-wall-or-only-the-candidate" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">When the supplied census wall contact is unreachable, does the read lose its wall operand entirely, or only its wall candidate?</p>
     <p class="r-dec-ctx">Two pinned contracts oppose each other on one code path and both were measured on identical operands 2026-09-20, so one of them is wrong and no repair can satisfy both. The structured-grid case requires a finite class margin, -0.31887492472951007, which the read can only produce by valuing the wall level from a wall node it can reach when the supplied contact is shadowed. The MAST diverted case requires that the same condition leave the read with no valid wall operand at all, asserting class_wall valid is false. Recovering the level makes the grid case pass and reddens the MAST case; withdrawing the operand keeps the MAST case and returns the infinity that broke the grid read. The other side of the mechanism, moving the anchor back to the wall nodes own flux from the state, is not available: it reverts the unified contour authority the parent commit established, and the read contract forbids the state wall flux from valuing the binding point. The third option below is the one that may dissolve the contradiction rather than pick a side, because the two cases may be asking about different things: the grid case wants a LEVEL and the MAST case forbids a CANDIDATE, and a read can decline to polish a contact the census did not select while still valuing the level from the wall it can reach. Nobody has measured whether the code can separate those.</p>
-        <p class="r-dec-opts">
+    <p class="r-dec-opts">
       <button class="r-opt" data-value="recover-the-level-from-the-reachable-wall">value the level from a wall node the read can reach, and restate the diverted contract</button>
       <button class="r-opt" data-value="withdraw-the-wall-operand-and-restate-the-grid-pin">keep the operand withdrawn and restate the grid pin, accepting an infinite margin as correct there</button>
-      <button class="r-opt" data-value="separate-the-level-from-the-candidate">decline the candidate the census did not select while still valuing the level, if the code can separate them</button></p>
-<p class="r-dec-rat"></p>
+      <button class="r-opt" data-value="separate-the-level-from-the-candidate">decline the candidate the census did not select while still valuing the level, if the code can separate them</button>
+      </p>
+    <p class="r-dec-rat"></p>
     </div>
 </section>
 </main>

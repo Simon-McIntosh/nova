@@ -3708,92 +3708,51 @@ def _active_set_newton_krylov(
             continue_globalization,
         )
 
-    first_result, first_globalization = solve_frozen(
-        initial,
-        initial_mask,
-        initial_partition,
-        jnp.asarray(True),
-        presettlement=(
-            jnp.asarray(True) if presettlement_incumbent_scoring else jnp.asarray(False)
+    # Infer the receipt layout without lowering another solve. The first active
+    # scan slot overwrites these placeholders before any result is observed.
+    result_shape, globalization_shape = jax.eval_shape(
+        lambda state, mask, partition: solve_frozen(
+            state,
+            mask,
+            partition,
+            jnp.asarray(True),
+            presettlement=jnp.asarray(presettlement_incumbent_scoring),
         ),
-    )
-    (
-        first_state,
-        first_mask,
-        first_partition,
-        history,
-        history_count,
-        first_residual,
-        first_difference,
-        first_damping,
-        first_active,
-        first_converged,
-        first_cycle,
-        first_nonfinite,
-        first_stagnated,
-        first_settled,
-        first_trajectory_state,
-        first_continue_trajectory,
-        first_globalization,
-        first_continue_globalization,
-    ) = reconcile(
-        0,
         initial,
         initial_mask,
         initial_partition,
-        history,
-        jnp.asarray(1, dtype=jnp.int32),
-        first_result,
-        first_globalization,
-        jnp.asarray(True),
-        jnp.asarray(jnp.nan, dtype=initial.dtype),
     )
-    first_presettlement = (
-        jnp.asarray(first_difference != 0)
-        if presettlement_incumbent_scoring
-        else jnp.asarray(False)
+    empty_result, empty_globalization = jax.tree.map(
+        lambda value: jnp.zeros(value.shape, value.dtype),
+        (result_shape, globalization_shape),
     )
     outer = _ActiveSetIterationState(
-        state=first_state,
-        mask=first_mask,
-        partition=first_partition,
+        state=initial,
+        mask=initial_mask,
+        partition=initial_partition,
         mask_history=history,
-        mask_history_count=history_count,
-        result=first_result,
-        trajectory_state=first_trajectory_state,
-        continue_trajectory=first_continue_trajectory,
-        globalization_state=first_globalization,
-        continue_globalization=first_continue_globalization,
-        live_residual=first_residual,
-        residuals=jnp.full(active_set_steps, jnp.nan, dtype=initial.dtype)
-        .at[0]
-        .set(first_residual),
-        mask_differences=jnp.full(active_set_steps, -1, dtype=jnp.int32)
-        .at[0]
-        .set(first_difference),
-        cycle_damping_activations=jnp.full(active_set_steps, -1, dtype=jnp.int32)
-        .at[0]
-        .set(first_damping.astype(jnp.int32)),
-        iterations=jnp.asarray(1, dtype=jnp.int32),
-        attempted_promotions=jnp.asarray(
-            first_result.attempted_newton_promotions, dtype=jnp.int32
-        ),
-        accepted_promotions=jnp.asarray(
-            first_result.accepted_newton_promotions, dtype=jnp.int32
-        ),
-        conditioning_count=jnp.asarray(
-            first_result.krylov_conditioning_count, dtype=jnp.int32
-        ),
-        maximum_condition=jnp.asarray(
-            first_result.maximum_projected_krylov_condition, dtype=initial.dtype
-        ),
-        active=first_active,
-        converged=first_converged,
-        cycle_detected=first_cycle,
-        nonfinite=first_nonfinite,
-        stagnated=first_stagnated,
-        settled=first_settled,
-        presettlement=first_presettlement,
+        mask_history_count=jnp.asarray(1, dtype=jnp.int32),
+        result=empty_result,
+        trajectory_state=initial,
+        continue_trajectory=jnp.asarray(False),
+        globalization_state=empty_globalization,
+        continue_globalization=jnp.asarray(False),
+        live_residual=jnp.asarray(jnp.nan, dtype=initial.dtype),
+        residuals=jnp.full(active_set_steps, jnp.nan, dtype=initial.dtype),
+        mask_differences=jnp.full(active_set_steps, -1, dtype=jnp.int32),
+        cycle_damping_activations=jnp.full(active_set_steps, -1, dtype=jnp.int32),
+        iterations=jnp.asarray(0, dtype=jnp.int32),
+        attempted_promotions=jnp.asarray(0, dtype=jnp.int32),
+        accepted_promotions=jnp.asarray(0, dtype=jnp.int32),
+        conditioning_count=jnp.asarray(0, dtype=jnp.int32),
+        maximum_condition=jnp.asarray(0.0, dtype=initial.dtype),
+        active=jnp.asarray(True),
+        converged=jnp.asarray(False),
+        cycle_detected=jnp.asarray(False),
+        nonfinite=jnp.asarray(False),
+        stagnated=jnp.asarray(False),
+        settled=jnp.asarray(False),
+        presettlement=jnp.asarray(presettlement_incumbent_scoring),
     )
 
     def outer_body(index, carry):
@@ -3902,7 +3861,11 @@ def _active_set_newton_krylov(
 
         return jax.lax.cond(carry.active, solve_active, lambda value: value, carry)
 
-    outer = jax.lax.fori_loop(1, active_set_steps, outer_body, outer)
+    outer, _ = jax.lax.scan(
+        lambda carry, index: (outer_body(index, carry), ()),
+        outer,
+        jnp.arange(active_set_steps),
+    )
     reason = jnp.where(
         outer.converged,
         FixedPointTerminationReason.CONVERGED,

@@ -133,6 +133,30 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     )
 
 
+def _signed_polygon_area(vertices: np.ndarray) -> float:
+    return 0.5 * float(
+        np.dot(vertices[:, 0], np.roll(vertices[:, 1], -1))
+        - np.dot(vertices[:, 1], np.roll(vertices[:, 0], -1))
+    )
+
+
+def _orientation_normalised(vertices: np.ndarray) -> np.ndarray:
+    """Return the cell in the vertex order the atomic mesh stores it in.
+
+    ``AtomicCellMesh`` reverses any cell whose signed area is negative, so its
+    edge ``e`` is this polygon's edge ``e`` traversed in the opposite
+    direction.  Every root fraction is an edge index plus a fraction along that
+    edge, so a fraction resolved against a clockwise polygon and consumed by a
+    counter-clockwise mesh names a different segment: the root lands on the
+    wrong branch.  Normalise the polygon once, at the point the cell is
+    selected, and index every edge quantity against this frame.
+    """
+    vertices = np.ascontiguousarray(vertices, dtype=np.float64)
+    if np.array_equal(vertices[0], vertices[-1]):
+        vertices = vertices[:-1]
+    return vertices[::-1] if _signed_polygon_area(vertices) < 0.0 else vertices
+
+
 def _point_segment_distance(
     point: np.ndarray, start: np.ndarray, end: np.ndarray
 ) -> tuple[float, float]:
@@ -672,8 +696,8 @@ def _measure_row(
     selected_geometry = None
     for candidate in candidates:
         candidate_cell = int(candidate["cell"])
-        candidate_polygon = np.asarray(
-            machine.cell_polygons[candidate_cell], dtype=np.float64
+        candidate_polygon = _orientation_normalised(
+            np.asarray(machine.cell_polygons[candidate_cell], dtype=np.float64)
         )
         candidate_centre = np.asarray(machine.node[candidate_cell], dtype=np.float64)
         candidate_mesh = AtomicCellMesh.from_cells(
@@ -778,13 +802,53 @@ def _measure_row(
             )
         ),
     )
+    private_slot = next(slot for slot in confined_slots if slot != core_slot)
+    sector_area = np.asarray(
+        [_signed_polygon_area(np.asarray(item["vertices"])) for item in sectors]
+    )
+    cell_interior_area = abs(_signed_polygon_area(polygon))
+    sector_winding_consistent = bool(
+        np.all(sector_area > 0.0) or np.all(sector_area < 0.0)
+    )
+    sector_largest_area = float(np.max(np.abs(sector_area)))
+    sector_area_total = float(np.sum(sector_area))
+    sector_area_closure = sector_area_total - cell_interior_area
+    if not sector_winding_consistent:
+        raise AssertionError(
+            f"reconstructed sectors do not wind consistently: {sector_area}"
+        )
+    if sector_largest_area > cell_interior_area + 1.0e-14:
+        raise AssertionError(
+            f"reconstructed sector area {sector_largest_area:.6e} m2 exceeds the "
+            f"cell interior {cell_interior_area:.6e} m2"
+        )
+    if abs(sector_area_closure) > 2.0e-14:
+        raise AssertionError(
+            f"reconstructed sectors close to {sector_area_closure:.3e} m2 against the "
+            f"cell interior, so they are not a partition"
+        )
     expected = np.zeros((4, 3))
     expected[0] = _analytic_polygon_moments(
         sectors[core_slot]["vertices"], centre, profiles[0]
     )
-    geometry_matches_carrier = _closing_vertex_sequence(
-        _support_vertices(wedges, 0)
-    ) == _closing_vertex_sequence(sectors[core_slot]["vertices"])
+    carrier_core_vertices = _closing_vertex_sequence(_support_vertices(wedges, 0))
+    carrier_private_vertices = _closing_vertex_sequence(_support_vertices(wedges, 1))
+    independent_core_vertices = _closing_vertex_sequence(sectors[core_slot]["vertices"])
+    independent_private_vertices = _closing_vertex_sequence(
+        sectors[private_slot]["vertices"]
+    )
+    geometry_matches_carrier = independent_core_vertices == carrier_core_vertices
+    private_matches_carrier = independent_private_vertices == carrier_private_vertices
+    if not geometry_matches_carrier:
+        raise AssertionError(
+            "the independent reconstruction's core sector is not the carrier's core "
+            "wedge, so the core selection or the edge frame is still wrong"
+        )
+    if not private_matches_carrier:
+        raise AssertionError(
+            "the independent reconstruction's private-flux sector is not the "
+            "carrier's private wedge"
+        )
     scale = np.maximum(np.abs(expected), 1.0e-12)
     relative_error = np.abs(actual - expected) / scale
     core_current_relative_error = float(relative_error[0, 0])
@@ -796,6 +860,16 @@ def _measure_row(
         "core_current_relative_error": core_current_relative_error,
         "private_flux_current_a": float(actual[1, 0]),
         "common_sol_current_a": [float(actual[2, 0]), float(actual[3, 0])],
+        "cell_interior_area_m2": cell_interior_area,
+        "independent_sector_signed_area_m2": sector_area,
+        "independent_sector_largest_area_m2": sector_largest_area,
+        "independent_sector_winding_consistent": sector_winding_consistent,
+        "independent_sector_area_total_m2": sector_area_total,
+        "independent_sector_area_closure_m2": sector_area_closure,
+        "independent_core_sector": int(core_slot),
+        "independent_private_sector": int(private_slot),
+        "carrier_core_polygon_matches_independent": geometry_matches_carrier,
+        "carrier_private_polygon_matches_independent": private_matches_carrier,
         "wall_seconds": perf_counter() - started,
     }
     _write_json(part_path, progress)
@@ -845,26 +919,19 @@ def _measure_row(
         "exact_zero_padding": exact_zero_padding,
         "profile_order": ["confined-core", "zero-private", "zero-sol", "zero-sol"],
         "independent_core_sector": int(core_slot),
+        "independent_private_sector": int(private_slot),
         "independent_confined_sectors": [int(slot) for slot in confined_slots],
         "independent_sector_area_m2": [
-            abs(
-                float(
-                    np.sum(
-                        np.asarray(item["vertices"])[:, 0]
-                        * np.roll(np.asarray(item["vertices"])[:, 1], -1)
-                    )
-                )
-                - float(
-                    np.sum(
-                        np.asarray(item["vertices"])[:, 1]
-                        * np.roll(np.asarray(item["vertices"])[:, 0], -1)
-                    )
-                )
-            )
-            / 2.0
-            for item in sectors
+            abs(_signed_polygon_area(np.asarray(item["vertices"]))) for item in sectors
         ],
+        "independent_sector_signed_area_m2": sector_area,
+        "cell_interior_area_m2": cell_interior_area,
+        "independent_sector_largest_area_m2": sector_largest_area,
+        "independent_sector_winding_consistent": sector_winding_consistent,
+        "independent_sector_area_total_m2": sector_area_total,
+        "independent_sector_area_closure_m2": sector_area_closure,
         "carrier_core_polygon_matches_independent": geometry_matches_carrier,
+        "carrier_private_polygon_matches_independent": private_matches_carrier,
         "measured_moments": actual,
         "analytic_moments": expected,
         "relative_moment_error": relative_error,

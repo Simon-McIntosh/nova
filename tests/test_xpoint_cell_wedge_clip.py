@@ -353,3 +353,70 @@ def test_wedge_profile_count_refuses_an_incomplete_region_declaration():
             _FlatField(),
             (_ConstantProfile(1.0),) * 3,
         )
+
+
+def _signed_polygon_area(vertices: np.ndarray) -> float:
+    points = np.asarray(vertices, dtype=np.float64)
+    return 0.5 * float(
+        np.dot(points[:, 0], np.roll(points[:, 1], -1))
+        - np.dot(points[:, 1], np.roll(points[:, 0], -1))
+    )
+
+
+def test_a_root_fraction_names_a_different_segment_in_each_traversal():
+    """A fraction is an edge index, so the traversal it is read in is the contract."""
+    from benchmarks.xpoint_cell_wedge_oracle import _orientation_normalised
+
+    clockwise = np.asarray([[-1.0, -1.0], [-1.0, 1.0], [1.0, 1.0], [1.0, -1.0]])
+    assert _signed_polygon_area(clockwise) < 0.0
+
+    as_exposed = AtomicCellMesh.from_cells([clockwise], centroids=np.zeros((1, 2)))
+    normalised = _orientation_normalised(clockwise)
+    aligned = AtomicCellMesh.from_cells([normalised], centroids=np.zeros((1, 2)))
+
+    assert _signed_polygon_area(normalised) > 0.0
+    np.testing.assert_array_equal(normalised, clockwise[::-1])
+    np.testing.assert_array_equal(
+        np.asarray(as_exposed.node_coordinates), clockwise[::-1]
+    )
+    np.testing.assert_array_equal(np.asarray(aligned.node_coordinates), normalised)
+
+    exposed_coordinates = np.asarray(as_exposed.node_coordinates)
+    midpoint_as_read = clockwise[0] + 0.5 * (clockwise[1] - clockwise[0])
+    midpoint_as_stored = exposed_coordinates[0] + 0.5 * (
+        exposed_coordinates[1] - exposed_coordinates[0]
+    )
+    np.testing.assert_allclose(midpoint_as_read, [-1.0, 0.0])
+    np.testing.assert_allclose(midpoint_as_stored, [1.0, 0.0])
+    assert np.linalg.norm(midpoint_as_read - midpoint_as_stored) > 1.0
+
+
+def test_saddle_wedges_wind_consistently_and_fill_the_cell_interior():
+    mesh, _signed_flux = _saddle_cell()
+    saddle = jnp.asarray([0.0, 0.8])
+
+    def displaced_saddle_level(points):
+        return (points[..., 1] - saddle[1]) ** 2 - points[..., 0] ** 2
+
+    signed_flux = displaced_saddle_level(jnp.asarray(mesh.node_coordinates))
+    wedges = mesh.traced_saddle_wedges(
+        signed_flux,
+        saddle_vertex=saddle,
+        core_reference=jnp.asarray([0.0, -1.0]),
+        curve_evaluator=displaced_saddle_level,
+        arc_tracer=_traced_level_arc,
+    )
+
+    vertices = np.asarray(wedges.support_vertices)[0]
+    counts = np.asarray(wedges.vertex_count)[0]
+    signed_area = np.asarray(
+        [
+            _signed_polygon_area(wedge[:count])
+            for wedge, count in zip(vertices, counts, strict=True)
+        ]
+    )
+    interior = abs(_signed_polygon_area(np.asarray(mesh.node_coordinates)))
+
+    assert np.all(signed_area > 0.0), "wedges do not wind consistently"
+    assert float(np.max(np.abs(signed_area))) <= interior + 1.0e-14
+    assert float(np.sum(signed_area)) == pytest.approx(interior, rel=0.0, abs=2.0e-13)

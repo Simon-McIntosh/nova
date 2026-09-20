@@ -18,26 +18,91 @@ array that disagrees with the digest beside it is refused.
 
 import hashlib
 import json
+import os
 from pathlib import Path
+import sys
 
 import numpy as np
 import pytest
 
+from benchmarks import solve_program_size_gate as gate_module
 from benchmarks.solve_program_size_gate import (
     CERTIFICATE_BASE_REVISION,
     CERTIFICATE_BASELINE_RECEIPT,
+    CERTIFICATE_EXECUTION_PROVENANCE_KEYS,
     CERTIFICATE_ROWS,
     CertificateBaselineRefusal,
     _persist_state_array,
     certificate_baseline_source,
     certificate_identity_arms,
+    certificate_row_entry,
     certificate_state_difference,
     load_certificate_baseline,
+    run_certificate_identity,
 )
 
 
 def _digest(values: np.ndarray) -> str:
     return hashlib.sha256(np.asarray(values, dtype=np.float64).tobytes()).hexdigest()
+
+
+def stub_certificate_row(
+    case_name: str,
+    requested_cells: int,
+    *,
+    baseline: dict,
+    candidate_revision: str,
+    panel_path: Path | None = None,
+    state_directory: Path | None = None,
+) -> dict:
+    """Return one row's payload without solving, for the process-shape case.
+
+    The row carries the fields a merged receipt is read for — both revision
+    keys, the baseline digest, the bit-identity verdict and the terminal
+    residual — so the merge is exercised over rows shaped like solved ones.
+    The child processes load this function by path, so the parent and the
+    children build their rows with the same code.
+    """
+    recorded = baseline["rows"][(str(case_name), int(requested_cells))]
+    return {
+        "case": case_name,
+        "requested_cells": requested_cells,
+        "baseline_revision": baseline["revision"],
+        "candidate_revision": candidate_revision,
+        "baseline_state_sha256_binary64": recorded["state_sha256_binary64"],
+        "candidate_state_sha256_binary64": "0" * 64,
+        "terminal_state_bit_identical": True,
+        "baseline_arm_kind": recorded["arm_kind"],
+        "maximum_absolute_state_difference": None,
+        "candidate_terminal_residual": 1.0e-9,
+        "panel": None,
+    }
+
+
+# Each child loads this module by path so the row it writes is built by the same
+# stub the parent uses, then runs the gate's own single-row entry point.  The
+# solve itself is not exercised here: a real row costs an allocation, and what
+# this case measures is the process boundary and the merge.
+_CHILD_ROW_SCRIPT = """
+import importlib.util
+from pathlib import Path
+import sys
+
+spec = importlib.util.spec_from_file_location("certificate_shape_case", sys.argv[3])
+case_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(case_module)
+
+from benchmarks import solve_program_size_gate as gate
+
+gate._certificate_identity_row = case_module.stub_certificate_row
+gate.run_certificate_identity(
+    Path(sys.argv[1]),
+    Path(sys.argv[2]),
+    case_module.CERTIFICATE_BASELINE_RECEIPT,
+    row=sys.argv[4],
+    process_per_row=False,
+)
+"""
 
 
 def _receipt_with_row(tmp_path: Path, row: dict) -> Path:
@@ -295,3 +360,126 @@ def test_named_state_array_that_is_absent_is_refused(tmp_path: Path) -> None:
     )
     with pytest.raises(CertificateBaselineRefusal, match="does not exist"):
         load_certificate_baseline(receipt)
+
+
+def test_row_selector_names_a_committed_row_and_refuses_any_other() -> None:
+    for case_name, requested_cells in CERTIFICATE_ROWS:
+        assert certificate_row_entry(case_name) == (case_name, requested_cells)
+    with pytest.raises(gate_module.CertificateRowRefusal, match="not one of"):
+        certificate_row_entry("no-such-case")
+
+
+def _child_command(test_file: Path, cache_root: Path):
+    def build(row, row_receipt, samples, summary, **_kwargs):
+        return [
+            sys.executable,
+            "-c",
+            _CHILD_ROW_SCRIPT,
+            str(row_receipt),
+            str(cache_root),
+            str(test_file),
+            row[0],
+        ]
+
+    return build
+
+
+def test_merged_receipt_from_four_child_rows_matches_the_single_process_shape(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The merge must mint the same receipt one process solving every row mints.
+
+    One process per row is what keeps a four-row run under the kernel's
+    per-process mapping cap, and the merged receipt is the evidence it did. So
+    the receipt the four children produce must carry the same shape, row for
+    row, as the one a single process produces — otherwise the gate would be
+    reading a receipt of a different kind — and it must name four processes of
+    its own, because rows solved by the receipt's own process are exactly the
+    configuration the merge exists to refuse.
+    """
+    monkeypatch.setenv("SLURM_JOB_ID", "1274080")
+    monkeypatch.setenv("TMPDIR", "/tmp")
+    monkeypatch.setenv("JAX_PLATFORMS", "cpu")
+    cache_root = tmp_path / "cache"
+    # Both runs name the same state directory, so the comparison below is of the
+    # receipt's shape rather than of the two output paths this case chose.
+    state_directory = tmp_path / "states"
+    single_receipt = tmp_path / "single.json"
+    merged_receipt = tmp_path / "merged.json"
+
+    monkeypatch.setattr(gate_module, "_certificate_identity_row", stub_certificate_row)
+    single = run_certificate_identity(
+        single_receipt,
+        cache_root,
+        CERTIFICATE_BASELINE_RECEIPT,
+        state_dir=state_directory,
+        process_per_row=False,
+    )
+    merged = run_certificate_identity(
+        merged_receipt,
+        cache_root,
+        CERTIFICATE_BASELINE_RECEIPT,
+        state_dir=state_directory,
+        row_command=_child_command(Path(__file__), cache_root),
+    )
+
+    # Row for row, and key for key, apart from the provenance the two paths
+    # differ in by construction and the capture time that advances between them.
+    varying = (*CERTIFICATE_EXECUTION_PROVENANCE_KEYS, "captured_at")
+    assert merged["rows"] == single["rows"]
+    assert len(merged["rows"]) == len(CERTIFICATE_ROWS)
+    assert {key: value for key, value in merged.items() if key not in varying} == {
+        key: value for key, value in single.items() if key not in varying
+    }
+
+    assert single["execution_mode"] is None
+    assert merged["execution_mode"] == "one-process-per-row"
+    assert merged["parent_process_id"] == os.getpid()
+    child_processes = [entry["process_id"] for entry in merged["row_processes"]]
+    assert len(child_processes) == len(CERTIFICATE_ROWS)
+    assert len(set(child_processes)) == len(CERTIFICATE_ROWS)
+    assert os.getpid() not in child_processes
+    assert all(entry["exit_code"] == 0 for entry in merged["row_processes"])
+
+
+def test_rows_solved_by_the_receipts_own_process_are_refused() -> None:
+    """A receipt whose rows all carry the parent's pid is not evidence of four loads."""
+    parent_process_id = os.getpid()
+    rows = [
+        stub_certificate_row(
+            name,
+            cells,
+            baseline=load_certificate_baseline(CERTIFICATE_BASELINE_RECEIPT),
+            candidate_revision="candidate-revision-sentinel",
+        )
+        for name, cells in CERTIFICATE_ROWS
+    ]
+    row_processes = [
+        {"case": row["case"], "process_id": parent_process_id} for row in rows
+    ]
+    with pytest.raises(gate_module.CertificateRowProcessRefusal, match="which owns"):
+        gate_module.assemble_certificate_receipt(
+            {"identity_row_count": len(rows)}, rows, row_processes, parent_process_id
+        )
+    with pytest.raises(gate_module.CertificateRowProcessRefusal, match="distinct"):
+        gate_module.assemble_certificate_receipt(
+            {"identity_row_count": len(rows)},
+            rows,
+            [
+                {"case": row["case"], "process_id": 4000 + index // 2}
+                for index, row in enumerate(rows)
+            ],
+            parent_process_id,
+        )
+    with pytest.raises(gate_module.CertificateRowProcessRefusal, match="no receipt"):
+        gate_module.assemble_certificate_receipt(
+            {"identity_row_count": len(rows)},
+            rows,
+            [
+                {"case": row["case"], "process_id": 4000 + index}
+                if index
+                else {"case": row["case"], "process_id": None}
+                for index, row in enumerate(rows)
+            ],
+            parent_process_id,
+        )

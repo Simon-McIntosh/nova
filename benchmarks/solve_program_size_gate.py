@@ -18,6 +18,8 @@ import json
 import math
 import os
 from pathlib import Path
+import subprocess
+import sys
 import time
 from typing import Any
 
@@ -47,6 +49,24 @@ CERTIFICATE_BASE_REVISION = "4e82bafb3abbd972096f84f306dfc8b28577e2fe"
 CERTIFICATE_BASELINE_RECEIPT = (
     Path(__file__).resolve().parents[1]
     / "docs/figures/millisecond-converged-solve/program-size/semantic/receipt.json"
+)
+# One certificate program load adds this many mappings to the process that
+# loads it, measured five times across two sampled runs.  It is the step that
+# bounds how many rows one process can hold: three loads stay under the
+# kernel's per-process mapping cap and the certificate asks for four, which is
+# why each row is solved in its own process.
+CERTIFICATE_PROGRAM_LOAD_MAPS = (16_789, 17_620)
+# Two loads cannot stay under twice the low end of that step and one cannot
+# reach it, so this separates a child that loaded one program from one that
+# loaded two.  A row solved in its own process loads one program.
+CERTIFICATE_CHILD_MAP_CEILING = 2 * CERTIFICATE_PROGRAM_LOAD_MAPS[0]
+# Receipt fields that describe how the rows were executed rather than what they
+# measured.  Two receipts of the same rows differ in exactly these, so a shape
+# comparison drops them and compares the rest.
+CERTIFICATE_EXECUTION_PROVENANCE_KEYS = (
+    "execution_mode",
+    "parent_process_id",
+    "row_processes",
 )
 
 
@@ -1731,47 +1751,65 @@ def _certificate_identity_row(
     }
 
 
-def run_certificate_identity(
-    output: Path,
-    cache_root: Path | None,
-    baseline_receipt: Path | None = None,
-    panel_dir: Path | None = None,
-    state_dir: Path | None = None,
-) -> dict[str, Any]:
-    """Persist the four certificate identity rows as each comparison lands.
+class CertificateRowRefusal(RuntimeError):
+    """Raised when a certificate row selector names no committed row."""
 
-    Each row writes its terminal state array beside its digest, into
-    ``state_dir`` (the receipt's own ``-states`` directory by default), so a
-    later run at another revision reads the array rather than a digest and
-    reports the size of the difference between the two revisions.
+
+class CertificateRowProcessRefusal(RuntimeError):
+    """Raised when a merged certificate receipt did not come from one process per row.
+
+    A receipt is evidence that no process loaded more than its share of programs
+    only when each row was solved in its own process.  Rows written by one
+    process — the receipt's own pid on every one of them — describe a process
+    that loaded every row's program, which is the configuration the receipt
+    exists to rule out, so the merge refuses rather than minting it.
     """
-    identity_row_count = _require_identity_rows(
-        len(CERTIFICATE_ROWS), "certificate identity rows"
+
+
+def certificate_row_entry(case_name: str) -> tuple[str, int]:
+    """Resolve a row selector to the committed ``(case, cells)`` row it names."""
+    for row in CERTIFICATE_ROWS:
+        if row[0] == case_name:
+            return row
+    raise CertificateRowRefusal(
+        f"certificate row {case_name!r} is not one of "
+        f"{[row[0] for row in CERTIFICATE_ROWS]}"
     )
+
+
+def certificate_row_order(row: dict[str, Any]) -> int:
+    """Rank one landed row by its place in the committed row set.
+
+    Rows are compared across receipts, so their order must come from the
+    committed set rather than from the order the processes happened to finish
+    in; a row outside that set sorts last.
+    """
+    key = (str(row["case"]), int(row["requested_cells"]))
+    for index, committed in enumerate(CERTIFICATE_ROWS):
+        if (committed[0], committed[1]) == key:
+            return index
+    return len(CERTIFICATE_ROWS)
+
+
+def certificate_receipt_header(
+    baseline: dict[str, Any],
+    candidate_revision: str,
+    panel_dir: Path | None,
+    state_directory: Path,
+    cache_receipt: dict[str, Any],
+    rows: tuple[tuple[str, int], ...],
+) -> dict[str, Any]:
+    """Assemble a certificate receipt's header and its unresolved rows.
+
+    Both paths that produce a certificate receipt — one process solving every
+    row, and one process per row merged by the parent — begin from this header,
+    so the two receipts differ in their provenance fields and nowhere else.
+    """
     import jax
 
-    from benchmarks.trip_quantum_width_one import _require_revision
-    from nova.jax.config import (
-        configure_dtypes,
-        configure_persistent_compilation_cache,
-        default_persistent_compilation_cache_root,
-    )
-
-    configure_dtypes()
-    if os.environ.get("SLURM_JOB_ID") is None:
-        raise RuntimeError("certificate identity requires a SLURM allocation")
-    baseline = load_certificate_baseline(
-        baseline_receipt or CERTIFICATE_BASELINE_RECEIPT
-    )
-    candidate_revision = _require_revision()
-    state_directory = (
-        state_dir
-        if state_dir is not None
-        else Path(output).resolve().parent / f"{Path(output).stem}-states"
-    )
-    receipt: dict[str, Any] = {
+    return {
         "schema": "nova.solve-program-certificate-identity",
-        "identity_row_count": identity_row_count,
+        "identity_row_count": len(rows),
         "measurement_revision": candidate_revision,
         "baseline_revision": baseline["revision"],
         "candidate_revision": candidate_revision,
@@ -1784,64 +1822,464 @@ def run_certificate_identity(
             or os.environ.get("SLURM_JOB_NODELIST"),
             "platform": jax.default_backend(),
         },
-        "persistent_compilation_cache": configure_persistent_compilation_cache(
-            cache_root or default_persistent_compilation_cache_root(),
-            minimum_compile_seconds=0.0,
-        ).receipt(),
+        "process_id": os.getpid(),
+        "persistent_compilation_cache": cache_receipt,
         "comparison": (
             "terminal state recorded at the base revision against the head "
             "accelerated program"
         ),
         "panel_directory": str(panel_dir) if panel_dir is not None else None,
         "state_directory": str(state_directory),
+        "execution_mode": None,
+        "parent_process_id": None,
+        "row_processes": [],
         "baseline_arm_kinds": {},
         "rows": [],
-        "pending_rows": [list(row) for row in CERTIFICATE_ROWS],
+        "pending_rows": [list(row) for row in rows],
         "passed": None,
     }
-    _write_json(output, receipt)
-    for case_name, requested_cells in CERTIFICATE_ROWS:
-        print(f"CERTIFICATE_START case={case_name} cells={requested_cells}", flush=True)
-        row = _certificate_identity_row(
-            case_name,
-            requested_cells,
-            baseline=baseline,
-            candidate_revision=candidate_revision,
-            panel_path=(
-                None
-                if panel_dir is None
-                else Path(panel_dir) / f"{_panel_slug(case_name, requested_cells)}.png"
-            ),
-            state_directory=state_directory,
-        )
-        receipt["rows"].append(row)
-        receipt["pending_rows"] = [
-            list(pending)
-            for pending in CERTIFICATE_ROWS
-            if (pending[0], pending[1]) != (case_name, requested_cells)
-            and not any(
-                landed["case"] == pending[0] and landed["requested_cells"] == pending[1]
-                for landed in receipt["rows"]
-            )
-        ]
-        _write_json(output, receipt)
-        kinds = receipt["baseline_arm_kinds"]
+
+
+def finalise_certificate_receipt(
+    receipt: dict[str, Any],
+    rows: list[dict[str, Any]],
+    *,
+    declared: tuple[tuple[str, int], ...],
+    row_processes: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Settle a certificate receipt's resolved fields from the rows it carries.
+
+    Every path that produces a certificate receipt closes through this function
+    — one process solving every row, and one process per row merged by the
+    parent — so the merged receipt carries the shape a single-process one does
+    rather than a shape of its own.
+    """
+    landed = {(str(row["case"]), int(row["requested_cells"])) for row in rows}
+    receipt["rows"] = sorted(rows, key=certificate_row_order)
+    receipt["pending_rows"] = [
+        list(row) for row in declared if (row[0], row[1]) not in landed
+    ]
+    kinds: dict[str, int] = {}
+    for row in receipt["rows"]:
         land = row["baseline_arm_kind"]
         kinds[land] = int(kinds.get(land, 0)) + 1
+    receipt["baseline_arm_kinds"] = kinds
+    if row_processes is not None:
+        receipt["execution_mode"] = "one-process-per-row"
+        receipt["row_processes"] = row_processes
+    receipt["passed"] = len(receipt["rows"]) == int(
+        receipt["identity_row_count"]
+    ) and all(bool(row["terminal_state_bit_identical"]) for row in receipt["rows"])
+    return receipt
+
+
+def _require_distinct_row_processes(
+    row_processes: list[dict[str, Any]],
+    parent_process_id: int,
+    expected: int,
+) -> None:
+    """Refuse a receipt whose rows were not each solved by one process of their own.
+
+    The guard fires on the three ways a receipt can look merged while carrying
+    one process's work: a row whose child wrote no receipt, so the process that
+    solved it is unknown; a row solved by the process that owns the receipt,
+    which is every row when the parent solves them itself; and fewer distinct
+    processes than rows.
+    """
+    if len(row_processes) != expected:
+        raise CertificateRowProcessRefusal(
+            f"merged receipt carries {len(row_processes)} row processes for "
+            f"{expected} rows"
+        )
+    process_ids = [entry.get("process_id") for entry in row_processes]
+    unknown = [
+        str(entry.get("case"))
+        for entry, pid in zip(row_processes, process_ids, strict=True)
+        if pid is None
+    ]
+    if unknown:
+        raise CertificateRowProcessRefusal(
+            f"rows {unknown} wrote no receipt, so the process that solved each "
+            "is unknown"
+        )
+    owned = [
+        str(entry.get("case"))
+        for entry, pid in zip(row_processes, process_ids, strict=True)
+        if int(pid) == int(parent_process_id)
+    ]
+    if owned:
+        raise CertificateRowProcessRefusal(
+            f"rows {owned} were solved by process {parent_process_id}, which owns "
+            "the merged receipt, so they were not solved in a process of their own"
+        )
+    if len(set(process_ids)) != expected:
+        raise CertificateRowProcessRefusal(
+            f"{expected} rows were solved by {len(set(process_ids))} distinct "
+            "processes, so at least one process loaded more than one row's program"
+        )
+
+
+def assemble_certificate_receipt(
+    header: dict[str, Any],
+    rows: list[dict[str, Any]],
+    row_processes: list[dict[str, Any]],
+    parent_process_id: int,
+    *,
+    declared: tuple[tuple[str, int], ...] = CERTIFICATE_ROWS,
+) -> dict[str, Any]:
+    """Mint the certificate receipt a set of per-row processes produced."""
+    _require_distinct_row_processes(row_processes, parent_process_id, len(declared))
+    receipt = dict(header)
+    receipt["parent_process_id"] = int(parent_process_id)
+    return finalise_certificate_receipt(
+        receipt, rows, declared=declared, row_processes=row_processes
+    )
+
+
+def merge_certificate_row_receipts(
+    row_receipts: list[Path],
+    header: dict[str, Any],
+    row_processes: list[dict[str, Any]],
+    parent_process_id: int,
+    *,
+    declared: tuple[tuple[str, int], ...] = CERTIFICATE_ROWS,
+) -> dict[str, Any]:
+    """Merge the per-row receipts the child processes wrote into the gate's receipt.
+
+    Each child writes one row's receipt in the same shape the single-process
+    path mints, so the merge reads the row out of each rather than rebuilding
+    it, and a receipt carrying more or fewer than one row is refused instead of
+    being flattened.
+    """
+    rows: list[dict[str, Any]] = []
+    for path in row_receipts:
+        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+        payload_rows = payload.get("rows") or []
+        if len(payload_rows) != 1:
+            raise CertificateRowProcessRefusal(
+                f"row receipt {path} carries {len(payload_rows)} rows; one "
+                "process solves one row"
+            )
+        rows.append(payload_rows[0])
+    return assemble_certificate_receipt(
+        header, rows, row_processes, parent_process_id, declared=declared
+    )
+
+
+def certificate_row_command(
+    row: tuple[str, int],
+    row_receipt: Path,
+    samples: Path | None,
+    summary: Path | None,
+    *,
+    baseline_receipt: Path | None = None,
+    panel_dir: Path | None = None,
+    state_directory: Path | None = None,
+    cache_root: Path | None = None,
+) -> list[str]:
+    """Build the command one certificate row runs in its own process.
+
+    The command is this module with the row selector, so a child runs the same
+    code as its parent and resolves its own operands.  When a sample path and a
+    summary path are given the command is wrapped in
+    :mod:`benchmarks.compile_abort_probe`, which records the child's own
+    mapping count beside its resident memory for the life of the load.
+    """
+    command = [
+        sys.executable,
+        "-m",
+        "benchmarks.solve_program_size_gate",
+        "--certificate-output",
+        str(row_receipt),
+        "--certificate-row",
+        row[0],
+    ]
+    for flag, value in (
+        ("--certificate-baseline-receipt", baseline_receipt),
+        ("--certificate-panel-dir", panel_dir),
+        ("--certificate-state-dir", state_directory),
+        ("--cache-root", cache_root),
+    ):
+        if value is not None:
+            command += [flag, str(value)]
+    if samples is not None and summary is not None:
+        command = [
+            sys.executable,
+            "-m",
+            "benchmarks.compile_abort_probe",
+            "--samples",
+            str(samples),
+            "--summary",
+            str(summary),
+            "--interval",
+            "0.2",
+            "--",
+            *command,
+        ]
+    return command
+
+
+def _print_certificate_done(row: dict[str, Any]) -> None:
+    print(
+        f"CERTIFICATE_DONE case={row['case']} cells={row['requested_cells']} "
+        f"bit_identical={int(row['terminal_state_bit_identical'])} "
+        f"baseline_arm={row['baseline_arm_kind']} "
+        f"max_abs_state_difference={row['maximum_absolute_state_difference']} "
+        f"baseline_revision={row['baseline_revision']} "
+        f"candidate_revision={row['candidate_revision']} "
+        f"terminal_residual={row['candidate_terminal_residual']}",
+        flush=True,
+    )
+
+
+def _certificate_row_paths(
+    rows: tuple[tuple[str, int], ...],
+    panel_dir: Path | None,
+) -> list[tuple[str, int, Path | None]]:
+    """Name each row's panel path, or none when no panel directory was given."""
+    return [
+        (
+            case_name,
+            requested_cells,
+            None
+            if panel_dir is None
+            else Path(panel_dir) / f"{_panel_slug(case_name, requested_cells)}.png",
+        )
+        for case_name, requested_cells in rows
+    ]
+
+
+def _certificate_rows_in_one_process(
+    receipt: dict[str, Any],
+    output: Path,
+    rows: tuple[tuple[str, int], ...],
+    baseline: dict[str, Any],
+    candidate_revision: str,
+    panel_dir: Path | None,
+    state_directory: Path,
+) -> dict[str, Any]:
+    """Solve the selected rows in this process, persisting each as it lands.
+
+    This is the path a row process takes for its single row, and the path the
+    parent takes when the per-row processes are turned off.
+    """
+    receipt["rows"] = []
+    _write_json(output, receipt)
+    landed: list[dict[str, Any]] = []
+    for case_name, requested_cells, panel_path in _certificate_row_paths(
+        rows, panel_dir
+    ):
         print(
-            f"CERTIFICATE_DONE case={case_name} cells={requested_cells} "
-            f"bit_identical={int(row['terminal_state_bit_identical'])} "
-            f"baseline_arm={row['baseline_arm_kind']} "
-            f"max_abs_state_difference={row['maximum_absolute_state_difference']} "
-            f"baseline_revision={row['baseline_revision']} "
-            f"candidate_revision={row['candidate_revision']}",
+            f"CERTIFICATE_START case={case_name} cells={requested_cells} "
+            f"process={os.getpid()}",
             flush=True,
         )
-    receipt["passed"] = len(receipt["rows"]) == identity_row_count and all(
-        row["terminal_state_bit_identical"] for row in receipt["rows"]
-    )
-    _write_json(output, receipt)
+        landed.append(
+            _certificate_identity_row(
+                case_name,
+                requested_cells,
+                baseline=baseline,
+                candidate_revision=candidate_revision,
+                panel_path=panel_path,
+                state_directory=state_directory,
+            )
+        )
+        receipt["rows"] = list(landed)
+        finalise_certificate_receipt(receipt, landed, declared=rows)
+        _write_json(output, receipt)
+        _print_certificate_done(landed[-1])
     return receipt
+
+
+def _certificate_rows_as_processes(
+    receipt: dict[str, Any],
+    output: Path,
+    rows: tuple[tuple[str, int], ...],
+    baseline_receipt: Path,
+    panel_dir: Path | None,
+    state_directory: Path,
+    cache_root: Path | None,
+    row_command: Any,
+    row_work_dir: Path | None,
+) -> dict[str, Any]:
+    """Run each selected row in a child process and merge their receipts.
+
+    One child per row means no process loads more than one row's programs, so
+    the load that a four-row process could not complete stays under the
+    kernel's per-process mapping cap.  Each child's mapping count is sampled by
+    :mod:`benchmarks.compile_abort_probe` for the life of its load and recorded
+    beside the measured per-load step, so the receipt reports each child
+    against one load rather than only asserting it.
+    """
+    parent_process_id = os.getpid()
+    work_directory = (
+        Path(row_work_dir)
+        if row_work_dir is not None
+        else Path(output).resolve().parent / f"{Path(output).stem}-rows"
+    )
+    work_directory.mkdir(parents=True, exist_ok=True)
+    receipt["rows"] = []
+    receipt["row_processes"] = []
+    _write_json(output, receipt)
+    landed: list[dict[str, Any]] = []
+    row_processes: list[dict[str, Any]] = []
+    row_receipts: list[Path] = []
+    for index, (case_name, requested_cells) in enumerate(rows):
+        row_receipt = work_directory / f"row-{index}-{case_name}.json"
+        samples = work_directory / f"row-{index}-{case_name}-maps.jsonl"
+        summary = work_directory / f"row-{index}-{case_name}-probe.json"
+        build = row_command or certificate_row_command
+        command = build(
+            (case_name, requested_cells),
+            row_receipt,
+            samples,
+            summary,
+            baseline_receipt=baseline_receipt,
+            panel_dir=panel_dir,
+            state_directory=state_directory,
+            cache_root=cache_root,
+        )
+        print(
+            f"CERTIFICATE_START case={case_name} cells={requested_cells} "
+            f"process=child command={' '.join(command)}",
+            flush=True,
+        )
+        completed = subprocess.run(command, check=False)
+        payload = (
+            json.loads(row_receipt.read_text(encoding="utf-8"))
+            if row_receipt.is_file()
+            else None
+        )
+        probe = (
+            json.loads(summary.read_text(encoding="utf-8"))
+            if summary.is_file()
+            else None
+        )
+        child_rows = [] if payload is None else list(payload.get("rows") or [])
+        peak_maps = None if probe is None else probe.get("peak_maps")
+        entry = {
+            "case": case_name,
+            "requested_cells": requested_cells,
+            "process_id": None if payload is None else payload.get("process_id"),
+            "exit_code": int(completed.returncode),
+            "probe_exit_code": None if probe is None else probe.get("exit_code"),
+            "peak_maps": peak_maps,
+            "max_map_count": None if probe is None else probe.get("max_map_count"),
+            "samples_path": None if probe is None else probe.get("samples_path"),
+            "program_load_maps": list(CERTIFICATE_PROGRAM_LOAD_MAPS),
+            "within_one_program_load": (
+                None
+                if peak_maps is None
+                else bool(int(peak_maps) < CERTIFICATE_CHILD_MAP_CEILING)
+            ),
+            "row_receipt": str(row_receipt),
+        }
+        row_processes.append(entry)
+        row_receipts.append(row_receipt)
+        landed.extend(child_rows)
+        receipt["rows"] = list(landed)
+        receipt["row_processes"] = list(row_processes)
+        finalise_certificate_receipt(receipt, landed, declared=rows)
+        _write_json(output, receipt)
+        if child_rows:
+            _print_certificate_done(child_rows[0])
+        else:
+            print(
+                f"CERTIFICATE_ROW_FAILED case={case_name} "
+                f"cells={requested_cells} exit={completed.returncode} "
+                f"row_receipt={row_receipt}",
+                flush=True,
+            )
+    merged = merge_certificate_row_receipts(
+        row_receipts,
+        receipt,
+        row_processes,
+        parent_process_id,
+        declared=rows,
+    )
+    _write_json(output, merged)
+    return merged
+
+
+def run_certificate_identity(
+    output: Path,
+    cache_root: Path | None,
+    baseline_receipt: Path | None = None,
+    panel_dir: Path | None = None,
+    state_dir: Path | None = None,
+    *,
+    row: str | None = None,
+    process_per_row: bool = True,
+    row_command: Any = None,
+    row_work_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Persist the certificate identity rows as each comparison lands.
+
+    By default each row is solved in a child process of this interpreter, so no
+    process loads more than one row's programs and the fourth load cannot cross
+    the kernel's per-process mapping cap; the children's receipts are merged
+    into the single receipt the gate reads.  ``row`` selects one committed row
+    and solves only it, which is what a child invocation does.
+
+    Each row writes its terminal state array beside its digest, into
+    ``state_dir`` (the receipt's own ``-states`` directory by default), so a
+    later run at another revision reads the array rather than a digest and
+    reports the size of the difference between the two revisions.
+    """
+    _require_identity_rows(len(CERTIFICATE_ROWS), "certificate identity rows")
+    from benchmarks.trip_quantum_width_one import _require_revision
+    from nova.jax.config import (
+        configure_dtypes,
+        configure_persistent_compilation_cache,
+        default_persistent_compilation_cache_root,
+    )
+
+    configure_dtypes()
+    if os.environ.get("SLURM_JOB_ID") is None:
+        raise RuntimeError("certificate identity requires a SLURM allocation")
+    baseline_path = (
+        CERTIFICATE_BASELINE_RECEIPT if baseline_receipt is None else baseline_receipt
+    )
+    baseline = load_certificate_baseline(baseline_path)
+    candidate_revision = _require_revision()
+    state_directory = (
+        state_dir
+        if state_dir is not None
+        else Path(output).resolve().parent / f"{Path(output).stem}-states"
+    )
+    rows = CERTIFICATE_ROWS if row is None else (certificate_row_entry(row),)
+    receipt = certificate_receipt_header(
+        baseline,
+        candidate_revision,
+        panel_dir,
+        state_directory,
+        configure_persistent_compilation_cache(
+            cache_root or default_persistent_compilation_cache_root(),
+            minimum_compile_seconds=0.0,
+        ).receipt(),
+        rows,
+    )
+    if row is not None or not process_per_row:
+        return _certificate_rows_in_one_process(
+            receipt,
+            output,
+            rows,
+            baseline,
+            candidate_revision,
+            panel_dir,
+            state_directory,
+        )
+    return _certificate_rows_as_processes(
+        receipt,
+        output,
+        rows,
+        baseline_path,
+        panel_dir,
+        state_directory,
+        cache_root,
+        row_command,
+        row_work_dir,
+    )
 
 
 def certificate_baseline_source(
@@ -2193,6 +2631,31 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--certificate-output", type=Path)
     parser.add_argument(
+        "--certificate-row",
+        help=(
+            "run this one committed certificate row and no other, so a child "
+            "process loads one row's programs; defaults to every row, each in "
+            "its own child process"
+        ),
+    )
+    parser.add_argument(
+        "--certificate-in-process",
+        action="store_true",
+        help=(
+            "solve every selected row in this process instead of one child "
+            "process per row; a receipt minted this way is refused as evidence "
+            "that each row had a process of its own"
+        ),
+    )
+    parser.add_argument(
+        "--certificate-row-work-dir",
+        type=Path,
+        help=(
+            "directory that receives each child's own receipt and mapping "
+            "series; defaults to a -rows directory beside the receipt"
+        ),
+    )
+    parser.add_argument(
         "--certificate-panel-dir",
         type=Path,
         help=(
@@ -2306,7 +2769,20 @@ def main() -> int:
             args.certificate_baseline_receipt,
             args.certificate_panel_dir,
             args.certificate_state_dir,
+            row=args.certificate_row,
+            process_per_row=not args.certificate_in_process,
+            row_work_dir=args.certificate_row_work_dir,
         )
+        for entry in result.get("row_processes") or []:
+            print(
+                f"CERTIFICATE_ROW_PROCESS case={entry['case']} "
+                f"process_id={entry['process_id']} exit={entry['exit_code']} "
+                f"peak_maps={entry['peak_maps']} "
+                f"max_map_count={entry['max_map_count']} "
+                f"program_load_maps={entry['program_load_maps']} "
+                f"within_one_program_load={entry['within_one_program_load']}",
+                flush=True,
+            )
         print(
             f"CERTIFICATE_IDENTITY_GATE={'PASS' if result['passed'] else 'FAIL'}",
             flush=True,

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T17:33:27",
+  "updated": "2026-09-20T17:37:05",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4661,6 +4661,15 @@
       },
       {
         "id": "s19c-cca-maps-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-20"
+      },
+      {
+        "id": "s19c-cca-oracle-c",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -214535,6 +214544,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2949
+    "_version": 2950
   }
 }

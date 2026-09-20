@@ -1,0 +1,30 @@
+{
+  "allocation": {
+    "allocated_cpus": 8,
+    "jax_default_backend": "cpu",
+    "jax_enable_x64": true,
+    "jax_platforms": [
+      "cpu"
+    ],
+    "job_id": 1274088,
+    "node": "98dci4-clu-3143",
+    "partition": "all_debug",
+    "tmpdir": "/tmp"
+  },
+  "completed": false,
+  "core_current_relative_limit": 1e-13,
+  "diagnose_only": false,
+  "error": "core current relative error 1.388e-01 exceeds 1.0e-13",
+  "error_type": "AssertionError",
+  "failed_requested_cells": 110,
+  "reference_requested_cells": 110,
+  "requested_cells": [
+    110,
+    300,
+    500
+  ],
+  "rows": [],
+  "schema": "nova.xpoint-cell-wedge-oracle",
+  "source_revision": "d90a522fe8ac53d4a26477bf920aeb8ac367be47",
+  "version": 1
+}

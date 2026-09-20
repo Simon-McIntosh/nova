@@ -947,6 +947,29 @@ def _wall_units(operator: Any) -> tuple[Any, ...]:
     )
 
 
+def _preflight_panel_wall(profile: Any) -> None:
+    """Resolve the vessel units and one interior mask before the sweep runs.
+
+    The panel writer builds its interior mask from the operator's wall units,
+    so an operator whose wall is not a unit collection fails the write only
+    after every edit has been solved.  Making the same call first turns that
+    into a failure of seconds rather than of the whole allocation.
+    """
+    units = _wall_units(profile.operator)
+    if not units:
+        raise RuntimeError("the operator carries no wall units to draw")
+    mask = _wall_interior(
+        np.asarray(profile.lattice.radius, dtype=float),
+        np.asarray(profile.lattice.height, dtype=float),
+        units,
+    )
+    print(
+        "PREFLIGHT_WALL_OK units=%d interior_samples=%d"
+        % (len(units), int(np.count_nonzero(mask))),
+        flush=True,
+    )
+
+
 def _grid_field(psi: Any, shape: Any) -> np.ndarray:
     """Return one raster psi as the (height, radius) contour array."""
     return (
@@ -1330,7 +1353,7 @@ def _write_panel_data(
     payload["achieved_class"] = np.asarray(
         [state["class"] for state in panel_states], dtype=str
     )
-    wall = profile.operator.wall
+    wall = _wall_units(profile.operator)
     inside = _wall_interior(payload["radius"], payload["height"], wall)
     for position, state in enumerate(panel_states):
         if state["psi"] is None:
@@ -2312,6 +2335,7 @@ def run(
     reporter.start()
     try:
         profile, prepared, carrier = _prepare_case(carrier_path)
+        _preflight_panel_wall(profile)
         solve_persistent_hits_start = int(cache_events["hits"])
         solve_persistent_misses_start = int(cache_events["misses"])
         solve_persistent_saved_start = float(cache_events["saved_seconds"])

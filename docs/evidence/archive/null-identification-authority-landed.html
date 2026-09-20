@@ -1037,12 +1037,36 @@ Gate on the login node: the new test module plus <code>tests/test_bank_drift_pai
   <code>-0.31887492472951007</code>. The pinned margin is therefore a true read of its revision, not a
   stale pin; what changed is which wall anchor the read selects and whether that anchor is reachable from
   the region the classification read searches.</p>
-  <p><strong>Status.</strong> Diagnosis only, committed before any repair. The shadow rule that writes the
-  infinity lives in <code>nova/equilibrium/connectivity_boundary.py</code>, which is outside this node's
-  write scope, so the repair has to be expressed at the <code>forward_operator.py</code> call site &mdash;
-  either the <code>classification_wall</code> operand the call supplies or the topology object whose region
-  the reachable-wall search runs from. The attribution of the moving read to a specific commit, and the
-  repair itself, are not yet landed.</p>
+  <p><strong>The revision that moved it, measured on both sides of one commit.</strong> The flip is
+  <code>8fdc71ef5</code> (<em>unify limited boundary authority</em>), and its own parent
+  <code>09f5cc508</code> reads the pinned value. Probed serially, one revision at a time, the parent reads
+  <code>class_margin</code> <code>-0.31887492472951007</code>, <code>u_wall</code>
+  <code>-0.26716652745672975</code>, <code>wall_point_flux</code> <code>-0.11954666666666702</code>,
+  <code>reachable</code> 2 of 64, <code>wall_shadowed</code> <code>False</code>; the child reads
+  <code>class_margin</code> <code>inf</code>, <code>u_wall</code> <code>inf</code>,
+  <code>wall_point_flux</code> <code>0.0804533333333329</code>, <code>reachable</code> 0 of 64,
+  <code>wall_shadowed</code> <code>True</code>. The <code>class_u_x</code> operand is identical on both
+  sides.</p>
+  <p><strong>The mechanical difference is exactly the state's wall offset.</strong>
+  <code>8fdc71ef5</code> changed <code>wall_anchor_data</code> to evaluate the wall flux on the tensor
+  spline that traces the boundary and to publish that surface value at the fitted contact, where the read
+  had previously used the wall nodes' own flux from the state. The fixture authors its wall flux as the
+  same spline value <em>minus</em> <code>_WALL_SEPARATRIX_OFFSET = 0.2</code>, and the two anchor fluxes
+  differ by exactly that 0.2: <code>-0.11954666666666702</code> against
+  <code>0.0804533333333329</code>. So the change discards the offset the fixture deliberately put into the
+  state, the anchor moves from the inboard limiter vertex to wall vertex 6, no wall node is then reachable
+  from the classification read's pre-saddle region, and the shadow turns a defined wall level into
+  <code>inf</code>.</p>
+  <p><strong>Status.</strong> Diagnosis and attribution, committed before any repair. No repair is landed,
+  and the derivation says one cannot be expressed inside this node's write scope. The shadow rule that
+  writes the infinity lives in <code>nova/equilibrium/connectivity_boundary.py</code> and the anchor
+  selection in <code>nova/equilibrium/topology.py</code>; both are outside this node's exclusive write
+  path. Nor does the in-scope call site have an operand combination that reproduces the pin: withholding
+  the classification operands on the identical state returns <code>+0.2667392207631908</code> (positive,
+  because the reachable wall level is then the read's own <code>0.3184476180359711</code>), and supplying
+  them forces the shadow and returns <code>inf</code>. The choice between re-pinning the case and repairing
+  the anchor authority belongs to whoever owns <code>tests/test_forward_operator_axes.py</code>, which this
+  node may not edit, so the conclusion is reported with this derivation rather than acted on.</p>
 </section>
 </main>
 </body>

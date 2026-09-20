@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T02:29:16",
+  "updated": "2026-09-20T02:30:47",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -213872,6 +213872,231 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260920T000512017766-dvfb-drivers-call-the-public-comparators",
+        "plan": "diiid-vertical-force-balance",
+        "section": "",
+        "node": "dvfb-drivers-call-the-public-comparators",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1773,
+                "cached_input_tokens": 553314,
+                "input_tokens": 555089,
+                "output_tokens": 1559,
+                "reasoning_output_tokens": 340,
+                "total_tokens": 556648,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "benchmarks/diiid_diverted_solve_overlay.py and benchmarks/diiid_circuit_driven_forward_validation.py call assemble_separatrix_branches and compare_closed_boundaries directly rather than importing _separatrix and contour_separation from benchmarks/diiid_forward_gs_match.py, with the terminal readings they produce unchanged and shown to be unchanged; the followup naming three drivers is checked and the manifest states how many actually import a private name from that module, naming each, rather than inventing a third; a committed case in tests/imas/test_diiid_forward_gs_match.py pins that no driver imports a private name from the match module, so the last one cannot come back; both test modules collect and pass in one all_debug CPU allocation with JAX_PLATFORMS=cpu, TMPDIR=/tmp in the submit environment and in the payload, the shared root interpreter run directly and uv never invoked on the compute node; the gate reports added failures against the base revision and the declared negative control reddens",
+          "estimated_hours": null,
+          "goal": "point the DIII-D drivers at the public separatrix and boundary comparators instead of the private names they reach into the match driver for",
+          "id": "dvfb-drivers-call-the-public-comparators",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-20T00:05:12Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T000512017766-dvfb-drivers-call-the-public-comparators/manifest.md",
+          "negative_control": "MUTATION: re-add the name _separatrix to the 'from benchmarks.diiid_forward_gs_match import (...)' block of a scratch copy of benchmarks/diiid_diverted_solve_overlay.py, then run the committed pinning case against that scratch root and require it to redden",
+          "plan": "diiid-vertical-force-balance",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/diiid_diverted_solve_overlay.py",
+            "benchmarks/diiid_circuit_driven_forward_validation.py",
+            "benchmarks/diiid_forward_gs_match.py",
+            "tests/imas/test_diiid_forward_gs_match.py",
+            "docs/plans/diiid-vertical-force-balance.html",
+            "docs/evidence/archive/diiid-vertical-force-balance-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-dvfb-pubapi-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-20T00:05:22Z",
+        "completed_at": "2026-09-20T00:23:33.845Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1084,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1091,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "6c122a0a04f4086cefacb88c4fa3cca75b410061",
+        "commits": [
+          "0705871eef2cf1172a0d7a560ca8a7a9a6a4637d",
+          "6851db28fb127271842b9735d8996470f40b5921"
+        ],
+        "changed_lines": {
+          "added": 344,
+          "removed": 6,
+          "files": 5
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "PYTHONPATH=$PWD JAX_PLATFORMS=cpu .venv/bin/python -m pytest -p no:cacheprovider -q tests/imas/test_diiid_forward_gs_match.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T000512017766-dvfb-drivers-call-the-public-comparators/logs/after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T000512017766-dvfb-drivers-call-the-public-comparators/manifest.md",
+        "scope_changed": false,
+        "session_id": "4529edb5-6b26-4ea3-b70a-9ebb61cf74b4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 10988929,
+            "input_tokens_cumulative": 10988929,
+            "output_tokens": 70006,
+            "output_tokens_cumulative": 70006,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-20T00:23:33.845Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 11156245,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1088.659,
+          "generated_tokens": 78837,
+          "generation_seconds": 1002.271,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 34.6,
+          "machine_seconds": 86.388,
+          "peak_input_tokens": 166016,
+          "tokens_per_second": 78.66,
+          "wall_tokens_per_second": 72.42
+        },
+        "follow_on_paths": [
+          "benchmarks/diiid_solenoid_inclusion_ladder.py:36",
+          "benchmarks/diiid_vacuum_from_description.py:56"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/dvfb-drivers-call-the-public-comparators",
+          "session_id": "4529edb5-6b26-4ea3-b70a-9ebb61cf74b4",
+          "session_source": "stream",
+          "retained_at": "2026-09-20T00:23:33.845Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.98,
+        "impl_move": {
+          "plan": "diiid-vertical-force-balance",
+          "at_dispatch": 0.98,
+          "at_complete": 1.0,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/imas/test_diiid_forward_gs_match.py"
+          ],
+          "declaration": "MUTATION: re-add the name _separatrix to the 'from benchmarks.diiid_forward_gs_match import (...)' block of a scratch copy of benchmarks/diiid_diverted_solve_overlay.py, then run the committed pinning case against that scratch root and require it to redden",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T000512017766-dvfb-drivers-call-the-public-comparators/logs/negative_control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T000512017766-dvfb-drivers-call-the-public-comparators/logs/negative_control.log"
+        },
+        "tool_steps": 95.0,
+        "orientation_input_tokens": 3172675.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -214310,6 +214535,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2946
+    "_version": 2947
   }
 }

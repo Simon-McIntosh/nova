@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-20">
-<meta name="plan-version" content="61">
+<meta name="plan-version" content="62">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
 <meta name="plan-impl" content="1.0">
@@ -262,6 +262,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260919T132251462287-review-of-dvfb-separatrix-import" data-who="reckon-ship" data-when="2026-09-19T13:45:02.929Z">
     <div class="r-comment-body"><p>Review verdict FAIL: _grid_axis_rz reverses the ordering under the falling polarity and locates a grid corner 2.83 m from the axis, so _separatrix returns (0,2) where an explicit axis returns 1953 vertices; items 2 and 3 pass with one record correction each; the record overstates the callers vertex-count check. Corrective node follows.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260920T000512017766-dvfb-drivers-call-the-public-comparators" data-who="reckon-ship" data-when="2026-09-20T00:23:33.845Z">
+    <div class="r-comment-body"><p>two DIII-D drivers call the public separatrix comparators instead of reaching into the match driver for its private names, with terminal readings unchanged, and a committed case declares the one importer that remains so a re-introduction reddens; the followup said three drivers and an abstract-syntax scan of every benchmark confirmed three, so the third was found rather than invented and is named as out of scope; 22 passed at head against 19 at base with three added</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

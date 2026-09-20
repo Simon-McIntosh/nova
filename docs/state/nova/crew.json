@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T20:46:53",
+  "updated": "2026-09-20T21:18:02",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -217361,6 +217361,299 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260920T183703371948-cco-persist-the-terminal-state-and-guard-the-lattice-order",
+        "plan": "centroid-constrained-oracle-solve",
+        "section": "",
+        "node": "cco-persist-the-terminal-state-and-guard-the-lattice-order",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3154,
+                "cached_input_tokens": 248090,
+                "input_tokens": 251276,
+                "output_tokens": 5647,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 256923,
+                "uncached_input_tokens": 32
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "benchmarks/centroid_constrained_fixture_receipt.py saves the terminal state before the receipt is written so the state exists beside the banked receipt, and the three figures under docs/figures/centroid-constrained-oracle-solve are re-rendered from that persisted state as PNG and SVG under the plotting rules (line contours on shared levels, both null sets, the wall, no axes) on one all_debug allocation without a betelgeuse solve; level_error_wb is replaced in the receipt and captions by the level row scaled residual as the gauge-free physical error, or dropped, and the record says which; the lattice-order guard in nova/equilibrium/constraint.py near line 1200 compares the sampled pool slice against the cell count the stencil convention states so that the pre-fix indexing fails it, pinned by a committed case in tests/test_centroid_constraint_lattice_guard.py that applies the pre-fix indexing and reddens; the two-module all_debug lane with JAX_PLATFORMS=cpu, TMPDIR=/tmp in the submit environment and the payload, the root interpreter run directly and uv never invoked on the node, reports zero added failures against the stated base revision; the declared negative control reddens",
+          "estimated_hours": null,
+          "goal": "persist the centroid fixture terminal state beside its receipt, re-render its figures with SVG companions from that state, replace the gauge-carrying level error, and make the lattice-order guard fail under the pre-fix indexing",
+          "id": "cco-persist-the-terminal-state-and-guard-the-lattice-order",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-20T18:37:03Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183703371948-cco-persist-the-terminal-state-and-guard-the-lattice-order/manifest.md",
+          "negative_control": "restore the pre-fix pool slice indexing in the lattice-order guard; the case asserting the guard refuses it must redden",
+          "plan": "centroid-constrained-oracle-solve",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/centroid_constrained_fixture_receipt.py",
+            "nova/equilibrium/constraint.py",
+            "tests/test_centroid_constraint_lattice_guard.py",
+            "docs/figures/centroid-constrained-oracle-solve",
+            "docs/plans/centroid-constrained-oracle-solve.html",
+            "docs/evidence/archive/centroid-constrained-oracle-solve-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-cco-svg-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-20T18:37:14Z",
+        "completed_at": "2026-09-20T18:54:28.691Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1025,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1034,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "8ccc6ed1150b870bd40e4b06d202ab648834ba9d",
+        "commits": [
+          "d1638f274ce653f435088eafa2cd36fd16dcba29",
+          "591ee7c68540ec9b28cb130edbf9a18e5ac1417c"
+        ],
+        "changed_lines": {
+          "added": 288,
+          "removed": 33,
+          "files": 4
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:20:00 --cpus-per-task=4 --mem=32G bash -lc \"export TMPDIR=/tmp JAX_PLATFORMS=cpu; /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_centroid_constraint_lattice_guard.py\"",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/cco-persist-terminal-state/guard_test.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T183703371948-cco-persist-the-terminal-state-and-guard-the-lattice-order/manifest.md",
+        "scope_changed": false,
+        "session_id": "9581fa38-7844-4521-9b5c-bf8a3406bece",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 8334761,
+            "input_tokens_cumulative": 8334761,
+            "output_tokens": 43141,
+            "output_tokens_cumulative": 43141,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-20T18:54:28.691Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports blocked: the evidence fence's two requirements cannot both hold on this code path. Recovering the wall level from the reachable wall makes the gate pass and reddens test_diverted_mast_row_polishes_only_its_census_wall_candidate; which requires the wall operand to be withdrawn when the supplied census contact is shadowed. The only other side; moving the anchor source instead of the shadow rule; is the publication 8fdc71ef5 established and the read contract's own words forbid the state's wall node flux from valuing the binding point. Decision needed: restate that struck contract beside the pin; or move the anchor source and restate the pin. Commit 44ecd9443 is a candidate and must not be promoted as it stands.",
+              "elapsed_seconds": 3241,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 5174,
+              "log_fresh": false,
+              "manifest_commits": [
+                "44ecd9443 fix(equilibrium): keep a finite wall level when the supplied contact has no reachable support (candidate",
+                "not promoted); b75246fcd docs(null-identification): record the grid-class margin measurement and the diverted contract it collides with"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "6b43651872db015c3143c666f48a3f5fe8f9e4ac3f7820074be6499e526da5ca",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T161637774565-nia-restore-a-finite-wall-level-on-the-grid-read/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T161637774565-nia-restore-a-finite-wall-level-on-the-grid-read/manifest.md; resolve the blocker before resuming the run",
+              "node": "nia-restore-a-finite-wall-level-on-the-grid-read",
+              "phase": "starting",
+              "plan": "null-identification-authority",
+              "process_alive": false,
+              "project": "nova",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260920T161637774565-nia-restore-a-finite-wall-level-on-the-grid-read",
+              "session": "s19-codex-20260916",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260920T161637774565-nia-restore-a-finite-wall-level-on-the-grid-read",
+                "session_id": "e39ce8f7-7649-4833-9afe-e441676da99f",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 5185,
+              "terminal_at": "2026-09-20T17:10:38Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-restore-a-finite-wall-level-on-the-grid-read"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 8334761,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1031.468,
+          "generated_tokens": 43141,
+          "generation_seconds": 562.368,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 33.6,
+          "machine_seconds": 469.1,
+          "peak_input_tokens": 161504,
+          "tokens_per_second": 76.71,
+          "wall_tokens_per_second": 41.82
+        },
+        "follow_on_paths": [
+          "field-response/panels/*.svg:",
+          "benchmarks/centroid_field_response_probe.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cco-persist-the-terminal-state-and-guard-the-lattice-order",
+          "session_id": "9581fa38-7844-4521-9b5c-bf8a3406bece",
+          "session_source": "stream",
+          "retained_at": "2026-09-20T18:54:28.691Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.8,
+        "impl_move": {
+          "plan": "centroid-constrained-oracle-solve",
+          "at_dispatch": 0.8,
+          "at_complete": 0.8,
+          "verdict": "waived",
+          "reason": "review repairs on a landed section; the plan remainder at 0.8 is the compensating exterior-field unknown, which this node does not touch"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/test_centroid_constraint_lattice_guard.py"
+          ],
+          "declaration": "restore the pre-fix pool slice indexing in the lattice-order guard; the case asserting the guard refuses it must redden",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/cco-persist-terminal-state/negative_control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/cco-persist-terminal-state/negative_control.log"
+        },
+        "tool_steps": 71.0,
+        "orientation_input_tokens": 1881605.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -217811,8 +218104,22 @@
         "reason": "utilisation 98% with burn multiple 1.1x and projected exhaustion 2026-09-21T05:20:19Z is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve); the account surface was read at 2026-09-20T18:02:22Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-astra-20260920191631",
+        "backend": "codex-astra",
+        "purpose": "resume",
+        "opened_at": "2026-09-20T19:16:31Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-21T05:57:32Z",
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100% with burn multiple 1.1x and projected exhaustion 2026-09-21T05:16:45Z is at or above the 100.0% ceiling for a resume; the account surface was read at 2026-09-20T19:16:29Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
+        "closed_by_purpose": null,
+        "resumption_fired": false
       }
     ],
-    "_version": 2987
+    "_version": 2989
   }
 }

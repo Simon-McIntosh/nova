@@ -23,8 +23,8 @@
   <title>Centroid-constrained oracle solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-19">
-<meta name="plan-version" content="24">
+<meta name="plan-modified" content="2026-09-20">
+<meta name="plan-version" content="25">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -127,6 +127,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-cco-review-repairs-landed-partial" data-who="coordinator" data-when="2026-09-19T17:00:00Z">
     <div class="r-comment-body"><p>The review repairs land at 10ff11fd, 0452c5cf, 662bc387, 44c0bd28, 28a632cd, 53112c65 and 1851827b, merged 92e9e706, with one of the three items unfinished for a reason that is not this plan's to fix. The terminal state is persisted before the receipt is written and the negative control arm is re-rendered from it as PNG and SVG. The mixed-gauge level error is dropped in favour of the level row's scaled residual, which is the physical quantity. The lattice-order guard is a guard rather than a stub: <code>_sampled_cell_pool</code> in nova/equilibrium/constraint.py refuses a point-sampled pool whose declared length disagrees with the operator's cell count, because the pool carries the carried cells first while the physical prefix adds the wall nodes between the two blocks, so slicing by the prefix answers with a neighbouring cell's polynomial and a uniform offset passes straight through. Verified live in the served module, not only committed. What is not produced is the constrained positive control: two all_debug jobs aborted inside LLVM compiling jit_scan, at 64G and again at 180G, so it waits on the program-size section of forward-solver-route-integrity rather than on another attempt here. The followup f-cco-review-repairs stays open for that half.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260920T183703371948-cco-persist-the-terminal-state-and-guard-the-lattice-order" data-who="reckon-ship" data-when="2026-09-20T18:54:28.691Z">
+    <div class="r-comment-body"><p>the lattice-order guard now refuses the pre-fix pool prefix, pinned by three cases; the control-negative panel is re-rendered from the persisted terminal state with its SVG companion; the one figure without a vector companion waits on the program-size fix</p></div>
 </div>
 </section>
 </main>

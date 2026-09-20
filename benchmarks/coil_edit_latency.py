@@ -823,7 +823,8 @@ def _seed_probe(
     current: jax.Array,
     requested_class: jax.Array,
     target_current: float,
-) -> dict[str, Any]:
+    program: Any = None,
+) -> tuple[dict[str, Any], Any]:
     """Measure the seed's own residual on the edited operator, before any trip.
 
     One trip closed with zero Newton steps evaluates the trip boundary at the
@@ -831,7 +832,10 @@ def _seed_probe(
     edited operator rather than the post-correction residual a full edit
     reports.  The program is not threaded from the sweep: this probe's policy
     key differs from the sweep's, so reusing the sweep program would only add
-    the probe's solver to a chain whose reuse the latency gates measure.
+    the probe's solver to a chain whose reuse the latency gates measure.  Its
+    own program is handed back so the caller can hold it across edits; a fresh
+    program loaded per edit would accumulate the section mappings the process
+    cannot exceed.
     """
     result = _compiled_edit(
         profile,
@@ -839,13 +843,13 @@ def _seed_probe(
         current,
         requested_class,
         target_current,
-        None,
+        program,
         newton_steps=0,
         active_set_steps=1,
     )
     jax.block_until_ready(result.state)
     residuals = [float(value) for value in result.active_set_residuals]
-    return {
+    probe = {
         "residual": float(np.asarray(result.terminal_residual)),
         "trip_count": int(np.asarray(result.active_set_iterations)),
         "termination": result.termination_name,
@@ -857,6 +861,7 @@ def _seed_probe(
         "achieved_class": _achieved_class(profile, state),
         "achieved_class_after_trip": _achieved_class(profile, result.state),
     }
+    return probe, result.program
 
 
 def _equilibrium_receipt(
@@ -2355,6 +2360,7 @@ def run(
         constraint_pairs = (prepared["vertical_centroid_pair"],)
         state = initial
         program = None
+        probe_program = None
         program_reused_from_edit: int | None = None
         reference_raster_separatrix = prepared["reference_raster_separatrix"]
         for index, (fraction, current) in enumerate(
@@ -2366,9 +2372,18 @@ def run(
             # the seed's, not the post-correction residual a full edit
             # reports.  It runs off the clock and before the miss counter is
             # sampled, so the probe's one-off program build lands in neither
-            # an edit's wall or its cache accounting.
-            seed_probe = _seed_probe(
-                profile, state, current, requested_class, target_current
+            # an edit's wall or its cache accounting.  The probe program is
+            # held from edit to edit and re-entered: loading one costs about
+            # seventeen thousand XLA section mappings against a 65,530 cap,
+            # so building a fresh one per edit exhausts the process's mapping
+            # space and aborts the sweep part-way through the chain.
+            seed_probe, probe_program = _seed_probe(
+                profile,
+                state,
+                current,
+                requested_class,
+                target_current,
+                probe_program,
             )
             persistent_misses_before = int(cache_events["misses"])
             persistent_hits_before = int(cache_events["hits"])

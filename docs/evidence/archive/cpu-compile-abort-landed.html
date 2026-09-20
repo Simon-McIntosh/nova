@@ -127,6 +127,106 @@ this node's write fence did not include.</p>
 <p>Committed with the landing record; a coordinator reading this over the peer channel should treat
 the mapping hypothesis as <strong>live and narrow</strong>, not settled.</p>
 
+<h2 id="the-configuration-that-aborts">The configuration that aborts, sampled</h2>
+<p>The section above measured a run that did <em>not</em> abort, because its write fence excluded
+the panel directory. This section runs the configuration that <em>does</em> abort — the same driver
+with <code>--certificate-panel-dir</code> pointing under the checkout's served figure tree — under
+the same sampler, twice.</p>
+<table>
+  <tr><th></th><th>run 1, job <code>1274173</code></th><th>run 2, job <code>1274181</code></th></tr>
+  <tr><td>node / partition</td><td><code>98dci4-clu-3142</code> / <code>all_debug</code></td><td><code>98dci4-clu-3142</code> / <code>all_debug</code></td></tr>
+  <tr><td>request</td><td><code>--cpus-per-task=8 --mem=64G --time=00:59:00</code>, <code>TMPDIR=/tmp</code>, <code>JAX_PLATFORMS=cpu</code></td><td>identical</td></tr>
+  <tr><td>sampler tick</td><td>1.0 s</td><td>0.2 s</td></tr>
+  <tr><td>panel directory</td><td><code>docs/figures/millisecond-converged-solve/program-size/compile-abort/panels</code></td><td>identical</td></tr>
+  <tr><td>outcome</td><td><strong>died at t ≈ 295 s, exit <code>-11</code> (SIGSEGV)</strong>, inside the fourth row <code>diverted-single-null</code></td><td>all four rows completed, exit 1 on <code>CERTIFICATE_IDENTITY_GATE=FAIL</code></td></tr>
+  <tr><td>peak mapping count</td><td><strong>54147</strong> at <strong>t = 294.205 s</strong> — 11383 short of 65530</td><td><strong>52744</strong> at t = 254.225 s — 12786 short</td></tr>
+  <tr><td>resident at the peak / peak over the run</td><td><strong>12.25 GB</strong> <code>VmRSS</code>, 20.68 GB <code>VmSize</code>, <code>VmHWM</code> 13.08 GB</td><td>12.48 GB <code>VmRSS</code> max, 20.08 GB <code>VmSize</code> max</td></tr>
+  <tr><td>samples</td><td>293 over 295 s</td><td>2047 live over 426 s</td></tr>
+</table>
+
+<figure>
+  <img src="/nova/figures/millisecond-converged-solve/program-size/compile-abort/mapping-count-through-the-abort.png"
+       alt="Two panels of process mapping count against time: run 1 rising in 17600-mapping steps to 54147 before dying, and run 2 performing the same four steps but returning 16178 mappings before the fourth load.">
+  <figcaption>The two sampled series against <code>vm.max_map_count</code> = 65530, read from the node
+  in both jobs. Upper panel: both runs, showing that run 1 stood one program-load ahead of run 2 when
+  the fourth load began, because run 2 had returned 16178 mappings to the kernel and run 1 had not.
+  Lower panel: run 2 at a 0.2 s tick, resolving the step that the 1.0 s tick could only see as a
+  jump — the whole 17618-mapping rise lands inside a single sample interval.</figcaption>
+</figure>
+
+<h3>What the sampler saw move</h3>
+<p>Only the mapping count approaches a bound. Resident memory never left the request — <code>VmRSS</code>
+peaked at 12.48 GB and <code>VmSize</code> at 20.08 GB against 64 GB requested — and the failure is
+<em>not</em> explained by an address-space rlimit or by strict overcommit: run 2 read
+<code>vm.overcommit_memory</code> = 0, <code>vm.overcommit_ratio</code> = 50 and <code>ulimit -v</code>
+= unlimited on the same node.</p>
+<p>The quantity the sampler saw move decisively is the <strong>size of a single step</strong>. Loading
+one certificate program adds <strong>16789–17620</strong> mappings to this process, and run 2 at a
+0.2 s tick shows the whole step landing inside one sample interval:</p>
+<table>
+  <tr><th>Run 2 step</th><th>t (s)</th><th>Rise</th><th>Count after</th></tr>
+  <tr><td>first program load</td><td>37.602</td><td>+17618</td><td>23072</td></tr>
+  <tr><td>second program load</td><td>115.315</td><td>+17619</td><td>45233</td></tr>
+  <tr><td>third program load</td><td>194.510</td><td>+17618</td><td>49640</td></tr>
+  <tr><td>mappings returned at the row boundary</td><td>256.516</td><td><strong>−16178</strong></td><td>36446</td></tr>
+  <tr><td>fourth program load</td><td>280.522</td><td>+16789</td><td>35632</td></tr>
+</table>
+
+<h3>Verdict</h3>
+<p><strong>The limit was reached in run 1.</strong> The last sample stood 11383 mappings short of
+65530, but the fourth program load — a step this process performed three times, each adding
+16789–17620 mappings — cannot complete from there without the count crossing the cap:
+54147 + 16789 = <strong>70936</strong>, 5406 mappings above it, and the process died inside exactly
+that step with LLVM refusing memory; run 2 completed the same four loads only because it returned
+<strong>16178</strong> mappings to the kernel before the fourth, which run 1 did not, so its fourth
+load began 35250 lower.</p>
+<p>The crossing itself is <strong>inferred, not observed</strong>, and the inference is quantitative
+rather than a reading off the same series: run 1's last sample fell <strong>0.78 s</strong> before the
+refusal and its next tick never came, while run 2 measured a <strong>17618-mapping rise inside one
+0.2 s interval</strong>, so the 11383-mapping gap is traversable in about <strong>0.13 s</strong> — a
+fifth of the interval that missed it. The 1.0 s tick was coarser than the process's own allocation
+burst, so a series at that tick <em>cannot</em> decide this question in either direction; the second
+run exists because of that, and its role is to supply the step size and its duration.</p>
+
+<h3>What this run does not settle</h3>
+<ul>
+  <li><strong>The terminal signal differs from the original abort.</strong> Job <code>1274080</code>
+  carried <code>allocateMappedMemory failed with error: Cannot allocate memory</code>,
+  <code>Failed to satisfy suballocation request for 69</code> and
+  <code>LLVM ERROR: Unable to allocate section memory!</code> before SIGABRT (exit 134). Run 1 carries
+  the shared first line, <code>execution_engine.cc:54] LLVM compilation error: Cannot allocate memory</code>,
+  <strong>192 times inside 9 ms</strong>, then SIGSEGV (<code>-11</code>) — no section-manager line and
+  no <code>Aborted</code> line. The refusal path is shared; the terminal signal is not, so the crash
+  mode is not yet reproduced faithfully even though the configuration is.</li>
+  <li><strong>The node's free memory at the instant of refusal was not captured</strong> in either
+  run, so a node-level pressure explanation of the <code>ENOMEM</code> is not formally excluded. What
+  is captured is that the same node ran the same configuration 40 minutes later to completion with the
+  same resident footprint.</li>
+  <li><strong>Run 2's series ends with an instrument artifact</strong>: its last sample (n = 2049,
+  t = 425.819 s) records <code>maps = 0</code>, which is the probe reading an exited-but-unreaped
+  child's empty <code>/proc/&nbsp;&lt;pid&gt;/maps</code>. The live series is 2047 samples, not 2049, and
+  the zero is not a measurement of the process.</li>
+</ul>
+
+<h2 id="abort-artifacts">Artifacts for the abort configuration</h2>
+<ul>
+  <li>Launchers: <code>.../r-20260920T160614302471-cca-reproduce-the-abort-under-the-sampler/abort-reproduction.sbatch</code>
+  (run 1) and <code>abort-reproduction-r2.sbatch</code> (run 2).</li>
+  <li>Logs: <code>abort-reproduction.log</code> (<code>CCA_JOB_START job=1274173 … max_map_count=65530</code>,
+  three <code>CERTIFICATE_START</code>/<code>CERTIFICATE_DONE</code> pairs, 192 LLVM lines,
+  <code>PROBE_SUMMARY exit=-11 peak_maps=54147 limit=65530 samples=293 wall=295.206s</code>) and
+  <code>abort-reproduction-r2.log</code> (<code>PROBE_SUMMARY exit=1 peak_maps=52744 limit=65530
+  samples=2049 wall=426.02s</code>, four <code>CERTIFICATE_DONE</code> pairs).</li>
+  <li>Series: <code>maps-run1.jsonl</code>, <code>maps-r2.jsonl</code>; summaries
+  <code>summary-run1.json</code>, <code>summary-r2.json</code>.</li>
+  <li>Partial receipt from run 1 (<code>pending_rows = [["diverted-single-null", -500]]</code>, three
+  rows landed) in <code>scratch/receipt.json</code>.</li>
+  <li>Certificate panels from run 1, one per completed row, in
+  <code>docs/figures/millisecond-converged-solve/program-size/compile-abort/panels</code>
+  (<code>weak-</code>, <code>moderate-</code>, <code>strong-rotation-compact-static-cells-300-across-revisions</code>,
+  each as PNG beside SVG).</li>
+</ul>
+
 </main>
 </body>
 </html>

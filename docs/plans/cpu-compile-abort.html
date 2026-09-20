@@ -176,6 +176,55 @@
       warm and a smaller emitted program, but it does make both remedies plausible and it rules
       out the allocation request as the lever.</p>
     </section>
+
+    <section id="abort-reproduction">
+      <h2><span class="sec">§</span> The aborting configuration, sampled (jobs 1274173 and 1274181)</h2>
+      <p class="worker-landing"><strong>Sampled 2026-09-20, commit <code>b5f02aca3</code>.</strong>
+      The configuration that aborts is the certificate driver with
+      <code>--certificate-panel-dir</code> under the served figure tree, which the previous node's
+      fence excluded. Run 1, job <code>1274173</code>, one <code>all_debug</code> allocation on
+      <code>98dci4-clu-3142</code> at <code>--cpus-per-task=8 --mem=64G --time=00:59:00</code> with
+      the panel directory at
+      <code>docs/figures/millisecond-converged-solve/program-size/compile-abort/panels</code>,
+      <strong>reproduced the abort</strong>: it died at <strong>t ≈ 295 s</strong> inside the fourth
+      row <strong><code>diverted-single-null</code></strong> after 192
+      <code>LLVM compilation error: Cannot allocate memory</code> lines inside 9 ms, exit
+      <code>-11</code>. Its recorded peak mapping count was <strong>54147</strong> of
+      <strong>65530</strong> — <strong>11383 short</strong> — at <code>t = 294.205 s</code>, with
+      <strong>12.25 GB</strong> resident against the 64 GB request.</p>
+      <p class="worker-landing">The near-miss reading is <strong>not</strong> the finding, and a second
+      allocation was run to say why. Loading one certificate program adds
+      <strong>16789–17620</strong> mappings to this process; run 2, job <code>1274181</code>, sampled
+      the same configuration at a <strong>0.2 s</strong> tick and resolved the step that the 1.0 s tick
+      could only see as a jump. Run 2 completed all four rows with a peak of <strong>52744</strong>
+      because it <strong>returned 16178 mappings</strong> to the kernel at the row boundary before its
+      fourth load, so that load began from 18843 and ended at 35632. Run 1 returned mappings once
+      (at <code>t = 114.5 s</code>, −17621) and stood at <strong>54147</strong> when its fourth load
+      began. That load cannot complete from there without crossing the cap —
+      <code>54147 + 16789 = 70936</code>, 5406 above it — and the process died inside it with LLVM
+      refusing memory.</p>
+      <p class="worker-landing"><strong>Verdict: the limit was reached.</strong> The crossing is
+      inferred rather than observed — run 1's last sample fell 0.78 s before the refusal and its next
+      tick never came — but the inference is quantitative: run 2 measured a 17618-mapping rise inside
+      one 0.2 s interval, so the 11383-mapping gap is traversable in about 0.13 s, a fifth of the
+      interval that missed it. Nothing else the sampler recorded approaches a bound: <code>VmRSS</code>
+      peaked at 12.48 GB and <code>VmSize</code> at 20.08 GB of 64 GB, and run 2 read
+      <code>vm.overcommit_memory</code> = 0, <code>overcommit_ratio</code> = 50 and
+      <code>ulimit -v</code> = unlimited on the same node, so the refusal is not a strict-overcommit
+      or rlimit refusal. The section stands: the mapping count is the quantity that runs out, and it
+      runs out because each program load adds about 17000 mappings and this process loads four.</p>
+      <p class="worker-landing"><strong>What remains open.</strong> The terminal signal differs from
+      the original abort — SIGSEGV here against SIGABRT (exit 134) for job <code>1274080</code>, with
+      no <code>allocateMappedMemory failed</code> and no
+      <code>Unable to allocate section memory!</code> line — so the crash mode is not reproduced
+      faithfully even though the configuration and the refusal path are; that is a crash-handling
+      question rather than a memory question and it is left to its own node. The decision
+      <code>compile-abort-remedy</code> is now answerable: the make-it-not-happen lever is the cache,
+      and the make-it-smaller lever is the emitted program, and this measurement favours the cache
+      because the abort happens on the load of a program the lane had not compiled before. Evidence:
+      <a href="/nova/evidence/archive/cpu-compile-abort-landed">the mapping-count record</a>, carrying
+      both series as a figure.</p>
+    </section>
   </main>
 </body>
 </html>

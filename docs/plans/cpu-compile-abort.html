@@ -123,6 +123,49 @@
         <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort §1</pre>
       </article>
     </section>
+
+    <section id="mapping-count">
+      <h2><span class="sec">§</span> What the sampler saw (job 1274144)</h2>
+      <p class="worker-landing"><strong>Sampled 2026-09-20, commit <code>17bd21d58</code>.</strong>
+      The smallest of the four aborting drivers is the certificate, job <code>1274080</code>: its
+      <code>sacct</code> elapsed is <code>20:28</code> against <code>38:47</code> /
+      <code>38:28</code> for the centroid arm and <code>53:13</code> for the coil-edit
+      regeneration, and its recorded peak resident memory is <code>16.9 GB</code> against
+      <code>28.7</code> / <code>30.1 GB</code>, so it reaches the abort fastest at the lowest
+      resident cost. One <code>all_debug</code> allocation, job <code>1274144</code>,
+      <code>--cpus-per-task=8 --mem=64G --time=00:59:00</code>, ran it under
+      <code>benchmarks/compile_abort_probe.py</code>, which polls the payload's own
+      <code>/proc/&lt;pid&gt;/maps</code> line count once per second beside
+      <code>VmRSS</code>/<code>VmSize</code> and writes each sample as it is taken.</p>
+      <p class="worker-landing">The limit, read from <code>/proc/sys/vm/max_map_count</code>, is
+      <strong>65530</strong>. The peak count was <strong>65271</strong>, held flat from
+      <code>t=930 s</code> to <code>t=936 s</code>, with resident memory <strong>16.6 GB</strong>
+      against the 64 GB request — a margin of <strong>259 mappings</strong>, or 0.4% of the limit;
+      the peak is 99.6% of it. The last live sample, at <code>t=1042.3 s</code>, carried
+      <code>2545</code> mappings and 16.5 GB. <strong>Verdict: the mapping count did not reach the
+      limit on this run, falling 259 short, but it is the only quantity the sampler saw approach a
+      bound, rising from 56 to within 0.4% of the kernel's per-process cap while resident memory
+      never left the request.</strong></p>
+      <p class="worker-landing">The run <strong>completed all four certificate rows and never
+      aborted</strong>, exiting 1 on <code>CERTIFICATE_IDENTITY_GATE=FAIL</code>, so the hypothesis
+      is <strong>not settled and must not be retired</strong>. The gap is explained by a measured
+      difference in configuration rather than by inference: job <code>1274080</code> ran with
+      <code>--certificate-panel-dir</code>, rendering a flux panel per row and compiling further
+      programs inside the same process, while this run omitted that flag because the driver refuses
+      a panel directory outside the checkout's <code>docs/</code> tree. Nothing in this run returns
+      mappings to the kernel between rows. A first attempt, job <code>1274141</code>, ran
+      <em>with</em> the panel directory and reached <strong>24718</strong> mappings in its first
+      100 s — 38% of the limit in an eighth of the run — before dying on a path-validation error in
+      the panel writer rather than in a compile.</p>
+      <p class="worker-landing"><strong>Open, and the direct continuation:</strong> repeat this
+      measurement with the panel directory placed under the checkout's <code>docs/</code> tree,
+      which is the configuration that aborted and which this node's write fence excluded.
+      Evidence: <a href="/nova/evidence/archive/cpu-compile-abort-landed">the mapping-count
+      record</a>, carrying the sampled series as a figure. The decision
+      <code>compile-abort-remedy</code> stays open: a near-miss does not choose between a cache
+      warm and a smaller emitted program, but it does make both remedies plausible and it rules
+      out the allocation request as the lever.</p>
+    </section>
   </main>
 </body>
 </html>

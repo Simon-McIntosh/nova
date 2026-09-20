@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <title>The mapping count runs to within 259 of the limit | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+<h2 id="what-ran">What ran</h2>
+<p>One <code>all_debug</code> CPU allocation, job <code>1274144</code>, node
+<code>98dci4-clu-3141</code>, <code>--cpus-per-task=8 --mem=64G --time=00:59:00</code>,
+<code>TMPDIR=/tmp</code> exported in the submit environment and again in the payload,
+<code>JAX_PLATFORMS=cpu</code>, <code>uv</code> never invoked on the compute node, the shared root
+interpreter <code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code> run directly. The
+persistent compilation cache root was <code>/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm</code>,
+the same one job <code>1274080</code> used, so the compile behaviour is comparable.</p>
+
+<p>The sampler is <code>benchmarks/compile_abort_probe.py</code>. It starts the driver as a
+shell-free child and polls that child's own <code>/proc/&lt;pid&gt;/maps</code> line count once per
+second, reading <code>VmRSS</code>, <code>VmSize</code> and <code>VmPeak</code> from
+<code>/proc/&lt;pid&gt;/status</code> at the same instant, and writing each sample to disk as it is
+taken. The sampler runs outside the driver, so it keeps sampling while the driver holds the GIL
+through a long compile. The limit was read from <code>/proc/sys/vm/max_map_count</code> at start:
+<strong>65530</strong>.</p>
+
+<h3>Which driver, and why it is the smallest of the four</h3>
+<p>The four aborts are job <code>1274003</code> and <code>1274028</code> (the centroid positive arm,
+<code>benchmarks/centroid_constrained_fixture_receipt.py</code>), <code>1274080</code> (the
+certificate, <code>benchmarks/solve_program_size_gate.py</code>) and <code>1274099</code> (the
+coil-edit regeneration, <code>benchmarks/coil_edit_latency.py</code>). <code>sacct</code> elapsed
+times for those jobs are <code>38:47</code>, <code>38:28</code>, <code>20:28</code> and
+<code>53:13</code>, with recorded peak resident memory of <code>28.7</code>, <code>30.1</code>,
+<code>16.9</code> and <code>11.3 GB</code> against a 64 G request. <strong>Job
+<code>1274080</code> is the smallest</strong>: it is the only one of the four that both reaches the
+abort fastest (20:28 against 38:28–53:13) and does so at the lowest reported resident memory
+(16.9 GB), so it is the cheapest faithful reproduction. It aborted on the third of its four
+certificate rows, <code>strong-rotation-compact-static</code> at 300 cells, immediately after
+<code>CERTIFICATE_START</code> for that row.</p>
+
+<h2 id="series">The mapping count through the run</h2>
+<figure>
+<svg viewBox="0 0 760 220" width="760" height="220" role="img"
+     aria-label="Process mapping count over 1042 seconds, rising in steps to a plateau at 65271 against a limit of 65530.">
+  <rect x="52" y="14" width="694" height="180" fill="none" stroke="#666" stroke-width="1"/>
+  <line x1="52" y1="17.5" x2="746" y2="17.5" stroke="#b00" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="748" y="14" font-size="11" fill="#b00" text-anchor="end">limit 65530</text>
+  <polyline fill="none" stroke="#123" stroke-width="1.6" points="52.0,193.8 54.7,189.9 57.3,187.4 60.0,179.5 62.7,179.3 65.3,179.3 68.0,179.3 70.7,179.3 73.4,179.3 76.0,179.3 78.7,131.9 81.4,131.9 84.1,131.9 86.7,131.9 89.4,131.9 92.1,131.9 94.8,131.9 97.5,131.9 100.1,131.9 102.8,131.9 105.5,131.9 108.2,131.9 110.9,131.9 113.5,128.1 116.2,124.1 118.9,124.1 121.6,124.1 124.3,124.1 126.9,124.1 129.6,76.7 132.3,76.7 135.0,76.7 137.7,76.7 140.4,76.7 143.1,76.7 145.8,76.7 148.4,76.7 151.1,76.7 153.8,76.7 156.5,76.7 159.2,76.7 161.9,76.7 164.6,76.7 167.3,69.1 170.0,116.5 172.6,116.5 175.3,116.5 178.0,116.5 180.7,116.5 183.4,116.5 186.1,116.5 188.7,116.5 191.4,116.5 194.1,116.5 196.8,116.5 199.5,116.5 202.1,116.5 204.8,116.5 207.5,116.5 210.2,116.5 212.9,116.5 215.6,116.5 218.2,116.5 220.9,116.5 223.6,116.5 226.3,116.5 229.0,116.5 231.7,116.5 234.3,116.5 237.0,116.5 239.7,116.5 242.4,116.5 245.1,116.5 247.7,116.5 250.4,116.5 253.1,116.5 255.8,116.5 258.5,116.5 261.2,116.5 263.8,116.5 266.5,116.5 269.2,116.5 271.9,116.5 274.6,116.5 277.2,116.5 279.9,116.5 282.6,116.5 285.3,116.4 288.0,116.4 290.7,116.4 293.3,116.4 296.0,116.4 298.7,116.4 301.4,116.4 304.1,116.4 306.8,116.4 309.4,116.4 312.1,116.4 314.8,116.4 317.5,116.4 320.2,116.4 322.8,116.4 325.5,116.4 328.2,116.4 330.9,116.4 333.6,116.4 336.3,116.4 338.9,116.4 341.6,116.4 344.3,116.4 347.0,116.4 349.7,116.4 352.3,116.4 355.0,116.4 357.7,116.4 360.4,116.4 363.1,116.4 365.8,116.4 368.4,116.4 371.1,116.4 373.8,116.4 376.5,116.4 379.2,116.4 381.8,116.4 384.5,116.4 387.2,116.4 389.9,116.4 392.6,106.6 395.3,89.2 398.0,72.1 400.7,69.0 403.4,69.0 406.1,21.5 408.8,21.5 411.5,69.0 414.1,68.9 416.8,68.7 419.5,68.7 422.2,64.8 424.9,61.2 427.6,108.7 430.3,108.7 433.0,108.7 435.7,108.7 438.3,108.7 441.0,108.7 443.7,108.7 446.4,108.7 449.1,108.7 451.8,108.7 454.4,108.7 457.1,108.7 459.8,108.7 462.5,108.7 465.2,108.7 467.9,108.7 470.5,108.7 473.2,108.7 475.9,108.7 478.6,108.7 481.3,108.7 484.0,108.7 486.6,108.7 489.3,108.7 492.0,108.7 494.7,108.7 497.4,108.7 500.1,108.7 502.8,108.7 505.4,108.7 508.1,108.7 510.8,108.7 513.5,108.7 516.2,108.7 518.9,108.7 521.5,108.7 524.2,108.7 526.9,108.7 529.6,108.7 532.3,108.7 535.0,108.7 537.6,108.7 540.3,108.7 543.0,108.7 545.7,108.7 548.4,108.7 551.1,108.7 553.8,108.7 556.4,108.7 559.1,108.7 561.8,108.7 564.5,108.7 567.2,108.7 569.9,108.7 572.5,108.7 575.2,108.7 577.9,108.7 580.6,108.7 583.3,108.7 586.0,108.7 588.6,108.7 591.3,108.7 594.0,108.7 596.7,108.7 599.4,108.7 602.1,108.7 604.7,108.7 607.4,108.7 610.1,108.7 612.8,108.7 615.5,108.7 618.2,108.7 620.9,108.7 623.5,108.7 626.2,108.7 628.9,108.7 631.6,108.7 634.3,108.7 637.0,108.7 639.6,108.7 642.3,108.7 645.0,108.7 647.7,108.7 650.4,108.7 653.1,108.7 655.7,108.7 658.4,102.8 661.1,87.9 663.8,72.6 666.5,63.5 669.2,63.5 671.9,18.2 674.6,18.2 677.3,63.5 680.0,63.5 682.7,63.5 685.4,63.5 688.1,63.5 690.8,63.5 693.5,63.5 696.2,63.5 698.9,63.5 701.6,63.5 704.3,63.5 707.0,63.5 709.6,63.5 712.3,63.5 715.0,63.5 717.7,63.5 720.4,63.5 723.1,63.5 725.8,63.5 728.5,63.5 731.2,63.5 733.9,63.5 736.6,63.5 739.3,63.6 742.0,96.0 744.7,141.9 746.0,187.1"/>
+  <line x1="671.9" y1="14" x2="671.9" y2="194" stroke="#090" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="668" y="30" font-size="11" fill="#090" text-anchor="end">peak 65271 at t=930 s</text>
+  <text x="52" y="212" font-size="11" fill="#333">0 s</text>
+  <text x="746" y="212" font-size="11" fill="#333" text-anchor="end">1042 s</text>
+  <text x="18" y="20" font-size="11" fill="#333">65530</text>
+  <text x="18" y="194" font-size="11" fill="#333">0</text>
+  <text x="399" y="212" font-size="11" fill="#333" text-anchor="middle">seconds from process start</text>
+</svg>
+<figcaption>The certificate driver under the sampler, job <code>1274144</code>: the process mapping
+count against time, one sample per second, drawn from 1036 samples. The red dashed rule is
+<code>vm.max_map_count</code> = 65530, read from the node. The green rule marks the peak, 65271 at
+t = 930 s. The count steps up as each certificate row compiles and is not returned to the kernel
+between rows; resident memory is not drawn here because it lives on a different scale and is given
+in the table below.</figcaption>
+</figure>
+
+<h2 id="instants">Peak, last sample, and resident memory at those instants</h2>
+<table>
+  <tr><th>Instant</th><th>Mapping count</th><th>Resident <code>VmRSS</code></th><th><code>VmSize</code></th></tr>
+  <tr><td>first sample, t = 0.0 s</td><td>56</td><td>3.4 MB</td><td>31.6 MB</td></tr>
+  <tr><td><strong>peak, t = 930.0 s</strong> (held flat 930–936 s)</td><td><strong>65271</strong></td><td><strong>16.6 GB</strong></td><td>24.5 GB</td></tr>
+  <tr><td>last live sample, t = 1042.3 s</td><td>2545</td><td>16.5 GB</td><td>24.1 GB</td></tr>
+  <tr><td>limit</td><td>65530</td><td>64 GB requested</td><td>—</td></tr>
+</table>
+<p>Margin at the peak: <strong>259 mappings</strong>, which is <strong>0.4%</strong> of the limit;
+the peak is <strong>99.6%</strong> of it. Resident memory at the peak was <strong>16.6 GB against a
+64 GB request</strong>, and the peak <code>VmPeak</code> over the run was 25.2 GB. The peak held flat
+for six consecutive one-second samples, so it is a plateau rather than a single reading.</p>
+
+<h2 id="verdict">Verdict</h2>
+<p><strong>The mapping count did not reach the limit on this run — the peak was 65271 against 65530,
+259 short — but the mapping count is the only quantity the sampler saw approach a bound, rising from
+56 to within 0.4% of <code>vm.max_map_count</code> while resident memory stayed at 16.6 GB of the
+64 GB requested.</strong></p>
+
+<h2 id="what-this-does-not-settle">What this run does not settle</h2>
+<p>This run <strong>completed all four certificate rows and never aborted</strong>; it exited 1 on
+<code>CERTIFICATE_IDENTITY_GATE=FAIL</code>, a bit-identity verdict that is not this node's subject.
+So the abort itself was <strong>not reproduced</strong>, and the mapping hypothesis is neither
+confirmed nor retired by this measurement: the honest reading is a near-miss that leaves the
+hypothesis live and narrows it to a small margin.</p>
+<p>Two concrete reasons the aborting job got further than this one, both stated as measurements
+rather than as inference:</p>
+<ul>
+  <li>Job <code>1274080</code> ran with <code>--certificate-panel-dir</code> set, so it rendered a
+  poloidal flux panel for each completed row; this run omitted the flag because the driver refuses
+  a panel directory outside the checkout's <code>docs/</code> tree. Rendering panels compiles
+  further programs inside the same process, and nothing in this run returns mappings to the kernel
+  between rows, so the omitted panels are the most likely source of the extra margin.</li>
+  <li>A first attempt at this measurement, job <code>1274141</code>, ran <em>with</em> the panel
+  directory and died after 100 s on a path-validation error in the panel writer, not in a compile,
+  having already reached <strong>24718</strong> mappings in 100 s. That is 38% of the limit in the
+  first eighth of the run, which is consistent with the step pattern in the figure.</li>
+</ul>
+<p>The direct continuation is one allocation of the same driver <em>with</em> a panel directory
+under the checkout's <code>docs/</code> tree, which is the configuration that aborted, and which
+this node's write fence did not include.</p>
+
+<h2 id="artifacts">Artifacts</h2>
+<ul>
+  <li>Sampler: <code>benchmarks/compile_abort_probe.py</code> (commit <code>17bd21d58</code>).</li>
+  <li>Launcher: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T153324775149-cca-sample-the-mapping-count-through-the-abort/mapping-count.sbatch</code>.</li>
+  <li>Job log: <code>.../mapping-count.log</code> — <code>CCA_JOB_START job=1274144</code>, four
+  <code>CERTIFICATE_START</code>/<code>CERTIFICATE_DONE</code> pairs, <code>PROBE_SUMMARY exit=1
+  peak_maps=65271 limit=65530 samples=1036 wall=1044.287s</code>.</li>
+  <li>Sample series: <code>.../maps.jsonl</code> (1036 JSON lines, one per second); summary
+  <code>.../summary.json</code>; the first attempt's series preserved as
+  <code>.../maps-first-attempt.jsonl</code>.</li>
+  <li>Smoke control for the sampler itself: <code>.../smoke-summary.json</code> and
+  <code>.../smoke-maps.jsonl</code> — five samples over a known 2.5 s child, exit 0 recorded,
+  <code>max_map_count</code> 65530 read, so the instrument is shown seeing a process known to be
+  present before any absence is reported.</li>
+</ul>
+<p>Committed with the landing record; a coordinator reading this over the peer channel should treat
+the mapping hypothesis as <strong>live and narrow</strong>, not settled.</p>
+
+</main>
+</body>
+</html>

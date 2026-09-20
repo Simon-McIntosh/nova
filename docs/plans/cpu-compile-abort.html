@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="cpu-compile-abort">
+  <meta name="plan-title"     content="The CPU Lane Aborts In Compilation">
+  <meta name="plan-summary"   content="Four drivers abort in LLVM section memory while compiling on CPU, with resident memory far inside the request and no GPU lane to escape to.">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="6.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-sprint"    content="S19">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="jax,throughput">
+  <meta name="plan-blocks"    content="millisecond-converged-solve,forward-solve-api,centroid-constrained-oracle-solve">
+  <title>The CPU Lane Aborts In Compilation | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s0">Why this plan exists</h2>
+    <p>Four independent measurements have died the same way while compiling on a CPU debug
+    partition, and between them they hold up three plans. The process raises
+    <code>LLVM compilation error: Cannot allocate memory</code> many times over, then
+    <code>allocateMappedMemory failed with error: Cannot allocate memory</code>, then
+    <code>Failed to satisfy suballocation request for</code> a few hundred bytes, and finally
+    <code>LLVM ERROR: Unable to allocate section memory!</code> before aborting with SIGABRT
+    and exit 134. Nothing in the payload names a cause a reader can act on, and the scheduler
+    reports the step as ended rather than as failed.</p>
+
+    <table>
+      <tr><th>Job</th><th>Driver</th><th>Request</th><th>Suballocation refused</th><th>Peak resident</th></tr>
+      <tr><td>1274003</td><td>centroid positive arm</td><td>64 G</td><td>129 bytes</td><td>28.7 GB</td></tr>
+      <tr><td>1274028</td><td>centroid positive arm</td><td>180 G</td><td>914 bytes</td><td>30.1 GB</td></tr>
+      <tr><td>1274080</td><td>certificate, third row</td><td>64 G</td><td>not printed</td><td>16.9 GB</td></tr>
+      <tr><td>1274099</td><td>coil-edit regeneration</td><td>64 G</td><td>352 bytes</td><td>not printed</td></tr>
+    </table>
+
+    <p><strong>Memory size is already excluded.</strong> Tripling the request from 64 G to
+    180 G moved the abort by nineteen seconds, and the scheduler recorded peak resident memory
+    of 28.7 and 30.1 GB against that raised ceiling. A run cannot be short of memory and fail
+    to place 129 bytes while using a sixth of what it asked for. Whatever is exhausted is not
+    the allocation.</p>
+
+    <p><strong>There is no GPU lane to escape to.</strong> The quality-of-service that governs
+    the shared H200 caps this account at four cards and 650 GB, and the local model serve holds
+    all four cards and 600 GB of that with no time limit. A correctly shaped single-card job
+    pends indefinitely. So for as long as the lane that runs the fleet is up, every heavy
+    measurement has to compile on CPU, and this abort is what stops it.</p>
+
+    <h2 id="s1">§1 — Name what is exhausted, before proposing anything</h2>
+    <p>The failure message says a mapped section could not be placed, which is consistent with
+    the process running out of memory <em>mappings</em> rather than memory. Both the login node
+    and the debug nodes carry the kernel default of 65,530 mappings per process, and a
+    compilation that emits many small sections can reach it; overcommit is heuristic rather
+    than strict, so a refusal at a few hundred bytes is not a size refusal. That is a
+    hypothesis and it has never been measured. It was offered by one worker and correctly
+    labelled untested, and this section exists so it stops being repeated as if it were a
+    finding.</p>
+    <p><strong>Done when.</strong> One debug allocation runs the smallest driver that aborts,
+    with a sampler recording the process mapping count from its own <code>/proc</code> entry
+    at a fixed interval until the abort, and the record states the peak count beside the
+    limit, the count in the last sample before the abort, and the resident memory at the same
+    instants. The verdict is one sentence: the mapping count did or did not reach the limit.
+    If it did not, the record names what else the sampler saw move, and the hypothesis is
+    retired in writing rather than left in circulation.</p>
+
+    <h2 id="s2">§2 — Take the cheapest remedy the measurement admits</h2>
+    <p>The remedies differ by cause and they are not equally cheap, so the choice is a decision
+    below rather than a foregone conclusion. If mappings are exhausted, the kernel limit is not
+    ours to raise on a shared node, so the useful levers are on our side of it: fewer sections
+    to place, or a compile that does not happen at all. The persistent compilation cache is the
+    second of those and it already exists, which makes a cache miss the most likely reason a
+    given driver compiles in the first place. The program-size work on another plan is the
+    first, and it is slower.</p>
+    <p><strong>Done when.</strong> The chosen remedy is applied to the smallest failing driver
+    and that driver completes in one debug allocation, with the before and after recorded as
+    the same measurement rather than as two anecdotes. Where the remedy is a cache warm, the
+    record states which program keys were missing and how they came to be missing, because a
+    cache that silently does not cover the lane's own programs is the defect rather than the
+    workaround.</p>
+
+    <h2 id="s3">§3 — Say it is a compile abort, at the moment it happens</h2>
+    <p>Every one of the four jobs reported the same way to whoever read it next: a worker that
+    stopped, with an empty or truncated artifact and a scheduler step that looks ended rather
+    than failed. Two coordinators attributed it to the allocation and raised the memory
+    request, which is the wrong remedy and cost two more allocations to disprove. The lane
+    already has a guard that reads its compilation cache and prints a contract; it is the right
+    place to recognise this.</p>
+    <p><strong>Done when.</strong> A run whose payload aborts with the section-memory signature
+    is named as a compile abort in its own log line, distinct from a failed test and from an
+    allocation that ran out of memory, and the line says that raising the memory request does
+    not address it. A committed case feeds the guard a captured log carrying the signature and
+    asserts the classification, and a second feeds it an ordinary out-of-memory kill and asserts
+    the two are not conflated.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="compile-abort-remedy" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Which remedy does the fleet take for a driver that aborts in compilation on CPU?</p>
+        <p class="r-dec-ctx">Deliberately left open until §1 reports, because the remedies are not equally cheap and the measurement chooses between them. A cache warm is hours and changes no code; reducing the emitted program is the bucket-floor work on the millisecond plan and is measured in days; waiting for the GPU lane means stopping the local serve, which is the engine the whole fleet runs on. If §1 finds the mapping limit is not reached, none of these is the answer and the section is re-opened rather than a remedy being chosen anyway.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="warm-the-cache-for-the-lane">warm the persistent compilation cache for the programs the CPU lane actually requests, so the compile does not happen</button>
+          <button class="r-opt" data-value="reduce-the-emitted-program">reduce the emitted program through the bucket floor, so the compile that does happen places fewer sections</button>
+          <button class="r-opt" data-value="reclaim-a-card-from-the-serve">reclaim one card from the model serve so heavy measurements have a GPU lane again</button></p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-cca-measure-the-mapping-count" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="coordinator" data-written-at="2026-09-20" data-recommends-skill="/reckon-ship cpu-compile-abort §1" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Sample the mapping count through a failing compile and settle the hypothesis either way</h4>
+        <div class="r-fu-body"><p>Take the smallest of the four drivers that reproduces the abort and run it in one debug allocation with a sampler recording the process mapping count from its own <code>/proc</code> entry alongside resident memory, at a fixed interval, until the process dies. Report the peak count against the 65,530 limit, the last sample before the abort, and the resident memory at those instants. One sentence of verdict: reached or did not reach. A negative is as valuable as a positive here and must be written down as plainly, because the hypothesis has already been repeated once as though it were established.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship cpu-compile-abort §1</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

@@ -27,9 +27,10 @@ MATCH_COMPARATOR_IMPORTS = ("_separatrix", "contour_separation")
 
 # Drivers that still import a match-module comparator, with the names each
 # takes.  The map is declared so a re-introduced import reddens this case
-# instead of reappearing unnoticed, and so moving a driver onto the public
-# comparators narrows it deliberately.
-MATCH_COMPARATOR_IMPORTERS = {"diiid_solenoid_inclusion_ladder.py": ("_separatrix",)}
+# instead of reappearing unnoticed, and no driver imports a match-module
+# comparator now that every one of them builds its boundary from the public
+# assembled-branch surface.
+MATCH_COMPARATOR_IMPORTERS: dict[str, tuple[str, ...]] = {}
 
 # The drivers re-pointed onto the public comparators, with the public names
 # each now must import.
@@ -112,25 +113,27 @@ def _ring_field(polarity: float):
 def test_driver_boundary_readings_reproduce_the_match_module_on_a_synthetic_field():
     """Pin the readings the re-pointed drivers produce to the replaced calls.
 
-    The drivers build their closed boundary and their vertex separation
-    locally now, so this compares each local construction against the
-    forward-match names the drivers used to reach for, on flux bands of both
-    polarities.  Equality is exact: a re-pointed driver that shifts a reading
-    by one ulp is a changed terminal reading, not a refactor.
+    Every driver builds its closed boundary and its vertex separation locally
+    now, so this compares each local construction against the forward-match
+    names the drivers used to reach for, on flux bands of both polarities.
+    Equality is exact: a re-pointed driver that shifts a reading by one ulp is
+    a changed terminal reading, not a refactor.
     """
 
     overlay = _load_driver("diiid_diverted_solve_overlay.py")
     circuit = _load_driver("diiid_circuit_driven_forward_validation.py")
+    ladder = _load_driver("diiid_solenoid_inclusion_ladder.py")
 
     for polarity in (1.0, -1.0):
         radius, height, flux, axis_flux, boundary_flux = _ring_field(polarity)
         expected = gate._separatrix(radius, height, flux, axis_flux, boundary_flux)
-        produced = overlay.assembled_closed_boundary(
-            radius, height, flux, axis_flux, boundary_flux
-        )
-        assert expected.shape == produced.shape
-        assert len(produced) >= 3
-        np.testing.assert_array_equal(produced, expected)
+        for driver in (overlay, ladder):
+            produced = driver.assembled_closed_boundary(
+                radius, height, flux, axis_flux, boundary_flux
+            )
+            assert expected.shape == produced.shape
+            assert len(produced) >= 3
+            np.testing.assert_array_equal(produced, expected)
 
         reference = expected + np.array([0.002, 0.0])
         assert circuit.symmetric_vertex_separation(

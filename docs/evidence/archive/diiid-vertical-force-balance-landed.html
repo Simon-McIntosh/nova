@@ -397,4 +397,62 @@ assertion in either file tests the artifact for absence.</p>
     <code>gate_status.log</code>, <code>gate.sh</code>, <code>baseline2.sh</code>). Commit
     <code>0705871ee</code>.</p>
   </section>
+
+  <section id="last-private-importer-retired">
+    <h2>The last private comparator importer is retired, and the declaration goes to empty</h2>
+    <p><strong>Base: <code>7a869bc1</code></strong>, this node's own worktree at
+    <code>.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/dvfb-retire-the-last-private-importer</code>. The
+    section above re-pointed two of the three drivers importing a match-module comparator and left the third,
+    <code>benchmarks/diiid_solenoid_inclusion_ladder.py</code>, outside its fence. This node takes that third one:
+    the <code>_separatrix</code> import at line 36 is gone, and the call at line 258 goes to a local
+    <code>assembled_closed_boundary</code> that samples the axis-enclosing closed branch of
+    <code>nova.equilibrium.separatrix_branches.assemble_separatrix_branches</code> — the same construction, with the
+    same axis extremum rule, the two drivers re-pointed before it use. Commit <code>b5c724932</code>.</p>
+    <p><strong>The declaration is empty now, and an empty declaration still guards.</strong>
+    <code>MATCH_COMPARATOR_IMPORTERS</code> in <code>tests/imas/test_diiid_forward_gs_match.py</code> declared exactly
+    one importer at base and declares none here. The case is an equality against a full parse of
+    <code>benchmarks/*.py</code>, so an empty map is strictly stronger than the one-entry map it replaces: any
+    re-introduced import of <code>_separatrix</code> or <code>contour_separation</code> in any driver reddens it, where
+    before the ladder's own entry would have been satisfied by the import being present.</p>
+    <table>
+      <caption>Drivers importing a match-module comparator (<code>_separatrix</code>, <code>contour_separation</code>), measured by parsing <code>benchmarks/*.py</code> with <code>ast</code></caption>
+      <thead><tr><th scope="col">Driver</th><th scope="col">At base <code>7a869bc1</code></th><th scope="col">At this head</th></tr></thead>
+      <tbody>
+        <tr><th scope="row"><code>diiid_solenoid_inclusion_ladder.py</code></th><td><code>_separatrix</code></td><td>none</td></tr>
+        <tr><th scope="row">every other <code>benchmarks/*.py</code></th><td>none</td><td>none</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Its terminal readings are unchanged, shown on the instrument the previous node used.</strong> The
+    committed case <code>test_driver_boundary_readings_reproduce_the_match_module_on_a_synthetic_field</code> compared
+    the two re-pointed drivers against the replaced call; the ladder is now a third member of that comparison, on
+    <code>psi = &plusmn;((R-1.6)&sup2;+Z&sup2;)</code> over R in [0.8, 2.4], Z in [-0.8, 0.8], 65 by 65, at both
+    polarities: <code>np.testing.assert_array_equal</code> on the sampled boundary vertices, exact. Every terminal
+    reading the ladder banks follows from those vertices through <code>_boundary_separation</code> and the
+    <code>len(boundary) &gt;= 4</code> finite-boundary flag, so an identical vertex array is an identical reading.
+    <strong>What this does not show:</strong> the ladder's own five-frame receipt was not regenerated, so the identity is
+    asserted at the boundary construction rather than observed at the cohort. Regenerating it is a GPU-shaped solve and
+    the H200 allowance is held by the local serve.</p>
+    <table>
+      <caption>Gate on all_debug CPU, one job holding both modules in one pytest process, shared root interpreter run directly, <code>JAX_PLATFORMS=cpu</code>, <code>TMPDIR=/tmp</code> in the submit environment and in the payload, <code>uv</code> never invoked on the compute node</caption>
+      <thead><tr><th scope="col">Measurement</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Base <code>7a869bc1</code>, both modules, in this worktree before any edit</th><td>15 passed, 0 failed, exit 0 — log sha256 <code>f08d3446&hellip;b3b0</code></td></tr>
+        <tr><th scope="row">This head, both modules</th><td>15 passed, 0 failed, exit 0 — log sha256 <code>418fb64a&hellip;21e3</code></td></tr>
+        <tr><th scope="row">Added failures against base</th><td>0, with no failure id on either side</td></tr>
+        <tr><th scope="row">Negative control, declared: a driver module in <code>benchmarks/</code> re-imports the private comparator</th><td>a scratch module carrying <code>from benchmarks.diiid_forward_gs_match import _separatrix</code>: <code>1 failed</code>, exit 1, <code>AssertionError</code> at the declaration case; removing the module returns the same case to <code>1 passed</code>, exit 0</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The stale comment is deleted, not updated.</strong>
+    <code>benchmarks/diiid_vacuum_from_description.py</code> carried a five-line comment justifying its own decision to
+    reproduce <code>ECOILA_INDEX</code>, <code>MISSING_CONDUCTOR_ORDER</code> and <code>CURRENT_SCALE</code> rather than
+    import them, by the claim that the match module no longer exports <code>_separatrix</code> and that the ladder's
+    import chain therefore raised. That stopped being true when the export was restored, and it was never this driver's
+    fact to hold. Deleted whole rather than rewritten to a new reason: the constants state their own provenance as
+    copies of the ladder's all-conductors rung, and a comment whose subject is another module's export surface is a
+    fact that rots. The file contains no mention of <code>_separatrix</code> or <code>ImportError</code> at this head.</p>
+    <p><strong>Logs:</strong>
+    <code>~/.config/reckon/crew/reports/nova/s19-codex-20260916/dvfb-retire-the-last-private-importer/</code>
+    (<code>gate-base.log</code>, <code>gate-head.log</code>, <code>negative-control-red.log</code>,
+    <code>negative-control-green.log</code>). Commit <code>b5c724932</code>.</p>
+  </section>
 </main>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T17:46:07",
+  "updated": "2026-09-20T17:56:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -214142,6 +214142,225 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260919T231747888058-fsa-coil-edit-under-the-vertical-constraint",
+        "plan": "forward-solve-api",
+        "section": "\u00a75",
+        "node": "fsa-coil-edit-under-the-vertical-constraint",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 449,
+                "cached_input_tokens": 411323,
+                "input_tokens": 411774,
+                "output_tokens": 1269,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 413043,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "one all_debug CPU allocation, --cpus-per-task=8 --mem=64G --time=00:59:00, TMPDIR=/tmp exported in the submit environment and in the payload, JAX_PLATFORMS=cpu, the shared root interpreter run directly and uv never invoked on the compute node, regenerates the coil-edit fixture through benchmarks/coil_edit_latency.py with CurrentCentroidConstraint imposed on the vertical current centre through the machine interface and with the provenance mark set, never as an array; the persisted-state test and the per-state census agree with the sweep-persistence record before anything is committed; the panel at docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged is redrawn as PNG and SVG from the regenerated fixture under the plotting rules, line contours on shared levels, both the solved and the reference null sets in their own styles, the wall drawn, no axes, and a caption naming the constraint and saying which null set is which; the landed record states, per panel, whether the solved boundary closes through the same null as its reference, and if any panel still does not it is reported as a failed regeneration rather than captioned",
+          "estimated_hours": null,
+          "goal": "regenerate the coil-edit fixture with the vertical current-centre constraint imposed and redraw the panel, so a solved plasma is compared against the reference it belongs to",
+          "id": "fsa-coil-edit-under-the-vertical-constraint",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-19T23:17:48Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T231747888058-fsa-coil-edit-under-the-vertical-constraint/manifest.md",
+          "negative_control": "none: this node regenerates a fixture and redraws a figure, adds no test, and its persisted-state guard was pinned by the node that built it",
+          "plan": "forward-solve-api",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "benchmarks/coil_edit_latency.py",
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence",
+            "docs/plans/forward-solve-api.html",
+            "docs/evidence/archive/forward-solve-api-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-fsa-coiledit-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-19T23:17:58Z",
+        "completed_at": "2026-09-20T15:36:04.434Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 58679,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 58686,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "7295f9420f6d73f3ce5b66e508a5aa36c2d0ca16",
+        "commits": [
+          "c920e30d9c265ecf1a3210b11acab704dc850815",
+          "5a1bac81be79e8e99943d770ac3527c03b17f043",
+          "eb9d7285fef7b4dc6ffd45caab9a2e5d1d6d0af3",
+          "315bdf33e7167d6dac7086680f8879a62038c44c"
+        ],
+        "changed_lines": {
+          "added": 388,
+          "removed": 16,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_coil_edit_persistence_guard.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T231747888058-fsa-coil-edit-under-the-vertical-constraint/logs/regen-1274099.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "the vertical current-centre row is imposed on the coil-edit sweep and its constrained probe passes in every allocation, with two pre-existing driver faults repaired alongside. The regeneration and the redrawn panel are NOT done, because the driver aborts in compilation after nine of twenty edits with a refused 352-byte section allocation, the fault four drivers now share and which has its own plan. The committed panel therefore still shows a solved plasma closing through a different null from its reference, and the record says so rather than captioning around it.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260919T231747888058-fsa-coil-edit-under-the-vertical-constraint/manifest.md",
+        "scope_changed": false,
+        "session_id": "abd14a3e-70c2-48f3-a3c7-539dc7275fa9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3007106,
+            "input_tokens_cumulative": 3007106,
+            "output_tokens": 15421,
+            "output_tokens_cumulative": 15421,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-20T15:36:04.434Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 24920616,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 330.593,
+          "generated_tokens": 117945,
+          "generation_seconds": 296.61,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 33.8,
+          "machine_seconds": 33.983,
+          "peak_input_tokens": 162306,
+          "tokens_per_second": 397.64,
+          "wall_tokens_per_second": 356.77
+        },
+        "follow_on_paths": [
+          "61.8",
+          "728.9"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-coil-edit-under-the-vertical-constraint",
+          "session_id": "abd14a3e-70c2-48f3-a3c7-539dc7275fa9",
+          "session_source": "stream",
+          "retained_at": "2026-09-20T15:36:04.434Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.94,
+        "impl_move": {
+          "plan": "forward-solve-api",
+          "at_dispatch": 0.94,
+          "at_complete": 0.96,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 155.0,
+        "orientation_input_tokens": 6063627.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -214580,6 +214799,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2954
+    "_version": 2955
   }
 }

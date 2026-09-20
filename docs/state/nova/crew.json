@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-20T18:23:18",
+  "updated": "2026-09-20T18:29:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -215497,6 +215497,229 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260920T160154139156-nia-retire-the-stale-certificate-pin",
+        "plan": "null-identification-authority",
+        "section": "",
+        "node": "nia-retire-the-stale-certificate-pin",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 799,
+                "cached_input_tokens": 828119,
+                "input_tokens": 828920,
+                "output_tokens": 1716,
+                "reasoning_output_tokens": 642,
+                "total_tokens": 830636,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "8fac263d-04b1-4202-bc28-df1b0b73ec93",
+            "session_id": "s19-codex-20260916"
+          },
+          "done_when": "tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback asserts the residual the rung actually terminates at rather than 0.025515711279493654, with the new value derived from a run rather than copied from a report, and the test states in one line why the value moved so the next reader does not treat the change as drift; the case is run explicitly by path so the slow marker does not exclude it, and the manifest quotes the collected count to show it was not an empty arm, because naming a slow file clears the inherited filter while the root conftest re-marks whole files by basename and a file that collects nothing exits without running and reads as a pass; if the measured residual is 2.248351582217136 the manifest says so and if it is not it reports what it is; one all_debug CPU allocation with JAX_PLATFORMS=cpu, TMPDIR=/tmp in the submit environment and in the payload, the shared root interpreter run directly and uv never invoked on the compute node; the gate reports added failures against the base revision and the declared negative control reddens",
+          "estimated_hours": null,
+          "goal": "correct a slow-marked pin that asserts a certificate residual the rung no longer reaches",
+          "id": "nia-retire-the-stale-certificate-pin",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-20T16:01:56Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T160154139156-nia-retire-the-stale-certificate-pin/manifest.md",
+          "negative_control": "negative_control: restore the retired pin value 0.025515711279493654 on the corrected tree (canonical case name, comment intact); expect the pin to redden",
+          "plan": "null-identification-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "tests/test_reduced_newton.py",
+            "docs/evidence/archive/null-identification-authority-landed.html",
+            "docs/plans/null-identification-authority.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s19c-nia-stalepin-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-20T16:02:10Z",
+        "completed_at": "2026-09-20T16:24:44.728Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1345,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1354,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9c5e64da8dddeb8bb369bf12e8799b881bdadc8e",
+        "commits": [
+          "f205bff1f32e41864ef99f78e3d292864453d23c",
+          "457f01255645d4ba785aca69e1bf2185b88f9227"
+        ],
+        "changed_lines": {
+          "added": 44,
+          "removed": 2,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T160154139156-nia-retire-the-stale-certificate-pin/logs/after-pin.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "the slow-marked pin now asserts 2.248351582217136, the residual the diverted certificate rung reaches, run by path with its collected count quoted so the marker could not turn it into an empty arm; the node also disclosed that the certificate render stage writes to a figure root the test does not redirect, so a gate run regenerates figures owned by another node, and left them untouched",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T160154139156-nia-retire-the-stale-certificate-pin/manifest.md",
+        "scope_changed": false,
+        "session_id": "ce1e5099-78f7-4e6b-b4c4-1d613145e4bf",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 7292461,
+            "input_tokens_cumulative": 7292461,
+            "output_tokens": 36424,
+            "output_tokens_cumulative": 36424,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-20T16:24:44.728Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 7292461,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1351.936,
+          "generated_tokens": 36424,
+          "generation_seconds": 529.017,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.5,
+          "machine_seconds": 822.919,
+          "peak_input_tokens": 151040,
+          "tokens_per_second": 68.85,
+          "wall_tokens_per_second": 26.94
+        },
+        "follow_on_paths": [
+          "benchmarks/solovev_certificate.py:2514",
+          "docs/figures/gs-absolute-accuracy/solovev/"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/nia-retire-the-stale-certificate-pin",
+          "session_id": "ce1e5099-78f7-4e6b-b4c4-1d613145e4bf",
+          "session_source": "stream",
+          "retained_at": "2026-09-20T16:24:44.728Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.9995,
+        "impl_move": {
+          "plan": "null-identification-authority",
+          "at_dispatch": 0.9995,
+          "at_complete": 0.9995,
+          "verdict": "waived",
+          "reason": "the node closes an open followup on a plan already at its landed fraction rather than advancing a section"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/test_reduced_newton.py"
+          ],
+          "declaration": "negative_control: restore the retired pin value 0.025515711279493654 on the corrected tree (canonical case name, comment intact); expect the pin to redden",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T160154139156-nia-retire-the-stale-certificate-pin/logs/negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T160154139156-nia-retire-the-stale-certificate-pin/logs/negative-control.log"
+        },
+        "tool_steps": 67.0,
+        "orientation_input_tokens": 2583313.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -215935,6 +216158,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2965
+    "_version": 2966
   }
 }

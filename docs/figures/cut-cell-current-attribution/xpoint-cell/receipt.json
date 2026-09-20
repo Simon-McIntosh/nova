@@ -427,6 +427,7 @@
       "saddle_inserted_as_first_vertex": true,
       "schema": "nova.xpoint-cell-wedge-oracle-part",
       "source_revision": "e9fd5a1e397c9fcaf0f455112ab22a7130a96e51",
+      "source_revision_note": "HEAD as the driver read it; the measured tree also carried the sector closure repair, which is committed as 1693bc631, so these numbers describe that tree rather than this revision alone",
       "stage": "complete",
       "version": 1,
       "wall_seconds": 8.252031452953815,
@@ -844,6 +845,7 @@
       "saddle_inserted_as_first_vertex": true,
       "schema": "nova.xpoint-cell-wedge-oracle-part",
       "source_revision": "e9fd5a1e397c9fcaf0f455112ab22a7130a96e51",
+      "source_revision_note": "HEAD as the driver read it; the measured tree also carried the sector closure repair, which is committed as 1693bc631, so these numbers describe that tree rather than this revision alone",
       "stage": "complete",
       "version": 1,
       "wall_seconds": 5.6365312691777945,
@@ -1264,6 +1266,7 @@
       "saddle_inserted_as_first_vertex": true,
       "schema": "nova.xpoint-cell-wedge-oracle-part",
       "source_revision": "e9fd5a1e397c9fcaf0f455112ab22a7130a96e51",
+      "source_revision_note": "HEAD as the driver read it; the measured tree also carried the sector closure repair, which is committed as 1693bc631, so these numbers describe that tree rather than this revision alone",
       "stage": "complete",
       "version": 1,
       "wall_seconds": 6.155733721330762,
@@ -1286,6 +1289,7 @@
   ],
   "schema": "nova.xpoint-cell-wedge-oracle",
   "source_revision": "e9fd5a1e397c9fcaf0f455112ab22a7130a96e51",
+  "source_revision_note": "HEAD as the driver read it; the measured tree also carried the sector closure repair, which is committed as 1693bc631, so these numbers describe that tree rather than this revision alone",
   "tested_requested_cells": [
     300,
     500

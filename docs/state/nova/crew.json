@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T10:56:39",
+  "updated": "2026-09-21T11:13:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4726,10 +4726,15 @@
         "id": "s19c-cca-ring-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-20"
+        "session_id": "55277970-28c7-4bda-bf39-dcb8ff40bf9e",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "55277970-28c7-4bda-bf39-dcb8ff40bf9e"
+        },
+        "created": "2026-09-20",
+        "session_owners": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "s19-codex-20260916"
+        }
       },
       {
         "id": "s19c-cca-saddle-c",
@@ -5089,19 +5094,29 @@
         "id": "s19c-fsa-regen-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-20"
+        "session_id": "63238c6f-d618-43a9-b3b8-e682e544fc9e",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "63238c6f-d618-43a9-b3b8-e682e544fc9e"
+        },
+        "created": "2026-09-20",
+        "session_owners": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "s19-codex-20260916"
+        }
       },
       {
         "id": "s19c-loop-inv-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-21"
+        "session_id": "ad393662-cfd4-46d2-af6b-c925f76a75b8",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "ad393662-cfd4-46d2-af6b-c925f76a75b8"
+        },
+        "created": "2026-09-21",
+        "session_owners": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "s19-codex-20260916"
+        }
       },
       {
         "id": "s19c-msc-byteid-c",
@@ -5528,10 +5543,15 @@
         "id": "s19c-nia-reach-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-20"
+        "session_id": "39263b4c-714b-4bbe-82c2-9649f4898c29",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "39263b4c-714b-4bbe-82c2-9649f4898c29"
+        },
+        "created": "2026-09-20",
+        "session_owners": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "s19-codex-20260916"
+        }
       },
       {
         "id": "s19c-nia-remainder-c",
@@ -5673,10 +5693,15 @@
         "id": "s19c-probe-exit-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-21"
+        "session_id": "d1ce7353-ac11-4591-a295-04330bfd662f",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "d1ce7353-ac11-4591-a295-04330bfd662f"
+        },
+        "created": "2026-09-21",
+        "session_owners": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "s19-codex-20260916"
+        }
       },
       {
         "id": "s19c-review-a-c",
@@ -6116,10 +6141,15 @@
         "id": "s19c-rows-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-20"
+        "session_id": "82d7a715-09f0-4a47-8e31-7cf07e0d44cf",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "82d7a715-09f0-4a47-8e31-7cf07e0d44cf"
+        },
+        "created": "2026-09-20",
+        "session_owners": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "s19-codex-20260916"
+        }
       },
       {
         "id": "s19c-scout-l",
@@ -7326,10 +7356,15 @@
         "id": "s19o-audit-cca",
         "harness": "claude-opus",
         "role": "review",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-21"
+        "session_id": "15d9f0b8-970e-4290-92bf-47adfab800c9",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"read-only\"}": "15d9f0b8-970e-4290-92bf-47adfab800c9"
+        },
+        "created": "2026-09-21",
+        "session_owners": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"read-only\"}": "s19-codex-20260916"
+        }
       },
       {
         "id": "s19o-audit-gsa",
@@ -225399,6 +225434,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3031
+    "_version": 3038
   }
 }

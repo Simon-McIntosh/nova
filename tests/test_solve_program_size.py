@@ -218,6 +218,15 @@ def test_loop_inventory_finds_both_compiled_slice_budgets():
         "compiled active-set trips",
     }
 
+    scan_budget = [
+        row
+        for row in _loop_inventory()
+        if row["loop"] == "certificate active-set budget"
+    ]
+
+    assert [row["form"] for row in scan_budget] == ["jax.lax.scan"]
+    assert all(isinstance(row["line"], int) and row["line"] > 0 for row in scan_budget)
+
 
 def test_reanalysis_preserves_executable_measurement(tmp_path, monkeypatch):
     from benchmarks import program_scope_census

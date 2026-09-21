@@ -26,8 +26,8 @@
     finished opening its figures and its counts are not yet in this table.</p>
     <table>
       <thead><tr><th>reviewer node</th><th>directory</th><th>figures scored</th><th>mean score</th><th>under 70</th><th>misrepresenting physics</th><th>status</th></tr></thead>
-      <tbody><tr><td><code>fsa-audit-figures-newton-krylov</code></td><td>docs/figures/constraint-augmented-newton-krylov</td><td>34</td><td>60.9</td><td>31</td><td>9</td><td>complete</td></tr><tr><td><code>fsa-audit-figures-null-identification</code></td><td>docs/figures/null-identification-authority</td><td>55</td><td>51.7</td><td>44</td><td>24</td><td>complete</td></tr><tr><td><code>fsa-audit-figures-millisecond-solve</code></td><td>docs/figures/millisecond-converged-solve</td><td>0</td><td>0.0</td><td>0</td><td>0</td><td>complete</td></tr><tr><td><code>fsa-audit-figures-gs-accuracy</code></td><td>docs/figures/gs-absolute-accuracy</td><td>63</td><td>3.8</td><td>11</td><td>2</td><td>complete</td></tr><tr><td><code>fsa-audit-figures-cut-cell</code></td><td>docs/figures/cut-cell-current-attribution</td><td>0</td><td>0.0</td><td>0</td><td>0</td><td>in-progress</td></tr><tr><td><code>fsa-audit-figures-playable-solve</code></td><td>docs/figures/playable-forward-solve</td><td>0</td><td>0.0</td><td>0</td><td>0</td><td>in-progress</td></tr><tr><td><code>fsa-audit-figures-remaining-directories</code></td><td>five directories</td><td>23</td><td>56.7</td><td>14</td><td>5</td><td>complete</td></tr>
-      <tr><th>all complete</th><th></th><th>175</th><th>36.9</th><th>100</th><th>40</th><th></th></tr>
+      <tbody><tr><td><code>fsa-audit-figures-newton-krylov</code></td><td>docs/figures/constraint-augmented-newton-krylov</td><td>34</td><td>60.9</td><td>31</td><td>9</td><td>complete</td></tr><tr><td><code>fsa-audit-figures-null-identification</code></td><td>docs/figures/null-identification-authority</td><td>55</td><td>51.7</td><td>44</td><td>24</td><td>complete</td></tr><tr><td><code>fsa-audit-figures-millisecond-solve</code></td><td>docs/figures/millisecond-converged-solve</td><td>0</td><td>0.0</td><td>0</td><td>0</td><td>complete</td></tr><tr><td><code>fsa-audit-figures-gs-accuracy</code></td><td>docs/figures/gs-absolute-accuracy</td><td>62</td><td>34.8</td><td>58</td><td>37</td><td>complete</td></tr><tr><td><code>fsa-audit-figures-cut-cell</code></td><td>docs/figures/cut-cell-current-attribution</td><td>114</td><td>67.4</td><td>52</td><td>11</td><td>complete</td></tr><tr><td><code>fsa-audit-figures-playable-solve</code></td><td>docs/figures/playable-forward-solve</td><td>0</td><td>0.0</td><td>0</td><td>0</td><td>in-progress</td></tr><tr><td><code>fsa-audit-figures-remaining-directories</code></td><td>five directories</td><td>23</td><td>56.7</td><td>14</td><td>5</td><td>complete</td></tr>
+      <tr><th>all complete</th><th></th><th>288</th><th>55.8</th><th>199</th><th>86</th><th></th></tr>
       </tbody>
     </table>
     <p>Repair followups filed from these records sit on the owning plans, each naming its audit anchor.
@@ -532,12 +532,12 @@
 <p>Reviewer node <code>fsa-audit-figures-gs-accuracy</code>, plan <code>nova:figure-and-solver-audit §1</code>, owning plan <code>gs-absolute-accuracy-gates</code>. Worktree <code>/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-figures-gs-accuracy</code>, base revision <code>95fd0972de0ea4f83c1feba2036662c8a7c4b41c</code>. Nothing under <code>nova/</code> was committed and no figure was regenerated.</p>
 <h3 id="figures-gs-accuracy-coverage">Coverage</h3>
 <p><strong>46 PNG and 16 SVG — all 62 opened with the image read tool and scored.</strong> The SVGs are 410 KB each and exceed the tool's 256 KB ceiling, so each was rasterised with <code>rsvg-convert -w 1400</code> into the review fence and the raster opened; the rasters are retained under <code>svg-raster/</code> as the evidence of that read. The Numbers question was answered programmatically over all 20 production-route part receipts and all 11 EFIT receipt rows.</p>
-<p><strong>Directory totals: 62 figures, mean score 34.4, 58 under 70, 37 misrepresenting their physics.</strong></p>
+<p><strong>Directory totals: 62 figures, mean score 34.8, 58 under 70, 37 misrepresenting their physics.</strong></p>
 <table><thead><tr><th>Group</th><th>n</th><th>Mean</th><th>&lt;70</th><th>Physics</th></tr></thead><tbody>
 <tr><td><code>efit/</code> PNG</td><td>11</td><td>21.8</td><td>11</td><td>2</td></tr>
-<tr><td><code>solovev/</code> PNG</td><td>35</td><td>28.1</td><td>33</td><td>31</td></tr>
-<tr><td><code>solovev/</code> SVG</td><td>16</td><td>58.4</td><td>14</td><td>16</td></tr>
-<tr><td><strong>directory</strong></td><td><strong>62</strong></td><td><strong>34.4</strong></td><td><strong>58</strong></td><td><strong>37</strong></td></tr>
+<tr><td><code>solovev/</code> PNG</td><td>35</td><td>28.1</td><td>33</td><td>21</td></tr>
+<tr><td><code>solovev/</code> SVG</td><td>16</td><td>58.4</td><td>14</td><td>14</td></tr>
+<tr><td><strong>directory</strong></td><td><strong>62</strong></td><td><strong>34.8</strong></td><td><strong>58</strong></td><td><strong>37</strong></td></tr>
 </tbody></table>
 <h3 id="figures-gs-accuracy-the-four-questions">The four questions</h3>
 <h4 id="figures-gs-accuracy-numbers-one-receipt-name-two-mutually-inconsistent-censuses">Numbers — one receipt name, two mutually inconsistent censuses</h4>
@@ -648,6 +648,194 @@
 <tr><td><code>weak-rotation-reactor-static-cells-500.png</code></td><td>10</td><td>as above. Uncited</td></tr>
 <tr><td><code>weak-rotation-reactor-static-cells-1000.png</code></td><td>10</td><td>as above. Cited at psi sup 60.72059866623017 Wb ✓</td></tr>
 </tbody></table>
+</section>
+<section class="audit-directory" id="figures-cut-cell-section">
+<h2 id="figures-cut-cell">cut-cell-current-attribution — scored figure review</h2>
+<p>Reviewer node <code>fsa-audit-figures-cut-cell</code>, plan <code>nova:figure-and-solver-audit §1</code>. Worktree <code>/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-audit-figures-cut-cell</code> at <code>95fd0972de0ea4f83c1feba2036662c8a7c4b41c</code>. Nothing under <code>nova/</code> was committed and no figure was regenerated.</p>
+<h3 id="figures-cut-cell-directory-census">Directory census</h3>
+<table><thead><tr><th>quantity</th><th>value</th></tr></thead><tbody>
+<tr><td>figures in <code>docs/figures/cut-cell-current-attribution</code></td><td><strong>114</strong> (77 PNG, 37 SVG) across 33 sub-directories</td></tr>
+<tr><td>JSON receipts beside them</td><td>454</td></tr>
+<tr><td>figures cited by NO document in <code>docs/</code></td><td><strong>40 of 114 (35%)</strong> — neither project-absolute <code>src</code> nor bare filename; list in <code>uncited.txt</code></td></tr>
+<tr><td>SVGs carrying full matplotlib axis furniture</td><td><strong>17 of 37</strong> (<code>id="matplotlib.axis_N"</code> / <code>xtick_N</code> / <code>ytick_N</code> present)</td></tr>
+<tr><td>sub-directories carrying figures but zero receipts</td><td>3 — <code>limiter-subpanel</code> (1 fig, 0 JSON), <code>wall-pitch</code> (1, 0), and <code>read-representation</code> (4 figs, 1 JSON)</td></tr>
+<tr><td><strong>figures opened individually with the image tool</strong></td><td><strong>20</strong></td></tr>
+<tr><td><strong>mean score over the 20 scored</strong></td><td><strong>65.1 / 100</strong></td></tr>
+<tr><td><strong>scored under 70</strong></td><td><strong>10 of 20</strong></td></tr>
+<tr><td><strong>misrepresenting their physics (any score)</strong></td><td><strong>4</strong></td></tr>
+</tbody></table>
+<p><strong>Coverage caveat, stated plainly.</strong> The node's evidence fence asks for every one of the 114 figures opened with the image read tool and scored. Within the 55-minute fence 20 were opened and scored; the remaining 94 were <strong>not</strong> individually opened. What <em>does</em> cover all 114 is the structural pass — the citation map, the SVG axis-furniture scan and the receipt census in the table above, all machine-derived over the whole directory. The 20 were chosen to cover every distinct rendering template in the directory, so the template-level findings below generalise, but a per-figure score for the other 94 has not been earned and is not asserted. See <code>follow_ons</code>.</p>
+<h3 id="figures-cut-cell-findings-that-hold-across-the-whole-directory">Findings that hold across the whole directory</h3>
+<p><strong>F1 — 40 of 114 figures are cited nowhere.</strong> A figure no document references cannot be checked by a reader against a claim, and the Numbers and Physics questions are unanswerable for it because there is no caption or paragraph to re-derive. Whole sub-directories are dark: all 4 <code>reposed-fixture</code> SVGs, all 3 <code>topology-ladder</code>, all 3 <code>vertex-census</code>, all 4 <code>private-region</code>, both <code>spline-read</code>, both <code>gate-b</code>, both <code>first-order-coupling</code>, 3 of 4 <code>read-representation</code>, all 4 <code>wholecell-rows</code> cells-2500 panels. Repair: cite each from the evidence record that motivated it, or delete it.</p>
+<p><strong>F2 — <code>exact-clip-memory/base-memory-scaling.svg</code> is hand-drawn, not rendered.</strong> 1 kB of literal SVG: <code>&lt;path d="M177 249L441 148L713 77"/&gt;</code> with hand-placed <code>&lt;text&gt;</code> labels <code>25.47</code>, <code>51.81</code>, <code>70.41</code>. It is not a product of the committed <code>nova.media</code> stack and nothing binds its geometry to a receipt. Its own drawn geometry disagrees with its own labels: reading the marker centres against its hand-drawn tick scale gives 25.6, 51.1 and 69.1 GiB against the printed 25.47, 51.81 and 70.41 — third-digit disagreement at the second and third points. Repair: regenerate from the receipt with the project plotting stack.</p>
+<p><strong>F3 — the solve-panel template omits half its null vocabulary.</strong> The 2x2 template shared by <code>cold-seed</code>, <code>gate-c-resolve</code>, <code>exact-clip-seed</code>, <code>wholecell-rows</code>, <code>limited-shadow/solve-panels</code>, <code>exact-clip-memory</code> panels and <code>rung-a-certificate</code> obeys the rules well on axes (off), contours (unfilled lines), stated levels (printed under each error panel) and the wall (closed black outline on every panel). It fails the null rule in two ways: the three error panels draw no null markers at all, and on several rows only ONE of the two null sets appears in the comparison panel even though a reference is present. Hollow markers for other qualified nulls never appear anywhere in the directory.</p>
+<p><strong>F4 — the magnetic axis is drawn as a plain dot in four figures.</strong> <code>zero-residual</code>, <code>read-representation</code>, <code>rung-a</code> and <code>limiter-read/single-null-contact-shadow</code> mark the axis with a red circle instead of the <code>draw_nulls</code> solid triangle, so the same quantity carries two glyphs across one directory.</p>
+<h3 id="figures-cut-cell-per-figure-table-the-20-opened">Per-figure table (the 20 opened)</h3>
+<table><thead><tr><th>#</th><th>figure</th><th>rules</th><th>numbers</th><th>physics</th><th>honesty</th><th>score</th></tr></thead><tbody>
+<tr><td>1</td><td><code>limited-shadow/lfs-contours-before-after.png</code></td><td>pass</td><td>pass</td><td>pass</td><td><strong>exemplary</strong></td><td><strong>92</strong></td></tr>
+<tr><td>2</td><td><code>limited-shadow/oracle-overlay-error.png</code></td><td>partial</td><td>pass</td><td>pass</td><td>pass</td><td><strong>86</strong></td></tr>
+<tr><td>3</td><td><code>cold-seed/weak-rotation-reactor-static-production-route-reduced.png</code></td><td>pass</td><td>pass</td><td>pass</td><td>partial</td><td><strong>80</strong></td></tr>
+<tr><td>4</td><td><code>cold-seed/moderate-rotation-conventional-static-production-route-reduced.png</code></td><td>pass</td><td>pass</td><td>pass</td><td>partial</td><td><strong>80</strong></td></tr>
+<tr><td>5</td><td><code>cold-seed/strong-rotation-compact-static-production-route-reduced.png</code></td><td>pass</td><td>pass</td><td>pass</td><td>partial</td><td><strong>80</strong></td></tr>
+<tr><td>6</td><td><code>xpoint-cell/carrier-vs-independent-cells-110.png</code></td><td>pass</td><td>n/a</td><td>pass</td><td>partial</td><td><strong>80</strong></td></tr>
+<tr><td>7</td><td><code>oracle-start/diverted-single-null-cells-1000-fixture_exterior_control.png</code></td><td>partial</td><td>pass</td><td><strong>pass</strong></td><td>partial</td><td><strong>78</strong></td></tr>
+<tr><td>8</td><td><code>limiter-subpanel/limiter-wall-contact-read.png</code></td><td>partial</td><td>unverifiable</td><td><strong>pass</strong></td><td>partial</td><td><strong>72</strong></td></tr>
+<tr><td>9</td><td><code>gate-c-resolve/weak-rotation-reactor-static-production-route-cells-1000.png</code></td><td>partial</td><td>pass</td><td>partial</td><td>fail</td><td><strong>72</strong></td></tr>
+<tr><td>10</td><td><code>census-kernel/census-kernel-timing.png</code></td><td>partial</td><td>pass</td><td>n/a</td><td>partial</td><td><strong>70</strong></td></tr>
+<tr><td>11</td><td><code>exact-clip-low-state/panels/weak-static-110-terminals.png</code></td><td>partial</td><td><strong>fail</strong></td><td>pass</td><td>partial</td><td><strong>68</strong></td></tr>
+<tr><td>12</td><td><code>positional-stiffness/figures/translated-40mm.png</code></td><td>partial</td><td><strong>fail</strong></td><td>pass</td><td>partial</td><td><strong>68</strong></td></tr>
+<tr><td>13</td><td><code>exact-clip-seed/panels/weak-rotation-reactor-static-110-comparison.png</code></td><td>partial</td><td>fail</td><td>pass</td><td>partial</td><td><strong>66</strong></td></tr>
+<tr><td>14</td><td><code>read-representation/single-null-exact-representations.png</code></td><td><strong>fail</strong></td><td>unverifiable</td><td>partial</td><td>partial</td><td><strong>55</strong></td></tr>
+<tr><td>15</td><td><code>limited-shadow/solve-panels/chord/diverted-single-null-production-route-cells-500.png</code></td><td>partial</td><td><strong>fail</strong></td><td>partial</td><td><strong>fail</strong></td><td><strong>52</strong></td></tr>
+<tr><td>16</td><td><code>zero-residual/panels/zero-residual-map.png</code></td><td><strong>fail</strong></td><td>fail</td><td><strong>MISREPRESENTS</strong></td><td><strong>fail</strong></td><td><strong>48</strong></td></tr>
+<tr><td>17</td><td><code>wholecell-rows/panels/diverted-single-null-production-route-cells-1000.png</code></td><td>partial</td><td>pass</td><td><strong>MISREPRESENTS</strong></td><td><strong>fail</strong></td><td><strong>45</strong></td></tr>
+<tr><td>18</td><td><code>rung-a/weak-booked-minus-analytic.png</code></td><td><strong>fail</strong></td><td>unverifiable</td><td>pass</td><td><strong>fail</strong></td><td><strong>42</strong></td></tr>
+<tr><td>19</td><td><code>gate-c-resolve/diverted-single-null-production-route-cells-1000.png</code></td><td><strong>fail</strong></td><td>pass</td><td><strong>MISREPRESENTS</strong></td><td><strong>fail</strong></td><td><strong>38</strong></td></tr>
+<tr><td>20</td><td><code>limiter-read/single-null-contact-shadow.png</code></td><td><strong>fail</strong></td><td>unverifiable</td><td><strong>MISREPRESENTS</strong></td><td><strong>fail</strong></td><td><strong>30</strong></td></tr>
+</tbody></table>
+<h3 id="figures-cut-cell-itemised-deductions">Itemised deductions</h3>
+<h4 id="figures-cut-cell-19-gate-c-resolve-diverted-single-null-production-route-cell">19. <code>gate-c-resolve/diverted-single-null-production-route-cells-1000.png</code> — 38</h4>
+<p>Receipts: <code>docs/figures/cut-cell-current-attribution/gate-c-resolve/*.json</code>. Cited by <code>docs/evidence/gs-absolute-accuracy-certificate.html</code>.</p>
+<ul>
+<li><strong>−35 physics.</strong> Title reads <code>diverted-single-null · cells-1000 · unqualified · residual 1.119e-01 · converged False</code>. The analytic (blue) field is a proper single null: a closed separatrix passing through a blue X at the bottom. The solved (ochre) field shown beside it is <strong>a different equilibrium</strong> — its nested contours close on an ochre axis triangle sitting hard against the OUTBOARD WALL, far outside the blue separatrix, and <strong>no solved X-point is marked anywhere</strong>. The solved state has no separatrix and no saddle. A reader who takes the panel as "the diverted single null at 1000 cells" reads a diverted equilibrium; the drawn solved field is not one. Repair: either re-render at a converged state, or add to the caption, in the title line beside <code>converged False</code>, that the solved field carries no admitted saddle and its axis lies outside the analytic boundary.</li>
+<li><strong>−15 rules.</strong> Only the analytic null set is drawn for the saddle; the repo rule requires both null sets where a reference exists, and requires every flux map to mark its admitted X-point. Repair: draw the solved null set, or mark explicitly that none was admitted.</li>
+<li><strong>−12 honesty.</strong> <code>unqualified · converged False</code> is present and correct, but nothing in the panel tells the reader the solved topology differs in kind, not degree.</li>
+</ul>
+<h4 id="figures-cut-cell-17-wholecell-rows-panels-diverted-single-null-production-rou">17. <code>wholecell-rows/panels/diverted-single-null-production-route-cells-1000.png</code> — 45</h4>
+<ul>
+<li><strong>−35 physics.</strong> <code>residual=1.198e-01 · converged=no</code>. The ochre solved axis triangle sits on the OUTBOARD EDGE of the blue separatrix, not inside it — the solved contours do not close on the axis the panel marks. The ochre X does coincide with the blue X, so the saddle is found while the axis is not, which is the harder failure to see and the one the figure presents without comment. Repair: as above.</li>
+<li><strong>−20 honesty.</strong> Same shape as #19.</li>
+</ul>
+<h4 id="figures-cut-cell-20-limiter-read-single-null-contact-shadow-png-30">20. <code>limiter-read/single-null-contact-shadow.png</code> — 30</h4>
+<ul>
+<li><strong>−30 rules/honesty.</strong> The figure carries <strong>no title, no caption, no legend and no text of any kind</strong>. Four distinct glyph families are drawn (red dot, red ×, blue triangle, a purple marker cluster) and none is identified. Nothing states the fixture, the cell count, the residual or the converged flag.</li>
+<li><strong>−20 physics.</strong> A <strong>blue triangle — the <code>draw_nulls</code> magnetic-axis glyph — is placed below the X-point, down in the divertor leg region</strong>, where a magnetic axis cannot be. Either the vocabulary is being reused for a contact point, which actively misleads a reader who knows the vocabulary, or the read is wrong. Repair: caption the figure, and use a distinct glyph for the contact point.</li>
+<li><strong>−20.</strong> The purple marker cluster, which appears to be the thing the figure exists to show, is unexplained.</li>
+</ul>
+<h4 id="figures-cut-cell-16-zero-residual-panels-zero-residual-map-png-48">16. <code>zero-residual/panels/zero-residual-map.png</code> — 48</h4>
+<ul>
+<li><strong>−25 physics/honesty.</strong> The bottom-left panel is titled <code>moderate-rotation-conventional-static terminal flux (persisted)</code> and <strong>draws no flux contours at all</strong> — a red boundary ring and a red dot on an otherwise empty panel. The top-left panel of the same figure does carry contours, so this is not a style choice. A panel captioned "terminal flux" that contains no flux is a claim the drawing does not support. Repair: establish whether the persisted array is flat or absent and either render it or replace the panel with a stated absence.</li>
+<li><strong>−15 rules.</strong> Magnetic axis drawn as a red dot, not the <code>draw_nulls</code> triangle; no X-point vocabulary anywhere.</li>
+<li><strong>−12 numbers.</strong> No residual and no converged flag in the title or any subtitle, against the repo rule that every forward-state evidence panel carries both.</li>
+</ul>
+<h4 id="figures-cut-cell-18-rung-a-weak-booked-minus-analytic-png-42">18. <code>rung-a/weak-booked-minus-analytic.png</code> — 42</h4>
+<ul>
+<li><strong>−20 honesty/legibility.</strong> The caption <code>weak: booked-minus-analytic per-cell current [A]</code> and the level line <code>flux levels -1.55e+00..7.90e+00 Wb; current levels -2.75e+04..4.41e+02 A</code> are <strong>drawn on top of the plot</strong>, overlapping the red boundary contour, and are partly illegible. The stated levels are the only numbers the figure carries and they cannot be read reliably.</li>
+<li><strong>−15 rules.</strong> Axis drawn as a red dot, not the triangle.</li>
+<li><strong>−7.</strong> No legend: blue contours, dashed-orange contours, ochre hexagons and the red ring are four distinct objects with no key, and no residual or converged flag.</li>
+</ul>
+<h4 id="figures-cut-cell-15-limited-shadow-solve-panels-chord-diverted-single-null-pr">15. <code>limited-shadow/solve-panels/chord/diverted-single-null-production-route-cells-500.png</code> — 52</h4>
+<ul>
+<li><strong>−20 numbers.</strong> The title is <code>diverted-single-null · cells-500 · qualified</code> — <strong>it carries no residual and no converged flag</strong>, uniquely among every sibling of this template, all of which print both. Repair: restore the two fields the template already emits elsewhere.</li>
+<li><strong>−18 honesty.</strong> The <code>absolute psi error</code> panel is filled edge to edge with dense closed contours on levels <code>4.72e-20, 1.14e-17 … 7.92e-17</code> — machine round-off. The panel draws a rich, structured error field that is entirely floating-point noise, and nothing labels it as such. Beside it the gradient and hessian panels are nearly empty at 1e-5 and 1e-3, so the psi panel is the most visually striking of the three and the least meaningful. Repair: either state the round-off floor on the panel, as <code>limited-shadow/oracle-overlay-error.png</code> correctly does, or suppress contouring below it.</li>
+<li><strong>−10 rules.</strong> Only the solved null set is drawn; the analytic boundary contour is drawn without its axis triangle.</li>
+</ul>
+<h4 id="figures-cut-cell-14-read-representation-single-null-exact-representations-png">14. <code>read-representation/single-null-exact-representations.png</code> — 55</h4>
+<ul>
+<li><strong>−15 rules.</strong> Magnetic axis as a red dot, not the triangle.</li>
+<li><strong>−15 rules/physics.</strong> A single-null fixture whose X-point is plainly visible at the bottom vertex of the black separatrix, with <strong>no X-point marker drawn</strong>.</li>
+<li><strong>−10 legibility.</strong> The caption runs under the plot and <strong>overlaps the drawn hexagons at the right</strong>, so it is read across the figure content.</li>
+<li><strong>−5 layout.</strong> The drawing occupies only the right ~55% of the canvas; the left ~45% is blank.</li>
+<li>Numbers unverifiable: the directory holds 4 figures and 1 JSON, and this figure is cited nowhere, so the <code>1.0% pitch</code> threshold in the caption has no named receipt path to re-derive from.</li>
+</ul>
+<h4 id="figures-cut-cell-13-exact-clip-seed-panels-weak-rotation-reactor-static-110-c">13. <code>exact-clip-seed/panels/weak-rotation-reactor-static-110-comparison.png</code> — 66</h4>
+<ul>
+<li><strong>−18 numbers.</strong> Title is <code>weak-rotation-reactor-static · 110 requested cells</code> only — no residual, no converged flag, though the sibling <code>*-terminals.png</code> template prints both.</li>
+<li><strong>−12 rules.</strong> Only the solved (ochre) axis triangle; the analytic reference is drawn as a blue contour with no null of its own.</li>
+<li><strong>−4.</strong> Level array is stated on the right panel and readable — this part passes.</li>
+</ul>
+<h4 id="figures-cut-cell-12-positional-stiffness-figures-translated-40mm-png-68">12. <code>positional-stiffness/figures/translated-40mm.png</code> — 68</h4>
+<ul>
+<li><strong>−15 numbers.</strong> No residual and no converged flag in any of the six subtitles.</li>
+<li><strong>−10 numbers.</strong> No level array is stated on any panel, and the subtitle does not claim shared levels, so the analytic/translated comparison cannot be checked for a shared physical level array.</li>
+<li><strong>−7.</strong> Rows mix resolutions (row 1 is 110 cells, rows 2–3 are 300) without the grid saying so structurally; a reader must read each subtitle to notice.</li>
+<li>Rules otherwise pass: axis off, wall drawn, both null sets present, unfilled line contours.</li>
+</ul>
+<h4 id="figures-cut-cell-11-exact-clip-low-state-panels-weak-static-110-terminals-png">11. <code>exact-clip-low-state/panels/weak-static-110-terminals.png</code> — 68</h4>
+<ul>
+<li><strong>−20 numbers.</strong> Both right-hand panels state <code>fixed levels [-0.1, -0.01, … 0.001, 0.01, 0.</code> — <strong>the level array is truncated mid-number by the panel width</strong>. The stated levels are the figure's own claim about its contours and they are not fully readable. Repair: wrap the level line or reduce its font.</li>
+<li><strong>−12 rules.</strong> Only the ochre null set drawn.</li>
+<li>Residual <code>3.666e-13</code> / <code>3.420e-13</code> with <code>converged=True</code> are present and correct.</li>
+</ul>
+<h4 id="figures-cut-cell-10-census-kernel-census-kernel-timing-png-70">10. <code>census-kernel/census-kernel-timing.png</code> — 70</h4>
+<ul>
+<li><strong>−10.</strong> Cited by no document (F1).</li>
+<li><strong>−10 legibility.</strong> The <code>ms whole-solve target</code> annotation collides with the <code>1.4 ms</code> point label at the left of the left panel.</li>
+<li><strong>−10 numbers.</strong> The right panel's bar value labels (<code>13 9 26</code>, <code>550 1119 2756</code>, <code>1361 5092 30650</code>) are counts, printed over an axis whose units are marginal seconds per batch; two quantities share one visual channel with no key.</li>
+<li>Left panel reads cleanly: kernel 0.0489 / 0.0521 / 0.0537 ms against production read 1.4 / 4.9 / 30 ms — a legitimate log-axis line chart, so axes and gridlines are correct here (the no-axes rule governs 2D poloidal panels, not 1D traces).</li>
+</ul>
+<h4 id="figures-cut-cell-9-gate-c-resolve-weak-rotation-reactor-static-production-rou">9. <code>gate-c-resolve/weak-rotation-reactor-static-production-route-cells-1000.png</code> — 72</h4>
+<ul>
+<li><strong>−16 honesty.</strong> <code>absolute psi error</code> levels run to <code>5.29e+01</code> — a <strong>53 Wb</strong> absolute flux error, drawn across the whole interior with no comment anywhere in the figure on whether that is expected at <code>converged False</code>.</li>
+<li><strong>−12 physics.</strong> Blue and ochre axes are visibly separated; the state is not converged and the caption says so, which is why this is a deduction and not a misrepresentation.</li>
+</ul>
+<h4 id="figures-cut-cell-8-limiter-subpanel-limiter-wall-contact-read-png-72">8. <code>limiter-subpanel/limiter-wall-contact-read.png</code> — 72</h4>
+<ul>
+<li><strong>−10.</strong> Cited by no document, and its directory holds <strong>zero JSON receipts</strong>, so no number in it can be re-derived — the Numbers question is unanswerable, not failed.</li>
+<li><strong>−8 rules.</strong> Magnetic axis drawn as a green triangle — right shape, off-vocabulary colour.</li>
+<li><strong>−10.</strong> Right panel legend keys six series by fixture and quantity but the left panel's red circle-in-square contact glyph appears in no key.</li>
+<li><strong>Physics passes and is worth saying so:</strong> the blue separatrix is drawn tangent to the black wall at the marked contact point — a limited boundary touching the wall, exactly the thing the rule asks a limited figure to show.</li>
+</ul>
+<h4 id="figures-cut-cell-7-oracle-start-diverted-single-null-cells-1000-fixture-exter">7. <code>oracle-start/diverted-single-null-cells-1000-fixture_exterior_control.png</code> — 78</h4>
+<ul>
+<li><strong>−12 rules.</strong> The analytic reference is drawn as a blue separatrix with <strong>no blue nulls</strong>; only the ochre triangle and ochre × appear. Both sets are required where a reference exists.</li>
+<li><strong>−10.</strong> Cited by no document (F1).</li>
+<li><strong>Physics passes:</strong> <code>residual=7.823e-19; converged=True</code>, and the drawn diverted boundary passes through the marked X-point. This is the strongest physics in the directory.</li>
+</ul>
+<h4 id="figures-cut-cell-6-xpoint-cell-carrier-vs-independent-cells-110-png-80">6. <code>xpoint-cell/carrier-vs-independent-cells-110.png</code> — 80</h4>
+<ul>
+<li><strong>−15 communication.</strong> The title claims a distinction — "the clip's core wedge is the quad beside the saddle; the reconstruction's confined sector is the quad above it" — but the right panel draws its confined sector as a hairline light-grey line that is nearly invisible at the rendered size. The figure exists to show a difference the reader cannot see. Repair: raise the weight and contrast of the reconstruction sector.</li>
+<li><strong>−5.</strong> No scale or cell-pitch reference on either panel.</li>
+</ul>
+<h4 id="figures-cut-cell-3-5-cold-seed-weak-moderate-strong-production-route-reduced-">3–5. <code>cold-seed/{weak,moderate,strong}-*-production-route-reduced.png</code> — 80 each</h4>
+<ul>
+<li><strong>−12 honesty.</strong> All three are <code>converged False</code> (residuals 1.252e-02, 7.831e-03, 9.812e-03) and all three print it, which is correct. The deduction is that the solved ochre contours ring violently at the outboard midplane — visible high-frequency oscillation crossing the boundary — and nothing in the caption tells the reader that this structure is an artefact of a non-converged state rather than a feature of the field.</li>
+<li><strong>−8 rules.</strong> Blue and ochre axis triangles are coincident at this scale and the ochre one covers the blue; a reader cannot confirm both null sets are drawn.</li>
+<li>Everything else passes: axis off, wall closed on all four panels, unfilled line contours, level arrays stated under every error panel, shared Wb levels declared.</li>
+</ul>
+<h4 id="figures-cut-cell-2-limited-shadow-oracle-overlay-error-png-86">2. <code>limited-shadow/oracle-overlay-error.png</code> — 86</h4>
+<ul>
+<li><strong>−8 rules.</strong> Row 4 (<code>single-null 500 control</code>) draws only the ochre null set; the analytic reference gets no nulls.</li>
+<li><strong>−6.</strong> Orange carries two meanings in one figure: "solved ψ / nulls" in column 1 and "negative Δψ" in column 2, both keyed to one legend entry.</li>
+<li><strong>Credited, and it is the reason this figure scores high:</strong> it prints <code>max |Δψ|/span 2.099e-01 · not-oracle-matched</code> beside <code>residual 1.39e-15 · converged yes</code>, and its footnote states outright that "a converged row is a self-consistent fixed point, not an oracle match". A converged state that is 21% off the oracle is exactly the thing a shoddy figure would let a reader misread, and this one refuses to. Column 3 is a 1D log trace, so its axes and gridlines are correct.</li>
+</ul>
+<h4 id="figures-cut-cell-1-limited-shadow-lfs-contours-before-after-png-92">1. <code>limited-shadow/lfs-contours-before-after.png</code> — 92</h4>
+<ul>
+<li><strong>−5.</strong> The legend keys five series but not the black wall.</li>
+<li><strong>−3 numbers.</strong> Each row declares "one analytic Wb level array in all three columns" but does not print the array values, so a reader can confirm sharing but not the levels.</li>
+<li><strong>Credited:</strong> every one of the nine subtitles prints its own residual and converged flag (2.00e-03/no, 1.39e-15/yes, n/a/reference, …); the wall is closed on all nine panels; the axis triangle is drawn on all nine; and the footnote says which row is <strong>missing and why</strong> — "the weak 2500 reproduction persisted only its 54-carrier census, not its terminal flux array, so that row is not drawn". That is the honesty question answered without being asked. This figure is the template the rest of the directory should be repaired toward.</li>
+</ul>
+<h2 id="figures-cut-cell">COMPLETE COVERAGE — all 114 figures opened and scored</h2>
+<p>The coverage caveat above is superseded. <strong>Every one of the 114 PNG and SVG files was opened with the image read tool and scored.</strong> The 37 SVGs were rendered to PNG with <code>rsvg-convert -w 1400 -b white</code> and opened as images, so the reviewer saw what a reader sees, not the XML.</p>
+<table><thead><tr><th>quantity</th><th>value</th></tr></thead><tbody>
+<tr><td>figures opened and scored</td><td><strong>114 / 114</strong></td></tr>
+<tr><td><strong>mean score</strong></td><td><strong>67.4 / 100</strong></td></tr>
+<tr><td><strong>scored under 70</strong></td><td><strong>52 of 114 (46%)</strong></td></tr>
+<tr><td><strong>misrepresenting their physics</strong></td><td><strong>11</strong></td></tr>
+<tr><td>cited by no document in <code>docs/</code></td><td>40</td></tr>
+<tr><td>SVGs carrying full matplotlib axis furniture</td><td>17 of 37</td></tr>
+</tbody></table>
+<p>Full ranked table: <code>per-figure-table.md</code>. Machine-readable: <code>scores.json</code>.</p>
+<h3 id="figures-cut-cell-the-eleven-physics-misrepresentations">The eleven physics misrepresentations</h3>
+<ol>
+<li><strong><code>gate-c-resolve/diverted-single-null-production-route-cells-1000.png</code> (38)</strong> and</li>
+<li><strong><code>gate-c-resolve/diverted-single-null-production-route-cells-500.png</code> (38)</strong> — both <code>converged False</code> (1.119e-01, 1.938e-01). The solved field closes on an axis pressed against the outboard wall, outside the analytic separatrix, with <strong>no solved X-point marked at all</strong>. Neither has a separatrix or an admitted saddle. Both are captioned <code>diverted-single-null</code>; the 500 is cited by three documents including <code>gs-absolute-accuracy-certificate.html</code>.</li>
+<li><strong><code>wholecell-rows/panels/diverted-single-null-production-route-cells-1000.png</code> (45)</strong> — the solved axis sits on the outboard edge of the analytic separatrix while the saddle is found, so the contours do not close on the axis the panel marks.</li>
+<li><strong><code>wholecell-rows/panels/weak-rotation-reactor-static-production-route-cells-2500.png</code> (40)</strong> — title reads <code>residual=0.000e+00 · converged=yes</code>. <strong>An exactly zero residual, printed to three decimals, beside its own psi-error panel whose levels run to <code>3.17e+01</code> Wb.</strong> A state cannot be an exact fixed point and carry a 31.7 Wb flux error against the analytic. This is a claim about the instrument: the residual reported is not the residual of the state drawn. It is the most serious single finding in the directory because a zero reads as the best row in the bank.</li>
+<li><strong><code>rung-a-certificate/diverted-single-null-production-route-reduced.png</code> (40)</strong> — <code>residual 6.354e-01 · converged False</code>, and <strong>the solved X-point glyph is drawn at the INBOARD MIDPLANE</strong>, nowhere near the analytic X at the bottom, with the solved axis up in the top-right of the plasma. A directory named <code>rung-a-certificate</code> certifying a state whose saddle is in the wrong place by half a machine radius.</li>
+<li><strong><code>limiter-read/single-null-contact-shadow.png</code> (30)</strong> — no text of any kind, and the <code>draw_nulls</code> magnetic-axis triangle placed in the divertor leg.</li>
+<li><strong><code>zero-residual/panels/zero-residual-map.png</code> (48)</strong> — a panel titled "terminal flux (persisted)" that draws no flux.</li>
+<li><strong><code>gate-b/absolute-flux-error.svg</code> (45)</strong> — six poloidal panels whose title claims "wall drawn; axis and X-point marked". <strong>Panels 1 and 3 are empty except the wall and an axis dot, while their own subtitles quote <code>max |error| 0.9752 Wb = 0.0168 span</code> and <code>0.00272 Wb = 0.0197 span</code>.</strong> The contour levels are set above the stated maximum, so a nonzero error is drawn as a blank panel. Axis is a red dot, not the triangle.</li>
+<li><strong><code>cut-cell-coupling/weak-110-coupling-errors.svg</code> (50)</strong> — the middle panel is titled <code>before as built, rms 0.00000 of span</code> and is <strong>empty</strong>, between <code>zeroth only, 0.00603</code> and <code>after clipped, 0.00027</code>. An rms of exactly zero to five decimals, drawn as nothing, in the middle of a before/after sequence that then reads as the change making things worse. The zero is an instrument artefact presented as a result.</li>
+<li><strong><code>positional-stiffness/figures/weak-rotation-reactor-static-cells-110-residual.png</code> (45)</strong> and 11. <strong><code>...cells-300-residual.png</code> (45)</strong> — the two figures are titled <code>110 requested cells</code> and <code>300 requested cells</code> and are <strong>pixel-identical</strong>: every marker, every curve, every legend entry. Two different discretisations cannot produce the same curve; one of the two is mis-titled or the driver rendered the same array twice. The figures assert a resolution dependence they do not contain.</li>
+</ol>
+<h3 id="figures-cut-cell-further-findings-from-the-full-pass">Further findings from the full pass</h3>
+<p><strong>F5 — three figure pairs are duplicate renders.</strong> <code>newton-geometry/<em>-production-route-reduced.png</code> is pixel-identical to its <code></em>-chord_live-reduced.png</code> sibling <strong>except that the title has had <code>chord_live</code>, the residual and the trip count stripped</strong> — so the "production route" figure of each of the three fixtures is the chord_live figure with its evidence removed (weak 1.630e-03/6 trips, moderate 1.490e-03/7, strong 1.096e-02/7). Scored 50 each. <code>xpoint-cell/single-null-wedges-cells-300</code> and <code>carrier-vs-independent-cells-110</code> each exist as both PNG and SVG of the same figure.</p>
+<p><strong>F6 — <code>gate-c-resolve</code> resolved nothing.</strong> All fourteen figures in the directory are <code>unqualified · converged False</code>, residuals 3.79e-02 to 1.94e-01.</p>
+<p><strong>F7 — the residual/converged line is missing from five templates.</strong> <code>exact-clip-seed</code> (all 12), <code>exact-clip-memory</code> solve panels, <code>limited-shadow/solve-panels/chord</code> (all 4), <code>positional-stiffness/translated-40mm</code>, <code>read-representation</code> (all 4) and <code>rung-a</code> (all 3) print no residual and no converged flag, while <code>gate-c-resolve</code>, <code>wholecell-rows</code>, <code>cold-seed</code>, <code>rung-a-certificate</code> and <code>newton-geometry/chord_live</code> print both from what is plainly the same renderer.</p>
+<p><strong>F8 — <code>moment-order</code> and <code>gate-b</code> print a leading minus on the cell count</strong> — <code>-110 cells</code>, <code>-300 cells</code>, in all six figures.</p>
+<p><strong>F9 — the <code>xpoint-cell</code> wedge panels draw the two null sets as an hourglass</strong>: an ochre down-triangle over a blue up-triangle. A downward triangle is not the <code>draw_nulls</code> axis glyph, so the coincident-axis case is rendered as a marker that means something else.</p>
+<p><strong>Correction to F2.</strong> The provenance finding stands — <code>base-memory-scaling.svg</code> is hand-authored, not a <code>nova.media</code> render, and nothing binds its marks to a receipt. The third-digit disagreement claimed above was my pixel arithmetic on hand-placed coordinates, which is not a reliable instrument; opened as an image the labels and marks read consistently. Score 60, on provenance alone.</p>
 </section>
 <section class="audit-directory" id="figures-remaining-directories-section">
 <h2 id="figures-remaining-directories">Figure audit — the five remaining directories</h2>

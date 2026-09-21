@@ -26,9 +26,9 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-blocks" content="millisecond-converged-solve">
-<meta name="plan-impl" content="0.45">
+<meta name="plan-impl" content="0.55">
 </head>
 <body>
   <main class="plan-doc">
@@ -240,10 +240,11 @@
     <div class="r-fu-body"><p>From review <code>solver test-pins review (codex sol)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-test-pins</code>.</p><p>Commits <code>d8bbc0491e72df29ddaabc1e6d76f704c4c8dc2d</code>, <code>a999eff40521e428d4c09a3b0d3adea5724a17b2</code>, and <code>8dc6be23ae6d0c3f76b6bd20e9821733200f23db</code>, <code>tests/test_solve_trips_are_a_scan.py</code> lines 48-61 and <code>benchmarks/program_scope_census.py</code> line 1054: the integrated scan gate passes 146 tests and the archived base implementation correctly produces two lowered trip bodies, but the loop inventory still searches for the removed <code>jax.lax.fori_loop(1, active_set_steps</code> source marker. Both certificate gates that include <code>tests/test_solve_program_size.py</code> now fail there. Repair: inventory the <code>lax.scan</code> form by mechanism, add that test to the route gate, and require the certificate gates to return green at the integrated head.</p></div>
     <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-003-third-rung-single-read-body-under-100-mb" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="coordinator" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship forward-solver-route-integrity section 2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-003-third-rung-single-read-body-under-100-mb" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="coordinator" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship forward-solver-route-integrity section 2" data-resolved-at="2026-09-21T15:09:03+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Third rung: one lowered operator-read body per trip and the executable under 100 MB</h4>
     <div class="r-fu-body"><p>The second rung (524e20dc, merged d8e3ca70c) shared the live maps across the shadow-selection branches and took the weak-rotation 300-cell executable from 146,456,085 to 126,313,707 bytes with the current-base terminal state d730c294 bit-identical; a qualification-batching variant measured worse (127,989,777) and was removed with its evidence kept. What remains, in the second rung's own words: share the remaining live evaluator bodies across residual, linearization, recovery and reconciliation so the full lowered program carries one operator-read body per trip (73 read-entry markers remain) and the executable falls under 100,000,000 bytes, preserving the d730c294 state and the trip budget. The strongest lane; the row's own non-convergence is the cut-cell plan's matter.</p></div>
     <pre class="r-fu-prompt">/reckon-ship forward-solver-route-integrity section 2</pre>
+    <p class="r-fu-outcome">Landed 2026-09-21 (commits bafd2a8a0, 26b4af642, faf2a7e01, 5f854ac81, ba2f3ff04; merged on main): sharing the initial and retried promotion bodies in _newton_krylov_inner took the weak-rotation 300-cell certificate executable from 126,313,582 to 88,289,094 bytes, under the 100 MB ceiling, with the d730c294 terminal state bit-identical across all 1529 values, the CPU compile witness exiting 0 and the focused suites at 157 passed; the control reddens both duplication guards. The global one-primal, one-linearized read-body proof is not claimed: the optimized-HLO counting positive control failed, and the instrument repair is the manifest follow-on. Section 2 ceiling met; the row's non-convergence remains the cut-cell plan's matter.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

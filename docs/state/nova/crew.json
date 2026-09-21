@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T11:13:45",
+  "updated": "2026-09-21T12:31:52",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4887,6 +4887,15 @@
           "{\"alias\":\"luna5.6\",\"backend\":\"codex-luna\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"model\":\"gpt-5.6-luna\",\"sandbox\":\"worktree-full\"}": "01a0a9ae-e7f7-7f41-a721-7ccdbcc4353c"
         },
         "created": "2026-09-16"
+      },
+      {
+        "id": "s19c-drift-resume-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
       },
       {
         "id": "s19c-dvf-cocos-c",
@@ -225461,6 +225470,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3041
+    "_version": 3042
   }
 }

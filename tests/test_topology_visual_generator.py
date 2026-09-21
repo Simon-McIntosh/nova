@@ -171,6 +171,52 @@ def test_mid_cohort_render_failure_preserves_seventeen_panel_denominator(
     assert cached[8]["panel_failure_exception_class"] == "RuntimeError"
 
 
+class _SynthesisedTopologyRead:
+    """Topology read result carrying one flux level per anchor."""
+
+    def __init__(self, boundary_flux, x_point_flux, wall_point_flux):
+        self.boundary_flux = np.asarray(boundary_flux, dtype=float)
+        self.x_point_flux = np.asarray(x_point_flux, dtype=float)
+        self.wall_point_flux = np.asarray(wall_point_flux, dtype=float)
+
+
+def test_persisted_boundary_flux_follows_the_recorded_class():
+    generator = _generator()
+    saddle_flux = -0.1220793
+    contact_flux = 0.0177761
+    read = _SynthesisedTopologyRead(contact_flux, saddle_flux, contact_flux)
+
+    assert generator._class_boundary_flux(
+        read, int(generator.TopologyClass.DIVERTED)
+    ) == pytest.approx(saddle_flux)
+    assert generator._class_boundary_flux(
+        read, int(generator.TopologyClass.LIMITED)
+    ) == pytest.approx(contact_flux)
+    assert generator._class_boundary_flux(read, None) == pytest.approx(contact_flux)
+
+
+def test_recorded_class_is_read_from_the_atlas_receipt(tmp_path):
+    generator = _generator()
+    receipt = tmp_path / "convergence-atlas.json"
+    receipt.write_text(
+        json.dumps(
+            {
+                "panels": [
+                    {"identity": "22086/43 mixed", "class": "diverted"},
+                    {"identity": "21978/35 pure", "class": "unclassified"},
+                ]
+            }
+        )
+    )
+
+    assert (
+        generator._recorded_topology_class(receipt, "22086/43 mixed")
+        == generator.TopologyClass.DIVERTED
+    )
+    assert generator._recorded_topology_class(receipt, "21978/35 pure") is None
+    assert generator._recorded_topology_class(receipt, "22086/43 other") is None
+
+
 def test_healthy_boundary_reports_integer_counts_with_true_availability(tmp_path):
     generator = _generator()
     generator.HERE = tmp_path

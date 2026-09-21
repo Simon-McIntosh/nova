@@ -56,6 +56,7 @@ from nova.equilibrium.flux_surface_connectivity import (
 from nova.geometry.hexstencil import hex_stencil
 from nova.equilibrium.separatrix_branches import assemble_separatrix_branches
 from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
+from nova.equilibrium.topology import TopologyClass
 from nova.imas.mast_efit_referee import read_efit_referee
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
 from nova.jax.config import (
@@ -73,6 +74,19 @@ DIIID_CACHE = HERE / "diiid-topology-operands.npz"
 MAST_AUTHORITY = (
     ROOT / "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py"
 )
+ATLAS_RECEIPT = (
+    ROOT
+    / "docs/figures/null-identification-authority/convergence-atlas"
+    / "convergence-atlas.json"
+)
+TOPOLOGY_CLASS_BY_LABEL = {
+    "diverted": TopologyClass.DIVERTED,
+    "limited": TopologyClass.LIMITED,
+}
+TOPOLOGY_LABEL_BY_CLASS = {
+    int(TopologyClass.DIVERTED): "diverted",
+    int(TopologyClass.LIMITED): "limited",
+}
 DIIID_AUTHORITY = ROOT / "benchmarks/diiid_forward_gs_match.py"
 EXPECTED_MAST_ROWS = 12
 EXPECTED_DIIID_ROWS = 5
@@ -155,6 +169,38 @@ def _load_path(path: Path, name: str):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def _recorded_topology_class(receipt: Path, identity: str):
+    """Return the topology class the atlas receipt records for one frame.
+
+    ``None`` means no class is recorded for that frame, so the read stays
+    class-free.
+    """
+    if not receipt.is_file():
+        return None
+    panels = json.loads(receipt.read_text(encoding="utf-8"))["panels"]
+    recorded = next(
+        (panel.get("class") for panel in panels if panel.get("identity") == identity),
+        None,
+    )
+    return TOPOLOGY_CLASS_BY_LABEL.get(recorded)
+
+
+def _class_boundary_flux(topology, requested_class) -> float:
+    """Boundary flux level the persisted polyline is traced at for a class.
+
+    A class-free read lets the wall contact win the boundary level.  A frame
+    whose recorded class is diverted persists the admitted saddle flux and a
+    limited frame the wall contact flux.
+    """
+    if requested_class is None:
+        return float(np.asarray(topology.boundary_flux))
+    if int(requested_class) == int(TopologyClass.DIVERTED):
+        return float(np.asarray(topology.x_point_flux))
+    if int(requested_class) == int(TopologyClass.LIMITED):
+        return float(np.asarray(topology.wall_point_flux))
+    raise ValueError(f"unsupported requested topology class {requested_class!r}")
 
 
 def _stationary_records(
@@ -255,6 +301,8 @@ def _mast_rows(
                 flush=True,
             )
             state = arm_result.state
+            identity = f"{shot}/{slice_index} {arm}"
+            requested_class = _recorded_topology_class(ATLAS_RECEIPT, identity)
             governed_wall = reachability._closed_wall(
                 np.asarray(profile.operator.wall.coordinate, dtype=float)
             )
@@ -266,7 +314,9 @@ def _mast_rows(
                 source_o, source_x = jax.device_get(
                     profile.operator._fixed_design_topology.grid(grid_flux)
                 )
-                masks, topology = profile.operator.read(state)
+                masks, topology = profile.operator.read(
+                    state, requested_class=requested_class
+                )
                 geometry = reachability._grid_geometry(profile, state)
                 flux = np.asarray(geometry["flux"], dtype=float)
                 radius = np.asarray(geometry["radius"], dtype=float)
@@ -360,9 +410,8 @@ def _mast_rows(
                     vertices = np.asarray(polygon, dtype=float)
                     padded_polygons[polygon_index, : len(vertices)] = vertices
                 shared_flux = moment_geometry.shared_node_flux(grid_flux)
-                signed_flux = profile.operator.polarity * (
-                    shared_flux - topology.boundary_flux
-                )
+                boundary_flux = _class_boundary_flux(topology, requested_class)
+                signed_flux = profile.operator.polarity * (shared_flux - boundary_flux)
                 print(
                     f"MAST_REPLAY_FIELDS_READY {shot}/{slice_index} {arm}",
                     flush=True,
@@ -372,7 +421,7 @@ def _mast_rows(
                         jnp.asarray(flux),
                         jnp.asarray(radius),
                         jnp.asarray(height),
-                        topology.boundary_flux,
+                        boundary_flux,
                         topology.axis,
                     )
                 )
@@ -391,6 +440,11 @@ def _mast_rows(
                     "wall_point": np.asarray(topology.wall_point, dtype=float),
                     "wall": governed_wall,
                     "nova_boundary": closed,
+                    "class": (
+                        None
+                        if requested_class is None
+                        else TOPOLOGY_LABEL_BY_CLASS.get(int(requested_class))
+                    ),
                     "converged": bool(arm_result.converged),
                     "qualification": str(arm_result.termination_reason),
                     "termination_reason": str(arm_result.termination_reason),
@@ -416,6 +470,7 @@ def _mast_rows(
                     "wall_point": empty_points,
                     "wall": governed_wall,
                     "nova_boundary": empty_points,
+                    "class": None,
                     "converged": False,
                     "qualification": type(error).__name__,
                     "termination_reason": str(arm_result.termination_reason),

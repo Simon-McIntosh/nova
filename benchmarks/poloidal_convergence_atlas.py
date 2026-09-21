@@ -487,7 +487,7 @@ def _panel(
         if isinstance(raw_time, (int, float)) and abs(raw_time) > 100
         else raw_time
     )
-    class_label = "diverted" if nova_boundary.shape[0] >= 3 else "unclassified"
+    class_label = record.get("class") or "unclassified"
     return {
         "machine": record["machine"],
         "identity": identity,

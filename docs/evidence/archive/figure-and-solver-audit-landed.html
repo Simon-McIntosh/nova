@@ -2541,6 +2541,120 @@ ROW2_EXIT=139</pre>
 <h3 id="fsa-audit-solver-wall-read-followups">Followups</h3>
 <p><code>findings.json</code> contains four complete <code>edit_plan</code> append items: false-green gate integrity on <code>figure-and-solver-audit</code>; atlas regeneration, completion/splitting of <code>74f00821c</code>, and replacement of <code>44ecd9443</code> under <code>null-identification-authority</code>. Each body names the commit, file, line, defect, and repair.</p>
 </section>
+<section class="audit-directory" id="fsa-verify-the-census-gate-and-the-drift-resume-repairs-section">
+<h2 id="fsa-verify-the-census-gate-and-the-drift-resume-repairs">Verification review — census gate and drift resume repairs</h2>
+<p>Reviewed landings:</p>
+<ul>
+<li><code>8a33b741b85e3df8737cdb16f79e8765c7975e4d</code> with record <code>16705cad5e8c4c4bf57881fe6ab0601d29ff4705</code></li>
+<li><code>4a6964cfb555d855471e7c6add537e8a5b66f76a</code> with record <code>17aeed77205315a6d14b85c16fa1a031a36de500</code></li>
+</ul>
+<h3 id="fsa-verify-the-census-gate-and-the-drift-resume-repairs-promotion-verdicts">Promotion verdicts</h3>
+<table><thead><tr><th>Repair</th><th>Verdict</th><th>Score</th><th>Basis</th></tr></thead><tbody>
+<tr><td>Repeatable outboard-hole census gate</td><td><strong>promote</strong></td><td><strong>94/100</strong></td><td>The prescribed one-job CPU gate passed all three tests in 133.67 s. The passing total and per-cell pins re-confirm chord <strong>15,868,149.094491 A</strong>, exact <strong>15,491,114.132435 A</strong>, and nonzero bookings for cells 83, 104, 106, 108 and 116 against analytic <strong>16,314,773.311828371 A</strong>. The stored 1.01 booking mutation fails both exact-value pins for the claimed 1% displacement.</td></tr>
+<tr><td>Bank-drift resume repair</td><td><strong>promote</strong></td><td><strong>99/100</strong></td><td>A fresh process passed the repair and companion module, <strong>12 passed in 14.33 s</strong>. The base-revision overlay was instrumented to prove the empty rebind was present and the skip absent; the resume test then failed because the worker was asked for all three identities. Restoring that same rebind reproduces the same red assertion.</td></tr>
+</tbody></table>
+<h3 id="fsa-verify-the-census-gate-and-the-drift-resume-repairs-census-gate-judgment">Census gate judgment</h3>
+<p>The test-only absent-saddle bridge is honest for this gate. It wraps only <code>ForwardFluxOperator._profile_support</code>, adds non-finite <code>x_point</code> and <code>x_point_flux</code> fields only when the analytic fixture lacks them, and restores the original method after the module fixture. The pre-bridge failure remains recorded as an <code>AttributeError</code> at <code>forward_operator.py:3091</code>; the bridge does not edit production code or assert that the production incompatibility is fixed. It routes around that known incompatibility solely so the booking gate can reach its own assertions.</p>
+<p><code>terminal_booked_currents()</code> is fit for the candidacy node to reuse: it reads the committed terminal state, calls the census helpers without figure rendering, and returns <code>(chord_total, exact_total, per_cell_for_the_five)</code>. A caller outside pytest must explicitly call <code>install_absent_saddle_bridge()</code>; that requirement is documented. The six-point deduction is for this process-global test bridge and manual lifecycle burden, not for a measured defect in the returned census.</p>
+<p>The original declared control is the committed <code>test_outboard_cells_book_nonzero_in_both_clip_modes</code>; it passed in the reviewer's allocation. The candidate's stored mutation receipt begins by declaring a 1.01 scale on every booked cell, shows that exact source line, then fails <code>test_booked_totals_reproduce_the_committed_state</code> and <code>test_outboard_cells_book_the_committed_current</code> at a measured relative error of 0.01. The nonzero control remains green under that mutation, as expected; it is a presence control, while the exact-value pins discriminate the scaling.</p>
+<h3 id="fsa-verify-the-census-gate-and-the-drift-resume-repairs-drift-resume-judgment">Drift resume judgment</h3>
+<p>The diff preserves <code>_resume_rows(out_path)</code>, derives the completed identity set from those rows, skips completed identities before any solve work, and writes the carried rows plus newly completed rows. The focused test observes both sides of the contract: only <code>21990/35</code> reaches the stub solver, the two checkpoint row objects survive byte-for-byte at the front of the emission, and all three identities occur exactly once.</p>
+<p>The first base attempt passed because pytest inserted the candidate checkout ahead of the overlay. That implausible pass was rejected. A separate instrument then proved the actual import path and both source markers; the corrected <code>--import-mode=importlib</code> run imported the base file and failed on <code>producer.asked == [UNLANDED]</code>, showing <code>['21978/35', '21990/35', '21983/35']</code>. The negative-control log repeats <code>restore the empty-list rebind</code> on its first line and fails for the same reason.</p>
+<h3 id="fsa-verify-the-census-gate-and-the-drift-resume-repairs-evidence">Evidence</h3>
+<ul>
+<li>Census gate: <code>logs/census-gate.log</code> — 3 passed, exit 0.</li>
+<li>Census candidate mutation: original worker receipt <code>r-20260921T091829303544-cca-the-outboard-hole-has-a-repeatable-gate/logs/negative-control.log</code> — 2 failed, 1 passed, exact 1% displacement.</li>
+<li>Drift candidate: <code>logs/drift-candidate.log</code> — 12 passed, exit 0.</li>
+<li>Drift baseline: <code>logs/drift-base.log</code> — 1 failed, exit 1.</li>
+<li>Drift baseline instrument: <code>logs/drift-base-instrument.log</code> — base path, empty rebind present, resume skip absent.</li>
+<li>Drift negative control: <code>logs/drift-negative-control.log</code> — 1 failed, exit 1.</li>
+</ul>
+<p>No file under <code>nova/</code>, <code>benchmarks/</code>, or <code>tests/</code> was modified by this review.</p>
+</section>
+<section class="audit-directory" id="fsa-verify-the-fixture-saddle-repair-section">
+<h2 id="fsa-verify-the-fixture-saddle-repair">Fixture topology saddle repair review</h2>
+<p>Verdict: <strong>PROMOTE</strong></p>
+<p>Score: <strong>100 / 100</strong></p>
+<p>Reviewed commits: <code>708af70077aa1eb366afece93a973c59c9b6df72</code> and <code>4c6c4f38d6a3647856adfc12a8c997a976b0b3f5</code> in the prescribed repair worktree. Review base: <code>fe471757a0ed8f12d951b87d6787ba752b4cdd64</code>.</p>
+<h3 id="fsa-verify-the-fixture-saddle-repair-findings">Findings</h3>
+<p>No blocking or non-blocking findings. The repair is minimal, discriminating, and matches the production topology convention.</p>
+<h3 id="fsa-verify-the-fixture-saddle-repair-diff-by-anomaly">Diff by anomaly</h3>
+<p>Commit <code>708af7007</code> changes exactly two paths: <code>scripts/analytic_oracle_fixtures/measure.py</code> and the new <code>tests/test_analytic_oracle_fixture_topology.py</code>. The source change adds <code>_analytic_saddle</code>, adds <code>_analytic_topology</code>, and routes the fixture's existing topology construction through that helper. No path under <code>nova/equilibrium</code> changes. Commit <code>4c6c4f38d</code> contains only the repair's landing record and plan comment.</p>
+<p>The diverted arm takes the analytic reference's declared <code>x_point</code>. The limited arm returns <code>jnp.full(2, jnp.nan)</code>. That absent-saddle representation agrees with both production sites checked independently: <code>nova/equilibrium/topology.py:417-425</code> emits a NaN-filled stationary-point row when no saddle is admitted and slices its first two coordinates, while <code>nova/equilibrium/forward_operator.py:2716</code> uses <code>getattr(topology, "x_point", jnp.full(2, jnp.nan))</code> as its absent-saddle fallback.</p>
+<h3 id="fsa-verify-the-fixture-saddle-repair-evidence">Evidence</h3>
+<p>One <code>all_debug</code> allocation, job <code>1274904</code>, used 8 CPUs and 64 GiB and completed in <code>00:03:34</code> with wrapper exit <code>0</code>. <code>TMPDIR=/tmp</code> was set in the submit environment and payload; <code>JAX_PLATFORMS=cpu</code> was set in the payload; the shared root interpreter was invoked directly; <code>uv</code> was not invoked on the compute node. Each test file or node ran in a separate Python process.</p>
+<table><thead><tr><th>Arm</th><th>Revision / mutation</th><th>Result</th><th>Receipt</th></tr></thead><tbody>
+<tr><td>Base reproduction</td><td><code>fe471757a</code>, fixture topology without <code>x_point</code></td><td>exit 1; <code>1 failed in 52.23s</code>; <code>AttributeError: 'types.SimpleNamespace' object has no attribute 'x_point'</code> at <code>forward_operator.py:3091</code></td><td><code>baseline-census.log</code>, SHA-256 <code>84a1c64d7c5b33f4cd03978fa6d1b1e12d5c9468e0e509d8e59840b652ceb358</code></td></tr>
+<tr><td>Focused repaired topology</td><td><code>708af7007</code></td><td>exit 0; <code>2 passed in 7.46s</code></td><td><code>after-fixture-topology.log</code>, SHA-256 <code>5493938c2eaf72469a72265dfa54c67a139806a605d40bf3f616b553e5dde664</code></td></tr>
+<tr><td>Repaired forward census</td><td><code>708af7007</code></td><td>exit 0; <code>1 passed in 97.67s</code></td><td><code>after-census.log</code>, SHA-256 <code>004d6e933bfedd883dba7832fa48a00ac84be1da87add4703b26dba4652f8246</code></td></tr>
+<tr><td>Negative control</td><td>remove the <code>x_point</code> field from the fixture topology again</td><td>exit 1; <code>1 failed in 12.47s</code>; the same missing-<code>x_point</code> <code>AttributeError</code> at <code>forward_operator.py:3091</code></td><td><code>negative-control.log</code>, SHA-256 <code>b0a7a60ef7d735444f0f39bb777e19cf9462a39c1e693e22f7b8e37a3c035a94</code></td></tr>
+</tbody></table>
+<p>The negative-control receipt's first line names the applied mutation verbatim. Its traceback proves the guard is discriminating for the repaired defect rather than merely producing a generic nonzero exit.</p>
+<h3 id="fsa-verify-the-fixture-saddle-repair-score">Score</h3>
+<ul>
+<li>Repair correctness and production-contract match: 40 / 40</li>
+<li>Focused diverted and limited fixture coverage: 25 / 25</li>
+<li>Independent base reproduction and exact negative control: 20 / 20</li>
+<li>Diff scope, landing record, and absence of solver-core churn: 15 / 15</li>
+</ul>
+<p>Total: <strong>100 / 100</strong>.</p>
+<h3 id="fsa-verify-the-fixture-saddle-repair-promotion-boundary">Promotion boundary</h3>
+<p>Promote the two prescribed commits as this repair's bookend. This verdict covers only the fixture-saddle repair at its repair worktree tip; it does not claim the separately owned merged-head integration gate, and it does not close the driving followup.</p>
+</section>
+<section class="audit-directory" id="fsa-verify-two-prescribed-local-repairs-section">
+<h2 id="fsa-verify-two-prescribed-local-repairs">Independent review of two prescribed local repairs</h2>
+<p>Review base: <code>61f7d79d558ec6219f39272bded5ab6933c666d1</code>. Both implementation worktrees were clean. Both workers branched from <code>25c9d7205e72b492dd27578f8709793c3ca5b9bc</code>; that revision was archived transiently and each candidate's added test was overlaid without its source repair for the base-red control. The scratch trees were removed after their logs landed.</p>
+<h3 id="fsa-verify-two-prescribed-local-repairs-verdicts">Verdicts</h3>
+<table><thead><tr><th>repair</th><th>code commit</th><th>scoped anomaly read</th><th>candidate gate</th><th>declared negative control</th><th>base with added test</th><th>score</th><th>verdict</th></tr></thead><tbody>
+<tr><td>sampler process status</td><td><code>c1af3a06d9055ea1cff652eac41d006426ec28da</code></td><td>exactly <code>benchmarks/compile_abort_probe.py</code> plus <code>tests/test_compile_abort_probe.py</code>; one source line and two subprocess cases</td><td>exit 0; 2 passed in 14.70 s</td><td><code>return exit_code</code> changed to <code>return 0</code>: exit 1; failed on <code>assert 0 == 7</code>, with the success case still passing</td><td>exit 1; same <code>assert 0 == 7</code> failure</td><td>97</td><td><strong>promote</strong></td></tr>
+<tr><td>certificate loop inventory</td><td><code>3d6e20d68326c1d4c7878c78fc955fe80d6be666</code></td><td>exactly <code>benchmarks/program_scope_census.py</code> plus <code>tests/test_solve_program_size.py</code>; only the certificate row and its assertion changed</td><td>exit 0; 1 passed in 36.69 s</td><td>scan row relabelled <code>jax.lax.fori_loop</code>: exit 1 on the new form assertion</td><td>exit 1; <code>_source_line</code> cannot find the stale <code>jax.lax.fori_loop(1, active_set_steps</code> needle</td><td>100</td><td><strong>promote</strong></td></tr>
+</tbody></table>
+<p>The sampler deduction is three points for a bounded coverage gap, not a repair defect: the two prescribed cases prove normal failure and success propagation, but the real compiler-abort path can terminate by signal. <code>Popen.wait()</code> then records a negative return code while <code>sys.exit()</code> exposes it modulo 256 to the parent shell. The wrapper still becomes nonzero as required, so promotion is sound; a future exact signal-identity contract would need a separately specified case.</p>
+<p>The loop repair points the inventory at the literal <code>outer, _ = jax.lax.scan(</code> call at <code>nova/equilibrium/fixed_point.py:3864</code>, labels it <code>jax.lax.scan</code>, and keeps both compiled-slice <code>fori_loop</code> rows intact. The new assertion distinguishes the repaired certificate row from those two rows and requires its source location to resolve.</p>
+<h3 id="fsa-verify-two-prescribed-local-repairs-reproduction-and-controls">Reproduction and controls</h3>
+<p>The sampler defect reproduces against the base source with the candidate test: the summary records child status 7 while the wrapper returns 0, producing <code>assert 0 == 7</code>. The negative-control mutation reproduces the same failure on the candidate archive. Logs: <code>sampler-baseline.log</code>, <code>sampler-negative-control.log</code>, and <code>sampler-gate.log</code>.</p>
+<p>The inventory defect reproduces against the base source with the candidate assertion: <code>_active_set_newton_krylov has no occurrence 0 of 'jax.lax.fori_loop(1, active_set_steps'</code>. The declared relabelling mutation reaches the repaired source line but fails the new form assertion with <code>['jax.lax.fori_loop'] != ['jax.lax.scan']</code>. Logs: <code>loop-baseline.log</code>, <code>loop-negative-control.log</code>, and <code>loop-gate.log</code>.</p>
+<h3 id="fsa-verify-two-prescribed-local-repairs-scope-notes">Scope notes</h3>
+<p>The sampler worktree tip is documentation commit <code>47324a70ca7998f619a1a6abc276a21d7e4827e4</code>; it is outside this review's prescribed code-and-test judgment and was not scored. The loop worktree tip is documentation commit <code>42ac982727909f5eb2a2fe2985a36638f7a71e21</code>; the scored repair is its parent <code>3d6e20d68</code>. Neither documentation diff was used to support a promotion verdict.</p>
+<p>No figure is appropriate: the evidence is a two-repair truth table of process exits, exception identity, and source-form resolution, which is clearer as a semantic table than as an image.</p>
+<h3 id="fsa-verify-two-prescribed-local-repairs-findings-json">Findings JSON</h3>
+<pre>{
+  &quot;schema_version&quot;: 1,
+  &quot;review_node&quot;: &quot;fsa-verify-two-prescribed-local-repairs&quot;,
+  &quot;base_revision&quot;: &quot;25c9d7205e72b492dd27578f8709793c3ca5b9bc&quot;,
+  &quot;reviews&quot;: [
+    {
+      &quot;candidate_commit&quot;: &quot;c1af3a06d9055ea1cff652eac41d006426ec28da&quot;,
+      &quot;verdict&quot;: &quot;promote&quot;,
+      &quot;score&quot;: 97,
+      &quot;candidate_gate_exit&quot;: 0,
+      &quot;negative_control_exit&quot;: 1,
+      &quot;baseline_exit&quot;: 1,
+      &quot;findings&quot;: [
+        {
+          &quot;severity&quot;: &quot;low&quot;,
+          &quot;class&quot;: &quot;bounded-coverage-gap&quot;,
+          &quot;path&quot;: &quot;tests/test_compile_abort_probe.py&quot;,
+          &quot;line&quot;: 61,
+          &quot;promotion_blocking&quot;: false,
+          &quot;summary&quot;: &quot;The prescribed normal-exit cases do not pin the process-boundary representation of a child killed by signal; failure propagation remains nonzero.&quot;
+        }
+      ],
+      &quot;unscored_tip_commit&quot;: &quot;47324a70ca7998f619a1a6abc276a21d7e4827e4&quot;
+    },
+    {
+      &quot;candidate_commit&quot;: &quot;3d6e20d68326c1d4c7878c78fc955fe80d6be666&quot;,
+      &quot;verdict&quot;: &quot;promote&quot;,
+      &quot;score&quot;: 100,
+      &quot;candidate_gate_exit&quot;: 0,
+      &quot;negative_control_exit&quot;: 1,
+      &quot;baseline_exit&quot;: 1,
+      &quot;findings&quot;: [],
+      &quot;unscored_tip_commit&quot;: &quot;42ac982727909f5eb2a2fe2985a36638f7a71e21&quot;
+    }
+  ]
+}</pre>
+</section>
   </main>
 </body>
 </html>

@@ -414,15 +414,28 @@ cards and the memory, and it is the one that refuses:
 `sacctmgr show qos gpu_0003_grpa` reads `cpu=30,gres/gpu=4,mem=650G` with
 `DenyOnLimit`.
 
-**While the local model lane serves, that whole GPU allowance is spent and no
-other job of ours can schedule on the node.** Measured 2026-09-20: the serve
-holds `gres/gpu:4` and 600G with no time limit, so a correctly shaped
-`--gres=gpu:1 --mem=128G` job pends on `Resources` indefinitely; the node shows
-two free cards and they belong to a group this account is not in, so they are
-unreachable. Check `squeue -w 98dci4-gpu-0003 -o '%b %m'` against the cap before
-writing an H200 shape into a done-when. Where the serve is up, write the gate
-for `all_debug` with `JAX_PLATFORMS=cpu` and size the row count to the one-hour
-limit instead. The node's live budget and the serving footprint are kept in
+**The reservation admits no job at all, and the serve is not the reason.**
+Measured 2026-09-21 and reproduced: the deepseek serve (job 1273253) runs under
+QoS `normal`, not `gpu_0003_grpa`, so it consumes none of that QoS's
+`gres/gpu=4`; cards 1, 2 and 3 on the node are idle and in nobody's hands. What
+refuses is the reservation itself:
+
+```bash
+sbatch --test-only --account=grpa --partition=betelgeuse --reservation=gpu_0003_grpA \
+  --nodes=1 --ntasks=1 --time=00:01:00 --wrap=true
+# allocation failure: Requested node configuration is not available
+```
+
+That is the minimal request, one task with no cores, memory or cards named,
+and it is refused in one call; the same request into `gpu_0003_grpB` fails with
+"Access denied to requested reservation", which rules out permissions, and a
+group B job sits stuck identically. The cause is the cluster configuration
+(two `CoreCnt=30` reservations with `CoreIDs=(null)` on a 64-core node under
+`sched/builtin`), an SDCC matter, so stopping or shrinking the serve would
+change nothing. Until it is fixed, write every heavy gate for `all_debug` with
+`JAX_PLATFORMS=cpu` and size the row count to the one-hour limit; a correctly
+shaped H200 job may be left queued so it runs the moment the reservation
+admits jobs again. The node's live budget and the serving footprint are kept in
 imas-ambix `imas_ambix/agent/AGENTS.md`.
 
 For CPU work the partition is `all_debug`. **`rigel_debug` is up, accepts jobs

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T12:31:56",
+  "updated": "2026-09-21T12:32:01",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5538,6 +5538,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-20"
+      },
+      {
+        "id": "s19c-nia-figs-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
       },
       {
         "id": "s19c-nia-limited-touch-c",
@@ -225479,6 +225488,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3043
+    "_version": 3044
   }
 }

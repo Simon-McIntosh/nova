@@ -1696,6 +1696,94 @@ nova/equilibrium/forward.py:2606: KeyError</pre>
   pre-repair disagreement between the two reconstructions; whoever closes the
   remaining clause should regenerate it against the repaired oracle.</p>
 </section>
+<section id="current-candidacy-preflight">
+<h2>Current candidacy: the terminal census refuses its analytic fixture</h2>
+<p><strong>Implementation blocked before the required defect reproduction.</strong>
+On 2026-09-21, base <code>61f7d79d558ec6219f39272bded5ab6933c666d1</code>, one
+<code>all_debug</code> allocation (job <code>1274784</code>, eight CPUs, 64 GiB,
+CPU JAX with x64 enabled, <code>TMPDIR=/tmp</code> in submit and payload) ran
+three independent processes through the root interpreter. Both terminal probes
+failed during analytic fixture construction. The cold-seed control completed and
+matched the separatrix-test verification. No production files or test files were
+changed. Reproduction artifacts are committed at
+<code>14c195642d58f0e53a21ee8d37a6c2a754227b40</code>.</p>
+<h3>Refusal before current integration</h3>
+<p>The existing unit-amplitude driver calls
+<code>scripts/analytic_oracle_fixtures/measure.py:exact_current_moments</code> from
+<code>_build_context</code>. Its <code>_analytic_profile_support</code> constructs
+a <code>SimpleNamespace</code> without a saddle, then calls the production support
+path which requires <code>topology.x_point</code> at
+<code>nova/equilibrium/forward_operator.py:3091</code>. Both terminal processes
+exit 1 with the same refusal:</p>
+<pre>AttributeError: 'types.SimpleNamespace' object has no attribute 'x_point'</pre>
+<p>The source reading also establishes that the present
+<code>DomainMasks.profile_participation</code> already permits CORE and COMMON_SOL;
+it excludes material and private-flux labels only. That fact does not establish
+terminal current recovery. The historical 15.541 MA and 15.149 MA deficits have
+therefore not been reproduced at this base, and no geometry repair is justified
+by this attempt.</p>
+<table>
+<thead><tr><th>Process</th><th>Exit</th><th>Measurement</th><th>Log</th></tr></thead>
+<tbody>
+<tr><td>Terminal, chord mode</td><td>1</td><td>Absent: fixture construction refused</td><td><a href="/nova/figures/cut-cell-current-attribution/outboard-hole/baseline-terminal-chord.log">terminal chord refusal</a></td></tr>
+<tr><td>Terminal, exact mode</td><td>1</td><td>Absent: fixture construction refused</td><td><a href="/nova/figures/cut-cell-current-attribution/outboard-hole/baseline-terminal-exact.log">terminal exact refusal</a></td></tr>
+<tr><td>Cold seed, chord mode</td><td>0</td><td>8,004,911.493855521 A</td><td><a href="/nova/figures/cut-cell-current-attribution/outboard-hole/baseline-seed-chord.log">cold-seed control</a></td></tr>
+</tbody>
+</table>
+<p>The gate command is the root interpreter
+<code>/home/ITER/mcintos/Code/nova/.venv/bin/python</code> running
+<code>docs/figures/cut-cell-current-attribution/outboard-hole/measure.py</code>
+with <code>--state terminal --mode chord</code>, then
+<code>--state terminal --mode exact</code>, then
+<code>--state seed --mode chord</code>, each with its own output and log.
+The <a href="/nova/figures/cut-cell-current-attribution/outboard-hole/preflight-receipt.json">preflight receipt</a>
+contains each absolute argument vector, child exit, log hash, and the exact
+submitted script. The allocation lasted 70 seconds and consumed 87.724 CPU seconds;
+peak resident memory was 1,378,180 KiB. Its scheduler exit was 0 because the
+submitted wrapper returned its last status-print operation; this is explicitly
+not the gate result. The measured gate exit is 1 from the terminal children.
+The committed launcher propagates any child failure, passes shell syntax
+validation, and was not rerun for that shell-only correction.</p>
+<h3>The independent cold-seed control remains measurable</h3>
+<p>The original boundary-band instrument builds the cold seed through its cached
+fixture route. Its current read observes all 85 known outside-centroid cells,
+with 12 carrying current and 62 positive-current cells across the domain.
+The outside-centroid current fraction is <code>0.049144724741143155</code>,
+matching the prior 4.9144724741 percent. Target current is
+16,314,773.311828371 A; the unscaled total is 8,004,911.493855521 A.
+This is a cold-seed measurement, not the requested terminal recovery, and its
+outside-centroid fraction counts legitimate confined pieces of cut cells.</p>
+<table>
+<thead><tr><th>Named cell</th><th>Cold-seed current (A)</th><th>Label</th><th>Profile permitted</th></tr></thead>
+<tbody>
+<tr><td>106</td><td>192343.790435</td><td>CORE</td><td>true</td></tr>
+<tr><td>104</td><td>187360.105179</td><td>CORE</td><td>true</td></tr>
+<tr><td>108</td><td>186978.486668</td><td>CORE</td><td>true</td></tr>
+<tr><td>83</td><td>0</td><td>COMMON_SOL</td><td>true</td></tr>
+<tr><td>116</td><td>0</td><td>COMMON_SOL</td><td>true</td></tr>
+</tbody>
+</table>
+<p>The zeros in cells 83 and 116 coexist with permitted labels and
+<code>psi_norm = 1.43694</code>; they cannot be attributed to a label veto at
+this seed. The <a href="/nova/figures/cut-cell-current-attribution/outboard-hole/baseline-seed-chord.json">full per-cell receipt</a>
+and its companion NPZ retain the evidence. No before/after figure exists because
+there is no measured terminal baseline or changed source state to compare.</p>
+<h3>Scope boundary and resumption</h3>
+<p>The analytic fixture <code>scripts/analytic_oracle_fixtures/measure.py</code>
+is outside this worker's write fence, and
+<code>benchmarks/unit_amplitude_current_census.py</code> is assigned to the
+adjacent census worker, which was notified through the assigned peer channel.
+The preferred next action is to repair that typed-saddle fixture contract and
+resume this same worktree. An alternative requires an explicit revised
+specification permitting a measured, equivalent cached-fixture adapter.</p>
+<p>The terminal total within one percent of analytic, all five named terminal
+cells nonzero, after-change leakage, geometry regression tests, source-import
+module failure delta, and declared label-only negative control are all unmeasured.
+No test suite or negative-control mutation ran. The reproduction driver passes
+Ruff, and the launcher passes <code>bash -n</code>; these checks do not establish
+any of those physics acceptance criteria. The plan section, driving followup,
+and status metadata remain open and unchanged.</p>
+</section>
 </main>
 </body>
 </html>

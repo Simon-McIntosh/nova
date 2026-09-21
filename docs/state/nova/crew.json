@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T06:20:10",
+  "updated": "2026-09-21T06:20:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7213,6 +7213,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-10"
+      },
+      {
+        "id": "s19k-audit-clip",
+        "harness": "codex-terra",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
       },
       {
         "id": "s19k-audit-wall",
@@ -220117,6 +220126,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 3003
+    "_version": 3004
   }
 }
